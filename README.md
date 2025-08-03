@@ -24,3 +24,5 @@ HTML仕様書日本語翻訳プロジェクト
 - [ ] File System
 - [ ] Notifications API
 - [ ] Console
+- [ ] Fullscreen API 
+- [ ] Cookie Store API
