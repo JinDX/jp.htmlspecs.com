@@ -3,8 +3,8 @@ HTML仕様書日本語翻訳プロジェクト
 
 ## TODO
 
-- [x] HTML
-- [x] ECMAScript
+- [x] [HTML](https://jp.htmlspecs.com/)
+- [x] [ECMAScript](https://ecma262.com/jp)
 - [ ] DOM
 - [ ] URL
 - [ ] URL Pattern
