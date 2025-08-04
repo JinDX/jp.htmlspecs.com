@@ -5,7 +5,7 @@ HTML仕様書日本語翻訳プロジェクト
 
 - [x] [HTML](https://jp.htmlspecs.com/)
 - [x] [ECMAScript](https://ecma262.com/jp)
-- [ ] DOM
+- [x] [DOM](https://jp.htmlspecs.com/dom/)
 - [ ] URL
 - [ ] URL Pattern
 - [ ] Web IDL
