@@ -14,7 +14,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [Infra](https://jp.htmlspecs.com/infra/)
 - [x] [Compatibility](https://jp.htmlspecs.com/compat/)
 - [x] [Compression](https://jp.htmlspecs.com/compression/)
-- [ ] Quirks Mode
+- [x] [Quirks Mode](https://jp.htmlspecs.com/quirks/)
 - [ ] Test Utils
 - [ ] Fetch
 - [ ] Streams
