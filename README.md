@@ -15,14 +15,14 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [Compatibility](https://jp.htmlspecs.com/compat/)
 - [x] [Compression](https://jp.htmlspecs.com/compression/)
 - [x] [Quirks Mode](https://jp.htmlspecs.com/quirks/)
-- [ ] Test Utils
-- [ ] Fetch
-- [ ] Streams
-- [ ] XMLHttpRequest
-- [ ] WebSockets
-- [ ] Storage
-- [ ] File System
-- [ ] Notifications API
-- [ ] Console
-- [ ] Fullscreen API 
-- [ ] Cookie Store API
+- [ ] [Test Utils](https://jp.htmlspecs.com/testutils/)
+- [ ] [Fetch](https://jp.htmlspecs.com/fetch)
+- [ ] [Streams](https://jp.htmlspecs.com/streams/)
+- [ ] [XMLHttpRequest](https://jp.htmlspecs.com/xhr/)
+- [ ] [WebSockets](https://jp.htmlspecs.com/websockets/)
+- [ ] [Storage](https://jp.htmlspecs.com/storage/)
+- [ ] [File System](https://jp.htmlspecs.com/fs/)
+- [ ] [Notifications API](https://jp.htmlspecs.com/notifications/)
+- [ ] [Console](https://jp.htmlspecs.com/console/)
+- [ ] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
+- [ ] [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)
