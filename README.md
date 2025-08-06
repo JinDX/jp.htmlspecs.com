@@ -10,7 +10,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [URL Pattern](https://jp.htmlspecs.com/urlpattern/)
 - [x] [Web IDL](https://jp.htmlspecs.com/webidl/)
 - [x] [Encoding](https://jp.htmlspecs.com/encoding/)
-- [x] MIME Sniffing(https://jp.htmlspecs.com/mimesniff/)
+- [x] [MIME Sniffing](https://jp.htmlspecs.com/mimesniff/)
 - [ ] Infra
 - [ ] Compatibility
 - [ ] Compression
