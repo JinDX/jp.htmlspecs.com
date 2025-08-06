@@ -11,7 +11,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [Web IDL](https://jp.htmlspecs.com/webidl/)
 - [x] [Encoding](https://jp.htmlspecs.com/encoding/)
 - [x] [MIME Sniffing](https://jp.htmlspecs.com/mimesniff/)
-- [ ] Infra
+- [x] [Infra](https://jp.htmlspecs.com/infra/)
 - [ ] Compatibility
 - [ ] Compression
 - [ ] Quirks Mode
