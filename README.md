@@ -12,7 +12,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [Encoding](https://jp.htmlspecs.com/encoding/)
 - [x] [MIME Sniffing](https://jp.htmlspecs.com/mimesniff/)
 - [x] [Infra](https://jp.htmlspecs.com/infra/)
-- [ ] Compatibility
+- [x] [Compatibility](https://jp.htmlspecs.com/compat/)
 - [ ] Compression
 - [ ] Quirks Mode
 - [ ] Test Utils
