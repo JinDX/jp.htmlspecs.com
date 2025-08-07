@@ -24,5 +24,5 @@ HTML仕様書日本語翻訳プロジェクト
 - [ ] [File System](https://jp.htmlspecs.com/fs/)
 - [ ] [Notifications API](https://jp.htmlspecs.com/notifications/)
 - [ ] [Console](https://jp.htmlspecs.com/console/)
-- [ ] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
+- [x] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
 - [ ] [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)
