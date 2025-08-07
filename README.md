@@ -16,7 +16,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [Compression](https://jp.htmlspecs.com/compression/)
 - [x] [Quirks Mode](https://jp.htmlspecs.com/quirks/)
 - [x] [Test Utils](https://jp.htmlspecs.com/testutils/)
-- [ ] [Fetch](https://jp.htmlspecs.com/fetch/)
+- [x] [Fetch](https://jp.htmlspecs.com/fetch/)
 - [ ] [Streams](https://jp.htmlspecs.com/streams/)
 - [ ] [XMLHttpRequest](https://jp.htmlspecs.com/xhr/)
 - [ ] [WebSockets](https://jp.htmlspecs.com/websockets/)
