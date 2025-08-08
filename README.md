@@ -25,4 +25,4 @@ HTML仕様書日本語翻訳プロジェクト
 - [ ] [Notifications API](https://jp.htmlspecs.com/notifications/)
 - [x] [Console](https://jp.htmlspecs.com/console/)
 - [x] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
-- [ ] [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)
+- [x] [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)
