@@ -22,7 +22,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [ ] [WebSockets](https://jp.htmlspecs.com/websockets/)
 - [ ] [Storage](https://jp.htmlspecs.com/storage/)
 - [ ] [File System](https://jp.htmlspecs.com/fs/)
-- [ ] [Notifications API](https://jp.htmlspecs.com/notifications/)
+- [x] [Notifications API](https://jp.htmlspecs.com/notifications/)
 - [x] [Console](https://jp.htmlspecs.com/console/)
 - [x] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
 - [x] [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)
