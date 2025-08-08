@@ -21,7 +21,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [ ] [XMLHttpRequest](https://jp.htmlspecs.com/xhr/)
 - [ ] [WebSockets](https://jp.htmlspecs.com/websockets/)
 - [ ] [Storage](https://jp.htmlspecs.com/storage/)
-- [ ] [File System](https://jp.htmlspecs.com/fs/)
+- [x] [File System](https://jp.htmlspecs.com/fs/)
 - [x] [Notifications API](https://jp.htmlspecs.com/notifications/)
 - [x] [Console](https://jp.htmlspecs.com/console/)
 - [x] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
