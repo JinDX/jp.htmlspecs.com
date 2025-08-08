@@ -19,7 +19,7 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [Fetch](https://jp.htmlspecs.com/fetch/)
 - [ ] [Streams](https://jp.htmlspecs.com/streams/)
 - [ ] [XMLHttpRequest](https://jp.htmlspecs.com/xhr/)
-- [ ] [WebSockets](https://jp.htmlspecs.com/websockets/)
+- [x] [WebSockets](https://jp.htmlspecs.com/websockets/)
 - [x] [Storage](https://jp.htmlspecs.com/storage/)
 - [x] [File System](https://jp.htmlspecs.com/fs/)
 - [x] [Notifications API](https://jp.htmlspecs.com/notifications/)
