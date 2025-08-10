@@ -1,5 +1,5 @@
 # jp.htmlspecs.com
-HTML仕様書日本語翻訳プロジェクト
+HTMLおよび関連API、CSS標準シリーズ。
 
 ## TODO
 
