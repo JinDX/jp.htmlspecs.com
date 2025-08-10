@@ -26,7 +26,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Console](https://jp.htmlspecs.com/console/)
 - [x] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
 - [x] [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)
-- [ ] Web Application Manifest
+- [ ] [Web Application Manifest](https://jp.htmlspecs.com/appmanifest/)
 - [ ] WCAG 2.2
 - [ ] Accessible Rich Internet Applications (WAI-ARIA) 1.2
 - [ ] Accessible Name and Description Computation 1.1
