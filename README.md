@@ -26,3 +26,14 @@ HTML仕様書日本語翻訳プロジェクト
 - [x] [Console](https://jp.htmlspecs.com/console/)
 - [x] [Fullscreen API](https://jp.htmlspecs.com/fullscreen/)
 - [x] [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)
+- [ ] Web Application Manifest
+- [ ] WCAG 2.2
+- [ ] Accessible Rich Internet Applications (WAI-ARIA) 1.2
+- [ ] Accessible Name and Description Computation 1.1
+- [ ] WebTransport
+- [ ] Service Workers
+- [ ] Push API
+- [ ] WebRTC
+- [ ] Payment Request API
+- [ ] Background Fetch
+- [ ] Beacon
