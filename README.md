@@ -31,8 +31,8 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Accessible Rich Internet Applications (WAI-ARIA) 1.2](https://jp.htmlspecs.com/wai-aria/)
 - [x] [Accessible Name and Description Computation 1.1](https://jp.htmlspecs.com/accname/)
 - [x] [WebTransport](https://jp.htmlspecs.com/webtransport/)
-- [x] [Service Workers](https://jp.htmlspecs.com/service-workers)
-- [ ] Push API
+- [x] [Service Workers](https://jp.htmlspecs.com/service-workers/)
+- [x] [Push API]((https://jp.htmlspecs.com/push-api/)
 - [ ] WebRTC
 - [ ] Payment Request API
 - [ ] Background Fetch
