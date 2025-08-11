@@ -30,7 +30,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [WCAG 2.2](https://jp.htmlspecs.com/WCAG/)
 - [x] [Accessible Rich Internet Applications (WAI-ARIA) 1.2](https://jp.htmlspecs.com/wai-aria/)
 - [x] [Accessible Name and Description Computation 1.1](https://jp.htmlspecs.com/accname/)
-- [ ] WebTransport
+- [x] [WebTransport](https://jp.htmlspecs.com/webtransport/)
 - [ ] Service Workers
 - [ ] Push API
 - [ ] WebRTC
