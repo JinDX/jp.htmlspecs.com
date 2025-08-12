@@ -33,7 +33,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [WebTransport](https://jp.htmlspecs.com/webtransport/)
 - [x] [Service Workers](https://jp.htmlspecs.com/service-workers/)
 - [x] [Push API](https://jp.htmlspecs.com/push-api/)
-- [ ] WebRTC
+- [x] [WebRTC](https://jp.htmlspecs.com/webrtc/)
 - [ ] Payment Request API
 - [ ] Background Fetch
 - [ ] Beacon
