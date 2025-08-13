@@ -36,4 +36,4 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [WebRTC](https://jp.htmlspecs.com/webrtc/)
 - [x] [Payment Request API](https://jp.htmlspecs.com/payment-request/)
 - [x] [Background Fetch](https://jp.htmlspecs.com/background-fetch/)
-- [ ] Beacon
+- [x] [Beacon](https://jp.htmlspecs.com/beacon/)
