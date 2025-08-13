@@ -34,6 +34,6 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Service Workers](https://jp.htmlspecs.com/service-workers/)
 - [x] [Push API](https://jp.htmlspecs.com/push-api/)
 - [x] [WebRTC](https://jp.htmlspecs.com/webrtc/)
-- [ ] Payment Request API
+- [x] [Payment Request API](https://jp.htmlspecs.com/payment-request/)
 - [ ] Background Fetch
 - [ ] Beacon
