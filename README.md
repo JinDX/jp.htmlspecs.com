@@ -38,7 +38,6 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Background Fetch](https://jp.htmlspecs.com/background-fetch/)
 - [x] [Beacon](https://jp.htmlspecs.com/beacon/)
 
-
 - [ ] [Cascading Style Sheets Level 2 Revision 2 (CSS 2.2)](https://jp.htmlspecs.com/css/css22)
 - [ ] [CSS Color Module Level 3](https://jp.htmlspecs.com/css/css-color-3)
 - [ ] [CSS Color Module Level 4](https://jp.htmlspecs.com/css/css-color-4)
