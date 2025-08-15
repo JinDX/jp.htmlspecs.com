@@ -41,7 +41,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 ### CSS
 
 - [x] [Cascading Style Sheets Level 2 Revision 2 (CSS 2.2)](https://jp.htmlspecs.com/css/css22)
-- [ ] [CSS Color Module Level 3](https://jp.htmlspecs.com/css/css-color-3)
+- [x] [CSS Color Module Level 3](https://jp.htmlspecs.com/css/css-color-3)
 - [ ] [CSS Color Module Level 4](https://jp.htmlspecs.com/css/css-color-4)
 - [ ] [CSS Color Module Level 5](https://jp.htmlspecs.com/css/css-color-5)
 - [ ] [CSS Color Adjustment Module Level 1](https://jp.htmlspecs.com/css/css-color-adjust-1)
