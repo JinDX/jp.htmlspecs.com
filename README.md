@@ -44,7 +44,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Color Module Level 3](https://jp.htmlspecs.com/css/css-color-3)
 - [x] [CSS Color Module Level 4](https://jp.htmlspecs.com/css/css-color-4)
 - [x] [CSS Color Module Level 5](https://jp.htmlspecs.com/css/css-color-5)
-- [ ] [CSS Color Adjustment Module Level 1](https://jp.htmlspecs.com/css/css-color-adjust-1)
+- [x] [CSS Color Adjustment Module Level 1](https://jp.htmlspecs.com/css/css-color-adjust-1)
 - [ ] [CSS Filter Effects Module Level 1](https://jp.htmlspecs.com/css/filter-effects-1)
 - [ ] [Compositing and Blending Level 1](https://jp.htmlspecs.com/css/compositing-1)
 - [ ] [CSS Conditional Rules Module Level 4](https://jp.htmlspecs.com/css/css-conditional-4)
