@@ -48,5 +48,5 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Filter Effects Module Level 1](https://jp.htmlspecs.com/css/filter-effects-1)
 - [x] [Compositing and Blending Level 1](https://jp.htmlspecs.com/css/compositing-1)
 - [x] [CSS Conditional Rules Module Level 4](https://jp.htmlspecs.com/css/css-conditional-4)
-- [ ] [CSS Backgrounds and Borders Level 3](https://jp.htmlspecs.com/css/css-backgrounds-3)
+- [x] [CSS Backgrounds and Borders Level 3](https://jp.htmlspecs.com/css/css-backgrounds-3)
 - [ ] [CSS Custom Highlight API Module Level 1](https://jp.htmlspecs.com/css/css-highlight-api-1)
