@@ -47,7 +47,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 ### デバイスとハードウェアアクセス
 - [x] [Pointer Events](https://jp.htmlspecs.com/pointerevents2)
 - [ ] ~~[Visual Viewport API](https://jp.htmlspecs.com/visual-viewport)~~
-- [ ] [Screen Orientation](https://jp.htmlspecs.com/screen-orientation)
+- [x] [Screen Orientation](https://jp.htmlspecs.com/screen-orientation)
 - [ ] [EyeDropper API](https://jp.htmlspecs.com/eyedropper-api)
 - [ ] [Fullscreen](https://jp.htmlspecs.com/fullscreen)
 - [ ] [Screen Capture](https://jp.htmlspecs.com/screen-capture)
