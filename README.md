@@ -45,7 +45,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Web Locks API](https://jp.htmlspecs.com/web-locks)
 
 ### デバイスとハードウェアアクセス
-- [ ] [Pointer Events](https://jp.htmlspecs.com/pointerevents2)
+- [x] [Pointer Events](https://jp.htmlspecs.com/pointerevents2)
 - [ ] [Visual Viewport API](https://jp.htmlspecs.com/visual-viewport)
 - [ ] [Screen Orientation](https://jp.htmlspecs.com/screen-orientation)
 - [ ] [EyeDropper API](https://jp.htmlspecs.com/eyedropper-api)
