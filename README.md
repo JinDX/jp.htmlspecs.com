@@ -41,7 +41,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [File API](https://jp.htmlspecs.com/FileAPI)
 - [x] [File System](https://jp.htmlspecs.com/fs)
 - [x] [Cookie Store API](https://jp.htmlspecs.com/cookiestore)
-- [ ] [File and Directory Entries API](https://jp.htmlspecs.com/entries-api)
+- [x] [File and Directory Entries API](https://jp.htmlspecs.com/entries-api)
 - [ ] [Web Locks API](https://jp.htmlspecs.com/web-locks)
 
 ### デバイスとハードウェアアクセス
