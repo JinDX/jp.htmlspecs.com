@@ -38,7 +38,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 ### ストレージとデータ
 - [x] [Indexed Database API 3.0](https://jp.htmlspecs.com/IndexedDB)
 - [x] [Storage](https://jp.htmlspecs.com/storage)
-- [ ] [File API](https://jp.htmlspecs.com/FileAPI)
+- [x] [File API](https://jp.htmlspecs.com/FileAPI)
 - [x] [File System](https://jp.htmlspecs.com/fs)
 - [x] [Cookie Store API](https://jp.htmlspecs.com/cookiestore)
 - [ ] [File and Directory Entries API](https://jp.htmlspecs.com/entries-api)
