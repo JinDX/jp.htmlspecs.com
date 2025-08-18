@@ -36,7 +36,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Beacon](https://jp.htmlspecs.com/beacon)
 
 ### ストレージとデータ
-- [ ] [Indexed Database API 3.0](https://jp.htmlspecs.com/IndexedDB)
+- [x] [Indexed Database API 3.0](https://jp.htmlspecs.com/IndexedDB)
 - [x] [Storage](https://jp.htmlspecs.com/storage)
 - [ ] [File API](https://jp.htmlspecs.com/FileAPI)
 - [x] [File System](https://jp.htmlspecs.com/fs)
