@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>EyeDropper API</title>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"></script>
+    <script class='remove'>
+        var respecConfig = {
+            specStatus: "CG-DRAFT",
+            shortName: "eyedropper-api",
+            editors: [{
+                name: "Ionel Popescu",
+                mailto: "iopopesc@microsoft.com",
+                company: "Microsoft Corporation",
+                companyURL: "https://www.microsoft.com/"
+            }],
+            group: "wicg",
+            github: "https://github.com/wicg/eyedropper-api",
+            xref: "web-platform",
+        };
+    </script>
+</head>
+
+<body>
+    <section id="abstract">
+        <p>
+            本書は、ブラウザが提供するスポイト（Eyedropper）にアクセスするためのAPIについて説明します。
+        </p>
+    </section>
+    <section id="sotd"></section>
+    <section class="informative" id="introduction">
+        <h2>はじめに</h2>
+        <p>
+            現在のウェブでは、クリエイティブなアプリ開発者がスポイト（ユーザーが画面上のピクセルから色を選択できるツール）を実装することができません。これには、ウェブページの外側にレンダリングされたピクセルも含まれます。
+
+        <p>
+            本APIにより、作者はカスタム色選択ツールを構築する際にブラウザ提供のスポイトを利用できるようになります。
+        </p>
+        </p>
+    </section>
+    <section id="conformance"></section>
+    <section>
+        <h2>API の説明</h2>
+
+        <section data-dfn-for="ColorSelectionResult">
+            <h3>ColorSelectionResult 辞書</h3>
+            <pre class="idl">
+          dictionary ColorSelectionResult {
+            DOMString sRGBHex;
+          };
+        </pre>
+            <dl>
+                <dt><dfn data-dfn-for="ColorSelectionResult">sRGBHex</dfn></dt>
+                <dd>
+                    有効な<dfn data-cite="!HTML#valid-simple-colour">シンプルカラー</dfn>の値である必要があります。
+                </dd>
+            </dl>
+        </section>
+
+        <section data-dfn-for="ColorSelectionOptions">
+            <h3>ColorSelectionOptions 辞書</h3>
+            <pre class="idl">
+          dictionary ColorSelectionOptions {
+            AbortSignal signal;
+          };
+        </pre>
+            <dl>
+                <dt><dfn data-dfn-for="ColorSelectionOptions">signal</dfn></dt>
+                <dd>
+                    {{EyeDropper/open}} 操作を中止するために使用できます。
+                </dd>
+            </dl>
+        </section>
+
+        <section data-dfn-for="EyeDropper">
+            <h3>EyeDropper インターフェイス</h3>
+            <pre class="idl">
+            [Exposed=Window, SecureContext]
+            interface EyeDropper {
+                constructor();
+                Promise&lt;ColorSelectionResult> open(optional ColorSelectionOptions options = {});
+            };
+        </pre>
+            <dl>
+                <dt><dfn data-dfn-for="EyeDropper">open()</dfn></dt>
+                <dd>
+                    メソッドは以下の手順に従う必要があります:
+                    <ol>
+                        <li>
+                            [=this=] の [=relevant global object=] に [=transient activation=] がない場合、新しい Promise
+                            を作成し、"{{NotAllowedError}}" {{DOMException}} で拒否して返します。
+                        </li>
+                        <li>
+                            すでに別のスポイトが開いている場合、新しい Promise を作成し、"{{InvalidStateError}}" {{DOMException}} で拒否して返します。
+                        </li>
+                        <li>
+                            |result| を新しい Promise とします。
+                        </li>
+                        <li>
+                            options.<dfn data-cite="!dom#abortsignal">signal</dfn> が存在する場合、次のサブステップを実行します:
+                            <ol>
+                                <li>
+                                    options.[=signal=] が <dfn data-cite="!dom#dom-abortsignal-aborted">中止済み</dfn>
+                                    の場合、options.[=signal=] の <dfn data-cite="!dom#abortsignal-abort-reason">中止理由</dfn> で
+                                    |result| を拒否し、|result| を返します。
+                                </li>
+                                <li>
+                                    <dfn data-cite="!dom#abortsignal-add">次の中止手順を追加</dfn> して options.[=signal=] に登録します:
+                                    <ol>
+                                        <li>"スポイトモード" を終了し、UI を閉じます。</li>
+                                        <li>options.[=signal=] の <a data-cite="!dom#abortsignal-abort-reason">中止理由</a> で
+                                            |result| を拒否します。</li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                        <li>
+                            ウェブページを "スポイトモード" にして、ユーザー入力を抑制します: ウェブページには UI イベントが配信されません。
+                        </li>
+                        <li>
+                            [=In parallel=]:
+                            <ol>
+                                <li>ユーザーが正常に色を選択した結果を |colorSelectionResult| とします。これが失敗した場合は:
+                                    <ol>
+                                        <li>
+                                            ユーザーが選択を中止した場合は |result| を "{{AbortError}}" {{DOMException}} で拒否し、そうでなければ
+                                            "{{OperationError}}" {{DOMException}} で拒否します。
+                                        </li>
+                                        <li>
+                                            これらの手順を中止します。
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>"スポイトモード" を終了し、UI を閉じます。</li>
+                                <li>|colorSelectionResult| で |result| を解決します。</li>
+                            </ol>
+                        </li>
+                        <li>
+                            |result| を返します。
+                        </li>
+                    </ol>
+                </dd>
+            </dl>
+        </section>
+    </section>
+    <section>
+        <h2>EyeDropper</h2>
+        <p>
+            {{EyeDropper/open}} を呼び出す際、ユーザーエージェントは以下のルールに従うユーザーインターフェイスを提示する必要があります:
+        <ul>
+            <li>
+                ユーザーインターフェイスの提示に失敗したり、画面コンテンツへのアクセスに失敗した場合は、失敗を返す必要があります。
+            </li>
+            <li>
+                色選択を許可する前に、UI が表示されていたことを保証する必要があります。
+            </li>
+            <li>
+                どの色が選択されるかが明確に分かるようにする必要があります。
+            </li>
+            <li>
+                色を選択せずにキャンセル／戻るオプションを提供する必要があります。
+            </li>
+        </ul>
+        </p>
+    </section>
+    <section class="informative" id="privacy">
+        <h2>セキュリティとプライバシーの考慮事項</h2>
+        <p>
+            開発者がユーザーのマシンから制限のないピクセルデータにアクセスできるようにすることは、セキュリティ上の課題をもたらします。
+            特に、スポイトの実装は、ユーザーがウェブアプリケーションと共有する意図のない情報（例えば、ユーザーが画面上をマウスで移動している間に得られるスクリーンの内容など）をウェブページが "スクリーンスクレイピング"
+            することを許してはなりません。
+        <p>
+            この脅威を軽減する1つの方法は、ピクセルデータがユーザーによる明示的なアクション（例えばマウスボタンの押下）のときのみウェブアプリケーションに提供されるようにすることです。
+        </p>
+        <p>
+            加えて、ブラウザはユーザーがスポイトモードに遷移したときにそれが分かる明確な表示（例えばカーソルの変更）を提供し、ユーザーがそのモードを終了できる手段（例えば ESC
+            キーによる終了）を提供するべきです。作者によってキャンセルできないようにする必要があります。
+        </p>
+        <p>
+            ユーザーが色を選択する前に、ブラウザはユーザーがUIを確認する機会を持てることを保証すべきです。これはスポイトを開いてから色選択を許可するまでの最小時間間隔を強制することで実現できるかもしれません。
+        </p>
+        <p>
+            スポイトモードへの遷移は消費可能なユーザーアクティベーション（例えばページ上のボタンをクリックすること）を要求すべきであり、意図せずピクセルデータを露出しないようにします。
+        </p>
+        </p>
+    </section>
+    <section class="informative" id="examples">
+        <h2>例</h2>
+        <section>
+            <h3>プラットフォームのサポート</h3>
+            <aside class="example">
+                <pre>
+            <xmp>
+              if (window.EyeDropper == undefined) {
+                console.error('このプラットフォームでは EyeDropper API はサポートされていません');
+              }
+            </xmp>
+          </pre>
+            </aside>
+        </section>
+        <section>
+            <h3>色の選択</h3>
+            <aside class="example">
+                <pre>
+            <xmp>
+              <button id="eyedropperButton">スポイトを開く</button>
+              <script>
+                // EyeDropper オブジェクトを作成
+                let eyeDropper = new EyeDropper();
+
+                document.getElementById("eyedropperButton").addEventListener('click', e => {
+                    // スポイトモードに入る
+                    eyeDropper.open()
+                        .then(colorSelectionResult => {
+                            // 選択したピクセルの 16 進表記の色値 (#RRGGBB) を返します
+                            console.log(colorSelectionResult.sRGBHex);
+                        })
+                        .catch(error => {
+                            // ユーザーが選択せずにスポイトモードを終了した場合の処理
+                        });
+                });
+            </script>
+            </xmp>
+          </pre>
+            </aside>
+        </section>
+    </section>
+    <section id="idl-index" class="appendix"></section>
+    <section id="references" class="appendix"></section>
+</body>
+
+</html>
