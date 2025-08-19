@@ -51,7 +51,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [EyeDropper API](https://jp.htmlspecs.com/eyedropper-api)
 - [x] [Fullscreen](https://jp.htmlspecs.com/fullscreen)
 - [x] [Screen Capture](https://jp.htmlspecs.com/screen-capture)
-- [ ] [UI Events](https://jp.htmlspecs.com/uievents)
+- [x] [UI Events](https://jp.htmlspecs.com/uievents)
 - [ ] [Touch Events - Level 2](https://jp.htmlspecs.com/touchevents)
 - [ ] [Contact Picker API](https://jp.htmlspecs.com/contact-picker)
 - [x] [Notifications API](https://jp.htmlspecs.com/notifications)
