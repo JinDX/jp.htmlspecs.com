@@ -55,7 +55,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Touch Events - Level 2](https://jp.htmlspecs.com/touch-events)
 - [x] [Contact Picker API](https://jp.htmlspecs.com/contact-picker)
 - [x] [Notifications API](https://jp.htmlspecs.com/notifications)
-- [ ] [Badging API](https://jp.htmlspecs.com/badging)
+- [x] [Badging API](https://jp.htmlspecs.com/badging)
 - [ ] [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard)
 - [ ] [Web Share API](https://jp.htmlspecs.com/web-share)
 - [ ] [Web Audio API](https://jp.htmlspecs.com/webaudio)
