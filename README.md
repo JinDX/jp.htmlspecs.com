@@ -50,7 +50,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Screen Orientation](https://jp.htmlspecs.com/screen-orientation)
 - [x] [EyeDropper API](https://jp.htmlspecs.com/eyedropper-api)
 - [x] [Fullscreen](https://jp.htmlspecs.com/fullscreen)
-- [ ] [Screen Capture](https://jp.htmlspecs.com/screen-capture)
+- [x] [Screen Capture](https://jp.htmlspecs.com/screen-capture)
 - [ ] [UI Events](https://jp.htmlspecs.com/uievents)
 - [ ] [Touch Events - Level 2](https://jp.htmlspecs.com/touchevents)
 - [ ] [Contact Picker API](https://jp.htmlspecs.com/contact-picker)
