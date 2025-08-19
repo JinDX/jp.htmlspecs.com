@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+    <title>タッチイベント - レベル2</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content="width=device-width" name="viewport"><!--
+      === NOTA BENE ===
+      For the three scripts below, if your spec resides on dev.w3 you can check them
+      out in the same tree and use relative links so that they'll work offline,
+    -->
+
+    <script class="remove" defer src="https://www.w3.org/Tools/respec/respec-w3c">
+    </script>
+    <script class="remove">
+        var respecConfig = {
+            // specification status (e.g. WD, LC, NOTE, etc.). If in doubt use ED.
+            specStatus: "CG-FINAL",
+
+            // the specification's short name, as in http://www.w3.org/TR/short-name/
+            shortName: "touch-events",
+
+            // if your specification has a subtitle that goes below the main
+            // formal title, define it here
+            // subtitle   :  "an excellent document",
+
+            // if you wish the publication date to be other than today, set this
+            publishDate: "2024-07-04",
+
+            // if the specification's copyright date is a range of years, specify
+            // the start date here:
+            // copyrightStart: "2005"
+
+            // if there is a previously published draft, uncomment this and set its YYYY-MM-DD date
+            // and its maturity status
+            previousPublishDate: "2013-10-10",
+            previousMaturity: "REC",
+
+            // if there a publicly available Editor's Draft, this is the link
+            edDraftURI: "https://w3c.github.io/touch-events/",
+            license: "w3c-software-doc",
+
+            // latest version for CG Final
+            latestVersion: "https://www.w3.org/community/reports/touchevents/CG-FINAL-touch-events-20240704/",
+
+            // if this is a LCWD, uncomment and set the end of its review period
+            // lcEnd: "2013-02-14",
+            // prEnd: "2013-06-06",
+
+            // editors, add as many as you like
+            // only "name" is required
+            editors: [
+                {
+                    name: "Doug Schepers", url: "http://schepers.cc/",
+                    company: "W3C", companyURL: "https://w3.org/"
+                },
+                {
+                    name: "Sangwhan Moon",
+                    company: "Opera Software ASA", companyURL: "https://www.opera.com/"
+                },
+                {
+                    name: "Matt Brubeck", url: "https://limpet.net/mbrubeck/",
+                    company: "Mozilla", companyURL: "https://www.mozilla.org/"
+                },
+                {
+                    name: "Arthur Barstow",
+                    company: "Invited Expert", companyURL: "https://twitter.com/afbarstow"
+                },
+                {
+                    name: "Rick Byers", url: "https://rbyers.net/",
+                    company: "Google", companyURL: "https://www.google.com/"
+                },
+                {
+                    name: "Patrick H. Lauke",
+                    company: "TetraLogical", companyURL: "https://tetralogical.com/"
+                },
+            ],
+            otherLinks: [{
+                key: 'Repository',
+                data: [{
+                    value: 'We are on Github.',
+                    href: 'https://github.com/w3c/touch-events'
+                }, {
+                    value: 'File a bug.',
+                    href: 'https://github.com/w3c/touch-events/issues'
+                }, {
+                    value: 'Commit history.',
+                    href: 'https://github.com/w3c/touch-events/commits/gh-pages'
+                }, {
+                    value: 'Mailing list.',
+                    href: 'https://lists.w3.org/Archives/Public/public-touchevents/'
+                }]
+            }],
+
+            // authors, add as many as you like.
+            // This is optional, uncomment if you have authors as well as editors.
+            // only "name" is required. Same format as editors.
+
+            //authors:  [
+            //    { name: "Your Name", url: "http://example.org/",
+            //      company: "Your Company", companyURL: "http://example.com/" },
+            //],
+
+            // Name of the group
+            group: "touchevents",
+
+            // URI of the patent status for this WG, for Rec-track documents
+            // !!!! IMPORTANT !!!!
+            // This is important for Rec-track documents, do not copy a patent URI from a random
+            // document unless you know what you're doing. If in doubt ask your friendly neighbourhood
+            // Team Contact.
+            // wgPatentURI:  "http://www.w3.org/2004/01/pp-impl/45559/status",
+
+            // Enables automatic linking
+            xref: ["html", "dom", "infra", "uievents"]
+        };
+    </script>
+    <script id="fixuphook">
+        (function () {
+            // Hacky fix-up hook to patch up return types generated by respec.js, as special
+            // operations like the ones in specialOps are not officially supported.
+            var specialOps = ['getter ', 'setter ', 'creator ', 'deleter ', 'caller ', 'omittable '];
+            var fixUpCaller = window.setInterval(function () {
+
+                // Check if respec.js is done.
+                var respecJS = document.querySelectorAll(".remove");
+                if (respecJS.length > 0) return;
+
+                else {
+                    // Performance-wise, this is a stupid idea. For long specs it's probably
+                    // going to take a *extremely* long time to finish. You have been warned.
+                    var tags = document.getElementsByTagName('a');
+
+                    for (var i = 0; i < tags.length; i++)
+                        for (var j = 0; j < specialOps.length; j++)
+                            if (tags[i].textContent.indexOf(specialOps[j]) === 0 &&
+                                tags[i].parentNode.previousSibling.textContent.indexOf('Return type:') !== -1)
+                                tags[i].textContent = tags[i].textContent.substring(specialOps[j].length - 1);
+
+                    // Clean-up script element and interval caller
+                    var fixUpEl = document.getElementById('fixuphook');
+                    fixUpEl.parentNode.removeChild(fixUpEl);
+
+                    window.clearInterval(fixUpCaller);
+                }
+            }, 100);
+        })();
+    </script>
+    <style>
+        .event {
+            font-family: monospace;
+            color: #459900;
+        }
+
+        pre.idl {
+            white-space: pre-wrap;
+        }
+
+        .simple th[scope=row] a {
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="sotd">
+        <p>この仕様書は <a href="https://www.w3.org/community/touchevents/">Touch Events Community Group</a> により公開されました。これは W3C の標準ではなく、W3C 標準化トラック上の文書ではありません。</p>
+        <p><a href="https://www.w3.org/community/about/process/final/">W3C Community Final Specification Agreement (FSA)</a> の下では他の条件が適用されることにご注意ください。</p>
+        <p>この仕様のこの版は <a href="https://www.w3.org/TR/touch-events/">Touch Events Level 1</a> に対する修正および改善を含み、以前に公開された <a href="https://www.w3.org/TR/touch-events-extensions/">Touch Event Extensions</a> の機能を取り込んでいます。</p>
+        <p class="note">現時点では Touch Events 仕様をさらに継続して作業する意図はありません。この文書は元の <a href="https://www.w3.org/TR/touch-events/">Touch Events Level 1</a> の公開以降、ユーザエージェントで行われた追加や変更を反映するために維持されています。コミュニティグループは Touch Events をレガシー API と見なしており、作者には代わりに <a href="https://www.w3.org/TR/pointerevents/">Pointer Events</a> の採用を強く推奨します。</p>
+    </section>
+    <section id="abstract">
+        <p>Touch Events 仕様は、タッチ感知面との一つまたは複数の接触点、およびその接触点が面やそこに表示される DOM 要素に対してどのように変化するかを表す低レベルのイベント群を定義します（例：タッチスクリーン）。また、スタイラス機能を考慮したペン・タブレット機器（表示を伴わない描画タブレットなど）にも対応します。</p>
+    </section>
+    <section class="informative" id="introduction">
+        <h2>イントロダクション</h2>
+        <p>タッチ入力を提供する端末で Web アプリケーションを実行するユーザエージェントは、通常インタラクティブな Web アプリケーションへのアクセスを可能にするために解釈されたマウスイベントを使用します。しかし、これらの解釈されたイベントは物理的なタッチ入力に基づく正規化データであるため、意図したユーザー体験を提供する上で制限があります。加えて、マウスイベントの制約（システムレベルの制約や互換性のための制約）により、デバイスの能力にかかわらず同時入力を扱うことができません。</p>
+        <p>一方で、ネイティブアプリケーションは提供されるシステム API を用いてこれらのケースを扱うことができます。</p>
+        <p>Touch Events 仕様は、Web アプリケーションが直接タッチイベントや複数のタッチポイントを扱えるようにするためのインターフェースを規定することで、この問題に対する解決を提供します。</p>
+    </section>
+    <section id="conformance">
+        <p>この仕様は、含まれるインターフェースを実装する単一の製品であるユーザーエージェントに適用される適合性基準を定義します。</p>
+        <p>WindowProxy は [[!HTML5]] で定義されています。</p>
+        <h3 id="webidl-conform">WebIDL 適合性</h3>
+        <p>この仕様における IDL ブロックは、WebIDL 仕様 [[!WEBIDL]] によって定義された適合 IDL フラグメントです。</p>
+        <p>適合するユーザエージェントは、次の例外を除いて、この仕様における IDL フラグメントの <a
+                href="https://webidl.spec.whatwg.org/#dfn-conforming-javascript-implementation">準拠した JavaScript
+                実装</a> である必要があります。</p>
+        <ul>
+            <li>
+                <a href="https://www.w3.org/TR/WebIDL/#es-attributes">section 4.4.6 of Web IDL</a> では、IDL 属性はインターフェースプロトタイプオブジェクト上のアクセサプロパティとして反映されることが要求されています。これに代わって、ユーザエージェントは、関連するインターフェースを実装するプラットフォームオブジェクト上のデータプロパティとして IDL 属性を反映させることができます。これらのデータプロパティは、プラットフォームオブジェクト上のアクセサプロパティのゲッターおよびセッターを呼び出す際に示されるのと同じ動作を持つ必要があります。
+            </li>
+        </ul>
+        <p><strong>注:</strong> IDL 属性をアクセサプロパティとして反映させる方法と、アクセサプロパティと同じ動作を持つプラットフォームオブジェクト上のデータプロパティとして反映させる方法の両方により、プロパティを単純に取得および設定することが可能になります。例えば、<code>Touch</code> オブジェクト <code>aTouch</code> が与えられた場合、<code>aTouch.target</code> を評価すると <code>Touch</code>
+            オブジェクトの <code>EventTarget</code> が返されます。ユーザエージェントが IDL 属性をアクセサプロパティとして実装している場合、プロパティアクセスはゲッターを呼び出し、<code>EventTarget</code> を返します。ユーザエージェントが IDL 属性をプラットフォームオブジェクト上のデータプロパティとして実装している場合、同じ動作を持つデータプロパティを持つように見えるオブジェクトが作成され、そのプロパティアクセスはこの値を返します。
+        </p>
+    </section>
+    <section>
+        <h2><dfn>Touch</dfn> インターフェース</h2>
+        <p>このインターフェースはタッチイベントの個々の <a>タッチポイント</a> を記述します。 <a><code>Touch</code></a>
+            オブジェクトは不変であり；一度作成されると、その属性は変更できません。</p>
+        <pre class="idl">
+enum TouchType {
+    "direct",
+    "stylus"
+};
+
+dictionary TouchInit {
+    required long        identifier;
+    required EventTarget target;
+             double      clientX = 0;
+             double      clientY = 0;
+             double      screenX = 0;
+             double      screenY = 0;
+             double      pageX = 0;
+             double      pageY = 0;
+             float       radiusX = 0;
+             float       radiusY = 0;
+             float       rotationAngle = 0;
+             float       force = 0;
+             double      altitudeAngle = 0;
+             double      azimuthAngle = 0;
+             TouchType   touchType = "direct";
+};
+
+[Exposed=Window]
+interface Touch {
+    constructor(TouchInit touchInitDict);
+    readonly        attribute long        identifier;
+    readonly        attribute EventTarget target;
+    readonly        attribute double      screenX;
+    readonly        attribute double      screenY;
+    readonly        attribute double      clientX;
+    readonly        attribute double      clientY;
+    readonly        attribute double      pageX;
+    readonly        attribute double      pageY;
+    readonly        attribute float       radiusX;
+    readonly        attribute float       radiusY;
+    readonly        attribute float       rotationAngle;
+    readonly        attribute float       force;
+    readonly        attribute float       altitudeAngle;
+    readonly        attribute float       azimuthAngle;
+    readonly        attribute TouchType   touchType;
+};
+      </pre>
+        <dl data-dfn-for="Touch" data-link-for="Touch">
+            <dt><dfn>identifier</dfn></dt>
+            <dd>
+                <p>各 <a>タッチポイント</a> の識別番号。</p>
+                <p>タッチポイントがアクティブになると、他の <a>アクティブなタッチポイント</a> と区別される識別子 <a>identifier</a> が割り当てられます。タッチポイントがアクティブな間は、それを参照するすべてのイベントに同じ <a>identifier</a> が割り当てられなければなりません。</p>
+            </dd>
+            <dt><dfn>target</dfn></dt>
+            <dd>
+                <p>タッチポイントが最初に表面に置かれたときに、その上でタッチポイントが開始された <code>EventTarget</code> 。たとえタッチポイントがその要素のインタラクティブエリアの外に移動したとしても。</p>
+                <p class="note">一部の実装では、粗い入力の不正確さを修正するためにターゲット要素が変更されます。したがって、ターゲット要素はイベントの座標に直接関連する要素であるとは限りません。タッチ入力をターゲットにするために使用される方法は、この仕様の範囲外です。</p>
+            </dd>
+            <dt><dfn>screenX</dfn></dt>
+            <dd>
+                <p>スクリーンに対するポイントの相対的な水平方向の座標（ピクセル単位）</p>
+            </dd>
+            <dt><dfn>screenY</dfn></dt>
+            <dd>
+                <p>スクリーンに対するポイントの相対的な鉛直方向の座標（ピクセル単位）</p>
+            </dd>
+            <dt><dfn>clientX</dfn></dt>
+            <dd>
+                <p>ビューポートに対するポイントの相対的な水平方向の座標（ピクセル単位）。スクロールオフセットは除外されます。</p>
+            </dd>
+            <dt><dfn>clientY</dfn></dt>
+            <dd>
+                <p>ビューポートに対するポイントの相対的な鉛直方向の座標（ピクセル単位）。スクロールオフセットは除外されます。</p>
+            </dd>
+            <dt><dfn>pageX</dfn></dt>
+            <dd>
+                <p>ビューポートに対するポイントの相対的な水平方向の座標（ピクセル単位）。スクロールオフセットを含みます。</p>
+            </dd>
+            <dt><dfn>pageY</dfn></dt>
+            <dd>
+                <p>ビューポートに対するポイントの相対的な鉛直方向の座標（ピクセル単位）。スクロールオフセットを含みます。</p>
+            </dd>
+            <dt><dfn>radiusX</dfn></dt>
+            <dd>
+                <p>回転角度で示される軸に沿った、接触面（例：指、スタイラス）を最も近く囲む楕円の半径（CSS ピクセル単位、[[!CSS-VALUES]] により定義）で、<code>0</code> は値が不明な場合を示します。値は負であってはなりません。</p>
+            </dd>
+            <dt><dfn>radiusY</dfn></dt>
+            <dd>
+                <p>回転角度で示される軸に垂直な方向の、接触面（例：指、スタイラス）を最も近く囲む楕円の半径（CSS ピクセル単位、[[!CSS-VALUES]] により定義）で、<code>0</code> は値が不明な場合を示します。値は負であってはなりません。</p>
+            </dd>
+            <dt><dfn>rotationAngle</dfn></dt>
+            <dd>
+                <p>半径 X および半径 Y によって記述される楕円がその中心を中心に時計回りに回転する角度（度単位）。値が不明な場合は <code>0</code> を示します。値は <code>0</code> 以上 <code>90</code> 未満でなければなりません。
+                </p>
+                <p>半径 X および半径 Y によって記述される楕円が円形の場合、回転角度は影響を与えません。この場合、ユーザエージェントは値を <code>0</code> とするか、前のタッチイベントからの rotationAngle 値など、許可された範囲内の任意の値を使用することができます。</p>
+            </dd>
+            <dt><dfn>force</dfn></dt>
+            <dd>
+                <p>デバイスが感知できるタッチの圧力の相対的な値で、<code>0</code> から <code>1</code> の範囲で、<code>0</code> は圧力なし、<code>1</code> はデバイスが感知できる最も高い圧力レベルを示します。値が不明な場合は <code>0</code> を示します。力が知られている環境では、力属性が表す絶対圧力と圧力レベルは異なる場合があります。
+                </p>
+            </dd>
+            <dt><dfn>altitudeAngle</dfn></dt>
+            <dd>
+                <p>トランスデューサ（例：ペン/スタイラス）の高度（ラジアン単位）で、範囲は [0,π/2] であり、0 は表面（X-Y 平面）に平行、π/2 は表面に垂直を示します。傾きや角度を報告しないハードウェアやプラットフォームでは、値は必ず 0 でなければなりません。</p>
+                <div class="note">
+                    <code>altitudeAngle</code> のここで定義されたデフォルト値は 0 ですが、これは π/2 のデフォルト値を持つ <a href="https://w3c.github.io/pointerevents/">Pointer Events - Level 3</a> [[POINTEREVENTS]]
+                    仕様とは異なります。この仕様では、トランスデューサが表面に垂直であると見なされるため、<code>altitudeAngle</code> のデフォルト値は π/2 です。
+                </div>
+                <figure id="figure_altitudeAngle">
+                    <img alt="altitudeAngle explanation diagram" src="images/altitudeAngle.png">
+                    <figcaption>
+                        Example <code>altitudeAngle</code> of π/4 (45 degrees from the X-Y plane).
+                    </figcaption>
+                </figure>
+            </dd>
+            <dt><dfn>azimuthAngle</dfn></dt>
+            <dd>
+                <p>トランスデューサ（例：ペン/スタイラス）の方位角（ラジアン単位）で、範囲は [0, 2π] であり、0 はトランスデューサのキャップが X-Y 平面上の X 値の増加方向（真下から見て「3 時方向」）を指し、時計回りに進むにつれて値が増加します（「6 時方向」では π/2、「9 時方向」では π、「12 時方向」では 3π/2）。トランスデューサが表面に完全に垂直な場合（<code>altitudeAngle</code> が π/2 の場合）、値は必ず 0 でなければなりません。傾きや角度を報告しないハードウェアやプラットフォームでは、値は必ず 0 でなければなりません。</p>
+                <figure id="figure_azimuthAngle">
+                    <img alt="azimuthAngle explanation diagram" src="images/azimuthAngle.png">
+                    <figcaption>
+                        Example <code>azimuthAngle</code> of π/6 ("4 o'clock").
+                    </figcaption>
+                </figure>
+            </dd>
+            <dt><dfn>touchType</dfn></dt>
+            <dd>
+                <p>タッチをトリガーするために使用されるデバイスの種類。</p>
+            </dd>
+        </dl>
+        <dl>
+            <dt><dfn>TouchType</dfn></dt>
+            <dd>
+                <p>異なるタイプのタッチ入力を表す列挙型。</p>
+            </dd>
+        </dl>
+        <dl data-dfn-for="TouchType" data-link-for="TouchType">
+            <dt><dfn>direct</dfn></dt>
+            <dd>
+                <p>画面上の指による直接タッチ。</p>
+            </dd>
+            <dt><dfn>stylus</dfn></dt>
+            <dd>
+                <p>スタイラスまたはペンデバイスによるタッチ。</p>
+            </dd>
+        </dl>
+    </section>
+    <section>
+        <h2><dfn>TouchList</dfn> インターフェース</h2>
+        <p>このインターフェースはタッチイベントの個々の接触点のリストを定義します。
+            <a><code>TouchList</code></a> オブジェクトは不変であり；一度作成されると、その内容は変更できません。
+        </p>
+        <p><code>TouchList</code> オブジェクトの <em>サポートされるプロパティインデックス</em> ([[!WEBIDL]]) は、リストの長さよりも 1 少ない範囲の数値です。</p>
+        <pre class="idl">
+[Exposed=Window]
+interface TouchList {
+    readonly        attribute unsigned long length;
+    getter Touch? item (unsigned long index);
+};
+      </pre>
+        <dl data-dfn-for="TouchList" data-link-for="TouchList">
+            <dt><dfn>length</dfn></dt>
+            <dd>
+                <p>リスト内の <a><code>Touch</code></a> オブジェクトの数を返します</p>
+            </dd>
+            <dt><dfn>item</dfn></dt>
+            <dd>
+                <p>リスト内の指定されたインデックスの <a><code>Touch</code></a> を返します。インデックスがリストの長さよりも小さくない場合は null を返します。</p>
+            </dd>
+        </dl>
+    </section>
+    <section>
+        <h2><dfn>TouchEvent</dfn> インターフェース</h2>
+        <p>このインターフェースは <a><code>touchstart</code></a> 、 <a><code>touchend</code></a>、
+            <a><code>touchmove</code></a>、および <a><code>touchcancel</code></a> イベントタイプを定義します。
+            <a><code>TouchEvent</code></a> オブジェクトは不変であり；一度作成され初期化されると、その属性は変更できません。 <code>TouchEvent</code> は [[!DOM-LEVEL-3-EVENTS]] で定義された <code>UIEvent</code> インターフェースから継承されます。
+        </p>
+        <p><dfn>TouchEventInit</dfn> 辞書は、<code>TouchEvent</code> インターフェースのコンストラクタによって未承認（合成）タッチイベントを構築するためのメカニズムを提供します。これは [[!DOM-LEVEL-3-EVENTS]] で定義された <code>EventModifierInit</code> 辞書から継承されます。イベントの構築手順は [[!DOM4]] に定義されています。合成タッチイベントをスクリプトから発火させる方法のサンプルコードについては、<a href="#firing-a-synthetic-touchevent-from-script"
+                title="examples">example</a> を参照してください。
+        </p>
+        <pre class="idl">
+dictionary TouchEventInit : EventModifierInit {
+            sequence&lt;Touch&gt; touches = [];
+            sequence&lt;Touch&gt; targetTouches = [];
+            sequence&lt;Touch&gt; changedTouches = [];
+};
+
+[Exposed=Window]
+interface TouchEvent : UIEvent {
+    constructor(DOMString type, optional TouchEventInit eventInitDict = {});
+    readonly        attribute TouchList touches;
+    readonly        attribute TouchList targetTouches;
+    readonly        attribute TouchList changedTouches;
+    readonly        attribute boolean   altKey;
+    readonly        attribute boolean   metaKey;
+    readonly        attribute boolean   ctrlKey;
+    readonly        attribute boolean   shiftKey;
+    getter boolean getModifierState (DOMString keyArg);
+};
+      </pre>
+        <dl data-dfn-for="TouchEvent" data-link-for="TouchEvent">
+            <dt><dfn>touches</dfn></dt>
+            <dd>
+                <p>現在表面に触れているすべての接触点に対する <a><code>Touch</code></a> オブジェクトのリスト。</p>
+            </dd>
+            <dt><dfn>targetTouches</dfn></dt>
+            <dd>
+                <p>現在表面に触れているすべての接触点に対する <a><code>Touch</code></a> オブジェクトのリストで、
+                    <em>かつ</em> 現在のイベントのターゲットである要素上で開始されたもの。
+                </p>
+            </dd>
+            <dt><dfn>changedTouches</dfn></dt>
+            <dd>
+                <p>イベントに寄与したすべての接触点に対する <a><code>Touch</code></a> オブジェクトのリスト。</p>
+                <p><a><code>touchstart</code></a> イベントの場合、これは現在のイベントでアクティブになったタッチポイントのリストでなければなりません。 <a><code>touchmove</code></a> イベントの場合、これは前のイベントから移動したタッチポイントのリストでなければなりません。 <a><code>touchend</code></a> および <a><code>touchcancel</code></a> イベントの場合、これは表面からちょうど取り除かれたタッチポイントのリストであり、取り除かれる前のタッチポイントの最後の既知の座標を含んでいなければなりません。
+                </p>
+            </dd>
+            <dt><dfn>altKey</dfn></dt>
+            <dd>
+                <p>alt (Alternate) キー修飾子がアクティブである場合は <code>true</code> 、そうでない場合は <code>false</code> を返します。</p>
+            </dd>
+            <dt><dfn>metaKey</dfn></dt>
+            <dd>
+                <p>meta (Meta) キー修飾子がアクティブである場合は <code>true</code> 、そうでない場合は <code>false</code> を返します。一部のプラットフォームでは、この属性は異なる名前のキー修飾子にマッピングされる場合があります。</p>
+            </dd>
+            <dt><dfn>ctrlKey</dfn></dt>
+            <dd>
+                <p>ctrl (Control) キー修飾子がアクティブである場合は <code>true</code> 、そうでない場合は <code>false</code> を返します。</p>
+            </dd>
+            <dt><dfn>shiftKey</dfn></dt>
+            <dd>
+                <p>shift (Shift) キー修飾子がアクティブである場合は <code>true</code> 、そうでない場合は <code>false</code> を返します。</p>
+            </dd>
+            <dt><dfn>getModifierState</dfn>(keyArg)</dt>
+            <dd>
+                <p>キー値を使用して修飾キーの状態を照会します。修飾キーであり、修飾キーがアクティブである場合は <code>true</code> を返し、そうでない場合は <code>false</code> を返します。</p>
+            </dd>
+        </dl>
+        <section class="informative">
+            <h2>TouchEvent 実装者向けノート</h2>
+            <div class="note">
+                <p>ユーザエージェントは、特定の <a><code>TouchEvent</code></a> に対して利用可能なすべての <a><code>Touch</code></a> オブジェクトが、<a><code>TouchEvent</code></a> が発信されたのと同じ文書に関連付けられていることを確認する必要があります。これを実装するために、ユーザエージェントは現在の <em>タッチアクティブ</em> 文書の概念を維持する必要があります。最初のタッチ時に、これはタッチが作成されたターゲット文書に設定されます。すべてのアクティブなタッチポイントが解放されると、<em>タッチアクティブ</em> 文書はクリアされます。すべての <a><code>TouchEvent</code></a> は現在の <em>タッチアクティブ</em> 文書に送信され、その中の各 <a><code>Touch</code></a> オブジェクトは、その文書内の DOM 要素（および座標）のみを参照します。タッチが現在の <em>タッチアクティブ</em> 文書の外部で完全に開始されると、それは完全に無視されます。
+                </p>
+            </div>
+        </section>
+        <section class="informative">
+            <h2>使用例</h2>
+            <p>以下の例は、<a><code>TouchEvent</code></a> インターフェースで定義された異なる <a><code>TouchList</code></a> メンバー間の関係を示しています。</p>
+            <section>
+                <h3><code>touches</code> と <code>targetTouches</code> の <a><code>TouchEvent</code></a> の例</h3>
+                <p>この例は、<a><code>TouchEvent</code></a> インターフェースで定義された <code>touches</code> と <code>targetTouches</code> メンバー間の関係を示しています。次のコードは、タッチ可能な要素と文書上のタッチポイントの数に基づいて異なる出力を生成します。
+                </p>
+                <pre class="example">
+&lt;div id="touchable"&gt;この要素はタッチ可能です。&lt;/div&gt;
+
+&lt;script&gt;
+document.getElementById('touchable').addEventListener('touchstart', function(ev) {
+
+    if (ev.touches.item(0) == ev.targetTouches.item(0))
+    {
+        /**
+         * 表面上の最初のタッチが「タッチ可能」要素をターゲットにしている場合、以下のコードが実行されるべきです。
+         * targetTouches は、touches のサブセットであり、全体の表面をカバーしているため、
+         * TouchEvent.touches &gt;= TouchEvents.targetTouches は常に真です。
+         */
+
+        document.write('Hello Touch Events!');
+    }
+
+    if (ev.touches.length == ev.targetTouches.length)
+    {
+        /**
+         * すべてのアクティブなタッチポイントが「タッチ可能」要素上にある場合、長さプロパティは同じであるべきです。
+         */
+
+        document.write('すべてのポイントがターゲット要素上にあります')
+    }
+
+    if (ev.touches.length &gt; 1)
+    {
+        /**
+         * 単一タッチ入力デバイスでは、表面上に接触ポイントは1つしか存在できないため、
+         * 次のコードは、端末が複数のタッチをサポートしている場合にのみ実行されます。
+         */
+
+        document.write('Hello Multiple Touch!');
+    }
+
+}, false);
+&lt;/script&gt;
+</pre>
+            </section>
+            <section>
+                <h3><code>changedTouches</code> の <a><code>TouchEvent</code></a> の例</h3>
+                <p>この例は、<code>changedTouches</code> の有用性と、<a><code>TouchEvent</code></a> インターフェースの他の <a><code>TouchList</code></a> メンバーとの関係を示しています。このコードは、タッチポイントが定義されたタッチ可能な要素から削除されるたびにトリガーされる例です。
+                </p>
+                <pre class="example">
+&lt;div id="touchable"&gt;この要素はタッチ可能です。&lt;/div&gt;
+
+&lt;script&gt;
+document.getElementById('touchable').addEventListener('touchend', function(ev) {
+
+    /**
+     * 3 つのタッチポイントが表面上にあり、そのうち 2 つが「タッチ可能」要素上にあり、
+     * そのうちの 1 つのポイントが表面から持ち上げられたときの例の出力は次のとおりです。
+     *
+     * 削除されたタッチポイント: 1
+     * 要素上に残っているタッチポイント: 1
+     * 文書上に残っているタッチポイント: 2
+     */
+
+    document.write('削除されたタッチポイント: ' + ev.changedTouches.length);
+    document.write('要素上に残っているタッチポイント: ' + ev.targetTouches.length);
+    document.write('文書上に残っているタッチポイント: ' + ev.touches.length);
+
+}, false);
+&lt;/script&gt;
+</pre>
+            </section>
+            <section>
+                <h3>スクリプトから合成 <a><code>TouchEvent</code></a> を発火させる</h3>
+                <p>この例は、スクリプトから <a><code>TouchEvent</code></a> を作成し、発火させる方法を示しています。</p>
+                <pre class="example">
+if (Touch.length &lt; 1 || TouchEvent.length &lt; 1)
+  throw "TouchEvent constructors not supported";
+
+var touch = new Touch({
+    identifier: 42,
+    target: document.body,
+    clientX: 200,
+    clientY: 200,
+    screenX: 300,
+    screenY: 300,
+    pageX: 200,
+    pageY: 200,
+    radiusX: 5,
+    radiusY: 5
+});
+
+var touchEvent = new TouchEvent("touchstart", {
+    cancelable: true,
+    bubbles: true,
+    composed: true,
+    touches: [touch],
+    targetTouches: [touch],
+    changedTouches: [touch]
+});
+
+document.body.dispatchEvent(touchEvent);
+</pre>
+            </section>
+        </section>
+        <section class="informative">
+            <h2><a><code>TouchEvent</code></a> タイプのリスト</h2>
+            <p>次の表は、この仕様で定義された <a><code>TouchEvent</code></a> イベントタイプの概要を提供します。すべてのイベントはバブリングフェーズを実行する必要があります。すべてのイベントは構成された [[WHATWG-DOM]] イベントである必要があります。</p><!--
+          // FIXME: As of the time of writing, respec.js doesn't have support for
+          // tables like this - we're just piggybacking on a existing class, with
+          // raw markup as a quick and dirty workaround.
+          -->
+            <table class="simple" id="table-event-summary">
+                <thead>
+                    <tr>
+                        <th>イベントタイプ</th>
+                        <th>同期/非同期</th>
+                        <th>バブリングフェーズ</th>
+                        <th>構成済み</th>
+                        <th>信頼できる近接イベントターゲットタイプ</th>
+                        <th>インターフェース</th>
+                        <th>キャンセル可能</th>
+                        <th>デフォルトアクション</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">
+                            <a><code>touchstart</code></a>
+                        </th>
+                        <td>同期</td>
+                        <td>はい</td>
+                        <td>はい</td>
+                        <td><code>Document</code>, <code>Element</code></td>
+                        <td>
+                            <a><code>TouchEvent</code></a>
+                        </td>
+                        <td>
+                            <a href="#cancelability">異なる</a>
+                        </td>
+                        <td>未定義</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <a><code>touchend</code></a>
+                        </th>
+                        <td>同期</td>
+                        <td>はい</td>
+                        <td>はい</td>
+                        <td><code>Document</code>, <code>Element</code></td>
+                        <td>
+                            <a><code>TouchEvent</code></a>
+                        </td>
+                        <td>
+                            <a href="#cancelability">異なる</a>
+                        </td>
+                        <td>
+                            異なる：ユーザエージェントは <a href="#mouse-events">マウスおよびクリックイベント</a> をディスパッチする場合があります
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <a><code>touchmove</code></a>
+                        </th>
+                        <td>同期</td>
+                        <td>はい</td>
+                        <td>はい</td>
+                        <td><code>Document</code>, <code>Element</code></td>
+                        <td>
+                            <a><code>TouchEvent</code></a>
+                        </td>
+                        <td>
+                            <a href="#cancelability">異なる</a>
+                        </td>
+                        <td>未定義</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <a><code>touchcancel</code></a>
+                        </th>
+                        <td>同期</td>
+                        <td>はい</td>
+                        <td>はい</td>
+                        <td><code>Document</code>, <code>Element</code></td>
+                        <td>
+                            <a><code>TouchEvent</code></a>
+                        </td>
+                        <td>No</td>
+                        <td>なし</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        <section>
+            <h3 id="cancelability">タッチイベントのキャンセル可能性</h3>
+            <p><a href="#dfn-canceled-event">キャンセル</a> タッチイベントは、スクロールを防止または中断することができます（これはスクリプト実行と並行して発生する可能性があります）。最大のスクロールパフォーマンスを確保するために、ユーザエージェントは、処理されるのを待たずに各タッチイベントを生成し、<code>cancelable</code> プロパティが <code>false</code> であることを示すタッチイベントを生成する場合があります。そうでない場合、<code>cancelable</code> は <code>true</code> になります。</p>
+            <p>特に、ユーザエージェントは、<a href="https://dom.spec.whatwg.org/#observing-event-listeners">非パッシブリスナーがないことを観察したとき</a> にのみ、キャンセルできないタッチイベントを生成するべきです。</p>
+        </section>
+        <section>
+            <h3 id="event-touchstart"> <dfn class="event"><code>touchstart</code></dfn> イベント</h3>
+            <p>ユーザエージェントは、ユーザが <a>タッチポイント</a> をタッチ面に置いたときに、このイベントタイプをディスパッチしなければなりません。</p>
+            <p>このイベントのターゲットは <code>Element</code> でなければなりません。タッチポイントがフレーム内にある場合、イベントはそのフレームの子ブラウジングコンテキスト内の要素にディスパッチされるべきです。</p>
+            <p>このイベントが<a href="#dfn-canceled-event">キャンセル</a>された場合、同じ <a>アクティブタッチポイント</a> に関連するタッチイベントによって引き起こされるデフォルトアクションを防ぐべきです。これには、マウスイベントやスクロールが含まれます。</p>
+        </section>
+        <section data-link-for="TouchEvent">
+            <h3 id="event-touchend"> <dfn class="event"><code>touchend</code></dfn> イベント</h3>
+            <p>ユーザエージェントは、ユーザがタッチポイントをタッチ面から取り除いたとき、またはタッチポイントがタッチ面から物理的に離れたとき（画面外にドラッグされるなど）に、このイベントタイプをディスパッチしなければなりません。</p>
+            <p>このイベントのターゲットは、タッチポイントが最初に表面に置かれたときと同じ <code>Element</code> でなければなりません。たとえタッチポイントがその後インタラクティブエリアの外に移動したとしても。</p>
+            <p>削除されたタッチポイントは、<a><code>changedTouches</code></a> 属性に含まれ、<a><code>touches</code></a> および <a><code>targetTouches</code></a> 属性には含まれないはずです。
+            </p>
+            <p>このイベントが<a href="#dfn-canceled-event">キャンセル</a>された場合、このイベントを含むタッチイベントのシーケンスは <a href="#click-events">クリックとして解釈されない</a> べきです。</p>
+        </section>
+        <section>
+            <h3 id="event-touchmove"> <dfn class="event"><code>touchmove</code></dfn> イベント</h3>
+            <p>ユーザエージェントは、ユーザがタッチポイントをタッチ面上で移動させたときに、このイベントタイプをディスパッチしなければなりません。</p>
+            <p>このイベントのターゲットは、タッチポイントが最初に表面に置かれたときと同じ <code>Element</code> でなければなりません。たとえタッチポイントがその後インタラクティブエリアの外に移動したとしても。</p>
+            <p>ユーザエージェントが <a><code>touchmove</code></a> イベントを送信する速度は実装依存であり、ハードウェアの能力やその他の実装の詳細に依存する場合があります。</p>
+            <p>ユーザエージェントは、少なくとも同じ <a>アクティブタッチポイント</a> に関連付けられた最初の <a><code>touchmove</code></a> イベントが <a href="#dfn-canceled-event">キャンセル</a>されるまで、<a><code>touchmove</code></a> イベントによって引き起こされるデフォルトアクションを抑制するべきです。その後の <a><code>touchmove</code></a> イベントに対するデフォルトアクションが抑制されるかどうかは、実装に依存します。
+            </p>
+        </section>
+        <section data-link-for="TouchEvent">
+            <h3 id="event-touchcancel"> <dfn class="event"><code>touchcancel</code></dfn> イベント</h3>
+            <p>ユーザエージェントは、タッチポイントが実装依存の方法で中断されたことを示すために、このイベントタイプをディスパッチしなければなりません。たとえば、UA からの同期イベントやアクションによってタッチがキャンセルされた場合や、タッチポイントが文書ウィンドウを離れてユーザーインタラクションを処理できる非文書領域に移動した場合などです（例：UA のネイティブユーザーインターフェース、またはプラグインによって管理される文書の領域）。また、デバイスまたは実装が保存するように構成されているタッチポイントの数を超えて、ユーザがタッチ面にタッチポイントを追加したときにも、このイベントタイプをディスパッチすることがあります。この場合、<a><code>Touch</code></a> オブジェクトの最初のものが削除されるべきです。</p>
+            <p>このイベントのターゲットは、タッチポイントが最初に表面に置かれたときと同じ <code>Element</code> でなければなりません。たとえタッチポイントがその後インタラクティブエリアの外に移動したとしても。</p>
+            <p>削除されたタッチポイントは、<a><code>changedTouches</code></a> 属性に含まれ、<a><code>touches</code></a> および <a><code>targetTouches</code></a> 属性には含まれないはずです。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>リターゲティング</h2>
+        <p>次のセクションでは、[[!WHATWG-DOM]] に定義された <a href="https://dom.spec.whatwg.org/#retarget">リターゲティング手順</a> について説明します。</p>
+        <p><code>Touch</code> オブジェクトには関連付けられた <dfn>調整前ターゲット</dfn> （null または <code>EventTarget</code>）があります。特に記載されていない限り、これは null です。</p>
+        <p><code>TouchEvent</code> の <a href="https://dom.spec.whatwg.org/#retarget">リターゲティング手順</a> は、<var>touchEvent</var> が与えられたときに、次の手順を実行しなければなりません。
+        </p>
+        <ol>
+            <li>
+                <p><var>touchEvent</var> の <code>touches</code>、<code>targetTouches</code>、および <code>changedTouches</code> メンバーにある各 <a><code>Touch</code></a> <var>touch</var> に対して：</p>
+                <ol>
+                    <li>もし <var>touch</var> の <a><code>unadjustedTarget</code></a> が null であれば、<var>touch</var> の <code>target</code> に設定します。</li>
+                    <li><var>touch</var> の <a><code>unadjustedTarget</code></a> を <var>touchEvent</var> の <code>target</code> に対してリターゲティングを実行した結果に設定します。</li>
+                </ol>
+            </li>
+        </ol>
+    </section>
+    <section>
+        <h2>レガシータッチイベント API の条件付き公開</h2>
+        <p>ユーザエージェントには、関連付けられたブール値の <dfn data-export="">レガシータッチイベント API を公開</dfn> があります。その値は<a>実装依存</a>です。</p>
+        <p class="note">既存のウェブコンテンツは、これらの API の存在をユーザエージェントがタッチ対応の「モバイル」デバイスであるという信号として使用することが多く、したがって、たとえタッチ対応であっても非モバイルデバイスでこれらの API を公開すると、そうしたウェブコンテンツに対して最適でないユーザー体験をもたらす可能性があります。</p>
+    </section>
+    <section>
+        <h2><code>GlobalEventHandlers</code> ミキシンへの拡張</h2>
+        <p>次のセクションでは、既存の <dfn
+                data-cite="HTML5#globaleventhandlers">GlobalEventHandlers</dfn> ミキシンへの拡張について説明します。これは [[!HTML5]] で定義されており、レガシータッチイベント API を公開するかどうかに応じて実装されるべきです。</p>
+        <pre class="idl">
+partial interface mixin GlobalEventHandlers {
+                    attribute EventHandler ontouchstart;
+                    attribute EventHandler ontouchend;
+                    attribute EventHandler ontouchmove;
+                    attribute EventHandler ontouchcancel;
+};
+      </pre>
+        <dl data-dfn-for="GlobalEventHandlers" data-link-for="GlobalEventHandlers">
+            <dt><dfn>ontouchstart</dfn></dt>
+            <dd>
+                <p><code>touchstart</code> イベントタイプのためのイベントハンドラ IDL 属性（[[!HTML5]] を参照）。</p>
+            </dd>
+            <dt><dfn>ontouchend</dfn></dt>
+            <dd>
+                <p><code>touchend</code> イベントタイプのためのイベントハンドラ IDL 属性（[[!HTML5]] を参照）。</p>
+            </dd>
+            <dt><dfn>ontouchmove</dfn></dt>
+            <dd>
+                <p><code>touchmove</code> イベントタイプのためのイベントハンドラ IDL 属性（[[!HTML5]] を参照）。</p>
+            </dd>
+            <dt><dfn>ontouchcancel</dfn></dt>
+            <dd>
+                <p><code>touchcancel</code> イベントタイプのためのイベントハンドラ IDL 属性（[[!HTML5]] を参照）。</p>
+            </dd>
+        </dl>
+    </section>
+    <section id="mouse-events">
+        <h2>マウスイベントおよび <code>click</code> との相互作用</h2>
+        <p>ユーザエージェントは、同じユーザー入力に対してタッチイベントと（タッチ用に設計されていないウェブコンテンツとの互換性のために）マウスイベント [[!DOM-LEVEL-2-EVENTS]] の両方をディスパッチする場合があります。ユーザエージェントが単一のユーザーアクションに対してタッチイベントとマウスイベントの両方をディスパッチする場合、<a><code>touchstart</code></a> イベントタイプは、そのアクションに対するいかなるマウスイベントタイプよりも前にディスパッチされなければなりません。<a><code>touchstart</code></a> 、 <a><code>touchmove</code></a>、または <a><code>touchend</code></a> が <a href="#dfn-canceled-event">キャンセル</a>された場合、ユーザエージェントは、キャンセルされたタッチイベントの結果として派生するマウスイベントをディスパッチしないようにすべきです。
+        </p>
+        <p class="note">ウェブアプリケーションがタッチイベントを処理できる場合、それらのイベントを <a href="#dfn-canceled-event">キャンセル</a> でき、ユーザエージェントによってマウスイベントがディスパッチされる必要はありません。ウェブアプリケーションがタッチ入力デバイス専用に書かれていない場合、代わりに subsequent mouse イベントに反応します。</p>
+        <p class="note">ユーザエージェントは通常、単一指のアクティベーションジェスチャ（タップや長押しなど）に対してのみマウスおよびクリックイベントをディスパッチします。タッチポイントの移動を伴うジェスチャや、2 つ以上の <a href="#dfn-active-touch-point">アクティブタッチポイント</a> を伴うマルチタッチインタラクションは、通常タッチイベントのみを生成します。</p>
+        <p id="click-events">ユーザエージェントがタッチイベントのシーケンスをタップジェスチャとして解釈する場合、<code>mousemove</code> 、 <code>mousedown</code> 、 <code>mouseup</code> 、および <code>click</code> イベントを（その順序で）対応するタッチ入力の <a><code>touchend</code></a> イベントの位置でディスパッチするべきです。タッチイベントの処理中に文書の内容が変更された場合、ユーザエージェントはタッチイベントとは異なるターゲットにマウスイベントをディスパッチすることがあります。</p>
+        <p>デフォルトアクションと、さらなるタッチおよびマウスイベントの順序は、他の場所で指定されている場合を除き、実装依存です。</p>
+        <div class="note">
+            <p>要素のアクティベーション（例えば、いくつかの実装ではタップ）は、通常次のイベントシーケンスを生成します（ただし、これはユーザエージェントの特定の動作に応じてわずかに異なる場合があります）。</p>
+            <ol data-class="note-list">
+                <li><code>touchstart</code></li>
+                <li>ゼロまたはそれ以上の <code>touchmove</code> イベント、指の動きに応じて</li>
+                <li><code>touchend</code></li>
+                <li><code>mousemove</code> <small>(レガシーなマウス専用コードとの互換性のため)</small></li>
+                <li><code>mousedown</code></li>
+                <li><code>mouseup</code></li>
+                <li><code>click</code></li>
+            </ol>
+            <p>ただし、<code>touchstart</code> 、 <code>touchmove</code> または <code>touchend</code> イベントが <a href="#dfn-canceled-event">キャンセル</a>された場合、マウスまたはクリックイベントは発生せず、結果として得られるイベントシーケンスは単に次のようになります。</p>
+            <ol data-class="note-list">
+                <li><code>touchstart</code></li>
+                <li>ゼロまたはそれ以上の <code>touchmove</code> イベント、指の動きに応じて</li>
+                <li><code>touchend</code></li>
+            </ol>
+        </div>
+        <div class="note">
+            <p>たとえユーザエージェントが Touch Events をサポートしていても、タッチスクリーンが唯一の入力メカニズムであるとは限りません。特に、タッチ対応のラップトップや、外部入力デバイスがペアリングされた従来の「タッチ専用」デバイス（電話やタブレットなど）の場合、ユーザはタッチスクリーンをトラックパッド、マウス、またはキーボードと併用して使用することがあります。このため、開発者は「タッチまたはマウス/キーボード」の条件付きコードでイベントリスナーをバインドすることを避けるべきです。これは、タッチとマウス/キーボードの両方の入力メカニズムを排除するサイト/アプリケーションを結果的に作成してしまうからです。</p>
+            <pre class="example"><code>
+// conditional "touch OR mouse/keyboard" event binding
+// DON'T DO THIS, as it makes interactions touch-exclusive
+// on devices that have both touch and mouse/keyboard
+
+if ('ontouchstart' in window) {
+  // set up event listeners for touch
+  target.addEventListener('touchend', ...);
+  ...
+} else {
+  // set up event listeners for mouse/keyboard
+  target.addEventListener('click', ...);
+  ...
+}
+</code></pre>
+            <p>代わりに、開発者は異なる形式の入力を同時に処理するべきです。</p>
+            <pre class="example"><code>
+// concurrent "touch AND mouse/keyboard" event binding
+
+// set up event listeners for touch
+target.addEventListener('touchend', function(e) {
+  // prevent compatibility mouse events and click
+  e.preventDefault();
+  ...
+});
+...
+
+// set up event listeners for mouse/keyboard
+target.addEventListener('click', ...);
+...
+</code></pre>
+            <p>タッチ（タッチイベントと互換性のあるマウスイベントの両方）の同じインタラクションを二重に処理しないようにするために、開発者はタッチイベントを<a href="#dfn-canceled-event">キャンセル</a>し、さらなるマウスまたはクリックイベントの生成を抑制する必要があります。あるいは、タッチイベントの結果として生成されたマウスイベントを検出する方法として、<a href="https://wicg.github.io/input-device-capabilities/">InputDeviceCapabilities API</a> を参照してください。</p>
+        </div>
+    </section>
+    <section>
+        <h2>用語集</h2>
+        <dl>
+            <dt><dfn>アクティブタッチポイント</dfn></dt>
+            <dd>
+                現在画面上にあり、ユーザエージェントによって追跡されている <a>タッチポイント</a> 。タッチポイントは、最初に <a><code>touchstart</code></a> イベントがその出現を示すとアクティブになります。ユーザエージェントが <a><code>touchend</code></a> または <a><code>touchcancel</code></a> イベントをディスパッチしてタッチポイントが表面から取り除かれたことを示すと、アクティブでなくなります。
+            </dd>
+            <dt><dfn>タッチポイント</dfn></dt>
+            <dd>ポインタ（例：指やスタイラス）がインターフェースのターゲット面に交差する座標点。タッチスクリーンへの指のタッチや、紙の上にデジタルペンで書くことに適用される場合があります。</dd>
+            <dt><dfn>キャンセルされたイベント</dfn></dt>
+            <dd><code>preventDefault()</code> によってデフォルトアクションが防止されたイベント。イベントハンドラ内で <code>false</code> を返すこと、または [[!DOM-LEVEL-3-EVENTS]] および [[!HTML5]] で定義された他の手段によってキャンセルされたイベント。
+            </dd>
+        </dl>
+    </section>
+    <section class="appendix informative">
+        <h2>謝辞</h2>
+        <p>この仕様の基礎となるモデルを開発した WebKit エンジニア、Neil Roberts (SitePen) の WebKit タッチイベントの要約、Peter-Paul Koch (PPK) の記事や提案、Robin Berjon の <a href="https://dev.w3.org/2009/dap/ReSpec.js/documentation.html">ReSpec.js スペック著者ツール</a> の開発、そして WebEvents WG の多くの貢献に感謝します。</p>
+        <p>仕様の策定にあたり、Matthew Schinckel、Andrew Grieve、Cathy Chan、Boris Zbarsky、Patrick H. Lauke、Simon Pieters など、多くの方々から追加のコメントをいただき、着実な改善がもたらされました。もし私たちがあなたの名前を不注意にも省略してしまった場合は、お知らせください。</p>
+        <p>テストスイートへのこの仕様の貢献者として、Matt Brubeck、Olli Pettay、Art Barstow、Cathy Chan、Rick Byers に感謝します。</p>
+    </section>
+    <section class="appendix informative">
+        <h2>前回の公開以来の変更点</h2>
+        <p>これは、<a href="https://www.w3.org/TR/touch-events/">2013 年 10 月 10 日の勧告</a> が公開されて以来の主要な変更点の概要です。 <a
+                href="https://github.com/w3c/touch-events/compare/v1...gh-pages">完全なコミット履歴</a> も利用可能です。</p>
+        <ul>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/125">altitudeAngle/azimuthAngle の説明を PointerEvents に沿って言い換え、図を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/120">getModifierState 定義の追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/303b36e1d188a380f9bc0861b175438e596a34b1">Touch に force 属性を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/6d222fb7f106273bef847ad1d1d7a23569841954">Touch に radiusX および radiusY 属性を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/487f6815a9590b72779d4820ff43c2b58d798f92">Touch に rotationAngle 属性を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/006274ffada14de504f731afdb5ec1581ff327ca">座標を long 型から double 型にアップグレード</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/df620100e48111cf7a30592f344606f8c8b7fe22">preventDefault に関する touchmove の動作を更新</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/54a3d1668c4f727d9c6f6d729b28a036041e301f">touchend イベントのキャンセルの影響を明確にする</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/219546b80cd148543a5ece656d81ba3c901d2106">TouchEvent と Touch のコンストラクタを追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/commit/50f51ccacb0d5ad06f9cf6ed44f853d6a3616d10">レガシーイベント初期化子 initTouchEvent を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/59">キャンセルできないタッチイベントのサポートを追加し、スクロールパフォーマンスへの影響を説明</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/67">すべてのイベントは「構成済み」であるべきことを示す</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/72">条件付き「タッチまたはマウス/キーボード」イベント処理を避けることに関する注意書き</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/73">TouchEvent のリターゲティング手順を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/81">タッチタイプ、高度角、方位角の追加（Safari iOS 10.3 のスタイラス拡張）</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/88">コンストラクタに [Exposed=Window] を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/95">UA がタッチターゲットを調整する可能性に関する言及を追加</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/96">レガシーイベント初期化子（createTouch と createTouchList）を削除し、<a href="https://github.com/w3c/touch-events/pull/100">initTouchEvent / createTouchList に関する注意書きを削除</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/111">条件付きでレガシータッチイベント API を公開</a>
+            </li>
+            <li>
+                <a href="https://github.com/w3c/touch-events/pull/91">TouchEvent に getModifierState 定義を追加</a>
+            </li>
+        </ul>
+    </section>
+</body>
+
+</html>
