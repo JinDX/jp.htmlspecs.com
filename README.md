@@ -52,7 +52,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Fullscreen](https://jp.htmlspecs.com/fullscreen)
 - [x] [Screen Capture](https://jp.htmlspecs.com/screen-capture)
 - [x] [UI Events](https://jp.htmlspecs.com/uievents)
-- [x] [Touch Events - Level 2](https://jp.htmlspecs.com/touchevents)
+- [x] [Touch Events - Level 2](https://jp.htmlspecs.com/touch-events)
 - [ ] [Contact Picker API](https://jp.htmlspecs.com/contact-picker)
 - [x] [Notifications API](https://jp.htmlspecs.com/notifications)
 - [ ] [Badging API](https://jp.htmlspecs.com/badging)
