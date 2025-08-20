@@ -56,7 +56,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Contact Picker API](https://jp.htmlspecs.com/contact-picker)
 - [x] [Notifications API](https://jp.htmlspecs.com/notifications)
 - [x] [Badging API](https://jp.htmlspecs.com/badging)
-- [ ] [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard)
+- [x] [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard)
 - [ ] [Web Share API](https://jp.htmlspecs.com/web-share)
 - [ ] [Web Audio API](https://jp.htmlspecs.com/webaudio)
 - [ ] [Geolocation API](https://jp.htmlspecs.com/geolocation)
