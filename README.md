@@ -57,7 +57,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Notifications API](https://jp.htmlspecs.com/notifications)
 - [x] [Badging API](https://jp.htmlspecs.com/badging)
 - [x] [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard)
-- [ ] [Web Share API](https://jp.htmlspecs.com/web-share)
+- [x] [Web Share API](https://jp.htmlspecs.com/web-share)
 - [ ] [Web Audio API](https://jp.htmlspecs.com/webaudio)
 - [ ] [Geolocation API](https://jp.htmlspecs.com/geolocation)
 - [ ] [Device Orientation and Motion](https://jp.htmlspecs.com/orientation-event)
