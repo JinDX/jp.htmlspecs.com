@@ -73,7 +73,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 
 ### パフォーマンスとオブザーバー
 - [x] [Performance Timeline](https://jp.htmlspecs.com/performance-timeline)
-- [ ] [High Resolution Time](https://jp.htmlspecs.com/hr-time-3)
+- [x] [High Resolution Time](https://jp.htmlspecs.com/hr-time-3)
 - [ ] [Intersection Observer](https://jp.htmlspecs.com/intersection-observer)
 - [ ] [Resize Observer](https://jp.htmlspecs.com/resize-observer)
 - [ ] [Navigation Timing Level 2](https://jp.htmlspecs.com/navigation-timing-2)
