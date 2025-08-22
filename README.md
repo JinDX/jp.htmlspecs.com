@@ -72,7 +72,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Battery Status API](https://jp.htmlspecs.com/battery-status)
 
 ### パフォーマンスとオブザーバー
-- [ ] [Performance Timeline](https://jp.htmlspecs.com/performance-timeline)
+- [x] [Performance Timeline](https://jp.htmlspecs.com/performance-timeline)
 - [ ] [High Resolution Time](https://jp.htmlspecs.com/hr-time-3)
 - [ ] [Intersection Observer](https://jp.htmlspecs.com/intersection-observer)
 - [ ] [Resize Observer](https://jp.htmlspecs.com/resize-observer)
