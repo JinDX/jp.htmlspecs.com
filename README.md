@@ -64,7 +64,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Pointer Lock 2.0](https://jp.htmlspecs.com/pointerlock)
 - [x] [Clipboard API and events](https://jp.htmlspecs.com/clipboard-apis)
 - [x] [Input Events Level 1](https://jp.htmlspecs.com/input-events-1)
-- [ ] [Input Events Level 2](https://jp.htmlspecs.com/input-events-2)
+- [x] [Input Events Level 2](https://jp.htmlspecs.com/input-events-2)
 - [ ] [Permissions](https://jp.htmlspecs.com/permissions)
 - [ ] [WebOTP API](https://jp.htmlspecs.com/web-otp)
 - [ ] [Device Posture API](https://jp.htmlspecs.com/device-posture)
