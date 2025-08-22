@@ -68,7 +68,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Permissions](https://jp.htmlspecs.com/permissions)
 - [x] [WebOTP API](https://jp.htmlspecs.com/web-otp)
 - [x] [Device Posture API](https://jp.htmlspecs.com/device-posture)
-- [ ] [Ambient Light Sensor](https://jp.htmlspecs.com/ambient-light)
+- [x] [Ambient Light Sensor](https://jp.htmlspecs.com/ambient-light)
 - [ ] [Battery Status API](https://jp.htmlspecs.com/battery-status)
 
 ### パフォーマンスとオブザーバー
