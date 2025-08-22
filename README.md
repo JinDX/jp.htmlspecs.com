@@ -65,7 +65,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Clipboard API and events](https://jp.htmlspecs.com/clipboard-apis)
 - [x] [Input Events Level 1](https://jp.htmlspecs.com/input-events-1)
 - [x] [Input Events Level 2](https://jp.htmlspecs.com/input-events-2)
-- [ ] [Permissions](https://jp.htmlspecs.com/permissions)
+- [x] [Permissions](https://jp.htmlspecs.com/permissions)
 - [ ] [WebOTP API](https://jp.htmlspecs.com/web-otp)
 - [ ] [Device Posture API](https://jp.htmlspecs.com/device-posture)
 - [ ] [Ambient Light Sensor](https://jp.htmlspecs.com/ambient-light)
