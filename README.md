@@ -66,7 +66,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Input Events Level 1](https://jp.htmlspecs.com/input-events-1)
 - [x] [Input Events Level 2](https://jp.htmlspecs.com/input-events-2)
 - [x] [Permissions](https://jp.htmlspecs.com/permissions)
-- [ ] [WebOTP API](https://jp.htmlspecs.com/web-otp)
+- [x] [WebOTP API](https://jp.htmlspecs.com/web-otp)
 - [ ] [Device Posture API](https://jp.htmlspecs.com/device-posture)
 - [ ] [Ambient Light Sensor](https://jp.htmlspecs.com/ambient-light)
 - [ ] [Battery Status API](https://jp.htmlspecs.com/battery-status)
