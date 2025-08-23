@@ -80,7 +80,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Resource Timing](https://jp.htmlspecs.com/resource-timing)
 - [x] [User Timing Level 2](https://jp.htmlspecs.com/user-timing-2)
 - [x] [Observable](https://jp.htmlspecs.com/observable)
-- [ ] [Long Tasks API](https://jp.htmlspecs.com/longtasks-1)
+- [x] [Long Tasks API](https://jp.htmlspecs.com/longtasks-1)
 - [ ] [Reporting API](https://jp.htmlspecs.com/reporting-1)
 - [ ] [Server Timing](https://jp.htmlspecs.com/server-timing)
 - [ ] [Paint Timing](https://jp.htmlspecs.com/paint-timing)
