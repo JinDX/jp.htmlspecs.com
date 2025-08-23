@@ -84,7 +84,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Reporting API](https://jp.htmlspecs.com/reporting-1)
 - [x] [Server Timing](https://jp.htmlspecs.com/server-timing)
 - [x] [Paint Timing](https://jp.htmlspecs.com/paint-timing)
-- [ ] [Event Timing API](https://jp.htmlspecs.com/event-timing)
+- [x] [Event Timing API](https://jp.htmlspecs.com/event-timing)
 
 ### セキュリティと認証
 - [ ] [Web Authentication Level 2](https://jp.htmlspecs.com/webauthn-2)
