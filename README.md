@@ -87,7 +87,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Event Timing API](https://jp.htmlspecs.com/event-timing)
 
 ### セキュリティと認証
-- [ ] [Web Authentication Level 2](https://jp.htmlspecs.com/webauthn-2)
+- [x] [Web Authentication Level 2](https://jp.htmlspecs.com/webauthn-2)
 - [ ] [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api)
 - [ ] [Subresource Integrity (SRI)](https://jp.htmlspecs.com/SRI)
 - [ ] [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3)
