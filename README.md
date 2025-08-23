@@ -83,7 +83,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Long Tasks API](https://jp.htmlspecs.com/longtasks-1)
 - [x] [Reporting API](https://jp.htmlspecs.com/reporting-1)
 - [x] [Server Timing](https://jp.htmlspecs.com/server-timing)
-- [ ] [Paint Timing](https://jp.htmlspecs.com/paint-timing)
+- [x] [Paint Timing](https://jp.htmlspecs.com/paint-timing)
 - [ ] [Event Timing API](https://jp.htmlspecs.com/event-timing)
 
 ### セキュリティと認証
