@@ -91,7 +91,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api)
 - [x] [Subresource Integrity (SRI)](https://jp.htmlspecs.com/sri)
 - [x] [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3)
-- [ ] [Secure Contexts](https://jp.htmlspecs.com/secure-contexts)
+- [x] [Secure Contexts](https://jp.htmlspecs.com/secure-contexts)
 - [ ] [Referrer Policy](https://jp.htmlspecs.com/referrer-policy)
 - [ ] [Mixed Content](https://jp.htmlspecs.com/mixed-content)
 - [ ] [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1)
