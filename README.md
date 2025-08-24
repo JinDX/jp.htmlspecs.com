@@ -93,7 +93,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3)
 - [x] [Secure Contexts](https://jp.htmlspecs.com/secure-contexts)
 - [x] [Referrer Policy](https://jp.htmlspecs.com/referrer-policy)
-- [ ] [Mixed Content](https://jp.htmlspecs.com/mixed-content)
+- [x] [Mixed Content](https://jp.htmlspecs.com/mixed-content)
 - [ ] [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1)
 
 ### メディアとグラフィックス
