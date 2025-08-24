@@ -94,7 +94,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Secure Contexts](https://jp.htmlspecs.com/secure-contexts)
 - [x] [Referrer Policy](https://jp.htmlspecs.com/referrer-policy)
 - [x] [Mixed Content](https://jp.htmlspecs.com/mixed-content)
-- [ ] [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1)
+- [x] [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1)
 
 ### メディアとグラフィックス
 - [ ] [WebGPU](https://jp.htmlspecs.com/webgpu)
