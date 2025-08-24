@@ -88,7 +88,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 
 ### セキュリティと認証
 - [x] [Web Authentication Level 2](https://jp.htmlspecs.com/webauthn-2)
-- [ ] [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api)
+- [x] [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api)
 - [ ] [Subresource Integrity (SRI)](https://jp.htmlspecs.com/SRI)
 - [ ] [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3)
 - [ ] [Secure Contexts](https://jp.htmlspecs.com/secure-contexts)
