@@ -3,7 +3,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 
 ### コア仕様
 - [x] [HTML](https://jp.htmlspecs.com/)
-- [x] [ECMAScript](https://ecma262.com/)
+- [x] [ECMAScript](https://ecma262.com/jp)
 - [x] [DOM](https://jp.htmlspecs.com/dom)
 - [x] [URL](https://jp.htmlspecs.com/url)
 - [x] [URL Pattern](https://jp.htmlspecs.com/urlpattern)
