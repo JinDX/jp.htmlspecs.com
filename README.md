@@ -97,7 +97,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1)
 
 ### メディアとグラフィックス
-- [ ] [WebGPU](https://jp.htmlspecs.com/webgpu)
+- [X] [WebGPU](https://jp.htmlspecs.com/webgpu)
 - [ ] [WebGPU Shading Language](https://jp.htmlspecs.com/WGSL)
 - [ ] [Web Animations](https://jp.htmlspecs.com/web-animations-1)
 - [ ] [SVG 2](https://jp.htmlspecs.com/SVG2/)
