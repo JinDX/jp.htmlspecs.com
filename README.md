@@ -99,7 +99,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 ### メディアとグラフィックス
 - [X] [WebGPU](https://jp.htmlspecs.com/webgpu)
 - [X] [WebGPU Shading Language](https://jp.htmlspecs.com/WGSL)
-- [ ] [Web Animations](https://jp.htmlspecs.com/web-animations-1)
+- [x] [Web Animations](https://jp.htmlspecs.com/web-animations-1)
 - [ ] [SVG 2](https://jp.htmlspecs.com/SVG2/)
 - [ ] [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture)
 - [ ] [Presentation API](https://jp.htmlspecs.com/presentation-api)
