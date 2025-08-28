@@ -12,7 +12,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Implementation Notes — SVG 2</title>
+    <title>実装に関する注意 — SVG 2</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
@@ -21,11 +21,12 @@
   (or use <style>), and include it before here. -->
 
 
-    <link rel="stylesheet" title="Default" href="https://www.w3.org/TR/SVG2/style/svg.css" type="text/css" media="screen" />
-    <link rel="alternate stylesheet" title="Only annotations for publication" href="https://www.w3.org/TR/SVG2/style/default_no_maturity.css"
-        type="text/css" media="screen" />
-    <link rel="alternate stylesheet" title="No issues/annotations" href="https://www.w3.org/TR/SVG2/style/default_no_issues.css" type="text/css"
+    <link rel="stylesheet" title="Default" href="https://www.w3.org/TR/SVG2/style/svg.css" type="text/css"
         media="screen" />
+    <link rel="alternate stylesheet" title="Only annotations for publication"
+        href="https://www.w3.org/TR/SVG2/style/default_no_maturity.css" type="text/css" media="screen" />
+    <link rel="alternate stylesheet" title="No issues/annotations"
+        href="https://www.w3.org/TR/SVG2/style/default_no_issues.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2016/W3C-ED" type="text/css" media="screen" />
     <script src="https://www.w3.org/TR/SVG2/style/link-fixup.js"></script>
     <script data-script-mathjax="" async=""
@@ -34,106 +35,83 @@
 
 <body class="chapter-implnote">
 
-    <h1>Appendix B: Implementation Notes</h1>
+    <h1>付録B: 実装に関する注意</h1>
     <nav id="toc">
-        <div class="header top"><a href="index.html">Overview</a> . <a href="idl.html">Previous</a> . <a
-                href="access.html">Next</a> . <a href="eltindex.html">Elements</a> . <a
-                href="attindex.html">Attributes</a> . <a href="propidx.html">Properties</a></div>
-        <h2 id="Contents" class="contents">Contents</h2>
+        <div class="header top"><a href="index.html">概要</a> . <a href="idl.html">前へ</a> . <a href="access.html">次へ</a> .
+            <a href="eltindex.html">要素</a> . <a href="attindex.html">属性</a> . <a href="propidx.html">プロパティ</a>
+        </div>
+        <h2 id="Contents" class="contents">目次</h2>
         <ol class="toc appendix-toc">
             <li>
                 <ol class="toc appendix-toc">
-                    <li><a href="implnote.html#Introduction"><span class="secno">B.1.</span> Introduction</a></li>
-                    <li><a href="implnote.html#ArcImplementationNotes"><span class="secno">B.2.</span> Elliptical arc
-                            parameter conversion</a>
+                    <li><a href="implnote.html#Introduction"><span class="secno">B.1.</span> はじめに</a></li>
+                    <li><a href="implnote.html#ArcImplementationNotes"><span class="secno">B.2.</span> 楕円弧パラメータ変換</a>
                         <ol class="toc appendix-toc">
-                            <li><a href="implnote.html#ArcSyntax"><span class="secno">B.2.1.</span> Elliptical arc
-                                    endpoint syntax</a></li>
+                            <li><a href="implnote.html#ArcSyntax"><span class="secno">B.2.1.</span> 楕円弧のエンドポイント構文</a>
+                            </li>
                             <li><a href="implnote.html#ArcParameterizationAlternatives"><span
-                                        class="secno">B.2.2.</span> Parameterization alternatives</a></li>
+                                        class="secno">B.2.2.</span> パラメータ化の代替案</a></li>
                             <li><a href="implnote.html#ArcConversionCenterToEndpoint"><span class="secno">B.2.3.</span>
-                                    Conversion from center to endpoint parameterization</a></li>
+                                    中心からエンドポイントへの変換</a></li>
                             <li><a href="implnote.html#ArcConversionEndpointToCenter"><span class="secno">B.2.4.</span>
-                                    Conversion from endpoint to center parameterization</a></li>
+                                    エンドポイントから中心への変換</a></li>
                             <li><a href="implnote.html#ArcCorrectionOutOfRangeRadii"><span class="secno">B.2.5.</span>
-                                    Correction of out-of-range radii</a></li>
+                                    範囲外半径の補正</a></li>
                         </ol>
                     </li>
                     <li><a href="implnote.html#NumericPrecisionImplementationNotes"><span class="secno">B.3.</span>
-                            Notes on generating high-precision geometry</a></li>
+                            高精度ジオメトリ生成に関する注意</a></li>
                 </ol>
             </li>
         </ol>
     </nav>
 
-    <h2 id="Introduction" class="heading">B.1. Introduction<a class="self-link" href="#Introduction"></a></h2>
+    <h2 id="Introduction" class="heading">B.1. はじめに<a class="self-link" href="#Introduction"></a></h2>
 
-    <p>The following notes describe algorithms and other strategies
-        which can be used by software developers when converting content
-        to and from the formats required by features in the SVG language.</p>
+    <p>以下の注意事項は、SVG言語の機能で要求されるフォーマットへのコンテンツ変換や、そこからの変換を行う際に、ソフトウェア開発者が利用できるアルゴリズムやその他の手法について説明します。</p>
 
-    <h2 id="ArcImplementationNotes" class="heading">B.2. Elliptical arc parameter conversion<a class="self-link"
+    <h2 id="ArcImplementationNotes" class="heading">B.2. 楕円弧パラメータ変換<a class="self-link"
             href="#ArcImplementationNotes"></a></h2>
 
     <p>
-        To be consistent with other path segment notation,
-        arcs in SVG paths are defined in terms of start and end points on the curve.
+        他のパスセグメント表記と一貫性を持たせるため、SVGパス内の弧は曲線上の開始点と終了点で定義されます。
     </p>
 
     <p>
-        This parameterization of elliptical arcs will be referred to
-        as <em>endpoint parameterization</em>. One of the
-        advantages of endpoint parameterization is that it permits a
-        consistent path syntax in which all path commands end in the
-        coordinates of the new "current point".
+        この楕円弧のパラメータ化は<em>エンドポイントパラメータ化</em>と呼ばれます。エンドポイントパラメータ化の利点のひとつは、すべてのパスコマンドが新しい「現在の点」の座標で終わるという一貫したパス構文を可能にすることです。
     </p>
 
     <p>
-        However, this is not the only way of describing arc geometry
-        used in software or mathematics.
-        This section describes the alternative center parameterization,
-        and how to convert it from and to SVG's endpoint parameterization.
+        しかし、これはソフトウェアや数学で弧の幾何を記述する唯一の方法ではありません。
+        この節では、もう一つの中心パラメータ化について説明し、SVGのエンドポイントパラメータ化との相互変換方法も示します。
     </p>
 
     <div class="math">
 
-        <h3 id="ArcSyntax" class="heading">B.2.1. Elliptical arc endpoint syntax<a class="self-link"
-                href="#ArcSyntax"></a></h3>
+        <h3 id="ArcSyntax" class="heading">B.2.1. 楕円弧のエンドポイント構文<a class="self-link" href="#ArcSyntax"></a></h3>
 
-        <p>An elliptical arc, as represented in the SVG path command,
-            is described by the following parameters in order:</p>
+        <p>SVGパスコマンドで表される楕円弧は、以下のパラメータで順番に記述されます：</p>
 
-        <p>(<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>) are the absolute coordinates of the
-            current point on the path, obtained from the last two
-            parameters of the previous path command.</p>
+        <p>(<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>)は、パス上の現在の点の絶対座標で、前のパスコマンドの最後の2つのパラメータから取得されます。</p>
 
         <p><var>r<sub>x</sub></var>
-            and <var>r<sub>y</sub></var>
-            are the radii of the ellipse (also known as its semi-major and
-            semi-minor axes).</p>
+            および<var>r<sub>y</sub></var>
+            は楕円の半径（主軸・副軸とも呼ばれます）です。</p>
 
-        <p><var>φ</var> is the angle from the x-axis of the current coordinate
-            system to the x-axis of the ellipse.</p>
+        <p><var>φ</var>は、現在の座標系のx軸から楕円のx軸への角度です。</p>
 
-        <p><var>f<sub>A</sub></var> is
-            the large arc flag, and is 0
-            if an arc spanning less than or equal to 180 degrees is chosen, or 1
-            if an arc spanning greater than 180 degrees is chosen.</p>
+        <p><var>f<sub>A</sub></var>は
+            ラージアークフラグで、180度以下の弧を選択する場合は0、180度を超える弧を選択する場合は1です。</p>
 
-        <p><var>f<sub>S</sub></var> is
-            the sweep flag, and is 0 if
-            the line joining center to arc sweeps through decreasing
-            angles, or 1 if it sweeps
-            through increasing angles.</p>
+        <p><var>f<sub>S</sub></var>は
+            スウィープフラグで、中心から弧への線が減少方向に角度を移動する場合は0、増加方向の場合は1です。</p>
 
-        <p>(<var>x</var><sub>2</sub>, <var>y</var><sub>2</sub>) are the absolute coordinates of the
-            final point of the arc.</p>
+        <p>(<var>x</var><sub>2</sub>, <var>y</var><sub>2</sub>)は弧の終点の絶対座標です。</p>
 
-        <h3 id="ArcParameterizationAlternatives" class="heading">B.2.2. Parameterization alternatives<a
-                class="self-link" href="#ArcParameterizationAlternatives"></a></h3>
+        <h3 id="ArcParameterizationAlternatives" class="heading">B.2.2. パラメータ化の代替案<a class="self-link"
+                href="#ArcParameterizationAlternatives"></a></h3>
 
-        <p>An arbitrary point (<var>x</var>, <var>y</var>) on the elliptical
-            arc can be described by the 2-dimensional matrix equation:</p>
+        <p>楕円弧上の任意の点(<var>x</var>, <var>y</var>)は、次の2次元行列式で表せます：</p>
 
         (eq. 3.1)
         <div role="math" aria-describedby="math-arbitrary-point-on-elliptical-arc">
@@ -253,50 +231,31 @@
   </pre>
         </div>
 
-        <p>(<var>c<sub>x</sub></var>, <var>c<sub>y</sub></var>) are
-            the coordinates of the center of the ellipse.</p>
+        <p>(<var>c<sub>x</sub></var>, <var>c<sub>y</sub></var>)は楕円の中心座標です。</p>
 
-        <p><var>r<sub>x</sub></var> and <var>r<sub>y</sub></var>
-            are the radii of the ellipse (also known as its semi-major and
-            semi-minor axes).</p>
+        <p><var>r<sub>x</sub></var>および<var>r<sub>y</sub></var>は楕円の半径（主軸・副軸とも呼ばれます）です。</p>
 
         <div class="ready-for-wider-review">
-            <p><var>φ</var> is the angle from the
-                x-axis of the current coordinate system to the x-axis of the
-                ellipse.</p>
+            <p><var>φ</var>は現在の座標系のx軸から楕円のx軸への角度です。</p>
 
-            <p><var>θ</var> is the angle around the arc that the point
-                (<var>x</var>, <var>y</var>) lies at, and ranges from:</p>
+            <p><var>θ</var>は弧上の点(<var>x</var>, <var>y</var>)が位置する弧周上の角度で、次の範囲になります：</p>
 
             <ul>
-                <li><var>θ</var><sub>1</sub> which is
-                    the start angle of the elliptical arc prior to the stretch and
-                    rotate operations.</li>
+                <li><var>θ</var><sub>1</sub>は、ストレッチと回転操作前の楕円弧の開始角です。</li>
 
-                <li><var>θ</var><sub>2</sub> which is
-                    the end angle of the elliptical arc prior to the stretch and
-                    rotate operations.</li>
+                <li><var>θ</var><sub>2</sub>は、ストレッチと回転操作前の楕円弧の終了角です。</li>
 
-                <li>Δ<var>θ</var> which is the difference between these
-                    two angles.</li>
+                <li>Δ<var>θ</var>は、これら2つの角度の差です。</li>
             </ul>
         </div>
-        <p>If one thinks of an ellipse as a circle that has been
-            stretched and then rotated, then <var>θ</var><sub>1</sub>,
-            <var>θ</var><sub>2</sub> and Δ<var>θ</var>
-            are the start angle, end angle and sweep angle, respectively
-            of the arc prior to the stretch and rotate operations.
-            This leads to an alternate parameterization which is common
-            among graphics APIs, which will be referred to as <em>center
-                parameterization</em>. In the next sections, formulas are
-            given for mapping in both directions between center
-            parameterization and endpoint parameterization.
+        <p>楕円を伸ばして回転させた円と考える場合、<var>θ</var><sub>1</sub>、<var>θ</var><sub>2</sub>、Δ<var>θ</var>はストレッチ・回転前の開始角・終了角・スウィープ角となります。
+            これはグラフィックスAPIで一般的な別のパラメータ化につながり、<em>中心パラメータ化</em>と呼ばれます。次節では中心パラメータ化とエンドポイントパラメータ化の相互変換式を示します。
         </p>
 
-        <h3 id="ArcConversionCenterToEndpoint" class="heading">B.2.3. Conversion from center to endpoint
-            parameterization<a class="self-link" href="#ArcConversionCenterToEndpoint"></a></h3>
+        <h3 id="ArcConversionCenterToEndpoint" class="heading">B.2.3. 中心からエンドポイントへのパラメータ変換<a class="self-link"
+                href="#ArcConversionCenterToEndpoint"></a></h3>
 
-        <p>Given the following variables:</p>
+        <p>次の変数が与えられます：</p>
 
         <p class="indented separated">
             <var>c<sub>x</sub></var>
@@ -308,7 +267,7 @@
             Δ<var>θ</var>
         </p>
 
-        <p>the task is to find:</p>
+        <p>求めるべきは以下です：</p>
 
         <p class="indented separated">
             <var>x</var><sub>1</sub>
@@ -319,15 +278,11 @@
             <var>f<sub>S</sub></var>
         </p>
 
-        <p>This can be achieved using the following formulas:</p>
+        <p>これらは以下の式を使って求めることができます：</p>
 
         <table style="width: 90%">
             <tr>
                 <td>
-                    <!--<img
-    alt="Equation 4.1"
-    src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image004.png" />-->
-
                     <div role="math">
                         <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                             <mrow>
@@ -448,13 +403,10 @@
                     </div>
 
                 </td>
-                <td style="text-align: right">(eq. 4.1)</td>
+                <td style="text-align: right">(式 4.1)</td>
             </tr>
             <tr>
                 <td>
-                    <!--<img
-    alt="Equation 4.2"
-    src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image006.png" />-->
                     <div role="math">
                         <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                             <mrow>
@@ -594,13 +546,10 @@
                         </math>
                     </div>
                 </td>
-                <td style="text-align: right">(eq. 4.2)</td>
+                <td style="text-align: right">(式 4.2)</td>
             </tr>
             <tr>
                 <td>
-                    <!--<img
-    alt="Equation 4.3"
-    src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image008.png" />-->
                     <div role="math">
                         <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                             <mrow>
@@ -660,13 +609,10 @@
                     </div>
 
                 </td>
-                <td style="text-align: right">(eq. 4.3)</td>
+                <td style="text-align: right">(式 4.3)</td>
             </tr>
             <tr>
                 <td>
-                    <!--<img
-    alt="Equation 4.4"
-    src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image010.png" />-->
                     <div role="math">
                         <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                             <mrow>
@@ -717,14 +663,14 @@
                         </math>
                     </div>
                 </td>
-                <td style="text-align: right">(eq. 4.4)</td>
+                <td style="text-align: right">(式 4.4)</td>
             </tr>
         </table>
 
-        <h3 id="ArcConversionEndpointToCenter" class="heading">B.2.4. Conversion from endpoint to center
-            parameterization<a class="self-link" href="#ArcConversionEndpointToCenter"></a></h3>
+        <h3 id="ArcConversionEndpointToCenter" class="heading">B.2.4. エンドポイントから中心へのパラメータ変換<a class="self-link"
+                href="#ArcConversionEndpointToCenter"></a></h3>
 
-        <p>Given the following variables:</p>
+        <p>次の変数が与えられます：</p>
 
         <p class="indented separated">
             <var>x</var><sub>1</sub>
@@ -738,7 +684,7 @@
             <var>φ</var>
         </p>
 
-        <p>the task is to find:</p>
+        <p>求めるべきは以下です：</p>
 
         <p class="indented separated">
             <var>c<sub>x</sub></var>
@@ -747,24 +693,17 @@
             Δ<var>θ</var>
         </p>
 
-        <p>The equations simplify after a translation which
-            places the origin at the midpoint of the line joining
-            (<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>) to
-            (<var>x</var><sub>2</sub>, <var>y</var><sub>2</sub>), followed by
-            a rotation to line up the coordinate axes with the axes of the ellipse.
-            All transformed coordinates will be written with primes. They are
-            computed as intermediate values on the way toward finding the required
-            center parameterization variables. This procedure consists of the
-            following steps:</p>
+        <p>式は、(<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>)から(<var>x</var><sub>2</sub>,
+            <var>y</var><sub>2</sub>)への線分の中点に原点を移動し、座標軸を楕円の軸に合わせて回転することで簡略化されます。
+            変換後の座標はプライム記号で表記され、中間値として求められます。この手順は以下のステップで構成されます：
+        </p>
 
         <ul>
             <li>
-                <p><em>Step 1: Compute</em> (<var>x</var><sub>1</sub>′, <var>y</var><sub>1</sub>′)</p>
+                <p><em>ステップ1: 計算</em> (<var>x</var><sub>1</sub>′, <var>y</var><sub>1</sub>′)</p>
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 5.1"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image012.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mrow>
@@ -875,18 +814,16 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 5.1)</td>
+                        <td style="text-align: right">(式 5.1)</td>
                     </tr>
                 </table>
             </li>
 
             <li>
-                <p><em>Step 2: Compute</em> (<var>c<sub>x</sub></var>′, <var>c<sub>y</sub></var>′)</p>
+                <p><em>ステップ2: 計算</em> (<var>c<sub>x</sub></var>′, <var>c<sub>y</sub></var>′)</p>
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 5.2"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image014.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mrow>
@@ -1079,22 +1016,21 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 5.2)</td>
+                        <td style="text-align: right">(式 5.2)</td>
                     </tr>
                 </table>
-                <p>where the + sign is chosen if <var>f<sub>A</sub></var> ≠ <var>f<sub>S</sub></var>, and
-                    the − sign is chosen if <var>f<sub>A</sub></var> = <var>f<sub>S</sub></var>.</p>
+                <p>ここで、+記号は<var>f<sub>A</sub></var> ≠ <var>f<sub>S</sub></var>の場合に選択し、−記号は<var>f<sub>A</sub></var> =
+                    <var>f<sub>S</sub></var>の場合に選択します。
+                </p>
             </li>
 
             <li>
-                <p><em>Step 3: Compute</em> (<var>c<sub>x</sub></var>, <var>c<sub>y</sub></var>)
+                <p><em>ステップ3: 計算</em> (<var>c<sub>x</sub></var>, <var>c<sub>y</sub></var>)
                     <em>from</em> (<var>c<sub>x</sub></var>′, <var>c<sub>y</sub></var>′)
                 </p>
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 5.3"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image016.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mrow>
@@ -1224,21 +1160,19 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 5.3)</td>
+                        <td style="text-align: right">(式 5.3)</td>
                     </tr>
                 </table>
             </li>
 
             <li>
-                <p><em>Step 4: Compute</em> <var>θ</var><sub>1</sub> and Δ<var>θ</var></p>
-                <p>In general, the angle between two vectors
-                    (<var>u<sub>x</sub></var>, <var>u<sub>y</sub></var>)
-                    and (<var>v<sub>x</sub></var>, <var>v<sub>y</sub></var>) can be computed as</p>
+                <p><em>ステップ4: 計算</em> <var>θ</var><sub>1</sub> および Δ<var>θ</var></p>
+                <p>一般に、2つのベクトル(<var>u<sub>x</sub></var>, <var>u<sub>y</sub></var>)と(<var>v<sub>x</sub></var>,
+                    <var>v<sub>y</sub></var>)間の角度は次式で求められます：
+                </p>
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 5.4"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image018.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mrow>
@@ -1301,23 +1235,19 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 5.4)</td>
+                        <td style="text-align: right">(式 5.4)</td>
                     </tr>
                 </table>
 
-                <p>where the ± sign appearing here is the sign of
-                    <var>u<sub>x</sub></var> <var>v<sub>y</sub></var> − <var>u<sub>y</sub></var>
-                    <var>v<sub>x</sub></var>.
+                <p>この±記号は、<var>u<sub>x</sub></var> <var>v<sub>y</sub></var> − <var>u<sub>y</sub></var>
+                    <var>v<sub>x</sub></var>の符号です。
                 </p>
 
-                <p>This angle function can be used to express <var>θ</var><sub>1</sub> and
-                    Δ<var>θ</var> as follows:</p>
+                <p>この角度関数を用いて、<var>θ</var><sub>1</sub> および Δ<var>θ</var> は以下で表されます：</p>
 
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 5.5"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image020.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mrow>
@@ -1416,12 +1346,10 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 5.5)</td>
+                        <td style="text-align: right">(式 5.5)</td>
                     </tr>
                     <tr>
-                        <td><!--<img
-        alt="Equation 5.6"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image022.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mrow>
@@ -1573,54 +1501,45 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 5.6)</td>
+                        <td style="text-align: right">(式 5.6)</td>
                     </tr>
                 </table>
 
-                <p>where Δ<var>θ</var> is fixed in the range
-                    −360° &lt; Δ<var>θ</var> &lt; 360° such that:</p>
+                <p>ここでΔ<var>θ</var>は
+                    −360° &lt; Δ<var>θ</var> &lt; 360°の範囲で次を満たします：</p>
 
-                <p class="indented">if <var>f<sub>S</sub></var> = 0, then Δ<var>θ</var> &lt; 0,</p>
-                <p class="indented">else if <var>f<sub>S</sub></var> = 1, then Δ<var>θ</var> > 0.</p>
+                <p class="indented">もし<var>f<sub>S</sub></var> = 0ならΔ<var>θ</var> &lt; 0,</p>
+                <p class="indented">もし<var>f<sub>S</sub></var> = 1ならΔ<var>θ</var> > 0.</p>
 
-                <p>In other words, if <var>f<sub>S</sub></var> = 0 and the
-                    right side of (eq. 5.6) is greater than 0, then subtract 360°,
-                    whereas if <var>f<sub>S</sub></var> = 1 and the right
-                    side of (eq. 5.6) is less than 0, then add 360°. In all other cases
-                    leave it as is.</p>
+                <p>つまり、<var>f<sub>S</sub></var> = 0で(式 5.6)の右辺が0より大きければ360°を減算し、<var>f<sub>S</sub></var> =
+                    1で右辺が0より小さければ360°を加算します。それ以外はそのままにします。</p>
             </li>
         </ul>
 
-        <h3 id="ArcCorrectionOutOfRangeRadii" class="heading">B.2.5. Correction of out-of-range radii<a
-                class="self-link" href="#ArcCorrectionOutOfRangeRadii"></a></h3>
+        <h3 id="ArcCorrectionOutOfRangeRadii" class="heading">B.2.5. 範囲外半径の補正<a class="self-link"
+                href="#ArcCorrectionOutOfRangeRadii"></a></h3>
 
-        <p>This section describes the mathematical adjustments required for out-of-range <var>r<sub>x</sub></var> and
-            <var>r<sub>y</sub></var>,
-            as described in the <a href="paths.html#ArcOutOfRangeParameters">Path implementation notes</a>.
-            Algorithmically these adjustments consist of the following
-            steps:
+        <p>この節では、<a href="paths.html#ArcOutOfRangeParameters">パス実装に関する注意</a>で説明されている範囲外の<var>r<sub>x</sub></var>および
+            <var>r<sub>y</sub></var>に対して必要な数学的調整について説明します。
+            アルゴリズムとしては、以下のステップで構成されます：
         </p>
 
         <ul>
             <li>
-                <p><em>Step 1: Ensure radii are non-zero</em></p>
-                <p>If <var>r<sub>x</sub></var> = 0 or
-                    <var>r<sub>y</sub></var> = 0, then treat
-                    this as a straight line from (<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>)
-                    to (<var>x</var><sub>2</sub>, <var>y</var><sub>2</sub>) and stop. Otherwise,
+                <p><em>ステップ1: 半径がゼロでないことを確認する</em></p>
+                <p>もし<var>r<sub>x</sub></var> = 0 または
+                    <var>r<sub>y</sub></var> = 0 であれば、
+                    (<var>x</var><sub>1</sub>, <var>y</var><sub>1</sub>)から(<var>x</var><sub>2</sub>,
+                    <var>y</var><sub>2</sub>)への直線として扱い、処理を終了します。そうでなければ、
                 </p>
             </li>
 
             <li>
-                <p><em>Step 2: Ensure radii are positive</em></p>
-                <p>Take the absolute value of <var>r<sub>x</sub></var> and
-                    <var>r<sub>y</sub></var>:
-                </p>
+                <p><em>ステップ2: 半径が正であることを確認する</em></p>
+                <p><var>r<sub>x</sub></var>と<var>r<sub>y</sub></var>の絶対値を取得します：</p>
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 6.1"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image024.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mtable columnalign="left">
@@ -1663,20 +1582,17 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 6.1)</td>
+                        <td style="text-align: right">(式 6.1)</td>
                     </tr>
                 </table>
             </li>
 
             <li>
-                <p><em>Step 3: Ensure radii are large enough</em></p>
-                <p>Using the primed coordinate values of equation (eq. 5.1),
-                    compute</p>
+                <p><em>ステップ3: 半径が十分大きいことを確認する</em></p>
+                <p>式（式 5.1）のプライム座標値を用いて、以下を計算します</p>
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 6.2"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image026.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mrow>
@@ -1729,19 +1645,14 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 6.2)</td>
+                        <td style="text-align: right">(式 6.2)</td>
                     </tr>
                 </table>
-                <p>If the result of the above equation is less than or equal to
-                    1, then no further change need be made to <var>r<sub>x</sub></var>
-                    and <var>r<sub>y</sub></var>. If
-                    the result of the above equation is greater than 1, then make
-                    the replacements</p>
+                <p>上記の式の結果が1以下であれば、<var>r<sub>x</sub></var>および<var>r<sub>y</sub></var>はさらに変更する必要はありません。
+                    上記の式の結果が1より大きい場合、以下のように置き換えます：</p>
                 <table style="width: 90%">
                     <tr>
-                        <td><!--<img
-        alt="Equation 6.3"
-        src="https://www.w3.org/TR/SVG2/images/implnote/arcs/image028.png" />-->
+                        <td>
                             <div role="math">
                                 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
                                     <mtable columnalign="left">
@@ -1788,111 +1699,83 @@
                                 </math>
                             </div>
                         </td>
-                        <td style="text-align: right">(eq. 6.3)</td>
+                        <td style="text-align: right">(式 6.3)</td>
                     </tr>
                 </table>
             </li>
 
             <li>
-                <p><em>Step 4: Proceed with computations</em></p>
-                <p>Proceed with the remaining elliptical arc computations, such
-                    as those in the <a href="#ArcConversionEndpointToCenter">Conversion from endpoint to center
-                        parameterization</a> algorithm.
-                    Note: As a consequence of the
-                    radii corrections in this section, the equation (5.2) for the
-                    center of the ellipse always has at least one solution (i.e.
-                    the radicand is never negative). In the case that the
-                    radii are scaled up using equation (eq. 6.3), the radicand of
-                    (eq. 5.2) is zero and there is exactly one solution for the
-                    center of the ellipse.</p>
+                <p><em>ステップ4: 計算を続行する</em></p>
+                <p>残りの楕円弧計算（<a href="#ArcConversionEndpointToCenter">エンドポイントから中心へのパラメータ変換</a>アルゴリズムなど）を続行します。
+                    注意：この節の半径補正の結果、楕円の中心を求める式（式 5.2）は常に少なくとも1つの解を持ちます（根号内は絶対に負になりません）。もし式（式 6.3）で半径が拡大される場合、式（式
+                    5.2）の根号内は0となり、楕円の中心の解はちょうど1つだけになります。</p>
             </li>
         </ul>
 
     </div>
 
-    <h2 id="NumericPrecisionImplementationNotes" class="heading">B.3. Notes on generating high-precision geometry<a
-            class="self-link" href="#NumericPrecisionImplementationNotes"></a></h2>
+    <h2 id="NumericPrecisionImplementationNotes" class="heading">B.3. 高精度ジオメトリ生成に関する注意<a class="self-link"
+            href="#NumericPrecisionImplementationNotes"></a></h2>
 
-    <p class="normativity">This section is informative.</p>
+    <p class="normativity">この節は参考情報です。</p>
 
-    <p>The <a href="types.html#Precision">real number precision</a> of SVG is
-        single-precision.
-        <a href="conform.html#ConformingSVGGenerators">conforming SVG generators</a> handling technical data
-        where expression of information exceeding single precision is desired,
-        such as maps and technical drawings,
-        are encouraged to follow the process outlined in this section
-        to ensure consistent display in <a href="conform.html#ConformingSVGViewers">conforming SVG viewers</a>.
+    <p>SVGの<a href="types.html#Precision">実数精度</a>は単精度です。
+        技術データを扱う<a href="conform.html#ConformingSVGGenerators">適合SVG生成器</a>で、単精度を超える情報表現が必要な場合（地図や技術図面など）には、一貫した表示を<a
+            href="conform.html#ConformingSVGViewers">適合SVGビューア</a>で保証するため、この節で説明されている手順に従うことが推奨されます。
     </p>
 
     <p>
-        Presentation with an effective precision higher than
-        single-precision may be obtained by taking advantage
-        of the fact that at least double-precision floating point must be used
-        when generating a CTM (See CTM generation processing in the
-        <a href="conform.html#ConformingSVGViewers">Conforming SVG Viewers</a> section).
-        The steps for generating content that takes advantage of this are:
+        単精度よりも高い有効精度で表示したい場合は、CTM生成時に少なくとも倍精度浮動小数点が使用されることを利用することで可能となります（<a
+            href="conform.html#ConformingSVGViewers">適合SVGビューア</a>節のCTM生成処理参照）。
+        これを活用したコンテンツ生成手順は次の通りです：
     </p>
     <ol>
-        <li>Split content into tiles such that the number of significant digits
-            required to position and size each object within a tile is within the
-            range of single precision floats. Besides, in this description,
-            the coordinate system which the original content has originally will be called source space. </li>
-        <li>Generate a coordinate transformation matrix per tile to transform from
-            source space to tile space, where tile space is a coordinate system with origin
-            <var>(0,0)</var> at the top left of the tile. Each element of the
-            transformation matrix must be within the range of single precision.
+        <li>コンテンツをタイルに分割し、各オブジェクトの位置やサイズに必要な有効桁数が単精度浮動小数点の範囲内となるようにします。なお、この記述において、元のコンテンツが持つ座標系をソース空間と呼びます。</li>
+        <li>各タイルごとに、ソース空間からタイル空間への座標変換行列を生成します。タイル空間は、タイルの左上を原点<var>(0,0)</var>とする座標系です。変換行列の各要素は単精度の範囲内でなければなりません。</li>
+        <li>各タイルの内容を、生成した座標変換行列を用いてソース空間からタイル空間へ変換します。その結果、各オブジェクトのパラメータは単精度の範囲内の有効桁数で表現できます。</li>
+        <li>各タイルごとに、タイル空間からソース空間への逆変換行列を生成します。これは次のステップで要素の<a class="property"
+                href="coords.html#TransformProperty">transform</a>属性として使用されます。</li>
+        <li>SVG内で各タイルを個別のユーザー座標系として配置します。例えば、タイルは<a href="struct.html#GElement"><span
+                    class="element-name">‘g’</span></a>要素として表現し、transform属性に前のステップで生成した変換行列を指定します。そして、ステップ3で生成した分割グラフィックスはその子要素として配置します。
         </li>
-        <li>Transform the contents of each tile from source space to tile space using
-            the generated coordinate transformation matrix. The result is that the parameters of each object can now be
-            expressed with significant digits within the range of single precision floats.</li>
-        <li>For each tile, generate an inverse transformation matrix for the
-            conversion of tile space to source space. This is used as a <a class="property"
-                href="coords.html#TransformProperty">transform</a> attribute of the element for the tile of the next
-            step. </li>
-        <li>Arrange each tile as a separate user coordinate system in SVG. For example,
-            the tiles may be expressed a <span class="element-name">‘<a
-                    href="struct.html#GElement"><span>g</span></a>’</span> elements
-            with an <a class="property" href="coords.html#TransformProperty">transform</a> attribute having the
-            transformation matrix generated by the previous step.
-            And the split graphics generated by the third step will be placed as children of it. </li>
-
     </ol>
 
     <table>
         <caption>
-            Example Splitting vector graphics bigger than a tile
+            タイルより大きいベクターグラフィックの分割例
         </caption>
         <tr>
-            <th>Before Splitting</th>
+            <th>分割前</th>
             <th> </th>
-            <th>After Splitting</th>
+            <th>分割後</th>
         </tr>
         <tr>
-            <td><img alt="Example Before splitting" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling3.png" width="200" /></td>
+            <td><img alt="分割前の例" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling3.png"
+                    width="200" /></td>
             <td> </td>
-            <td><img alt="Example After Splitting" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling4.png" width="200" /></td>
+            <td><img alt="分割後の例" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling4.png"
+                    width="200" /></td>
         </tr>
     </table>
 
     <table>
         <caption>
-            Example Improving Significant Digits
+            有効桁数の改善例
         </caption>
         <tr>
-            <th>Step 1 : Splitting content</th>
+            <th>ステップ1：分割</th>
             <th> </th>
-            <th>Step 5 : Arranging tiles with smaller effective digits and appropriate translate</th>
+            <th>ステップ5：有効桁数を小さくしつつ適切な配置</th>
         </tr>
         <tr>
-            <td><img alt="Example Split content into tiles" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling1.png"
+            <td><img alt="タイルへの分割例" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling1.png"
                     width="400" /></td>
             <td> </td>
-            <td><img alt="Example Translate and assign split contents" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling2.png"
+            <td><img alt="分割内容の配置例" src="https://www.w3.org/TR/SVG2/images/conform/betterPrecisionTiling2.png"
                     width="400" /></td>
         </tr>
         <tr>
-            <td colspan="3">This example provides the significant figure of eight digits using tiles with the user
-                coordinate system of seven digits.</td>
+            <td colspan="3">この例ではユーザー座標系が7桁のタイルを用いることで8桁の有効数字を提供しています。</td>
         </tr>
     </table>
 
