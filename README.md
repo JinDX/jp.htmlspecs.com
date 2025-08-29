@@ -101,7 +101,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [X] [WebGPU Shading Language](https://jp.htmlspecs.com/WGSL)
 - [x] [Web Animations](https://jp.htmlspecs.com/web-animations-1)
 - [x] [SVG 2](https://jp.htmlspecs.com/SVG2/)
-- [ ] [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture)
+- [x] [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture)
 - [ ] [Presentation API](https://jp.htmlspecs.com/presentation-api)
 - [ ] [Scroll-driven Animations](https://jp.htmlspecs.com/scroll-animations-1)
 - [ ] [Media Capture and Streams](https://jp.htmlspecs.com/mediacapture-streams)
