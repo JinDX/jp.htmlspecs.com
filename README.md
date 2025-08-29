@@ -103,7 +103,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [SVG 2](https://jp.htmlspecs.com/SVG2/)
 - [x] [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture)
 - [x] [Presentation API](https://jp.htmlspecs.com/presentation-api)
-- [ ] [Scroll-driven Animations](https://jp.htmlspecs.com/scroll-animations-1)
+- [x] [Scroll-driven Animations](https://jp.htmlspecs.com/scroll-animations-1)
 - [ ] [Media Capture and Streams](https://jp.htmlspecs.com/mediacapture-streams)
 
 ### 開発者ツール
