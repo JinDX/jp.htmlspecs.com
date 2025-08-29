@@ -104,7 +104,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture)
 - [x] [Presentation API](https://jp.htmlspecs.com/presentation-api)
 - [x] [Scroll-driven Animations](https://jp.htmlspecs.com/scroll-animations-1)
-- [ ] [Media Capture and Streams](https://jp.htmlspecs.com/mediacapture-streams)
+- [x] [Media Capture and Streams](https://jp.htmlspecs.com/mediacapture-streams)
 
 ### 開発者ツール
 - [x] [Console](https://jp.htmlspecs.com/console)
