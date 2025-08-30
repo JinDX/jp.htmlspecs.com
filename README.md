@@ -124,8 +124,8 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Custom Highlight API Module Level 1](https://jp.htmlspecs.com/css/css-highlight-api-1)
 
 ### フォント
-- [ ] [CSS Fonts Module Level 3](https://jp.htmlspecs.com/css/css-fonts-3)
-- [ ] [CSS Fonts Module Level 4](https://jp.htmlspecs.com/css/css-fonts-4)
+- [x] [CSS Fonts Module Level 3](https://jp.htmlspecs.com/css/css-fonts-3)
+- [x] [CSS Fonts Module Level 4](https://jp.htmlspecs.com/css/css-fonts-4)
 - [ ] [CSS Font Loading Module Level 3](https://jp.htmlspecs.com/css/css-font-loading)
 
 ### テキストとタイポグラフィ
