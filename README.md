@@ -126,11 +126,11 @@ HTMLおよび関連API、CSS標準シリーズ。
 ### フォント
 - [x] [CSS Fonts Module Level 3](https://jp.htmlspecs.com/css/css-fonts-3)
 - [x] [CSS Fonts Module Level 4](https://jp.htmlspecs.com/css/css-fonts-4)
-- [ ] [CSS Font Loading Module Level 3](https://jp.htmlspecs.com/css/css-font-loading)
+- [x] [CSS Font Loading Module Level 3](https://jp.htmlspecs.com/css/css-font-loading)
 
 ### テキストとタイポグラフィ
-- [ ] [CSS Text Module Level 3](https://jp.htmlspecs.com/css/css-text-3)
-- [ ] [CSS Text Module Level 4](https://jp.htmlspecs.com/css/css-text-4)
+- [x] [CSS Text Module Level 3](https://jp.htmlspecs.com/css/css-text-3)
+- [x] [CSS Text Module Level 4](https://jp.htmlspecs.com/css/css-text-4)
 - [ ] [CSS Counter Styles Level 3](https://jp.htmlspecs.com/css/css-counter-styles-3)
 - [ ] [CSS Lists and Counters Module Level 3](https://jp.htmlspecs.com/css/css-lists-3)
 - [ ] [CSS Text Decoration Level 3](https://jp.htmlspecs.com/css/css-text-decor-3)
