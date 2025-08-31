@@ -131,7 +131,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 ### テキストとタイポグラフィ
 - [x] [CSS Text Module Level 3](https://jp.htmlspecs.com/css/css-text-3)
 - [x] [CSS Text Module Level 4](https://jp.htmlspecs.com/css/css-text-4)
-- [ ] [CSS Counter Styles Level 3](https://jp.htmlspecs.com/css/css-counter-styles-3)
+- [x] [CSS Counter Styles Level 3](https://jp.htmlspecs.com/css/css-counter-styles-3)
 - [ ] [CSS Lists and Counters Module Level 3](https://jp.htmlspecs.com/css/css-lists-3)
 - [ ] [CSS Text Decoration Level 3](https://jp.htmlspecs.com/css/css-text-decor-3)
 
