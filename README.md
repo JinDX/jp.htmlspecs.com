@@ -136,7 +136,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Text Decoration Level 3](https://jp.htmlspecs.com/css/css-text-decor-3)
 
 ### メディアクエリ
-- [ ] [Media Queries Level 3](https://jp.htmlspecs.com/css/mediaqueries-3)
+- [x] [Media Queries Level 3](https://jp.htmlspecs.com/css/mediaqueries-3)
 - [ ] [Media Queries Level 4](https://jp.htmlspecs.com/css/mediaqueries-4)
 - [ ] [Media Queries Level 5](https://jp.htmlspecs.com/css/mediaqueries-5)
 
