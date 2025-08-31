@@ -137,8 +137,8 @@ HTMLおよび関連API、CSS標準シリーズ。
 
 ### メディアクエリ
 - [x] [Media Queries Level 3](https://jp.htmlspecs.com/css/mediaqueries-3)
-- [ ] [Media Queries Level 4](https://jp.htmlspecs.com/css/mediaqueries-4)
-- [ ] [Media Queries Level 5](https://jp.htmlspecs.com/css/mediaqueries-5)
+- [x] [Media Queries Level 4](https://jp.htmlspecs.com/css/mediaqueries-4)
+- [x] [Media Queries Level 5](https://jp.htmlspecs.com/css/mediaqueries-5)
 
 ### レイアウト
 - [ ] [CSS Box Model Level 3](https://jp.htmlspecs.com/css/css-box-3)
