@@ -144,7 +144,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Box Model Level 3](https://jp.htmlspecs.com/css/css-box-3)
 - [x] [CSS Box Model Level 4](https://jp.htmlspecs.com/css/css-box-4)
 - [x] [CSS Display Module Level 3](https://jp.htmlspecs.com/css/css-display-3)
-- [ ] [CSS Flexible Box Layout Module Level 1](https://jp.htmlspecs.com/css/css-flexbox-1)
+- [x] [CSS Flexible Box Layout Module Level 1](https://jp.htmlspecs.com/css/css-flexbox-1)
 - [ ] [CSS Grid Layout Module Level 1](https://jp.htmlspecs.com/css/css-grid-1)
 - [ ] [CSS Grid Layout Module Level 2](https://jp.htmlspecs.com/css/css-grid-2)
 - [ ] [CSS Grid Layout Module Level 3](https://jp.htmlspecs.com/css/css-grid-3)
