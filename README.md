@@ -154,8 +154,8 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Positioned Layout Module Level 3](https://jp.htmlspecs.com/css/css-position-3)
 - [x] [CSS Box Sizing Module Level 3](https://jp.htmlspecs.com/css/css-sizing-3)
 - [x] [CSS Box Alignment Module Level 3](https://jp.htmlspecs.com/css/css-align-3)
-- [ ] [CSS Overflow Module Level 4](https://jp.htmlspecs.com/css/css-overflow-4)
-- [ ] [CSS Overflow Module Level 5](https://jp.htmlspecs.com/css/css-overflow-5)
+- [x] [CSS Overflow Module Level 4](https://jp.htmlspecs.com/css/css-overflow-4)
+- [x] [CSS Overflow Module Level 5](https://jp.htmlspecs.com/css/css-overflow-5)
 - [ ] [CSS Gap Decorations Module Level 1](https://jp.htmlspecs.com/css/css-gaps-1)
 - [ ] [CSS Anchor Positioning Module Level 1](https://jp.htmlspecs.com/css/css-anchor-position-1)
 
