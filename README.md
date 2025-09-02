@@ -150,7 +150,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Grid Layout Module Level 3](https://jp.htmlspecs.com/css/css-grid-3)
 - [x] [CSS Inline Layout Module Level 3](https://jp.htmlspecs.com/css/css-inline-3)
 - [x] [CSS Multi-column Layout Module Level 1](https://jp.htmlspecs.com/css/css-multicol-1)
-- [ ] [CSS Shapes Module Level 1](https://jp.htmlspecs.com/css/css-shapes-1)
+- [x] [CSS Shapes Module Level 1](https://jp.htmlspecs.com/css/css-shapes-1)
 - [ ] [CSS Positioned Layout Module Level 3](https://jp.htmlspecs.com/css/css-position-3)
 - [ ] [CSS Box Sizing Module Level 3](https://jp.htmlspecs.com/css/css-sizing-3)
 - [ ] [CSS Box Alignment Module Level 3](https://jp.htmlspecs.com/css/css-align-3)
