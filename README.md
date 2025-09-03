@@ -170,7 +170,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Fragmentation Module Level 3](https://jp.htmlspecs.com/css/css-break-3)
 
 ### 擬似要素
-- [ ] [CSS Pseudo-Elements Module Level 4](https://jp.htmlspecs.com/css/css-pseudo-4)
+- [x] [CSS Pseudo-Elements Module Level 4](https://jp.htmlspecs.com/css/css-pseudo-4)
 
 ### 画像
 - [ ] [CSS Images Module Level 4](https://jp.htmlspecs.com/css/css-images-4)
