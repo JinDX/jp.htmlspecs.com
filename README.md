@@ -167,7 +167,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Writing Modes Level 4](https://jp.htmlspecs.com/css/css-writing-modes-4)
 
 ### 分割
-- [ ] [CSS Fragmentation Module Level 3](https://jp.htmlspecs.com/css/css-break-3)
+- [x] [CSS Fragmentation Module Level 3](https://jp.htmlspecs.com/css/css-break-3)
 
 ### 擬似要素
 - [ ] [CSS Pseudo-Elements Module Level 4](https://jp.htmlspecs.com/css/css-pseudo-4)
