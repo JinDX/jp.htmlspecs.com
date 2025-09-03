@@ -174,7 +174,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 
 ### 画像
 - [x] [CSS Images Module Level 4](https://jp.htmlspecs.com/css/css-images-4)
-- [ ] [CSS Masking Module Level 1](https://jp.htmlspecs.com/css/css-masking-1)
+- [x] [CSS Masking Module Level 1](https://jp.htmlspecs.com/css/css-masking-1)
 
 ### 変換とアニメーション
 - [ ] [CSS Easing Functions Level 1](https://jp.htmlspecs.com/css/css-easing-1)
