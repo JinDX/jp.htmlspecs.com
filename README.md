@@ -157,7 +157,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Overflow Module Level 4](https://jp.htmlspecs.com/css/css-overflow-4)
 - [x] [CSS Overflow Module Level 5](https://jp.htmlspecs.com/css/css-overflow-5)
 - [x] [CSS Gap Decorations Module Level 1](https://jp.htmlspecs.com/css/css-gaps-1)
-- [ ] [CSS Anchor Positioning Module Level 1](https://jp.htmlspecs.com/css/css-anchor-position-1)
+- [x] [CSS Anchor Positioning Module Level 1](https://jp.htmlspecs.com/css/css-anchor-position-1)
 
 ### ナビゲーション
 - [ ] [CSS Spatial Navigation Level 1](https://jp.htmlspecs.com/css/css-nav-1)
