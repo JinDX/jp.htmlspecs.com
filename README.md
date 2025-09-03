@@ -160,7 +160,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Anchor Positioning Module Level 1](https://jp.htmlspecs.com/css/css-anchor-position-1)
 
 ### ナビゲーション
-- [ ] [CSS Spatial Navigation Level 1](https://jp.htmlspecs.com/css/css-nav-1)
+- [x] [CSS Spatial Navigation Level 1](https://jp.htmlspecs.com/css/css-nav-1)
 
 ### 書字モード
 - [ ] [CSS Writing Modes Level 3](https://jp.htmlspecs.com/css/css-writing-modes-3)
