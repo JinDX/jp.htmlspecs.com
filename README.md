@@ -173,7 +173,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Pseudo-Elements Module Level 4](https://jp.htmlspecs.com/css/css-pseudo-4)
 
 ### 画像
-- [ ] [CSS Images Module Level 4](https://jp.htmlspecs.com/css/css-images-4)
+- [x] [CSS Images Module Level 4](https://jp.htmlspecs.com/css/css-images-4)
 - [ ] [CSS Masking Module Level 1](https://jp.htmlspecs.com/css/css-masking-1)
 
 ### 変換とアニメーション
