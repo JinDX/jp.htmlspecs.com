@@ -163,7 +163,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Spatial Navigation Level 1](https://jp.htmlspecs.com/css/css-nav-1)
 
 ### 書字モード
-- [ ] [CSS Writing Modes Level 3](https://jp.htmlspecs.com/css/css-writing-modes-3)
+- [x] [CSS Writing Modes Level 3](https://jp.htmlspecs.com/css/css-writing-modes-3)
 - [ ] [CSS Writing Modes Level 4](https://jp.htmlspecs.com/css/css-writing-modes-4)
 
 ### 分割
