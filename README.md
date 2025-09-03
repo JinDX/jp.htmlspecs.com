@@ -164,7 +164,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 
 ### 書字モード
 - [x] [CSS Writing Modes Level 3](https://jp.htmlspecs.com/css/css-writing-modes-3)
-- [ ] [CSS Writing Modes Level 4](https://jp.htmlspecs.com/css/css-writing-modes-4)
+- [x] [CSS Writing Modes Level 4](https://jp.htmlspecs.com/css/css-writing-modes-4)
 
 ### 分割
 - [ ] [CSS Fragmentation Module Level 3](https://jp.htmlspecs.com/css/css-break-3)
