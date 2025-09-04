@@ -177,8 +177,8 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Masking Module Level 1](https://jp.htmlspecs.com/css/css-masking-1)
 
 ### 変換とアニメーション
-- [ ] [CSS Easing Functions Level 1](https://jp.htmlspecs.com/css/css-easing-1)
-- [ ] [CSS Easing Functions Level 2](https://jp.htmlspecs.com/css/css-easing-2)
+- [x] [CSS Easing Functions Level 1](https://jp.htmlspecs.com/css/css-easing-1)
+- [x] [CSS Easing Functions Level 2](https://jp.htmlspecs.com/css/css-easing-2)
 - [ ] [CSS Transforms Module Level 1](https://jp.htmlspecs.com/css/css-transforms-1)
 - [ ] [CSS Transforms Module Level 2](https://jp.htmlspecs.com/css/css-transforms-2)
 - [ ] [CSS Transitions Level 2](https://jp.htmlspecs.com/css/css-transitions-2)
