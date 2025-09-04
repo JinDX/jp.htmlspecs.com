@@ -190,8 +190,8 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Animation Worklet API](https://jp.htmlspecs.com/css/css-animation-worklet-1)
 
 ### コンテインメント
-- [ ] [CSS Containment Module Level 2](https://jp.htmlspecs.com/css/css-contain-2)
-- [ ] [CSS Containment Module Level 3](https://jp.htmlspecs.com/css/css-contain-3)
+- [x] [CSS Containment Module Level 2](https://jp.htmlspecs.com/css/css-contain-2)
+- [x] [CSS Containment Module Level 3](https://jp.htmlspecs.com/css/css-contain-3)
 
 ### 音声
 - [ ] [CSS Speech Module Level 1](https://jp.htmlspecs.com/css/css-speech-1)
