@@ -187,7 +187,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Motion Path Module Level 1](https://jp.htmlspecs.com/css/motion-1)
 - [x] [CSS View Transitions Module Level 1](https://jp.htmlspecs.com/css/css-view-transitions-1)
 - [x] [CSS View Transitions Module Level 2](https://jp.htmlspecs.com/css/css-view-transitions-2)
-- [ ] [CSS Animation Worklet API](https://jp.htmlspecs.com/css/css-animation-worklet-1)
+- [x] [CSS Animation Worklet API](https://jp.htmlspecs.com/css/css-animation-worklet-1)
 
 ### コンテインメント
 - [ ] [CSS Containment Module Level 2](https://jp.htmlspecs.com/css/css-contain-2)
