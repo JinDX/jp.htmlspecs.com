@@ -197,7 +197,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Speech Module Level 1](https://jp.htmlspecs.com/css/css-speech-1)
 
 ### その他
-- [ ] [CSS Snapshot 2023](https://jp.htmlspecs.com/css/css-2023)
+- [ ] ~~[CSS Snapshot 2023](https://jp.htmlspecs.com/css/css-2023)~~
 - [ ] [CSS Snapshot 2024](https://jp.htmlspecs.com/css/css-2024)
 - [ ] [CSS Namespaces](https://jp.htmlspecs.com/css/css-namespaces-3)
 - [ ] [Selectors Level 3](https://jp.htmlspecs.com/css/selectors-3)
