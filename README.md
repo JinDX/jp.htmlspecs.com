@@ -202,7 +202,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Namespaces Module Level 3](https://jp.htmlspecs.com/css/css-namespaces-3)
 - [x] [Selectors Level 3](https://jp.htmlspecs.com/css/selectors-3)
 - [x] [Selectors Level 4](https://jp.htmlspecs.com/css/selectors-4)
-- [ ] [CSS Style Attributes](https://jp.htmlspecs.com/css/css-style-attr)
+- [x] [CSS Style Attributes](https://jp.htmlspecs.com/css/css-style-attr)
 - [ ] [CSS Overscroll Behavior Module Level 1](https://jp.htmlspecs.com/css/css-overscroll-1)
 - [ ] [CSS Scroll Snap Module Level 1](https://jp.htmlspecs.com/css/css-scroll-snap-1)
 - [ ] [CSS Scroll Snap Module Level 2](https://jp.htmlspecs.com/css/css-scroll-snap-2)
