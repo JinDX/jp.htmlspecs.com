@@ -208,7 +208,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Scroll Snap Module Level 2](https://jp.htmlspecs.com/css/css-scroll-snap-2)
 - [x] [CSS Scrollbars Styling Module Level 1](https://jp.htmlspecs.com/css/css-scrollbars-1)
 - [x] [CSS Scroll Anchoring Module Level 1](https://jp.htmlspecs.com/css/css-scroll-anchoring-1)
-- [ ] [CSS Will Change Module Level 1](https://jp.htmlspecs.com/css/css-will-change-1)
+- [x] [CSS Will Change Module Level 1](https://jp.htmlspecs.com/css/css-will-change-1)
 - [ ] [CSS Nesting Module Level 1](https://jp.htmlspecs.com/css/css-nesting-1)
 - [ ] [CSS Custom Properties for Cascading Variables Module Level 1](https://jp.htmlspecs.com/css/css-variables-1)
 - [ ] [CSS Object Model (CSSOM)](https://jp.htmlspecs.com/css/cssom-1)
