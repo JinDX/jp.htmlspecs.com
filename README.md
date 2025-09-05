@@ -194,7 +194,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Containment Module Level 3](https://jp.htmlspecs.com/css/css-contain-3)
 
 ### 音声
-- [ ] [CSS Speech Module Level 1](https://jp.htmlspecs.com/css/css-speech-1)
+- [x] [CSS Speech Module Level 1](https://jp.htmlspecs.com/css/css-speech-1)
 
 ### その他
 - [ ] [CSS Snapshot 2023](https://jp.htmlspecs.com/css/css-2023)
