@@ -225,7 +225,7 @@ HTMLおよび関連API、CSS標準シリーズ。
 - [x] [CSS Mixins Module Level 1](https://jp.htmlspecs.com/css/css-mixins-1)
 
 ### CSS Houdini APIs
-- [ ] [CSS Typed OM Level 1](https://jp.htmlspecs.com/css/css-typed-om-1)
+- [x] [CSS Typed OM Level 1](https://jp.htmlspecs.com/css/css-typed-om-1)
 - [x] [CSS Paint API Level 1](https://jp.htmlspecs.com/css/css-paint-api-1)
 - [ ] [CSS Layout API Level 1](https://jp.htmlspecs.com/css/css-layout-api-1)
 - [ ] [CSS Properties and Values API Level 1](https://jp.htmlspecs.com/css/css-properties-values-api-1)
