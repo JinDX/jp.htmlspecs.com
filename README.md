@@ -195,7 +195,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 ### 音声
 - [CSS Speech Module Level 1](https://jp.htmlspecs.com/css/css-speech-1)（[Source](https://www.w3.org/TR/2023/CRD-css-speech-1-20230214/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
-### 기타
+### その他
 - [CSS Snapshot 2023](https://jp.htmlspecs.com/css/css-2023)（[Source](https://www.w3.org/TR/2023/NOTE-css-2023-20231207/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [CSS Snapshot 2024](https://jp.htmlspecs.com/css/css-2024)（[Source](https://www.w3.org/TR/2025/NOTE-css-2024-20250225/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [CSS Namespaces Module Level 3](https://jp.htmlspecs.com/css/css-namespaces-3)（[Source](https://www.w3.org/TR/2014/REC-css-namespaces-3-20140320/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
