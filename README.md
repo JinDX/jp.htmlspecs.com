@@ -29,7 +29,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [WebSockets](https://jp.htmlspecs.com/websockets)（[Source](https://websockets.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [WebTransport](https://jp.htmlspecs.com/webtransport)（[Source](https://www.w3.org/TR/2025/WD-webtransport-20250702/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Service Workers](https://jp.htmlspecs.com/service-workers)（[Source](https://www.w3.org/TR/2025/CRD-service-workers-20250306/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [Push API](https://jp.htmlspecs.com/push-api)（[Source](https://www.w3.org/TR/2025/WD-push-api-20250828/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Push API](https://jp.htmlspecs.com/push-api)（[Source](https://www.w3.org/TR/2025/WD-push-api-20250910/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebRTC](https://jp.htmlspecs.com/webrtc)（[Source](https://www.w3.org/TR/2025/REC-webrtc-20250313/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Payment Request API](https://jp.htmlspecs.com/payment-request)（[Source](https://www.w3.org/TR/2025/CRD-payment-request-20250815/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Background Fetch](https://jp.htmlspecs.com/background-fetch)（[Source](https://wicg.github.io/background-fetch/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
@@ -54,7 +54,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Touch Events - Level 2](https://jp.htmlspecs.com/touch-events)（[Source](https://www.w3.org/community/reports/touchevents/CG-FINAL-touch-events-20240704/) ![Community Group Final Report](https://img.shields.io/badge/CG--FINAL-ffcc00)）
 - [Contact Picker API](https://jp.htmlspecs.com/contact-picker)（[Source](https://www.w3.org/TR/2024/WD-contact-picker-20240708/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Notifications API](https://jp.htmlspecs.com/notifications)（[Source](https://notifications.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [Badging API](https://jp.htmlspecs.com/badging)（[Source](https://www.w3.org/TR/2025/WD-badging-20250903/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Badging API](https://jp.htmlspecs.com/badging)（[Source](https://www.w3.org/TR/2025/WD-badging-20250910/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard)（[Source](https://www.w3.org/TR/2022/WD-virtual-keyboard-20220505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web Share API](https://jp.htmlspecs.com/web-share)（[Source](https://www.w3.org/TR/2023/REC-web-share-20230530/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Web Audio API](https://jp.htmlspecs.com/webaudio)（[Source](https://www.w3.org/TR/2024/WD-webaudio-1.1-20241105/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
@@ -96,7 +96,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1)（[Source](https://www.w3.org/TR/2024/WD-credential-management-1-20240813/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### メディアとグラフィックス
-- [WebGPU](https://jp.htmlspecs.com/webgpu)（[Source](https://www.w3.org/TR/2025/CRD-webgpu-20250827/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebGPU](https://jp.htmlspecs.com/webgpu)（[Source](https://www.w3.org/TR/2025/CRD-webgpu-20250910/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [WebGPU Shading Language](https://jp.htmlspecs.com/WGSL)（[Source](https://www.w3.org/TR/2025/CRD-WGSL-20250909/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Web Animations](https://jp.htmlspecs.com/web-animations-1)（[Source](https://www.w3.org/TR/2023/WD-web-animations-1-20230605/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Scalable Vector Graphics (SVG) 2](https://jp.htmlspecs.com/SVG2/)（[Source](https://www.w3.org/TR/2018/CR-SVG2-20181004/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
@@ -108,7 +108,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 ### 開発者ツール
 - [Console](https://jp.htmlspecs.com/console)（[Source](https://console.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 
-### CSS
+## CSS
 - [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### 色
