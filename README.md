@@ -103,7 +103,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture)（[Source](https://www.w3.org/TR/2025/WD-picture-in-picture-20250820/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Presentation API](https://jp.htmlspecs.com/presentation-api)（[Source](https://www.w3.org/TR/2025/CRD-presentation-api-20250212/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Scroll-driven Animations](https://jp.htmlspecs.com/scroll-animations-1)（[Source](https://www.w3.org/TR/2023/WD-scroll-animations-1-20230606/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Media Capture and Streams](https://jp.htmlspecs.com/mediacapture-streams)（[Source](https://www.w3.org/TR/2025/CRD-mediacapture-streams-20250624/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Media Capture and Streams](https://jp.htmlspecs.com/mediacapture-streams)（[Source](https://www.w3.org/TR/2025/CRD-mediacapture-streams-20250911/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
 ### 開発者ツール
 - [Console](https://jp.htmlspecs.com/console)（[Source](https://console.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
