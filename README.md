@@ -3,7 +3,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 
 ### コア仕様
 - [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/multipage/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [ECMAScript](https://ecma262.com/jp)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [ECMAScript](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [DOM](https://jp.htmlspecs.com/dom)（[Source](https://dom.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [URL](https://jp.htmlspecs.com/url)（[Source](https://url.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [URL Pattern](https://jp.htmlspecs.com/urlpattern)（[Source](https://urlpattern.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
