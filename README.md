@@ -211,7 +211,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [CSS Nesting Module Level 1](https://jp.htmlspecs.com/css/css-nesting-1)（[Source](https://www.w3.org/TR/2023/WD-css-nesting-1-20230214/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Custom Properties for Cascading Variables Module Level 1](https://jp.htmlspecs.com/css/css-variables-1)（[Source](https://www.w3.org/TR/2022/CR-css-variables-1-20220616/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [CSS Object Model (CSSOM)](https://jp.htmlspecs.com/css/cssom-1)（[Source](https://www.w3.org/TR/2021/WD-cssom-1-20210826/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [CSSOM View Module](https://jp.htmlspecs.com/css/cssom-view)（[Source](https://www.w3.org/TR/2016/WD-cssom-view-1-20160317/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSSOM View Module](https://jp.htmlspecs.com/css/cssom-view)（[Source](https://www.w3.org/TR/2025/WD-cssom-view-1-20250916/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Cascading and Inheritance Level 3](https://jp.htmlspecs.com/css/css-cascade-3)（[Source](https://www.w3.org/TR/2021/REC-css-cascade-3-20210211/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [CSS Cascading and Inheritance Level 4](https://jp.htmlspecs.com/css/css-cascade-4)（[Source](https://www.w3.org/TR/2022/CR-css-cascade-4-20220113/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [CSS Cascading and Inheritance Level 5](https://jp.htmlspecs.com/css/css-cascade-5)（[Source](https://www.w3.org/TR/2022/CR-css-cascade-5-20220113/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
