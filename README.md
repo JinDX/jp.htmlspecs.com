@@ -107,6 +107,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [WebCodecs](https://jp.htmlspecs.com/webcodecs)（[Source](https://www.w3.org/TR/2025/WD-webcodecs-20250708/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Session](https://jp.htmlspecs.com/mediasession)（[Source](https://www.w3.org/TR/2025/WD-mediasession-20250919/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Capabilities](https://jp.htmlspecs.com/media-capabilities)（[Source](https://www.w3.org/TR/2025/WD-media-capabilities-20250825/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Image Capture](https://jp.htmlspecs.com/image-capture)（[Source](https://www.w3.org/TR/2025/WD-image-capture-20250423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### 開発者ツール
 - [Console](https://jp.htmlspecs.com/console)（[Source](https://console.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
