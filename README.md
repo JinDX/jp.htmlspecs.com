@@ -42,7 +42,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [File System](https://jp.htmlspecs.com/fs)（[Source](https://fs.spec.whatwg.org) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Cookie Store API](https://jp.htmlspecs.com/cookiestore)（[Source](https://cookiestore.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [File and Directory Entries API](https://jp.htmlspecs.com/entries-api)（[Source](https://wicg.github.io/entries-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Web Locks API](https://jp.htmlspecs.com/web-locks)（[Source](https://www.w3.org/TR/2023/WD-web-locks-20230105/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Web Locks API](https://jp.htmlspecs.com/web-locks)（[Source](https://www.w3.org/TR/2025/WD-web-locks-20250924/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### デバイスとハードウェアアクセス
 - [Pointer Events](https://jp.htmlspecs.com/pointerevents2)（[Source](https://www.w3.org/TR/2019/REC-pointerevents2-20190404/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
