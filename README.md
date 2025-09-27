@@ -64,7 +64,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Clipboard API and events](https://jp.htmlspecs.com/clipboard-apis)（[Source](https://www.w3.org/TR/2025/WD-clipboard-apis-20250516/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Input Events Level 1](https://jp.htmlspecs.com/input-events-1)（[Source](https://www.w3.org/TR/2023/DISC-input-events-1-20230928/) ![Discontinued Draft](https://img.shields.io/badge/DISC-ffcc00)）
 - [Input Events Level 2](https://jp.htmlspecs.com/input-events-2)（[Source](https://www.w3.org/TR/2025/WD-input-events-2-20250814/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Permissions](https://jp.htmlspecs.com/permissions)（[Source](https://www.w3.org/TR/2025/WD-permissions-20250624/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Permissions](https://jp.htmlspecs.com/permissions)（[Source](https://www.w3.org/TR/2025/WD-permissions-20250926/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebOTP API](https://jp.htmlspecs.com/web-otp)（[Source](https://wicg.github.io/web-otp/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Device Posture API](https://jp.htmlspecs.com/device-posture)（[Source](https://www.w3.org/TR/2024/CR-device-posture-20241126/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Ambient Light Sensor](https://jp.htmlspecs.com/ambient-light)（[Source](https://www.w3.org/TR/2025/WD-ambient-light-20250212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
