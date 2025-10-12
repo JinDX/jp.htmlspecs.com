@@ -1,0 +1,3197 @@
+<!doctype html>
+<html lang="ja-JP">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>ページライフサイクル</title>
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <link href="https://www.w3.org/StyleSheets/TR/2021/cg-draft" rel="stylesheet">
+    <!-- <meta content="Bikeshed version 37b7e7e68, updated Fri May 27 15:08:11 2022 -0700" name="generator"> -->
+    <link href="https://wicg.github.io/page-lifecycle/" rel="canonical">
+    <!-- <meta content="5ea95470f9709bed5c01c91d1c5d4e03a40530e5" name="document-revision"> -->
+    <style>
+        /* style-autolinks */
+
+        .css.css,
+        .property.property,
+        .descriptor.descriptor {
+            color: var(--a-normal-text);
+            font-size: inherit;
+            font-family: inherit;
+        }
+
+        .css::before,
+        .property::before,
+        .descriptor::before {
+            content: "‘";
+        }
+
+        .css::after,
+        .property::after,
+        .descriptor::after {
+            content: "’";
+        }
+
+        .property,
+        .descriptor {
+            /* Don't wrap property and descriptor names */
+            white-space: nowrap;
+        }
+
+        .type {
+            /* CSS value <type> */
+            font-style: italic;
+        }
+
+        pre .property::before,
+        pre .property::after {
+            content: "";
+        }
+
+        [data-link-type="property"]::before,
+        [data-link-type="propdesc"]::before,
+        [data-link-type="descriptor"]::before,
+        [data-link-type="value"]::before,
+        [data-link-type="function"]::before,
+        [data-link-type="at-rule"]::before,
+        [data-link-type="selector"]::before,
+        [data-link-type="maybe"]::before {
+            content: "‘";
+        }
+
+        [data-link-type="property"]::after,
+        [data-link-type="propdesc"]::after,
+        [data-link-type="descriptor"]::after,
+        [data-link-type="value"]::after,
+        [data-link-type="function"]::after,
+        [data-link-type="at-rule"]::after,
+        [data-link-type="selector"]::after,
+        [data-link-type="maybe"]::after {
+            content: "’";
+        }
+
+        [data-link-type].production::before,
+        [data-link-type].production::after,
+        .prod [data-link-type]::before,
+        .prod [data-link-type]::after {
+            content: "";
+        }
+
+        [data-link-type=element],
+        [data-link-type=element-attr] {
+            font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+            font-size: .9em;
+        }
+
+        [data-link-type=element]::before {
+            content: "<"
+        }
+
+        [data-link-type=element]::after {
+            content: ">"
+        }
+
+        [data-link-type=biblio] {
+            white-space: pre;
+        }
+    </style>
+    <style>
+        /* style-colors */
+
+        /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
+        :root {
+            color-scheme: light dark;
+
+            --text: black;
+            --bg: white;
+
+            --unofficial-watermark: url(https://www.w3.org/StyleSheets/TR/2016/logos/UD-watermark);
+
+            --logo-bg: #1a5e9a;
+            --logo-active-bg: #c00;
+            --logo-text: white;
+
+            --tocnav-normal-text: #707070;
+            --tocnav-normal-bg: var(--bg);
+            --tocnav-hover-text: var(--tocnav-normal-text);
+            --tocnav-hover-bg: #f8f8f8;
+            --tocnav-active-text: #c00;
+            --tocnav-active-bg: var(--tocnav-normal-bg);
+
+            --tocsidebar-text: var(--text);
+            --tocsidebar-bg: #f7f8f9;
+            --tocsidebar-shadow: rgba(0, 0, 0, .1);
+            --tocsidebar-heading-text: hsla(203, 20%, 40%, .7);
+
+            --toclink-text: var(--text);
+            --toclink-underline: #3980b5;
+            --toclink-visited-text: var(--toclink-text);
+            --toclink-visited-underline: #054572;
+
+            --heading-text: #005a9c;
+
+            --hr-text: var(--text);
+
+            --algo-border: #def;
+
+            --del-text: red;
+            --del-bg: transparent;
+            --ins-text: #080;
+            --ins-bg: transparent;
+
+            --a-normal-text: #034575;
+            --a-normal-underline: #bbb;
+            --a-visited-text: var(--a-normal-text);
+            --a-visited-underline: #707070;
+            --a-hover-bg: rgba(75%, 75%, 75%, .25);
+            --a-active-text: #c00;
+            --a-active-underline: #c00;
+
+            --blockquote-border: silver;
+            --blockquote-bg: transparent;
+            --blockquote-text: currentcolor;
+
+            --issue-border: #e05252;
+            --issue-bg: #fbe9e9;
+            --issue-text: var(--text);
+            --issueheading-text: #831616;
+
+            --example-border: #e0cb52;
+            --example-bg: #fcfaee;
+            --example-text: var(--text);
+            --exampleheading-text: #574b0f;
+
+            --note-border: #52e052;
+            --note-bg: #e9fbe9;
+            --note-text: var(--text);
+            --noteheading-text: hsl(120, 70%, 30%);
+            --notesummary-underline: silver;
+
+            --assertion-border: #aaa;
+            --assertion-bg: #eee;
+            --assertion-text: black;
+
+            --advisement-border: orange;
+            --advisement-bg: #fec;
+            --advisement-text: var(--text);
+            --advisementheading-text: #b35f00;
+
+            --warning-border: red;
+            --warning-bg: hsla(40, 100%, 50%, 0.95);
+            --warning-text: var(--text);
+
+            --amendment-border: #330099;
+            --amendment-bg: #F5F0FF;
+            --amendment-text: var(--text);
+            --amendmentheading-text: #220066;
+
+            --def-border: #8ccbf2;
+            --def-bg: #def;
+            --def-text: var(--text);
+            --defrow-border: #bbd7e9;
+
+            --datacell-border: silver;
+
+            --indexinfo-text: #707070;
+
+            --indextable-hover-text: black;
+            --indextable-hover-bg: #f7f8f9;
+
+            --outdatedspec-bg: rgba(0, 0, 0, .5);
+            --outdatedspec-text: black;
+            --outdated-bg: maroon;
+            --outdated-text: white;
+            --outdated-shadow: red;
+
+            --editedrec-bg: darkorange;
+        }
+    </style>
+    <style>
+        /* style-counters */
+
+        body {
+            counter-reset: example figure issue;
+        }
+
+        .issue {
+            counter-increment: issue;
+        }
+
+        .issue:not(.no-marker)::before {
+            content: "Issue " counter(issue);
+        }
+
+        .example {
+            counter-increment: example;
+        }
+
+        .example:not(.no-marker)::before {
+            content: "Example " counter(example);
+        }
+
+        .invalid.example:not(.no-marker)::before,
+        .illegal.example:not(.no-marker)::before {
+            content: "Invalid Example" counter(example);
+        }
+
+        figcaption {
+            counter-increment: figure;
+        }
+
+        figcaption:not(.no-marker)::before {
+            content: "Figure " counter(figure) " ";
+        }
+    </style>
+    <style>
+        /* style-dfn-panel */
+
+        :root {
+            --dfnpanel-bg: #ddd;
+            --dfnpanel-text: var(--text);
+        }
+
+        .dfn-panel {
+            position: absolute;
+            z-index: 35;
+            height: auto;
+            width: -webkit-fit-content;
+            width: fit-content;
+            max-width: 300px;
+            max-height: 500px;
+            overflow: auto;
+            padding: 0.5em 0.75em;
+            font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
+            background: var(--dfnpanel-bg);
+            color: var(--dfnpanel-text);
+            border: outset 0.2em;
+        }
+
+        .dfn-panel:not(.on) {
+            display: none;
+        }
+
+        .dfn-panel * {
+            margin: 0;
+            padding: 0;
+            text-indent: 0;
+        }
+
+        .dfn-panel>b {
+            display: block;
+        }
+
+        .dfn-panel a {
+            color: var(--dfnpanel-text);
+        }
+
+        .dfn-panel a:not(:hover) {
+            text-decoration: none !important;
+            border-bottom: none !important;
+        }
+
+        .dfn-panel>b+b {
+            margin-top: 0.25em;
+        }
+
+        .dfn-panel ul {
+            padding: 0;
+        }
+
+        .dfn-panel li {
+            list-style: inside;
+        }
+
+        .dfn-panel.activated {
+            display: inline-block;
+            position: fixed;
+            left: .5em;
+            bottom: 2em;
+            margin: 0 auto;
+            max-width: calc(100vw - 1.5em - .4em - .5em);
+            max-height: 30vh;
+        }
+
+        .dfn-paneled {
+            cursor: pointer;
+        }
+    </style>
+    <style>
+        /* style-issues */
+
+        a[href].issue-return {
+            float: right;
+            float: inline-end;
+            color: var(--issueheading-text);
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+    <style>
+        /* style-md-lists */
+
+        /* This is a weird hack for me not yet following the commonmark spec
+   regarding paragraph and lists. */
+        [data-md]> :first-child {
+            margin-top: 0;
+        }
+
+        [data-md]> :last-child {
+            margin-bottom: 0;
+        }
+    </style>
+    <style>
+        /* style-selflinks */
+
+        :root {
+            --selflink-text: white;
+            --selflink-bg: gray;
+            --selflink-hover-text: black;
+        }
+
+        .heading,
+        .issue,
+        .note,
+        .example,
+        li,
+        dt {
+            position: relative;
+        }
+
+        a.self-link {
+            position: absolute;
+            top: 0;
+            left: calc(-1 * (3.5rem - 26px));
+            width: calc(3.5rem - 26px);
+            height: 2em;
+            text-align: center;
+            border: none;
+            transition: opacity .2s;
+            opacity: .5;
+        }
+
+        a.self-link:hover {
+            opacity: 1;
+        }
+
+        .heading>a.self-link {
+            font-size: 83%;
+        }
+
+        li>a.self-link {
+            left: calc(-1 * (3.5rem - 26px) - 2em);
+        }
+
+        dfn>a.self-link {
+            top: auto;
+            left: auto;
+            opacity: 0;
+            width: 1.5em;
+            height: 1.5em;
+            background: var(--selflink-bg);
+            color: var(--selflink-text);
+            font-style: normal;
+            transition: opacity .2s, background-color .2s, color .2s;
+        }
+
+        dfn:hover>a.self-link {
+            opacity: 1;
+        }
+
+        dfn>a.self-link:hover {
+            color: var(--selflink-hover-text);
+        }
+
+        a.self-link::before {
+            content: "¶";
+        }
+
+        .heading>a.self-link::before {
+            content: "§";
+        }
+
+        dfn>a.self-link::before {
+            content: "#";
+        }
+    </style>
+    <style>
+        /* style-syntax-highlighting */
+
+        pre.idl.highlight {
+            background: var(--borderedblock-bg, var(--def-bg));
+        }
+
+        code.highlight {
+            padding: .1em;
+            border-radius: .3em;
+        }
+
+        pre.highlight,
+        pre>code.highlight {
+            display: block;
+            padding: 1em;
+            margin: .5em 0;
+            overflow: auto;
+            border-radius: 0;
+        }
+
+        .highlight:not(.idl) {
+            background: rgba(0, 0, 0, .03);
+        }
+
+        c-[a] {
+            color: #990055
+        }
+
+        /* Keyword.Declaration */
+        c-[b] {
+            color: #990055
+        }
+
+        /* Keyword.Type */
+        c-[c] {
+            color: #708090
+        }
+
+        /* Comment */
+        c-[d] {
+            color: #708090
+        }
+
+        /* Comment.Multiline */
+        c-[e] {
+            color: #0077aa
+        }
+
+        /* Name.Attribute */
+        c-[f] {
+            color: #669900
+        }
+
+        /* Name.Tag */
+        c-[g] {
+            color: #222222
+        }
+
+        /* Name.Variable */
+        c-[k] {
+            color: #990055
+        }
+
+        /* Keyword */
+        c-[l] {
+            color: #000000
+        }
+
+        /* Literal */
+        c-[m] {
+            color: #000000
+        }
+
+        /* Literal.Number */
+        c-[n] {
+            color: #0077aa
+        }
+
+        /* Name */
+        c-[o] {
+            color: #999999
+        }
+
+        /* Operator */
+        c-[p] {
+            color: #999999
+        }
+
+        /* Punctuation */
+        c-[s] {
+            color: #a67f59
+        }
+
+        /* Literal.String */
+        c-[t] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Single */
+        c-[u] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Double */
+        c-[cp] {
+            color: #708090
+        }
+
+        /* Comment.Preproc */
+        c-[c1] {
+            color: #708090
+        }
+
+        /* Comment.Single */
+        c-[cs] {
+            color: #708090
+        }
+
+        /* Comment.Special */
+        c-[kc] {
+            color: #990055
+        }
+
+        /* Keyword.Constant */
+        c-[kn] {
+            color: #990055
+        }
+
+        /* Keyword.Namespace */
+        c-[kp] {
+            color: #990055
+        }
+
+        /* Keyword.Pseudo */
+        c-[kr] {
+            color: #990055
+        }
+
+        /* Keyword.Reserved */
+        c-[ld] {
+            color: #000000
+        }
+
+        /* Literal.Date */
+        c-[nc] {
+            color: #0077aa
+        }
+
+        /* Name.Class */
+        c-[no] {
+            color: #0077aa
+        }
+
+        /* Name.Constant */
+        c-[nd] {
+            color: #0077aa
+        }
+
+        /* Name.Decorator */
+        c-[ni] {
+            color: #0077aa
+        }
+
+        /* Name.Entity */
+        c-[ne] {
+            color: #0077aa
+        }
+
+        /* Name.Exception */
+        c-[nf] {
+            color: #0077aa
+        }
+
+        /* Name.Function */
+        c-[nl] {
+            color: #0077aa
+        }
+
+        /* Name.Label */
+        c-[nn] {
+            color: #0077aa
+        }
+
+        /* Name.Namespace */
+        c-[py] {
+            color: #0077aa
+        }
+
+        /* Name.Property */
+        c-[ow] {
+            color: #999999
+        }
+
+        /* Operator.Word */
+        c-[mb] {
+            color: #000000
+        }
+
+        /* Literal.Number.Bin */
+        c-[mf] {
+            color: #000000
+        }
+
+        /* Literal.Number.Float */
+        c-[mh] {
+            color: #000000
+        }
+
+        /* Literal.Number.Hex */
+        c-[mi] {
+            color: #000000
+        }
+
+        /* Literal.Number.Integer */
+        c-[mo] {
+            color: #000000
+        }
+
+        /* Literal.Number.Oct */
+        c-[sb] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Backtick */
+        c-[sc] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Char */
+        c-[sd] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Doc */
+        c-[se] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Escape */
+        c-[sh] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Heredoc */
+        c-[si] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Interpol */
+        c-[sx] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Other */
+        c-[sr] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Regex */
+        c-[ss] {
+            color: #a67f59
+        }
+
+        /* Literal.String.Symbol */
+        c-[vc] {
+            color: #0077aa
+        }
+
+        /* Name.Variable.Class */
+        c-[vg] {
+            color: #0077aa
+        }
+
+        /* Name.Variable.Global */
+        c-[vi] {
+            color: #0077aa
+        }
+
+        /* Name.Variable.Instance */
+        c-[il] {
+            color: #000000
+        }
+
+        /* Literal.Number.Integer.Long */
+    </style>
+    <style>
+        /* style-var-click-highlighting */
+
+        var {
+            cursor: pointer;
+        }
+
+        var.selected0 {
+            background-color: #F4D200;
+            box-shadow: 0 0 0 2px #F4D200;
+        }
+
+        var.selected1 {
+            background-color: #FF87A2;
+            box-shadow: 0 0 0 2px #FF87A2;
+        }
+
+        var.selected2 {
+            background-color: #96E885;
+            box-shadow: 0 0 0 2px #96E885;
+        }
+
+        var.selected3 {
+            background-color: #3EEED2;
+            box-shadow: 0 0 0 2px #3EEED2;
+        }
+
+        var.selected4 {
+            background-color: #EACFB6;
+            box-shadow: 0 0 0 2px #EACFB6;
+        }
+
+        var.selected5 {
+            background-color: #82DDFF;
+            box-shadow: 0 0 0 2px #82DDFF;
+        }
+
+        var.selected6 {
+            background-color: #FFBCF2;
+            box-shadow: 0 0 0 2px #FFBCF2;
+        }
+    </style>
+    <style>
+        /* style-darkmode */
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text: #ddd;
+                --bg: black;
+
+                --unofficial-watermark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='%23100808' transform='translate(200 200) rotate(-45) translate(-200 -200)' stroke='%23100808' stroke-width='3'%3E%3Ctext x='50%25' y='220' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EUNOFFICIAL%3C/text%3E%3Ctext x='50%25' y='305' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EDRAFT%3C/text%3E%3C/g%3E%3C/svg%3E");
+
+                --logo-bg: #1a5e9a;
+                --logo-active-bg: #c00;
+                --logo-text: white;
+
+                --tocnav-normal-text: #999;
+                --tocnav-normal-bg: var(--bg);
+                --tocnav-hover-text: var(--tocnav-normal-text);
+                --tocnav-hover-bg: #080808;
+                --tocnav-active-text: #f44;
+                --tocnav-active-bg: var(--tocnav-normal-bg);
+
+                --tocsidebar-text: var(--text);
+                --tocsidebar-bg: #080808;
+                --tocsidebar-shadow: rgba(255, 255, 255, .1);
+                --tocsidebar-heading-text: hsla(203, 20%, 40%, .7);
+
+                --toclink-text: var(--text);
+                --toclink-underline: #6af;
+                --toclink-visited-text: var(--toclink-text);
+                --toclink-visited-underline: #054572;
+
+                --heading-text: #8af;
+
+                --hr-text: var(--text);
+
+                --algo-border: #456;
+
+                --del-text: #f44;
+                --del-bg: transparent;
+                --ins-text: #4a4;
+                --ins-bg: transparent;
+
+                --a-normal-text: #6af;
+                --a-normal-underline: #555;
+                --a-visited-text: var(--a-normal-text);
+                --a-visited-underline: var(--a-normal-underline);
+                --a-hover-bg: rgba(25%, 25%, 25%, .2);
+                --a-active-text: #f44;
+                --a-active-underline: var(--a-active-text);
+
+                --borderedblock-bg: rgba(255, 255, 255, .05);
+
+                --blockquote-border: silver;
+                --blockquote-bg: var(--borderedblock-bg);
+                --blockquote-text: currentcolor;
+
+                --issue-border: #e05252;
+                --issue-bg: var(--borderedblock-bg);
+                --issue-text: var(--text);
+                --issueheading-text: hsl(0deg, 70%, 70%);
+
+                --example-border: hsl(50deg, 90%, 60%);
+                --example-bg: var(--borderedblock-bg);
+                --example-text: var(--text);
+                --exampleheading-text: hsl(50deg, 70%, 70%);
+
+                --note-border: hsl(120deg, 100%, 35%);
+                --note-bg: var(--borderedblock-bg);
+                --note-text: var(--text);
+                --noteheading-text: hsl(120, 70%, 70%);
+                --notesummary-underline: silver;
+
+                --assertion-border: #444;
+                --assertion-bg: var(--borderedblock-bg);
+                --assertion-text: var(--text);
+
+                --advisement-border: orange;
+                --advisement-bg: #222218;
+                --advisement-text: var(--text);
+                --advisementheading-text: #f84;
+
+                --warning-border: red;
+                --warning-bg: hsla(40, 100%, 20%, 0.95);
+                --warning-text: var(--text);
+
+                --amendment-border: #330099;
+                --amendment-bg: #080010;
+                --amendment-text: var(--text);
+                --amendmentheading-text: #cc00ff;
+
+                --def-border: #8ccbf2;
+                --def-bg: #080818;
+                --def-text: var(--text);
+                --defrow-border: #136;
+
+                --datacell-border: silver;
+
+                --indexinfo-text: #aaa;
+
+                --indextable-hover-text: var(--text);
+                --indextable-hover-bg: #181818;
+
+                --outdatedspec-bg: rgba(255, 255, 255, .5);
+                --outdatedspec-text: black;
+                --outdated-bg: maroon;
+                --outdated-text: white;
+                --outdated-shadow: red;
+
+                --editedrec-bg: darkorange;
+            }
+
+            /* In case a transparent-bg image doesn't expect to be on a dark bg,
+       which is quite common in practice... */
+            img {
+                background: white;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --selflink-text: black;
+                --selflink-bg: silver;
+                --selflink-hover-text: white;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --dfnpanel-bg: #222;
+                --dfnpanel-text: var(--text);
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .highlight:not(.idl) {
+                background: rgba(255, 255, 255, .05);
+            }
+
+            c-[a] {
+                color: #d33682
+            }
+
+            /* Keyword.Declaration */
+            c-[b] {
+                color: #d33682
+            }
+
+            /* Keyword.Type */
+            c-[c] {
+                color: #2aa198
+            }
+
+            /* Comment */
+            c-[d] {
+                color: #2aa198
+            }
+
+            /* Comment.Multiline */
+            c-[e] {
+                color: #268bd2
+            }
+
+            /* Name.Attribute */
+            c-[f] {
+                color: #b58900
+            }
+
+            /* Name.Tag */
+            c-[g] {
+                color: #cb4b16
+            }
+
+            /* Name.Variable */
+            c-[k] {
+                color: #d33682
+            }
+
+            /* Keyword */
+            c-[l] {
+                color: #657b83
+            }
+
+            /* Literal */
+            c-[m] {
+                color: #657b83
+            }
+
+            /* Literal.Number */
+            c-[n] {
+                color: #268bd2
+            }
+
+            /* Name */
+            c-[o] {
+                color: #657b83
+            }
+
+            /* Operator */
+            c-[p] {
+                color: #657b83
+            }
+
+            /* Punctuation */
+            c-[s] {
+                color: #6c71c4
+            }
+
+            /* Literal.String */
+            c-[t] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Single */
+            c-[u] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Double */
+            c-[ch] {
+                color: #2aa198
+            }
+
+            /* Comment.Hashbang */
+            c-[cp] {
+                color: #2aa198
+            }
+
+            /* Comment.Preproc */
+            c-[cpf] {
+                color: #2aa198
+            }
+
+            /* Comment.PreprocFile */
+            c-[c1] {
+                color: #2aa198
+            }
+
+            /* Comment.Single */
+            c-[cs] {
+                color: #2aa198
+            }
+
+            /* Comment.Special */
+            c-[kc] {
+                color: #d33682
+            }
+
+            /* Keyword.Constant */
+            c-[kn] {
+                color: #d33682
+            }
+
+            /* Keyword.Namespace */
+            c-[kp] {
+                color: #d33682
+            }
+
+            /* Keyword.Pseudo */
+            c-[kr] {
+                color: #d33682
+            }
+
+            /* Keyword.Reserved */
+            c-[ld] {
+                color: #657b83
+            }
+
+            /* Literal.Date */
+            c-[nc] {
+                color: #268bd2
+            }
+
+            /* Name.Class */
+            c-[no] {
+                color: #268bd2
+            }
+
+            /* Name.Constant */
+            c-[nd] {
+                color: #268bd2
+            }
+
+            /* Name.Decorator */
+            c-[ni] {
+                color: #268bd2
+            }
+
+            /* Name.Entity */
+            c-[ne] {
+                color: #268bd2
+            }
+
+            /* Name.Exception */
+            c-[nf] {
+                color: #268bd2
+            }
+
+            /* Name.Function */
+            c-[nl] {
+                color: #268bd2
+            }
+
+            /* Name.Label */
+            c-[nn] {
+                color: #268bd2
+            }
+
+            /* Name.Namespace */
+            c-[py] {
+                color: #268bd2
+            }
+
+            /* Name.Property */
+            c-[ow] {
+                color: #657b83
+            }
+
+            /* Operator.Word */
+            c-[mb] {
+                color: #657b83
+            }
+
+            /* Literal.Number.Bin */
+            c-[mf] {
+                color: #657b83
+            }
+
+            /* Literal.Number.Float */
+            c-[mh] {
+                color: #657b83
+            }
+
+            /* Literal.Number.Hex */
+            c-[mi] {
+                color: #657b83
+            }
+
+            /* Literal.Number.Integer */
+            c-[mo] {
+                color: #657b83
+            }
+
+            /* Literal.Number.Oct */
+            c-[sa] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Affix */
+            c-[sb] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Backtick */
+            c-[sc] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Char */
+            c-[dl] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Delimiter */
+            c-[sd] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Doc */
+            c-[se] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Escape */
+            c-[sh] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Heredoc */
+            c-[si] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Interpol */
+            c-[sx] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Other */
+            c-[sr] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Regex */
+            c-[ss] {
+                color: #6c71c4
+            }
+
+            /* Literal.String.Symbol */
+            c-[fm] {
+                color: #268bd2
+            }
+
+            /* Name.Function.Magic */
+            c-[vc] {
+                color: #cb4b16
+            }
+
+            /* Name.Variable.Class */
+            c-[vg] {
+                color: #cb4b16
+            }
+
+            /* Name.Variable.Global */
+            c-[vi] {
+                color: #cb4b16
+            }
+
+            /* Name.Variable.Instance */
+            c-[vm] {
+                color: #cb4b16
+            }
+
+            /* Name.Variable.Magic */
+            c-[il] {
+                color: #657b83
+            }
+
+            /* Literal.Number.Integer.Long */
+        }
+    </style>
+
+<body class="h-entry">
+    <div class="head">
+        <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48"
+                    src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
+        <h1 class="p-name no-ref" id="title">ページライフサイクル</h1>
+        <p id="w3c-state"><a href="https://www.w3.org/standards/types#CG-DRAFT">ドラフトコミュニティグループレポート</a>, <time
+                class="dt-updated" datetime="2022-06-09">2022年6月9日</time></p>
+        <div data-fill-with="spec-metadata">
+            <dl>
+                <dt>このバージョン:
+                <dd><a class="u-url"
+                        href="https://wicg.github.io/page-lifecycle/">https://wicg.github.io/page-lifecycle/</a>
+                <dt>課題管理:
+                <dd><a href="https://github.com/wicg/page-lifecycle/issues/">GitHub</a>
+                <dt class="editor">編集者:
+                <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email"
+                        href="mailto:shaseley@google.com">Scott Haseley</a> (<a class="p-org org"
+                        href="https://google.com">Google</a>)
+                <dt class="editor">以前の編集者:
+                <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email"
+                        href="mailto:panicker@google.com">Shubhie Panicker</a> (<a class="p-org org"
+                        href="https://google.com">Google</a>)
+                <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email"
+                        href="mailto:d@domenic.me">Domenic Denicola</a> (<a class="p-org org"
+                        href="https://google.com">Google</a>)
+            </dl>
+        </div>
+        <div data-fill-with="warning"></div>
+        <p class="copyright" data-fill-with="copyright"><a
+                href="http://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> © 2022 the Contributors to
+            the Page Lifecycle Specification, published by the <a href="https://www.w3.org/community/wicg/">Web Platform
+                Incubator Community Group</a> under the <a href="https://www.w3.org/community/about/agreements/cla/">W3C
+                Community Contributor License Agreement (CLA)</a>.
+            A human-readable <a href="http://www.w3.org/community/about/agreements/cla-deed/">summary</a> is available.
+        </p>
+        <hr title="Separator for header">
+    </div>
+    <div class="p-summary" data-fill-with="abstract">
+        <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">概要</span></h2>
+        <p>本ドキュメントは、ブラウザがウェブページのライフサイクルを管理する能力をサポートするAPIを定義します。</p>
+    </div>
+    <div data-fill-with="at-risk"></div>
+    <h2 class="no-num no-toc no-ref heading settled" id="status"><span class="content">この文書のステータス</span>
+    </h2>
+    <div data-fill-with="status">
+        <p> この仕様は <a href="https://www.w3.org/community/wicg/">Web Platform Incubator Community Group</a> によって公開されました。
+            W3C標準でもW3C標準化トラック上のものでもありません。
+
+            <a href="https://www.w3.org/community/about/agreements/cla/">W3C Community Contributor License Agreement
+                (CLA)</a> のもと、限定的なオプトアウトや他の条件が適用されることにご注意ください。
+
+            <a href="http://www.w3.org/community/">W3Cコミュニティおよびビジネスグループ</a>について詳しくは、こちらをご覧ください。
+        </p>
+        <p></p>
+    </div>
+    <div data-fill-with="at-risk"></div>
+    <nav data-fill-with="table-of-contents" id="toc">
+        <h2 class="no-num no-toc no-ref" id="contents">目次</h2>
+        <ol class="toc" role="directory">
+            <li><a href="#intro"><span class="secno">1</span> <span class="content">はじめに</span></a>
+            <li><a href="#sec-lifecycle-states"><span class="secno">2</span> <span
+                        class="content">ページライフサイクル状態</span></a>
+            <li>
+                <a href="#sec-api"><span class="secno">3</span> <span class="content">API</span></a>
+                <ol class="toc">
+                    <li><a href="#example"><span class="secno">3.1</span> <span class="content">使用例</span></a>
+                </ol>
+            <li><a href="#feature-policies"><span class="secno">4</span> <span class="content">機能ポリシー</span></a>
+            <li>
+                <a href="#sec-processing-model"><span class="secno">5</span> <span class="content">処理モデル</span></a>
+                <ol class="toc">
+                    <li><a href="#worklets-workers"><span class="secno">5.1</span> <span
+                                class="content">ワークレット・ワーカーの挙動変更</span></a>
+                    <li>
+                        <a href="#mod"><span class="secno">5.2</span> <span class="content">HTML標準の修正</span></a>
+                        <ol class="toc">
+                            <li><a href="#html-bfcache-dfn"><span class="secno">5.2.1</span> <span
+                                        class="content"><span>ドキュメントのアンロード</span>と<span>履歴トラバーサル</span></span></a>
+                            <li><a href="#html-html-event-loop-definitions"><span class="secno">5.2.2</span> <span
+                                        class="content"><span>イベントループ: 定義</span></span></a>
+                            <li><a href="#html-event-loop"><span class="secno">5.2.3</span> <span
+                                        class="content"><span>イベントループ: 処理モデル</span></span></a>
+                            <li><a href="#html-discarding"><span class="secno">5.2.4</span> <span
+                                        class="content"><span>閲覧コンテキストの破棄</span></span></a>
+                            <li><a href="#html-initialize-doc"><span class="secno">5.2.5</span> <span
+                                        class="content"><span>ドキュメントの初期化</span></span></a>
+                            <li><a href="#html-iframe-load"><span class="secno">5.2.6</span> <span
+                                        class="content"><span>iframe loadイベントの手順</span></span></a>
+                            <li><a href="#html-media-elements"><span class="secno">5.2.7</span> <span
+                                        class="content"><code
+                                            class="idl"><span>HTMLMediaElement</span></code></span></a>
+                            <li><a href="#html-post-message"><span class="secno">5.2.8</span> <span
+                                        class="content"><span>メッセージの送信</span></span></a>
+                        </ol>
+                    <li>
+                        <a href="#serviceworker-mod"><span class="secno">5.3</span> <span class="content">Service Worker標準への修正</span></a>
+                        <ol class="toc">
+                            <li>
+                                <a href="#serviceworker-client-dfn"><span class="secno">5.3.1</span> <span
+                                        class="content"><span><code>Client</code></span></span></a>
+                                <ol class="toc">
+                                    <li><a href="#service-worker-client-lifecycle-state"><span
+                                                class="secno">5.3.1.1</span> <span class="content"><code
+                                                    class="idl"><span>lifecycleState</span></code></span></a>
+                                    <li><a href="#serviceworker-matchall-dfn"><span class="secno">5.3.1.2</span> <span
+                                                class="content"><span><code>matchAll(options)</code></span></span></a>
+                                    <li><a href="#serviceworker-openwindow-dfn"><span class="secno">5.3.1.3</span> <span
+                                                class="content"><span><code>openWindow(url)</code></span></span></a>
+                                </ol>
+                            <li>
+                                <a href="#serviceworker-algorithms-dfn"><span class="secno">5.3.2</span> <span
+                                        class="content"><span>アルゴリズム</span></span></a>
+                                <ol class="toc">
+                                    <li><a href="#get-client-lifecycle-state-algorithm"><span
+                                                class="secno">5.3.2.1</span> <span
+                                                class="content"><span>クライアントのライフサイクル状態取得</span></span></a>
+                                    <li><a href="#serviceworker-createclient-dfn"><span class="secno">5.3.2.2</span>
+                                            <span class="content"><span>Create Client</span></span></a>
+                                    <li><a href="#serviceworker-createwindowclient-dfn"><span
+                                                class="secno">5.3.2.3</span> <span
+                                                class="content"><span>Create Window Client</span></span></a>
+                                </ol>
+                        </ol>
+                    <li>
+                        <a href="#page-lifecycle"><span class="secno">5.4</span> <span
+                                class="content">ページライフサイクル処理モデル</span></a>
+                        <ol class="toc">
+                            <li><a href="#frozenness-state"><span class="secno">5.4.1</span> <span
+                                        class="content">凍結状態</span></a>
+                            <li><a href="#changing-frozenness"><span class="secno">5.4.2</span> <span
+                                        class="content">ドキュメントの凍結状態変更</span></a>
+                            <li><a href="#discarding"><span class="secno">5.4.3</span> <span
+                                        class="content">破棄</span></a>
+                        </ol>
+                </ol>
+            <li><a href="#acknowledgements"><span class="secno">6</span> <span class="content">謝辞</span></a>
+            <li>
+                <a href="#w3c-conformance"><span class="secno"></span> <span class="content">適合性</span></a>
+                <ol class="toc">
+                    <li><a href="#w3c-conventions"><span class="secno"></span> <span class="content">文書規約</span></a>
+                    <li><a href="#w3c-conformant-algorithms"><span class="secno"></span> <span
+                                class="content">適合アルゴリズム</span></a>
+                </ol>
+            <li>
+                <a href="#index"><span class="secno"></span> <span class="content">索引</span></a>
+                <ol class="toc">
+                    <li><a href="#index-defined-here"><span class="secno"></span> <span
+                                class="content">本仕様で定義された用語</span></a>
+                    <li><a href="#index-defined-elsewhere"><span class="secno"></span> <span
+                                class="content">参照で定義される用語</span></a>
+                </ol>
+            <li>
+                <a href="#references"><span class="secno"></span> <span class="content">参考文献</span></a>
+                <ol class="toc">
+                    <li><a href="#normative"><span class="secno"></span> <span class="content">規範的参考文献</span></a>
+                    <li><a href="#informative"><span class="secno"></span> <span class="content">参考情報</span></a>
+                </ol>
+            <li><a href="#idl-index"><span class="secno"></span> <span class="content">IDL索引</span></a>
+        </ol>
+    </nav>
+    <main>
+        <h2 class="heading settled" data-level="1" id="intro"><span class="secno">1. </span><span
+                class="content">はじめに</span><a class="self-link" href="#intro"></a></h2>
+        多数のWebアプリ（およびタブ）が動作していると、メモリ・CPU・バッテリー・ネットワークなどの重要なリソースがすぐに使い過ぎとなり、ユーザー体験が悪化します。アプリケーションのライフサイクルは、現代のOSがリソースを管理する主要な手法です。
+        <p>プラットフォームがアプリケーションライフサイクルをサポートするには、以下が必要です:</p>
+        <ul>
+            <li data-md>
+                <p>ライフサイクル状態間の遷移について、開発者へ通知（シグナル）を提供すること</p>
+            <li data-md>
+                <p>アプリがバックグラウンドや停止状態でも主要機能が動作できる、ライフサイクル互換APIを提供すること</p>
+        </ul>
+        <p>この提案は、Webページのライフサイクルが何かを定義し、Webアプリケーションがユーザーエージェントによってよく行われる2つの重要なライフサイクルイベントに応答できる拡張を追加することを目指しています:</p>
+        <ul>
+            <li data-md>
+                <p>タブの破棄（メモリ節約のため）</p>
+            <li data-md>
+                <p>CPUの一時停止（バッテリー、データ、CPU節約のため）</p>
+        </ul>
+        <h2 class="heading settled" data-level="2" id="sec-lifecycle-states"><span class="secno">2. </span><span
+                class="content">ページライフサイクル状態</span><a class="self-link" href="#sec-lifecycle-states"></a></h2>
+        <p>この仕様はWebページのライフサイクルが何かを定義し、Webアプリケーションがユーザーエージェントによってよく行われる2つの重要なライフサイクルイベントに応答できる拡張を追加します:</p>
+        <ul>
+            <li data-md>
+                <p>CPUの一時停止（バッテリー・データ・CPUの節約）</p>
+            <li data-md>
+                <p>タブの破棄（メモリ節約のため）</p>
+        </ul>
+        <p>この仕様では、上記をサポートするために2つの新しいライフサイクル状態を正式化します:</p>
+        <ul>
+            <li data-md>
+                <p>Frozen（凍結）: CPU一時停止のためのライフサイクル状態。これは、<a data-link-type="dfn" href="#freeze-steps"
+                        id="ref-for-freeze-steps">freeze steps</a> アルゴリズムが <code
+                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document">Document</a></code>
+                    の
+                    <a data-link-type="dfn"
+                        href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc"
+                        id="ref-for-concept-document-bc">閲覧コンテキスト</a>に対して呼び出されたことを意味します。通常、HIDDENページはリソース節約のため<a
+                        data-link-type="dfn" href="#frozen" id="ref-for-frozen">凍結</a>状態になります。
+                </p>
+            <li data-md>
+                <p>Discarded（破棄）: <a data-link-type="dfn" href="#discarded" id="ref-for-discarded">discard</a> アルゴリズムが
+                    <code
+                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①">Document</a></code>
+                    の
+                    <a data-link-type="dfn"
+                        href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc"
+                        id="ref-for-concept-document-bc①">閲覧コンテキスト</a>に対して呼び出されたことを意味します。通常、<a data-link-type="dfn"
+                        href="#frozen" id="ref-for-frozen①">凍結</a>されたフレームはリソース節約のため破棄状態へ移行します。
+                </p>
+        </ul>
+        <p>TODO(panicker): 図を挿入予定</p>
+        <h2 class="heading settled" data-level="3" id="sec-api"><span class="secno">3. </span><span
+                class="content">API</span><a class="self-link" href="#sec-api"></a></h2>
+        <p>ページライフサイクルには以下の追加が含まれます:</p>
+        <pre class="idl highlight def"><c- b>partial</c-> <c- b>interface</c-> <a class="idl-code" data-link-type="interface" href="https://dom.spec.whatwg.org/#document" id="ref-for-document②"><c- g>Document</c-></a> {
+    <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler" id="ref-for-eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-document-onfreeze" id="ref-for-dom-document-onfreeze"><c- g>onfreeze</c-></a>;
+    <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler" id="ref-for-eventhandler①"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-document-onresume" id="ref-for-dom-document-onresume"><c- g>onresume</c-></a>;
+    <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-boolean" id="ref-for-idl-boolean"><c- b>boolean</c-></a> <a class="idl-code" data-link-type="attribute" data-readonly data-type="boolean" href="#dom-document-wasdiscarded" id="ref-for-dom-document-wasdiscarded"><c- g>wasDiscarded</c-></a>;
+};
+</pre>
+        <p><dfn class="dfn-paneled idl-code" data-dfn-for="Document" data-dfn-type="attribute" data-export
+                id="dom-document-onfreeze"><code>onfreeze</code></dfn> と <dfn class="dfn-paneled idl-code"
+                data-dfn-for="Document" data-dfn-type="attribute" data-export
+                id="dom-document-onresume"><code>onresume</code></dfn> 属性は、それぞれ <code>freeze</code> および
+            <code>resume</code> イベントの
+            <a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes"
+                id="ref-for-event-handler-idl-attributes">イベントハンドラーIDL属性</a>です。
+        </p>
+        <p><dfn class="dfn-paneled idl-code" data-dfn-for="Document" data-dfn-type="attribute" data-export
+                id="dom-document-wasdiscarded"><code>wasDiscarded</code></dfn> 属性のgetterは、この <code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document③">Document</a></code>
+            の
+            <a data-link-type="dfn" href="#document-discarded" id="ref-for-document-discarded">discarded</a> ブール値を返します。
+        </p>
+        <p class="note" role="note"><span>注:</span> これらのAPIは <code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document④">Document</a></code>
+            に追加されています。
+            <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window">Window</a></code>
+            ではなく、
+            Page Visibility APIとの一貫性のためです。これらのAPIは既存APIと組み合わせて使われることを想定しています。<a data-link-type="biblio"
+                href="#biblio-page-visibility">[PAGE-VISIBILITY]</a>
+        </p>
+        <p class="note" role="note"><span>注:</span> 加えて <a
+                href="https://github.com/whatwg/html/issues/3378"><code>clientId</code> および
+                <code>discardedClientId</code></a> が <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window①">Window</a></code>
+            に追加され、破棄後にページを再訪してリロードする際のビュー状態復元をサポートします。これらは本イベントに反応するコードで利用される見込みです。</p>
+        <h3 class="heading settled" data-level="3.1" id="example"><span class="secno">3.1. </span><span
+                class="content">使用例</span><a class="self-link" href="#example"></a></h3>
+        <p>freezeとresumeのハンドリング例:</p>
+        <pre class="example highlight" id="example-edb6c132"><a class="self-link" href="#example-edb6c132"></a><c- a>const</c-> prepareForFreeze <c- o>=</c-> <c- p>()</c-> <c- p>=></c-> <c- p>{</c->
+  <c- c1>// 開いているIndexedDB接続を閉じる。</c->
+  <c- c1>// Webロックを解放する。</c->
+  <c- c1>// タイマーやポーリングを停止する。</c->
+<c- p>};</c->
+
+<c- a>const</c-> reInitializeApp <c- o>=</c-> <c- p>()</c-> <c- p>=></c-> <c- p>{</c->
+  <c- c1>// IndexedDB接続を復元する。</c->
+  <c- c1>// 必要なWebロックを再取得する。</c->
+  <c- c1>// タイマーやポーリングを再開する。</c->
+<c- p>};</c->
+
+document<c- p>.</c->addEventListener<c- p>(</c-><c- t>'freeze'</c-><c- p>,</c-> prepareForFreeze<c- p>);</c->
+document<c- p>.</c->addEventListener<c- p>(</c-><c- t>'resume'</c-><c- p>,</c-> reInitializeApp<c- p>);</c->
+</pre>
+        <p>破棄後にビュー状態を復元する例:
+            ユーザーが同じアプリ・URLで複数タブを開いている場合、両方がバックグラウンドかつ破棄されたとき、アプリは2つのタブを区別して正しい状態を復元する必要があります。この目的でWindowのclientIdとlastClientIdが使えます。
+        </p>
+        <pre class="example highlight" id="example-e35b9ec1"><a class="self-link" href="#example-e35b9ec1"></a><c- c1>// IndexedDBに状態を保存する際、self.clientIdの現在値をレコードにセットしておくことで</c->
+<c- c1>// getPersistedState()で後から取得可能（タブが破棄後リロードされた場合など）。</c->
+<c- a>const</c-> persistState <c- o>=</c-> <c- k>async</c-> <c- p>(</c->state<c- p>)</c-> <c- p>=></c-> <c- p>{</c->
+  <c- a>const</c-> record <c- o>=</c-> <c- p>{...</c->state<c- p>,</c-> cliendId<c- o>:</c-> self<c- p>.</c->clientId<c- p>};</c->
+
+  <c- c1>// レコードをIndexedDBやSessionStorageに保存...</c->
+<c- p>}</c->
+
+<c- c1>// 渡されたクライアントIDに基づき、IndexedDBから状態レコードを取得。</c->
+<c- a>const</c-> getPersistedState <c- o>=</c-> <c- k>async</c-> <c- p>(</c->clientId<c- p>)</c-> <c- p>=></c-> <c- p>{</c->
+  <c- c1>// IndexedDBでレコードを検索...</c->
+<c- p>};</c->
+
+<c- c1>// タブが以前破棄されていれば、self.lastClientId経由でそのクライアントIDの状態を取得。</c->
+<c- k>if</c-> <c- p>(</c->document<c- p>.</c->wasDiscarded<c- p>)</c-> <c- p>{</c->
+  getPersistedState<c- p>(</c->self<c- p>.</c->lastClientId<c- p>);</c->
+<c- p>}</c->
+</pre>
+        <h2 class="heading settled" data-level="4" id="feature-policies"><span class="secno">4. </span><span
+                class="content">機能ポリシー</span><a class="self-link" href="#feature-policies"></a></h2>
+        <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context"
+            id="ref-for-nested-browsing-context">ネストされた閲覧コンテキスト</a> の実行状態を制御することは、<a data-link-type="dfn"
+            href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc"
+            id="ref-for-concept-document-bc②">閲覧コンテキスト</a>からユーザー体験を管理する上で望ましいです。たとえばアプリケーションは、ドキュメントが <a
+            data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/rendering.html#being-rendered"
+            id="ref-for-being-rendered">描画中</a>でない、または <a data-link-type="dfn"
+            href="https://www.w3.org/TR/CSS2/visuren.html#viewport" id="ref-for-viewport">ビューポート</a>に重なっていない場合、
+        ネストされた閲覧コンテキスト内（再生中の動画や音声含む）のすべての実行を停止したいかもしれません。すべての実行を停止することでCPU利用効率が向上します。こうしたニーズに対応するため、2つの機能ポリシーを定義します:
+        <ul>
+            <li data-md>
+                <p>"<dfn class="dfn-paneled" data-dfn-type="dfn" data-export
+                        id="execution-while-not-rendered"><code>execution-while-not-rendered</code></dfn>"（デフォルト許可リストは<code>*</code>）
+                </p>
+            <li data-md>
+                <p>"<dfn class="dfn-paneled" data-dfn-type="dfn" data-export
+                        id="execution-while-out-of-viewport"><code>execution-while-out-of-viewport</code></dfn>"（デフォルト許可リストは<code>*</code>）
+                </p>
+        </ul>
+        <p>"<a data-link-type="dfn" href="#execution-while-not-rendered"
+                id="ref-for-execution-while-not-rendered"><code>execution-while-not-rendered</code></a>" ポリシーは、
+            <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context"
+                id="ref-for-nested-browsing-context②">ネストされた閲覧コンテキスト</a>の <a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container"
+                id="ref-for-browsing-context-container">閲覧コンテキストコンテナ</a>が <a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/rendering.html#being-rendered"
+                id="ref-for-being-rendered①">描画中</a>でない場合に、タスクの実行可否を制御します。
+        </p>
+        <p>"<a data-link-type="dfn" href="#execution-while-out-of-viewport"
+                id="ref-for-execution-while-out-of-viewport"><code>execution-while-out-of-viewport</code></a>" ポリシーは、
+            <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context"
+                id="ref-for-nested-browsing-context③">ネストされた閲覧コンテキスト</a>の <a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container"
+                id="ref-for-browsing-context-container①">閲覧コンテキストコンテナ</a>が <a data-link-type="dfn"
+                href="https://www.w3.org/TR/CSS2/visuren.html#viewport" id="ref-for-viewport①">ビューポート</a>に重なっていない場合（<a
+                data-link-type="dfn" href="https://w3c.github.io/IntersectionObserver/#calculate-intersection-rect-algo"
+                id="ref-for-calculate-intersection-rect-algo">ターゲット要素とルートの交差領域計算</a>アルゴリズムによる）に、タスクの実行可否を制御します。
+        </p>
+        <p><a href="#mod">§ 5.2 HTML標準の修正</a>では、以下条件を満たした際にドキュメント（およびその子孫）を<a data-link-type="dfn" href="#frozen"
+                id="ref-for-frozen②">凍結</a>状態に移行することでこれを実現します:</p>
+        <ul>
+            <li data-md>
+                <p><a data-link-type="dfn"
+                        href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#iframe-load-event-steps"
+                        id="ref-for-iframe-load-event-steps">iframe loadイベントの手順</a>が実行済み</p>
+            <li data-md>
+                <p>当該ドキュメントのポリシーが無効である</p>
+            <li data-md>
+                <p>該当するポリシー条件が成立（描画されていない・スクロールで視野外）</p>
+        </ul>
+        <p>これら条件が成立しない場合、ドキュメントは<a data-link-type="dfn" href="#unfrozen" id="ref-for-unfrozen">未凍結</a>状態となります。</p>
+        <pre class="example highlight" id="example-fa17f32b"><a class="self-link" href="#example-fa17f32b"></a><c- d>&lt;!-- iframeはロード後すぐに凍結されます。 --></c->
+
+<c- p>&lt;</c-><c- f>iframe</c-> <c- e>allow</c-><c- o>=</c-><c- s>"execution-while-not-rendered 'none'"</c->
+  <c- e>src</c-><c- o>=</c-><c- s>"subframe.html"</c-> <c- e>style</c-><c- o>=</c-><c- s>"display:none"</c-><c- p>>&lt;/</c-><c- f>iframe</c-><c- p>></c->
+</pre>
+        <div class="algorithm" data-algorithm="update document frozenness steps">
+            <code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑤">Document</a></code>
+            <var>document</var> の <dfn class="dfn-paneled" data-dfn-type="dfn" data-export
+                id="update-document-frozenness-steps">ドキュメント凍結状態更新手順</dfn>は以下の通り:
+            <ol>
+                <li data-md>
+                    <p><var>document</var> の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc"
+                            id="ref-for-concept-document-bc③">閲覧コンテキスト</a>が <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context"
+                            id="ref-for-nested-browsing-context④">ネストされた閲覧コンテキスト</a>でない場合はreturn。</p>
+                <li data-md>
+                    <p><var>document</var> の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/dom.html#current-document-readiness"
+                            id="ref-for-current-document-readiness">readiness</a> が "<code>complete</code>"
+                        でない場合はreturn。</p>
+                <li data-md>
+                    <p><var>element</var> を <var>document</var> の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc"
+                            id="ref-for-concept-document-bc④">閲覧コンテキスト</a>の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container"
+                            id="ref-for-browsing-context-container②">閲覧コンテキストコンテナ</a>とする。</p>
+                <li data-md>
+                    <p><var>frozenness</var> を false とする。</p>
+                <li data-md>
+                    <p><var>auto resume media</var> を false とする。</p>
+                <li data-md>
+                    <p><var>document</var> が "<a data-link-type="dfn" href="#execution-while-not-rendered"
+                            id="ref-for-execution-while-not-rendered①"><code>execution-while-not-rendered</code></a>"
+                        機能の利用を許可されていない場合:</p>
+                    <ol>
+                        <li data-md>
+                            <p><var>element</var> が <a data-link-type="dfn"
+                                    href="https://html.spec.whatwg.org/multipage/rendering.html#being-rendered"
+                                    id="ref-for-being-rendered②">描画中</a>でなければ <var>frozenness</var> を true にする。</p>
+                    </ol>
+                <li data-md>
+                    <p>それ以外で <var>document</var> が "<a data-link-type="dfn" href="#execution-while-out-of-viewport"
+                            id="ref-for-execution-while-out-of-viewport①"><code>execution-while-out-of-viewport</code></a>"
+                        機能の利用を許可されていない場合:</p>
+                    <ol>
+                        <li data-md>
+                            <p><var>element</var> が <a data-link-type="dfn"
+                                    href="https://www.w3.org/TR/CSS2/visuren.html#viewport"
+                                    id="ref-for-viewport②">ビューポート</a>に重ならない場合（<a data-link-type="dfn"
+                                    href="https://w3c.github.io/IntersectionObserver/#calculate-intersection-rect-algo"
+                                    id="ref-for-calculate-intersection-rect-algo①">ターゲット要素とルートの交差領域計算</a>による）、
+                                <var>frozenness</var> を true、<var>auto resume media</var> を true にする。
+                            </p>
+                    </ol>
+                <li data-md>
+                    <p><var>frozenness</var> が <var>document</var> の <a data-link-type="dfn" href="#document-frozenness"
+                            id="ref-for-document-frozenness">凍結状態</a>と異なる場合、
+                        <a data-link-type="dfn" href="#change-the-frozenness-of-a-document"
+                            id="ref-for-change-the-frozenness-of-a-document">ドキュメントの凍結状態変更</a>（<var>document</var>,
+                        <var>frozenness</var>, <var>auto resume media</var>）を実行。
+                    </p>
+            </ol>
+        </div>
+        <h2 class="heading settled" data-level="5" id="sec-processing-model"><span class="secno">5. </span><span
+                class="content">処理モデル</span><a class="self-link" href="#sec-processing-model"></a></h2>
+        <h3 class="heading settled" data-level="5.1" id="worklets-workers"><span class="secno">5.1. </span><span
+                class="content">ワークレット・ワーカーの挙動変更</span><a class="self-link" href="#worklets-workers"></a></h3>
+        <p>単一の <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#worklet-agent"
+                id="ref-for-worklet-agent">ワークレットエージェント</a> の <a data-link-type="dfn"
+                href="https://tc39.github.io/ecma262/#sec-code-realms" id="ref-for-sec-code-realms">realm</a> の <a
+                data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global"
+                id="ref-for-concept-realm-global">グローバルオブジェクト</a>の <a data-link-type="dfn"
+                href="https://drafts.css-houdini.org/worklets#workletglobalscope-owner-document"
+                id="ref-for-workletglobalscope-owner-document">所有ドキュメント</a>が <a data-link-type="dfn" href="#frozen"
+                id="ref-for-frozen③">凍結</a>状態の場合、<a data-link-type="dfn"
+                href="https://tc39.github.io/ecma262/#sec-forward-progress"
+                id="ref-for-sec-forward-progress">進行停止</a>となる必要があります。
+            単一の <a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/webappapis.html#dedicated-worker-agent"
+                id="ref-for-dedicated-worker-agent">専用ワーカーエージェント</a> の <a data-link-type="dfn"
+                href="https://tc39.github.io/ecma262/#sec-code-realms" id="ref-for-sec-code-realms①">realm</a> の <a
+                data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global"
+                id="ref-for-concept-realm-global①">グローバルオブジェクト</a>の <a data-link-type="dfn"
+                href="#dedicatedworkerglobalscope-owning-document"
+                id="ref-for-dedicatedworkerglobalscope-owning-document">所有ドキュメント</a>が非nullかつ <a data-link-type="dfn"
+                href="#frozen" id="ref-for-frozen④">凍結</a>状態の場合も <a data-link-type="dfn"
+                href="https://tc39.github.io/ecma262/#sec-forward-progress"
+                id="ref-for-sec-forward-progress①">進行停止</a>となる必要があります。</p>
+        <div class="algorithm" data-algorithm="owning document" data-algorithm-for="DedicatedWorkerGlobalScope">
+            <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope" id="ref-for-dedicatedworkerglobalscope">DedicatedWorkerGlobalScope</a></code>
+            <var>workerGlobalScope</var> の <dfn class="dfn-paneled" data-dfn-for="DedicatedWorkerGlobalScope"
+                data-dfn-type="dfn" data-export id="dedicatedworkerglobalscope-owning-document">所有ドキュメント</dfn>判定手順:
+            <ol>
+                <li data-md>
+                    <p><var>workerGlobalScope</var> の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/workers.html#concept-WorkerGlobalScope-owner-set"
+                            id="ref-for-concept-WorkerGlobalScope-owner-set">所有セット</a>が1つの <code
+                            class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑥">Document</a></code>
+                        <var>document</var> なら、<var>document</var> を返す。
+                    </p>
+                <li data-md>
+                    <p><var>workerGlobalScope</var> の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/workers.html#concept-WorkerGlobalScope-owner-set"
+                            id="ref-for-concept-WorkerGlobalScope-owner-set①">所有セット</a>が1つの <code
+                            class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope" id="ref-for-dedicatedworkerglobalscope①">DedicatedWorkerGlobalScope</a></code>
+                        <var>parentWorkerGlobalScope</var> なら、<var>parentWorkerGlobalScope</var> の <a
+                            data-link-type="dfn" href="#dedicatedworkerglobalscope-owning-document"
+                            id="ref-for-dedicatedworkerglobalscope-owning-document①">所有ドキュメント</a> を返す。
+                    </p>
+                <li data-md>
+                    <p>nullを返す。</p>
+            </ol>
+            <p class="note" role="note"><span>注:</span> <code
+                    class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope" id="ref-for-dedicatedworkerglobalscope②">DedicatedWorkerGlobalScope</a></code>
+                の
+                <a data-link-type="dfn"
+                    href="https://html.spec.whatwg.org/multipage/workers.html#concept-WorkerGlobalScope-owner-set"
+                    id="ref-for-concept-WorkerGlobalScope-owner-set②">所有セット</a>は常に1つだけ要素を持ちます。
+            </p>
+        </div>
+        <h3 class="heading settled" data-level="5.2" id="mod"><span class="secno">5.2. </span><span
+                class="content">HTML標準の修正</span><a class="self-link" href="#mod"></a></h3>
+        <h4 class="heading settled" data-level="5.2.1" id="html-bfcache-dfn"><span class="secno">5.2.1. </span><span
+                class="content"><a
+                    href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#unloading-documents">ドキュメントのアンロード</a>と<a
+                    href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#history-traversal">履歴トラバーサル</a></span><a
+                class="self-link" href="#html-bfcache-dfn"></a></h4>
+        <p>ドキュメントが <a href="https://webkit.org/blog/427/webkit-page-cache-i-the-basics/">bfcache（back forward cache）</a>
+            へ出入りする際、<a data-link-type="dfn" href="#document-frozenness"
+                id="ref-for-document-frozenness①">凍結状態</a>がtrue/falseに遷移します。</p>
+        <ul>
+            <li data-md>
+                <p><a data-link-type="dfn"
+                        href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#unload-a-document"
+                        id="ref-for-unload-a-document">ドキュメントアンロード</a>アルゴリズムで、Step #5後に <code
+                        class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#dom-pagetransitionevent-persisted" id="ref-for-dom-pagetransitionevent-persisted">persisted</a></code>
+                    属性がtrue（bfcacheへ移動時）、<a data-link-type="dfn" href="#change-the-frozenness-of-a-document"
+                        id="ref-for-change-the-frozenness-of-a-document①">ドキュメントの凍結状態変更</a>を<var>document</var>・trueで実行。
+                </p>
+            <li data-md>
+                <p><a data-link-type="dfn"
+                        href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#traverse-the-history"
+                        id="ref-for-traverse-the-history">履歴トラバーサル</a>アルゴリズムで、Step #4.6.4前に <code
+                        class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#dom-pagetransitionevent-persisted" id="ref-for-dom-pagetransitionevent-persisted①">persisted</a></code>
+                    属性がtrue（bfcacheから出る時）、<a data-link-type="dfn" href="#change-the-frozenness-of-a-document"
+                        id="ref-for-change-the-frozenness-of-a-document②">ドキュメントの凍結状態変更</a>を<var>document</var>・falseで実行。
+                </p>
+        </ul>
+        <h4 class="heading settled" data-level="5.2.2" id="html-html-event-loop-definitions"><span class="secno">5.2.2.
+            </span><span class="content"><a
+                    href="https://html.spec.whatwg.org/multipage/webappapis.html#definitions-3">イベントループ: 定義</a></span><a
+                class="self-link" href="#html-html-event-loop-definitions"></a></h4>
+        <p>置き換え: <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-task"
+                id="ref-for-concept-task">タスク</a>は、その <a data-link-type="dfn"
+                href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document">document</a> がnullまたは
+            <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#fully-active"
+                id="ref-for-fully-active">完全にアクティブ</a>な場合、実行可能。
+        </p>
+        <p>修正後: <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-task"
+                id="ref-for-concept-task①">タスク</a>は、その <a data-link-type="dfn"
+                href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document①">document</a>
+            がnullまたは <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#fully-active"
+                id="ref-for-fully-active①">完全にアクティブ</a>かつ <a data-link-type="dfn" href="#unfrozen"
+                id="ref-for-unfrozen①">未凍結</a>の場合、実行可能。</p>
+        <h4 class="heading settled" data-level="5.2.3" id="html-event-loop"><span class="secno">5.2.3. </span><span
+                class="content"><a
+                    href="https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model">イベントループ:
+                    処理モデル</a></span><a class="self-link" href="#html-event-loop"></a></h4>
+        <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering"
+                id="ref-for-update-the-rendering">レンダリングの更新</a>中、Step #11後に以下のステップを追加:</p>
+        <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#fully-active"
+                id="ref-for-fully-active②">完全にアクティブ</a>な <code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑦">Document</a></code>
+            <var>doc</var> それぞれについて、<a data-link-type="dfn" href="#update-document-frozenness-steps"
+                id="ref-for-update-document-frozenness-steps">ドキュメント凍結状態更新手順</a>を<var>doc</var>で実行。
+        </p>
+        <h4 class="heading settled" data-level="5.2.4" id="html-discarding"><span class="secno">5.2.4. </span><span
+                class="content"><a
+                    href="https://html.spec.whatwg.org/multipage/window-object.html#a-browsing-context-is-discarded">閲覧コンテキストの破棄</a></span><a
+                class="self-link" href="#html-discarding"></a></h4>
+        <p>閲覧コンテキストやドキュメントの「discard」概念を「destroy」にリネームします。これにより、ユーザー向け属性 <code
+                class="idl"><a data-link-type="idl" href="#dom-document-wasdiscarded" id="ref-for-dom-document-wasdiscarded①">wasDiscarded</a></code>
+            に「discarded」という用語を使えます。</p>
+        <h4 class="heading settled" data-level="5.2.5" id="html-initialize-doc"><span class="secno">5.2.5. </span><span
+                class="content"><a
+                    href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#initialise-the-document-object">ドキュメントの初期化</a></span><a
+                class="self-link" href="#html-initialize-doc"></a></h4>
+        <p>Step #3の前に以下を追加:</p>
+        <p>閲覧コンテキストが以前<a data-link-type="dfn" href="#discarded" id="ref-for-discarded①">破棄</a>状態だった場合、<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑧">Document</a></code>の
+            <a data-link-type="dfn" href="#document-discarded"
+                id="ref-for-document-discarded①">discarded</a>ブール値をtrueにセット。
+        </p>
+        <h4 class="heading settled" data-level="5.2.6" id="html-iframe-load"><span class="secno">5.2.6. </span><span
+                class="content"><a data-link-type="dfn"
+                    href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#iframe-load-event-steps"
+                    id="ref-for-iframe-load-event-steps①">iframe loadイベントの手順</a></span><a class="self-link"
+                href="#html-iframe-load"></a></h4>
+        <p>Step #5後に以下を追加:</p>
+        <p><var>child document</var> で <a data-link-type="dfn" href="#update-document-frozenness-steps"
+                id="ref-for-update-document-frozenness-steps①">ドキュメント凍結状態更新手順</a>を実行。</p>
+        <h4 class="heading settled" data-level="5.2.7" id="html-media-elements"><span class="secno">5.2.7. </span><span
+                class="content"><code
+                    class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/media.html#htmlmediaelement" id="ref-for-htmlmediaelement">HTMLMediaElement</a></code></span><a
+                class="self-link" href="#html-media-elements"></a></h4>
+        <p>各 <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/media.html#htmlmediaelement" id="ref-for-htmlmediaelement①">HTMLMediaElement</a></code>
+            は <dfn class="dfn-paneled" data-dfn-for="HTMLMediaElement" data-dfn-type="dfn" data-noexport
+                id="htmlmediaelement-resume-frozen-flag">resume frozen flag</dfn>（初期値false）を持ちます。</p>
+        <h4 class="heading settled" data-level="5.2.8" id="html-post-message"><span class="secno">5.2.8. </span><span
+                class="content"><a
+                    href="https://html.spec.whatwg.org/multipage/web-messaging.html#posting-messages">メッセージの送信</a></span><a
+                class="self-link" href="#html-post-message"></a></h4>
+        <p>注記追加:</p>
+        <p class="note" role="note"><span>注:</span> <a data-link-type="dfn" href="#frozen"
+                id="ref-for-frozen⑤">凍結</a>状態の <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window②">Window</a></code>
+            にメッセージ送信すると、<a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source"
+                id="ref-for-posted-message-task-source">posted message task source</a>にキューされたイベントは
+            <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window③">Window</a></code>
+            が<a data-link-type="dfn" href="#unfrozen" id="ref-for-unfrozen②">未凍結</a>になるまで実行されません。
+            イベントが多すぎる場合、ユーザーエージェントは <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window④">Window</a></code>
+            の
+            <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/window-object.html#window-bc"
+                id="ref-for-window-bc">閲覧コンテキスト</a>を破棄することがあります（リソース圧迫時の一般的な破棄許可の一部）。
+        </p>
+        <h3 class="heading settled" data-level="5.3" id="serviceworker-mod"><span class="secno">5.3. </span><span
+                class="content">Service Worker標準への修正</span><a class="self-link" href="#serviceworker-mod"></a></h3>
+        <h4 class="heading settled" data-level="5.3.1" id="serviceworker-client-dfn"><span class="secno">5.3.1.
+            </span><span class="content"><a
+                    href="https://w3c.github.io/ServiceWorker/#client-interface"><code>Client</code></a></span><a
+                class="self-link" href="#serviceworker-client-dfn"></a></h4>
+        <pre class="idl highlight def"><c- b>partial</c-> <c- b>interface</c-> <a class="idl-code" data-link-type="interface" href="https://w3c.github.io/ServiceWorker/#client" id="ref-for-client"><c- g>Client</c-></a> {
+    <c- b>readonly</c-> <c- b>attribute</c-> <a data-link-type="idl-name" href="#enumdef-clientlifecyclestate" id="ref-for-enumdef-clientlifecyclestate"><c- n>ClientLifecycleState</c-></a> <dfn class="idl-code" data-dfn-for="Client" data-dfn-type="attribute" data-export data-readonly data-type="ClientLifecycleState" id="dom-client-lifecyclestate"><code><c- g>lifecycleState</c-></code><a class="self-link" href="#dom-client-lifecyclestate"></a></dfn>;
+};
+
+<c- b>enum</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="enum" data-export id="enumdef-clientlifecyclestate"><code><c- g>ClientLifecycleState</c-></code></dfn> {
+    <dfn class="dfn-paneled idl-code" data-dfn-for="ClientLifecycleState" data-dfn-type="enum-value" data-export id="dom-clientlifecyclestate-active"><code><c- s>"active"</c-></code></dfn>,
+    <dfn class="dfn-paneled idl-code" data-dfn-for="ClientLifecycleState" data-dfn-type="enum-value" data-export id="dom-clientlifecyclestate-frozen"><code><c- s>"frozen"</c-></code></dfn>
+};
+</pre>
+        <p><code
+                class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#client" id="ref-for-client①">Client</a></code>
+            オブジェクトは <dfn class="dfn-paneled" data-dfn-for="Client" data-dfn-type="dfn" data-noexport
+                id="dfn-service-worker-client-lifecycle-state">ライフサイクル状態</dfn> を持ち、これは <code
+                class="idl"><a data-link-type="idl" href="#enumdef-clientlifecyclestate" id="ref-for-enumdef-clientlifecyclestate①">ClientLifecycleState</a></code>
+            列挙値のいずれかです。</p>
+        <h5 class="heading settled" data-level="5.3.1.1" id="service-worker-client-lifecycle-state"><span
+                class="secno">5.3.1.1. </span><span class="content"><code
+                    class="idl"><a data-link-type="idl" href="#dom-serviceworkerclient-lifecyclestate" id="ref-for-dom-serviceworkerclient-lifecyclestate">lifecycleState</a></code></span><a
+                class="self-link" href="#service-worker-client-lifecycle-state"></a></h5>
+        <p><dfn class="dfn-paneled idl-code" data-dfn-for="ServiceWorkerClient" data-dfn-type="attribute" data-export
+                id="dom-serviceworkerclient-lifecyclestate"><code>lifecycleState</code></dfn> のgetter手順は、<a
+                data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this">this</a> の <a
+                data-link-type="dfn" href="#dfn-service-worker-client-lifecycle-state"
+                id="ref-for-dfn-service-worker-client-lifecycle-state">ライフサイクル状態</a>を返します。</p>
+        <h5 class="heading settled" data-level="5.3.1.2" id="serviceworker-matchall-dfn"><span class="secno">5.3.1.2.
+            </span><span class="content"><a
+                    href="https://w3c.github.io/ServiceWorker/#clients-matchall"><code>matchAll(options)</code></a></span><a
+                class="self-link" href="#serviceworker-matchall-dfn"></a></h5>
+        <p>Step #4 の変数名を変更します。</p>
+        <ol>
+            <li data-md>
+                <p><var>matchedClientData</var> を新しい <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list"
+                        id="ref-for-list">リスト</a>とする。</p>
+        </ol>
+        <p>Step #2.5.1 の前に挿入</p>
+        <ol>
+            <li data-md>
+                <p><var>lifecycleState</var> を <a data-link-type="dfn" href="#get-client-lifecycle-state"
+                        id="ref-for-get-client-lifecycle-state">Get Client Lifecycle
+                        State</a> に <var>client</var> を渡して実行した結果とする。</p>
+        </ol>
+        <p>Step #5.3.1 でリストに lifecycleState を追加</p>
+        <ol>
+            <li data-md>
+                <p><var>windowData</var> を «[ "client" → <var>client</var>, "ancestorOriginsList" → 新しい <a
+                        data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list①">リスト</a>,
+                    "lifecycleState" → <var>lifecycleState</var> ]»とする。</p>
+        </ol>
+        <p>Step #5.4 で matchedClientData に lifecycleState を追加</p>
+        <ol>
+            <li data-md>
+                <p>«[ "client" → <var>client</var>, "lifecycleState" → <var>lifecycleState</var> ]» を
+                    <var>matchedClientData</var> に追加する。
+                </p>
+        </ol>
+        <p>Step #6.2 で windowData の lifecycleState を Create Window Clientアルゴリズムに渡す</p>
+        <ol>
+            <li data-md>
+                <p><var>windowClient</var> を <a data-link-type="dfn"
+                        href="https://w3c.github.io/ServiceWorker/#create-windowclient-algorithm"
+                        id="ref-for-create-windowclient-algorithm">Create Window Client</a>アルゴリズムに
+                    <var>windowData</var>["<code>client</code>"], <var>windowData</var>["<code>frameType</code>"],
+                    <var>windowData</var>["<code>visibilityState</code>"],
+                    <var>windowData</var>["<code>focusState</code>"],
+                    <var>windowData</var>["<code>ancestorOriginsList</code>"],
+                    <var>windowData</var>["<code>lifecycleState</code>"] を引数として渡して実行した結果とする。
+                </p>
+        </ol>
+        <p>Step #6.3 の調整</p>
+        <ol>
+            <li data-md>
+                <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate"
+                        id="ref-for-list-iterate">各</a> <var>clientData</var> を <var>matchedClientData</var> で反復:</p>
+                <ol>
+                    <li data-md>
+                        <p><var>clientObject</var> を <a data-link-type="dfn"
+                                href="https://w3c.github.io/ServiceWorker/#create-client-algorithm"
+                                id="ref-for-create-client-algorithm">Create Client</a>アルゴリズムに
+                            <var>clientData</var>["<code>client</code>"],
+                            <var>clientData</var>["<code>lifecycleState</code>"] を引数として渡して実行した結果とする。
+                        </p>
+                    <li data-md>
+                        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append"
+                                id="ref-for-list-append">clientObject を clientObjects に追加</a>する。</p>
+                </ol>
+        </ol>
+        <h5 class="heading settled" data-level="5.3.1.3" id="serviceworker-openwindow-dfn"><span class="secno">5.3.1.3.
+            </span><span class="content"><a
+                    href="https://w3c.github.io/ServiceWorker/#dom-clients-openwindow"><code>openWindow(url)</code></a></span><a
+                class="self-link" href="#serviceworker-openwindow-dfn"></a></h5>
+        <p>Step #7.5 の前に挿入</p>
+        <ol>
+            <li data-md>
+                <p><var>lifecycleState</var> を <a data-link-type="dfn" href="#get-client-lifecycle-state"
+                        id="ref-for-get-client-lifecycle-state①">Get Client Lifecycle
+                        State</a> に <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
+                        id="ref-for-this①">this</a> の関連 <a data-link-type="dfn"
+                        href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-client"
+                        id="ref-for-dfn-service-worker-client">service worker client</a> を渡して実行した結果とする。</p>
+        </ol>
+        <p>Step #7.8.2 の調整（lifecycleState を渡す）</p>
+        <ol>
+            <li data-md>
+                <p><var>client</var> を <a data-link-type="dfn"
+                        href="https://w3c.github.io/ServiceWorker/#create-windowclient-algorithm"
+                        id="ref-for-create-windowclient-algorithm①">Create Window Client</a>に
+                    <var>newContext</var> の <code
+                        class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window⑤">Window</a></code>
+                    オブジェクトの <a data-link-type="dfn"
+                        href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object"
+                        id="ref-for-environment-settings-object">environment settings object</a>, <var>frameType</var>,
+                    <var>visibilityState</var>, <var>focusState</var>, <var>ancestorOriginsList</var>,
+                    <var>lifecycleState</var> を引数として実行した結果とする。
+                </p>
+        </ol>
+        <h4 class="heading settled" data-level="5.3.2" id="serviceworker-algorithms-dfn"><span class="secno">5.3.2.
+            </span><span class="content"><a href="https://w3c.github.io/ServiceWorker/#algorithms">アルゴリズム</a></span><a
+                class="self-link" href="#serviceworker-algorithms-dfn"></a></h4>
+        <section class="algorithm" data-algorithm="Get Client Lifecycle State">
+            <h5 class="heading settled" data-level="5.3.2.1" id="get-client-lifecycle-state-algorithm"><span
+                    class="secno">5.3.2.1. </span><span class="content"><dfn class="dfn-paneled" data-dfn-type="dfn"
+                        data-noexport id="get-client-lifecycle-state">クライアントのライフサイクル状態取得</dfn></span><a
+                    class="self-link" href="#get-client-lifecycle-state-algorithm"></a></h5>
+            <p>次のアルゴリズムを追加:</p>
+            <dl>
+                <dt data-md>入力
+                <dd data-md>
+                    <p><var>client</var> : <a data-link-type="dfn"
+                            href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-client"
+                            id="ref-for-dfn-service-worker-client①">service worker client</a></p>
+                <dt data-md>出力
+                <dd data-md>
+                    <p><var>state</var> : 文字列</p>
+            </dl>
+            <ol>
+                <li data-md>
+                    <p><var>state</var> を <code
+                            class="idl"><a data-link-type="idl" href="#dom-clientlifecyclestate-active" id="ref-for-dom-clientlifecyclestate-active">"active"</a></code>
+                        にする。
+                    </p>
+                <li data-md>
+                    <p>もし <var>client</var> の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global"
+                            id="ref-for-concept-settings-object-global">global object</a> の <a data-link-type="dfn"
+                            href="#dedicatedworkerglobalscope-owning-document"
+                            id="ref-for-dedicatedworkerglobalscope-owning-document②">所有ドキュメント</a> が <a
+                            data-link-type="dfn" href="#frozen" id="ref-for-frozen⑥">凍結</a>状態なら <var>state</var> を <code
+                            class="idl"><a data-link-type="idl" href="#dom-clientlifecyclestate-frozen" id="ref-for-dom-clientlifecyclestate-frozen">"frozen"</a></code>
+                        にする。
+                    </p>
+                <li data-md>
+                    <p><var>state</var> を返す。</p>
+            </ol>
+        </section>
+        <section class="algorithm" data-algorithm="create-client-monkeypatch">
+            <h5 class="heading settled" data-level="5.3.2.2" id="serviceworker-createclient-dfn"><span
+                    class="secno">5.3.2.2. </span><span class="content"><a
+                        href="https://w3c.github.io/ServiceWorker/#create-client-algorithm"
+                        id="termref-for-create-client-algorithm">Create Client</a></span><a class="self-link"
+                    href="#serviceworker-createclient-dfn"></a></h5>
+            <p>入力に <var>lifecycleState</var>（文字列）を追加</p>
+            <p>出力の Step #2 の後に次を追加</p>
+            <ol>
+                <li data-md>
+                    <p><var>clientObject</var> の <a data-link-type="dfn"
+                            href="#dfn-service-worker-client-lifecycle-state"
+                            id="ref-for-dfn-service-worker-client-lifecycle-state①">ライフサイクル状態</a> を
+                        <var>lifecycleState</var> にセットする。
+                    </p>
+            </ol>
+        </section>
+        <section class="algorithm" data-algorithm="create-window-client-monkeypatch">
+            <h5 class="heading settled" data-level="5.3.2.3" id="serviceworker-createwindowclient-dfn"><span
+                    class="secno">5.3.2.3. </span><span class="content"><a
+                        href="https://w3c.github.io/ServiceWorker/#create-windowclient-algorithm"
+                        id="termref-for-create-windowclient-algorithm">Create Window Client</a></span><a
+                    class="self-link" href="#serviceworker-createwindowclient-dfn"></a></h5>
+            <p>入力に <var>lifecycleState</var>（文字列）を追加</p>
+            <p>出力の Step #5 の後に次を追加</p>
+            <ol>
+                <li data-md>
+                    <p><var>windowClient</var> の <a data-link-type="dfn"
+                            href="#dfn-service-worker-client-lifecycle-state"
+                            id="ref-for-dfn-service-worker-client-lifecycle-state②">ライフサイクル状態</a> を
+                        <var>lifecycleState</var> にセットする。
+                    </p>
+            </ol>
+        </section>
+        <h3 class="heading settled" data-level="5.4" id="page-lifecycle"><span class="secno">5.4. </span><span
+                class="content">ページライフサイクル処理モデル</span><a class="self-link" href="#page-lifecycle"></a>
+        </h3>
+        <h4 class="heading settled" data-level="5.4.1" id="frozenness-state"><span class="secno">5.4.1. </span><span
+                class="content">凍結状態（FROZENNESS state）</span><a class="self-link" href="#frozenness-state"></a></h4>
+        ドキュメントは以下の <dfn class="dfn-paneled" data-dfn-for="Document" data-dfn-type="dfn" data-noexport
+            id="document-frozenness">凍結状態（FROZENNESS）</dfn> のいずれかになります:
+        <ul>
+            <li data-md>
+                <p>true: ドキュメントが <dfn class="dfn-paneled" data-dfn-type="dfn" data-export
+                        id="frozen">凍結</dfn>状態、関連するタスクは実行されない</p>
+            <li data-md>
+                <p>false: ドキュメントが <dfn class="dfn-paneled" data-dfn-type="dfn" data-export
+                        id="unfrozen">未凍結</dfn>状態、関連するタスクは通常通り実行される</p>
+                <p class="note" role="note"><span>注:</span> <a data-link-type="dfn"
+                        href="#change-the-frozenness-of-a-top-level-document"
+                        id="ref-for-change-the-frozenness-of-a-top-level-document">トップレベルドキュメントの凍結状態変更</a>アルゴリズムによれば、トップレベル閲覧コンテキストのドキュメントが凍結状態を変更すると、子孫閲覧コンテキストのすべてのドキュメントも同じ値に変更され（トップレベルと一致する）、一貫性が保たれます。
+                </p>
+        </ul>
+        <p>UAは状況に応じ <a data-link-type="dfn" href="#change-the-frozenness-of-a-top-level-document"
+                id="ref-for-change-the-frozenness-of-a-top-level-document①">トップレベルドキュメントの凍結状態変更</a>アルゴリズムをtrueで実行することがあります。
+            例えば、トップレベル閲覧コンテキストがバックグラウンドまたは非表示であり、猶予期間が経過した場合、UAはリソース節約とフォアグラウンドのユーザー体験品質維持のためtrueで実行できます。
+            具体例:</p>
+        <ul>
+            <li data-md>
+                <p>モバイルChromeでは、バックグラウンドに5分以上あるタブは <a data-link-type="dfn" href="#frozen"
+                        id="ref-for-frozen⑦">凍結</a>され、バッテリーやデータを節約します。</p>
+            <li data-md>
+                <p>デスクトップChromeでは、ユーザーに重要でない（しばらく利用されていない）バックグラウンドタブは
+                    <a data-link-type="dfn" href="#discarded" id="ref-for-discarded③">破棄</a>され、メモリを節約します。
+                </p>
+                <p class="note" role="note"><span>注:</span> ユーザーのために積極的に動作している（例：音声再生中）バックグラウンドタブは通常 <a
+                        data-link-type="dfn" href="#frozen" id="ref-for-frozen⑧">凍結</a>や <a data-link-type="dfn"
+                        href="#discarded" id="ref-for-discarded④">破棄</a>されません。</p>
+                <p class="note" role="note"><span>注:</span> Chromeが用いる詳しいヒューリスティック・除外条件は <a
+                        href="https://docs.google.com/document/d/1QJpuBTdllLVflMJSov0tlFX3e3yfSfd_-al2IBavbQM/edit">こちらの文書</a>を参照してください。
+                </p>
+        </ul>
+        <p>UAは通常、ユーザーがその閲覧コンテキストを再訪した際 <a data-link-type="dfn" href="#change-the-frozenness-of-a-top-level-document"
+                id="ref-for-change-the-frozenness-of-a-top-level-document③">トップレベルドキュメントの凍結状態変更</a>をfalseで実行します。また、リソースが豊富にある場合はバックグラウンドでも定期的にfalseで実行することがあります。
+        </p>
+        <h4 class="heading settled" data-level="5.4.2" id="changing-frozenness"><span class="secno">5.4.2. </span><span
+                class="content">ドキュメントの凍結状態変更</span><a class="self-link" href="#changing-frozenness"></a></h4>
+        <div class="algorithm" data-algorithm="change the frozenness of a top-level document">
+            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
+                id="change-the-frozenness-of-a-top-level-document">トップレベルドキュメントの凍結状態変更</dfn>（<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑨">Document</a></code>
+            <var>topLevelDoc</var>、boolean <a data-link-type="dfn" href="#document-frozenness"
+                id="ref-for-document-frozenness④">frozenness</a>状態<var>frozenness</var>）の手順:
+            <ol>
+                <li data-md>
+                    <p class="assertion">Assert: <var>doc</var> の <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc"
+                            id="ref-for-concept-document-bc⑤">閲覧コンテキスト</a>が <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context"
+                            id="ref-for-top-level-browsing-context">トップレベル閲覧コンテキスト</a>である。</p>
+                <li data-md>
+                    <p><a data-link-type="dfn" href="#change-the-frozenness-of-a-document"
+                            id="ref-for-change-the-frozenness-of-a-document③">ドキュメントの凍結状態変更</a>を <var>topLevelDoc</var>,
+                        <var>frozenness</var>, false で実行。
+                    </p>
+                <li data-md>
+                    <p><var>descendants</var> を <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#list-of-the-descendant-browsing-contexts"
+                            id="ref-for-list-of-the-descendant-browsing-contexts">子孫閲覧コンテキストのリスト</a>（<var>doc</var>）とする。
+                    </p>
+                <li data-md>
+                    <p>各 <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context"
+                            id="ref-for-browsing-context">閲覧コンテキスト</a> <var>b</var> を <var>descendants</var> で反復:</p>
+                    <ol>
+                        <li data-md>
+                            <p><var>descendantDocument</var> を <a data-link-type="dfn"
+                                    href="https://html.spec.whatwg.org/multipage/browsers.html#active-document"
+                                    id="ref-for-active-document">アクティブドキュメント</a>（<var>b</var>）とする。</p>
+                        <li data-md>
+                            <p><a data-link-type="dfn" href="#change-the-frozenness-of-a-document"
+                                    id="ref-for-change-the-frozenness-of-a-document④">ドキュメントの凍結状態変更</a>を
+                                <var>descendantDocument</var>, <var>frozenness</var>, false で実行。
+                            </p>
+                    </ol>
+            </ol>
+        </div>
+        <div class="algorithm" data-algorithm="change the frozenness of a document">
+            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
+                id="change-the-frozenness-of-a-document">ドキュメントの凍結状態変更</dfn>（<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⓪">Document</a></code>
+            <var>doc</var>, boolean <a data-link-type="dfn" href="#document-frozenness"
+                id="ref-for-document-frozenness⑤">frozenness</a>状態<var>frozenness</var>, boolean <var>auto resume frozen
+                media</var>）の手順:
+            <ol>
+                <li data-md>
+                    <p>もし <var>frozenness</var> が true なら <a data-link-type="dfn" href="#freeze-steps"
+                            id="ref-for-freeze-steps①">freeze steps</a> を <var>doc</var>・<var>auto resume frozen
+                            media</var> で実行。</p>
+                <li data-md>
+                    <p>そうでなければ <a data-link-type="dfn" href="#resume-steps" id="ref-for-resume-steps">resume steps</a> を
+                        <var>doc</var> で実行。
+                    </p>
+            </ol>
+        </div>
+        <div class="algorithm" data-algorithm="freeze steps">
+            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="freeze-steps">freeze steps</dfn>
+            （<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①①">Document</a></code>
+            <var>doc</var>, boolean <var>auto resume frozen media</var>）の手順:
+            <ol>
+                <li data-md>
+                    <p><var>doc</var> の <a data-link-type="dfn" href="#document-frozenness"
+                            id="ref-for-document-frozenness⑥">凍結状態</a> を true にセットする。</p>
+                <li data-md>
+                    <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire"
+                            id="ref-for-concept-event-fire">freeze</a>イベントを <var>doc</var> で発火する。
+                    </p>
+                <li data-md>
+                    <p><var>elements</var> を <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/media.html#media-element"
+                            id="ref-for-media-element">メディア要素</a>のうち <a data-link-type="dfn"
+                            href="https://dom.spec.whatwg.org/#concept-shadow-including-descendant"
+                            id="ref-for-concept-shadow-including-descendant">shadow-including descendants</a> で
+                        <var>doc</var> をルートとし、<a data-link-type="dfn"
+                            href="https://dom.spec.whatwg.org/#concept-shadow-including-tree-order"
+                            id="ref-for-concept-shadow-including-tree-order">shadow-including tree order</a>で並べたものとする。
+                    </p>
+                <li data-md>
+                    <p>各 <var>element</var> を <var>elements</var> で反復:</p>
+                    <ol>
+                        <li data-md>
+                            <p>もし <var>element</var> の <code
+                                    class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/media.html#dom-media-paused" id="ref-for-dom-media-paused">paused</a></code>
+                                が false なら:</p>
+                            <ol>
+                                <li data-md>
+                                    <p><var>element</var> の <a data-link-type="dfn"
+                                            href="#htmlmediaelement-resume-frozen-flag"
+                                            id="ref-for-htmlmediaelement-resume-frozen-flag">resume frozen flag</a> を
+                                        <var>auto resume frozen media</var> にセットする。
+                                    </p>
+                                <li data-md>
+                                    <p><a data-link-type="dfn"
+                                            href="https://html.spec.whatwg.org/multipage/media.html#internal-pause-steps"
+                                            id="ref-for-internal-pause-steps">media pause</a> を <var>element</var> に実行。
+                                    </p>
+                            </ol>
+                    </ol>
+                    <p class="note" role="note"><span>注:</span> frozenness 状態の代入がイベント発火より先になる順序は意図的です。</p>
+            </ol>
+        </div>
+        <div class="algorithm" data-algorithm="resume steps">
+            <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="resume-steps">resume steps</dfn>
+            （<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①②">Document</a></code>
+            <var>doc</var>）の手順:
+            <ol>
+                <li data-md>
+                    <p><var>elements</var> を <a data-link-type="dfn"
+                            href="https://html.spec.whatwg.org/multipage/media.html#media-element"
+                            id="ref-for-media-element①">メディア要素</a>のうち <a data-link-type="dfn"
+                            href="https://dom.spec.whatwg.org/#concept-shadow-including-descendant"
+                            id="ref-for-concept-shadow-including-descendant①">shadow-including descendants</a> で
+                        <var>doc</var> をルートとし、<a data-link-type="dfn"
+                            href="https://dom.spec.whatwg.org/#concept-shadow-including-tree-order"
+                            id="ref-for-concept-shadow-including-tree-order①">shadow-including tree order</a>で並べたものとする。
+                    </p>
+                    <ol>
+                        <li data-md>
+                            <p>各 <var>element</var> を <var>elements</var> で反復:</p>
+                            <ol>
+                                <li data-md>
+                                    <p>もし <var>elements</var> の <a data-link-type="dfn"
+                                            href="#htmlmediaelement-resume-frozen-flag"
+                                            id="ref-for-htmlmediaelement-resume-frozen-flag①">resume frozen flag</a> が
+                                        true なら:</p>
+                                    <ol>
+                                        <li data-md>
+                                            <p><var>elements</var> の <a data-link-type="dfn"
+                                                    href="#htmlmediaelement-resume-frozen-flag"
+                                                    id="ref-for-htmlmediaelement-resume-frozen-flag②">resume frozen
+                                                    flag</a> を false にセット。</p>
+                                        <li data-md>
+                                            <p><a data-link-type="dfn"
+                                                    href="https://html.spec.whatwg.org/multipage/media.html#internal-play-steps"
+                                                    id="ref-for-internal-play-steps">media play</a> を <var>element</var>
+                                                に実行。
+                                            </p>
+                                    </ol>
+                            </ol>
+                    </ol>
+                <li data-md>
+                    <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire"
+                            id="ref-for-concept-event-fire①">resume</a>イベントを <var>doc</var> で発火する。
+                    </p>
+                <li data-md>
+                    <p><var>doc</var> の <a data-link-type="dfn" href="#document-frozenness"
+                            id="ref-for-document-frozenness⑦">凍結状態</a> を false にセットする。</p>
+                    <p class="note" role="note"><span>注:</span> frozenness 状態の代入がイベント発火の後になる順序は意図的です。</p>
+            </ol>
+        </div>
+        <h4 class="heading settled" data-level="5.4.3" id="discarding"><span class="secno">5.4.3. </span><span
+                class="content">破棄（Discarding）</span><a class="self-link" href="#discarding"></a></h4>
+        各Documentは <dfn class="dfn-paneled" data-dfn-for="Document" data-dfn-type="dfn" data-noexport
+            id="document-discarded">discarded</dfn> ブール値（初期値false）を持つ。
+        <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-lt="discarded|discard"
+                id="discarded">discard</dfn> で閲覧コンテキストを破棄するには、<a
+                href="https://html.spec.whatwg.org/multipage/window-object.html#a-browsing-context-is-discarded">閲覧コンテキストをdestroy</a>し、その理由がdiscardingによるものであることを記録する（子孫も同様）。
+        </p>
+        <p class="note" role="note"><span>注:</span> <a data-link-type="dfn" href="#discarded"
+                id="ref-for-discarded⑤">discard</a>は通常、システムメモリ等のリソース不足時に解放目的で行う。一方destroyはユーザーがページ離脱等で通常の後処理として行う。</p>
+        <p>閲覧コンテキスト ― バックグラウンドかつ、そのドキュメントが <a
+                href="https://www.w3.org/TR/page-visibility-2/#visibility-states-and-the-visibilitystate-enum">VisibilityState
+                hidden</a> の場合、リソース圧迫時（例：メモリ不足）には <a data-link-type="dfn" href="#discarded"
+                id="ref-for-discarded⑥">discarded</a> され得る。具体例:</p>
+        <ul>
+            <li data-md>
+                <p>デスクトップChromeでは、ユーザーに重要でない（しばらく利用されていない）バックグラウンドタブは
+                    <a data-link-type="dfn" href="#discarded" id="ref-for-discarded⑦">破棄</a>され、メモリを節約します。
+                </p>
+                <p class="note" role="note"><span>注:</span> ユーザーのために積極的に動作している（例：音声再生中）バックグラウンドタブは通常 <a
+                        data-link-type="dfn" href="#discarded" id="ref-for-discarded⑧">破棄</a>されません。</p>
+                <p class="note" role="note"><span>注:</span> Chromeが用いる詳しいヒューリスティック・除外条件は <a
+                        href="https://docs.google.com/document/d/1QJpuBTdllLVflMJSov0tlFX3e3yfSfd_-al2IBavbQM/edit">こちらの文書</a>を参照してください。
+                </p>
+        </ul>
+        <p><a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context"
+                id="ref-for-top-level-browsing-context①">トップレベル閲覧コンテキスト</a>（ブラウザのタブ）がリソース圧迫や予期せぬ事象（プロセスクラッシュ等）で <a
+                data-link-type="dfn" href="#discarded" id="ref-for-discarded⑨">破棄</a>された後、ユーザーが再度タブを訪れた場合、<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①③">Document</a></code>
+            の <a data-link-type="dfn" href="#document-discarded" id="ref-for-document-discarded②">discarded</a> ブール値が <a
+                href="#html-initialize-doc">§ 5.2.5 ドキュメントの初期化</a>により true となります。
+        </p>
+        <h2 class="heading settled" data-level="6" id="acknowledgements"><span class="secno">6. </span><span
+                class="content">謝辞</span><a class="self-link" href="#acknowledgements"></a></h2>
+        <p>この仕様の改善につながる技術的な助言と提案をいただいた
+            Dave Tapuska、
+            Fadi Meawad、
+            Ojan Vafai、
+            Olli Pettay、
+            Philip Walton、
+            そして
+            Todd Reifsteck
+            に特別な感謝を捧げます。</p>
+    </main>
+    <div data-fill-with="conformance">
+        <h2 class="no-ref no-num heading settled" id="w3c-conformance"><span class="content">適合性</span><a
+                class="self-link" href="#w3c-conformance"></a></h2>
+        <h3 class="no-ref no-num heading settled" id="w3c-conventions"><span class="content">文書規約</span><a
+                class="self-link" href="#w3c-conventions"></a></h3>
+        <p>適合性要件は記述的な断言と RFC 2119 の用語の組み合わせで表現されています。
+            この文書の規範部分における「MUST」「MUST NOT」「REQUIRED」「SHALL」「SHALL NOT」「SHOULD」「SHOULD
+            NOT」「RECOMMENDED」「MAY」「OPTIONAL」といったキーワードは RFC 2119 の定義に従って解釈されます。
+            ただし、可読性のため、これらの語はすべて大文字では記載されていません。</p>
+        <p>この仕様のすべての文章は、
+            明示的に非規範とされた節・例・注記を除き、規範的です。<a data-link-type="biblio" href="#biblio-rfc2119">[RFC2119]</a> </p>
+        <p>この仕様の例は「for example」という語で始めるか、規範テキストと区別して <code>class="example"</code> が付与されて示されます。
+            例:</p>
+        <div class="example" id="w3c-example">
+            <a class="self-link" href="#w3c-example"></a>
+            <p>これは情報例の一例です。</p>
+        </div>
+        <p>情報注記は「Note」で始まり、規範テキストと区別して <code>class="note"</code> が付与されて示されます。
+            例:</p>
+        <p class="note" role="note">注: これは情報注記の例です。</p>
+        <h3 class="no-ref no-num heading settled" id="w3c-conformant-algorithms"><span class="content">適合アルゴリズム</span><a
+                class="self-link" href="#w3c-conformant-algorithms"></a></h3>
+        <p>アルゴリズムの一部として命令形で書かれた要件（例:「先頭の空白文字を除去する」や「falseを返してこれらの手順を中止する」）は、アルゴリズム導入部で使われているキーワード（"must"、"should"、"may"
+            など）の意味で解釈されます。</p>
+        <p>アルゴリズムや特定の手順として表現された適合要件は、最終的な結果が同等であれば、どのような方法で実装してもかまいません。
+            特に、この仕様で定義されたアルゴリズムは理解しやすいことを意図しており、パフォーマンスを重視したものではありません。
+            実装者は最適化を推奨します。</p>
+    </div>
+    <script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
+    <h2 class="no-num no-ref heading settled" id="index"><span class="content">索引</span><a class="self-link"
+            href="#index"></a></h2>
+    <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">本仕様で定義された用語</span><a
+            class="self-link" href="#index-defined-here"></a></h3>
+    <ul class="index">
+        <li><a href="#dom-clientlifecyclestate-active">"active"</a><span>, § 5.3.1</span>
+        <li><a href="#change-the-frozenness-of-a-document">change the frozenness of a document</a><span>, § 5.4.2</span>
+        <li><a href="#change-the-frozenness-of-a-top-level-document">change the frozenness of a top-level
+                document</a><span>, § 5.4.2</span>
+        <li><a href="#enumdef-clientlifecyclestate">ClientLifecycleState</a><span>, § 5.3.1</span>
+        <li><a href="#discarded">discard</a><span>, § 5.4.3</span>
+        <li>
+            discarded
+            <ul>
+                <li><a href="#discarded">definition of</a><span>, § 5.4.3</span>
+                <li><a href="#document-discarded">dfn for Document</a><span>, § 5.4.3</span>
+            </ul>
+        <li><a href="#execution-while-not-rendered">execution-while-not-rendered</a><span>, § 4</span>
+        <li><a href="#execution-while-out-of-viewport">execution-while-out-of-viewport</a><span>, § 4</span>
+        <li><a href="#freeze-steps">freeze steps</a><span>, § 5.4.2</span>
+        <li><a href="#dom-clientlifecyclestate-frozen">"frozen"</a><span>, § 5.3.1</span>
+        <li><a href="#frozen">frozen</a><span>, § 5.4.1</span>
+        <li><a href="#document-frozenness">FROZENNESS</a><span>, § 5.4.1</span>
+        <li><a href="#get-client-lifecycle-state">Get Client Lifecycle State</a><span>, § 5.3.2.1</span>
+        <li><a href="#dfn-service-worker-client-lifecycle-state">lifecycle state</a><span>, § 5.3.1</span>
+        <li>
+            lifecycleState
+            <ul>
+                <li><a href="#dom-client-lifecyclestate">attribute for Client</a><span>, § 5.3.1</span>
+                <li><a href="#dom-serviceworkerclient-lifecyclestate">attribute for ServiceWorkerClient</a><span>,
+                        § 5.3.1.1</span>
+            </ul>
+        <li><a href="#dom-document-onfreeze">onfreeze</a><span>, § 3</span>
+        <li><a href="#dom-document-onresume">onresume</a><span>, § 3</span>
+        <li><a href="#dedicatedworkerglobalscope-owning-document">owning document</a><span>, § 5.1</span>
+        <li><a href="#htmlmediaelement-resume-frozen-flag">resume frozen flag</a><span>, § 5.2.7</span>
+        <li><a href="#resume-steps">resume steps</a><span>, § 5.4.2</span>
+        <li><a href="#unfrozen">unfrozen</a><span>, § 5.4.1</span>
+        <li><a href="#update-document-frozenness-steps">update document frozenness steps</a><span>, § 4</span>
+        <li><a href="#dom-document-wasdiscarded">wasDiscarded</a><span>, § 3</span>
+    </ul>
+    <aside class="dfn-panel" data-for="term-for-workletglobalscope-owner-document">
+        <a
+            href="https://drafts.css-houdini.org/worklets#workletglobalscope-owner-document">https://drafts.css-houdini.org/worklets#workletglobalscope-owner-document</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-workletglobalscope-owner-document">5.1. Modifications to worklet and worker
+                    behavior</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-viewport">
+        <a
+            href="https://www.w3.org/TR/CSS2/visuren.html#viewport">https://www.w3.org/TR/CSS2/visuren.html#viewport</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-viewport">4. Feature Policies</a> <a href="#ref-for-viewport①">(2)</a> <a
+                    href="#ref-for-viewport②">(3)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-document">
+        <a href="https://dom.spec.whatwg.org/#document">https://dom.spec.whatwg.org/#document</a><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-document">2. Page Lifecycle States</a> <a href="#ref-for-document①">(2)</a>
+            <li><a href="#ref-for-document②">3. API</a> <a href="#ref-for-document③">(2)</a> <a
+                    href="#ref-for-document④">(3)</a>
+            <li><a href="#ref-for-document⑤">4. Feature Policies</a>
+            <li><a href="#ref-for-document⑥">5.1. Modifications to worklet and worker behavior</a>
+            <li><a href="#ref-for-document⑦">5.2.3. Event loop: processing model</a>
+            <li><a href="#ref-for-document⑧">5.2.5. Initialize the document</a>
+            <li><a href="#ref-for-document⑨">5.4.2. Changing the frozenness of documents</a> <a
+                    href="#ref-for-document①⓪">(2)</a> <a href="#ref-for-document①①">(3)</a> <a
+                    href="#ref-for-document①②">(4)</a>
+            <li><a href="#ref-for-document①③">5.4.3. Discarding</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-document">
+        <a href="https://dom.spec.whatwg.org/#concept-document">https://dom.spec.whatwg.org/#concept-document</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-document">5.2.2. Event loop: definitions</a> <a
+                    href="#ref-for-concept-document①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-event-fire">
+        <a href="https://dom.spec.whatwg.org/#concept-event-fire">https://dom.spec.whatwg.org/#concept-event-fire</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-event-fire">5.4.2. Changing the frozenness of documents</a> <a
+                    href="#ref-for-concept-event-fire①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-shadow-including-descendant">
+        <a
+            href="https://dom.spec.whatwg.org/#concept-shadow-including-descendant">https://dom.spec.whatwg.org/#concept-shadow-including-descendant</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-shadow-including-descendant">5.4.2. Changing the frozenness of documents</a>
+                <a href="#ref-for-concept-shadow-including-descendant①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-shadow-including-tree-order">
+        <a
+            href="https://dom.spec.whatwg.org/#concept-shadow-including-tree-order">https://dom.spec.whatwg.org/#concept-shadow-including-tree-order</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-shadow-including-tree-order">5.4.2. Changing the frozenness of documents</a>
+                <a href="#ref-for-concept-shadow-including-tree-order①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-sec-forward-progress">
+        <a
+            href="https://tc39.github.io/ecma262/#sec-forward-progress">https://tc39.github.io/ecma262/#sec-forward-progress</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-sec-forward-progress">5.1. Modifications to worklet and worker behavior</a> <a
+                    href="#ref-for-sec-forward-progress①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-sec-code-realms">
+        <a href="https://tc39.github.io/ecma262/#sec-code-realms">https://tc39.github.io/ecma262/#sec-code-realms</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-sec-code-realms">5.1. Modifications to worklet and worker behavior</a> <a
+                    href="#ref-for-sec-code-realms①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-dedicatedworkerglobalscope">
+        <a
+            href="https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope">https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dedicatedworkerglobalscope">5.1. Modifications to worklet and worker behavior</a> <a
+                    href="#ref-for-dedicatedworkerglobalscope①">(2)</a> <a
+                    href="#ref-for-dedicatedworkerglobalscope②">(3)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-eventhandler">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler">https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-eventhandler">3. API</a> <a href="#ref-for-eventhandler①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-htmlmediaelement">
+        <a
+            href="https://html.spec.whatwg.org/multipage/media.html#htmlmediaelement">https://html.spec.whatwg.org/multipage/media.html#htmlmediaelement</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-htmlmediaelement">5.2.7. HTMLMediaElement</a> <a
+                    href="#ref-for-htmlmediaelement①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-window">
+        <a
+            href="https://html.spec.whatwg.org/multipage/window-object.html#window">https://html.spec.whatwg.org/multipage/window-object.html#window</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-window">3. API</a> <a href="#ref-for-window①">(2)</a>
+            <li><a href="#ref-for-window②">5.2.8. Posting messages</a> <a href="#ref-for-window③">(2)</a> <a
+                    href="#ref-for-window④">(3)</a>
+            <li><a href="#ref-for-window⑤">5.3.1.3. openWindow(url)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-active-document">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">https://html.spec.whatwg.org/multipage/browsers.html#active-document</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-active-document">5.4.2. Changing the frozenness of documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-allowed-to-use">
+        <a
+            href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#allowed-to-use">https://html.spec.whatwg.org/multipage/iframe-embed-object.html#allowed-to-use</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-allowed-to-use">4. Feature Policies</a> <a href="#ref-for-allowed-to-use①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-being-rendered">
+        <a
+            href="https://html.spec.whatwg.org/multipage/rendering.html#being-rendered">https://html.spec.whatwg.org/multipage/rendering.html#being-rendered</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-being-rendered">4. Feature Policies</a> <a href="#ref-for-being-rendered①">(2)</a> <a
+                    href="#ref-for-being-rendered②">(3)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-document-bc">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc">https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-document-bc">2. Page Lifecycle States</a> <a
+                    href="#ref-for-concept-document-bc①">(2)</a>
+            <li><a href="#ref-for-concept-document-bc②">4. Feature Policies</a> <a
+                    href="#ref-for-concept-document-bc③">(2)</a> <a href="#ref-for-concept-document-bc④">(3)</a>
+            <li><a href="#ref-for-concept-document-bc⑤">5.4.2. Changing the frozenness of documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-browsing-context-container">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container">https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-browsing-context-container">4. Feature Policies</a> <a
+                    href="#ref-for-browsing-context-container①">(2)</a> <a
+                    href="#ref-for-browsing-context-container②">(3)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-dedicated-worker-agent">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#dedicated-worker-agent">https://html.spec.whatwg.org/multipage/webappapis.html#dedicated-worker-agent</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dedicated-worker-agent">5.1. Modifications to worklet and worker behavior</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-environment-settings-object">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object">https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-environment-settings-object">5.3.1.3. openWindow(url)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-event-handler-idl-attributes">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes">https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-event-handler-idl-attributes">3. API</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-fully-active">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsers.html#fully-active">https://html.spec.whatwg.org/multipage/browsers.html#fully-active</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-fully-active">5.2.2. Event loop: definitions</a> <a
+                    href="#ref-for-fully-active①">(2)</a>
+            <li><a href="#ref-for-fully-active②">5.2.3. Event loop: processing model</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-settings-object-global">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-settings-object-global">5.3.2.1. Get Client Lifecycle State</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-iframe-load-event-steps">
+        <a
+            href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#iframe-load-event-steps">https://html.spec.whatwg.org/multipage/iframe-embed-object.html#iframe-load-event-steps</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-iframe-load-event-steps">4. Feature Policies</a>
+            <li><a href="#ref-for-iframe-load-event-steps①">5.2.6. iframe load event steps</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-list-of-the-descendant-browsing-contexts">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsers.html#list-of-the-descendant-browsing-contexts">https://html.spec.whatwg.org/multipage/browsers.html#list-of-the-descendant-browsing-contexts</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-list-of-the-descendant-browsing-contexts">5.4.2. Changing the frozenness of
+                    documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-media-element">
+        <a
+            href="https://html.spec.whatwg.org/multipage/media.html#media-element">https://html.spec.whatwg.org/multipage/media.html#media-element</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-media-element">5.4.2. Changing the frozenness of documents</a> <a
+                    href="#ref-for-media-element①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-internal-pause-steps">
+        <a
+            href="https://html.spec.whatwg.org/multipage/media.html#internal-pause-steps">https://html.spec.whatwg.org/multipage/media.html#internal-pause-steps</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-internal-pause-steps">5.4.2. Changing the frozenness of documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-internal-play-steps">
+        <a
+            href="https://html.spec.whatwg.org/multipage/media.html#internal-play-steps">https://html.spec.whatwg.org/multipage/media.html#internal-play-steps</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-internal-play-steps">5.4.2. Changing the frozenness of documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-nested-browsing-context">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-nested-browsing-context">4. Feature Policies</a> <a
+                    href="#ref-for-nested-browsing-context①">(2)</a> <a href="#ref-for-nested-browsing-context②">(3)</a>
+                <a href="#ref-for-nested-browsing-context③">(4)</a> <a href="#ref-for-nested-browsing-context④">(5)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-WorkerGlobalScope-owner-set">
+        <a
+            href="https://html.spec.whatwg.org/multipage/workers.html#concept-WorkerGlobalScope-owner-set">https://html.spec.whatwg.org/multipage/workers.html#concept-WorkerGlobalScope-owner-set</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-WorkerGlobalScope-owner-set">5.1. Modifications to worklet and worker
+                    behavior</a> <a href="#ref-for-concept-WorkerGlobalScope-owner-set①">(2)</a> <a
+                    href="#ref-for-concept-WorkerGlobalScope-owner-set②">(3)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-dom-media-paused">
+        <a
+            href="https://html.spec.whatwg.org/multipage/media.html#dom-media-paused">https://html.spec.whatwg.org/multipage/media.html#dom-media-paused</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-media-paused">5.4.2. Changing the frozenness of documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-dom-pagetransitionevent-persisted">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#dom-pagetransitionevent-persisted">https://html.spec.whatwg.org/multipage/browsing-the-web.html#dom-pagetransitionevent-persisted</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-pagetransitionevent-persisted">5.2.1. Unloading documents and history
+                    traversal</a> <a href="#ref-for-dom-pagetransitionevent-persisted①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-posted-message-task-source">
+        <a
+            href="https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source">https://html.spec.whatwg.org/multipage/web-messaging.html#posted-message-task-source</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-posted-message-task-source">5.2.8. Posting messages</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-current-document-readiness">
+        <a
+            href="https://html.spec.whatwg.org/multipage/dom.html#current-document-readiness">https://html.spec.whatwg.org/multipage/dom.html#current-document-readiness</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-current-document-readiness">4. Feature Policies</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-concept-task">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-task">https://html.spec.whatwg.org/multipage/webappapis.html#concept-task</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-concept-task">5.2.2. Event loop: definitions</a> <a
+                    href="#ref-for-concept-task①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-top-level-browsing-context">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-top-level-browsing-context">5.4.2. Changing the frozenness of documents</a>
+            <li><a href="#ref-for-top-level-browsing-context①">5.4.3. Discarding</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-traverse-the-history">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#traverse-the-history">https://html.spec.whatwg.org/multipage/browsing-the-web.html#traverse-the-history</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-traverse-the-history">5.2.1. Unloading documents and history traversal</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-unload-a-document">
+        <a
+            href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#unload-a-document">https://html.spec.whatwg.org/multipage/browsing-the-web.html#unload-a-document</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-unload-a-document">5.2.1. Unloading documents and history traversal</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-update-the-rendering">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering">https://html.spec.whatwg.org/multipage/webappapis.html#update-the-rendering</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-update-the-rendering">5.2.3. Event loop: processing model</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-worklet-agent">
+        <a
+            href="https://html.spec.whatwg.org/multipage/webappapis.html#worklet-agent">https://html.spec.whatwg.org/multipage/webappapis.html#worklet-agent</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-worklet-agent">5.1. Modifications to worklet and worker behavior</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-list-append">
+        <a href="https://infra.spec.whatwg.org/#list-append">https://infra.spec.whatwg.org/#list-append</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-list-append">5.3.1.2. matchAll(options)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-list-iterate">
+        <a href="https://infra.spec.whatwg.org/#list-iterate">https://infra.spec.whatwg.org/#list-iterate</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-list-iterate">5.3.1.2. matchAll(options)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-list">
+        <a href="https://infra.spec.whatwg.org/#list">https://infra.spec.whatwg.org/#list</a><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-list">5.3.1.2. matchAll(options)</a> <a href="#ref-for-list①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-calculate-intersection-rect-algo">
+        <a
+            href="https://w3c.github.io/IntersectionObserver/#calculate-intersection-rect-algo">https://w3c.github.io/IntersectionObserver/#calculate-intersection-rect-algo</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-calculate-intersection-rect-algo">4. Feature Policies</a> <a
+                    href="#ref-for-calculate-intersection-rect-algo①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-default-allowlist">
+        <a
+            href="https://w3c.github.io/webappsec-permissions-policy/#default-allowlist">https://w3c.github.io/webappsec-permissions-policy/#default-allowlist</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-default-allowlist">4. Feature Policies</a> <a
+                    href="#ref-for-default-allowlist①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-client">
+        <a href="https://w3c.github.io/ServiceWorker/#client">https://w3c.github.io/ServiceWorker/#client</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-client">5.3.1. Client</a> <a href="#ref-for-client①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-dfn-service-worker-client">
+        <a
+            href="https://w3c.github.io/ServiceWorker/#dfn-service-worker-client">https://w3c.github.io/ServiceWorker/#dfn-service-worker-client</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dfn-service-worker-client">5.3.1.3. openWindow(url)</a>
+            <li><a href="#ref-for-dfn-service-worker-client①">5.3.2.1. Get Client Lifecycle State</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-create-client-algorithm">
+        <a
+            href="https://w3c.github.io/ServiceWorker/#create-client-algorithm">https://w3c.github.io/ServiceWorker/#create-client-algorithm</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-create-client-algorithm">5.3.1.2. matchAll(options)</a>
+            <li><a href="#termref-for-create-client-algorithm">5.3.2.2. Create Client</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-create-windowclient-algorithm">
+        <a
+            href="https://w3c.github.io/ServiceWorker/#create-windowclient-algorithm">https://w3c.github.io/ServiceWorker/#create-windowclient-algorithm</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-create-windowclient-algorithm">5.3.1.2. matchAll(options)</a>
+            <li><a href="#ref-for-create-windowclient-algorithm①">5.3.1.3. openWindow(url)</a>
+            <li><a href="#termref-for-create-windowclient-algorithm">5.3.2.3. Create Window Client</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-idl-boolean">
+        <a href="https://webidl.spec.whatwg.org/#idl-boolean">https://webidl.spec.whatwg.org/#idl-boolean</a><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-idl-boolean">3. API</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="term-for-this">
+        <a href="https://webidl.spec.whatwg.org/#this">https://webidl.spec.whatwg.org/#this</a><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-this">5.3.1.1. lifecycleState</a>
+            <li><a href="#ref-for-this①">5.3.1.3. openWindow(url)</a>
+        </ul>
+    </aside>
+    <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">参照で定義される用語</span><a
+            class="self-link" href="#index-defined-elsewhere"></a></h3>
+    <ul class="index">
+        <li>
+            <a data-link-type="biblio">[CSS-HOUDINI]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-workletglobalscope-owner-document">owning document</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[CSS21]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-viewport">viewport</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[DOM]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-document">Document</span>
+                <li><span class="dfn-paneled" id="term-for-concept-document">document</span>
+                <li><span class="dfn-paneled" id="term-for-concept-event-fire">fire an event</span>
+                <li><span class="dfn-paneled" id="term-for-concept-shadow-including-descendant">shadow-including
+                        descendant</span>
+                <li><span class="dfn-paneled" id="term-for-concept-shadow-including-tree-order">shadow-including tree
+                        order</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[ECMA262]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-sec-forward-progress">blocked</span>
+                <li><span class="dfn-paneled" id="term-for-sec-code-realms">realm</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[HTML]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-dedicatedworkerglobalscope">DedicatedWorkerGlobalScope</span>
+                <li><span class="dfn-paneled" id="term-for-eventhandler">EventHandler</span>
+                <li><span class="dfn-paneled" id="term-for-htmlmediaelement">HTMLMediaElement</span>
+                <li><span class="dfn-paneled" id="term-for-window">Window</span>
+                <li><span class="dfn-paneled" id="term-for-active-document">active document</span>
+                <li><span class="dfn-paneled" id="term-for-allowed-to-use">allowed to use</span>
+                <li><span class="dfn-paneled" id="term-for-being-rendered">being rendered</span>
+                <li><span class="dfn-paneled" id="term-for-concept-document-bc">browsing context <small>(for
+                            document)</small></span>
+                <li><span class="dfn-paneled" id="term-for-browsing-context-container">browsing context container</span>
+                <li><span class="dfn-paneled" id="term-for-dedicated-worker-agent">dedicated worker agent</span>
+                <li><span class="dfn-paneled" id="term-for-environment-settings-object">environment settings
+                        object</span>
+                <li><span class="dfn-paneled" id="term-for-event-handler-idl-attributes">event handler idl
+                        attribute</span>
+                <li><span class="dfn-paneled" id="term-for-fully-active">fully active</span>
+                <li><span class="dfn-paneled" id="term-for-concept-settings-object-global">global object <small>(for
+                            environment settings object)</small></span>
+                <li><span class="dfn-paneled" id="term-for-iframe-load-event-steps">iframe load event steps</span>
+                <li><span class="dfn-paneled" id="term-for-list-of-the-descendant-browsing-contexts">list of the
+                        descendant browsing contexts</span>
+                <li><span class="dfn-paneled" id="term-for-media-element">media elements</span>
+                <li><span class="dfn-paneled" id="term-for-internal-pause-steps">media pause</span>
+                <li><span class="dfn-paneled" id="term-for-internal-play-steps">media play</span>
+                <li><span class="dfn-paneled" id="term-for-nested-browsing-context">nested browsing context</span>
+                <li><span class="dfn-paneled" id="term-for-concept-WorkerGlobalScope-owner-set">owner set</span>
+                <li><span class="dfn-paneled" id="term-for-dom-media-paused">paused</span>
+                <li><span class="dfn-paneled" id="term-for-dom-pagetransitionevent-persisted">persisted</span>
+                <li><span class="dfn-paneled" id="term-for-posted-message-task-source">posted message task source</span>
+                <li><span class="dfn-paneled" id="term-for-current-document-readiness">readiness</span>
+                <li><span class="dfn-paneled" id="term-for-concept-task">task</span>
+                <li><span class="dfn-paneled" id="term-for-top-level-browsing-context">top-level browsing context</span>
+                <li><span class="dfn-paneled" id="term-for-traverse-the-history">traverse the history</span>
+                <li><span class="dfn-paneled" id="term-for-unload-a-document">unload a document</span>
+                <li><span class="dfn-paneled" id="term-for-update-the-rendering">update the rendering</span>
+                <li><span class="dfn-paneled" id="term-for-worklet-agent">worklet agent</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[INFRA]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-list-append">append</span>
+                <li><span class="dfn-paneled" id="term-for-list-iterate">for each</span>
+                <li><span class="dfn-paneled" id="term-for-list">list</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[INTERSECTIONOBSERVER]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-calculate-intersection-rect-algo">compute the intersection of
+                        a target element and the root</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[permissions-policy-1]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-default-allowlist">default allowlist</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[service-workers-1]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-client">Client</span>
+                <li><span class="dfn-paneled" id="term-for-dfn-service-worker-client">service worker client</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[SERVICEWORKER]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-create-client-algorithm">create client</span>
+                <li><span class="dfn-paneled" id="term-for-create-windowclient-algorithm">create window client</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[WEBIDL]</a> で以下の用語が定義されています:
+            <ul>
+                <li><span class="dfn-paneled" id="term-for-idl-boolean">boolean</span>
+                <li><span class="dfn-paneled" id="term-for-this">this</span>
+            </ul>
+    </ul>
+    <h2 class="no-num no-ref heading settled" id="references"><span class="content">参考文献</span><a class="self-link"
+            href="#references"></a></h2>
+    <h3 class="no-num no-ref heading settled" id="normative"><span class="content">規範的参考文献</span><a class="self-link"
+            href="#normative"></a></h3>
+    <dl>
+        <dt id="biblio-css21">[CSS21]
+        <dd>Bert Bos; 他. <a href="https://drafts.csswg.org/css2/"><cite>Cascading Style Sheets Level 2 Revision 1
+                    (CSS 2.1) Specification</cite></a>. URL: <a
+                href="https://drafts.csswg.org/css2/">https://drafts.csswg.org/css2/</a>
+        <dt id="biblio-dom">[DOM]
+        <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/"><cite>DOM Standard</cite></a>. Living Standard.
+            URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
+        <dt id="biblio-html">[HTML]
+        <dd>Anne van Kesteren; 他. <a href="https://html.spec.whatwg.org/multipage/"><cite>HTML Standard</cite></a>.
+            Living Standard. URL: <a
+                href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+        <dt id="biblio-infra">[INFRA]
+        <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/"><cite>Infra
+                    Standard</cite></a>. Living Standard. URL: <a
+                href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
+        <dt id="biblio-permissions-policy-1">[PERMISSIONS-POLICY-1]
+        <dd>Ian Clelland. <a href="https://w3c.github.io/webappsec-permissions-policy/"><cite>Permissions
+                    Policy</cite></a>. URL: <a
+                href="https://w3c.github.io/webappsec-permissions-policy/">https://w3c.github.io/webappsec-permissions-policy/</a>
+        <dt id="biblio-rfc2119">[RFC2119]
+        <dd>S. Bradner. <a href="https://datatracker.ietf.org/doc/html/rfc2119"><cite>Key words for use in RFCs to
+                    Indicate Requirement Levels</cite></a>. 1997年3月. Best Current Practice. URL: <a
+                href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>
+        <dt id="biblio-service-workers-1">[SERVICE-WORKERS-1]
+        <dd>Alex Russell; 他. <a href="https://w3c.github.io/ServiceWorker/"><cite>Service Workers 1</cite></a>. URL:
+            <a href="https://w3c.github.io/ServiceWorker/">https://w3c.github.io/ServiceWorker/</a>
+        <dt id="biblio-webidl">[WEBIDL]
+        <dd>Edgar Chen; Timothy Gu. <a href="https://webidl.spec.whatwg.org/"><cite>Web IDL Standard</cite></a>. Living
+            Standard. URL: <a href="https://webidl.spec.whatwg.org/">https://webidl.spec.whatwg.org/</a>
+    </dl>
+    <h3 class="no-num no-ref heading settled" id="informative"><span class="content">参考情報</span><a class="self-link"
+            href="#informative"></a></h3>
+    <dl>
+        <dt id="biblio-page-visibility">[PAGE-VISIBILITY]
+        <dd>Jatinder Mann; Arvind Jain. <a href="https://www.w3.org/TR/page-visibility/"><cite>Page Visibility (Second
+                    Edition)</cite></a>. 2013年10月29日. REC. URL: <a
+                href="https://www.w3.org/TR/page-visibility/">https://www.w3.org/TR/page-visibility/</a>
+    </dl>
+    <h2 class="no-num no-ref heading settled" id="idl-index"><span class="content">IDL索引</span><a class="self-link"
+            href="#idl-index"></a></h2>
+    <pre class="idl highlight def"><c- b>partial</c-> <c- b>interface</c-> <a class="idl-code" data-link-type="interface" href="https://dom.spec.whatwg.org/#document"><c- g>Document</c-></a> {
+    <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-document-onfreeze"><c- g>onfreeze</c-></a>;
+    <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/webappapis.html#eventhandler"><c- n>EventHandler</c-></a> <a class="idl-code" data-link-type="attribute" data-type="EventHandler" href="#dom-document-onresume"><c- g>onresume</c-></a>;
+    <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-boolean"><c- b>boolean</c-></a> <a class="idl-code" data-link-type="attribute" data-readonly data-type="boolean" href="#dom-document-wasdiscarded"><c- g>wasDiscarded</c-></a>;
+};
+
+<c- b>partial</c-> <c- b>interface</c-> <a class="idl-code" data-link-type="interface" href="https://w3c.github.io/ServiceWorker/#client"><c- g>Client</c-></a> {
+    <c- b>readonly</c-> <c- b>attribute</c-> <a data-link-type="idl-name" href="#enumdef-clientlifecyclestate"><c- n>ClientLifecycleState</c-></a> <a data-readonly data-type="ClientLifecycleState" href="#dom-client-lifecyclestate"><code><c- g>lifecycleState</c-></code></a>;
+};
+
+<c- b>enum</c-> <a href="#enumdef-clientlifecyclestate"><code><c- g>ClientLifecycleState</c-></code></a> {
+    <a href="#dom-clientlifecyclestate-active"><code><c- s>"active"</c-></code></a>,
+    <a href="#dom-clientlifecyclestate-frozen"><code><c- s>"frozen"</c-></code></a>
+};
+
+</pre>
+    <aside class="dfn-panel" data-for="dom-document-onfreeze">
+        <b><a href="#dom-document-onfreeze">#dom-document-onfreeze</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-document-onfreeze">3. API</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="dom-document-onresume">
+        <b><a href="#dom-document-onresume">#dom-document-onresume</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-document-onresume">3. API</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="dom-document-wasdiscarded">
+        <b><a href="#dom-document-wasdiscarded">#dom-document-wasdiscarded</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-document-wasdiscarded">3. API</a>
+            <li><a href="#ref-for-dom-document-wasdiscarded①">5.2.4. Discarding browsing contexts</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="execution-while-not-rendered">
+        <b><a href="#execution-while-not-rendered">#execution-while-not-rendered</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-execution-while-not-rendered">4. Feature Policies</a> <a
+                    href="#ref-for-execution-while-not-rendered①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="execution-while-out-of-viewport">
+        <b><a href="#execution-while-out-of-viewport">#execution-while-out-of-viewport</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-execution-while-out-of-viewport">4. Feature Policies</a> <a
+                    href="#ref-for-execution-while-out-of-viewport①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="update-document-frozenness-steps">
+        <b><a href="#update-document-frozenness-steps">#update-document-frozenness-steps</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-update-document-frozenness-steps">5.2.3. Event loop: processing model</a>
+            <li><a href="#ref-for-update-document-frozenness-steps①">5.2.6. iframe load event steps</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="dedicatedworkerglobalscope-owning-document">
+        <b><a
+                href="#dedicatedworkerglobalscope-owning-document">#dedicatedworkerglobalscope-owning-document</a></b><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dedicatedworkerglobalscope-owning-document">5.1. Modifications to worklet and worker
+                    behavior</a> <a href="#ref-for-dedicatedworkerglobalscope-owning-document①">(2)</a>
+            <li><a href="#ref-for-dedicatedworkerglobalscope-owning-document②">5.3.2.1. Get Client Lifecycle State</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="htmlmediaelement-resume-frozen-flag">
+        <b><a href="#htmlmediaelement-resume-frozen-flag">#htmlmediaelement-resume-frozen-flag</a></b><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-htmlmediaelement-resume-frozen-flag">5.4.2. Changing the frozenness of documents</a>
+                <a href="#ref-for-htmlmediaelement-resume-frozen-flag①">(2)</a> <a
+                    href="#ref-for-htmlmediaelement-resume-frozen-flag②">(3)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="enumdef-clientlifecyclestate">
+        <b><a href="#enumdef-clientlifecyclestate">#enumdef-clientlifecyclestate</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-enumdef-clientlifecyclestate">5.3.1. Client</a> <a
+                    href="#ref-for-enumdef-clientlifecyclestate①">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="dom-clientlifecyclestate-active">
+        <b><a href="#dom-clientlifecyclestate-active">#dom-clientlifecyclestate-active</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-clientlifecyclestate-active">5.3.2.1. Get Client Lifecycle State</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="dom-clientlifecyclestate-frozen">
+        <b><a href="#dom-clientlifecyclestate-frozen">#dom-clientlifecyclestate-frozen</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-clientlifecyclestate-frozen">5.3.2.1. Get Client Lifecycle State</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="dfn-service-worker-client-lifecycle-state">
+        <b><a
+                href="#dfn-service-worker-client-lifecycle-state">#dfn-service-worker-client-lifecycle-state</a></b><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dfn-service-worker-client-lifecycle-state">5.3.1.1. lifecycleState</a>
+            <li><a href="#ref-for-dfn-service-worker-client-lifecycle-state①">5.3.2.2. Create Client</a>
+            <li><a href="#ref-for-dfn-service-worker-client-lifecycle-state②">5.3.2.3. Create Window Client</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="dom-serviceworkerclient-lifecyclestate">
+        <b><a
+                href="#dom-serviceworkerclient-lifecyclestate">#dom-serviceworkerclient-lifecyclestate</a></b><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-dom-serviceworkerclient-lifecyclestate">5.3.1.1. lifecycleState</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="get-client-lifecycle-state">
+        <b><a href="#get-client-lifecycle-state">#get-client-lifecycle-state</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-get-client-lifecycle-state">5.3.1.2. matchAll(options)</a>
+            <li><a href="#ref-for-get-client-lifecycle-state①">5.3.1.3. openWindow(url)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="document-frozenness">
+        <b><a href="#document-frozenness">#document-frozenness</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-document-frozenness">4. Feature Policies</a>
+            <li><a href="#ref-for-document-frozenness①">5.2.1. Unloading documents and history traversal</a>
+            <li><a href="#ref-for-document-frozenness②">5.4.1. FROZENNESS state</a> <a
+                    href="#ref-for-document-frozenness③">(2)</a>
+            <li><a href="#ref-for-document-frozenness④">5.4.2. Changing the frozenness of documents</a> <a
+                    href="#ref-for-document-frozenness⑤">(2)</a> <a href="#ref-for-document-frozenness⑥">(3)</a> <a
+                    href="#ref-for-document-frozenness⑦">(4)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="frozen">
+        <b><a href="#frozen">#frozen</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-frozen">2. Page Lifecycle States</a> <a href="#ref-for-frozen①">(2)</a>
+            <li><a href="#ref-for-frozen②">4. Feature Policies</a>
+            <li><a href="#ref-for-frozen③">5.1. Modifications to worklet and worker behavior</a> <a
+                    href="#ref-for-frozen④">(2)</a>
+            <li><a href="#ref-for-frozen⑤">5.2.8. Posting messages</a>
+            <li><a href="#ref-for-frozen⑥">5.3.2.1. Get Client Lifecycle State</a>
+            <li><a href="#ref-for-frozen⑦">5.4.1. FROZENNESS state</a> <a href="#ref-for-frozen⑧">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="unfrozen">
+        <b><a href="#unfrozen">#unfrozen</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-unfrozen">4. Feature Policies</a>
+            <li><a href="#ref-for-unfrozen①">5.2.2. Event loop: definitions</a>
+            <li><a href="#ref-for-unfrozen②">5.2.8. Posting messages</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="change-the-frozenness-of-a-top-level-document">
+        <b><a
+                href="#change-the-frozenness-of-a-top-level-document">#change-the-frozenness-of-a-top-level-document</a></b><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-change-the-frozenness-of-a-top-level-document">5.4.1. FROZENNESS state</a> <a
+                    href="#ref-for-change-the-frozenness-of-a-top-level-document①">(2)</a> <a
+                    href="#ref-for-change-the-frozenness-of-a-top-level-document②">(3)</a> <a
+                    href="#ref-for-change-the-frozenness-of-a-top-level-document③">(4)</a> <a
+                    href="#ref-for-change-the-frozenness-of-a-top-level-document④">(5)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="change-the-frozenness-of-a-document">
+        <b><a href="#change-the-frozenness-of-a-document">#change-the-frozenness-of-a-document</a></b><b>Referenced
+            in:</b>
+        <ul>
+            <li><a href="#ref-for-change-the-frozenness-of-a-document">4. Feature Policies</a>
+            <li><a href="#ref-for-change-the-frozenness-of-a-document①">5.2.1. Unloading documents and history
+                    traversal</a> <a href="#ref-for-change-the-frozenness-of-a-document②">(2)</a>
+            <li><a href="#ref-for-change-the-frozenness-of-a-document③">5.4.2. Changing the frozenness of documents</a>
+                <a href="#ref-for-change-the-frozenness-of-a-document④">(2)</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="freeze-steps">
+        <b><a href="#freeze-steps">#freeze-steps</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-freeze-steps">2. Page Lifecycle States</a>
+            <li><a href="#ref-for-freeze-steps①">5.4.2. Changing the frozenness of documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="resume-steps">
+        <b><a href="#resume-steps">#resume-steps</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-resume-steps">5.4.2. Changing the frozenness of documents</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="document-discarded">
+        <b><a href="#document-discarded">#document-discarded</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-document-discarded">3. API</a>
+            <li><a href="#ref-for-document-discarded①">5.2.5. Initialize the document</a>
+            <li><a href="#ref-for-document-discarded②">5.4.3. Discarding</a>
+        </ul>
+    </aside>
+    <aside class="dfn-panel" data-for="discarded">
+        <b><a href="#discarded">#discarded</a></b><b>Referenced in:</b>
+        <ul>
+            <li><a href="#ref-for-discarded">2. Page Lifecycle States</a>
+            <li><a href="#ref-for-discarded①">5.2.5. Initialize the document</a>
+            <li><a href="#ref-for-discarded②">5.2.8. Posting messages</a>
+            <li><a href="#ref-for-discarded③">5.4.1. FROZENNESS state</a> <a href="#ref-for-discarded④">(2)</a>
+            <li><a href="#ref-for-discarded⑤">5.4.3. Discarding</a> <a href="#ref-for-discarded⑥">(2)</a> <a
+                    href="#ref-for-discarded⑦">(3)</a> <a href="#ref-for-discarded⑧">(4)</a> <a
+                    href="#ref-for-discarded⑨">(5)</a>
+        </ul>
+    </aside>
+    <script>/* script-dfn-panel */
+
+        document.body.addEventListener("click", function (e) {
+            var queryAll = function (sel) { return [].slice.call(document.querySelectorAll(sel)); }
+            // Find the dfn element or panel, if any, that was clicked on.
+            var el = e.target;
+            var target;
+            var hitALink = false;
+            while (el.parentElement) {
+                if (el.tagName == "A") {
+                    // Clicking on a link in a <dfn> shouldn't summon the panel
+                    hitALink = true;
+                }
+                if (el.classList.contains("dfn-paneled")) {
+                    target = "dfn";
+                    break;
+                }
+                if (el.classList.contains("dfn-panel")) {
+                    target = "dfn-panel";
+                    break;
+                }
+                el = el.parentElement;
+            }
+            if (target != "dfn-panel") {
+                // Turn off any currently "on" or "activated" panels.
+                queryAll(".dfn-panel.on, .dfn-panel.activated").forEach(function (el) {
+                    el.classList.remove("on");
+                    el.classList.remove("activated");
+                });
+            }
+            if (target == "dfn" && !hitALink) {
+                // open the panel
+                var dfnPanel = document.querySelector(".dfn-panel[data-for='" + el.id + "']");
+                if (dfnPanel) {
+                    dfnPanel.classList.add("on");
+                    var rect = el.getBoundingClientRect();
+                    dfnPanel.style.left = window.scrollX + rect.right + 5 + "px";
+                    dfnPanel.style.top = window.scrollY + rect.top + "px";
+                    var panelRect = dfnPanel.getBoundingClientRect();
+                    var panelWidth = panelRect.right - panelRect.left;
+                    if (panelRect.right > document.body.scrollWidth && (rect.left - (panelWidth + 5)) > 0) {
+                        // Reposition, because the panel is overflowing
+                        dfnPanel.style.left = window.scrollX + rect.left - (panelWidth + 5) + "px";
+                    }
+                } else {
+                    console.log("Couldn't find .dfn-panel[data-for='" + el.id + "']");
+                }
+            } else if (target == "dfn-panel") {
+                // Switch it to "activated" state, which pins it.
+                el.classList.add("activated");
+                el.style.left = null;
+                el.style.top = null;
+            }
+
+        });
+    </script>
+    <script>/* script-var-click-highlighting */
+
+        document.addEventListener("click", e => {
+            if (e.target.nodeName == "VAR") {
+                highlightSameAlgoVars(e.target);
+            }
+        });
+        {
+            const indexCounts = new Map();
+            const indexNames = new Map();
+            function highlightSameAlgoVars(v) {
+                // Find the algorithm container.
+                let algoContainer = null;
+                let searchEl = v;
+                while (algoContainer == null && searchEl != document.body) {
+                    searchEl = searchEl.parentNode;
+                    if (searchEl.hasAttribute("data-algorithm")) {
+                        algoContainer = searchEl;
+                    }
+                }
+
+                // Not highlighting document-global vars,
+                // too likely to be unrelated.
+                if (algoContainer == null) return;
+
+                const algoName = algoContainer.getAttribute("data-algorithm");
+                const varName = getVarName(v);
+                const addClass = !v.classList.contains("selected");
+                let highlightClass = null;
+                if (addClass) {
+                    const index = chooseHighlightIndex(algoName, varName);
+                    indexCounts.get(algoName)[index] += 1;
+                    indexNames.set(algoName + "///" + varName, index);
+                    highlightClass = nameFromIndex(index);
+                } else {
+                    const index = previousHighlightIndex(algoName, varName);
+                    indexCounts.get(algoName)[index] -= 1;
+                    highlightClass = nameFromIndex(index);
+                }
+
+                // Find all same-name vars, and toggle their class appropriately.
+                for (const el of algoContainer.querySelectorAll("var")) {
+                    if (getVarName(el) == varName) {
+                        el.classList.toggle("selected", addClass);
+                        el.classList.toggle(highlightClass, addClass);
+                    }
+                }
+            }
+            function getVarName(el) {
+                return el.textContent.replace(/(\s|\xa0)+/, " ").trim();
+            }
+            function chooseHighlightIndex(algoName, varName) {
+                let indexes = null;
+                if (indexCounts.has(algoName)) {
+                    indexes = indexCounts.get(algoName);
+                } else {
+                    // 7 classes right now
+                    indexes = [0, 0, 0, 0, 0, 0, 0];
+                    indexCounts.set(algoName, indexes);
+                }
+
+                // If the element was recently unclicked,
+                // *and* that color is still unclaimed,
+                // give it back the same color.
+                const lastIndex = previousHighlightIndex(algoName, varName);
+                if (indexes[lastIndex] === 0) return lastIndex;
+
+                // Find the earliest index with the lowest count.
+                const minCount = Math.min.apply(null, indexes);
+                let index = null;
+                for (var i = 0; i < indexes.length; i++) {
+                    if (indexes[i] == minCount) {
+                        return i;
+                    }
+                }
+            }
+            function previousHighlightIndex(algoName, varName) {
+                return indexNames.get(algoName + "///" + varName);
+            }
+            function nameFromIndex(index) {
+                return "selected" + index;
+            }
+        }
+    </script>
