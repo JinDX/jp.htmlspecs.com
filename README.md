@@ -123,7 +123,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Console](https://jp.htmlspecs.com/console)（[Source](https://console.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 
 ## CSS
-- [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)），- [How to Read](https://jp.htmlspecs.com/css/read)（[Source](https://www.w3.org/Style/CSS/read)）
 
 ### 色
 - [CSS Color Module Level 3](https://jp.htmlspecs.com/css/css-color-3)（[Source](https://www.w3.org/TR/2022/REC-css-color-3-20220118/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
