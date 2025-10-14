@@ -3,7 +3,8 @@ HTML および関連 API、CSS 仕様シリーズ。
 
 ### コア仕様
 - [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/multipage/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [ECMAScript](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），- [How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
+- [ECMAScript® 2026 Language Specification](https://ecma262.com/)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [ECMAScript® 2026 Internationalization API Specification](https://ecma262.com/)（[Source](https://tc39.es/ecma402/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），- [How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
 - [DOM](https://jp.htmlspecs.com/dom)（[Source](https://dom.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [URL](https://jp.htmlspecs.com/url)（[Source](https://url.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [URL Pattern](https://jp.htmlspecs.com/urlpattern)（[Source](https://urlpattern.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
