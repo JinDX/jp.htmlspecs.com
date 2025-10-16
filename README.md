@@ -75,6 +75,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Device Posture API](https://jp.htmlspecs.com/device-posture)（[Source](https://www.w3.org/TR/2024/CR-device-posture-20241126/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Ambient Light Sensor](https://jp.htmlspecs.com/ambient-light)（[Source](https://www.w3.org/TR/2025/WD-ambient-light-20250212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Battery Status API](https://jp.htmlspecs.com/battery-status)（[Source](https://www.w3.org/TR/2024/WD-battery-status-20241024/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Vibration API](https://jp.htmlspecs.com/vibration)（[Source](https://www.w3.org/TR/2025/CRD-vibration-20250212/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
 ### パフォーマンスとオブザーバ
 - [Performance Timeline](https://jp.htmlspecs.com/performance-timeline)（[Source](https://www.w3.org/TR/2025/CRD-performance-timeline-20250521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
