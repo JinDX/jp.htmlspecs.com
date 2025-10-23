@@ -14,7 +14,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Infra](https://jp.htmlspecs.com/infra)（[Source](https://infra.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Web Application Manifest](https://jp.htmlspecs.com/appmanifest)（[Source](https://www.w3.org/TR/2025/WD-appmanifest-20250903/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Compatibility](https://jp.htmlspecs.com/compat)（[Source](https://compat.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [Web Platform Design Principles](https://jp.htmlspecs.com/design-principles)（[Source](https://www.w3.org/TR/2025/NOTE-design-principles-20251021/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
+- [Web Platform Design Principles](https://jp.htmlspecs.com/design-principles)（[Source](https://www.w3.org/TR/2025/NOTE-design-principles-20251022/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Compression](https://jp.htmlspecs.com/compression)（[Source](https://compression.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Quirks Mode](https://jp.htmlspecs.com/quirks)（[Source](https://quirks.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Test Utils](https://jp.htmlspecs.com/testutils)（[Source](https://testutils.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）

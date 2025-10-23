@@ -1272,7 +1272,7 @@
         </p>
         <h1 class="p-name no-ref" id="title">ウェブプラットフォーム設計原則</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types/#NOTE">W3Cグループノート</a>,
-            <time class="dt-updated" datetime="2025-10-21">2025年10月21日</time>
+            <time class="dt-updated" datetime="2025-10-22">2025年10月22日</time>
         </p>
         <details open>
             <summary>この文書についての詳細</summary>
@@ -1280,15 +1280,15 @@
                 <dl>
                     <dt>このバージョン:
                     <dd><a class="u-url"
-                            href="https://www.w3.org/TR/2025/NOTE-design-principles-20251021/">https://www.w3.org/TR/2025/NOTE-design-principles-20251021/</a>
+                            href="https://www.w3.org/TR/2025/NOTE-design-principles-20251022/">https://www.w3.org/TR/2025/NOTE-design-principles-20251022/</a>
                     <dt>最新公開バージョン:
                     <dd><a href="https://www.w3.org/TR/design-principles/">https://www.w3.org/TR/design-principles/</a>
                     <dt>編集者ドラフト:
                     <dd><a
                             href="https://w3ctag.github.io/design-principles/">https://w3ctag.github.io/design-principles/</a>
                     <dt>以前のバージョン:
-                    <dd><a href="https://www.w3.org/TR/2025/NOTE-design-principles-20251020/"
-                            rel="prev">https://www.w3.org/TR/2025/NOTE-design-principles-20251020/</a>
+                    <dd><a href="https://www.w3.org/TR/2025/NOTE-design-principles-20251021/"
+                            rel="prev">https://www.w3.org/TR/2025/NOTE-design-principles-20251021/</a>
                     <dt>履歴:
                     <dd><a class="u-url"
                             href="https://www.w3.org/standards/history/design-principles/">https://www.w3.org/standards/history/design-principles/</a>
@@ -1527,8 +1527,9 @@
                                 class="content">通知にはイベントを使う</span></a>
                     <li><a href="#guard-against-recursion"><span class="secno">7.7</span> <span
                                 class="content">再帰の可能性に注意する</span></a>
-                    <li><a href="#state-and-subclassing"><span class="secno">7.8</span> <span
-                                class="content">状態には通常の<code class="idl"><span>Event</span></code> を使う</span></a>
+                    <li><a href="#state-and-subclassing"><span class="secno">7.8</span> <span class="content"><code
+                                    class="idl"><span>Event</span></code> ではなく、<code
+                                    class="idl"><span>target</span></code> オブジェクトに状態を持たせる</span></a>
                     <li><a href="#events-vs-observers"><span class="secno">7.9</span> <span
                                 class="content">イベントとオブザーバーを適切に使い分ける</span></a>
                 </ol>
@@ -3587,7 +3588,8 @@ geolocation<c- p>.</c->read<c- p>({</c-> signal <c- p>});</c->
         </p>
         <h3 class="heading settled" data-level="6.13" id="string-constants"><span class="secno">6.13. </span><span
                 class="content">定数やenum値には文字列を使う</span><a class="self-link" href="#string-constants"></a></h3>
-        <p>定数やenum値には文字列を使ってください。</p>
+        <p>定数や列挙値の集合の値としては文字列を使用してください。
+            文字列を選ぶ際は <a href="#naming-is-hard">§ 12 名前付けの原則</a> を参照してください。</p>
         <p>文字列は値の確認やコードの読みやすさが向上します。
             JavaScriptでは整数を使っても性能向上はありません。
             <a href="https://webidl.spec.whatwg.org/#idl-enums">WebIDLのenum型</a>値もこの原則に従って文字列です。
@@ -3754,7 +3756,7 @@ geolocation<c- p>.</c->read<c- p>({</c-> signal <c- p>});</c->
             <li data-md>
                 <p><a href="#events-vs-observers">§ 7.9 イベントとオブザーバーを適切に使い分ける</a></p>
             <li data-md>
-                <p><a href="#state-and-subclassing">§ 7.8 状態には普通のEventを使う</a></p>
+                <p><a href="#state-and-subclassing">§ 7.8 状態は Event ではなく target オブジェクトに持たせる</a></p>
         </ul>
         <h3 class="heading settled" data-level="7.5" id="always-add-event-handlers"><span class="secno">7.5.
             </span><span class="content">常にイベントハンドラ属性を追加する</span><a class="self-link"
@@ -3912,31 +3914,85 @@ geolocation<c- p>.</c->read<c- p>({</c-> signal <c- p>});</c->
             非同期イベントのようにイベント発火自体が非同期可能であるかのような誤解を招くためです。
             全てのイベントは同期発火です。ここで言う「非同期イベント」は発火の延期を意味します。</p>
         <h3 class="heading settled" data-level="7.8" id="state-and-subclassing"><span class="secno">7.8. </span><span
-                class="content">状態には通常の<code
-                    class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event⑤">Event</a></code>
-                を使う</span><a class="self-link" href="#state-and-subclassing"></a></h3>
-        <p>可能であれば、指定した<code>type</code>を持つ通常の<code
+                class="content"><code
+                    class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-target" id="ref-for-dom-event-target">target</a></code>
+                オブジェクトに状態を持たせ、<code
+                    class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event⑤">Event</a></code>には持たせない</span><a
+                class="self-link" href="#state-and-subclassing"></a></h3>
+        <p>状態は <code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-target" id="ref-for-dom-event-target①">target</a></code>
+            に持たせ、イベントはその状態の変更を通知するために使い、
+            <code
                 class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event⑥">Event</a></code>
-            を使い、状態情報は<code
-                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-target" id="ref-for-dom-event-target">target</a></code>
-            オブジェクトに保持してください。</p>
+            オブジェクトに状態を持たせないようにしてください。
+        </p>
         <p><code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-target" id="ref-for-dom-event-target②">target</a></code>
+            オブジェクトに状態を持たせることで、次のイベントを待たずに現在の状態を判定できます。
+            特に、最終的な状態があり、以降イベントが発生しない場合に有用です。</p>
+        <p>通常は <code
                 class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event⑦">Event</a></code>
-            の新しいサブクラスを作る必要は通常ありません。</p>
+            の新しいサブクラスを作成する必要はありませんが、
+            状態変化の経緯を伝えるために使用することはできます。</p>
+        <div class="example" id="example-4fb1a71f"><a class="self-link" href="#example-4fb1a71f"></a>
+            <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/input.html#htmlinputelement" id="ref-for-htmlinputelement③">HTMLInputElement</a></code>
+            の
+            <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/input.html#dom-input-value" id="ref-for-dom-input-value">value</a></code>
+            などのプロパティは入力の状態を示します。
+            <code
+                class="idl"><a data-link-type="idl" href="https://w3c.github.io/uievents/#inputevent" id="ref-for-inputevent">InputEvent</a></code>
+            の
+            <code
+                class="idl"><a data-link-type="idl" href="https://w3c.github.io/uievents/#dom-inputevent-inputtype" id="ref-for-dom-inputevent-inputtype">inputType</a></code>
+            などのプロパティは、状態の変更内容を説明します。
+        </div>
+        <p>例外的なケースとして、オブジェクトに状態を持たせるコストが高い場合は、
+            関数呼び出しが関心のシグナルとなるような、<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget">EventTarget</a></code>
+            を関数呼び出しの戻り値として返すパターンなどを検討できます。</p>
+        <div class="example" id="example-bad2d2dd">
+            <a class="self-link" href="#example-bad2d2dd"></a>
+            仮想的な <code>dataUsage</code> API が環境で使用されたデータ量を報告する場合、推奨されるパターンは次の通りです：
+
+            <pre class="highlight">self<c- p>.</c->dataUsage<c- p>.</c->addEventListener<c- p>(</c-><c- t>'change'</c-><c- p>,</c-> <c- p>()</c-> <c- p>=></c-> <c- p>{</c->
+  console<c- p>.</c->log<c- p>(</c->self<c- p>.</c->dataUsage<c- p>.</c->bytesReceived<c- p>);</c->
+<c- p>});</c->
+</pre>
+            <p><code>bytesReceived</code> は <code>dataUsage</code> の <code
+                    class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget①">EventTarget</a></code>
+                に存在し、
+                <code
+                    class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event⑧">Event</a></code>
+                には存在しません。
+            </p>
+            <p>このオブジェクトに状態を持たせるコストが高い場合は、次のパターンを検討できます：</p>
+            <pre class="highlight"><c- a>const</c-> dataUsage <c- o>=</c-> <c- k>await</c-> self<c- p>.</c->monitorDataUsage<c- p>();</c->
+
+dataUsage<c- p>.</c->addEventListener<c- p>(</c-><c- t>'change'</c-><c- p>,</c-> <c- p>()</c-> <c- p>=></c-> <c- p>{</c->
+  console<c- p>.</c->log<c- p>(</c->dataUsage<c- p>.</c->bytesReceived<c- p>);</c->
+<c- p>});</c->
+</pre>
+            <p>このパターンでは、<code>monitorDataUsage</code> の呼び出しがデータへの関心を示し、
+                <code>monitorDataUsage</code> が呼ばれるまで状態の更新は不要となります。
+            </p>
+        </div>
         <h3 class="heading settled" data-level="7.9" id="events-vs-observers"><span class="secno">7.9. </span><span
                 class="content">イベントとオブザーバーを適切に使い分ける</span><a class="self-link" href="#events-vs-observers"></a></h3>
-        <p>一般的には、<code
-                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget">EventTarget</a></code>
-            と通知用の<code
-                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event⑧">Event</a></code>
-            を使い、Observerパターンは<code
-                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget①">EventTarget</a></code>
-            でうまく機能しない場合のみ検討してください。</p>
-        <p><code
+        <p>一般的に、<code
                 class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget②">EventTarget</a></code>
-            を使うことで、<code
-                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-addeventlisteneroptions-once" id="ref-for-dom-addeventlisteneroptions-once">once</a></code>
-            の追加など、共通基底クラスの改良恩恵を受けられます。</p>
+            と通知用<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#event" id="ref-for-event⑨">Event</a></code>を使い、Observerパターンは使用しないでください。
+            ただし、<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget③">EventTarget</a></code>があなたの機能にうまく適用できない場合は例外です。
+        </p>
+        <p><code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget④">EventTarget</a></code>を使うことで、
+            例えば<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-addeventlisteneroptions-once" id="ref-for-dom-addeventlisteneroptions-once">once</a></code>の追加など、
+            共有基底クラスの改善による恩恵を機能にも受けられます。
+        </p>
         <p>イベント利用が問題（例：避けられない<a href="#guard-against-recursion">再帰</a>）を引き起こす場合は、Observerパターンの利用も検討してください。</p>
         <p><code
                 class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#mutationobserver" id="ref-for-mutationobserver">MutationObserver</a></code>、
@@ -4062,35 +4118,49 @@ observer<c- p>.</c->observe<c- p>(</c->ad<c- p>);</c->
             <li data-md>
                 <p>Observerは単一目的なのでイベントタイプ指定不要。</p>
         </ul>
-        <p>Observerと<code
-                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget③">EventTarget</a></code>
-            の共通点：</p>
+        <p><code>Observer</code> と <code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑤">EventTarget</a></code>
+            には以下の共通点があります：</p>
         <ul>
             <li data-md>
-                <p>両方とも作成時にカスタマイズ可能</p>
+                <p>どちらも生成時にカスタマイズできます。</p>
             <li data-md>
-                <p>両方ともバッチ処理で任意タイミングで配信可能。
+                <p>どちらも発生をまとめて、任意のタイミングで配信できます。
                     <code
-                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget④">EventTarget</a></code>
-                    も同期的である必要はなく、マイクロタスク・idle・animation-frameタイミングなど利用可能。特別なタイミングやバッチ処理のためだけにObserverを使う必要はありません。
+                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑥">EventTarget</a></code>
+                    は同期である必要はなく、
+                    マイクロタスクタイミング、アイドルタイミング、アニメーションフレームタイミングなどを使えます。
+                    特別なタイミングやバッチ化のために <code>Observer</code> は不要です。
                 </p>
             <li data-md>
                 <p><code
-                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑤">EventTarget</a></code>
-                    もObserverもDOMツリー（バブリング/キャプチャやキャンセル）に参加不要。主要な<code
-                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑥">EventTarget</a></code>
-                    はDOMノードですが、多くのイベントは独立しています。例えば<code
-                        class="idl"><a data-link-type="idl" href="https://w3c.github.io/IndexedDB/#idbdatabase" id="ref-for-idbdatabase">IDBDatabase</a></code>や<code
-                        class="idl"><a data-link-type="idl" href="https://xhr.spec.whatwg.org/#xmlhttprequesteventtarget" id="ref-for-xmlhttprequesteventtarget">XMLHttpRequestEventTarget</a></code>。DOMノードでも非バブリング・非キャンセルイベント設計も可能です。
+                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑦">EventTarget</a></code>
+                    も <code>Observer</code> も DOM ツリー（バブリング/キャプチャやキャンセル）に関与する必要はありません。
+                    代表的な <code
+                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑧">EventTarget</a></code>
+                    は DOM ツリー内の <code
+                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#node" id="ref-for-node①">Node</a></code>
+                    ですが、
+                    他にも独立したイベントが多くあります。
+                    例えば、<code
+                        class="idl"><a data-link-type="idl" href="https://w3c.github.io/IndexedDB/#idbdatabase" id="ref-for-idbdatabase">IDBDatabase</a></code>
+                    や <code
+                        class="idl"><a data-link-type="idl" href="https://xhr.spec.whatwg.org/#xmlhttprequesteventtarget" id="ref-for-xmlhttprequesteventtarget">XMLHttpRequestEventTarget</a></code>
+                    などです。
+                    <code
+                        class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#node" id="ref-for-node②">Node</a></code>
+                    を使う場合でも、
+                    イベントをバブリングせず、キャンセル不可に設計することもできます。
                 </p>
         </ul>
         <div class="example" id="example-211011c7">
             <a class="self-link" href="#example-211011c7"></a>
-            仮想の<code
+            仮想的な <code
                 class="idl"><a data-link-type="idl" href="https://w3c.github.io/IntersectionObserver/#intersectionobserver" id="ref-for-intersectionobserver">IntersectionObserver</a></code>
-            が<code
-                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑦">EventTarget</a></code>
-            のサブクラスの場合の例：
+            を <code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#eventtarget" id="ref-for-eventtarget⑨">EventTarget</a></code>
+            のサブクラスとして使う例：
+
             <pre class="highlight"><c- a>const</c-> io <c- o>=</c-> <c- ow>new</c-> ETIntersectionObserver<c- p>(</c->element<c- p>,</c-> <c- p>{</c-> root<c- p>,</c-> rootMargin<c- p>,</c-> threshold <c- p>});</c->
 
 <c- a>function</c-> listener<c- p>(</c->e<c- p>)</c-> <c- p>{</c->
@@ -4102,36 +4172,36 @@ observer<c- p>.</c->observe<c- p>(</c->ad<c- p>);</c->
 io<c- p>.</c->addEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> listener<c- p>);</c->
 io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> listener<c- p>);</c->
 </pre>
-            <p>Observer版との比較：</p>
+            <p><code>Observer</code> バージョンと比較すると：</p>
             <ul>
                 <li data-md>
-                    <p>同じオプションで複数要素を監視するのが難しい</p>
+                    <p>同じオプションで複数要素を監視するのが難しい；</p>
                 <li data-md>
-                    <p>即座にデータ取得する手段がない</p>
+                    <p>即座にデータを要求する方法がない；</p>
                 <li data-md>
-                    <p>同一イベントの複数リスナー削除が面倒</p>
+                    <p>同じイベントの複数リスナーを削除するのが面倒；</p>
                 <li data-md>
-                    <p>冗長な<code>"intersect"</code>イベントタイプの指定が必要</p>
+                    <p>冗長な <code>"intersect"</code> イベントタイプを著者が指定する必要がある。</p>
             </ul>
-            <p>Observer版との共通点：</p>
+            <p><code>Observer</code> バージョンと共通する点：</p>
             <ul>
                 <li data-md>
-                    <p>バッチ処理可能</p>
+                    <p>バッチ処理は可能；</p>
                 <li data-md>
-                    <p>タイミング（JSイベントキュー基準）は同じ</p>
+                    <p>タイミングは同じ（JavaScript のイベントキュー基準）；</p>
                 <li data-md>
-                    <p>著者はリッスン対象をカスタマイズ可能</p>
+                    <p>著者は何を監視するかカスタマイズ可能；</p>
                 <li data-md>
-                    <p>イベントはキャプチャ・バブリングしない</p>
+                    <p>イベントはキャプチャやバブリングされない。</p>
             </ul>
-            <p>これらの設計はどちらでも実現できます。</p>
+            <p>これらの特徴はどちらの設計でも実現可能です。</p>
         </div>
-        <p>関連情報:</p>
+        <p>関連項目：</p>
         <ul>
             <li data-md>
                 <p><a href="#events-are-for-notification">§ 7.6 通知にはイベントを使う</a></p>
             <li data-md>
-                <p><a href="#state-and-subclassing">§ 7.8 状態には普通のEventを使う</a></p>
+                <p><a href="#state-and-subclassing">§ 7.8 状態は Event ではなく target オブジェクトに持たせる</a></p>
         </ul>
         <h2 class="heading settled" data-level="8" id="types-and-units"><span class="secno">8. </span><span
                 class="content">WebIDL、型、単位</span><a class="self-link" href="#types-and-units"></a></h2>
@@ -4975,8 +5045,10 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
             </p>
         </div>
         <p>簡潔さよりも可読性を重視してください。
-            ただし、短い名前の方が分かりやすい場合も多いです。
-            例えば、API定義仕様内では専門用語や有名な技術用語を使うのが適切な場合もあります。</p>
+            略語は極めて一般的で分かりやすい場合を除き、避けてください。
+            例えば、<code>UIEvent</code> の "<code>UI</code>" はユーザーインターフェースを意味します。
+            ただし、短い名前の方が分かりやすい場合も多いことを念頭に置いてください。
+            例えば、APIが定義される仕様では、技術用語やよく知られた専門用語を使うのが適切な場合があります。</p>
         <div class="example" id="example-3cd78f17">
             <a class="self-link" href="#example-3cd78f17"></a>
             <p>例：
@@ -5553,7 +5625,8 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 <li><span class="dfn-paneled" id="66aee777">type</span>
                 <li><span class="dfn-paneled" id="b815f411">update the rendering</span>
                 <li><span class="dfn-paneled" id="825cbc48">user interaction task source</span>
-                <li><span class="dfn-paneled" id="fd7a9317">value</span>
+                <li><span class="dfn-paneled" id="14e45097">value <small>(for HTMLInputElement)</small></span>
+                <li><span class="dfn-paneled" id="fd7a9317">value <small>(for input)</small></span>
                 <li><span class="dfn-paneled" id="aa7bbf63">video</span>
                 <li><span class="dfn-paneled" id="7a26cf99">width</span>
             </ul>
@@ -5645,8 +5718,10 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
         <li>
             <a data-link-type="biblio">[UIEVENTS]</a> で定義されている用語：
             <ul>
+                <li><span class="dfn-paneled" id="518be2ae">InputEvent</span>
                 <li><span class="dfn-paneled" id="1fc098b2">KeyboardEvent</span>
                 <li><span class="dfn-paneled" id="c3469cd0">MouseEvent</span>
+                <li><span class="dfn-paneled" id="d387f951">inputType</span>
             </ul>
         <li>
             <a data-link-type="biblio">[URL]</a> で定義されている用語：
@@ -6199,9 +6274,10 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "112278c6": { "dfnID": "112278c6", "dfnText": "Gamepad", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-gamepad" }], "title": "5.2. Preserve run-to-completion semantics" }], "url": "https://w3c.github.io/gamepad/#dom-gamepad" },
                 "11289557": { "dfnID": "11289557", "dfnText": "figcaption", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-the-figcaption-element" }], "title": "Use casing rules consistent with existing APIs" }], "url": "https://html.spec.whatwg.org/multipage/grouping-content.html#the-figcaption-element" },
                 "11e0b87f": { "dfnID": "11e0b87f", "dfnText": "unrestricted double", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-idl-unrestricted-double" }], "title": "8.1. Use numeric types appropriately" }], "url": "https://webidl.spec.whatwg.org/#idl-unrestricted-double" },
-                "129bdae8": { "dfnID": "129bdae8", "dfnText": "Event", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-event" }, { "id": "ref-for-event\u2460" }], "title": "2.15. Build complex types by composing simpler types" }, { "refs": [{ "id": "ref-for-event\u2461" }, { "id": "ref-for-event\u2462" }], "title": "6.9. Classes should have constructors when possible" }, { "refs": [{ "id": "ref-for-event\u2463" }], "title": "7.7. Guard against potential recursion" }, { "refs": [{ "id": "ref-for-event\u2464" }, { "id": "ref-for-event\u2465" }, { "id": "ref-for-event\u2466" }], "title": "7.8. Use plain Events for state" }, { "refs": [{ "id": "ref-for-event\u2467" }], "title": "7.9. Use Events and Observers appropriately" }], "url": "https://dom.spec.whatwg.org/#event" },
+                "129bdae8": { "dfnID": "129bdae8", "dfnText": "Event", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-event" }, { "id": "ref-for-event\u2460" }], "title": "2.15. Build complex types by composing simpler types" }, { "refs": [{ "id": "ref-for-event\u2461" }, { "id": "ref-for-event\u2462" }], "title": "6.9. Classes should have constructors when possible" }, { "refs": [{ "id": "ref-for-event\u2463" }], "title": "7.7. Guard against potential recursion" }, { "refs": [{ "id": "ref-for-event\u2464" }, { "id": "ref-for-event\u2465" }, { "id": "ref-for-event\u2466" }, { "id": "ref-for-event\u2467" }], "title": "7.8. Put state on target objects rather than Events" }, { "refs": [{ "id": "ref-for-event\u2468" }], "title": "7.9. Use Events and Observers appropriately" }], "url": "https://dom.spec.whatwg.org/#event" },
                 "12cf38c9": { "dfnID": "12cf38c9", "dfnText": "initial-letter", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-propdef-initial-letter" }], "title": "4.1. Separate CSS properties based on what should cascade separately" }], "url": "https://drafts.csswg.org/css-inline-3/#propdef-initial-letter" },
                 "141bbada": { "dfnID": "141bbada", "dfnText": "DOMTokenList", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-domtokenlist" }, { "id": "ref-for-domtokenlist\u2460" }, { "id": "ref-for-domtokenlist\u2461" }], "title": "3.2. Use space-separated attributes for short lists of values, separate elements for longer lists" }, { "refs": [{ "id": "ref-for-domtokenlist\u2462" }, { "id": "ref-for-domtokenlist\u2463" }], "title": "6.9. Classes should have constructors when possible" }], "url": "https://dom.spec.whatwg.org/#domtokenlist" },
+                "14e45097": { "dfnID": "14e45097", "dfnText": "value (for HTMLInputElement)", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-input-value" }], "title": "7.8. Put state on target objects rather than Events" }], "url": "https://html.spec.whatwg.org/multipage/input.html#dom-input-value" },
                 "16310992": { "dfnID": "16310992", "dfnText": "<number>", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-number-value" }, { "id": "ref-for-number-value\u2460" }], "title": "4.3. Choose the computed value type based on how the property should inherit" }, { "refs": [{ "id": "ref-for-number-value\u2461" }, { "id": "ref-for-number-value\u2462" }], "title": "11.4.1. If you need to monkey patch" }], "url": "https://drafts.csswg.org/css-values-4/#number-value" },
                 "1748bbeb": { "dfnID": "1748bbeb", "dfnText": "details", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-the-details-element" }], "title": "3.1. Re-use HTML attribute names (only) for similar functionality" }], "url": "https://html.spec.whatwg.org/multipage/interactive-elements.html#the-details-element" },
                 "1812300f": { "dfnID": "1812300f", "dfnText": "dialog", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-the-dialog-element" }], "title": "3.1. Re-use HTML attribute names (only) for similar functionality" }], "url": "https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element" },
@@ -6215,7 +6291,7 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "24366e21": { "dfnID": "24366e21", "dfnText": "accept", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-attr-input-accept" }], "title": "3.2. Use space-separated attributes for short lists of values, separate elements for longer lists" }], "url": "https://html.spec.whatwg.org/multipage/input.html#attr-input-accept" },
                 "296f3551": { "dfnID": "296f3551", "dfnText": "Element", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-element" }], "title": "6.9. Classes should have constructors when possible" }], "url": "https://dom.spec.whatwg.org/#element" },
                 "2aaa2f42": { "dfnID": "2aaa2f42", "dfnText": "HTTP fetch", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-http-fetch" }], "title": "11.4.1. If you need to monkey patch" }], "url": "https://fetch.spec.whatwg.org/#concept-http-fetch" },
-                "2bc0cdf4": { "dfnID": "2bc0cdf4", "dfnText": "EventTarget", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-eventtarget" }, { "id": "ref-for-eventtarget\u2460" }, { "id": "ref-for-eventtarget\u2461" }, { "id": "ref-for-eventtarget\u2462" }, { "id": "ref-for-eventtarget\u2463" }, { "id": "ref-for-eventtarget\u2464" }, { "id": "ref-for-eventtarget\u2465" }, { "id": "ref-for-eventtarget\u2466" }], "title": "7.9. Use Events and Observers appropriately" }], "url": "https://dom.spec.whatwg.org/#eventtarget" },
+                "2bc0cdf4": { "dfnID": "2bc0cdf4", "dfnText": "EventTarget", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-eventtarget" }, { "id": "ref-for-eventtarget\u2460" }], "title": "7.8. Put state on target objects rather than Events" }, { "refs": [{ "id": "ref-for-eventtarget\u2461" }, { "id": "ref-for-eventtarget\u2462" }, { "id": "ref-for-eventtarget\u2463" }, { "id": "ref-for-eventtarget\u2464" }, { "id": "ref-for-eventtarget\u2465" }, { "id": "ref-for-eventtarget\u2466" }, { "id": "ref-for-eventtarget\u2467" }, { "id": "ref-for-eventtarget\u2468" }], "title": "7.9. Use Events and Observers appropriately" }], "url": "https://dom.spec.whatwg.org/#eventtarget" },
                 "2c73cb69": { "dfnID": "2c73cb69", "dfnText": "languagechange", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-event-languagechange" }], "title": "Use casing rules consistent with existing APIs" }], "url": "https://html.spec.whatwg.org/multipage/indices.html#event-languagechange" },
                 "2c82d279": { "dfnID": "2c82d279", "dfnText": "audio", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-audio" }], "title": "3.2. Use space-separated attributes for short lists of values, separate elements for longer lists" }], "url": "https://html.spec.whatwg.org/multipage/media.html#audio" },
                 "2e3a180b": { "dfnID": "2e3a180b", "dfnText": "[[state]]", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-state" }, { "id": "ref-for-dfn-state\u2460" }], "title": "7.7. Guard against potential recursion" }], "url": "https://w3c.github.io/payment-request/#dfn-state" },
@@ -6244,6 +6320,7 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "4872935b": { "dfnID": "4872935b", "dfnText": "resize", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-event-media-resize" }], "title": "7.6. Use events for notification" }], "url": "https://html.spec.whatwg.org/multipage/media.html#event-media-resize" },
                 "4fe61159": { "dfnID": "4fe61159", "dfnText": "resolved value", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-resolved-value" }], "title": "4.3. Choose the computed value type based on how the property should inherit" }], "url": "https://drafts.csswg.org/cssom-1/#resolved-value" },
                 "50e555d8": { "dfnID": "50e555d8", "dfnText": "once", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-addeventlisteneroptions-once" }], "title": "7.9. Use Events and Observers appropriately" }], "url": "https://dom.spec.whatwg.org/#dom-addeventlisteneroptions-once" },
+                "518be2ae": { "dfnID": "518be2ae", "dfnText": "InputEvent", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-inputevent" }], "title": "7.8. Put state on target objects rather than Events" }], "url": "https://w3c.github.io/uievents/#inputevent" },
                 "529179ea": { "dfnID": "529179ea", "dfnText": "Crypto", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-Crypto" }], "title": "6.9. Classes should have constructors when possible" }], "url": "https://w3c.github.io/webcrypto/#dfn-Crypto" },
                 "535dd335": { "dfnID": "535dd335", "dfnText": "aborted", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-abortsignal-aborted" }, { "id": "ref-for-abortsignal-aborted\u2460" }], "title": "7.7. Guard against potential recursion" }], "url": "https://dom.spec.whatwg.org/#abortsignal-aborted" },
                 "537cf076": { "dfnID": "537cf076", "dfnText": "?", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-mult-opt" }], "title": "11.4.1. If you need to monkey patch" }], "url": "https://drafts.csswg.org/css-values-4/#mult-opt" },
@@ -6293,7 +6370,7 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "7f769aa9": { "dfnID": "7f769aa9", "dfnText": "remote playback device", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-remote-playback-devices" }, { "id": "ref-for-dfn-remote-playback-devices\u2460" }], "title": "9.2. Use care when exposing APIs for selecting or enumerating devices" }], "url": "https://w3c.github.io/remote-playback/#dfn-remote-playback-devices" },
                 "825cbc48": { "dfnID": "825cbc48", "dfnText": "user interaction task source", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-user-interaction-task-source" }], "title": "6.17. Prefer existing task sources" }], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#user-interaction-task-source" },
                 "82ca3efc": { "dfnID": "82ca3efc", "dfnText": "TypeError", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-exceptiondef-typeerror" }], "title": "6.9. Classes should have constructors when possible" }, { "refs": [{ "id": "ref-for-exceptiondef-typeerror\u2460" }, { "id": "ref-for-exceptiondef-typeerror\u2461" }], "title": "8.1. Use numeric types appropriately" }], "url": "https://webidl.spec.whatwg.org/#exceptiondef-typeerror" },
-                "83b269de": { "dfnID": "83b269de", "dfnText": "HTMLInputElement", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-htmlinputelement" }, { "id": "ref-for-htmlinputelement\u2460" }, { "id": "ref-for-htmlinputelement\u2461" }], "title": "2.15. Build complex types by composing simpler types" }], "url": "https://html.spec.whatwg.org/multipage/input.html#htmlinputelement" },
+                "83b269de": { "dfnID": "83b269de", "dfnText": "HTMLInputElement", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-htmlinputelement" }, { "id": "ref-for-htmlinputelement\u2460" }, { "id": "ref-for-htmlinputelement\u2461" }], "title": "2.15. Build complex types by composing simpler types" }, { "refs": [{ "id": "ref-for-htmlinputelement\u2462" }], "title": "7.8. Put state on target objects rather than Events" }], "url": "https://html.spec.whatwg.org/multipage/input.html#htmlinputelement" },
                 "83c7a70f": { "dfnID": "83c7a70f", "dfnText": "MutationObserver", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-mutationobserver" }, { "id": "ref-for-mutationobserver\u2460" }], "title": "7.9. Use Events and Observers appropriately" }], "url": "https://dom.spec.whatwg.org/#mutationobserver" },
                 "84f243ef": { "dfnID": "84f243ef", "dfnText": "label", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-the-label-element" }], "title": "3.1. Re-use HTML attribute names (only) for similar functionality" }], "url": "https://html.spec.whatwg.org/multipage/forms.html#the-label-element" },
                 "85188fb3": { "dfnID": "85188fb3", "dfnText": "select", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-the-select-element" }], "title": "3.1. Re-use HTML attribute names (only) for similar functionality" }, { "refs": [{ "id": "ref-for-the-select-element\u2460" }], "title": "3.2. Use space-separated attributes for short lists of values, separate elements for longer lists" }], "url": "https://html.spec.whatwg.org/multipage/form-elements.html#the-select-element" },
@@ -6378,6 +6455,7 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "cca3cdb2": { "dfnID": "cca3cdb2", "dfnText": "AbortSignal", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-abortsignal" }], "title": "6.12. Cancel asynchronous APIs/operations using AbortSignal" }, { "refs": [{ "id": "ref-for-abortsignal\u2460" }, { "id": "ref-for-abortsignal\u2461" }, { "id": "ref-for-abortsignal\u2462" }], "title": "7.7. Guard against potential recursion" }, { "refs": [{ "id": "ref-for-abortsignal\u2463" }, { "id": "ref-for-abortsignal\u2464" }], "title": "10.3. Only purely computational features should be exposed everywhere" }], "url": "https://dom.spec.whatwg.org/#abortsignal" },
                 "d06b2b8c": { "dfnID": "d06b2b8c", "dfnText": "XMLHttpRequest", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-xmlhttprequest" }], "title": "6.6. Make method arguments optional if possible" }, { "refs": [{ "id": "ref-for-xmlhttprequest\u2460" }], "title": "6.13. Use strings for constants and enums" }, { "refs": [{ "id": "ref-for-xmlhttprequest\u2461" }], "title": "Use casing rules consistent with existing APIs" }], "url": "https://xhr.spec.whatwg.org/#xmlhttprequest" },
                 "d0eba3fd": { "dfnID": "d0eba3fd", "dfnText": "partial interface", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-partial-interface" }], "title": "11.4.1. If you need to monkey patch" }], "url": "https://webidl.spec.whatwg.org/#dfn-partial-interface" },
+                "d387f951": { "dfnID": "d387f951", "dfnText": "inputType", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-inputevent-inputtype" }], "title": "7.8. Put state on target objects rather than Events" }], "url": "https://w3c.github.io/uievents/#dom-inputevent-inputtype" },
                 "d38f9598": { "dfnID": "d38f9598", "dfnText": "getBoundingClientRect()", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-element-getboundingclientrect" }], "title": "6.2. Attributes should behave like data properties" }], "url": "https://drafts.csswg.org/cssom-view-1/#dom-element-getboundingclientrect" },
                 "d4127354": { "dfnID": "d4127354", "dfnText": "innerHTML", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-element-innerhtml" }], "title": "Use casing rules consistent with existing APIs" }], "url": "https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-innerhtml" },
                 "d4b3b8bc": { "dfnID": "d4b3b8bc", "dfnText": "cite", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-attr-q-cite" }], "title": "3.6. Name URL-containing attributes based on their primary purpose" }], "url": "https://html.spec.whatwg.org/multipage/text-level-semantics.html#attr-q-cite" },
@@ -6401,7 +6479,7 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "e5882acf": { "dfnID": "e5882acf", "dfnText": "source", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-the-source-element" }], "title": "3.2. Use space-separated attributes for short lists of values, separate elements for longer lists" }, { "refs": [{ "id": "ref-for-the-source-element\u2460" }, { "id": "ref-for-the-source-element\u2461" }], "title": "3.7. Give each HTML element a single purpose" }], "url": "https://html.spec.whatwg.org/multipage/embedded-content.html#the-source-element" },
                 "e6b9f496": { "dfnID": "e6b9f496", "dfnText": "canplaythrough", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-event-media-canplaythrough" }], "title": "Use casing rules consistent with existing APIs" }], "url": "https://html.spec.whatwg.org/multipage/media.html#event-media-canplaythrough" },
                 "e81f86c3": { "dfnID": "e81f86c3", "dfnText": "bgColor", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-document-bgcolor" }], "title": "Use casing rules consistent with existing APIs" }], "url": "https://html.spec.whatwg.org/multipage/obsolete.html#dom-document-bgcolor" },
-                "e8478f36": { "dfnID": "e8478f36", "dfnText": "target", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-event-target" }], "title": "7.8. Use plain Events for state" }], "url": "https://dom.spec.whatwg.org/#dom-event-target" },
+                "e8478f36": { "dfnID": "e8478f36", "dfnText": "target", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-event-target" }, { "id": "ref-for-dom-event-target\u2460" }, { "id": "ref-for-dom-event-target\u2461" }], "title": "7.8. Put state on target objects rather than Events" }], "url": "https://dom.spec.whatwg.org/#dom-event-target" },
                 "ea2e2ea4": { "dfnID": "ea2e2ea4", "dfnText": "timeRemaining()", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-idledeadline-timeremaining" }], "title": "5.2. Preserve run-to-completion semantics" }], "url": "https://w3c.github.io/requestidlecallback/#dom-idledeadline-timeremaining" },
                 "eb9a1873": { "dfnID": "eb9a1873", "dfnText": "rel", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-attr-link-rel" }], "title": "3.6. Name URL-containing attributes based on their primary purpose" }], "url": "https://html.spec.whatwg.org/multipage/semantics.html#attr-link-rel" },
                 "ecf251b4": { "dfnID": "ecf251b4", "dfnText": "scalar value", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-scalar-value" }], "title": "8.2. Represent strings appropriately" }], "url": "https://infra.spec.whatwg.org/#scalar-value" },
@@ -6418,7 +6496,7 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "f8de33a3": { "dfnID": "f8de33a3", "dfnText": "long", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-idl-long" }], "title": "8.1. Use numeric types appropriately" }], "url": "https://webidl.spec.whatwg.org/#idl-long" },
                 "fb030e6c": { "dfnID": "fb030e6c", "dfnText": "<length>", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-length-value" }], "title": "4.3. Choose the computed value type based on how the property should inherit" }], "url": "https://drafts.csswg.org/css-values-4/#length-value" },
                 "fc736137": { "dfnID": "fc736137", "dfnText": "textarea", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-the-textarea-element" }], "title": "3.7. Give each HTML element a single purpose" }], "url": "https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element" },
-                "fd7a9317": { "dfnID": "fd7a9317", "dfnText": "value", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-attr-input-value" }], "title": "3.5. Keep attributes in sync" }], "url": "https://html.spec.whatwg.org/multipage/input.html#attr-input-value" },
+                "fd7a9317": { "dfnID": "fd7a9317", "dfnText": "value (for input)", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-attr-input-value" }], "title": "3.5. Keep attributes in sync" }], "url": "https://html.spec.whatwg.org/multipage/input.html#attr-input-value" },
                 "fdf6efd5": { "dfnID": "fdf6efd5", "dfnText": "font-size", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-propdef-font-size" }, { "id": "ref-for-propdef-font-size\u2460" }, { "id": "ref-for-propdef-font-size\u2461" }], "title": "4.2. Make appropriate choices for whether CSS properties are inherited" }, { "refs": [{ "id": "ref-for-propdef-font-size\u2462" }, { "id": "ref-for-propdef-font-size\u2463" }, { "id": "ref-for-propdef-font-size\u2464" }, { "id": "ref-for-propdef-font-size\u2465" }, { "id": "ref-for-propdef-font-size\u2466" }], "title": "4.3. Choose the computed value type based on how the property should inherit" }], "url": "https://drafts.csswg.org/css-fonts-4/#propdef-font-size" },
                 "fefe0433": { "dfnID": "fefe0433", "dfnText": "preventDefault()", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-event-preventdefault" }], "title": "When to use callback functions" }], "url": "https://dom.spec.whatwg.org/#dom-event-preventdefault" },
                 "ff87eaf9": { "dfnID": "ff87eaf9", "dfnText": "remove", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-abortsignal-remove" }, { "id": "ref-for-abortsignal-remove\u2460" }], "title": "7.7. Guard against potential recursion" }], "url": "https://dom.spec.whatwg.org/#abortsignal-remove" },
@@ -6935,6 +7013,7 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "https://html.spec.whatwg.org/multipage/input.html#attr-input-value": { "displayText": "value", "export": true, "for_": ["input"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "value", "type": "element-attr", "url": "https://html.spec.whatwg.org/multipage/input.html#attr-input-value" },
                 "https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultchecked": { "displayText": "defaultChecked", "export": true, "for_": ["HTMLInputElement"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "defaultChecked", "type": "attribute", "url": "https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultchecked" },
                 "https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultvalue": { "displayText": "defaultValue", "export": true, "for_": ["HTMLInputElement"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "defaultValue", "type": "attribute", "url": "https://html.spec.whatwg.org/multipage/input.html#dom-input-defaultvalue" },
+                "https://html.spec.whatwg.org/multipage/input.html#dom-input-value": { "displayText": "value", "export": true, "for_": ["HTMLInputElement"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "value", "type": "attribute", "url": "https://html.spec.whatwg.org/multipage/input.html#dom-input-value" },
                 "https://html.spec.whatwg.org/multipage/input.html#htmlinputelement": { "displayText": "HTMLInputElement", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "HTMLInputElement", "type": "interface", "url": "https://html.spec.whatwg.org/multipage/input.html#htmlinputelement" },
                 "https://html.spec.whatwg.org/multipage/input.html#the-input-element": { "displayText": "input", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "input", "type": "element", "url": "https://html.spec.whatwg.org/multipage/input.html#the-input-element" },
                 "https://html.spec.whatwg.org/multipage/interaction.html#dom-useractivation-isactive": { "displayText": "isActive", "export": true, "for_": ["UserActivation"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "isActive", "type": "attribute", "url": "https://html.spec.whatwg.org/multipage/interaction.html#dom-useractivation-isactive" },
@@ -7030,6 +7109,8 @@ io<c- p>.</c->removeEventListener<c- p>(</c-><c- u>"intersect"</c-><c- p>,</c-> 
                 "https://w3c.github.io/remote-playback/#dfn-remote-playback-devices": { "displayText": "remote playback devices", "export": false, "for_": [], "level": "1", "normative": true, "shortname": "remote-playback", "spec": "remote-playback", "status": "current", "text": "remote playback devices", "type": "dfn", "url": "https://w3c.github.io/remote-playback/#dfn-remote-playback-devices" },
                 "https://w3c.github.io/remote-playback/#dom-remoteplayback": { "displayText": "RemotePlayback", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "remote-playback", "spec": "remote-playback", "status": "current", "text": "RemotePlayback", "type": "interface", "url": "https://w3c.github.io/remote-playback/#dom-remoteplayback" },
                 "https://w3c.github.io/requestidlecallback/#dom-idledeadline-timeremaining": { "displayText": "timeRemaining()", "export": true, "for_": ["IdleDeadline"], "level": "1", "normative": true, "shortname": "requestidlecallback", "spec": "requestidlecallback", "status": "current", "text": "timeRemaining()", "type": "method", "url": "https://w3c.github.io/requestidlecallback/#dom-idledeadline-timeremaining" },
+                "https://w3c.github.io/uievents/#dom-inputevent-inputtype": { "displayText": "inputType", "export": true, "for_": ["InputEvent"], "level": "1", "normative": true, "shortname": "uievents", "spec": "uievents", "status": "current", "text": "inputType", "type": "attribute", "url": "https://w3c.github.io/uievents/#dom-inputevent-inputtype" },
+                "https://w3c.github.io/uievents/#inputevent": { "displayText": "InputEvent", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "uievents", "spec": "uievents", "status": "current", "text": "InputEvent", "type": "interface", "url": "https://w3c.github.io/uievents/#inputevent" },
                 "https://w3c.github.io/uievents/#keyboardevent": { "displayText": "KeyboardEvent", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "uievents", "spec": "uievents", "status": "current", "text": "KeyboardEvent", "type": "interface", "url": "https://w3c.github.io/uievents/#keyboardevent" },
                 "https://w3c.github.io/uievents/#mouseevent": { "displayText": "MouseEvent", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "uievents", "spec": "uievents", "status": "current", "text": "MouseEvent", "type": "interface", "url": "https://w3c.github.io/uievents/#mouseevent" },
                 "https://w3c.github.io/web-locks/#lockmanager": { "displayText": "LockManager", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "web-locks", "spec": "web-locks", "status": "current", "text": "LockManager", "type": "interface", "url": "https://w3c.github.io/web-locks/#lockmanager" },
