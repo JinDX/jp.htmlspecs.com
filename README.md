@@ -126,6 +126,7 @@ HTML および関連 API、CSS 仕様シリーズ。
 - [Image Capture](https://jp.htmlspecs.com/image-capture)（[Source](https://www.w3.org/TR/2025/WD-image-capture-20250423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Encrypted Media Extensions](https://jp.htmlspecs.com/encrypted-media-2)（[Source](https://www.w3.org/TR/2025/WD-encrypted-media-2-20250821/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebXR Device API](https://jp.htmlspecs.com/webxr)（[Source](https://www.w3.org/TR/2025/CRD-webxr-20251001/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Portable Network Graphics (PNG) 3](https://jp.htmlspecs.com/png-3)（[Source](https://www.w3.org/TR/2025/REC-png-3-20250624/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 
 ### 開発者ツール
 - [Console](https://jp.htmlspecs.com/console)（[Source](https://console.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
