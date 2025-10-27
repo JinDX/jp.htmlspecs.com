@@ -1,0 +1,2228 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 9205 - HTTPによるプロトコルの構築</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC9205">
+    <meta property="og:description" content="Building Protocols with HTTP">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc9205.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 Is HTTP Being Used?" href="#rfc.section.2">
+    <link rel="Chapter" title="3 What's Important About HTTP" href="#rfc.section.3">
+    <link rel="Chapter" title="4 Best Practices for Specifying the Use of HTTP" href="#rfc.section.4">
+    <link rel="Chapter" title="5 IANA Considerations" href="#rfc.section.5">
+    <link rel="Chapter" title="6 Security Considerations" href="#rfc.section.6">
+    <link rel="Chapter" title="7 References" href="#rfc.section.7">
+    <link rel="Appendix" title="A Changes from RFC 3205" href="#rfc.section.A">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-bcp56bis-15" rel="prev">
+    <link href="https://dx.doi.org/10.17487/rfc9205" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc9205.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="https://www.rfc-editor.org/info/rfc9205">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <meta name="keywords" content="HTTP API">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Nottingham, M.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:9205">
+    <meta name="dcterms.issued" content="2022-06">
+    <meta name="dct.replaces" content="urn:ietf:rfc:3205">
+    <meta name="dcterms.abstract"
+        content="Applications often use HTTP as a substrate to create HTTP-based APIs. This document specifies best practices for writing specifications that use HTTP to define new application protocols. It is written primarily to guide IETF efforts to define application protocols using HTTP for deployment on the Internet but might be applicable in other situations.This document obsoletes RFC 3205.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="Applications often use HTTP as a substrate to create HTTP-based APIs. This document specifies best practices for writing specifications that use HTTP to define new application protocols. It is written primarily to guide IETF efforts to define application protocols using HTTP for deployment on the Internet but might be applicable in other situations.This document obsoletes RFC 3205.">
+</head>
+
+<body onload="getMeta(9205,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>9205</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">導入</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#notational-conventions">表記規約</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#used">HTTPは使用されていますか?</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#non-http-protocols">非HTTPプロトコル</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#overview">HTTPの重要な点</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#generic-semantics">汎用セマンティクス</a></li>
+                                        <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#links">リンク</a></li>
+                                        <li><a href="#rfc.section.3.3">3.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rich-functionality">豊富な機能</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#bp">HTTPの使用を指定する際のベストプラクティス</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#specifying-the-use-of-http">HTTPの使用の指定</a></li>
+                                        <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#resource">サーバーの動作の指定</a></li>
+                                        <li><a href="#rfc.section.4.3">4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#clients">クライアントの動作の指定</a></li>
+                                        <li><a href="#rfc.section.4.4">4.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#specifying-urls">URLの指定</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.4.4.1">4.4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#discovering-an-applications-urls">アプリケーションのURLの検出</a>
+                                                </li>
+                                                <li><a href="#rfc.section.4.4.2">4.4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#scheme">URIスキームの検討</a></li>
+                                                <li><a href="#rfc.section.4.4.3">4.4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#choosing-transport-ports">トランスポートポートの選択</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.4.5">4.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#using-http-methods">HTTPメソッドの使用</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.4.5.1">4.5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#get">GET</a></li>
+                                                <li><a href="#rfc.section.4.5.2">4.5.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#options">OPTIONS</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.4.6">4.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#using-http-status-codes">HTTPステータスコードの使用</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.4.6.1">4.6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#redirects">リダイレクション</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.4.7">4.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#headers">HTTPヘッダフィールドの指定</a></li>
+                                        <li><a href="#rfc.section.4.8">4.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#content">メッセージコンテンツの定義</a></li>
+                                        <li><a href="#rfc.section.4.9">4.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#caching">HTTPキャッシュの活用</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.4.9.1">4.9.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#freshness">鮮度</a></li>
+                                                <li><a href="#rfc.section.4.9.2">4.9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#stale-responses">古い応答</a></li>
+                                                <li><a href="#rfc.section.4.9.3">4.9.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#caching-app-semantics">キャッシュとアプリケーションのセマンティクス</a></li>
+                                                <li><a href="#rfc.section.4.9.4">4.9.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#varying-content-based-upon-the-request">リクエストに基づくコンテンツの変化</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.4.10">4.10.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#state">アプリケーションの状態の処理</a></li>
+                                        <li><a href="#rfc.section.4.11">4.11.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#multiplex">複数リクエストの実行</a></li>
+                                        <li><a href="#rfc.section.4.12">4.12.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#client-auth">クライアント認証</a></li>
+                                        <li><a href="#rfc.section.4.13">4.13.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#browser">Webブラウジングとの共存</a></li>
+                                        <li><a href="#rfc.section.4.14">4.14.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#other-apps">アプリケーション境界の維持</a></li>
+                                        <li><a href="#rfc.section.4.15">4.15.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#server-push">サーバープッシュの使用</a></li>
+                                        <li><a href="#rfc.section.4.16">4.16.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#versioning">バージョン管理と進化を許容する</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#iana-considerations">IANAに関する考慮事項</a></li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security-considerations">セキュリティに関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#privacy-considerations">プライバシーに関する考慮事項</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">規範的参照</a></li>
+                                        <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.3">情報的参照</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.A">Appendix A.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#changes-from-rfc-3205">RFC 3205からの変更点</a></li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネットエンジニアリングタスクフォース (IETF)</td>
+                                <td class="text-right">M. Nottingham</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 9205</td>
+                                <td class="text-right">2022年6月</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">廃止: <a href="#RFC3205">3205</a></td>
+                                <td class="text-right"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">BCP: <a href="https://www.rfc-editor.org/info/bcp56">56</a></td>
+                                <td class="text-right"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: 最良の現行慣行</td>
+                                <td class="text-right"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>HTTPによるプロトコルの構築</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">概要</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>アプリケーションはしばしばHTTPを基盤としてHTTPベースのAPIを作成します。本書は、HTTPを用いて新しいアプリケーションプロトコルを定義する仕様を作成する際のベストプラクティスを規定します。主にインターネット上での展開のためにHTTPを利用するアプリケーションプロトコルを定義するIETFの取り組みを導くことを目的として作成されていますが、他の状況でも適用可能です。
+                        </p>
+                    </div>
+                    <div id="rfc.abstract.p.2">
+                        <p>本書はRFC 3205を廃止します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモの状態</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>このメモはインターネットの最良現行慣行を文書化したものです。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネットエンジニアリングタスクフォース (IETF) の成果物です。IETFコミュニティの合意を表しています。公開審査を経てインターネットエンジニアリング運営グループ
+                            (IESG) による公開承認を受けています。BCPに関する詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc7841.html#section-2">RFC 7841 のセクション 2</a>
+                            を参照してください。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>本書の現状、訂正情報 (errata)、およびフィードバックの送付方法に関する情報は <a
+                                href="https://www.rfc-editor.org/info/rfc9205">https://www.rfc-editor.org/info/rfc9205</a>
+                            で入手できます。</p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2022 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>)
+                            in effect on the date of publication of this document. Please review these documents
+                            carefully, as they describe your rights and restrictions with respect to this document. Code
+                            Components extracted from this document must include Revised BSD License text as described
+                            in Section 4.e of the Trust Legal Provisions and are provided without warranty as described
+                            in the Revised BSD License.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">導入</a>
+                            <ul>
+                                <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#notational-conventions">表記規約</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#used">HTTPは使用されていますか?</a>
+                            <ul>
+                                <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#non-http-protocols">非HTTPプロトコル</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#overview">HTTPの重要な点</a>
+                            <ul>
+                                <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#generic-semantics">汎用セマンティクス</a></li>
+                                <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a href="#links">リンク</a></li>
+                                <li><a href="#rfc.section.3.3">3.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rich-functionality">豊富な機能</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#bp">HTTPの使用を指定する際のベストプラクティス</a>
+                            <ul>
+                                <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#specifying-the-use-of-http">HTTPの使用の指定</a></li>
+                                <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#resource">サーバーの動作の指定</a></li>
+                                <li><a href="#rfc.section.4.3">4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#clients">クライアントの動作の指定</a></li>
+                                <li><a href="#rfc.section.4.4">4.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#specifying-urls">URLの指定</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.4.1">4.4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#discovering-an-applications-urls">アプリケーションのURLの検出</a></li>
+                                        <li><a href="#rfc.section.4.4.2">4.4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#scheme">URIスキームの検討</a></li>
+                                        <li><a href="#rfc.section.4.4.3">4.4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#choosing-transport-ports">トランスポートポートの選択</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4.5">4.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#using-http-methods">HTTPメソッドの使用</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.5.1">4.5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#get">GET</a></li>
+                                        <li><a href="#rfc.section.4.5.2">4.5.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#options">OPTIONS</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4.6">4.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#using-http-status-codes">HTTPステータスコードの使用</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.6.1">4.6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#redirects">リダイレクション</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4.7">4.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#headers">HTTPヘッダフィールドの指定</a></li>
+                                <li><a href="#rfc.section.4.8">4.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#content">メッセージコンテンツの定義</a></li>
+                                <li><a href="#rfc.section.4.9">4.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#caching">HTTPキャッシュの活用</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.9.1">4.9.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#freshness">鮮度</a></li>
+                                        <li><a href="#rfc.section.4.9.2">4.9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#stale-responses">古い応答</a></li>
+                                        <li><a href="#rfc.section.4.9.3">4.9.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#caching-app-semantics">キャッシュとアプリケーションのセマンティクス</a></li>
+                                        <li><a href="#rfc.section.4.9.4">4.9.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#varying-content-based-upon-the-request">リクエストに基づくコンテンツの変化</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4.10">4.10.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#state">アプリケーションの状態の処理</a></li>
+                                <li><a href="#rfc.section.4.11">4.11.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#multiplex">複数リクエストの実行</a></li>
+                                <li><a href="#rfc.section.4.12">4.12.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#client-auth">クライアント認証</a></li>
+                                <li><a href="#rfc.section.4.13">4.13.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#browser">Webブラウジングとの共存</a></li>
+                                <li><a href="#rfc.section.4.14">4.14.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#other-apps">アプリケーション境界の維持</a></li>
+                                <li><a href="#rfc.section.4.15">4.15.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#server-push">サーバープッシュの使用</a></li>
+                                <li><a href="#rfc.section.4.16">4.16.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#versioning">バージョン管理と進化を許容する</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#iana-considerations">IANAに関する考慮事項</a></li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#security-considerations">セキュリティに関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#privacy-considerations">プライバシーに関する考慮事項</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                            <ul>
+                                <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">規範的参照</a></li>
+                                <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.3">情報的参照</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.A">Appendix A.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#changes-from-rfc-3205">RFC 3205からの変更点</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <hr class="hidden-print">
+                <section id="introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#introduction">導入</a></h2>
+                    <div id="rfc.section.1.p.1" class="avoidbreakafter">
+                        <p>Webブラウジング以外のアプリケーションはしばしばHTTP <a href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>
+                            を基盤として使用します。この慣行は「HTTPベースのAPI」「REST API」あるいは単に「HTTP
+                            API」と呼ばれることがあります。これが行われる理由には以下のようなものがあります:</p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <ul>
+                            <li>実装者、仕様作成者、管理者、開発者、および利用者にとっての馴染みやすさ;</li>
+                            <li>さまざまなクライアント、サーバー、およびプロキシ実装の利用可能性;</li>
+                            <li>使いやすさ;</li>
+                            <li>Webブラウザの利用可能性;</li>
+                            <li>認証や暗号化といった既存の仕組みの再利用;</li>
+                            <li>対象デプロイメントにおけるHTTPサーバーやクライアントの存在;</li>
+                            <li>ファイアウォールを通過できる能力。</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.1.p.3">
+                        <p>これらのプロトコルはしばしば場当たり的で、1つまたは少数のサーバーによるデプロイと限られたクライアント群による利用のみを想定しています。その結果、こうした条件を好むHTTPベースのAPIの定義に関する実践とツール群が生じています。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.4">
+                        <p>しかし、そのようなアプリケーションが複数の独立した実装を持ち、複数の調整されていないサーバーにデプロイされ、多様なクライアントに消費される場合（標準化努力によって定義されるHTTP
+                            APIにしばしば見られるように）、限定的なデプロイ向けのツールや実践は不適切になることがあります。</p>
+                    </div>
+                    <div id="rfc.section.1.p.5">
+                        <p>この不一致は主に、APIのクライアントとサーバーが異なる速度で実装および進化するため、異なる機能やバージョンを持つデプロイメントが共存する必要が生じることに起因します。その結果、そのようなデプロイメントを想定したHTTPベースのAPIの設計者は、サービスの拡張性をどのように扱うか、異なるデプロイ要件をどのように受け入れるかをより慎重に検討する必要があります。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.6" class="avoidbreakafter">
+                        <p>より一般的には、HTTPを使用するアプリケーションプロトコルは多数の設計判断に直面します。これには例えば次のようなものがあります:</p>
+                    </div>
+                    <div id="rfc.section.1.p.7">
+                        <ul>
+                            <li>新しいURIスキームを定義すべきか？新しいポートを使うべきか？</li>
+                            <li>標準のHTTPメソッドやステータスコードを使うべきか、それとも新しいものを定義するべきか？</li>
+                            <li>HTTPの利用から最大の価値をどう引き出すか？</li>
+                            <li>特にWebブラウジングとの共存をどのように実現するか？</li>
+                            <li>相互運用性の問題や「プロトコルの行き止まり」をどう回避するか？</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.1.p.8">
+                        <p><a href="#used" title="Is HTTP Being Used?">セクション 2</a>は本書が適用される場合を定義し、<a href="#overview"
+                                title="What's Important About HTTP">セクション 3</a>は保持すべきHTTPの特性を概観し、<a href="#bp"
+                                title="Best Practices for Specifying the Use of HTTP">セクション
+                                4</a>にはHTTPを使用するアプリケーションの仕様作成に関するベストプラクティスが含まれます。</p>
+                    </div>
+                    <div id="rfc.section.1.p.9">
+                        <p>本書は主にインターネット上での展開を目的としてHTTPを用いるアプリケーションプロトコルを定義するIETFの取り組みを導くために書かれていますが、他の状況にも適用可能です。ここに記載された要件は必ずしも汎用のHTTP拡張の開発に適用されるわけではないことに注意してください。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.10">
+                        <p>本書は <a href="#RFC3205"><cite title="On the use of HTTP as a Substrate">[RFC3205]</cite></a>
+                            を廃止し、HTTPに関する経過時間中の経験と発展を反映しています。</p>
+                    </div>
+                    <section id="notational-conventions">
+                        <h3 id="rfc.section.1.1"><a href="#rfc.section.1.1">1.1.</a>&nbsp;<a
+                                href="#notational-conventions">表記規約</a></h3>
+                        <div id="rfc.section.1.1.p.1">
+                            <p>本書におけるキーワード "<em class="bcp14">MUST</em>", "<em class="bcp14">MUST NOT</em>", "<em
+                                    class="bcp14">REQUIRED</em>", "<em class="bcp14">SHALL</em>", "<em
+                                    class="bcp14">SHALL NOT</em>", "<em class="bcp14">SHOULD</em>", "<em
+                                    class="bcp14">SHOULD NOT</em>", "<em class="bcp14">RECOMMENDED</em>", "<em
+                                    class="bcp14">NOT RECOMMENDED</em>", "<em class="bcp14">MAY</em>", および "<em
+                                    class="bcp14">OPTIONAL</em>" は、すべて大文字で示される場合に限り <span class="nobr">BCP 14</span>
+                                に記載されたとおりに解釈されます。<a href="#RFC2119"><cite
+                                        title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                                <a href="#RFC8174"><cite
+                                        title="Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words">[RFC8174]</cite></a>
+                                を参照してください。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="used">
+                    <h2 id="rfc.section.2" class="np"><a href="#rfc.section.2">2.</a>&nbsp;<a
+                            href="#used">HTTPは使用されていますか?</a></h2>
+                    <div id="rfc.section.2.p.1" class="avoidbreakafter">
+                        <p>HTTPを使用する目的はアプリケーションごとに異なります。本書の推奨事項は、仕様が次の条件を満たすアプリケーションを定義する場合に適用されます:</p>
+                    </div>
+                    <div id="rfc.section.2.p.2">
+                        <ul>
+                            <li>トランスポートポートとして80または443を使用する、または</li>
+                            <li>URIスキーム "http" または "https" を使用する、または</li>
+                            <li>ALPNプロトコルID <a href="#RFC7301"><cite
+                                        title="Transport Layer Security (TLS) Application-Layer Protocol Negotiation Extension">[RFC7301]</cite></a>
+                                を使用して一般的にHTTPを識別する（例: "http/1.1", "h2", "h3"）、または</li>
+                            <li>HTTP用に定義されたIANAレジストリへの登録または全体的な変更を行う。</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.2.p.3">
+                        <p>さらに、仕様がHTTPを使用する場合、HTTPプロトコルスイートのすべての要件が適用されます（特に <a href="#HTTP"><cite
+                                    title="HTTP Semantics">[HTTP]</cite></a> ですが、使用する特定のHTTPのバージョンや利用する拡張も含まれます）。</p>
+                    </div>
+                    <div id="rfc.section.2.p.4">
+                        <p>本書はアプリケーションに適用されることを意図しており、汎用のHTTP拡張には当てはまらないことに注意してください。さらに、本書は主にIETFで仕様化されるアプリケーションを対象としますが、他の標準化団体もその要件に従うことが奨励されます。
+                        </p>
+                    </div>
+                    <section id="non-http-protocols">
+                        <h3 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a>&nbsp;<a
+                                href="#non-http-protocols">非HTTPプロトコル</a></h3>
+                        <div id="rfc.section.2.1.p.1">
+                            <p>アプリケーションは、上記のHTTP使用基準を満たさなくてもHTTPに依存することができます。たとえば、メッセージ形式の一部を再定義したくないがプロトコルの他の動作を変更したい場合や、アプリケーション固有のメソッドを使用したい場合があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.2.1.p.2">
+                            <p>そうすることでプロトコル動作をより自由に変更できますが、<a href="#overview" title="What's Important About HTTP">セクション
+                                    3</a>で概説されている利点の少なくとも一部が失われます。大多数のHTTP実装はこれらの変更に容易に適応できないためです。マインドシェア（広く認知されていること）の利点も失われます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.2.1.p.3">
+                            <p>そのような仕様は <em class="bcp14">MUST NOT</em>
+                                HTTPのURIスキーム、トランスポートポート、ALPNプロトコルID、またはIANAレジストリを使用してはなりません。代わりに、それら自身のものを定義することが推奨されます。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="overview">
+                    <h2 id="rfc.section.3" class="np"><a href="#rfc.section.3">3.</a>&nbsp;<a
+                            href="#overview">HTTPの重要な点</a></h2>
+                    <div id="rfc.section.3.p.1">
+                        <p>このセクションでは、アプリケーションプロトコルを定義する際に考慮すべき、HTTPの重要な特性を検討します。</p>
+                    </div>
+                    <section id="generic-semantics">
+                        <h3 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a>&nbsp;<a
+                                href="#generic-semantics">汎用セマンティクス</a></h3>
+                        <div id="rfc.section.3.1.p.1">
+                            <p>HTTPの価値の多くはその汎用的なセマンティクスにあります。つまり、HTTPによって定義されるプロトコル要素は、特定の文脈に限定されず、あらゆるリソースに適用可能であるという点です。アプリケーション固有のセマンティクスは、ステータスコードやメソッドではなく、メッセージコンテンツやヘッダーフィールドで表現するのが適切です（とはいえ、ステータスコードやメソッドにもアプリケーション状態に関連する汎用的セマンティクスはあります）。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.1.p.2">
+                            <p>この汎用とアプリケーション固有のセマンティクスの分離により、HTTPメッセージは共通のソフトウェア（例:
+                                HTTPサーバー、中間機、クライアント実装、キャッシュ）によってアプリケーションを理解することなく処理され得ます。また、特定のアプリケーションについての専門知識がなくてもHTTPのセマンティクスの知識を活用できるようになります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.1.p.3">
+                            <p>したがって、HTTPを使用するアプリケーションは、メソッド、ステータスコード、既存のヘッダーフィールドなどの汎用的なプロトコル要素のセマンティクスを再定義、細分化、上書きしてはなりません（<em
+                                    class="bcp14">MUST NOT</em>）。代わりに、仕様はそのアプリケーション固有のプロトコル要素、すなわちHTTPリソースに焦点を当てるべきです。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.1.p.4" class="avoidbreakafter">
+                            <p>仕様を書く際には、HTTPがどのように実装、サポート、使用されるべきかを正確に指定したくなることがよくあります。しかし、これにより意図しないHTTP動作のプロファイルが生まれることがあります。例えば、次のような文言を含む仕様をよく見かけます:
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.1.p.5">
+                            <blockquote>
+                                <div id="rfc.section.3.1.p.5.1">
+                                    <p>POSTリクエストは必ず201 (Created) の応答を返さなければならない。</p>
+                                </div>
+                            </blockquote>
+                        </div>
+                        <div id="rfc.section.3.1.p.6">
+                            <p>このような記述は、実際のデプロイメントではステータスコードが異なる理由が多数あるにもかかわらず、クライアントに対して常に201が返るという期待を生じさせます。例えば、認証を要求するプロキシがある場合や、サーバー側のエラー、リダイレクションなどが考えられます。クライアントがこれらを想定していないと、アプリケーションのデプロイメントは脆弱になります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.1.p.7">
+                            <p>詳細は <a href="#resource" title="Specifying Server Behaviour">セクション 4.2</a> を参照してください。</p>
+                        </div>
+                    </section>
+                    <section id="links">
+                        <h3 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a>&nbsp;<a href="#links">リンク</a>
+                        </h3>
+                        <div id="rfc.section.3.2.p.1">
+                            <p>もう一つの一般的な慣行は、HTTPサーバーの名前空間（またはその一部）が単一のアプリケーション専用であると仮定することです。これはその空間にアプリケーション固有の特別なセマンティクスを重ねることになり、他のアプリケーションがそれを使用することを妨げます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.2.p.2">
+                            <p><a href="#BCP190"><cite title="URI Design and Ownership">[BCP190]</cite></a>
+                                で説明されているように、標準によるURL空間の一部の「占拠」はサーバー自身のリソースに対する権限を奪い、デプロイメントの問題を引き起こす可能性があるため、標準化において望ましくない慣行です。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.2.p.3">
+                            <p>代わりに、URIコンポーネント（パスなど）を静的に定義するのではなく、HTTPを使用するアプリケーションはリンク <a href="#WEB-LINKING"><cite
+                                        title="Web Linking">[WEB-LINKING]</cite></a> を定義・使用して、デプロイの柔軟性を確保することが<em
+                                    class="bcp14">RECOMMENDED</em>です。</p>
+                        </div>
+                        <div id="rfc.section.3.2.p.4">
+                            <p>このようにランタイムのリンクを使用することには、特にアプリケーションが複数の実装やデプロイメントを持つ場合（標準化されることの多いケース）に、多くの利点があります。</p>
+                        </div>
+                        <div id="rfc.section.3.2.p.5">
+                            <p>例えば、リンクでナビゲートすることでリクエストがリダイレクトのオーバーヘッドなしに別のサーバーにルーティングされ、複数のマシンにまたがるデプロイメントをよくサポートできます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.2.p.6">
+                            <p>リンクを使用することで、同じサーバー上で異なるアプリケーションを「混在」させることが可能になり、リンクを含むドキュメント自体にターゲットに関する情報を含めることで拡張性、バージョニング、機能管理の自然な仕組みが提供されます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.2.p.7">
+                            <p>また、リンクを使用することはWebで見られるキャッシュ無効化の一形態も提供します。リソースの状態が変わったときに、アプリケーションは影響を受けるリンクを変更して常に新しいコピーが取得されるようにできます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.2.p.8">
+                            <p>詳細は <a href="#specifying-urls" title="Specifying URLs">セクション 4.4</a> を参照してください。</p>
+                        </div>
+                    </section>
+                    <section id="rich-functionality">
+                        <h3 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a>&nbsp;<a
+                                href="#rich-functionality">豊富な機能</a></h3>
+                        <div id="rfc.section.3.3.p.1" class="avoidbreakafter">
+                            <p>HTTPはアプリケーションに対して次のような多数の機能を提供します:</p>
+                        </div>
+                        <div id="rfc.section.3.3.p.2">
+                            <ul>
+                                <li>メッセージのフレーミング</li>
+                                <li>多重化（HTTP/2 <a href="#HTTP2"><cite title="HTTP/2">[HTTP/2]</cite></a> および HTTP/3 <a
+                                        href="#HTTP3"><cite title="HTTP/3">[HTTP/3]</cite></a> において）</li>
+                                <li>TLSとの統合</li>
+                                <li>中間体（プロキシ、ゲートウェイ、コンテンツ配信ネットワーク(CDN)）のサポート</li>
+                                <li>クライアント認証</li>
+                                <li>フォーマット、言語、その他の機能に対するコンテンツネゴシエーション</li>
+                                <li>サーバーのスケーラビリティ、レイテンシおよび帯域幅の削減、信頼性のためのキャッシング</li>
+                                <li>URL空間の豊かな利用によるアクセス制御の粒度</li>
+                                <li>レスポンスの一部を選択的に要求するための部分コンテンツ</li>
+                                <li>Webブラウザを用いてアプリケーションと容易に対話できる能力</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.3">
+                            <p>HTTPを使用するアプリケーションは、これらの機能を活用して、ユーザーがそれらの恩恵を最大限に受けられるようにし、さまざまな状況でデプロイできるようにすることが奨励されます。本書は特定の機能の使用を義務付けるものではありません。適切な設計上のトレードオフは状況に強く依存するためです。しかし、<a
+                                    href="#bp" title="Best Practices for Specifying the Use of HTTP">セクション
+                                    4</a>の実践に従うことが良い出発点となります。</p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="bp">
+                    <h2 id="rfc.section.4" class="np"><a href="#rfc.section.4">4.</a>&nbsp;<a
+                            href="#bp">HTTPの使用を指定する際のベストプラクティス</a></h2>
+                    <div id="rfc.section.4.p.1">
+                        <p>このセクションには、特定のHTTPプロトコル要素に関する実践を含め、アプリケーションがHTTPを使用する際の仕様作成に関するベストプラクティスが含まれます。</p>
+                    </div>
+                    <section id="specifying-the-use-of-http">
+                        <h3 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a>&nbsp;<a
+                                href="#specifying-the-use-of-http">HTTPの使用の指定</a></h3>
+                        <div id="rfc.section.4.1.p.1">
+                            <p>仕様はHTTPの主要な参照として<a href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>を使用すべきです;
+                                特定の機能が明示的に指定されているなどの特別な理由がない限り、HTTPスイート内のすべての仕様を参照する必要はありません。</p>
+                        </div>
+                        <div id="rfc.section.4.1.p.2">
+                            <p>HTTPはホップバイホップのプロトコルであるため、接続はアプリケーションが制御していない実装（プロキシ、CDN、ファイアウォールなど）によって扱われる可能性があります。特定のHTTPバージョンを必須とするとこれらの状況での利用が困難になり、相互運用性を損ないます。したがって、HTTPを使用するアプリケーションが使用するHTTPの最低バージョンを指定することは<em
+                                    class="bcp14">推奨されません</em>。</p>
+                        </div>
+                        <div id="rfc.section.4.1.p.3">
+                            <p>ただし、アプリケーションのデプロイメントが特定のHTTPバージョン（例えばHTTP/2の多重化）を利用することで利益を得る場合は、その旨を記述すべきです。</p>
+                        </div>
+                        <div id="rfc.section.4.1.p.4">
+                            <p>HTTPを使用するアプリケーションは、プロトコルの進化能力を保持するために、最大バージョンを指定してはなりません (<em class="bcp14">MUST NOT</em>
+                                )。</p>
+                        </div>
+                        <div id="rfc.section.4.1.p.5" class="avoidbreakafter">
+                            <p>プロトコル相互作用の例を指定する際、アプリケーションはリクエストとレスポンスの両方のメッセージを完全なヘッダセクションで文書化するべきで、望ましくはHTTP/1.1形式で示すべきです
+                                <a href="#HTTP11"><cite title="HTTP/1.1">[HTTP/1.1]</cite></a>。例えば:
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.1.p.6">
+                            <pre class="text">
+GET /thing HTTP/1.1
+Host: example.com
+Accept: application/things+json
+User-Agent: Foo/1.0
+
+</pre>
+                        </div>
+                        <div id="rfc.section.4.1.p.7">
+                            <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/things+json
+Content-Length: 500
+Server: Bar/2.2
+
+[content here]
+</pre>
+                        </div>
+                    </section>
+                    <section id="resource">
+                        <h3 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a>&nbsp;<a
+                                href="#resource">サーバーの動作の指定</a></h3>
+                        <div id="rfc.section.4.2.p.1" class="avoidbreakafter">
+                            <p>アプリケーションのサーバー側の動作は、以下のプロトコル要素を定義することで最も効果的に指定されます:</p>
+                        </div>
+                        <div id="rfc.section.4.2.p.2">
+                            <ul>
+                                <li>メディアタイプ <a href="#RFC6838"><cite
+                                            title="Media Type Specifications and Registration Procedures">[RFC6838]</cite></a>、しばしばJSONのようなフォーマット慣習に基づく;
+                                </li>
+                                <li>HTTPヘッダフィールド（<a href="#headers" title="Specifying HTTP Header Fields">セクション
+                                        4.7</a>参照）; および</li>
+                                <li>リンク関係によって識別されるリソースの動作 <a href="#WEB-LINKING"><cite
+                                            title="Web Linking">[WEB-LINKING]</cite></a>。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.4.2.p.3" class="avoidbreakafter">
+                            <p>これらのプロトコル要素を組み合わせて、リンク関係で識別され指定された動作を実装する一連のリソースを定義することで、アプリケーションの動作を定義できます。これには例えば:</p>
+                        </div>
+                        <div id="rfc.section.4.2.p.4">
+                            <ul>
+                                <li>GETを使用した複数のメディアタイプで識別される形式でのリソース状態の取得;</li>
+                                <li>POSTまたはPUTを使用したリソースの作成または更新（適切に識別されたリクエストコンテンツ形式で）;</li>
+                                <li>POSTを用いたデータ処理（識別されたリクエストおよびレスポンスのコンテンツ形式を使用）; および</li>
+                                <li>DELETEを使用したリソースの削除。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.4.2.p.5" class="avoidbreakafter">
+                            <p>例えば、アプリケーションは次のように指定するかもしれません:</p>
+                        </div>
+                        <div id="rfc.section.4.2.p.6">
+                            <blockquote>
+                                <div id="rfc.section.4.2.p.6.1">
+                                    <p>"example-widget"リンク関係タイプでリンクされたリソースはWidgetです。Widgetの状態は"application/example-widget+json"形式で取得でき、同じリンクへPUTすることで更新できます。Widgetリソースは削除できます。
+                                    </p>
+                                </div>
+                                <div id="rfc.section.4.2.p.6.2">
+                                    <p>Widget表現のExample-Countレスポンスヘッダフィールドは、送信者が保持するWidgetの数を示します。</p>
+                                </div>
+                                <div id="rfc.section.4.2.p.6.3">
+                                    <p>"application/example-widget+json"形式は、Widgetの状態を表すJSON
+                                        [RFC8259]形式です。Linkヘッダフィールドの値に示されたリンクで"example-other-info"リンク関係タイプにある関連情報へのリンクを含みます。
+                                    </p>
+                                </div>
+                            </blockquote>
+                        </div>
+                        <div id="rfc.section.4.2.p.7">
+                            <p>アプリケーションはURIテンプレート <a href="#URI-TEMPLATE"><cite
+                                        title="URI Template">[URI-TEMPLATE]</cite></a>
+                                の使用を指定して、クライアントがランタイムデータに基づいてURLを生成できるようにすることもできます。</p>
+                        </div>
+                    </section>
+                    <section id="clients">
+                        <h3 id="rfc.section.4.3"><a href="#rfc.section.4.3">4.3.</a>&nbsp;<a
+                                href="#clients">クライアントの動作の指定</a></h3>
+                        <div id="rfc.section.4.3.p.1">
+                            <p>アプリケーションがクライアントに期待する動作は、相互運用性の問題を避けるためにWebブラウザの期待と密接に整合しているべきです。</p>
+                        </div>
+                        <div id="rfc.section.4.3.p.2">
+                            <p>その一つの方法は、ブラウザがHTTPに対して使用する抽象である<a href="#FETCH"><cite
+                                        title="Fetch - Living Standard">[FETCH]</cite></a>に基づいて定義することです。</p>
+                        </div>
+                        <div id="rfc.section.4.3.p.3" class="avoidbreakafter">
+                            <p>自動リダイレクト処理などのいくつかのクライアント挙動やクッキーのような拡張は、HTTPによって必須ではありませんが非常に一般的になっています。アプリケーションがそれらの使用を明示的に指定しない場合、混乱や相互運用性の問題が生じる可能性があります。特に次の点に注意してください:
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.3.p.4">
+                            <dl>
+                                <dt>リダイレクト処理:</dt>
+                                <dd style="margin-left: 1.5em">アプリケーションはリダイレクトをどのように扱うことを期待するかを指定する必要があります。詳細は<a
+                                        href="#redirects" title="Redirection">セクション 4.6.1</a>を参照してください。</dd>
+                                <dt>クッキー:</dt>
+                                <dd style="margin-left: 1.5em">HTTPを使用するアプリケーションは、クッキーが必要な場合はクッキー仕様 <a
+                                        href="#COOKIES"><cite
+                                            title="HTTP State Management Mechanism">[COOKIES]</cite></a> を明示的に参照するべきです。
+                                </dd>
+                                <dt>証明書:</dt>
+                                <dd style="margin-left: 1.5em">HTTPを使用するアプリケーションは、HTTPSが使用される場合にTLS証明書が<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110.html#section-4.3.4">Section
+                                        4.3.4</a> に従って検証されることを指定するべきです。</dd>
+                            </dl>
+                        </div>
+                        <div id="rfc.section.4.3.p.5">
+                            <p>HTTPを使用するアプリケーションは、通常ネゴシエートされるHTTP機能をクライアントが静的にサポートすることを要求すべきではありません。例えば、あるコンテンツコーディングをクライアントが静的にサポートすることを要求する（<a
+                                    href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>、<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.4.1">Section
+                                    8.4.1</a>）代わりに、それをネゴシエートする（<a href="#HTTP"><cite
+                                        title="HTTP Semantics">[HTTP]</cite></a>、<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-12.5.3">Section
+                                    12.5.3</a>）べきです。前者は、そうでなければ適合するクライアントがアプリケーションと相互運用できなくなることを意味します。とはいえ、アプリケーションはそのような機能の実装を奨励することはできます。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="specifying-urls">
+                        <h3 id="rfc.section.4.4"><a href="#rfc.section.4.4">4.4.</a>&nbsp;<a
+                                href="#specifying-urls">URLの指定</a></h3>
+                        <div id="rfc.section.4.4.p.1">
+                            <p>HTTPでは、クライアントがやり取りするリソースはURLで識別されます <a href="#URL"><cite
+                                        title="Uniform Resource Identifier (URI): Generic Syntax">[URL]</cite></a>。<a
+                                    href="#BCP190"><cite title="URI Design and Ownership">[BCP190]</cite></a>
+                                が説明するように、URLの一部はサーバーの所有者（"authority"）の制御下に置かれるよう設計されており、これがデプロイの柔軟性を与えます。</p>
+                        </div>
+                        <div id="rfc.section.4.4.p.2">
+                            <p>これは多くの場合、HTTPを使用するアプリケーションの仕様が固定されたアプリケーションURLやパスを含まないことを意味します。単一デプロイ向けAPIの仕様で"/app/v1"のようなパスプレフィックスを指定するのは一般的ですが、IETFの仕様でそれを行うのは不適切です。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.4.p.3">
+                            <p>したがって、仕様作成者はクライアントがアプリケーションのURLを発見する手段を提供する必要があります。加えて、どのURLスキームを使用するか、専用ポートを用いるかHTTPのポートを再利用するかを指定する必要があります。
+                            </p>
+                        </div>
+                        <section id="discovering-an-applications-urls">
+                            <h4 id="rfc.section.4.4.1"><a href="#rfc.section.4.4.1">4.4.1.</a>&nbsp;<a
+                                    href="#discovering-an-applications-urls">アプリケーションのURLの検出</a></h4>
+                            <div id="rfc.section.4.4.1.p.1">
+                                <p>一般に、クライアントは特定のデプロイメントに関する情報（他の関連リソースへのリンクを含むことがある）を含む初期ドキュメントを要求することで、そのアプリケーションサーバーとのやり取りを開始します。これによりデプロイは可能な限り柔軟になり（複数サーバーにまたがる可能性など）、進化を許容し、また"ディスカバリドキュメント"をクライアントに合わせて調整する機会を与えます。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.4.1.p.2">
+                                <p>初期URLを検出するための一般的なパターンがいくつかあります。</p>
+                            </div>
+                            <div id="rfc.section.4.4.1.p.3">
+                                <p>最も直接的なURL検出メカニズムは、クライアントを完全なURLで設定する（またはそれを伝える）ことです。これは設定ドキュメントや他のディスカバリメカニズムを通じて行われるかもしれません。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.4.1.p.4">
+                                <p>しかし、クライアントがサーバーのホスト名とアプリケーションの識別子しか知らない場合、そこから初期URLを導出する方法が必要になります。</p>
+                            </div>
+                            <div id="rfc.section.4.4.1.p.5" class="avoidbreakafter">
+                                <p>アプリケーションはURLパスの固定プレフィックスを定義できません; 詳細は<a href="#BCP190"><cite
+                                            title="URI Design and Ownership">[BCP190]</cite></a>を参照してください。代わりに、そのようなアプリケーションの仕様は次の戦略のいずれかを使用できます:
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.4.1.p.6">
+                                <ul>
+                                    <li>そのアプリケーションのエントリポイントとしてwell-known URI <a href="#WELL-KNOWN-URI"><cite
+                                                title="Well-Known Uniform Resource Identifiers (URIs)">[WELL-KNOWN-URI]</cite></a>
+                                        を登録する。これにより、他のアプリケーションと衝突しない固定パスが各サーバーに提供されます。</li>
+                                    <li>サーバー権限がエントリポイントのURLを生成するためのURIテンプレート <a href="#URI-TEMPLATE"><cite
+                                                title="URI Template">[URI-TEMPLATE]</cite></a>
+                                        や類似のメカニズムを伝達できるようにする。例えば、これは設定ドキュメントや他のアーティファクトで行われるかもしれません。</li>
+                                </ul>
+                            </div>
+                            <div id="rfc.section.4.4.1.p.7">
+                                <p>一度ディスカバリドキュメントが見つかれば、それを取得し（メタデータが許す場合は）後で再利用のためにキャッシュし、完全なURIやURLテンプレートを使ってアプリケーションに関連する他のリソースを見つけるために使用できます。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.4.1.p.8">
+                                <p>場合によっては、通信が非常に短い場合やレイテンシの懸念からディスカバリドキュメントの使用を避けたい場合があります。これらの状況には、アプリケーションのすべてのリソースをwell-knownな場所に配置することで対処できます。
+                                </p>
+                            </div>
+                        </section>
+                        <section id="scheme">
+                            <h4 id="rfc.section.4.4.2"><a href="#rfc.section.4.4.2">4.4.2.</a>&nbsp;<a
+                                    href="#scheme">URIスキームの検討</a></h4>
+                            <div id="rfc.section.4.4.2.p.1">
+                                <p>HTTPを使用するアプリケーションは通常 "http" および/または "https"
+                                    URIスキームを利用します。認証、完全性、機密性を提供し、広範な監視攻撃を軽減するために "https" が<em class="bcp14">推奨されます</em>
+                                    <a href="#RFC7258"><cite
+                                            title="Pervasive Monitoring Is an Attack">[RFC7258]</cite></a>。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.4.2.p.2" class="avoidbreakafter">
+                                <p>ただし、アプリケーション固有のスキームを定義することも可能です。HTTPを使うアプリケーションのURIスキームを定義する際には、いくつかのトレードオフと注意点があります:
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.4.2.p.3">
+                                <ul>
+                                    <li>未修正のWebブラウザは新しいスキームをサポートしません。Webブラウザに新しいURIスキームを登録することは可能ですが（例: <a
+                                            href="#HTML"><cite title="HTML - Living Standard">[HTML]</cite></a> の
+                                        registerProtocolHandler() など）、これらのメカニズムのサポートはブラウザ間で一貫しておらず、機能も異なります。</li>
+                                    <li>既存の非ブラウザクライアント、中間体、サーバー、および関連ソフトウェアは新しいスキームを認識しません。例えば、クライアントライブラリがリクエストを適切に送信できなかったり、キャッシュがレスポンスの保存を拒否したり、プロキシがリクエストを転送できなかったりする可能性があります。
+                                    </li>
+                                    <li>URLはHTTPアーティファクトに自動生成されることが多いため（例:
+                                        Locationレスポンスヘッダフィールド）、新しいスキームが一貫して使用されるようにするのは難しいことがあります。</li>
+                                    <li>新しいスキームで識別されるリソースは依然として "http" および/または "https"
+                                        URLで利用可能です。それらのURLが使用されてしまうと、セキュリティや運用上の問題が発生する可能性があります。例えば、リクエストが通常のWebサイトに送信されないように新しいスキームを使おうとするのは失敗しやすいです。
+                                    </li>
+                                    <li>Webの同一生成元ポリシーのようにURLのオリジンに依存する機能は、スキームの変更によって影響を受けます <a href="#RFC6454"><cite
+                                                title="The Web Origin Concept">[RFC6454]</cite></a>。</li>
+                                    <li>クッキー <a href="#COOKIES"><cite
+                                                title="HTTP State Management Mechanism">[COOKIES]</cite></a>、認証 <a
+                                            href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>、キャッシュ <a
+                                            href="#HTTP-CACHING"><cite
+                                                title="HTTP Caching">[HTTP-CACHING]</cite></a>、HTTP Strict Transport
+                                        Security (HSTS) <a href="#RFC6797"><cite
+                                                title="HTTP Strict Transport Security (HSTS)">[RFC6797]</cite></a>、Cross-Origin
+                                        Resource Sharing (CORS) <a href="#FETCH"><cite
+                                                title="Fetch - Living Standard">[FETCH]</cite></a>
+                                        のようなHTTP固有の機能は、定義と実装に依存して正しく動作しないことがあります。一般にこれらはURLが常に "http" または "https"
+                                        であることを前提に設計されています。</li>
+                                    <li>セキュアコンテキストを要求するWeb機能 <a href="#SECCTXT"><cite
+                                                title="Secure Contexts">[SECCTXT]</cite></a>
+                                        は、新しいスキームを安全でないものとして扱う可能性があります。</li>
+                                </ul>
+                            </div>
+                            <div id="rfc.section.4.4.2.p.4">
+                                <p>新しいURIスキームの作成に関する詳細は <a href="#RFC7595"><cite
+                                            title="Guidelines and Registration Procedures for URI Schemes">[RFC7595]</cite></a>
+                                    を参照してください。</p>
+                            </div>
+                        </section>
+                        <section id="choosing-transport-ports">
+                            <h4 id="rfc.section.4.4.3"><a href="#rfc.section.4.4.3">4.4.3.</a>&nbsp;<a
+                                    href="#choosing-transport-ports">トランスポートポートの選択</a></h4>
+                            <div id="rfc.section.4.4.3.p.1">
+                                <p>アプリケーションはデフォルトのポート（HTTPは80、HTTPSは443）を使用するか、他のポートでデプロイすることができます。この決定はデプロイ時に行うか、仕様で推奨することができます（例:
+                                    そのアプリケーションのためにポートを割り当て登録するなど）。</p>
+                            </div>
+                            <div id="rfc.section.4.4.3.p.2">
+                                <p>非デフォルトポートを使用する場合、そのポートはすべてのリソースのURLのauthorityに反映される必要があります;
+                                    デフォルトポートを変更する唯一のメカニズムはURIスキームを変更することです（<a href="#scheme"
+                                        title="Considering URI Schemes">セクション 4.4.2</a>参照）。</p>
+                            </div>
+                            <div id="rfc.section.4.4.3.p.3">
+                                <p>デフォルト以外のポートを使用するとプライバシーへの影響（つまり、プロトコルが他のトラフィックと区別されるようになる）や運用上の懸念（いくつかのネットワークがブロックする可能性がある）が生じます。これらのプライバシーの影響（区別可能性から生じるものを含む）はセキュリティ考慮事項に文書化されるべきです。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.4.3.p.4">
+                                <p>さらなるガイダンスについては <a href="#RFC7605"><cite
+                                            title="Recommendations on Using Assigned Transport Port Numbers">[RFC7605]</cite></a>
+                                    を参照してください。</p>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="using-http-methods">
+                        <h3 id="rfc.section.4.5"><a href="#rfc.section.4.5">4.5.</a>&nbsp;<a
+                                href="#using-http-methods">HTTPメソッドの使用</a></h3>
+                        <div id="rfc.section.4.5.p.1">
+                            <p>HTTPを使用するアプリケーションは、GET、POST、PUT、DELETE、PATCHのような登録済みのHTTPメソッドの使用に限定しなければなりません (<em
+                                    class="bcp14">MUST</em>)。</p>
+                        </div>
+                        <div id="rfc.section.4.5.p.2">
+                            <p>新しいHTTPメソッドはまれであり、IETFレビューでの登録が必要です（"HTTP Method
+                                Registry"）。また、それらは汎用である必要があります。つまり、特定のアプリケーションのリソースだけでなく、潜在的にすべてのリソースに適用可能でなければなりません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.5.p.3">
+                            <p>歴史的に一部のアプリケーション（例: <a href="#RFC4791"><cite
+                                        title="Calendaring Extensions to WebDAV (CalDAV)">[RFC4791]</cite></a>）はアプリケーション固有のメソッドを定義してきましたが、<a
+                                    href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a> は現在これを禁止しています。</p>
+                        </div>
+                        <div id="rfc.section.4.5.p.4">
+                            <p>新しいメソッドが必要だと著者が考える場合は、早期にHTTPコミュニティ（例: &lt;<a
+                                    href="mailto:ietf-http-wg@w3.org">mailto:ietf-http-wg@w3.org</a>&gt;
+                                メーリングリスト）と関わり、アプリケーション仕様の一部としてではなく別個のHTTP拡張として提案を文書化することが推奨されます。</p>
+                        </div>
+                        <section id="get">
+                            <h4 id="rfc.section.4.5.1"><a href="#rfc.section.4.5.1">4.5.1.</a>&nbsp;<a
+                                    href="#get">GET</a></h4>
+                            <div id="rfc.section.4.5.1.p.1">
+                                <p>GETは最も一般的で有用なHTTPメソッドであり、その取得セマンティクスはキャッシュや副作用のないリンク付けを可能にし、HTTPを使用する多くの利点の基礎となります。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.5.1.p.2">
+                                <p>クエリはしばしばURLのクエリコンポーネントを使用してGETで行われます。これはWebブラウジングで馴染みのあるパターンであり、結果はキャッシュされ、高コストの処理の効率を改善できます。しかし、バイナリデータがクエリの一部である場合など、URIの制限された構文のためにGETが扱いにくくなることがあります。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.5.1.p.3">
+                                <p>短いクエリでは問題になりませんが、大きなクエリや高頻度のリクエストが必要な場合には問題になることがあります。さらに、一部のHTTP実装はサポートするURLのサイズを制限していますが、現代のHTTPソフトウェアは以前よりもはるかに寛大な限界を持っています（通常、<a
+                                        href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>
+                                    が要求するように8000オクテットよりかなり多い）。</p>
+                            </div>
+                            <div id="rfc.section.4.5.1.p.4">
+                                <p>これらの場合、HTTPを使用するアプリケーションはクエリをリクエストのコンテンツで表現するためにPOSTの使用を検討してもよいです;
+                                    これによりエンコードのオーバーヘッドや実装におけるURL長制限を回避できます。ただし、その場合GETのキャッシュやクエリ結果へのリンクといった利点は失われます。したがって、POSTクエリをサポートする必要があるアプリケーションは両方のメソッドを許容することを検討すべきです。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.5.1.p.5">
+                                <p>GETリクエストの処理はアプリケーションの状態を変更したり、クライアントにとって重要な副作用を持ってはなりません。なぜなら実装は失敗したHTTP
+                                    GETリクエストを再試行することがあり、またTLSのearly dataで保護された一部のGETリクエストはリプレイ攻撃に対して脆弱である可能性があるためです（<a
+                                        href="#RFC8470"><cite
+                                            title="Using Early Data in HTTP">[RFC8470]</cite></a>参照）。これはログ記録などの類似機能を含みません;
+                                    詳細は <a href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.1">Section
+                                        9.2.1</a> を参照してください。</p>
+                            </div>
+                            <div id="rfc.section.4.5.1.p.6">
+                                <p>最後に、汎用のHTTP構文ではGETリクエストメッセージにコンテンツを含めることが許されていますが、これはメッセージパーサーを汎用にするためのものです。<a
+                                        href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.1">Section
+                                        9.3.1</a>
+                                    によれば、GETの中のコンテンツは推奨されず意味を持たず、汎用のHTTPソフトウェア（中間体、キャッシュ、サーバー、クライアントライブラリなど）によって無視または拒否されます。
+                                </p>
+                            </div>
+                        </section>
+                        <section id="options">
+                            <h4 id="rfc.section.4.5.2"><a href="#rfc.section.4.5.2">4.5.2.</a>&nbsp;<a
+                                    href="#options">OPTIONS</a></h4>
+                            <div id="rfc.section.4.5.2.p.1">
+                                <p>OPTIONSメソッドはメタデータ取得のために定義され、WebDAV <a href="#RFC4918"><cite
+                                            title="HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV)">[RFC4918]</cite></a>
+                                    やCORS <a href="#FETCH"><cite title="Fetch - Living Standard">[FETCH]</cite></a>
+                                    で使用されます。HTTPベースのAPIはしばしばリソースに関するメタデータを取得する必要があるため、OPTIONSが検討されます。</p>
+                            </div>
+                            <div id="rfc.section.4.5.2.p.2" class="avoidbreakafter">
+                                <p>しかし、OPTIONSには重要な制限があります:</p>
+                            </div>
+                            <div id="rfc.section.4.5.2.p.3">
+                                <ul>
+                                    <li>OPTIONSはデフォルトメソッドではないため、単純なURLでメタデータにリンクすることができません。</li>
+                                    <li>OPTIONSレスポンスはキャッシュ可能ではありません。HTTPキャッシュはリソースの表現（つまりGETとHEAD）に基づいて動作するためです。OPTIONSレスポンスを別個にキャッシュする場合、そのHTTPキャッシュの有効期限、二次キー、その他のメカニズムとの相互作用を考慮する必要があります。
+                                    </li>
+                                    <li>OPTIONSは"チャッティ"です — メタデータを別途要求することで、アプリケーションとのやり取りに必要なリクエスト数が増えます。</li>
+                                    <li>OPTIONSの実装サポートは普遍的ではありません; 一部のサーバーは大きな労力なしにOPTIONS要求に応答する機能を公開しないことがあります。</li>
+                                </ul>
+                            </div>
+                            <div id="rfc.section.4.5.2.p.4" class="avoidbreakafter">
+                                <p>OPTIONSの代わりに次のいずれかの代替アプローチがより適切かもしれません:</p>
+                            </div>
+                            <div id="rfc.section.4.5.2.p.5">
+                                <ul>
+                                    <li>サーバー全体のメタデータについては、well-known URI <a href="#WELL-KNOWN-URI"><cite
+                                                title="Well-Known Uniform Resource Identifiers (URIs)">[WELL-KNOWN-URI]</cite></a>
+                                        を作成するか、適切であれば既存のものを使用する（例: host-meta <a href="#RFC6415"><cite
+                                                title="Web Host Metadata">[RFC6415]</cite></a>）。</li>
+                                    <li>特定のリソースに関するメタデータについては、別個のリソースを作成し、それへのリンクをLinkレスポンスヘッダフィールドやレスポンス内容に直列化されたリンクで示す。<a
+                                            href="#WEB-LINKING"><cite title="Web Linking">[WEB-LINKING]</cite></a>
+                                        を参照。LinkヘッダフィールドはHEADレスポンスでも利用可能であり、クライアントがリソースと対話する前にその機能を発見したい場合に有用です。</li>
+                                </ul>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="using-http-status-codes">
+                        <h3 id="rfc.section.4.6"><a href="#rfc.section.4.6">4.6.</a>&nbsp;<a
+                                href="#using-http-status-codes">HTTPステータスコードの使用</a></h3>
+                        <div id="rfc.section.4.6.p.1">
+                            <p>HTTPステータスコードはキャッシュや中間体、クライアントなどの汎用HTTPコンポーネントおよびアプリケーション自体の利便のためにセマンティクスを伝えます。しかし、アプリケーションはその使用においていくつかの落とし穴に直面します。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.6.p.2">
+                            <p>まず、ステータスコードはしばしばアプリケーション以外のコンポーネントによって生成されます。例えば、ネットワークエラーが発生した場合、キャプティブポータルやプロキシ、CDNが存在する場合、またはサーバーが過負荷状態にある、あるいは攻撃を受けていると考える場合などです。特定のエラー条件が発生したときに汎用クライアントソフトウェアがステータスコードを生成することさえあります。その結果、アプリケーションが特定のステータスコードに特定のセマンティクスを割り当てると、クライアントはそのステータスコードがアプリケーションではなく汎用コンポーネントによって生成されたために状態を誤認する可能性があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.6.p.3">
+                            <p>さらに、アプリケーションのエラーを個別のHTTPステータスコードに1対1でマッピングすると、適用可能なHTTPステータスコードの有限の空間が枯渇する状況に陥りやすいです。これにより、新しいアプリケーション固有のステータスコードを作成したり、既存のステータスコードをその意味と乖離して使用したりするなどの悪い慣行につながります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.6.p.4">
+                            <p>代わりに、HTTPを使用するアプリケーションは、最も適切なステータスコードを使用し、疑わしい場合は一般的なステータスコード（200、400、500など）を寛大に使うべきです。重要なのは、ステータスコードとアプリケーションエラーの間に1対1の関係を指定しないことであり、これにより前述の枯渇問題を回避できます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.6.p.5">
+                            <p>同じステータスコードにマップされた複数のエラー状態を区別し、前述の誤帰属の問題を避けるために、HTTPを使用するアプリケーションはレスポンスのメッセージ内容および/またはヘッダフィールドでより細かいエラー情報を伝えるべきです。<a
+                                    href="#PROBLEM-DETAILS"><cite
+                                        title="Problem Details for HTTP APIs">[PROBLEM-DETAILS]</cite></a>
+                                はその一つの方法を提供します。</p>
+                        </div>
+                        <div id="rfc.section.4.6.p.6">
+                            <p>登録されたHTTPステータスコードの集合は拡張され得るため、HTTPを使用するアプリケーションはクライアントがすべての適用可能なステータスコードを優雅に扱えるようにすべきであることを明示するべきです（つまり、あるステータスコードを認識しないクライアントはそのコードの一般的なn00のセマンティクスにフォールバックできること;
+                                例えば499を認識しないクライアントは安全に400 (Bad Request) として扱える等）。これは将来的に完全でない洗い出しリストを作成するより好ましいです。</p>
+                        </div>
+                        <div id="rfc.section.4.6.p.7">
+                            <p>HTTPを使用するアプリケーションはHTTPステータスコードのセマンティクスを再定義してはなりません (<em class="bcp14">MUST
+                                    NOT</em>)。理由句を特定のものにすることを要求するのは<em class="bcp14">推奨されません</em>;
+                                理由句はHTTPにおいて機能を持たず、実装によって保持される保証がなく、HTTP/2のメッセージ形式ではまったく運ばれません。</p>
+                        </div>
+                        <div id="rfc.section.4.6.p.8">
+                            <p>アプリケーションは登録済みのHTTPステータスコードのみを使用しなければなりません (<em
+                                    class="bcp14">MUST</em>)。メソッドと同様に、新しいHTTPステータスコードはまれであり、IETFレビューで登録されることが要求されます。HTTPステータスコードは汎用的であり、特定のアプリケーションのリソースだけでなく潜在的にすべてのリソースに適用可能である必要があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.6.p.9">
+                            <p>著者が新しいステータスコードが必要だと考える場合は、早期にHTTPコミュニティ（例: &lt;<a
+                                    href="mailto:ietf-http-wg@w3.org">mailto:ietf-http-wg@w3.org</a>&gt;
+                                メーリングリスト）と関わり、アプリケーション仕様の一部としてではなく別個のHTTP拡張として提案を文書化することが推奨されます。</p>
+                        </div>
+                        <section id="redirects">
+                            <h4 id="rfc.section.4.6.1"><a href="#rfc.section.4.6.1">4.6.1.</a>&nbsp;<a
+                                    href="#redirects">リダイレクション</a></h4>
+                            <div id="rfc.section.4.6.1.p.1">
+                                <p>3xx系列のステータスコードは<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110.html#section-15.4">Section
+                                        15.4</a>で定義され、ユーザエージェントにリクエストを満たす別のリソースを指示します。最も一般的なのは301、302、307、308で、これらはすべてクライアントがリクエストを再送する場所を示すLocationレスポンスヘッダフィールドを使用します。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.6.1.p.2" class="avoidbreakafter">
+                                <p>このグループのメンバーが異なる点は二つあります:</p>
+                            </div>
+                            <div id="rfc.section.4.6.1.p.3">
+                                <ul>
+                                    <li>恒久的か一時的か。恒久的リダイレクトはクライアントに保存されたリンク（例:
+                                        ブックマーク）を更新させるために使用できますが、一時的なものはそうできません。これはHTTPキャッシングには影響しません; 完全に別のものです。</li>
+                                    <li>リダイレクトがPOSTからGETへのリクエストメソッド変更を許すかどうか。Webブラウザは一般に301および302に対してPOSTをGETに変更するため、308および307はメソッドを変更せずにリダイレクトを許可するために作成されました。
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="rfc.section.4.6.1.p.4" class="avoidbreakafter">
+                                <p>この表はそれらの関係を要約します:</p>
+                            </div>
+                            <div class="table table-condensed table-striped">
+                                <table class="v3 text-center">
+                                    <caption>表 1</caption>
+                                    <thead>
+                                        <tr>
+                                            <th class="text-left" colspan="1" rowspan="1"><span class="nobr"> </span>
+                                            </th>
+                                            <th class="text-left" colspan="1" rowspan="1">恒久的</th>
+                                            <th class="text-left" colspan="1" rowspan="1">一時的</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-left" colspan="1" rowspan="1">POSTからGETへのリクエストメソッドの変更を許す
+                                            </td>
+                                            <td class="text-left" colspan="1" rowspan="1">301</td>
+                                            <td class="text-left" colspan="1" rowspan="1">302</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-left" colspan="1" rowspan="1">リクエストメソッドの変更を許さない</td>
+                                            <td class="text-left" colspan="1" rowspan="1">308</td>
+                                            <td class="text-left" colspan="1" rowspan="1">307</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="rfc.section.4.6.1.p.5">
+                                <p>303 (See Other) ステータスコードは、操作の結果がGETを使って別の場所で利用可能であることをクライアントに通知するために使用できます。</p>
+                            </div>
+                            <div id="rfc.section.4.6.1.p.6">
+                                <p><a href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>
+                                    に記載されているように、ユーザエージェントは特定のステータスコードのセマンティクスを理解していなくてもLocationレスポンスヘッダフィールドを持つ3xxリダイレクトを自動的に追従してもよいとされています。しかし、それを行う義務はありません;
+                                    したがって、HTTPを使用するアプリケーションがリダイレクトを自動的に追従させたい場合は、その要件の状況を明示的に指定する必要があります。</p>
+                            </div>
+                            <div id="rfc.section.4.6.1.p.7">
+                                <p>リダイレクトは（適切なキャッシュディレクティブがある場合）キャッシュ可能ですが、それ以外では"スティッキー"ではありません。つまり、URIのリダイレクトがあってもクライアントは類似のURI（例:
+                                    異なるクエリパラメータを持つもの）もリダイレクトされるとは仮定しません。</p>
+                            </div>
+                            <div id="rfc.section.4.6.1.p.8">
+                                <p>HTTPを使用するアプリケーションは、ブラウザ互換性のために301および302レスポンスがPOSTから（ただし他のメソッドからは）GETに後続のリクエストメソッドを変更することを指定することが奨励されます。一般に、リダイレクトされたリクエストが行われるとき、そのヘッダフィールドは元のリクエストからコピーされます。しかし、送信元（および場合によってはパス）が変わると変更されることがあります（送信されたAuthorizationヘッダやCookieヘッダが変わる等）。アプリケーションは、リダイレクト時に定義する任意のリクエストヘッダフィールドを変更または削除する必要があるかを指定するべきですが、この動作は汎用クライアント（ブラウザなど）がその要件を認識していないため、信頼できるものではありません。
+                                </p>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="headers">
+                        <h3 id="rfc.section.4.7"><a href="#rfc.section.4.7">4.7.</a>&nbsp;<a
+                                href="#headers">HTTPヘッダフィールドの指定</a></h3>
+                        <div id="rfc.section.4.7.p.1" class="avoidbreakafter">
+                            <p>アプリケーションはしばしば新しいHTTPヘッダフィールドを定義します。通常、HTTPヘッダフィールドの使用は以下のような状況で適切です:</p>
+                        </div>
+                        <div id="rfc.section.4.7.p.2">
+                            <ul>
+                                <li>そのフィールドが中間体にとって有用である（中間体はしばしばメッセージコンテンツの解析を避けたい）および/または</li>
+                                <li>そのフィールドが汎用のHTTPソフトウェア（クライアント、サーバーなど）にとって有用である、および/または</li>
+                                <li>値をメッセージコンテンツに含めることが不可能である（通常はフォーマットがそれを許さないため）。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.4.7.p.3">
+                            <p>上記の条件が満たされない場合、アプリケーション固有の情報は通常メッセージ内容やURLクエリ文字列など他の場所で伝える方が良いです。</p>
+                        </div>
+                        <div id="rfc.section.4.7.p.4">
+                            <p>新しいヘッダフィールドは登録されなければなりません (<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-16.3">Section 16.3</a>
+                                に従って) 。</p>
+                        </div>
+                        <div id="rfc.section.4.7.p.5">
+                            <p>新しいヘッダフィールドを作成する際に検討すべきガイドラインは <a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-16.3.2">Section 16.3.2</a>
+                                を参照してください。<a href="#STRUCTURED-FIELDS"><cite
+                                        title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>
+                                は新しいヘッダフィールドに共通の構造を提供し、その解析と処理における多くの問題を回避します; 新しいヘッダフィールドでの使用が<em
+                                    class="bcp14">推奨されます</em>。</p>
+                        </div>
+                        <div id="rfc.section.4.7.p.6">
+                            <p>ヘッダフィールド名は短くすることが<em class="bcp14">推奨されます</em>（フィールド圧縮が使われていてもオーバーヘッドがあるため）
+                                が、適切に具体的であるべきです。特に、ヘッダフィールドがアプリケーション固有である場合、ハイフンで区切ったアプリケーション識別子をプレフィックスとして使うことができます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.7.p.7">
+                            <p>例えば、"example"アプリケーションが3つのヘッダフィールドを作成する必要がある場合、それらは "example-foo", "example-bar",
+                                "example-baz"
+                                と呼ばれるかもしれません。主な動機はより一般的なフィールド名の消費を避けることであり、アプリケーションのために名前空間の一部を予約することではない点に注意してください;
+                                関連する考慮事項は <a href="#RFC6648"><cite
+                                        title="Deprecating the &#34;X-&#34; Prefix and Similar Constructs in Application Protocols">[RFC6648]</cite></a>
+                                を参照してください。</p>
+                        </div>
+                        <div id="rfc.section.4.7.p.8">
+                            <p>既存のHTTPヘッダフィールドのセマンティクスは、登録を更新したり（許される場合は）それらに対する拡張を定義したりしない限り再定義してはなりません (<em
+                                    class="bcp14">MUST NOT</em>)。例えば、アプリケーションがLocationヘッダフィールドに特定の文脈で特別な意味を持たせることはできません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.7.p.9">
+                            <p>ヘッダフィールドとHTTPキャッシュの相互作用については <a href="#caching" title="Leveraging HTTP Caching">セクション
+                                    4.9</a> を参照してください。特に、レスポンスを選択するために使用されるリクエストヘッダフィールド（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9111.html#section-4.1">Section 4.1</a>
+                                に従う）は影響を及ぼすため注意が必要です。</p>
+                        </div>
+                        <div id="rfc.section.4.7.p.10">
+                            <p>アプリケーション状態を運ぶヘッダフィールド（例: Cookie）に関する考慮事項については <a href="#state"
+                                    title="Handling Application State">セクション 4.10</a> を参照してください。</p>
+                        </div>
+                    </section>
+                    <section id="content">
+                        <h3 id="rfc.section.4.8"><a href="#rfc.section.4.8">4.8.</a>&nbsp;<a
+                                href="#content">メッセージコンテンツの定義</a></h3>
+                        <div id="rfc.section.4.8.p.1">
+                            <p>メッセージ内容の一般的な構文慣例にはJSON <a href="#JSON"><cite
+                                        title="The JavaScript Object Notation (JSON) Data Interchange Format">[JSON]</cite></a>、XML
+                                <a href="#XML"><cite
+                                        title="Extensible Markup Language (XML) 1.0 (Fifth Edition)">[XML]</cite></a>、およびCBOR
+                                <a href="#RFC8949"><cite
+                                        title="Concise Binary Object Representation (CBOR)">[RFC8949]</cite></a>
+                                などがあります。これらの使用に関するベストプラクティスは本書の範囲外です。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.8.p.2">
+                            <p>アプリケーションは定義する各フォーマットについて個別のメディアタイプを登録すべきです; これによりそれらを一意に識別し、使用のネゴシエーションが可能になります。詳細は <a
+                                    href="#RFC6838"><cite
+                                        title="Media Type Specifications and Registration Procedures">[RFC6838]</cite></a>
+                                を参照してください。</p>
+                        </div>
+                    </section>
+                    <section id="caching">
+                        <h3 id="rfc.section.4.9"><a href="#rfc.section.4.9">4.9.</a>&nbsp;<a
+                                href="#caching">HTTPキャッシュの活用</a></h3>
+                        <div id="rfc.section.4.9.p.1">
+                            <p>HTTPキャッシュ <a href="#HTTP-CACHING"><cite title="HTTP Caching">[HTTP-CACHING]</cite></a>
+                                は、アプリケーションでHTTPを使用する主な利点の一つです。これによりスケーラビリティが向上し、レイテンシが削減され、信頼性が向上します。さらに、HTTPキャッシュはブラウザや他のクライアント、ネットワーク上のフォワードおよびリバースプロキシ、CDN、サーバーソフトウェアの一部として容易に利用できます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.9.p.2">
+                            <p>HTTPを使用するアプリケーションがキャッシュの利点を活用するよう設計されていない場合でも、キャッシュがレスポンスをどのように扱うかを考慮して、ネットワーク、サーバー、クライアント、または途中のインフラに差し挟まれた場合でも正しい動作が保たれるようにする必要があります。
+                            </p>
+                        </div>
+                        <section id="freshness">
+                            <h4 id="rfc.section.4.9.1"><a href="#rfc.section.4.9.1">4.9.1.</a>&nbsp;<a
+                                    href="#freshness">鮮度</a></h4>
+                            <div id="rfc.section.4.9.1.p.1">
+                                <p>短い鮮度寿命（例えば5秒）の割り当てでも（<a href="#HTTP-CACHING"><cite
+                                            title="HTTP Caching">[HTTP-CACHING]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9111.html#section-4.2">Section
+                                        4.2</a>）、レスポンスを複数のクライアントや同一クライアントからの繰り返しの同一リクエストに再利用することができます。一般に、何かを安全に再利用できるのであれば、鮮度寿命の割り当てを検討してください。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.9.1.p.2">
+                                <p>鮮度を指定する最も一般的な方法はmax-ageレスポンスディレクティブ（<a href="#HTTP-CACHING"><cite
+                                            title="HTTP Caching">[HTTP-CACHING]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9111.html#section-5.2.2.1">Section
+                                        5.2.2.1</a>）です。Expiresヘッダフィールドも使用できますが、必須ではありません;
+                                    すべての現代的なキャッシュ実装はCache-Controlヘッダフィールドをサポートしており、デルタで鮮度を指定する方が通常より便利でエラーが少ないです。</p>
+                            </div>
+                            <div id="rfc.section.4.9.1.p.3">
+                                <p>ほとんどのレスポンスをキャッシュするためにpublicレスポンスディレクティブを追加する必要はありません;
+                                    これは認証されたレスポンスを保存したい場合、またはキャッシュがステータスコードを理解しておらず明示的な鮮度情報がない場合にのみ必要です。</p>
+                            </div>
+                            <div id="rfc.section.4.9.1.p.4">
+                                <p>場合によっては、明示的なキャッシュ鮮度ディレクティブがないレスポンスがヒューリスティックな鮮度寿命を用いて保存・提供されることがあります; 詳細は <a
+                                        href="#HTTP-CACHING"><cite title="HTTP Caching">[HTTP-CACHING]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9111.html#section-4.2.2">Section
+                                        4.2.2</a>
+                                    を参照してください。ヒューリスティックはアプリケーションの制御外であるため、明示的な鮮度寿命を設定するか、レスポンスを明示的にキャッシュ不可にする方が一般的に好ましいです。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.9.1.p.5">
+                                <p>レスポンスのキャッシュが望ましくない場合、適切なキャッシュレスポンスディレクティブはno-storeです。他のディレクティブは必要なく、no-storeはレスポンスがキャッシュされる可能性がある状況でのみ送信する必要があります。no-cacheディレクティブはレスポンスの保存を許すが、検証なしにキャッシュが再利用することを許さない点に注意してください（名前に反してキャッシュを防ぐわけではありません）。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.9.1.p.6" class="avoidbreakafter">
+                                <p>例えば、このレスポンスはキャッシュによって保存または再利用されません:</p>
+                            </div>
+                            <div id="rfc.section.4.9.1.p.7">
+                                <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/example+xml
+Cache-Control: no-store
+
+[content]
+</pre>
+                            </div>
+                        </section>
+                        <section id="stale-responses">
+                            <h4 id="rfc.section.4.9.2"><a href="#rfc.section.4.9.2">4.9.2.</a>&nbsp;<a
+                                    href="#stale-responses">古い応答</a></h4>
+                            <div id="rfc.section.4.9.2.p.1">
+                                <p>著者は、Cache-Control: max-age=0 のような古いレスポンスがオリジンから切断されたときにキャッシュによって再利用され得ることを理解しておくべきです;
+                                    これはネットワークの問題に対処するのに有用です。</p>
+                            </div>
+                            <div id="rfc.section.4.9.2.p.2">
+                                <p>もしこれが特定のレスポンスに適さない場合、オリジンはmust-revalidateキャッシュディレクティブを送るべきです。詳細は <a
+                                        href="https://www.rfc-editor.org/rfc/rfc9111.html#section-4.2.4">Section
+                                        4.2.4</a> と、古いコンテンツに対する追加制御については <a href="#RFC5861"><cite
+                                            title="HTTP Cache-Control Extensions for Stale Content">[RFC5861]</cite></a>
+                                    を参照してください。</p>
+                            </div>
+                            <div id="rfc.section.4.9.2.p.3">
+                                <p>古いレスポンスはバリデータを割り当てることで更新でき、これにより大きなレスポンスの転送帯域幅とレイテンシを節約できます; 詳細は <a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110.html#section-13">Section 13</a>
+                                    を参照してください。</p>
+                            </div>
+                        </section>
+                        <section id="caching-app-semantics">
+                            <h4 id="rfc.section.4.9.3"><a href="#rfc.section.4.9.3">4.9.3.</a>&nbsp;<a
+                                    href="#caching-app-semantics">キャッシュとアプリケーションのセマンティクス</a></h4>
+                            <div id="rfc.section.4.9.3.p.1">
+                                <p>アプリケーションが鮮度寿命とは別の寿命を表現する必要がある場合、それはレスポンスの内容または別のヘッダフィールドで別個に伝えられるべきです。この場合、HTTPキャッシュとその寿命との関係を慎重に検討する必要があります。レスポンスは鮮度と見なされている限り使用されるためです。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.9.3.p.2">
+                                <p>特に、アプリケーション著者はオリジンから新鮮に取得されていないレスポンスをどのように扱うべきかを考慮する必要があります;
+                                    有効期間のような概念がある場合、レスポンスの年齢を考慮してこれを計算する必要があります（<a href="#HTTP-CACHING"><cite
+                                            title="HTTP Caching">[HTTP-CACHING]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9111.html#section-4.2.3">Section
+                                        4.2.3</a>参照）。</p>
+                            </div>
+                            <div id="rfc.section.4.9.3.p.3">
+                                <p>この問題への対処方法の一つは、使用時にレスポンスが新鮮であることを明示的に指定することです。</p>
+                            </div>
+                        </section>
+                        <section id="varying-content-based-upon-the-request">
+                            <h4 id="rfc.section.4.9.4"><a href="#rfc.section.4.9.4">4.9.4.</a>&nbsp;<a
+                                    href="#varying-content-based-upon-the-request">リクエストに基づくコンテンツの変化</a></h4>
+                            <div id="rfc.section.4.9.4.p.1">
+                                <p>アプリケーションがリクエストヘッダフィールドを使用してレスポンスのヘッダフィールドやコンテンツを変更する場合、著者はこれがキャッシュに与える影響を指摘すべきです。一般に、そのようなリソースはレスポンスをキャッシュ不可にする（例:
+                                    <a href="#HTTP-CACHING"><cite title="HTTP Caching">[HTTP-CACHING]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9111.html#section-5.2.2.5">Section
+                                        5.2.2.5</a>
+                                    で定義されるno-storeディレクティブ）か、またはそのリソースからのすべてのレスポンス（"デフォルト"レスポンスを含む）にVaryレスポンスヘッダフィールドを送る必要があります
+                                    (<a href="#HTTP"><cite title="HTTP Semantics">[HTTP]</cite></a>、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110.html#section-12.5.5">Section
+                                        12.5.5</a>参照)。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.9.4.p.2" class="avoidbreakafter">
+                                <p>例えば、このレスポンス:</p>
+                            </div>
+                            <div id="rfc.section.4.9.4.p.3">
+                                <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/example+xml
+Cache-Control: max-age=60
+ETag: "sa0f8wf20fs0f"
+Vary: Accept-Encoding
+
+[content]
+</pre>
+                            </div>
+                            <div id="rfc.section.4.9.4.p.4">
+                                <p>は、プライベートおよび共有キャッシュの両方で60秒間保存でき、If-None-Matchで再検証可能であり、Accept-Encodingリクエストヘッダフィールドに基づいて変化します。
+                                </p>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="state">
+                        <h3 id="rfc.section.4.10"><a href="#rfc.section.4.10">4.10.</a>&nbsp;<a
+                                href="#state">アプリケーションの状態の処理</a></h3>
+                        <div id="rfc.section.4.10.p.1">
+                            <p>アプリケーションは状態を識別するため、またはリクエストを文脈化するためにクライアント固有データを保存するためにステートフルなクッキー <a
+                                    href="#COOKIES"><cite title="HTTP State Management Mechanism">[COOKIES]</cite></a>
+                                を使用できます。</p>
+                        </div>
+                        <div id="rfc.section.4.10.p.2">
+                            <p>使用する場合、クッキーのスコープと使用法を慎重に指定することが重要です; アプリケーションが機密データや機能を公開する（例:
+                                周辺的権限として動作する）場合、悪用の可能性があります。軽減策には、クライアントの意図を保証するためのリクエスト固有のトークンの使用が含まれます。</p>
+                        </div>
+                    </section>
+                    <section id="multiplex">
+                        <h3 id="rfc.section.4.11"><a href="#rfc.section.4.11">4.11.</a>&nbsp;<a
+                                href="#multiplex">複数リクエストの実行</a></h3>
+                        <div id="rfc.section.4.11.p.1">
+                            <p>クライアントはしばしばタスクを実行するために複数のリクエストを送信する必要があります。</p>
+                        </div>
+                        <div id="rfc.section.4.11.p.2">
+                            <p>HTTP/1 <a href="#HTTP11"><cite title="HTTP/1.1">[HTTP/1.1]</cite></a>
+                                では、並列リクエストは通常複数の接続を開くことでサポートされます。接続の輻輳制御が調整されないため、同時接続が多すぎるとアプリケーションのパフォーマンスに影響を与える可能性があります。さらに、どの接続をいつ使ってリクエストを発行するかを決定するのが難しい場合があり、これもパフォーマンスに影響します。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.11.p.3">
+                            <p>HTTP/2 <a href="#HTTP2"><cite title="HTTP/2">[HTTP/2]</cite></a> および HTTP/3 <a
+                                    href="#HTTP3"><cite title="HTTP/3">[HTTP/3]</cite></a>
+                                はアプリケーションに多重化を提供し、複数接続を使用する必要性を排除します。しかし、サーバーがレスポンスの優先順位をどのように選ぶかによってアプリケーションのパフォーマンスは依然として大きく影響され得ます。アプリケーションによっては、サーバーがレスポンスの優先度を決定する方が良い場合や、クライアントがサーバーに優先度をヒントとして示す方が良い場合があります（例:
+                                <a href="#HTTP-PRIORITY"><cite
+                                        title="Extensible Prioritization Scheme for HTTP">[HTTP-PRIORITY]</cite></a>）。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.11.p.4">
+                            <p>すべてのHTTPバージョンにおいて、リクエストは独立して行われます —
+                                二つのリクエストの相対的な順序が処理順序を保証すると期待してはなりません。これらは中間体によって多重化されたり、異なるオリジンサーバーに送られたり、サーバーが異なる順序で処理したりする可能性があるためです。二つのリクエストに厳密な順序が必要な場合、結果を確実にする唯一の信頼できる方法は、最初のリクエストの最終レスポンスが開始されたときに二番目のリクエストを発行することです。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.11.p.5">
+                            <p>アプリケーションは単一のトランスポート接続上の別々のリクエスト間の関係について仮定してはなりません (<em class="bcp14">MUST
+                                    NOT</em>)。そうするとHTTPのステートレスプロトコルとしての多くの仮定を壊し、相互運用性、セキュリティ、運用性、進化に問題を引き起こします。</p>
+                        </div>
+                    </section>
+                    <section id="client-auth">
+                        <h3 id="rfc.section.4.12"><a href="#rfc.section.4.12">4.12.</a>&nbsp;<a
+                                href="#client-auth">クライアント認証</a></h3>
+                        <div id="rfc.section.4.12.p.1">
+                            <p>アプリケーションはクライアントを識別するためにHTTP認証（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-11">Section
+                                    11</a>）を使用できます。<a href="#RFC7617"><cite
+                                        title="The 'Basic' HTTP Authentication Scheme">[RFC7617]</cite></a>
+                                によれば、Basic認証スキームはチャネルが安全でない限り（例: "https" URIスキームを使う）機密情報や価値のある情報を保護するのに適していません。同様に <a
+                                    href="#RFC7616"><cite title="HTTP Digest Access Authentication">[RFC7616]</cite></a>
+                                はDigest認証スキームを安全なチャネル上で使用することを要求します。</p>
+                        </div>
+                        <div id="rfc.section.4.12.p.2">
+                            <p>HTTPSでは、クライアントは証明書を用いて認証されることもあります <a href="#RFC8446"><cite
+                                        title="The Transport Layer Security (TLS) Protocol Version 1.3">[RFC8446]</cite></a>
+                                が、そのような認証は基盤となるトランスポート接続に本質的にスコープされる点に注意してください。その結果、クライアントは認証された状態がレスポンスの準備に使用されたかどうかを知る方法がありません（ただしVary:
+                                * や private キャッシュディレクティブは部分的な指標を与えることがあります）。特に、明示的に未認証のレスポンスを得る唯一の方法は新しい接続を開くことです。</p>
+                        </div>
+                        <div id="rfc.section.4.12.p.3">
+                            <p>使用する場合、認証のスコープと使用法を慎重に指定することが重要です; アプリケーションが機密データや機能を公開する（例:
+                                周辺的権限として動作する）場合、悪用の可能性があります。軽減策として、クライアントの意図を保証するためのリクエスト固有のトークンの使用が含まれます。</p>
+                        </div>
+                    </section>
+                    <section id="browser">
+                        <h3 id="rfc.section.4.13"><a href="#rfc.section.4.13">4.13.</a>&nbsp;<a
+                                href="#browser">Webブラウジングとの共存</a></h3>
+                        <div id="rfc.section.4.13.p.1">
+                            <p>アプリケーションがWebブラウザで使用される意図がなくても、そのリソースはブラウザや他のHTTPクライアントから引き続きアクセス可能であり続けます。これは、HTTPを使用するすべてのアプリケーションがブラウザとの相互作用、特にセキュリティに関してどのように動作するかを考慮する必要があることを意味します。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.13.p.2">
+                            <p>例えば、アプリケーションの状態がPOSTリクエストで変更できる場合、Webブラウザは任意のWebサイトからのクロスサイトリクエストフォージェリ（CSRF）を簡単に誘発される可能性があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.13.p.3">
+                            <p>また、攻撃者がアプリケーションのリソースから返されるコンテンツを制御すると（例えば、リクエストの一部がレスポンスに反映される、またはレスポンスに攻撃者が変更できる外部情報が含まれる場合）、ブラウザにコードを注入してオリジンとしてデータや機能にアクセスすることが可能になります。これはクロスサイトスクリプティング（XSS）攻撃として知られています。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.13.p.4">
+                            <p>これは考慮すべき問題の一部に過ぎません。一般に最良のアプローチは、アプリケーションを実際にWebアプリケーションとして扱い、その安全な開発のためのベストプラクティスに従うことです。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.13.p.5" class="avoidbreakafter">
+                            <p>これらのプラクティスの完全な列挙は本書の範囲外ですが、いくつかの考慮事項には次が含まれます:</p>
+                        </div>
+                        <div id="rfc.section.4.13.p.6">
+                            <ul>
+                                <li>Content-Typeヘッダフィールドでアプリケーション固有のメディアタイプを使用し、クライアントがそれを使用しない場合に失敗するよう要求すること。</li>
+                                <li>X-Content-Type-Options: nosniff <a href="#FETCH"><cite
+                                            title="Fetch - Living Standard">[FETCH]</cite></a>
+                                    を使用して、攻撃者に制御されたコンテンツがブラウザによってアクティブコンテンツとして解釈されるのを防ぐこと。</li>
+                                <li>Content-Security-Policy <a href="#CSP"><cite
+                                            title="Content Security Policy Level 3">[CSP]</cite></a>
+                                    を使用して、HTMLやPDFのような実行可能なスクリプトを持つアクティブコンテンツの能力を制約し、XSS攻撃を軽減すること。</li>
+                                <li>Referrer-Policy <a href="#REFERRER-POLICY"><cite
+                                            title="Referrer Policy">[REFERRER-POLICY]</cite></a>
+                                    を使用して、URL内の機密データがRefererリクエストヘッダフィールドで漏洩するのを防ぐこと。</li>
+                                <li>クッキーに 'HttpOnly' フラグを使用して、クッキーがブラウザのスクリプト言語から露出しないようにすること <a href="#COOKIES"><cite
+                                            title="HTTP State Management Mechanism">[COOKIES]</cite></a>。</li>
+                                <li>認証トークンやパスワードなどの機密情報に対して圧縮を使用することを避けること。ブラウザが提供するスクリプト環境により攻撃者が圧縮領域を繰り返し探査することが可能であり、通信のネットワーク経路に攻撃者がアクセスできる場合、その情報を回復するためにこの機能を悪用され得ます。
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.4.13.p.7">
+                            <p>それらがどのようにデプロイされることを意図しているかに応じて、HTTPを使用するアプリケーションの仕様はこれらのメカニズムの使用を特定の方法で要求するか、あるいはセキュリティ考慮事項で指摘するだけにとどめるかもしれません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.13.p.8" class="avoidbreakafter">
+                            <p>ブラウザによってアクティブコンテンツとして扱われる意図がないアプリケーションのHTTPレスポンスの例は次のようになります:</p>
+                        </div>
+                        <div id="rfc.section.4.13.p.9">
+                            <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/example+json
+X-Content-Type-Options: nosniff
+Content-Security-Policy: default-src 'none'
+Cache-Control: max-age=3600
+Referrer-Policy: no-referrer
+
+[content]
+</pre>
+                        </div>
+                        <div id="rfc.section.4.13.p.10">
+                            <p>アプリケーションがブラウザ互換性を目標とする場合、クライアントとの対話はブラウザがHTTPに対して使用する抽象である<a href="#FETCH"><cite
+                                        title="Fetch - Living Standard">[FETCH]</cite></a>に基づいて定義されるべきです;
+                                これにより多くのベストプラクティスが強制されます。</p>
+                        </div>
+                    </section>
+                    <section id="other-apps">
+                        <h3 id="rfc.section.4.14"><a href="#rfc.section.4.14">4.14.</a>&nbsp;<a
+                                href="#other-apps">アプリケーション境界の維持</a></h3>
+                        <div id="rfc.section.4.14.p.1">
+                            <p>多くのHTTP機能がオリジンにスコープされるため <a href="#RFC6454"><cite
+                                        title="The Web Origin Concept">[RFC6454]</cite></a>、アプリケーションは同じオリジンサーバーを使用する他のアプリケーション（Webブラウジングを含む）とのデプロイがどのように相互作用するかも考慮する必要があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.14.p.2">
+                            <p>例えば、クッキー <a href="#COOKIES"><cite
+                                        title="HTTP State Management Mechanism">[COOKIES]</cite></a>
+                                がアプリケーション状態を運ぶために使用される場合、それらはデフォルトでオリジンへのすべてのリクエストと共に送信されます（パスでスコープされていない限り）、そしてアプリケーションはオリジン上の他のアプリケーションからのクッキーも受け取る可能性があります。これによりセキュリティ問題やクッキー名の衝突が発生する可能性があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.14.p.3">
+                            <p>これらの問題の一つの解決策は、アプリケーションに専用のホスト名を要求して固有のオリジンを持たせることですが、複数のアプリケーションを単一のホスト名にデプロイできるようにすることが望ましいことが多いです;
+                                そうすることで最も多くのデプロイの柔軟性が得られ、それらを"混在"させることができます（詳細は <a href="#BCP190"><cite
+                                        title="URI Design and Ownership">[BCP190]</cite></a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.4.14.p.4">
+                            <p>したがって、HTTPを使用するアプリケーションはオリジン上で複数のアプリケーションを許容するよう努めるべきです。具体的には、クッキー、HTTP認証領域 <a
+                                    href="#HTTP"><cite
+                                        title="HTTP Semantics">[HTTP]</cite></a>、またはその他のオリジン全体に関わるHTTPメカニズムを指定する際、HTTPを使用するアプリケーションは特定の名前の使用を強制するのではなく、デプロイメント側でそれらを設定できるようにすべきです。部分的にオリジンにスコープする方法を検討し、指定されたメカニズムを用いることを考慮してください。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.14.p.5">
+                            <p>現代のWebブラウザは一つのオリジンからのコンテンツが別のオリジンのリソースにアクセスする能力を制約してプライベート情報の漏洩を防いでいます。その結果、ブラウザにクロスオリジンデータを公開したいアプリケーションはCORSプロトコルを実装する必要があります;
+                                詳細は <a href="#FETCH"><cite title="Fetch - Living Standard">[FETCH]</cite></a> を参照してください。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="server-push">
+                        <h3 id="rfc.section.4.15"><a href="#rfc.section.4.15">4.15.</a>&nbsp;<a
+                                href="#server-push">サーバープッシュの使用</a></h3>
+                        <div id="rfc.section.4.15.p.1" class="avoidbreakafter">
+                            <p>HTTP/2はサーバーがクライアントに対してリクエスト/レスポンス対を"プッシュ"する機能を追加しました <a href="#HTTP2"><cite
+                                        title="HTTP/2">[HTTP/2]</cite></a>、<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9113.html#section-8.4">Section
+                                    8.4</a>。サーバープッシュは多くの一般的なアプリケーションセマンティクス（例: "fanout" や
+                                publish/subscribe）に適しているように見えますが、いくつかの注意点があります:</p>
+                        </div>
+                        <div id="rfc.section.4.15.p.2">
+                            <ul>
+                                <li>サーバープッシュはホップバイホップです;
+                                    つまり中間体によって自動的に転送されません。したがって、プロキシ、リバースプロキシ、CDNと容易に（または全く）動作しない可能性があります。</li>
+                                <li>サーバープッシュは誤用された場合にHTTPのパフォーマンスに悪影響を与える可能性があり、特にクライアントが実際に要求したリソースと競合する場合に顕著です。</li>
+                                <li>サーバープッシュはキャッシュとの相互作用に関して異なるクライアントで異なる実装があり、機能は様々です。</li>
+                                <li>サーバープッシュのAPIは一部の実装で現在利用できず、他の実装では大きく異なります。特にブラウザ向けの現在のAPIはありません。</li>
+                                <li>サーバープッシュはHTTP/1.1やHTTP/1.0ではサポートされていません。</li>
+                                <li>サーバープッシュはHTTPの"コア"セマンティクスの一部ではないため、将来のバージョンのプロトコルでサポートされない可能性があります。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.4.15.p.3">
+                            <p>クライアントが完全なレスポンスを受け取る前に関連する作業を行えるように最適化したいアプリケーション（例えば、その中に含まれる可能性の高いリンクを事前取得する等）は、103
+                                (Early Hints) ステータスコードの使用を検討すると有益かもしれません; <a href="#RFC8297"><cite
+                                        title="An HTTP Status Code for Indicating Hints">[RFC8297]</cite></a> を参照してください。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.15.p.4">
+                            <p>サーバープッシュを直接使用するアプリケーションは、クロスオリジンプッシュ攻撃を避けるために <a href="#HTTP2"><cite
+                                        title="HTTP/2">[HTTP/2]</cite></a>、<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9113.html#section-8.4">Section 8.4</a>
+                                に記載されている権限に関する要件を順守する必要があります。</p>
+                        </div>
+                    </section>
+                    <section id="versioning">
+                        <h3 id="rfc.section.4.16"><a href="#rfc.section.4.16">4.16.</a>&nbsp;<a
+                                href="#versioning">バージョン管理と進化を許容する</a></h3>
+                        <div id="rfc.section.4.16.p.1">
+                            <p>アプリケーションプロトコルに新機能を導入したり既存のものを変更したりすることがしばしば必要になります。</p>
+                        </div>
+                        <div id="rfc.section.4.16.p.2" class="avoidbreakafter">
+                            <p>HTTPでは、後方互換性のない変更は次のようなメカニズムを用いて行うことができます:</p>
+                        </div>
+                        <div id="rfc.section.4.16.p.3">
+                            <ul>
+                                <li>新機能を実装するリソースのURLを識別するために、別個のリンク関係タイプ <a href="#WEB-LINKING"><cite
+                                            title="Web Linking">[WEB-LINKING]</cite></a> を使用すること。</li>
+                                <li>新機能を可能にするフォーマットを識別するために、別個のメディアタイプ <a href="#RFC6838"><cite
+                                            title="Media Type Specifications and Registration Procedures">[RFC6838]</cite></a>
+                                    を使用すること。</li>
+                                <li>メッセージ内容の外で新機能を実装するために、別個のHTTPヘッダフィールドを使用すること。</li>
+                            </ul>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="iana-considerations">
+                    <h2 id="rfc.section.5" class="np"><a href="#rfc.section.5">5.</a>&nbsp;<a
+                            href="#iana-considerations">IANA に関する考慮事項</a></h2>
+                    <div id="rfc.section.5.p.1">
+                        <p>この文書は IANA に対するアクションを含みません。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="security-considerations">
+                    <h2 id="rfc.section.6" class="np"><a href="#rfc.section.6">6.</a>&nbsp;<a
+                            href="#security-considerations">セキュリティに関する考慮事項</a></h2>
+                    <div id="rfc.section.6.p.1">
+                        <p>HTTP を使用するアプリケーションは、HTTP 自体および使用する拡張のセキュリティ考慮事項の対象になります。<a href="#HTTP"><cite
+                                    title="HTTP Semantics">[HTTP]</cite></a>、<a href="#HTTP-CACHING"><cite
+                                    title="HTTP Caching">[HTTP-CACHING]</cite></a>、および <a href="#WEB-LINKING"><cite
+                                    title="Web Linking">[WEB-LINKING]</cite></a> などがしばしば関連します。</p>
+                    </div>
+                    <div id="rfc.section.6.p.2">
+                        <p><a href="#scheme" title="Considering URI Schemes">セクション 4.4.2</a> は "https" URL
+                            の利用を推奨し、認証、整合性、機密性を提供し、広範な監視攻撃を軽減するために "http" URL の使用を抑制することを勧めています。多くの HTTP
+                            アプリケーションはベアラートークン（例: セッションクッキー）で認証や認可を行います。トランスポートが暗号化されていない場合、HTTP
+                            通信を盗聴または改変できる攻撃者はしばしば権限を昇格させてリソース上の操作を実行できるようになります。</p>
+                    </div>
+                    <div id="rfc.section.6.p.3">
+                        <p><a href="#caching-app-semantics" title="Caching and Application Semantics">セクション 4.9.3</a>
+                            は、HTTP キャッシュとアプリケーション固有のレスポンス保存やその内部情報との不整合の可能性を強調しています。</p>
+                    </div>
+                    <div id="rfc.section.6.p.4">
+                        <p><a href="#state" title="Handling Application State">セクション 4.10</a>
+                            は、プロトコル内で状態を持つメカニズムを周辺的権限として使用することの影響について議論し、緩和策を示唆しています。</p>
+                    </div>
+                    <div id="rfc.section.6.p.5">
+                        <p><a href="#browser" title="Coexisting with Web Browsing">セクション 4.13</a> は、Web ブラウザの機能が HTTP
+                            を使用するアプリケーションに及ぼす影響を強調しています。</p>
+                    </div>
+                    <div id="rfc.section.6.p.6">
+                        <p><a href="#other-apps" title="Maintaining Application Boundaries">セクション 4.14</a>
+                            は、アプリケーションがウェブサイト（および他のアプリケーション）と同じオリジンにデプロイされるときに生じる問題について論じています。</p>
+                    </div>
+                    <div id="rfc.section.6.p.7">
+                        <p><a href="#server-push" title="Using Server Push">セクション 4.15</a> は、指定された方法以外で HTTP/2
+                            のサーバープッシュを使用することのリスクを指摘しています。</p>
+                    </div>
+                    <div id="rfc.section.6.p.8">
+                        <p>新しい URI スキームや非標準メソッドのサポートを要求するなど、実装の変更を伴う形で HTTP を使用するアプリケーションは、これらの実装が親の HTTP
+                            実装から「フォーク」されるリスクがあり、その結果として上流で取り入れられるパッチやその他のセキュリティ改善の恩恵を受けられなくなる可能性があります。</p>
+                    </div>
+                    <section id="privacy-considerations">
+                        <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a>&nbsp;<a
+                                href="#privacy-considerations">プライバシーに関する考慮事項</a></h3>
+                        <div id="rfc.section.6.1.p.1">
+                            <p>HTTP
+                                クライアントはサーバーにさまざまな情報を公開する可能性があります。アプリケーションの操作の一部として明示的に送信される情報（例えば名前やユーザー入力データ）や「ワイヤ上」の情報（これが
+                                <a href="#scheme" title="Considering URI Schemes">セクション 4.4.2</a> で "https"
+                                が推奨される理由の一つです）に加えて、より明白でない手段によって収集される情報もあり、しばしばユーザーの活動を時間を通じて結び付けることで行われます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.1.p.2">
+                            <p>これにはセッション情報、フィンガープリンティングによるクライアントの追跡、コード実行などが含まれます。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.3">
+                            <p>セッション情報にはクライアントの IP アドレス、TLS セッションチケット、クッキー、クライアントキャッシュに保存された
+                                ETag、およびその他の状態を持つメカニズムが含まれます。アプリケーションは、避けられないか動作に必要でない限りセッションメカニズムの使用を回避することが勧められます。必要な場合は、これらのリスクを文書化する必要があります。使用する場合は、実装がそのような状態をクリアできるようにすることが奨励されます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.1.p.4">
+                            <p>フィンガープリンティングは、クライアントのメッセージや振る舞いの固有の側面を利用して異なるリクエストや接続を結び付けます。例えば User-Agent
+                                リクエストヘッダは実装に関する特定の情報を伝え、Accept-Language
+                                リクエストヘッダはユーザーの優先言語を伝えます。これらのマーカーを組み合わせることでクライアントを一意に識別でき、データに対するコントロールに影響を与え得ます。その結果、アプリケーションはクライアントがリクエストで機能に必要な情報のみを送信するよう指定することが推奨されます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.1.p.5">
+                            <p>最後に、アプリケーションがコード実行の機能を公開する場合、環境を観察できる能力はクライアントのフィンガープリンティングや機密データ（セッション情報を含む）の取得・操作の機会として悪用され得るため、細心の注意が必要です。例えば高精度タイマーへのアクセス（間接的であっても）は基盤となるハードウェアのプロファイリングに利用され、システムの一意識別子を作り得ます。可能な限りモバイルコードの使用を避けることが勧められ、避けられない場合はその結果として生じるシステムのセキュリティ特性を注意深く精査する必要があります。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <section class="np">
+                    <div id="rfc.references">
+                        <h2 id="rfc.section.7"><a href="#rfc.section.7">7.</a> 参考文献</h2>
+                        <section>
+                            <div id="rfc.references.2">
+                                <h3 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a> 規範的参照</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="BCP190">[<a href="#BCP190" class="smpl">BCP190</a>]</dt>
+                                    <dd>Nottingham, M., “<a href="https://www.rfc-editor.org/rfc/rfc8820">URI Design and
+                                            Ownership</a>”, <a href="https://www.rfc-editor.org/info/bcp190">BCP
+                                            190</a>, RFC 8820, <a href="https://dx.doi.org/10.17487/RFC8820">DOI
+                                            10.17487/RFC8820</a>, June 2020, &lt;<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8820">https://www.rfc-editor.org/rfc/rfc8820</a>&gt;.
+                                    </dd>
+                                    <dt id="HTTP">[<a href="#HTTP" class="smpl">HTTP</a>]</dt>
+                                    <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9110.html">HTTP Semantics</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std97">STD 97</a>, RFC 9110, <a
+                                            href="https://dx.doi.org/10.17487/RFC9110">DOI 10.17487/RFC9110</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9110">https://www.rfc-editor.org/info/rfc9110</a>&gt;.
+                                    </dd>
+                                    <dt id="HTTP-CACHING">[<a href="#HTTP-CACHING" class="smpl">HTTP-CACHING</a>]</dt>
+                                    <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9111.html">HTTP Caching</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std98">STD 98</a>, RFC 9111, <a
+                                            href="https://dx.doi.org/10.17487/RFC9111">DOI 10.17487/RFC9111</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9111">https://www.rfc-editor.org/info/rfc9111</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                    <dd>Bradner, S., “<a href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words
+                                            for use in RFCs to Indicate Requirement Levels</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 2119, <a
+                                            href="https://dx.doi.org/10.17487/RFC2119">DOI 10.17487/RFC2119</a>, March
+                                        1997, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC6454">[<a href="#RFC6454" class="smpl">RFC6454</a>]</dt>
+                                    <dd>Barth, A., “<a href="https://www.rfc-editor.org/rfc/rfc6454.html">The Web Origin
+                                            Concept</a>”, RFC 6454, <a href="https://dx.doi.org/10.17487/RFC6454">DOI
+                                            10.17487/RFC6454</a>, December 2011, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6454">https://www.rfc-editor.org/info/rfc6454</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC6648">[<a href="#RFC6648" class="smpl">RFC6648</a>]</dt>
+                                    <dd>Saint-Andre, P., Crocker, D., and M. Nottingham, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6648.html">Deprecating the "X-"
+                                            Prefix and Similar Constructs in Application Protocols</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp178">BCP 178</a>, RFC 6648, <a
+                                            href="https://dx.doi.org/10.17487/RFC6648">DOI 10.17487/RFC6648</a>, June
+                                        2012, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6648">https://www.rfc-editor.org/info/rfc6648</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC6838">[<a href="#RFC6838" class="smpl">RFC6838</a>]</dt>
+                                    <dd>Freed, N., Klensin, J., and T. Hansen, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6838.html">Media Type Specifications
+                                            and Registration Procedures</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp13">BCP 13</a>, RFC 6838, <a
+                                            href="https://dx.doi.org/10.17487/RFC6838">DOI 10.17487/RFC6838</a>, January
+                                        2013, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6838">https://www.rfc-editor.org/info/rfc6838</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC8174">[<a href="#RFC8174" class="smpl">RFC8174</a>]</dt>
+                                    <dd>Leiba, B., “<a href="https://www.rfc-editor.org/rfc/rfc8174.html">Ambiguity of
+                                            Uppercase vs Lowercase in RFC 2119 Key Words</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 8174, <a
+                                            href="https://dx.doi.org/10.17487/RFC8174">DOI 10.17487/RFC8174</a>, May
+                                        2017, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;.
+                                    </dd>
+                                    <dt id="STRUCTURED-FIELDS">[<a href="#STRUCTURED-FIELDS"
+                                            class="smpl">STRUCTURED-FIELDS</a>]</dt>
+                                    <dd>Nottingham, M. and P-H. Kamp, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8941.html">Structured Field Values
+                                            for HTTP</a>”, RFC 8941, <a href="https://dx.doi.org/10.17487/RFC8941">DOI
+                                            10.17487/RFC8941</a>, February 2021, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8941">https://www.rfc-editor.org/info/rfc8941</a>&gt;.
+                                    </dd>
+                                    <dt id="URL">[<a href="#URL" class="smpl">URL</a>]</dt>
+                                    <dd>Berners-Lee, T., Fielding, R., and L. Masinter, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc3986.html">Uniform Resource
+                                            Identifier (URI): Generic Syntax</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std66">STD 66</a>, RFC 3986, <a
+                                            href="https://dx.doi.org/10.17487/RFC3986">DOI 10.17487/RFC3986</a>, January
+                                        2005, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc3986">https://www.rfc-editor.org/info/rfc3986</a>&gt;.
+                                    </dd>
+                                    <dt id="WEB-LINKING">[<a href="#WEB-LINKING" class="smpl">WEB-LINKING</a>]</dt>
+                                    <dd>Nottingham, M., “<a href="https://www.rfc-editor.org/rfc/rfc8288.html">Web
+                                            Linking</a>”, RFC 8288, <a href="https://dx.doi.org/10.17487/RFC8288">DOI
+                                            10.17487/RFC8288</a>, October 2017, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8288">https://www.rfc-editor.org/info/rfc8288</a>&gt;.
+                                    </dd>
+                                    <dt id="WELL-KNOWN-URI">[<a href="#WELL-KNOWN-URI" class="smpl">WELL-KNOWN-URI</a>]
+                                    </dt>
+                                    <dd>Nottingham, M., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8615.html">Well-Known Uniform
+                                            Resource Identifiers (URIs)</a>”, RFC 8615, <a
+                                            href="https://dx.doi.org/10.17487/RFC8615">DOI 10.17487/RFC8615</a>, May
+                                        2019, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8615">https://www.rfc-editor.org/info/rfc8615</a>&gt;.
+                                    </dd>
+                                </dl>
+                            </div>
+                        </section>
+                        <section>
+                            <div id="rfc.references.3">
+                                <h3 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2.</a> 情報的参照</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="COOKIES">[<a href="#COOKIES" class="smpl">COOKIES</a>]</dt>
+                                    <dd>Barth, A., “<a href="https://www.rfc-editor.org/rfc/rfc6265.html">HTTP State
+                                            Management Mechanism</a>”, RFC 6265, <a
+                                            href="https://dx.doi.org/10.17487/RFC6265">DOI 10.17487/RFC6265</a>, April
+                                        2011, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6265">https://www.rfc-editor.org/info/rfc6265</a>&gt;.
+                                    </dd>
+                                    <dt id="CSP">[<a href="#CSP" class="smpl">CSP</a>]</dt>
+                                    <dd>West, M., “<a href="https://www.w3.org/TR/2021/WD-CSP3-20210629">Content
+                                            Security Policy Level 3</a>”, W3C Working Draft, June 2021, &lt;<a
+                                            href="https://www.w3.org/TR/2021/WD-CSP3-20210629">https://www.w3.org/TR/2021/WD-CSP3-20210629</a>&gt;.
+                                    </dd>
+                                    <dt id="FETCH">[<a href="#FETCH" class="smpl">FETCH</a>]</dt>
+                                    <dd>WHATWG, “<a href="https://fetch.spec.whatwg.org">Fetch - Living Standard</a>”,
+                                        &lt;<a
+                                            href="https://fetch.spec.whatwg.org">https://fetch.spec.whatwg.org</a>&gt;.
+                                    </dd>
+                                    <dt id="HTML">[<a href="#HTML" class="smpl">HTML</a>]</dt>
+                                    <dd>WHATWG, “<a href="https://html.spec.whatwg.org">HTML - Living Standard</a>”,
+                                        &lt;<a href="https://html.spec.whatwg.org">https://html.spec.whatwg.org</a>&gt;.
+                                    </dd>
+                                    <dt id="HTTP-PRIORITY">[<a href="#HTTP-PRIORITY" class="smpl">HTTP-PRIORITY</a>]
+                                    </dt>
+                                    <dd>一穂, 奥. and L. Pardue, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9218.html">Extensible Prioritization
+                                            Scheme for HTTP</a>”, RFC 9218, <a
+                                            href="https://dx.doi.org/10.17487/RFC9218">DOI 10.17487/RFC9218</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9218">https://www.rfc-editor.org/info/rfc9218</a>&gt;.
+                                    </dd>
+                                    <dt id="HTTP11">[<a href="#HTTP11" class="smpl">HTTP/1.1</a>]</dt>
+                                    <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9112.html">HTTP/1.1</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std99">STD 99</a>, RFC 9112, <a
+                                            href="https://dx.doi.org/10.17487/RFC9112">DOI 10.17487/RFC9112</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9112">https://www.rfc-editor.org/info/rfc9112</a>&gt;.
+                                    </dd>
+                                    <dt id="HTTP2">[<a href="#HTTP2" class="smpl">HTTP/2</a>]</dt>
+                                    <dd>Thomson, M., Ed. and C. Benfield, Ed., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9113.html">HTTP/2</a>”, RFC 9113, <a
+                                            href="https://dx.doi.org/10.17487/RFC9113">DOI 10.17487/RFC9113</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9113">https://www.rfc-editor.org/info/rfc9113</a>&gt;.
+                                    </dd>
+                                    <dt id="HTTP3">[<a href="#HTTP3" class="smpl">HTTP/3</a>]</dt>
+                                    <dd>Bishop, M., Ed., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9114.html">HTTP/3</a>”, RFC 9114, <a
+                                            href="https://dx.doi.org/10.17487/RFC9114">DOI 10.17487/RFC9114</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9114">https://www.rfc-editor.org/info/rfc9114</a>&gt;.
+                                    </dd>
+                                    <dt id="JSON">[<a href="#JSON" class="smpl">JSON</a>]</dt>
+                                    <dd>Bray, T., Ed., “<a href="https://www.rfc-editor.org/rfc/rfc8259.html">The
+                                            JavaScript Object Notation (JSON) Data Interchange Format</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std90">STD 90</a>, RFC 8259, <a
+                                            href="https://dx.doi.org/10.17487/RFC8259">DOI 10.17487/RFC8259</a>,
+                                        December 2017, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;.
+                                    </dd>
+                                    <dt id="PROBLEM-DETAILS">[<a href="#PROBLEM-DETAILS"
+                                            class="smpl">PROBLEM-DETAILS</a>]</dt>
+                                    <dd>Nottingham, M. and E. Wilde, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7807.html">Problem Details for HTTP
+                                            APIs</a>”, RFC 7807, <a href="https://dx.doi.org/10.17487/RFC7807">DOI
+                                            10.17487/RFC7807</a>, March 2016, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7807">https://www.rfc-editor.org/info/rfc7807</a>&gt;.
+                                    </dd>
+                                    <dt id="REFERRER-POLICY">[<a href="#REFERRER-POLICY"
+                                            class="smpl">REFERRER-POLICY</a>]</dt>
+                                    <dd>Eisinger, J. and E. Stark, “<a
+                                            href="https://www.w3.org/TR/2017/CR-referrer-policy-20170126">Referrer
+                                            Policy</a>”, W3C Candidate Recommendation CR-referrer-policy-20170126,
+                                        January 2017, &lt;<a
+                                            href="https://www.w3.org/TR/2017/CR-referrer-policy-20170126">https://www.w3.org/TR/2017/CR-referrer-policy-20170126</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC3205">[<a href="#RFC3205" class="smpl">RFC3205</a>]</dt>
+                                    <dd>Moore, K., “<a href="https://www.rfc-editor.org/rfc/rfc3205.html">On the use of
+                                            HTTP as a Substrate</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp56">BCP 56</a>, RFC 3205, <a
+                                            href="https://dx.doi.org/10.17487/RFC3205">DOI 10.17487/RFC3205</a>,
+                                        February 2002, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc3205">https://www.rfc-editor.org/info/rfc3205</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC4791">[<a href="#RFC4791" class="smpl">RFC4791</a>]</dt>
+                                    <dd>Daboo, C., Desruisseaux, B., and L. Dusseault, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc4791.html">Calendaring Extensions to
+                                            WebDAV (CalDAV)</a>”, RFC 4791, <a
+                                            href="https://dx.doi.org/10.17487/RFC4791">DOI 10.17487/RFC4791</a>, March
+                                        2007, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc4791">https://www.rfc-editor.org/info/rfc4791</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC4918">[<a href="#RFC4918" class="smpl">RFC4918</a>]</dt>
+                                    <dd>Dusseault, L., Ed., “<a href="https://www.rfc-editor.org/rfc/rfc4918.html">HTTP
+                                            Extensions for Web Distributed Authoring and Versioning (WebDAV)</a>”, RFC
+                                        4918, <a href="https://dx.doi.org/10.17487/RFC4918">DOI 10.17487/RFC4918</a>,
+                                        June 2007, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc4918">https://www.rfc-editor.org/info/rfc4918</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC5861">[<a href="#RFC5861" class="smpl">RFC5861</a>]</dt>
+                                    <dd>Nottingham, M., “<a href="https://www.rfc-editor.org/rfc/rfc5861.html">HTTP
+                                            Cache-Control Extensions for Stale Content</a>”, RFC 5861, <a
+                                            href="https://dx.doi.org/10.17487/RFC5861">DOI 10.17487/RFC5861</a>, May
+                                        2010, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc5861">https://www.rfc-editor.org/info/rfc5861</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC6415">[<a href="#RFC6415" class="smpl">RFC6415</a>]</dt>
+                                    <dd>Hammer-Lahav, E., Ed. and B. Cook, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6415.html">Web Host Metadata</a>”,
+                                        RFC 6415, <a href="https://dx.doi.org/10.17487/RFC6415">DOI
+                                            10.17487/RFC6415</a>, October 2011, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6415">https://www.rfc-editor.org/info/rfc6415</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC6797">[<a href="#RFC6797" class="smpl">RFC6797</a>]</dt>
+                                    <dd>Hodges, J., Jackson, C., and A. Barth, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6797.html">HTTP Strict Transport
+                                            Security (HSTS)</a>”, RFC 6797, <a
+                                            href="https://dx.doi.org/10.17487/RFC6797">DOI 10.17487/RFC6797</a>,
+                                        November 2012, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6797">https://www.rfc-editor.org/info/rfc6797</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC7258">[<a href="#RFC7258" class="smpl">RFC7258</a>]</dt>
+                                    <dd>Farrell, S. and H. Tschofenig, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7258.html">Pervasive Monitoring Is
+                                            an Attack</a>”, <a href="https://www.rfc-editor.org/info/bcp188">BCP
+                                            188</a>, RFC 7258, <a href="https://dx.doi.org/10.17487/RFC7258">DOI
+                                            10.17487/RFC7258</a>, May 2014, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7258">https://www.rfc-editor.org/info/rfc7258</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC7301">[<a href="#RFC7301" class="smpl">RFC7301</a>]</dt>
+                                    <dd>Friedl, S., Popov, A., Langley, A., and E. Stephan, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7301.html">Transport Layer Security
+                                            (TLS) Application-Layer Protocol Negotiation Extension</a>”, RFC 7301, <a
+                                            href="https://dx.doi.org/10.17487/RFC7301">DOI 10.17487/RFC7301</a>, July
+                                        2014, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7301">https://www.rfc-editor.org/info/rfc7301</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC7595">[<a href="#RFC7595" class="smpl">RFC7595</a>]</dt>
+                                    <dd>Thaler, D., Ed., Hansen, T., and T. Hardie, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7595.html">Guidelines and
+                                            Registration Procedures for URI Schemes</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp35">BCP 35</a>, RFC 7595, <a
+                                            href="https://dx.doi.org/10.17487/RFC7595">DOI 10.17487/RFC7595</a>, June
+                                        2015, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7595">https://www.rfc-editor.org/info/rfc7595</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC7605">[<a href="#RFC7605" class="smpl">RFC7605</a>]</dt>
+                                    <dd>Touch, J., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7605.html">Recommendations on Using
+                                            Assigned Transport Port Numbers</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp165">BCP 165</a>, RFC 7605, <a
+                                            href="https://dx.doi.org/10.17487/RFC7605">DOI 10.17487/RFC7605</a>, August
+                                        2015, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7605">https://www.rfc-editor.org/info/rfc7605</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC7616">[<a href="#RFC7616" class="smpl">RFC7616</a>]</dt>
+                                    <dd>Shekh-Yusef, R., Ed., Ahrens, D., and S. Bremer, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7616.html">HTTP Digest Access
+                                            Authentication</a>”, RFC 7616, <a
+                                            href="https://dx.doi.org/10.17487/RFC7616">DOI 10.17487/RFC7616</a>,
+                                        September 2015, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7616">https://www.rfc-editor.org/info/rfc7616</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC7617">[<a href="#RFC7617" class="smpl">RFC7617</a>]</dt>
+                                    <dd>Reschke, J., “<a href="https://www.rfc-editor.org/rfc/rfc7617.html">The 'Basic'
+                                            HTTP Authentication Scheme</a>”, RFC 7617, <a
+                                            href="https://dx.doi.org/10.17487/RFC7617">DOI 10.17487/RFC7617</a>,
+                                        September 2015, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7617">https://www.rfc-editor.org/info/rfc7617</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC8297">[<a href="#RFC8297" class="smpl">RFC8297</a>]</dt>
+                                    <dd>Oku, K., “<a href="https://www.rfc-editor.org/rfc/rfc8297.html">An HTTP Status
+                                            Code for Indicating Hints</a>”, RFC 8297, <a
+                                            href="https://dx.doi.org/10.17487/RFC8297">DOI 10.17487/RFC8297</a>,
+                                        December 2017, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8297">https://www.rfc-editor.org/info/rfc8297</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC8446">[<a href="#RFC8446" class="smpl">RFC8446</a>]</dt>
+                                    <dd>Rescorla, E., “<a href="https://www.rfc-editor.org/rfc/rfc8446.html">The
+                                            Transport Layer Security (TLS) Protocol Version 1.3</a>”, RFC 8446, <a
+                                            href="https://dx.doi.org/10.17487/RFC8446">DOI 10.17487/RFC8446</a>, August
+                                        2018, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8446">https://www.rfc-editor.org/info/rfc8446</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC8470">[<a href="#RFC8470" class="smpl">RFC8470</a>]</dt>
+                                    <dd>Thomson, M., Nottingham, M., and W. Tarreau, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8470.html">Using Early Data in
+                                            HTTP</a>”, RFC 8470, <a href="https://dx.doi.org/10.17487/RFC8470">DOI
+                                            10.17487/RFC8470</a>, September 2018, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8470">https://www.rfc-editor.org/info/rfc8470</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC8949">[<a href="#RFC8949" class="smpl">RFC8949</a>]</dt>
+                                    <dd>Bormann, C. and P. Hoffman, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8949.html">Concise Binary Object
+                                            Representation (CBOR)</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std94">STD 94</a>, RFC 8949, <a
+                                            href="https://dx.doi.org/10.17487/RFC8949">DOI 10.17487/RFC8949</a>,
+                                        December 2020, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8949">https://www.rfc-editor.org/info/rfc8949</a>&gt;.
+                                    </dd>
+                                    <dt id="SECCTXT">[<a href="#SECCTXT" class="smpl">SECCTXT</a>]</dt>
+                                    <dd>West, M., “<a
+                                            href="https://www.w3.org/TR/2021/CRD-secure-contexts-20210918">Secure
+                                            Contexts</a>”, W3C Candidate Recommendation, September 2021, &lt;<a
+                                            href="https://www.w3.org/TR/2021/CRD-secure-contexts-20210918">https://www.w3.org/TR/2021/CRD-secure-contexts-20210918</a>&gt;.
+                                    </dd>
+                                    <dt id="URI-TEMPLATE">[<a href="#URI-TEMPLATE" class="smpl">URI-TEMPLATE</a>]</dt>
+                                    <dd>Gregorio, J., Fielding, R., Hadley, M., Nottingham, M., and D. Orchard, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6570.html">URI Template</a>”, RFC
+                                        6570, <a href="https://dx.doi.org/10.17487/RFC6570">DOI 10.17487/RFC6570</a>,
+                                        March 2012, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6570">https://www.rfc-editor.org/info/rfc6570</a>&gt;.
+                                    </dd>
+                                    <dt id="XML">[<a href="#XML" class="smpl">XML</a>]</dt>
+                                    <dd>Bray, T., Paoli, J., Sperberg-McQueen, M., Maler, E., and F. Yergeau, “<a
+                                            href="https://www.w3.org/TR/2008/REC-xml-20081126">Extensible Markup
+                                            Language (XML) 1.0 (Fifth Edition)</a>”, W3C Recommendation
+                                        REC-xml-20081126, November 2008, &lt;<a
+                                            href="https://www.w3.org/TR/2008/REC-xml-20081126">https://www.w3.org/TR/2008/REC-xml-20081126</a>&gt;.
+                                    </dd>
+                                </dl>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="changes-from-rfc-3205">
+                    <h2 id="rfc.section.A" class="np"><a href="#rfc.section.A">Appendix A.</a>&nbsp;<a
+                            href="#changes-from-rfc-3205">RFC 3205 からの変更点</a></h2>
+                    <div id="rfc.section.A.p.1">
+                        <p><a href="#RFC3205"><cite title="On the use of HTTP as a Substrate">[RFC3205]</cite></a>
+                            は 2000 年代初頭のプロトコル設計者が直面していた懸念に基づき最良の現行慣行を捉えていました。その後の HTTP
+                            の使用法は大きく変化したため、本書は実質的に異なります。その結果、変更点は個別に列挙するには多すぎます。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="rfc.authors" class="np">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>Mark Nottingham</b><br>Prahran<br>オーストラリア<br>EMail: <a
+                            href="mailto:mnot@mnot.net">mnot@mnot.net</a><br>URI: <a
+                            href="https://www.mnot.net/">https://www.mnot.net/</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
