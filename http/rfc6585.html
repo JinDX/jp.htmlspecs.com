@@ -1,0 +1,915 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 6585 - 追加のHTTPステータスコード</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC6585">
+    <meta property="og:description" content="Additional HTTP Status Codes">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc6585.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 Requirements" href="#rfc.section.2">
+    <link rel="Chapter" title="3 428 Precondition Required" href="#rfc.section.3">
+    <link rel="Chapter" title="4 429 Too Many Requests" href="#rfc.section.4">
+    <link rel="Chapter" title="5 431 Request Header Fields Too Large" href="#rfc.section.5">
+    <link rel="Chapter" title="6 511 Network Authentication Required" href="#rfc.section.6">
+    <link rel="Chapter" title="7 Security Considerations" href="#rfc.section.7">
+    <link rel="Chapter" title="8 IANA Considerations" href="#rfc.section.8">
+    <link rel="Chapter" title="9 References" href="#rfc.section.9">
+    <link rel="Appendix" title="A Acknowledgements" href="#rfc.section.A">
+    <link rel="Appendix" title="B Issues Raised by Captive Portals" href="#rfc.section.B">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc6585.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="http://www.rfc-editor.org/info/rfc6585">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Nottingham, M.">
+    <meta name="dcterms.creator" content="Fielding, R.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:6585">
+    <meta name="dcterms.issued" content="2012-04">
+    <meta name="dcterms.abstract"
+        content="This document specifies additional HyperText Transfer Protocol (HTTP) status codes for a variety of common situations.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="This document specifies additional HyperText Transfer Protocol (HTTP) status codes for a variety of common situations.">
+</head>
+
+<body onload="getMeta(6585,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>6585</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.1">序論</a>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.2">要件</a>
+                                </li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#status-428">428
+                                        前提条件が必要</a></li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#status-429">429
+                                        要求が多すぎます</a></li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#status-431">431
+                                        リクエストヘッダーが大きすぎます</a></li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#status-511">511
+                                        ネットワーク認証が必要</a></li>
+                                <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security-considerations">セキュリティ考慮事項</a></li>
+                                <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.8">IANAに関する考慮事項</a></li>
+                                <li><a href="#rfc.section.9">9.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                                    <ul>
+                                        <li class="excluded"></li>
+                                        <li class="excluded"></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.A">Appendix A.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.A">謝辞</a></li>
+                                <li><a href="#rfc.section.B">Appendix B.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#issues-511">キャプティブポータルによって提起された問題</a></li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネットエンジニアリングタスクフォース（IETF）</td>
+                                <td class="text-right">M. Nottingham</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 6585</td>
+                                <td class="text-right">Rackspace</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">更新: <a href="#RFC2616">2616</a></td>
+                                <td class="text-right">R. Fielding</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: 標準トラック</td>
+                                <td class="text-right">Adobe</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right">2012年4月</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>追加のHTTPステータスコード</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">概要</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>この文書は、さまざまな一般的な状況に対する追加のHyperText Transfer Protocol (HTTP) ステータスコードを定めます。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモのステータス</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>本書はインターネット標準トラックの文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネットエンジニアリングタスクフォース（IETF）の成果物です。本書はIETFコミュニティのコンセンサスを示します。本書は公開レビューを受け、インターネットエンジニアリング運営グループ（IESG）によって公開が承認されています。インターネット標準に関する詳細は
+                            <a href="https://www.rfc-editor.org/rfc/rfc5741.html#section-2">RFC 5741 のセクション 2</a>
+                            を参照してください。
+                        </p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>本書の現在の状況、訂正（errata）、およびフィードバックの方法に関する情報は <a
+                                href="http://www.rfc-editor.org/info/rfc6585">http://www.rfc-editor.org/info/rfc6585</a>
+                            で入手できます。
+                        </p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2012 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in
+                            effect on the date of publication of this document. Please review these documents carefully,
+                            as they describe your rights and restrictions with respect to this document. Code Components
+                            extracted from this document must include Simplified BSD License text as described in
+                            Section 4.e of the Trust Legal Provisions and are provided without warranty as described in
+                            the Simplified BSD License.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.1">序論</a>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.2">要件</a>
+                        </li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#status-428">428 前提条件が必要</a></li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#status-429">429 リクエストが多すぎます</a>
+                        </li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#status-431">431
+                                リクエストヘッダーフィールドが大きすぎます</a></li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#status-511">511 ネットワーク認証が必要</a>
+                        </li>
+                        <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#security-considerations">セキュリティに関する考慮事項</a></li>
+                        <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.8">IANAに関する考慮事項</a>
+                        </li>
+                        <li><a href="#rfc.section.9">9.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                            <ul>
+                                <li class="excluded"></li>
+                                <li class="excluded"></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.A">Appendix A.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.A">謝辞</a>
+                        </li>
+                        <li><a href="#rfc.section.B">Appendix B.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#issues-511">キャプティブポータルによって提起された問題</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <section id="n-introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#n-introduction">序論</a></h2>
+                    <div id="rfc.section.1.p.1">
+                        <p>この文書は、さまざまな一般的な状況に対して追加の HTTP <a href="#RFC2616"><cite
+                                    title="Hypertext Transfer Protocol -- HTTP/1.1">[RFC2616]</cite></a>
+                            ステータスコードを定め、相互運用性を向上させ、他のより曖昧なステータスコードが使用された場合の混乱を避けることを目的としています。</p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>これらのステータスコードは任意であり、サーバーに対してサポートを強制することはできない点に注意してください。しかし、クライアントは未知のステータスコードを同じクラスの一般的なエラーとして扱う（例えば、499
+                            は認識されない場合 400 として扱われる）ため、既存のサーバーでも安全に導入できます（詳細は <a href="#RFC2616"><cite
+                                    title="Hypertext Transfer Protocol -- HTTP/1.1">[RFC2616]</cite></a> のセクション 6.1.1
+                            を参照してください）。</p>
+                    </div>
+                </section>
+                <section id="n-requirements">
+                    <h2 id="rfc.section.2"><a href="#rfc.section.2">2.</a>&nbsp;<a href="#n-requirements">要件</a></h2>
+                    <div id="rfc.section.2.p.1">
+                        <p>本書で使用されるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
+                            "RECOMMENDED", "MAY", および "OPTIONAL" は、<a href="#RFC2119"><cite
+                                    title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                            に記載されているとおりに解釈されます。</p>
+                    </div>
+                </section>
+                <section id="status-428">
+                    <h2 id="rfc.section.3"><a href="#rfc.section.3">3.</a>&nbsp;<a href="#status-428">428 前提条件が必要</a>
+                    </h2>
+                    <div id="rfc.section.3.p.1">
+                        <p>428 ステータスコードは、オリジンサーバーがリクエストに対して条件付きであることを要求していることを示します。</p>
+                    </div>
+                    <div id="rfc.section.3.p.2">
+                        <p>典型的な用途は、クライアントがリソースの状態をGETし、それを変更してPUTでサーバーに戻す間に第三者がサーバー上の状態を変更して競合が発生する「ロストアップデート」問題を回避することです。サーバーがリクエストを条件付きにすることで、クライアントが正しいコピーで作業していることを確認できます。
+                        </p>
+                    </div>
+                    <div id="rfc.section.3.p.3" class="avoidbreakafter">
+                        <p>このステータスコードを使用するレスポンスは、リクエストを再送する方法を説明するべきです。例えば：</p>
+                    </div>
+                    <div id="rfc.figure.u.1">
+                        <div>
+                            <pre class="text">
+HTTP/1.1 428 Precondition Required
+Content-Type: text/html
+
+&lt;html&gt;
+   &lt;head&gt;
+      &lt;title&gt;Precondition Required&lt;/title&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+      &lt;h1&gt;Precondition Required&lt;/h1&gt;
+      &lt;p&gt;This request is required to be conditional; 
+      try using "If-Match".&lt;/p&gt;
+   &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+                        </div>
+                    </div>
+                    <div id="rfc.section.3.p.4">
+                        <p>428 ステータスコードを持つレスポンスは、キャッシュに保存してはなりません。</p>
+                    </div>
+                </section>
+                <section id="status-429">
+                    <h2 id="rfc.section.4"><a href="#rfc.section.4">4.</a>&nbsp;<a href="#status-429">429
+                            リクエストが多すぎます</a></h2>
+                    <div id="rfc.section.4.p.1">
+                        <p>429 ステータスコードは、ある一定期間内にユーザーがあまりにも多くのリクエストを送信したこと（「レート制限」）を示します。</p>
+                    </div>
+                    <div id="rfc.section.4.p.2">
+                        <p>レスポンス表現は、状況を説明する詳細を含めるべきであり、再リクエストまでの待機時間を示す Retry-After ヘッダーを含めてもよいです。</p>
+                    </div>
+                    <div id="rfc.section.4.p.3" class="avoidbreakafter">
+                        <p>例えば：</p>
+                    </div>
+                    <div id="rfc.figure.u.2">
+                        <div>
+                            <pre class="text">
+HTTP/1.1 429 Too Many Requests
+Content-Type: text/html
+Retry-After: 3600
+
+&lt;html&gt;
+   &lt;head&gt;
+      &lt;title&gt;Too Many Requests&lt;/title&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+      &lt;h1&gt;Too Many Requests&lt;/h1&gt;
+      &lt;p&gt;I only allow 50 requests per hour to this Web site per
+         logged in user.  Try again soon.&lt;/p&gt;
+   &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+                        </div>
+                    </div>
+                    <div id="rfc.section.4.p.4">
+                        <p>この仕様は、オリジンサーバーがユーザーをどのように識別するか、またどのようにリクエストをカウントするかを定義するものではないことに注意してください。例えば、リクエストレートを制限するオリジンサーバーは、リソース単位、サーバー全体、あるいはサーバー群にわたってカウントすることができます。同様に、ユーザーは認証資格情報やステートフルなクッキーによって識別されるかもしれません。
+                        </p>
+                    </div>
+                    <div id="rfc.section.4.p.5">
+                        <p>429 ステータスコードを持つレスポンスは、キャッシュに保存してはなりません。</p>
+                    </div>
+                </section>
+                <section id="status-431">
+                    <h2 id="rfc.section.5"><a href="#rfc.section.5">5.</a>&nbsp;<a href="#status-431">431
+                            リクエストヘッダーフィールドが大きすぎます</a></h2>
+                    <div id="rfc.section.5.p.1">
+                        <p>431
+                            ステータスコードは、サーバーがリクエストのヘッダーフィールドが大きすぎるためリクエストの処理を拒否することを示します。リクエストヘッダーフィールドのサイズを縮小した後にリクエストを再送信してもよいです。
+                        </p>
+                    </div>
+                    <div id="rfc.section.5.p.2">
+                        <p>これは、リクエストヘッダーフィールドの合計が大きすぎる場合にも、単一のヘッダーフィールドが原因の場合にも使用できます。後者の場合、レスポンス表現はどのヘッダーフィールドが大きすぎたかを指定するべきです。
+                        </p>
+                    </div>
+                    <div id="rfc.section.5.p.3" class="avoidbreakafter">
+                        <p>例えば：</p>
+                    </div>
+                    <div id="rfc.figure.u.3">
+                        <div>
+                            <pre class="text">
+HTTP/1.1 431 Request Header Fields Too Large
+Content-Type: text/html
+
+&lt;html&gt;
+   &lt;head&gt;
+      &lt;title&gt;Request Header Fields Too Large&lt;/title&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+      &lt;h1&gt;Request Header Fields Too Large&lt;/h1&gt;
+      &lt;p&gt;The "Example" header was too large.&lt;/p&gt;
+   &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+                        </div>
+                    </div>
+                    <div id="rfc.section.5.p.4">
+                        <p>431 ステータスコードを持つレスポンスは、キャッシュに保存してはなりません。</p>
+                    </div>
+                </section>
+                <section id="status-511">
+                    <h2 id="rfc.section.6"><a href="#rfc.section.6">6.</a>&nbsp;<a href="#status-511">511
+                            ネットワーク認証が必要</a></h2>
+                    <div id="rfc.section.6.p.1">
+                        <p>511 ステータスコードは、クライアントがネットワークアクセスを得るために認証する必要があることを示します。</p>
+                    </div>
+                    <div id="rfc.section.6.p.2">
+                        <p>レスポンス表現は、ユーザーが資格情報を送信できるリソースへのリンク（例えば HTML フォーム）を含むべきです。</p>
+                    </div>
+                    <div id="rfc.section.6.p.3">
+                        <p>511 レスポンスはチャレンジやログインインターフェース自体を含むべきではありません。ブラウザはログインインターフェースを元の要求された URL
+                            に関連付けて表示し、混乱を招く可能性があるためです。</p>
+                    </div>
+                    <div id="rfc.section.6.p.4">
+                        <p>511
+                            ステータスはオリジンサーバーによって生成されるべきではありません。これはネットワークへのアクセスを制御するために介在するインターセプティングプロキシによって使用されることを意図しています。
+                        </p>
+                    </div>
+                    <div id="rfc.section.6.p.5">
+                        <p>511 ステータスコードを持つレスポンスは、キャッシュに保存してはなりません。</p>
+                    </div>
+                    <section id="using-511">
+                        <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a>&nbsp;<a href="#using-511">511
+                                ステータスコードとキャプティブポータル</a></h3>
+                        <div id="rfc.section.6.1.p.1">
+                            <p>511
+                                ステータスコードは、ソフトウェア（特に非ブラウザのエージェント）が、要求したサーバーからのレスポンスを期待している場合に、介在するネットワークインフラが返すレスポンスによって引き起こされる問題を軽減するために設計されています。これはキャプティブポータルの導入を奨励するものではなく、それによって生じる被害を制限することを目的としています。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.1.p.2">
+                            <p>ネットワーク管理者が認証や利用規約の承諾、その他のユーザー操作を要求する場合、通常は Media Access Control (MAC)
+                                アドレスを使ってまだそれらを行っていないクライアント（「不明なクライアント」）を識別します。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.3">
+                            <p>不明なクライアントはすべてのトラフィックがブロックされますが、TCP ポート 80 のトラフィックのみが HTTP
+                                サーバー（「ログインサーバー」）に送られ、不明なクライアントの「ログイン」を扱うことになります。もちろんログインサーバー自身へのトラフィックは除外されます。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.4" class="avoidbreakafter">
+                            <p>例えば、ユーザーエージェントがネットワークに接続して TCP ポート 80 で次の HTTP リクエストを行うかもしれません：</p>
+                        </div>
+                        <div id="rfc.figure.u.4">
+                            <div>
+                                <pre class="text2">
+GET /index.htm HTTP/1.1
+Host: www.example.com
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.6.1.p.5" class="avoidbreakafter">
+                            <p>そのようなリクエストを受け取ると、ログインサーバーは 511 レスポンスを生成します：</p>
+                        </div>
+                        <div id="rfc.figure.u.5">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 511 Network Authentication Required
+Content-Type: text/html
+
+&lt;html&gt;
+   &lt;head&gt;
+      &lt;title&gt;Network Authentication Required&lt;/title&gt;
+      &lt;meta http-equiv="refresh" 
+            content="0; url=https://login.example.net/"&gt;
+   &lt;/head&gt;
+   &lt;body&gt;
+      &lt;p&gt;You need to &lt;a href="https://login.example.net/"&gt;
+      authenticate with the local network&lt;/a&gt; in order to gain 
+      access.&lt;/p&gt;
+   &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.6.1.p.6">
+                            <p>ここで、511 ステータスコードは非ブラウザクライアントがレスポンスをオリジンサーバーからのものと誤解しないようにし、META HTML
+                                要素はユーザーエージェントをログインサーバーへリダイレクトします。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="security-considerations">
+                    <h2 id="rfc.section.7"><a href="#rfc.section.7">7.</a>&nbsp;<a
+                            href="#security-considerations">セキュリティに関する考慮事項</a></h2>
+                    <section id="n-428-precondition-required">
+                        <h3 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a>&nbsp;<a
+                                href="#n-428-precondition-required">428 前提条件が必要</a></h3>
+                        <div id="rfc.section.7.1.p.1">
+                            <p>428 ステータスコードは任意であり、クライアントは「ロストアップデート」競合を防ぐためにその使用を前提とすることはできません。</p>
+                        </div>
+                    </section>
+                    <section id="n-429-too-many-requests">
+                        <h3 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2.</a>&nbsp;<a
+                                href="#n-429-too-many-requests">429 リクエストが多すぎます</a></h3>
+                        <div id="rfc.section.7.2.p.1">
+                            <p>サーバーが攻撃を受けているか、単一の当事者から非常に大量のリクエストを受け取っている場合、各リクエストに対して 429 ステータスで応答することはリソースを消費します。</p>
+                        </div>
+                        <div id="rfc.section.7.2.p.2">
+                            <p>したがって、サーバーは 429 ステータスコードを使用する義務はありません。リソースの使用を制限する際には、単に接続を切断するなどの方が適切な場合があります。</p>
+                        </div>
+                    </section>
+                    <section id="n-431-request-header-fields-too-large">
+                        <h3 id="rfc.section.7.3"><a href="#rfc.section.7.3">7.3.</a>&nbsp;<a
+                                href="#n-431-request-header-fields-too-large">431 リクエストヘッダーフィールドが大きすぎます</a>
+                        </h3>
+                        <div id="rfc.section.7.3.p.1">
+                            <p>サーバーは 431 ステータスコードを使用する義務はありません。攻撃を受けている場合、単に接続を切断するなどの方が適切な場合があります。</p>
+                        </div>
+                    </section>
+                    <section id="n-511-network-authentication-required">
+                        <h3 id="rfc.section.7.4"><a href="#rfc.section.7.4">7.4.</a>&nbsp;<a
+                                href="#n-511-network-authentication-required">511 ネットワーク認証が必要</a>
+                        </h3>
+                        <div id="rfc.section.7.4.p.1">
+                            <p>一般的に、511 ステータスコードを含むレスポンスは要求の URL
+                                に示されたオリジンサーバーからのものではありません。これは多くのセキュリティ問題を引き起こします。例えば、攻撃的な仲介者が元のドメインの名前空間にクッキーを挿入したり、ユーザーエージェントから送信されるクッキーや
+                                HTTP 認証資格情報を観察したりする可能性があります。</p>
+                        </div>
+                        <div id="rfc.section.7.4.p.2">
+                            <p>しかし、これらのリスクは 511 ステータスコードに特有のものではありません。言い換えれば、このステータスコードを使用していないキャプティブポータルも同じ問題を引き起こします。
+                            </p>
+                        </div>
+                        <div id="rfc.section.7.4.p.3">
+                            <p>また、SSL/TLS 接続（通常はポート 443）でこのステータスコードを使用するキャプティブポータルは、クライアント側で証明書エラーを発生させることに注意してください。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="n-iana-considerations">
+                    <h2 id="rfc.section.8"><a href="#rfc.section.8">8.</a>&nbsp;<a
+                            href="#n-iana-considerations">IANAに関する考慮事項</a></h2>
+                    <div id="rfc.section.8.p.1" class="avoidbreakafter">
+                        <p>HTTP ステータスコードのレジストリは、次のエントリで更新されました：</p>
+                    </div>
+                    <div id="rfc.section.8.p.2">
+                        <ul class="empty">
+                            <li>Value: 428</li>
+                            <li>Description: Precondition Required</li>
+                            <li>Reference: [RFC6585]</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.8.p.3">
+                        <ul class="empty">
+                            <li>Value: 429</li>
+                            <li>Description: Too Many Requests</li>
+                            <li>Reference: [RFC6585]</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.8.p.4">
+                        <ul class="empty">
+                            <li>Value: 431</li>
+                            <li>Description: Request Header Fields Too Large</li>
+                            <li>Reference: [RFC6585]</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.8.p.5">
+                        <ul class="empty">
+                            <li>Value: 511</li>
+                            <li>Description: Network Authentication Required</li>
+                            <li>Reference: [RFC6585]</li>
+                        </ul>
+                    </div>
+                </section>
+                <section id="rfc.references">
+                    <h2 id="rfc.section.9"><a href="#rfc.section.9">9.</a> 参考文献</h2>
+                    <section>
+                        <div id="rfc.references.1">
+                            <h3 id="rfc.section.9.1"><a href="#rfc.section.9.1">9.1.</a> 規範的参考文献</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                <dd><a href="mailto:sob@harvard.edu">Bradner, S.</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words for use in RFCs to
+                                        Indicate Requirement Levels</a>”, <a
+                                        href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 2119, March 1997.
+                                </dd>
+                                <dt id="RFC2616">[<a href="#RFC2616" class="smpl">RFC2616</a>]</dt>
+                                <dd><a href="mailto:fielding@ics.uci.edu">Fielding, R.</a>, <a
+                                        href="mailto:jg@w3.org">Gettys, J.</a>, <a
+                                        href="mailto:mogul@wrl.dec.com">Mogul, J.</a>, <a
+                                        href="mailto:frystyk@w3.org">Frystyk, H.</a>, <a
+                                        href="mailto:masinter@parc.xerox.com">Masinter, L.</a>, <a
+                                        href="mailto:paulle@microsoft.com">Leach, P.</a>, and <a
+                                        href="mailto:timbl@w3.org">T. Berners-Lee</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2616.html">Hypertext Transfer Protocol
+                                        -- HTTP/1.1</a>”, RFC 2616, June 1999.</dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section>
+                        <div id="rfc.references.2">
+                            <h3 id="rfc.section.9.2"><a href="#rfc.section.9.2">9.2.</a> 参考資料（情報）</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="CORS">[<a href="#CORS" class="smpl">CORS</a>]</dt>
+                                <dd>van Kesteren, A., Ed., “<a href="http://www.w3.org/TR/cors/">Cross-Origin Resource
+                                        Sharing</a>”, W3C Working Draft WD-cors-20100727, July 2010, &lt;<a
+                                        href="http://www.w3.org/TR/cors/">http://www.w3.org/TR/cors/</a>&gt;.</dd>
+                                <dt id="Favicon">[<a href="#Favicon" class="smpl">Favicon</a>]</dt>
+                                <dd>Wikipedia, “<a
+                                        href="http://en.wikipedia.org/w/index.php?title=Favicon&amp;oldid=484627550">Favicon</a>”,
+                                    March 2012, &lt;<a
+                                        href="http://en.wikipedia.org/w/index.php?title=Favicon&amp;oldid=484627550">http://en.wikipedia.org/w/index.php?title=Favicon&amp;oldid=484627550</a>&gt;.
+                                </dd>
+                                <dt id="OAuth2.0">[<a href="#OAuth2.0" class="smpl">OAuth2.0</a>]</dt>
+                                <dd>Hammer-Lahav, E., Ed., Recordon, D., and D. Hardt, “The OAuth 2.0 Authorization
+                                    Protocol”, Work in Progress, March 2012.</dd>
+                                <dt id="P3P">[<a href="#P3P" class="smpl">P3P</a>]</dt>
+                                <dd>Marchiori, M., Ed., “<a href="http://www.w3.org/TR/P3P/">The Platform for Privacy
+                                        Preferences 1.0 (P3P1.0) Specification</a>”, W3C Recommendation
+                                    REC-P3P-20020416, April 2002, &lt;<a
+                                        href="http://www.w3.org/TR/P3P/">http://www.w3.org/TR/P3P/</a>&gt;.</dd>
+                                <dt id="RFC4791">[<a href="#RFC4791" class="smpl">RFC4791</a>]</dt>
+                                <dd><a href="mailto:cyrus@daboo.name">Daboo, C.</a>, <a
+                                        href="mailto:bernard.desruisseaux@oracle.com">Desruisseaux, B.</a>, and <a
+                                        href="mailto:ldusseault@commerce.net">L. Dusseault</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc4791.html">Calendaring Extensions to
+                                        WebDAV (CalDAV)</a>”, RFC 4791, March 2007.</dd>
+                                <dt id="RFC4918">[<a href="#RFC4918" class="smpl">RFC4918</a>]</dt>
+                                <dd>Dusseault, L., Ed., “<a href="https://www.rfc-editor.org/rfc/rfc4918.html">HTTP
+                                        Extensions for Web Distributed Authoring and Versioning (WebDAV)</a>”, RFC 4918,
+                                    June 2007.</dd>
+                                <dt id="WIDGETS">[<a href="#WIDGETS" class="smpl">WIDGETS</a>]</dt>
+                                <dd>Caceres, M., Ed., “<a href="http://www.w3.org/TR/widgets/">Widget Packaging and XML
+                                        Configuration</a>”, W3C Recommendation REC-widgets-20110927, September 2011,
+                                    &lt;<a href="http://www.w3.org/TR/widgets/">http://www.w3.org/TR/widgets/</a>&gt;.
+                                </dd>
+                                <dt id="WebFinger">[<a href="#WebFinger" class="smpl">WebFinger</a>]</dt>
+                                <dd>WebFinger Project, “<a
+                                        href="http://code.google.com/p/webfinger/wiki/WebFingerProtocol">WebFingerProtocol
+                                        (Draft)</a>”, January 2010, &lt;<a
+                                        href="http://code.google.com/p/webfinger/wiki/WebFingerProtocol">http://code.google.com/p/webfinger/wiki/WebFingerProtocol</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                </section>
+                <section id="n-acknowledgements">
+                    <h2 id="rfc.section.A" class="np"><a href="#rfc.section.A">Appendix A.</a>&nbsp;<a
+                            href="#n-acknowledgements">謝辞</a></h2>
+                    <div id="rfc.section.A.p.1">
+                        <p>Jan Algermissen と Julian Reschke に提案とフィードバックを感謝します。</p>
+                    </div>
+                </section>
+                <section id="issues-511">
+                    <h2 id="rfc.section.B"><a href="#rfc.section.B">Appendix B.</a>&nbsp;<a
+                            href="#issues-511">キャプティブポータルによって提起された問題</a></h2>
+                    <div id="rfc.section.B.p.1">
+                        <p>クライアントはポータルのレスポンスと意図した HTTP サーバーのレスポンスを区別できないため、多くの問題が発生します。511
+                            ステータスコードはそれらの一部を軽減することを目的としています。</p>
+                    </div>
+                    <div id="rfc.section.B.p.2">
+                        <p>一例はブラウザがサイトを識別するために一般的に使用する "favicon.ico" <a href="#Favicon"><cite
+                                    title="Favicon">[Favicon]</cite></a> です。特定サイトの favicon
+                            が意図したサイトではなくキャプティブポータルから取得された場合（例えばユーザーが未認証であるため）、ほとんどの実装が favicon
+                            を積極的にキャッシュするため、ポータルのセッションを超えてブラウザのキャッシュに残り、ポータルの favicon が正当なサイトを「乗っ取った」ように見えることがあります。</p>
+                    </div>
+                    <div id="rfc.section.B.p.3">
+                        <p>別のブラウザベースの問題は、Platform for Privacy Preferences <a href="#P3P"><cite
+                                    title="The Platform for Privacy Preferences 1.0 (P3P1.0) Specification">[P3P]</cite></a>
+                            がサポートされている場合に起こります。実装方法によっては、ポータルの p3p.xml
+                            に対するレスポンスをサーバーのものと解釈してしまい、ポータルが提示するプライバシーポリシー（またはその不在）が意図したサイトに適用されると解釈される可能性があります。WebFinger
+                            <a href="#WebFinger"><cite
+                                    title="WebFingerProtocol (Draft)">[WebFinger]</cite></a>、Cross-Origin Resource
+                            Sharing <a href="#CORS"><cite title="Cross-Origin Resource Sharing">[CORS]</cite></a>、および
+                            Open Authorization <a href="#OAuth2.0"><cite
+                                    title="The OAuth 2.0 Authorization Protocol">[OAuth2.0]</cite></a> のような他の Web
+                            ベースのプロトコルも同様の問題に脆弱であり得ます。
+                        </p>
+                    </div>
+                    <div id="rfc.section.B.p.4">
+                        <p>HTTP は主に Web ブラウザで使用されていますが、非ブラウザアプリケーションでの使用も増えています。例えば、Web Distributed Authoring and
+                            Versioning (WebDAV) <a href="#RFC4918"><cite
+                                    title="HTTP Extensions for Web Distributed Authoring and Versioning (WebDAV)">[RFC4918]</cite></a>
+                            や Calendaring Extensions to WebDAV (CalDAV) <a href="#RFC4791"><cite
+                                    title="Calendaring Extensions to WebDAV (CalDAV)">[RFC4791]</cite></a>
+                            はそれぞれリモート編集やカレンダリングのために HTTP
+                            を基盤として使用します。これらのアプリケーションをキャプティブポータルの背後から使用すると、ユーザーに誤ったエラーが表示されたり、極端な場合にはコンテンツの破損が発生する可能性があります。
+                        </p>
+                    </div>
+                    <div id="rfc.section.B.p.5">
+                        <p>同様に、ウィジェット <a href="#WIDGETS"><cite
+                                    title="Widget Packaging and XML Configuration">[WIDGETS]</cite></a>、ソフトウェアアップデート、Twitter
+                            クライアントや iTunes Music Store のようなその他の特殊なソフトウェアなど、HTTP を使用する他の非ブラウザアプリケーションも影響を受ける可能性があります。</p>
+                    </div>
+                    <div id="rfc.section.B.p.6">
+                        <p>HTTP
+                            リダイレクトを使ってトラフィックをポータルに誘導することがこれらの問題を解決すると信じられていることがありますが、多くの利用方法がリダイレクトを「追跡」するため、これは良い解決策ではありません。
+                        </p>
+                    </div>
+                </section>
+                <section id="rfc.authors" class="avoidbreakinside">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>Mark Nottingham</b><br>Rackspace<br>Email: <a
+                            href="mailto:mnot@mnot.net">mnot@mnot.net</a><br>URI: <a
+                            href="http://www.mnot.net/">http://www.mnot.net/</a></address>
+                    <address><b>Roy T. Fielding</b><br>Adobe Systems Incorporated<br>345 Park Ave.<br>San Jose, CA
+                        95110<br>USA<br>Email: <a href="mailto:fielding@gbiv.com">fielding@gbiv.com</a><br>URI: <a
+                            href="http://roy.gbiv.com/">http://roy.gbiv.com/</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
