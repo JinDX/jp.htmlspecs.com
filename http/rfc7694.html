@@ -1,0 +1,833 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 7694 - ハイパーテキスト転送プロトコル (HTTP) におけるクライアント発起のコンテンツエンコーディング</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC7694">
+    <meta property="og:description" content="Hypertext Transfer Protocol (HTTP) Client-Initiated Content-Encoding">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc7694.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 Notational Conventions" href="#rfc.section.2">
+    <link rel="Chapter" title="3 Using the 'Accept-Encoding' Header Field in Responses" href="#rfc.section.3">
+    <link rel="Chapter" title="4 Example" href="#rfc.section.4">
+    <link rel="Chapter" title="5 Deployment Considerations" href="#rfc.section.5">
+    <link rel="Chapter" title="6 Security Considerations" href="#rfc.section.6">
+    <link rel="Chapter" title="7 IANA Considerations" href="#rfc.section.7">
+    <link rel="Chapter" title="8 References" href="#rfc.section.8">
+    <link rel="Appendix" title="Acknowledgements" href="#rfc.section.unnumbered-1">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc7694.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="http://www.rfc-editor.org/info/rfc7694">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <meta name="keywords" content="HTTP, content-encoding">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Reschke, J. F.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:7694">
+    <meta name="dcterms.issued" content="2015-11">
+    <meta name="dcterms.abstract"
+        content="In HTTP, content codings allow for payload encodings such as for compression or integrity checks. In particular, the &#34;gzip&#34; content coding is widely used for payload data sent in response messages. Content codings can be used in request messages as well; however, discoverability is not on par with response messages. This document extends the HTTP &#34;Accept-Encoding&#34; header field for use in responses, to indicate the content codings that are supported in requests.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="In HTTP, content codings allow for payload encodings such as for compression or integrity checks. In particular, the &#34;gzip&#34; content coding is widely used for payload data sent in response messages. Content codings can be used in request messages as well; however, discoverability is not on par with response messages. This document extends the HTTP &#34;Accept-Encoding&#34; header field for use in responses, to indicate the content codings that are supported in requests.">
+</head>
+
+<body onload="getMeta(7694,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>7694</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#notational.conventions">記法上の規約</a></li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#accept-encoding">応答における
+                                        'Accept-Encoding' ヘッダーフィールドの使用</a></li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#example">例</a></li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#deployment.considerations">配備に関する考慮事項</a></li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security.considerations">セキュリティに関する考慮事項</a></li>
+                                <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#iana.considerations">IANA
+                                        に関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.7.1">ヘッダーフィールドレジストリ</a></li>
+                                        <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.7.2">ステータスコードレジストリ</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.8.1">8.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.1">規範的参考文献</a></li>
+                                        <li><a href="#rfc.section.8.2">8.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">参考情報</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.unnumbered-1">謝辞</a></li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネット技術標準化委員会 (IETF)</td>
+                                <td class="text-right">J. Reschke</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 7694</td>
+                                <td class="text-right">greenbytes</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: 標準化トラック</td>
+                                <td class="text-right">2015年11月</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>ハイパーテキスト転送プロトコル (HTTP) におけるクライアント発起のコンテンツエンコーディング</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">概要</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>HTTP では、コンテンツ符号化（content coding）により圧縮や整合性チェックなどのペイロードのエンコードが可能です。特に "gzip"
+                            コンテンツ符号化は、レスポンスメッセージ内で送信されるペイロードデータに広く使われています。</p>
+                    </div>
+                    <div id="rfc.abstract.p.2">
+                        <p>コンテンツ符号化はリクエストメッセージでも使用できますが、発見可能性（discoverability）はレスポンスメッセージと同等ではありません。本ドキュメントは、リクエストでサポートされるコンテンツ符号化を示すために、応答で使用される
+                            HTTP の "Accept-Encoding" ヘッダーフィールドを拡張します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモのステータス</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>これはインターネット標準化トラック文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネット技術標準化委員会（IETF）の成果物です。本書は IETF
+                            コミュニティの合意を表しており、公開のために一般レビューを経てインターネット技術運営指導グループ（IESG）によって承認されています。インターネット標準に関する詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc5741.html#section-2">RFC 5741 のセクション2</a>
+                            を参照してください。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>本書の現在のステータス、正誤表、フィードバックの提供方法については <a
+                                href="http://www.rfc-editor.org/info/rfc7694">http://www.rfc-editor.org/info/rfc7694</a>
+                            を参照してください。</p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2015 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in
+                            effect on the date of publication of this document. Please review these documents carefully,
+                            as they describe your rights and restrictions with respect to this document. Code Components
+                            extracted from this document must include Simplified BSD License text as described in
+                            Section 4.e of the Trust Legal Provisions and are provided without warranty as described in
+                            the Simplified BSD License.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#notational.conventions">記法上の規約</a></li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#accept-encoding">レスポンスでの
+                                'Accept-Encoding' ヘッダーフィールドの使用</a></li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#example">例</a></li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#deployment.considerations">配備に関する考慮事項</a></li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#security.considerations">セキュリティに関する考慮事項</a></li>
+                        <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#iana.considerations">IANA
+                                に関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.7.1">ヘッダーフィールドレジストリ</a></li>
+                                <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.7.2">ステータスコードレジストリ</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                            <ul>
+                                <li><a href="#rfc.section.8.1">8.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.1">規範的参考文献</a></li>
+                                <li><a href="#rfc.section.8.2">8.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">参考情報</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.unnumbered-1">謝辞</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <section id="introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#introduction">はじめに</a></h2>
+                    <div id="rfc.section.1.p.1">
+                        <p>HTTP において、コンテンツ符号化は圧縮や整合性チェックのようなペイロードのエンコーディングを可能にします（<a href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>、
+                            <a href="rfc7231.html#data.encoding" title="Encoding for Compression or Integrity">Section
+                                3.1.2</a>）。特に、"gzip" コンテンツ符号化（<a href="#RFC7230"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[RFC7230]</cite></a>、
+                            <a href="rfc7230.html#compression.codings" title="Compression Codings">Section 4.2</a>）は、
+                            レスポンスメッセージで送信されるペイロードデータに広く利用されています。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>コンテンツ符号化はリクエストメッセージでも使用可能ですが、その発見可能性はレスポンスメッセージと同等ではありません。本書は、HTTP の "Accept-Encoding"
+                            ヘッダーフィールド（<a href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>、
+                            <a href="rfc7231.html#header.accept-encoding" title="Accept-Encoding">Section 5.3.4</a>）を、
+                            リクエストでサポートされるコンテンツ符号化を示すためにレスポンスでも使用できるように拡張します。さらに、ステータスコード 415 (Unsupported Media Type)
+                            の定義（<a href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>、
+                            <a href="rfc7231.html#status.415" title="415 Unsupported Media Type">Section
+                                6.5.13</a>）を更新し、
+                            適切な場合に "Accept-Encoding" ヘッダーフィールドを含めることを推奨します。
+                        </p>
+                    </div>
+                </section>
+                <section id="notational.conventions">
+                    <h2 id="rfc.section.2"><a href="#rfc.section.2">2.</a>&nbsp;<a
+                            href="#notational.conventions">記法上の規約</a></h2>
+                    <div id="rfc.section.2.p.1">
+                        <p>本書中のキーワード "MUST"、"MUST NOT"、"REQUIRED"、"SHALL"、"SHALL NOT"、"SHOULD"、"SHOULD NOT"、
+                            "RECOMMENDED"、"MAY"、および "OPTIONAL" は <a href="#RFC2119"><cite
+                                    title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                            に従って解釈されます。
+                        </p>
+                    </div>
+                    <div id="rfc.section.2.p.2">
+                        <p>本書は基礎となる HTTP 仕様で定義された用語を再利用します。具体的には、<a href="rfc7230.html#architecture"
+                                title="Architecture">Section 2</a> の <a href="#RFC7230"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[RFC7230]</cite></a>、
+                            および <a href="rfc7231.html#data.encoding"
+                                title="Encoding for Compression or Integrity">Section 3.1.2</a> の <a
+                                href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>
+                            にある用語を再利用します。
+                        </p>
+                    </div>
+                </section>
+                <section id="accept-encoding">
+                    <h2 id="rfc.section.3"><a href="#rfc.section.3">3.</a>&nbsp;<a href="#accept-encoding">レスポンスでの
+                            'Accept-Encoding' ヘッダーフィールドの使用</a></h2>
+                    <div id="rfc.section.3.p.1">
+                        <p><a href="rfc7231.html#header.accept-encoding" title="Accept-Encoding">Section 5.3.4</a> の <a
+                                href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>
+                            は "Accept-Encoding" をリクエストヘッダーフィールドとして定義しています。</p>
+                    </div>
+                    <div id="rfc.section.3.p.2">
+                        <p>本仕様はその定義を拡張し、"Accept-Encoding"
+                            をレスポンスヘッダーフィールドとしても許可します。レスポンス中に存在する場合、それは当該レスポンスに関連するリクエストでリソースが受け入れていたコンテンツ符号化を示します。フィールド値が
+                            "identity" のみを含む場合は、コンテンツ符号化がサポートされていなかったことを意味します。</p>
+                    </div>
+                    <div id="rfc.section.3.p.3">
+                        <p>なお、この情報は関連するリクエストに固有のものであり、同一サーバー上の他のリソースに対するサポートされるエンコーディング集合は異なる可能性があり、時間とともに変化したり、リクエストの他の側面（例:
+                            リクエストメソッド）に依存したりすることがあります。</p>
+                    </div>
+                    <div id="rfc.section.3.p.4">
+                        <p><a href="rfc7231.html#status.415" title="415 Unsupported Media Type">Section 6.5.13</a> の <a
+                                href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>
+                            は、メディア型とコンテンツ符号化の両方に関連する問題に対してステータスコード 415 (Unsupported Media Type) を適用することを定義しています。</p>
+                    </div>
+                    <div id="rfc.section.3.p.5">
+                        <p>サーバーがサポートされないコンテンツ符号化のためにリクエストを失敗させた場合、415 ステータスで応答し、そのレスポンスに "Accept-Encoding"
+                            ヘッダーフィールドを含めるべきです。これによりクライアントはコンテンツ符号化に関連する問題とメディア型に関連する問題を区別できます。メディア型に関連しない理由で 415
+                            を返す場合、混乱を避けるためにサーバーは "Accept-Encoding" ヘッダーフィールドを含めてはなりません <em class="bcp14">MUST NOT</em>。
+                        </p>
+                    </div>
+                    <div id="rfc.section.3.p.6">
+                        <p>"Accept-Encoding" をレスポンスで使用する最も一般的な用途は、クライアントが楽観的にコンテンツ符号化を用いた場合に対する 415
+                            応答であることが予想されます。ただし、このヘッダーフィールドは将来のやりとりを最適化するために、コンテンツ符号化がサポートされていることをクライアントに通知する目的でも使用できます。例えば、リクエストペイロードが圧縮の使用に値するほど大きかったがクライアントが圧縮を行わなかった場合に、リソースが
+                            2xx レスポンスでこれを含めることがあります。</p>
+                    </div>
+                </section>
+                <section id="example">
+                    <h2 id="rfc.section.4"><a href="#rfc.section.4">4.</a>&nbsp;<a href="#example">例</a></h2>
+                    <div id="rfc.section.4.p.1" class="avoidbreakafter">
+                        <p>クライアントが "compress" コンテンツ符号化を使用して POST リクエストを送信する例（<a href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>、
+                            <a href="rfc7231.html#content.codings" title="Content Codings">Section 3.1.2.1</a>）:
+                        </p>
+                    </div>
+                    <div id="rfc.figure.u.1">
+                        <div>
+                            <pre class="text2">POST /edit/ HTTP/1.1
+Host: example.org
+Content-Type: application/atom+xml;type=entry
+Content-Encoding: compress
+
+...compressed payload...
+</pre>
+                        </div>
+                    </div>
+                    <div id="rfc.section.4.p.2" class="avoidbreakafter">
+                        <p>サーバーが、そのリソースが "gzip" コンテンツ符号化しか許可していないためリクエストを拒否する例:</p>
+                    </div>
+                    <div id="rfc.figure.u.2">
+                        <div>
+                            <pre class="text">HTTP/1.1 415 Unsupported Media Type
+Date: Fri, 09 May 2014 11:43:53 GMT
+Accept-Encoding: gzip
+Content-Length: 68
+Content-Type: text/plain
+
+<span id="exbody">このリソースはリクエストにおける "gzip" コンテンツ符号化のみをサポートします。
+</span></pre>
+                        </div>
+                    </div>
+                    <div id="rfc.section.4.p.3">
+                        <p>この時点で、クライアントはサポートされている "gzip" コンテンツ符号化でリクエストを再試行できます。</p>
+                    </div>
+                    <div id="rfc.section.4.p.4" class="avoidbreakafter">
+                        <p>あるいは、リクエスト内でコンテンツ符号化を一切サポートしないサーバーは、次のように応答することもできます:</p>
+                    </div>
+                    <div id="rfc.figure.u.3">
+                        <div>
+                            <pre class="text">HTTP/1.1 415 Unsupported Media Type
+Date: Fri, 09 May 2014 11:43:53 GMT
+Accept-Encoding: identity
+Content-Length: 61
+Content-Type: text/plain
+
+<span id="exbody2">このリソースはリクエスト内のコンテンツ符号化をサポートしていません。
+</span></pre>
+                        </div>
+                    </div>
+                </section>
+                <section id="deployment.considerations">
+                    <h2 id="rfc.section.5"><a href="#rfc.section.5">5.</a>&nbsp;<a
+                            href="#deployment.considerations">配備に関する考慮事項</a></h2>
+                    <div id="rfc.section.5.p.1">
+                        <p>リクエストでのコンテンツ符号化をサポートしないサーバーは、コンテンツ符号化を使用したリクエストを既に失敗させるよう要求されています。<a
+                                href="rfc7231.html#status.415" title="415 Unsupported Media Type">Section 6.5.13</a> の
+                            <a href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>
+                            はこの目的のためにステータスコード 415 を定義しているため、必要な変更はそのレスポンスに値 "identity" の "Accept-Encoding"
+                            ヘッダーフィールドを含めることだけです。
+                        </p>
+                    </div>
+                    <div id="rfc.section.5.p.2">
+                        <p>いくつかのコンテンツ符号化をサポートするサーバーは、サポートされていないコンテンツ符号化を用いたリクエストも失敗させる必要があります。本仕様に準拠するために、サーバーは問題を示すためにステータスコード
+                            415 を使用し、サポートされているコンテンツ符号化を列挙した "Accept-Encoding"
+                            ヘッダーフィールドを含める必要があります。サポートされるコンテンツ符号化の集合は通常静的かつ小規模であるため、ヘッダーフィールドを追加することは簡単であるべきです。</p>
+                    </div>
+                </section>
+                <section id="security.considerations">
+                    <h2 id="rfc.section.6"><a href="#rfc.section.6">6.</a>&nbsp;<a
+                            href="#security.considerations">セキュリティに関する考慮事項</a></h2>
+                    <div id="rfc.section.6.p.1">
+                        <p>本仕様はサポートされるコンテンツ符号化の発見性と、サポートされないコンテンツ符号化によるリクエスト失敗の診断を追加するだけです。そのため、HTTP/1.1（<a
+                                href="rfc7231.html#security.considerations" title="Security Considerations">Section
+                                9</a> の <a href="#RFC7231"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>）や
+                            HTTP/2（<a href="https://www.rfc-editor.org/rfc/rfc7540.html#section-10"
+                                title="Security Considerations">Section 10</a> の <a href="#RFC7540"><cite
+                                    title="Hypertext Transfer Protocol Version 2 (HTTP/2)">[RFC7540]</cite></a>）に既に存在するセキュリティ上の考慮事項を超える新たな懸念を導入するものではありません。
+                        </p>
+                    </div>
+                    <div id="rfc.section.6.p.2">
+                        <p>しかしながら、発見性と診断の向上により、リクエストでのコンテンツ符号化の利用が容易になり、その結果 gzip のような圧縮符号化の使用が増加する可能性があります（<a
+                                href="rfc7230.html#compression.codings" title="Compression Codings">Section 4.2</a> の <a
+                                href="#RFC7230"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[RFC7230]</cite></a>）。セキュアチャネル上で使用される場合、これは
+                            BREACH のようなサイドチャネル攻撃を可能にする場合があります（<a
+                                href="https://www.rfc-editor.org/rfc/rfc7540.html#section-10.6">RFC7540 Section 10.6</a>
+                            と <a href="#BREACH"><cite
+                                    title="BREACH: Reviving the CRIME Attack">[BREACH]</cite></a>を参照）。公開時点では、リクエスト内の圧縮に対して
+                            BREACH 類似の攻撃がどのように適用されるかは明確ではありません。</p>
+                    </div>
+                </section>
+                <section id="iana.considerations">
+                    <h2 id="rfc.section.7"><a href="#rfc.section.7">7.</a>&nbsp;<a href="#iana.considerations">IANA
+                            に関する考慮事項</a></h2>
+                    <section id="n-header-field-registry">
+                        <h3 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a>&nbsp;<a
+                                href="#n-header-field-registry">ヘッダーフィールドレジストリ</a></h3>
+                        <div id="rfc.section.7.1.p.1">
+                            <p>HTTP ヘッダーフィールドは、BCP90（"Message Headers" レジストリ）で定義されている &lt;<a
+                                    href="http://www.iana.org/assignments/message-headers">http://www.iana.org/assignments/message-headers</a>&gt;
+                                に登録されます（<a href="#BCP90"><cite
+                                        title="Registration Procedures for Message Header Fields">[BCP90]</cite></a>参照）。
+                            </p>
+                        </div>
+                        <div id="rfc.section.7.1.p.2" class="avoidbreakafter">
+                            <p>本書は "Accept-Encoding" ヘッダーフィールドの定義を更新します。恒久的メッセージヘッダーフィールド名レジストリは以下のように更新されました:</p>
+                        </div>
+                        <div id="rfc.table.1" class="table table-condensed table-striped">
+                            <div id="iana.header.registration.table"></div>
+                            <table class="table table-condensed table-striped full tleft">
+                                <thead>
+                                    <tr>
+                                        <th>ヘッダーフィールド名</th>
+                                        <th>プロトコル</th>
+                                        <th>ステータス</th>
+                                        <th>参照</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-left">Accept-Encoding</td>
+                                        <td class="text-left">http</td>
+                                        <td class="text-left">standard</td>
+                                        <td class="text-left"><a href="rfc7231.html#header.accept-encoding"
+                                                title="Accept-Encoding">Section 5.3.4</a> of <a href="#RFC7231"><cite
+                                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>
+                                            and <a href="#accept-encoding"
+                                                title="Using the 'Accept-Encoding' Header Field in Responses">Section
+                                                3</a> of this document</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <section id="n-status-code-registry">
+                        <h3 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2.</a>&nbsp;<a
+                                href="#n-status-code-registry">ステータスコードレジストリ</a></h3>
+                        <div id="rfc.section.7.2.p.1">
+                            <p>HTTP ステータスコードは &lt;<a
+                                    href="http://www.iana.org/assignments/http-status-codes">http://www.iana.org/assignments/http-status-codes</a>&gt;
+                                にある "HTTP Status Codes" レジストリに登録されます。</p>
+                        </div>
+                        <div id="rfc.section.7.2.p.2" class="avoidbreakafter">
+                            <p>本書はステータスコード 415 (Unsupported Media Type) の定義を更新します。"HTTP Status Codes"
+                                レジストリは以下のように更新されました:</p>
+                        </div>
+                        <div id="rfc.table.2" class="table table-condensed table-striped">
+                            <div id="iana.status.code.registration.table"></div>
+                            <table class="table table-condensed table-striped full tleft">
+                                <thead>
+                                    <tr>
+                                        <th>値</th>
+                                        <th>説明</th>
+                                        <th>参照</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-left">415</td>
+                                        <td class="text-left">Unsupported Media Type</td>
+                                        <td class="text-left"><a href="rfc7231.html#status.415"
+                                                title="415 Unsupported Media Type">Section 6.5.13</a> of <a
+                                                href="#RFC7231"><cite
+                                                    title="Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content">[RFC7231]</cite></a>
+                                            and <a href="#accept-encoding"
+                                                title="Using the 'Accept-Encoding' Header Field in Responses">Section
+                                                3</a> of this document</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </section>
+                <section id="rfc.references">
+                    <h2 id="rfc.section.8"><a href="#rfc.section.8">8.</a> 参考文献</h2>
+                    <section>
+                        <div id="rfc.references.1">
+                            <h3 id="rfc.section.8.1"><a href="#rfc.section.8.1">8.1.</a> 規範的参考文献</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                <dd><a href="mailto:sob@harvard.edu">Bradner, S.</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words for use in RFCs to
+                                        Indicate Requirement Levels</a>”, <a
+                                        href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 2119, <a
+                                        href="https://dx.doi.org/10.17487/RFC2119">DOI 10.17487/RFC2119</a>, March 1997,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
+                                </dd>
+                                <dt id="RFC7230">[<a href="#RFC7230" class="smpl">RFC7230</a>]</dt>
+                                <dd><a href="mailto:fielding@gbiv.com">Fielding, R., Ed.</a> and <a
+                                        href="mailto:julian.reschke@greenbytes.de">J. Reschke, Ed.</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Message Syntax and Routing</a>”, RFC 7230, <a
+                                        href="https://dx.doi.org/10.17487/RFC7230">DOI 10.17487/RFC7230</a>, June 2014,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7230">http://www.rfc-editor.org/info/rfc7230</a>&gt;.
+                                </dd>
+                                <dt id="RFC7231">[<a href="#RFC7231" class="smpl">RFC7231</a>]</dt>
+                                <dd><a href="mailto:fielding@gbiv.com">Fielding, R., Ed.</a> and <a
+                                        href="mailto:julian.reschke@greenbytes.de">J. Reschke, Ed.</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7231.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Semantics and Content</a>”, RFC 7231, <a
+                                        href="https://dx.doi.org/10.17487/RFC7231">DOI 10.17487/RFC7231</a>, June 2014,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7231">http://www.rfc-editor.org/info/rfc7231</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section>
+                        <div id="rfc.references.2">
+                            <h3 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a> 参考情報</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="BCP90">[<a href="#BCP90" class="smpl">BCP90</a>]</dt>
+                                <dd><a href="mailto:GK-IETF@ninebynine.org">Klyne, G.</a>, <a
+                                        href="mailto:mnot@pobox.com">Nottingham, M.</a>, and <a
+                                        href="mailto:JeffMogul@acm.org">J. Mogul</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc3864.html">Registration Procedures for
+                                        Message Header Fields</a>”, <a href="https://www.rfc-editor.org/info/bcp90">BCP
+                                        90</a>, RFC 3864, September 2004, &lt;<a
+                                        href="http://www.rfc-editor.org/info/bcp90">http://www.rfc-editor.org/info/bcp90</a>&gt;.
+                                </dd>
+                                <dt id="BREACH">[<a href="#BREACH" class="smpl">BREACH</a>]</dt>
+                                <dd>Gluck, Y., Harris, N., and A. Prado, “<a
+                                        href="http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf">BREACH:
+                                        Reviving the CRIME Attack</a>”, July 2013, &lt;<a
+                                        href="http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf">http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf</a>&gt;.
+                                </dd>
+                                <dt id="RFC7540">[<a href="#RFC7540" class="smpl">RFC7540</a>]</dt>
+                                <dd>Belshe, M., Peon, R., and M. Thomson, Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7540.html">Hypertext Transfer Protocol
+                                        Version 2 (HTTP/2)</a>”, RFC 7540, <a
+                                        href="https://dx.doi.org/10.17487/RFC7540">DOI 10.17487/RFC7540</a>, May 2015,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7540">http://www.rfc-editor.org/info/rfc7540</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                </section>
+                <section id="n-acknowledgements">
+                    <h2 id="rfc.section.unnumbered-1"><a href="#n-acknowledgements">謝辞</a></h2>
+                    <div id="rfc.section.unnumbered-1.p.1">
+                        <p>Hypertext Transfer Protocol ワーキンググループの参加者、すなわち Amos Jeffries、Ben Campbell、Mark
+                            Nottingham、Pete Resnick、Stephen Farrell、Ted Hardie に感謝します。</p>
+                    </div>
+                </section>
+                <section id="rfc.authors" class="avoidbreakinside">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>Julian F. Reschke</b><br>greenbytes GmbH<br>Hafenweg 16<br>Muenster, NW
+                        48155<br>Germany<br>Email: <a
+                            href="mailto:julian.reschke@greenbytes.de">julian.reschke@greenbytes.de</a><br>URI: <a
+                            href="http://greenbytes.de/tech/webdav/">http://greenbytes.de/tech/webdav/</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>

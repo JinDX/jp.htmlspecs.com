@@ -1,0 +1,2260 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 6265 - HTTP ステート管理メカニズム</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC6265">
+    <meta property="og:description" content="HTTP State Management Mechanism">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc6265.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 Conventions" href="#rfc.section.2">
+    <link rel="Chapter" title="3 Overview" href="#rfc.section.3">
+    <link rel="Chapter" title="4 Server Requirements" href="#rfc.section.4">
+    <link rel="Chapter" title="5 User Agent Requirements" href="#rfc.section.5">
+    <link rel="Chapter" title="6 Implementation Considerations" href="#rfc.section.6">
+    <link rel="Chapter" title="7 Privacy Considerations" href="#rfc.section.7">
+    <link rel="Chapter" title="8 Security Considerations" href="#rfc.section.8">
+    <link rel="Chapter" title="9 IANA Considerations" href="#rfc.section.9">
+    <link rel="Chapter" title="10 References" href="#rfc.section.10">
+    <link rel="Appendix" title="A Acknowledgements" href="#rfc.section.A">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc6265.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="http://www.rfc-editor.org/info/rfc6265">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <meta name="keywords" content="Cookie, Set-Cookie, Secure, HttpOnly">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Barth, A.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:6265">
+    <meta name="dcterms.issued" content="2011-04">
+    <meta name="dct.replaces" content="urn:ietf:rfc:2965">
+    <meta name="dcterms.abstract"
+        content="This document defines the HTTP Cookie and Set-Cookie header fields. These header fields can be used by HTTP servers to store state (called cookies) at HTTP user agents, letting the servers maintain a stateful session over the mostly stateless HTTP protocol. Although cookies have many historical infelicities that degrade their security and privacy, the Cookie and Set-Cookie header fields are widely used on the Internet. This document obsoletes RFC 2965.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="This document defines the HTTP Cookie and Set-Cookie header fields. These header fields can be used by HTTP servers to store state (called cookies) at HTTP user agents, letting the servers maintain a stateful session over the mostly stateless HTTP protocol. Although cookies have many historical infelicities that degrade their security and privacy, the Cookie and Set-Cookie header fields are widely used on the Internet. This document obsoletes RFC 2965.">
+</head>
+
+<body onload="getMeta(6265,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>6265</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#intro">はじめに</a>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#conventions">規約</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#conformance-criteria">適合基準</a></li>
+                                        <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#syntax-notation">構文表記法</a></li>
+                                        <li><a href="#rfc.section.2.3">2.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#terminology">用語</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#overview">概要</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.1">例</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#sane-profile">サーバー要件</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sane-set-cookie">Set-Cookie</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.4.1.1">4.1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#sane-set-cookie-syntax">構文</a></li>
+                                                <li><a href="#rfc.section.4.1.2">4.1.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#sane-set-cookie-semantics">セマンティクス（非規範）</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sane-cookie">Cookie</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.4.2.1">4.2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#sane-cookie-syntax">構文</a></li>
+                                                <li><a href="#rfc.section.4.2.2">4.2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#sane-cookie-semantics">セマンティクス</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#ua-requirements">ユーザーエージェント要件</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.5.1">5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#algorithms">サブコンポーネントアルゴリズム</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.5.1.1">5.1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#cookie-date">日付</a></li>
+                                                <li><a href="#rfc.section.5.1.2">5.1.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#cookie-domain-canonicalize">正規化されたホスト名</a>
+                                                </li>
+                                                <li><a href="#rfc.section.5.1.3">5.1.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#cookie-domain">ドメインマッチング</a></li>
+                                                <li><a href="#rfc.section.5.1.4">5.1.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#cookie-path">パスとパスマッチ</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.5.2">5.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#set-cookie">Set-Cookie ヘッダー</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.5.2.1">5.2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#expires-attribute">Expires 属性</a></li>
+                                                <li><a href="#rfc.section.5.2.2">5.2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#max-age-attribute">Max-Age 属性</a></li>
+                                                <li><a href="#rfc.section.5.2.3">5.2.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#domain-attribute">Domain 属性</a></li>
+                                                <li><a href="#rfc.section.5.2.4">5.2.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#path-attribute">Path 属性</a></li>
+                                                <li><a href="#rfc.section.5.2.5">5.2.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#secure-attribute">Secure 属性</a></li>
+                                                <li><a href="#rfc.section.5.2.6">5.2.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#httponly-attribute">HttpOnly 属性</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.5.3">5.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#storage-model">ストレージモデル</a></li>
+                                        <li><a href="#rfc.section.5.4">5.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#cookie">Cookie ヘッダー</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#implementation-considerations">実装に関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#implementation-limits">制限</a></li>
+                                        <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#implementation-apis">API（アプリケーションプログラミングインタフェース）</a></li>
+                                        <li><a href="#rfc.section.6.3">6.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#idna-migration">IDNA 依存と移行</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#privacy-considerations">プライバシーに関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#third-party-cookies">サードパーティクッキー</a></li>
+                                        <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#user-controls">ユーザーコントロール</a></li>
+                                        <li><a href="#rfc.section.7.3">7.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#expiration-dates">有効期限</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security-considerations">セキュリティに関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.8.1">8.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#section-overview">概要</a></li>
+                                        <li><a href="#rfc.section.8.2">8.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#ambient-authority">周辺権限</a></li>
+                                        <li><a href="#rfc.section.8.3">8.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#clear-text">平文</a></li>
+                                        <li><a href="#rfc.section.8.4">8.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#session-identifiers">セッション識別子</a></li>
+                                        <li><a href="#rfc.section.8.5">8.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#weak-confidentiality">弱い機密性</a></li>
+                                        <li><a href="#rfc.section.8.6">8.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#weak-integrity">弱い完全性</a></li>
+                                        <li><a href="#rfc.section.8.7">8.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#reliance-on-dns">DNS への依存</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.9">9.</a>&nbsp;&nbsp;&nbsp;<a href="#iana-considerations">IANA
+                                        に関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.9.1">9.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.9.1">Cookie</a></li>
+                                        <li><a href="#rfc.section.9.2">9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.9.2">Set-Cookie</a></li>
+                                        <li><a href="#rfc.section.9.3">9.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.9.3">Cookie2</a></li>
+                                        <li><a href="#rfc.section.9.4">9.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.9.4">Set-Cookie2</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.10">10.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references">参照文献</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.10.1">10.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.1">規範的参照文献</a></li>
+                                        <li><a href="#rfc.section.10.2">10.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">参考情報</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.A">付録 A.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.A">謝辞</a>
+                                </li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネット技術標準化委員会 (IETF)</td>
+                                <td class="text-right">A. Barth</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 6265</td>
+                                <td class="text-right">U.C. Berkeley</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">廃止対象: <a href="#RFC2965">2965</a></td>
+                                <td class="text-right">2011年4月</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: 標準化トラック</td>
+                                <td class="text-right"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>HTTP ステート管理メカニズム</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">概要</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>本書は HTTP の Cookie および Set-Cookie ヘッダーフィールドを定義します。これらのヘッダーフィールドは、HTTP サーバーが HTTP
+                            ユーザーエージェントに状態（クッキーと呼ばれる）を保存させるために使用でき、主にステートレスな HTTP
+                            プロトコル上で状態を持つセッションを維持することを可能にします。クッキーにはセキュリティやプライバシーを低下させる歴史的な不都合が多くありますが、Cookie および
+                            Set-Cookie ヘッダーフィールドはインターネット上で広く使用されています。本書は RFC 2965 を廃止します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモのステータス</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>これはインターネット標準化トラック文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネット技術標準化委員会（IETF）の成果物です。本書は IETF
+                            コミュニティの合意を表しています。公開のために一般レビューを経て、インターネット技術運営指導グループ（IESG）によって承認されています。インターネット標準に関する詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc5741.html#section-2">RFC 5741 のセクション2</a>
+                            を参照してください。
+                        </p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>本書の現在のステータス、正誤表、フィードバックの提供方法などの情報は <a
+                                href="http://www.rfc-editor.org/info/rfc6265">http://www.rfc-editor.org/info/rfc6265</a>
+                            で入手できます。
+                        </p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2011 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in
+                            effect on the date of publication of this document. Please review these documents carefully,
+                            as they describe your rights and restrictions with respect to this document. Code Components
+                            extracted from this document must include Simplified BSD License text as described in
+                            Section 4.e of the Trust Legal Provisions and are provided without warranty as described in
+                            the Simplified BSD License.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.3">
+                        <p>This document may contain material from IETF Documents or IETF Contributions published or
+                            made publicly available before November 10, 2008. The person(s) controlling the copyright in
+                            some of this material may not have granted the IETF Trust the right to allow modifications
+                            of such material outside the IETF Standards Process. Without obtaining an adequate license
+                            from the person(s) controlling the copyright in such materials, this document may not be
+                            modified outside the IETF Standards Process, and derivative works of it may not be created
+                            outside the IETF Standards Process, except to format it for publication as an RFC or to
+                            translate it into languages other than English.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#intro">はじめに</a></li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#conventions">規約</a>
+                            <ul>
+                                <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#conformance-criteria">適合基準</a></li>
+                                <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#syntax-notation">構文表記法</a></li>
+                                <li><a href="#rfc.section.2.3">2.3.</a>&nbsp;&nbsp;&nbsp;<a href="#terminology">用語</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#overview">概要</a>
+                            <ul>
+                                <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.3.1">例</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#sane-profile">サーバー要件</a>
+                            <ul>
+                                <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#sane-set-cookie">Set-Cookie</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.1.1">4.1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sane-set-cookie-syntax">構文</a></li>
+                                        <li><a href="#rfc.section.4.1.2">4.1.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sane-set-cookie-semantics">セマンティクス（非規範）</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#sane-cookie">Cookie</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.2.1">4.2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sane-cookie-syntax">構文</a></li>
+                                        <li><a href="#rfc.section.4.2.2">4.2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sane-cookie-semantics">セマンティクス</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#ua-requirements">ユーザーエージェント要件</a>
+                            <ul>
+                                <li><a href="#rfc.section.5.1">5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#algorithms">サブコンポーネントアルゴリズム</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.5.1.1">5.1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#cookie-date">日付</a></li>
+                                        <li><a href="#rfc.section.5.1.2">5.1.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#cookie-domain-canonicalize">正規化されたホスト名</a></li>
+                                        <li><a href="#rfc.section.5.1.3">5.1.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#cookie-domain">ドメインマッチング</a></li>
+                                        <li><a href="#rfc.section.5.1.4">5.1.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#cookie-path">パスとパスマッチ</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.5.2">5.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#set-cookie">Set-Cookie ヘッダー</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.5.2.1">5.2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#expires-attribute">Expires 属性</a></li>
+                                        <li><a href="#rfc.section.5.2.2">5.2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#max-age-attribute">Max-Age 属性</a></li>
+                                        <li><a href="#rfc.section.5.2.3">5.2.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#domain-attribute">Domain 属性</a></li>
+                                        <li><a href="#rfc.section.5.2.4">5.2.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#path-attribute">Path 属性</a></li>
+                                        <li><a href="#rfc.section.5.2.5">5.2.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#secure-attribute">Secure 属性</a></li>
+                                        <li><a href="#rfc.section.5.2.6">5.2.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#httponly-attribute">HttpOnly 属性</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.5.3">5.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#storage-model">ストレージモデル</a></li>
+                                <li><a href="#rfc.section.5.4">5.4.</a>&nbsp;&nbsp;&nbsp;<a href="#cookie">Cookie
+                                        ヘッダー</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#implementation-considerations">実装に関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#implementation-limits">制限</a></li>
+                                <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#implementation-apis">API（アプリケーションプログラミングインタフェース）</a></li>
+                                <li><a href="#rfc.section.6.3">6.3.</a>&nbsp;&nbsp;&nbsp;<a href="#idna-migration">IDNA
+                                        依存と移行</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#privacy-considerations">プライバシーに関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#third-party-cookies">サードパーティクッキー</a></li>
+                                <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#user-controls">ユーザーコントロール</a></li>
+                                <li><a href="#rfc.section.7.3">7.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#expiration-dates">有効期限</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#security-considerations">セキュリティに関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.8.1">8.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#section-overview">概要</a></li>
+                                <li><a href="#rfc.section.8.2">8.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#ambient-authority">周辺権限</a></li>
+                                <li><a href="#rfc.section.8.3">8.3.</a>&nbsp;&nbsp;&nbsp;<a href="#clear-text">平文</a>
+                                </li>
+                                <li><a href="#rfc.section.8.4">8.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#session-identifiers">セッション識別子</a></li>
+                                <li><a href="#rfc.section.8.5">8.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#weak-confidentiality">弱い機密性</a></li>
+                                <li><a href="#rfc.section.8.6">8.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#weak-integrity">弱い完全性</a></li>
+                                <li><a href="#rfc.section.8.7">8.7.</a>&nbsp;&nbsp;&nbsp;<a href="#reliance-on-dns">DNS
+                                        への依存</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.9">9.</a>&nbsp;&nbsp;&nbsp;<a href="#iana-considerations">IANA
+                                に関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.9.1">9.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.9.1">Cookie</a></li>
+                                <li><a href="#rfc.section.9.2">9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.9.2">Set-Cookie</a></li>
+                                <li><a href="#rfc.section.9.3">9.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.9.3">Cookie2</a></li>
+                                <li><a href="#rfc.section.9.4">9.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.9.4">Set-Cookie2</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.10">10.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参照文献</a>
+                            <ul>
+                                <li><a href="#rfc.section.10.1">10.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.1">規範的参照文献</a></li>
+                                <li><a href="#rfc.section.10.2">10.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">参考情報</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.A">付録 A.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.A">謝辞</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <section id="intro">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a href="#intro">はじめに</a>
+                    </h2>
+                    <div id="rfc.section.1.p.1">
+                        <p>本書は HTTP の Cookie と Set-Cookie ヘッダーフィールドを定義します。Set-Cookie ヘッダーフィールドを使用して、HTTP
+                            サーバーは名前/値のペアと関連メタデータ（クッキーと呼ばれる）をユーザーエージェントに渡すことができます。ユーザーエージェントがその後サーバーに行うリクエストでは、ユーザーエージェントはメタデータやその他の情報を使って、Cookie
+                            ヘッダーに名前/値のペアを返すかどうかを判断します。</p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>表面的には単純ですが、クッキーには多くの複雑さがあります。例えば、サーバーはクッキーを送信する際に各クッキーのスコープを示します。スコープは、ユーザーエージェントがクッキーを返すべき最大の期間、クッキーを返すべきサーバー、およびクッキーが適用される
+                            URI スキームを示します。</p>
+                    </div>
+                    <div id="rfc.section.1.p.3">
+                        <p>歴史的な理由から、クッキーにはいくつかのセキュリティおよびプライバシー上の不都合があります。例えば、サーバーはあるクッキーが「Secure」接続向けであることを示すことができますが、Secure
+                            属性は能動的なネットワーク攻撃者の存在下で完全性を提供するものではありません。同様に、あるホスト向けのクッキーは、そのホストのすべてのポートで共有されますが、通常のブラウザの「同一生成元ポリシー」は異なるポート経由で取得されたコンテンツを分離します。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.4">
+                        <p>本仕様には二つの対象読者がいます: クッキーを生成するサーバーの開発者と、クッキーを消費するユーザーエージェントの開発者です。</p>
+                    </div>
+                    <div id="rfc.section.1.p.5">
+                        <p>ユーザーエージェントとの相互運用性を最大化するために、サーバーはクッキーを生成する際に <a href="#sane-profile"
+                                title="Server Requirements">セクション4</a> で定義された良好なプロファイルに従うことを <em
+                                class="bcp14">SHOULD</em> 推奨します。</p>
+                    </div>
+                    <div id="rfc.section.1.p.6">
+                        <p>ユーザーエージェントは、既存の良好でないサーバー挙動とも相互運用性を最大化するために、<a href="#ua-requirements"
+                                title="User Agent Requirements">セクション5</a> で定義されたより寛容な処理規則を <em class="bcp14">MUST</em>
+                            実装しなければなりません。</p>
+                    </div>
+                    <div id="rfc.section.1.p.7">
+                        <p>本書は、インターネット上で実際に使われている Cookie と Set-Cookie
+                            ヘッダーの構文と意味を規定します。特に、本書は今日使われているものを超える新たな構文や意味を作成するものではありません。<a href="#sane-profile"
+                                title="Server Requirements">セクション4</a>
+                            に示したクッキー生成に関する推奨は、現在のサーバー挙動の望ましい部分集合を表しています。さらに、<a href="#ua-requirements"
+                                title="User Agent Requirements">セクション5</a>
+                            のより寛容なクッキー処理アルゴリズムも、今日使われているすべての構文的・意味的変種を推奨するものではありません。既存ソフトウェアが推奨プロトコルと大きく異なる場合は、その差異を説明する注記を文書内に含めています。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.8">
+                        <p>本書の前には少なくとも三つのクッキーの記述がありました: いわゆる「Netscape cookie specification」<a href="#Netscape"><cite
+                                    title="Persistent Client State -- HTTP Cookies">[Netscape]</cite></a>、RFC 2109 <a
+                                href="#RFC2109"><cite title="HTTP State Management Mechanism">[RFC2109]</cite></a>、および
+                            RFC 2965 <a href="#RFC2965"><cite
+                                    title="HTTP State Management Mechanism">[RFC2965]</cite></a>。しかし、これらのいずれの文書もインターネット上で実際に
+                            Cookie と Set-Cookie ヘッダーがどのように使われているかを記述していません（歴史的文脈については <a href="#Kri2001"><cite
+                                    title="HTTP Cookies: Standards, Privacy, and Politics">[Kri2001]</cite></a>
+                            を参照）。本書は以前の IETF による HTTP 状態管理機構の仕様に関連して以下の措置を要求します:</p>
+                        <ol>
+                            <li>RFC2109 の状態を Historic に変更する（既に RFC2965 によって廃止されています）。</li>
+                            <li>RFC2965 の状態を Historic に変更する。</li>
+                            <li>RFC2965 が本書によって廃止されたことを示す。</li>
+                        </ol>
+                        <p>特に、RFC 2965 を Historic に移し廃止することにより、本書は Cookie2 および Set-Cookie2 ヘッダーフィールドの使用を非推奨とします。</p>
+                    </div>
+                </section>
+                <section id="conventions">
+                    <h2 id="rfc.section.2"><a href="#rfc.section.2">2.</a>&nbsp;<a href="#conventions">規約</a>
+                    </h2>
+                    <section id="conformance-criteria">
+                        <h3 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a>&nbsp;<a
+                                href="#conformance-criteria">適合基準</a></h3>
+                        <div id="rfc.section.2.1.p.1">
+                            <p>本書におけるキーワード "MUST"、"MUST NOT"、"REQUIRED"、"SHALL"、"SHALL NOT"、"SHOULD"、"SHOULD
+                                NOT"、"RECOMMENDED"、"MAY"、および "OPTIONAL" は <a href="#RFC2119"><cite
+                                        title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                                に従って解釈されます。</p>
+                        </div>
+                        <div id="rfc.section.2.1.p.2">
+                            <p>アルゴリズムの一部として命令形で表現された要件（例えば "先頭の空白文字を取り除く" や "false を返してこれらの手順を中止する"
+                                など）は、導入部で使用されたキーワード（"MUST"、"SHOULD"、"MAY" 等）の意味で解釈されます。</p>
+                        </div>
+                        <div id="rfc.section.2.1.p.3">
+                            <p>アルゴリズムや特定の手順として表現された適合要件は、最終結果が同等であれば任意の方法で実装できます。特に、本仕様で定義されたアルゴリズムは理解しやすくすることを目的としており、性能を目的としたものではありません。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="syntax-notation">
+                        <h3 id="rfc.section.2.2"><a href="#rfc.section.2.2">2.2.</a>&nbsp;<a
+                                href="#syntax-notation">構文表記法</a></h3>
+                        <div id="rfc.section.2.2.p.1">
+                            <p>本仕様は拡張バックゥス・ナウア形式（ABNF）表記を <a href="#RFC5234"><cite
+                                        title="Augmented BNF for Syntax Specifications: ABNF">[RFC5234]</cite></a>
+                                の記法で使用します。</p>
+                        </div>
+                        <div id="rfc.section.2.2.p.2">
+                            <p>以下のコアルールは参照として含まれます（<a href="#RFC5234"><cite
+                                        title="Augmented BNF for Syntax Specifications: ABNF">[RFC5234]</cite></a>、付録B.1
+                                参照）: ALPHA（文字）、CR（キャリッジリターン）、CRLF（CR LF）、CTL（制御文字）、DIGIT（10進
+                                0-9）、DQUOTE（ダブルクォート）、HEXDIG（16進 0-9/A-F/a-f）、LF（ラインフィード）、NUL（ヌルオクテット）、OCTET（NUL を除く任意の 8
+                                ビットデータ列）、SP（空白）、HTAB（水平タブ）、CHAR（任意の <a href="#USASCII"><cite
+                                        title="Coded Character Set -- 7-bit American Standard Code for Information Interchange">[USASCII]</cite></a>
+                                文字）、VCHAR（可視 <a href="#USASCII"><cite
+                                        title="Coded Character Set -- 7-bit American Standard Code for Information Interchange">[USASCII]</cite></a>
+                                文字）、および WSP（空白文字）.</p>
+                        </div>
+                        <div id="rfc.section.2.2.p.3">
+                            <p>OWS（optional whitespace）ルールは 0 個以上の線形空白文字が現れてよい場所で使用されます。:</p><span
+                                id="rfc.figure.u.1"><span>
+                                    <pre class="inline">OWS            = *( [ obs-fold ] WSP )
+                 ; "optional" whitespace
+obs-fold       = CRLF
+          </pre>
+                                </span></span>
+                            <p>OWS は生産しないか、あるいは単一の SP 文字として生産することが <em class="bcp14">SHOULD</em> 推奨されます。</p>
+                        </div>
+                    </section>
+                    <section id="terminology">
+                        <h3 id="rfc.section.2.3"><a href="#rfc.section.2.3">2.3.</a>&nbsp;<a href="#terminology">用語</a>
+                        </h3>
+                        <div id="rfc.section.2.3.p.1">
+                            <p>用語 user agent、client、server、proxy、および origin server は HTTP/1.1 仕様（<a
+                                    href="#RFC2616"><cite
+                                        title="Hypertext Transfer Protocol -- HTTP/1.1">[RFC2616]</cite></a>、セクション1.3）での意味と同じです。
+                            </p>
+                        </div>
+                        <div id="rfc.section.2.3.p.2">
+                            <p>request-host は、ユーザーエージェントが HTTP リクエストを送信している（あるいは HTTP レスポンスを受信している）ホストの名前です（すなわち、対応する
+                                HTTP リクエストを送信したホストの名前）。</p>
+                        </div>
+                        <div id="rfc.section.2.3.p.3">
+                            <p>request-uri の用語は <a
+                                    href="https://www.rfc-editor.org/rfc/rfc2616.html#section-5.1.2">RFC2616
+                                    セクション5.1.2</a> に定義されています。</p>
+                        </div>
+                        <div id="rfc.section.2.3.p.4">
+                            <p>二つのオクテット列が大文字小文字を区別せずに一致すると言えるのは、<a href="#RFC4790"><cite
+                                        title="Internet Application Protocol Collation Registry">[RFC4790]</cite></a>
+                                に定義された i;ascii-casemap 照合の下で等価である場合に限ります。</p>
+                        </div>
+                        <div id="rfc.section.2.3.p.5">
+                            <p>文字列（string）とは非 NUL オクテットの列を意味します。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="overview">
+                    <h2 id="rfc.section.3"><a href="#rfc.section.3">3.</a>&nbsp;<a href="#overview">概要</a></h2>
+                    <div id="rfc.section.3.p.1">
+                        <p>このセクションは、オリジンサーバーがユーザーエージェントに状態情報を送信し、ユーザーエージェントがその状態情報をオリジンサーバーに返す方法の概略を示します。</p>
+                    </div>
+                    <div id="rfc.section.3.p.2">
+                        <p>状態を保存するために、オリジンサーバーは HTTP レスポンスに Set-Cookie ヘッダーを含めます。以後のリクエストでは、ユーザーエージェントは以前に受け取った
+                            Set-Cookie ヘッダー内のクッキーを含む Cookie リクエストヘッダーをオリジンサーバーに返します。オリジンサーバーは Cookie
+                            ヘッダーを無視してもよく、その内容をアプリケーション定義の目的のために使用しても構いません。</p>
+                    </div>
+                    <div id="rfc.section.3.p.3">
+                        <p>オリジンサーバーは任意のレスポンスに Set-Cookie 応答ヘッダーを送信することが <em class="bcp14">MAY</em> 許されています。ユーザーエージェントは
+                            100 レベルのステータスコードを持つレスポンスに含まれる Set-Cookie ヘッダーを無視することが <em class="bcp14">MAY</em>
+                            許されていますが、その他のレスポンス（400 や 500 レベルを含む）に含まれる Set-Cookie ヘッダーは処理しなければならないことが <em
+                                class="bcp14">MUST</em> 指定されています。オリジンサーバーは一つのレスポンスに複数の Set-Cookie
+                            ヘッダーフィールドを含めることができます。Cookie または Set-Cookie ヘッダーフィールドの存在は、HTTP
+                            キャッシュがレスポンスを保存および再利用することを妨げるものではありません。</p>
+                    </div>
+                    <div id="rfc.section.3.p.4">
+                        <p>オリジンサーバーは複数の Set-Cookie ヘッダーフィールドを単一のヘッダーフィールドに折りたたむべきではありません <em class="bcp14">SHOULD
+                                NOT</em>。HTTP ヘッダーフィールドの折りたたみ（RFC2616 の定義など）を使うと、Set-Cookie の %x2C (",")
+                            文字の使用と衝突し、Set-Cookie ヘッダーフィールドの意味が変わる可能性があります。</p>
+                    </div>
+                    <section id="n-examples">
+                        <h3 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a>&nbsp;<a href="#n-examples">例</a>
+                        </h3>
+                        <div id="rfc.section.3.1.p.1">
+                            <p>Set-Cookie ヘッダーを使って、サーバーは短い文字列を HTTP レスポンスでユーザーエージェントに送り、それをユーザーエージェントが将来のスコープ内の HTTP
+                                リクエストで返すようにできます。例えば、サーバーは名前 SID、値 31d4d96e407aad42
+                                の「セッション識別子」をユーザーエージェントに送ることができます。ユーザーエージェントはその後のリクエストでそのセッション識別子を返します。</p>
+                        </div>
+                        <div id="rfc.figure.u.2">
+                            <p>== Server -&gt; User Agent ==</p>
+                            <div>
+                                <pre class="text">Set-Cookie: SID=31d4d96e407aad42
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.figure.u.3">
+                            <p>== User Agent -&gt; Server ==</p>
+                            <div>
+                                <pre class="text">Cookie: SID=31d4d96e407aad42
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.3.1.p.2">
+                            <p>サーバーは Path および Domain 属性を使用してクッキーのデフォルトスコープを変更できます。例えば、サーバーはユーザーエージェントに対し example.com
+                                のすべてのパスおよびすべてのサブドメインに対してクッキーを返すよう指示できます。</p>
+                        </div>
+                        <div id="rfc.figure.u.4">
+                            <p>== Server -&gt; User Agent ==</p>
+                            <div>
+                                <pre class="text">Set-Cookie: SID=31d4d96e407aad42; Path=/; Domain=example.com
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.figure.u.5">
+                            <p>== User Agent -&gt; Server ==</p>
+                            <div>
+                                <pre class="text">Cookie: SID=31d4d96e407aad42
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.3.1.p.3">
+                            <p>次の例に示すように、サーバーはユーザーエージェントに複数のクッキーを保存させることができます。例えば、サーバーはセッション識別子とユーザーの選好言語の両方を保存するために二つの
+                                Set-Cookie ヘッダーフィールドを返すことができます。セッション識別子のような機微な情報には Secure および HttpOnly
+                                属性を使用して追加のセキュリティ保護を提供している点に注目してください（<a href="#sane-set-cookie-semantics"
+                                    title="Semantics (Non-Normative)">セクション4.1.2</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.figure.u.6">
+                            <p>== Server -&gt; User Agent ==</p>
+                            <div>
+                                <pre class="text">Set-Cookie: SID=31d4d96e407aad42; Path=/; Secure; HttpOnly
+    Set-Cookie: lang=en-US; Path=/; Domain=example.com
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.figure.u.7">
+                            <p>== User Agent -&gt; Server ==</p>
+                            <div>
+                                <pre class="text">Cookie: SID=31d4d96e407aad42; lang=en-US
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.3.1.p.4">
+                            <p>上記の Cookie ヘッダーには SID と lang
+                                の二つのクッキーが含まれていることに注意してください。サーバーがユーザーエージェントにクッキーを複数回の「セッション」（例えばユーザーエージェントの再起動）に渡って保持させたい場合、サーバーは
+                                Expires
+                                属性で有効期限を指定できます。なお、ユーザーエージェントがクッキーストアの割当てを超えた場合やユーザーが手動でクッキーを削除した場合には、ユーザーエージェントが有効期限より前にクッキーを削除する可能性がある点に注意してください。
+                            </p>
+                        </div>
+                        <div id="rfc.figure.u.8">
+                            <p>== Server -&gt; User Agent ==</p>
+                            <div>
+                                <pre class="text">Set-Cookie: lang=en-US; Expires=Wed, 09 Jun 2021 10:18:14 GMT
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.figure.u.9">
+                            <p>== User Agent -&gt; Server ==</p>
+                            <div>
+                                <pre class="text">Cookie: SID=31d4d96e407aad42; lang=en-US
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.3.1.p.5">
+                            <p>最後に、クッキーを削除するには、サーバーは過去の日付を持つ Expires を指定した Set-Cookie
+                                ヘッダーを返します。サーバーがクッキーの削除に成功するのは、Set-Cookie ヘッダーの Path と Domain
+                                属性がクッキー作成時に使用された値と一致する場合に限ります。</p>
+                        </div>
+                        <div id="rfc.figure.u.10">
+                            <p>== Server -&gt; User Agent ==</p>
+                            <div>
+                                <pre class="text">Set-Cookie: lang=; Expires=Sun, 06 Nov 1994 08:49:37 GMT
+              </pre>
+                            </div>
+                        </div>
+                        <div id="rfc.figure.u.11">
+                            <p>== User Agent -&gt; Server ==</p>
+                            <div>
+                                <pre class="text">Cookie: SID=31d4d96e407aad42
+              </pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+                <section id="sane-profile">
+                    <h2 id="rfc.section.4"><a href="#rfc.section.4">4.</a>&nbsp;<a href="#sane-profile">サーバー要件</a></h2>
+                    <div id="rfc.section.4.p.1">
+                        <p>この節では、Cookie および Set-Cookie ヘッダの良好なプロファイルの構文と意味を説明します。</p>
+                    </div>
+                    <section id="sane-set-cookie">
+                        <h3 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a>&nbsp;<a
+                                href="#sane-set-cookie">Set-Cookie</a></h3>
+                        <div id="rfc.section.4.1.p.1">
+                            <p>Set-Cookie HTTP 応答ヘッダは、サーバーからユーザーエージェントへクッキーを送信するために使用されます。</p>
+                        </div>
+                        <section id="sane-set-cookie-syntax">
+                            <h4 id="rfc.section.4.1.1"><a href="#rfc.section.4.1.1">4.1.1.</a>&nbsp;<a
+                                    href="#sane-set-cookie-syntax">構文</a></h4>
+                            <div id="rfc.section.4.1.1.p.1" class="avoidbreakafter">
+                                <p>非公式には、Set-Cookie 応答ヘッダはヘッダ名 "Set-Cookie" に続けて ":" と cookie を含みます。各 cookie は
+                                    name-value-pair で始まり、その後にゼロ個以上の attribute-value ペアが続きます。サーバーは次の文法に従わない Set-Cookie
+                                    ヘッダを送信するべきではありません <em class="bcp14">SHOULD NOT</em>。</p>
+                            </div>
+                            <div id="rfc.figure.u.12">
+                                <div>
+                                    <pre class="inline">set-cookie-header = "Set-Cookie:" SP set-cookie-string
+set-cookie-string = cookie-pair *( ";" SP cookie-av )
+cookie-pair       = cookie-name "=" cookie-value
+cookie-name       = token
+cookie-value      = *cookie-octet / ( DQUOTE *cookie-octet DQUOTE )
+cookie-octet      = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
+                      ; US-ASCII characters excluding CTLs,
+                      ; whitespace DQUOTE, comma, semicolon,
+                      ; and backslash
+token             = &lt;token, defined in <a href="#RFC2616"><cite title="Hypertext Transfer Protocol -- HTTP/1.1">[RFC2616]</cite></a>, <a href="https://www.rfc-editor.org/rfc/rfc2616.html#section-2.2">Section 2.2</a>&gt;
+
+cookie-av         = expires-av / max-age-av / domain-av /
+                    path-av / secure-av / httponly-av /
+                    extension-av
+expires-av        = "Expires=" sane-cookie-date
+sane-cookie-date  = &lt;rfc1123-date, defined in <a href="#RFC2616"><cite title="Hypertext Transfer Protocol -- HTTP/1.1">[RFC2616]</cite></a>, <a href="https://www.rfc-editor.org/rfc/rfc2616.html#section-3.3.1">Section 3.3.1</a>&gt;
+max-age-av        = "Max-Age=" non-zero-digit *DIGIT
+                      ; In practice, both expires-av and max-age-av
+                      ; are limited to dates representable by the
+                      ; user agent.
+non-zero-digit    = %x31-39
+                      ; digits 1 through 9
+domain-av         = "Domain=" domain-value
+domain-value      = &lt;subdomain&gt;
+                      ; defined in <a href="#RFC1034"><cite title="Domain names - concepts and facilities">[RFC1034]</cite></a>, <a href="https://www.rfc-editor.org/rfc/rfc1034.html#section-3.5">Section 3.5</a>, as
+                      ; enhanced by <a href="#RFC1123"><cite title="Requirements for Internet Hosts - Application and Support">[RFC1123]</cite></a>, <a href="https://www.rfc-editor.org/rfc/rfc1123.html#section-2.1">Section 2.1</a>
+path-av           = "Path=" path-value
+path-value        = &lt;any CHAR except CTLs or ";"&gt;
+secure-av         = "Secure"
+httponly-av       = "HttpOnly"
+extension-av      = &lt;any CHAR except CTLs or ";"&gt;
+            </pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.2">
+                                <p>上記の文法用語のいくつかは、本書が使用する ABNF（<a href="#RFC5234"><cite
+                                            title="Augmented BNF for Syntax Specifications: ABNF">[RFC5234]</cite></a>）とは異なる文法表記を使用する文書を参照しています。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.3">
+                                <p>cookie-value の意味は本書で定義されません。</p>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.4">
+                                <p>ユーザーエージェントとの互換性を最大化するために、任意のデータを cookie-value に格納したいサーバーは、そのデータをエンコードすることを推奨します。例えば
+                                    Base64（<a href="#RFC4648"><cite
+                                            title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>）の使用などが挙げられます。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.5">
+                                <p>set-cookie-string の cookie-av 項で生成される部分は属性と呼ばれます。ユーザーエージェントとの互換性を最大化するために、サーバーは同一の
+                                    set-cookie-string 内で同じ名前の属性を二つ生成すべきではありません <em class="bcp14">SHOULD
+                                        NOT</em>。（この場合のユーザーエージェントの処理方法は <a href="#storage-model"
+                                        title="Storage Model">セクション5.3</a> を参照してください。）</p>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.6">
+                                <p>サーバーは同一レスポンス内で同じ cookie-name を持つ Set-Cookie ヘッダを二つ以上含めるべきではありません <em
+                                        class="bcp14">SHOULD NOT</em>。（ユーザーエージェントの処理方法は <a href="#set-cookie"
+                                        title="The Set-Cookie Header">セクション5.2</a> を参照してください。）</p>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.7">
+                                <p>サーバーが複数のソケットを介してユーザーエージェントへ同時に Set-Cookie
+                                    を含む複数の応答を送信した場合、レースコンディションが発生し予測不可能な動作を引き起こす可能性があります。</p>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.8">
+                                <p>注: 一部の既存ユーザーエージェントは2桁年の解釈が異なります。互換性の問題を避けるため、サーバーは 4 桁年を要求する rfc1123-date
+                                    形式を使用することが推奨されます <em class="bcp14">SHOULD</em>。</p>
+                            </div>
+                            <div id="rfc.section.4.1.1.p.9">
+                                <p>注: 一部のユーザーエージェントはクッキー内の日付を 32 ビット UNIX time_t 値として格納・処理します。time_t
+                                    処理ライブラリの実装バグにより、2038 年以降の日付を誤って処理するユーザーエージェントが存在する可能性があります。</p>
+                            </div>
+                        </section>
+                        <section id="sane-set-cookie-semantics">
+                            <h4 id="rfc.section.4.1.2"><a href="#rfc.section.4.1.2">4.1.2.</a>&nbsp;<a
+                                    href="#sane-set-cookie-semantics">セマンティクス（非規範）</a></h4>
+                            <div id="rfc.section.4.1.2.p.1">
+                                <p>この節は Set-Cookie
+                                    ヘッダの簡潔化された意味を記述します。これらの意味はサーバーがクッキーを一般的に利用する方法を理解するのに十分な詳細を含みます。完全な意味は <a
+                                        href="#ua-requirements" title="User Agent Requirements">セクション5</a> に記載されています。
+                                </p>
+                            </div>
+                            <div id="rfc.section.4.1.2.p.2">
+                                <p>ユーザーエージェントが Set-Cookie ヘッダを受け取ると、その属性とともにクッキーを保存します。その後、ユーザーエージェントが HTTP
+                                    リクエストを行う際には、適用可能かつ期限切れでないクッキーを Cookie ヘッダに含めます。</p>
+                            </div>
+                            <div id="rfc.section.4.1.2.p.3">
+                                <p>もしユーザーエージェントが既に保存しているクッキーと同じ cookie-name、domain-value、path-value
+                                    を持つ新しいクッキーを受け取った場合、既存のクッキーは削除され新しいクッキーに置き換えられます。サーバーは Expires
+                                    属性に過去日を含む新しいクッキーを送ることでクッキーを削除できます。</p>
+                            </div>
+                            <div id="rfc.section.4.1.2.p.4">
+                                <p>属性で特に指示されていない限り、クッキーはオリジンサーバーにのみ返され（例えばサブドメインには返されない）、セッションの終了時に期限切れとなります（ユーザーエージェントによって定義）。ユーザーエージェントは未認識のクッキー属性を無視します（ただしクッキー自体は無視しません）。
+                                </p>
+                            </div>
+                            <section id="sane-expires">
+                                <h5 id="rfc.section.4.1.2.1"><a href="#rfc.section.4.1.2.1">4.1.2.1.</a>&nbsp;<a
+                                        href="#sane-expires">Expires 属性</a></h5>
+                                <div id="rfc.section.4.1.2.1.p.1">
+                                    <p>Expires
+                                        属性はクッキーの最大有効期間を示し、クッキーが有効期限切れになる日付と時刻を表します。ユーザーエージェントは指定された日付までクッキーを保持することを要求されているわけではありません。実際には、メモリ圧迫やプライバシー上の懸念からユーザーエージェントがクッキーを早めに破棄することがあります。
+                                    </p>
+                                </div>
+                            </section>
+                            <section id="sane-max-age">
+                                <h5 id="rfc.section.4.1.2.2"><a href="#rfc.section.4.1.2.2">4.1.2.2.</a>&nbsp;<a
+                                        href="#sane-max-age">Max-Age 属性</a></h5>
+                                <div id="rfc.section.4.1.2.2.p.1">
+                                    <p>Max-Age
+                                        属性はクッキーの最大有効期間を、クッキーが失効するまでの秒数として示します。ユーザーエージェントは指定された期間クッキーを保持する義務はありません。実際には、メモリ圧迫やプライバシーの理由でユーザーエージェントがクッキーを早期に破棄することがあります。
+                                    </p>
+                                    <ul class="empty">
+                                        <li>注: 一部の既存ユーザーエージェントは Max-Age 属性をサポートしていません。Max-Age
+                                            をサポートしないユーザーエージェントはその属性を無視します。</li>
+                                    </ul>
+                                </div>
+                                <div id="rfc.section.4.1.2.2.p.2">
+                                    <p>クッキーに Max-Age と Expires の両方がある場合、Max-Age
+                                        が優先されクッキーの失効日時を制御します。どちらの属性もない場合、ユーザーエージェントは "現在のセッションが終了するまで"
+                                        クッキーを保持します（ユーザーエージェントが定義）。</p>
+                                </div>
+                            </section>
+                            <section id="sane-domain">
+                                <h5 id="rfc.section.4.1.2.3"><a href="#rfc.section.4.1.2.3">4.1.2.3.</a>&nbsp;<a
+                                        href="#sane-domain">Domain 属性</a></h5>
+                                <div id="rfc.section.4.1.2.3.p.1">
+                                    <p>Domain 属性はクッキーが送信されるホストを指定します。例えば Domain 属性が "example.com" の場合、ユーザーエージェントは
+                                        example.com、www.example.com、www.corp.example.com への HTTP リクエストでそのクッキーを Cookie
+                                        ヘッダに含めます。（先頭の %x2E ("." ) は許容されても無視されますが、末尾の %x2E は属性を無視させる原因になります。）サーバーが Domain
+                                        属性を省略した場合、ユーザーエージェントはクッキーをオリジンサーバーにのみ返します。</p>
+                                    <ul class="empty">
+                                        <li>警告: 一部の既存ユーザーエージェントは Domain 属性がない場合でも、Domain 属性が現在のホスト名を含むかのように扱います。例えば
+                                            example.com が Domain 属性なしで Set-Cookie を返すと、これらのユーザーエージェントは誤って
+                                            www.example.com にもクッキーを送信します。</li>
+                                    </ul>
+                                </div>
+                                <div id="rfc.section.4.1.2.3.p.2">
+                                    <p>ユーザーエージェントは、Domain 属性がオリジンサーバーを含むスコープを指定していない場合、クッキーを拒否します。例えば foo.example.com から
+                                        "example.com" または "foo.example.com" の Domain
+                                        属性を持つクッキーは受け入れられますが、"bar.example.com" や "baz.foo.example.com" の Domain
+                                        属性は受け入れられません。</p>
+                                </div>
+                                <div id="rfc.section.4.1.2.3.p.3">
+                                    <p>注: セキュリティ上の理由から、多くのユーザーエージェントは "public suffix" に対応する Domain 属性を拒否するよう設定されています。例えば
+                                        "com" や "co.uk" は拒否されることがあります（詳細は <a href="#storage-model"
+                                            title="Storage Model">セクション5.3</a> を参照）。</p>
+                                </div>
+                            </section>
+                            <section id="sane-path">
+                                <h5 id="rfc.section.4.1.2.4"><a href="#rfc.section.4.1.2.4">4.1.2.4.</a>&nbsp;<a
+                                        href="#sane-path">Path 属性</a></h5>
+                                <div id="rfc.section.4.1.2.4.p.1">
+                                    <p>各クッキーのスコープは Path 属性で制御されるパス集合に限定されます。サーバーが Path 属性を省略した場合、ユーザーエージェントは request-uri
+                                        のパス成分の "ディレクトリ" をデフォルト値として使用します（詳細は <a href="#cookie-path"
+                                            title="Paths and Path-Match">セクション5.1.4</a> を参照）。</p>
+                                </div>
+                                <div id="rfc.section.4.1.2.4.p.2">
+                                    <p>ユーザーエージェントは、リクエスト URI のパス部分がクッキーの Path 属性と一致する（あるいはそのサブディレクトリである）場合にのみ、そのクッキーを
+                                        HTTP リクエストに含めます。%x2F ("/") はディレクトリ区切りとして解釈されます。</p>
+                                </div>
+                                <div id="rfc.section.4.1.2.4.p.3">
+                                    <p>一見すると同一ホスト内の異なるパス間でクッキーを分離するのに有用に思えますが、Path 属性はセキュリティ目的で信頼できるものではありません（詳細は <a
+                                            href="#security-considerations" title="Security Considerations">セクション8</a>
+                                        を参照）。</p>
+                                </div>
+                            </section>
+                            <section id="sane-secure">
+                                <h5 id="rfc.section.4.1.2.5"><a href="#rfc.section.4.1.2.5">4.1.2.5.</a>&nbsp;<a
+                                        href="#sane-secure">Secure 属性</a></h5>
+                                <div id="rfc.section.4.1.2.5.p.1">
+                                    <p>Secure 属性はクッキーのスコープを「セキュア」チャネルに限定します（「セキュア」の定義はユーザーエージェントによる）。Secure
+                                        属性を持つクッキーは、通常 TLS 上の HTTP（例: HTTPS）などのセキュアチャネルで送信されるリクエストでのみユーザーエージェントが含めます。</p>
+                                </div>
+                                <div id="rfc.section.4.1.2.5.p.2">
+                                    <p>Secure
+                                        属性はアクティブなネットワーク攻撃者からクッキーの機密性を保護しますが、整合性を保護するものではありません。アクティブな攻撃者は非セキュアチャネルから
+                                        Secure クッキーを上書きできるため、整合性は損なわれる可能性があります（詳細は <a href="#weak-integrity"
+                                            title="Weak Integrity">セクション8.6</a> を参照）。</p>
+                                </div>
+                            </section>
+                            <section id="sane-httponly">
+                                <h5 id="rfc.section.4.1.2.6"><a href="#rfc.section.4.1.2.6">4.1.2.6.</a>&nbsp;<a
+                                        href="#sane-httponly">HttpOnly 属性</a></h5>
+                                <div id="rfc.section.4.1.2.6.p.1">
+                                    <p>HttpOnly 属性はクッキーのスコープを HTTP リクエストに限定します。具体的には、スクリプトがアクセスするような「非 HTTP」API（例:
+                                        ブラウザのスクリプト向けのクッキー公開 API）に対してクッキーを省くようにユーザーエージェントに指示します。</p>
+                                </div>
+                                <div id="rfc.section.4.1.2.6.p.2">
+                                    <p>HttpOnly 属性は Secure 属性とは独立しています。クッキーは HttpOnly と Secure の両方の属性を持つことができます。</p>
+                                </div>
+                            </section>
+                        </section>
+                    </section>
+                    <section id="sane-cookie">
+                        <h3 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a>&nbsp;<a
+                                href="#sane-cookie">Cookie</a></h3>
+                        <section id="sane-cookie-syntax">
+                            <h4 id="rfc.section.4.2.1"><a href="#rfc.section.4.2.1">4.2.1.</a>&nbsp;<a
+                                    href="#sane-cookie-syntax">構文</a></h4>
+                            <div id="rfc.section.4.2.1.p.1" class="avoidbreakafter">
+                                <p>ユーザーエージェントは保存したクッキーを Cookie ヘッダでオリジンサーバーに送信します。サーバーが <a href="#sane-set-cookie"
+                                        title="Set-Cookie">セクション4.1</a> の要件に従い（かつユーザーエージェントが <a href="#ua-requirements"
+                                        title="User Agent Requirements">セクション5</a> の要件に従う）場合、ユーザーエージェントは次の文法に従う Cookie
+                                    ヘッダを送信します：</p>
+                            </div>
+                            <div id="rfc.figure.u.13">
+                                <div>
+                                    <pre class="inline">cookie-header = "Cookie:" OWS cookie-string OWS
+cookie-string = cookie-pair *( ";" SP cookie-pair )
+            </pre>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="sane-cookie-semantics">
+                            <h4 id="rfc.section.4.2.2"><a href="#rfc.section.4.2.2">4.2.2.</a>&nbsp;<a
+                                    href="#sane-cookie-semantics">セマンティクス</a></h4>
+                            <div id="rfc.section.4.2.2.p.1">
+                                <p>各 cookie-pair はユーザーエージェントが保存したクッキーを表します。cookie-pair には Set-Cookie ヘッダで受け取った
+                                    cookie-name と cookie-value が含まれます。</p>
+                            </div>
+                            <div id="rfc.section.4.2.2.p.2">
+                                <p>注意: Cookie ヘッダにはクッキー属性は返されません。特に、サーバーは Cookie
+                                    ヘッダだけからクッキーの有効期限、どのホストに対して有効か、どのパスに対して有効か、あるいは Secure や HttpOnly
+                                    属性が付与されていたかを判断できません。</p>
+                            </div>
+                            <div id="rfc.section.4.2.2.p.3">
+                                <p>Cookie ヘッダ内の個々のクッキーの意味は本書で定義されません。サーバーはこれらのクッキーにアプリケーション固有の意味を持たせることが期待されます。</p>
+                            </div>
+                            <div id="rfc.section.4.2.2.p.4">
+                                <p>Cookie ヘッダ内ではクッキーは線形に直列化されますが、サーバーは直列化順序に依存すべきではありません <em class="bcp14">SHOULD
+                                        NOT</em>。特に、同じ名前のクッキーが二つ含まれる場合（例えば異なる Path や Domain
+                                    で設定されたもの）、サーバーはその出現順に依存すべきではありません。</p>
+                            </div>
+                        </section>
+                    </section>
+                </section>
+                <section id="ua-requirements">
+                    <h2 id="rfc.section.5"><a href="#rfc.section.5">5.</a>&nbsp;<a
+                            href="#ua-requirements">ユーザーエージェント要件</a></h2>
+                    <div id="rfc.section.5.p.1">
+                        <p>この節は Cookie および Set-Cookie
+                            ヘッダを実装可能な詳細で定めています。これらの要件を正確に実装するユーザーエージェントは、良好なプロファイルに従わない既存のサーバーとも相互運用できます。</p>
+                    </div>
+                    <div id="rfc.section.5.p.2">
+                        <p>ユーザーエージェントは、より厳格な制約を実装することもできます（例えばセキュリティ向上のため）。しかし実験により、そのような厳格性は既存サーバーとの相互運用性を低下させることが示されています。
+                        </p>
+                    </div>
+                    <section id="algorithms">
+                        <h3 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a>&nbsp;<a
+                                href="#algorithms">サブコンポーネントアルゴリズム</a></h3>
+                        <div id="rfc.section.5.1.p.1">
+                            <p>この節では、ユーザーエージェントが Cookie および Set-Cookie ヘッダの特定サブコンポーネントを処理するために使用するいくつかのアルゴリズムを定義します。</p>
+                        </div>
+                        <section id="cookie-date">
+                            <h4 id="rfc.section.5.1.1"><a href="#rfc.section.5.1.1">5.1.1.</a>&nbsp;<a
+                                    href="#cookie-date">日付</a></h4>
+                            <div id="rfc.section.5.1.1.p.1">
+                                <p>ユーザーエージェントは cookie-date を解析するために以下と同等のアルゴリズムを使用しなければなりません <em
+                                        class="bcp14">MUST</em>。アルゴリズムの一部で定義される各種ブールフラグ（found-time、found-day-of-month、found-month、found-year）は初期状態では「未設定」です。
+                                </p>
+                                <ol>
+                                    <li>以下の文法を使用して cookie-date を date-token に分割する。 <span id="rfc.figure.u.14"><span>
+                                                <pre class="inline">cookie-date     = *delimiter date-token-list *delimiter
+date-token-list = date-token *( 1*delimiter date-token )
+date-token      = 1*non-delimiter
+
+delimiter       = %x09 / %x20-2F / %x3B-40 / %x5B-60 / %x7B-7E
+non-delimiter   = %x00-08 / %x0A-1F / DIGIT / ":" / ALPHA / %x7F-FF
+non-digit       = %x00-2F / %x3A-FF
+
+day-of-month    = 1*2DIGIT ( non-digit *OCTET )
+month           = ( "jan" / "feb" / "mar" / "apr" /
+                    "may" / "jun" / "jul" / "aug" /
+                    "sep" / "oct" / "nov" / "dec" ) *OCTET
+year            = 2*4DIGIT ( non-digit *OCTET )
+time            = hms-time ( non-digit *OCTET )
+hms-time        = time-field ":" time-field ":" time-field
+time-field      = 1*2DIGIT
+              </pre>
+                                            </span></span> </li>
+                                    <li>date-token を出現順に順次処理する: <ol>
+                                            <li>found-time フラグが未設定でトークンが time 生成にマッチする場合、found-time を設定し hour-value,
+                                                minute-value, second-value を設定して次の date-token へ移る。</li>
+                                            <li>found-day-of-month フラグが未設定でトークンが day-of-month
+                                                にマッチする場合、found-day-of-month を設定し day-of-month-value を設定して次へ。</li>
+                                            <li>found-month フラグが未設定でトークンが month にマッチする場合、found-month を設定し month-value
+                                                を設定して次へ。</li>
+                                            <li>found-year フラグが未設定でトークンが year にマッチする場合、found-year を設定し year-value
+                                                を設定して次へ。</li>
+                                        </ol>
+                                    </li>
+                                    <li>year-value が 70 以上 99 以下の場合、year-value に 1900 を加算する。</li>
+                                    <li>year-value が 0 以上 69 以下の場合、year-value に 2000 を加算する。<ol>
+                                            <li>注: 一部の既存ユーザーエージェントは 2 桁年を異なる方法で解釈する。</li>
+                                        </ol>
+                                    </li>
+                                    <li>次のいずれかの条件を満たす場合、解析を中止し cookie-date の解析に失敗する: <ul>
+                                            <li>found-day-of-month、found-month、found-year、found-time のうち少なくとも一つが未設定である。
+                                            </li>
+                                            <li>day-of-month-value が 1 未満または 31 超である。</li>
+                                            <li>year-value が 1601 未満である。</li>
+                                            <li>hour-value が 23 より大きい。</li>
+                                            <li>minute-value が 59 より大きい。</li>
+                                            <li>second-value が 59 より大きい。</li>
+                                        </ul>（うるう秒はこの構文で表現できません。）</li>
+                                    <li>parsed-cookie-date を UTC の day-of-month-value, month-value, year-value,
+                                        hour-value, minute-value, second-value を持つ日付とする。もしそのような日付が存在しない場合、解析を中止して失敗する。
+                                    </li>
+                                    <li>parsed-cookie-date をこのアルゴリズムの結果として返す。</li>
+                                </ol>
+                            </div>
+                        </section>
+                        <section id="cookie-domain-canonicalize">
+                            <h4 id="rfc.section.5.1.2"><a href="#rfc.section.5.1.2">5.1.2.</a>&nbsp;<a
+                                    href="#cookie-domain-canonicalize">正規化ホスト名</a></h4>
+                            <div id="rfc.section.5.1.2.p.1">
+                                <p>正規化されたホスト名は次のアルゴリズムで生成される文字列です:</p>
+                                <ol>
+                                    <li>ホスト名を個々のドメインラベルの列に分割する。</li>
+                                    <li>NR-LDH ラベルでない各ラベルを A-label（あるいは ToASCII による punycode ラベル）へ変換する（詳細は <a
+                                            href="#RFC5890"><cite
+                                                title="Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework">[RFC5890]</cite></a>
+                                        等を参照）。</li>
+                                    <li>結果のラベルを %x2E (".") で連結する。</li>
+                                </ol>
+                            </div>
+                        </section>
+                        <section id="cookie-domain">
+                            <h4 id="rfc.section.5.1.3"><a href="#rfc.section.5.1.3">5.1.3.</a>&nbsp;<a
+                                    href="#cookie-domain">ドメインマッチング</a></h4>
+                            <div id="rfc.section.5.1.3.p.1">
+                                <p>ある文字列が与えられたドメイン文字列と domain-match するのは次のいずれかが成り立つときです:</p>
+                                <ul>
+                                    <li>ドメイン文字列と文字列が同一である。（この時点で両方とも小文字に正規化されています。）</li>
+                                    <li>次の全てが成り立つ場合: <ul>
+                                            <li>ドメイン文字列が文字列の接尾辞である。</li>
+                                            <li>ドメイン文字列に含まれない文字列の最後の文字が %x2E (".") である。</li>
+                                            <li>その文字列がホスト名である（IP アドレスではない）。</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </section>
+                        <section id="cookie-path">
+                            <h4 id="rfc.section.5.1.4"><a href="#rfc.section.5.1.4">5.1.4.</a>&nbsp;<a
+                                    href="#cookie-path">パスとパスマッチ</a></h4>
+                            <div id="rfc.section.5.1.4.p.1">
+                                <p>ユーザーエージェントは cookie の default-path を算出するのに次のアルゴリズムと同等のものを使用しなければなりません <em
+                                        class="bcp14">MUST</em>:</p>
+                                <ol>
+                                    <li>uri-path を request-uri のパス部分（存在する場合）とする。例えば request-uri
+                                        がパスのみ（と任意のクエリ文字列）を含む場合、uri-path はそのパス（"?" やクエリ文字列を除く）。また request-uri が完全な
+                                        absoluteURI の場合、uri-path はその URI のパス成分である。</li>
+                                    <li>もし uri-path が空、または uri-path の最初の文字が %x2F ("/") でない場合、%x2F ("/")
+                                        を出力して残りの手順をスキップする。</li>
+                                    <li>uri-path が %x2F ("/") を 1 個以下しか含まない場合、%x2F ("/") を出力して残りの手順をスキップする。</li>
+                                    <li>uri-path の先頭から右端の %x2F ("/") 直前までの文字を出力する。</li>
+                                </ol>
+                            </div>
+                            <div id="rfc.section.5.1.4.p.2">
+                                <p>ある request-path が cookie-path に path-match するのは次のいずれかが成り立つときです:</p>
+                                <ul>
+                                    <li>cookie-path と request-path が同一である。</li>
+                                    <li>cookie-path が request-path の接頭辞であり、cookie-path の最後の文字が %x2F ("/") である。</li>
+                                    <li>cookie-path が request-path の接頭辞であり、cookie-path に含まれない request-path の最初の文字が %x2F
+                                        ("/") である。</li>
+                                </ul>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="set-cookie">
+                        <h3 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a>&nbsp;<a
+                                href="#set-cookie">Set-Cookie ヘッダー</a></h3>
+                        <div id="rfc.section.5.2.p.1">
+                            <p>ユーザーエージェントが HTTP レスポンスで Set-Cookie ヘッダを受け取った場合、ユーザーエージェントはその Set-Cookie ヘッダ全体を無視してもよい <em
+                                    class="bcp14">MAY</em>。例えば、ユーザーエージェントはサードパーティのリクエストからのレスポンスによるクッキー設定をブロックしたい場合があります（<a
+                                    href="#third-party-cookies" title="Third-Party Cookies">セクション7.1</a>参照）。</p>
+                        </div>
+                        <div id="rfc.section.5.2.p.2">
+                            <p>ユーザーエージェントが Set-Cookie を全体として無視しない場合、ユーザーエージェントは Set-Cookie ヘッダフィールドの field-value を
+                                set-cookie-string として解析しなければなりません <em class="bcp14">MUST</em>。</p>
+                        </div>
+                        <div id="rfc.section.5.2.p.3">
+                            <p>注: 以下のアルゴリズムは <a href="#sane-set-cookie" title="Set-Cookie">セクション4.1</a>
+                                の文法よりも寛容です。例えば、アルゴリズムは cookie
+                                名と値の先頭および末尾の空白を削除します（内部の空白は維持）。これはサーバーが推奨に従わない場合でも相互運用するために必要です。</p>
+                        </div>
+                        <div id="rfc.section.5.2.p.4">
+                            <p>ユーザーエージェントは set-cookie-string を解析するのに以下と同等のアルゴリズムを使用しなければなりません <em
+                                    class="bcp14">MUST</em>:</p>
+                            <ol>
+                                <li>set-cookie-string に %x3B (";") が含まれる場合: <ul class="empty">
+                                        <li>name-value-pair 文字列は最初の %x3B (";") までの文字列とし、unparsed-attributes は残り（当該 %x3B
+                                            を含む）とする。</li>
+                                    </ul> それ以外の場合: <ul class="empty">
+                                        <li>name-value-pair 文字列は set-cookie-string の全ての文字列とし、unparsed-attributes
+                                            は空文字列とする。</li>
+                                    </ul>
+                                </li>
+                                <li>もし name-value-pair 文字列が %x3D ("=") を欠くなら、set-cookie-string を完全に無視する。</li>
+                                <li>名前文字列は最初の %x3D ("=") までの文字、値文字列は最初の %x3D ("=") の後の文字とする（どちらも空でも可）。</li>
+                                <li>名前文字列と値文字列の先頭および末尾の WSP を削除する。</li>
+                                <li>名前文字列が空であれば、set-cookie-string を完全に無視する。</li>
+                                <li>cookie-name は名前文字列、cookie-value は値文字列とする。</li>
+                            </ol>
+                        </div>
+                        <div id="rfc.section.5.2.p.5">
+                            <p>ユーザーエージェントは unparsed-attributes を解析するのに以下と同等のアルゴリズムを使用しなければなりません <em
+                                    class="bcp14">MUST</em>:</p>
+                            <ol>
+                                <li>unparsed-attributes が空なら残りの手順をスキップする。</li>
+                                <li>unparsed-attributes の最初の文字（%x3B (";")）を破棄する。</li>
+                                <li>残りの unparsed-attributes に %x3B が含まれる場合: <ul class="empty">
+                                        <li>最初の %x3B までの文字を消費する。</li>
+                                    </ul> 含まれない場合: <ul class="empty">
+                                        <li>残り全てを消費する。</li>
+                                    </ul> 消費した文字列を cookie-av 文字列とする。</li>
+                                <li>cookie-av に %x3D ("=") が含まれる場合: <ul class="empty">
+                                        <li>attribute-name は最初の %x3D までの文字列、attribute-value はその後の文字列（どちらも空でも可）とする。</li>
+                                    </ul> 含まれない場合: <ul class="empty">
+                                        <li>attribute-name は cookie-av 全体、attribute-value は空とする。</li>
+                                    </ul>
+                                </li>
+                                <li>attribute-name と attribute-value の先頭および末尾の WSP を削除する。</li>
+                                <li>attribute-name と attribute-value を以降の小節の要求に従って処理する（未認識の属性名は無視されることに注意）。</li>
+                                <li>ステップ1 に戻る。</li>
+                            </ol>
+                        </div>
+                        <div id="rfc.section.5.2.p.6">
+                            <p>ユーザーエージェントが set-cookie-string の解析を終えると、ユーザーエージェントはリクエスト URI から cookie-name, cookie-value,
+                                cookie-attribute-list を "受け取った" とみなします（追加の要件は <a href="#storage-model"
+                                    title="Storage Model">セクション5.3</a> を参照）。</p>
+                        </div>
+                        <section id="expires-attribute">
+                            <h4 id="rfc.section.5.2.1"><a href="#rfc.section.5.2.1">5.2.1.</a>&nbsp;<a
+                                    href="#expires-attribute">Expires 属性</a></h4>
+                            <div id="rfc.section.5.2.1.p.1">
+                                <p>attribute-name が大文字小文字を区別せず "Expires" と一致する場合、ユーザーエージェントは cookie-av
+                                    を次のように処理しなければなりません <em class="bcp14">MUST</em>。</p>
+                            </div>
+                            <div id="rfc.section.5.2.1.p.2">
+                                <p>expiry-time を attribute-value を cookie-date として解析した結果とする（<a href="#cookie-date"
+                                        title="Dates">セクション5.1.1</a>参照）。</p>
+                            </div>
+                            <div id="rfc.section.5.2.1.p.3">
+                                <p>attribute-value が cookie-date として解析に失敗した場合、その cookie-av を無視する。</p>
+                            </div>
+                            <div id="rfc.section.5.2.1.p.4">
+                                <p>expiry-time がユーザーエージェントが表現可能な最後の日付より後である場合、ユーザーエージェントは expiry-time
+                                    を最後に表現可能な日付に置き換えてもよい <em class="bcp14">MAY</em>。</p>
+                            </div>
+                            <div id="rfc.section.5.2.1.p.5">
+                                <p>expiry-time がユーザーエージェントが表現可能な最初の日付より前である場合、ユーザーエージェントは expiry-time
+                                    を最初に表現可能な日付に置き換えてもよい <em class="bcp14">MAY</em>。</p>
+                            </div>
+                            <div id="rfc.section.5.2.1.p.6">
+                                <p>cookie-attribute-list に attribute-name が Expires、attribute-value が expiry-time
+                                    の属性を追加する。</p>
+                            </div>
+                        </section>
+                        <section id="max-age-attribute">
+                            <h4 id="rfc.section.5.2.2"><a href="#rfc.section.5.2.2">5.2.2.</a>&nbsp;<a
+                                    href="#max-age-attribute">Max-Age 属性</a></h4>
+                            <div id="rfc.section.5.2.2.p.1">
+                                <p>attribute-name が大文字小文字を区別せず "Max-Age" と一致する場合、ユーザーエージェントは cookie-av
+                                    を次のように処理しなければなりません <em class="bcp14">MUST</em>。</p>
+                            </div>
+                            <div id="rfc.section.5.2.2.p.2">
+                                <p>attribute-value の最初の文字が DIGIT でも "-" 文字でもない場合、その cookie-av を無視する。</p>
+                            </div>
+                            <div id="rfc.section.5.2.2.p.3">
+                                <p>attribute-value の残りに非 DIGIT 文字が含まれる場合、その cookie-av を無視する。</p>
+                            </div>
+                            <div id="rfc.section.5.2.2.p.4">
+                                <p>delta-seconds を attribute-value を整数に変換したものとする。</p>
+                            </div>
+                            <div id="rfc.section.5.2.2.p.5">
+                                <p>もし delta-seconds が 0 以下なら、expiry-time を最小表現可能日時とする。そうでなければ expiry-time を現在日時に
+                                    delta-seconds 秒を加えた値とする。</p>
+                            </div>
+                            <div id="rfc.section.5.2.2.p.6">
+                                <p>cookie-attribute-list に attribute-name が Max-Age、attribute-value が expiry-time
+                                    の属性を追加する。</p>
+                            </div>
+                        </section>
+                        <section id="domain-attribute">
+                            <h4 id="rfc.section.5.2.3"><a href="#rfc.section.5.2.3">5.2.3.</a>&nbsp;<a
+                                    href="#domain-attribute">Domain 属性</a></h4>
+                            <div id="rfc.section.5.2.3.p.1">
+                                <p>attribute-name が大文字小文字を区別せず "Domain" と一致する場合、ユーザーエージェントは cookie-av を次のように処理しなければなりません
+                                    <em class="bcp14">MUST</em>。
+                                </p>
+                            </div>
+                            <div id="rfc.section.5.2.3.p.2">
+                                <p>attribute-value が空文字列の場合、挙動は未定義です。とはいえユーザーエージェントはその cookie-av を無視することが推奨されます <em
+                                        class="bcp14">SHOULD</em>。</p>
+                            </div>
+                            <div id="rfc.section.5.2.3.p.3">
+                                <p>attribute-value の最初の文字が %x2E ("." ) の場合:</p>
+                                <ul class="empty">
+                                    <li>cookie-domain を先頭の %x2E を除いた attribute-value とする。</li>
+                                </ul>
+                                <p>それ以外の場合:</p>
+                                <ul class="empty">
+                                    <li>cookie-domain を attribute-value 全体とする。</li>
+                                </ul>
+                            </div>
+                            <div id="rfc.section.5.2.3.p.4">
+                                <p>cookie-domain を小文字に変換する。</p>
+                            </div>
+                            <div id="rfc.section.5.2.3.p.5">
+                                <p>cookie-attribute-list に attribute-name が Domain、attribute-value が cookie-domain
+                                    の属性を追加する。</p>
+                            </div>
+                        </section>
+                        <section id="path-attribute">
+                            <h4 id="rfc.section.5.2.4"><a href="#rfc.section.5.2.4">5.2.4.</a>&nbsp;<a
+                                    href="#path-attribute">Path 属性</a></h4>
+                            <div id="rfc.section.5.2.4.p.1">
+                                <p>attribute-name が大文字小文字を区別せず "Path" と一致する場合、ユーザーエージェントは cookie-av を次のように処理しなければなりません
+                                    <em class="bcp14">MUST</em>。
+                                </p>
+                            </div>
+                            <div id="rfc.section.5.2.4.p.2">
+                                <p>attribute-value が空、または最初の文字が %x2F ("/") でない場合:</p>
+                                <ul class="empty">
+                                    <li>cookie-path を default-path とする。</li>
+                                </ul>
+                                <p>それ以外の場合:</p>
+                                <ul class="empty">
+                                    <li>cookie-path を attribute-value とする。</li>
+                                </ul>
+                            </div>
+                            <div id="rfc.section.5.2.4.p.3">
+                                <p>cookie-attribute-list に attribute-name が Path、attribute-value が cookie-path の属性を追加する。
+                                </p>
+                            </div>
+                        </section>
+                        <section id="secure-attribute">
+                            <h4 id="rfc.section.5.2.5"><a href="#rfc.section.5.2.5">5.2.5.</a>&nbsp;<a
+                                    href="#secure-attribute">Secure 属性</a></h4>
+                            <div id="rfc.section.5.2.5.p.1">
+                                <p>attribute-name が大文字小文字を区別せず "Secure" と一致する場合、ユーザーエージェントは attribute-name が Secure で
+                                    attribute-value が空の属性を cookie-attribute-list に追加しなければなりません <em
+                                        class="bcp14">MUST</em>。</p>
+                            </div>
+                        </section>
+                        <section id="httponly-attribute">
+                            <h4 id="rfc.section.5.2.6"><a href="#rfc.section.5.2.6">5.2.6.</a>&nbsp;<a
+                                    href="#httponly-attribute">HttpOnly 属性</a></h4>
+                            <div id="rfc.section.5.2.6.p.1">
+                                <p>attribute-name が大文字小文字を区別せず "HttpOnly" と一致する場合、ユーザーエージェントは attribute-name が HttpOnly
+                                    で attribute-value が空の属性を cookie-attribute-list に追加しなければなりません <em
+                                        class="bcp14">MUST</em>。</p>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="storage-model">
+                        <h3 id="rfc.section.5.3"><a href="#rfc.section.5.3">5.3.</a>&nbsp;<a
+                                href="#storage-model">ストレージモデル</a></h3>
+                        <div id="rfc.section.5.3.p.1">
+                            <p>ユーザーエージェントは各クッキーについて次のフィールドを保存します: name, value, expiry-time, domain, path, creation-time,
+                                last-access-time, persistent-flag, host-only-flag, secure-only-flag, http-only-flag。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.2">
+                            <p>ユーザーエージェントが request-uri から name cookie-name、value cookie-value、attributes
+                                cookie-attribute-list のクッキーを "受け取った" とき、ユーザーエージェントは次のように処理しなければなりません <em
+                                    class="bcp14">MUST</em>:</p>
+                            <ol>
+                                <li>ユーザーエージェントは受け取ったクッキーを完全に無視してもよい <em
+                                        class="bcp14">MAY</em>。例えば、サードパーティのレスポンスからのクッキー受領をブロックしたり、サイズ超過のクッキーを保存しないことがある。
+                                </li>
+                                <li>新しいクッキーを作成し name と value を設定する。creation-time と last-access-time を現在日時に設定する。</li>
+                                <li>もし cookie-attribute-list に "Max-Age" 属性が含まれているなら: <ul class="empty">
+                                        <li>persistent-flag を true にする。</li>
+                                        <li>cookie-attribute-list 内で最後に現れる "Max-Age" 属性の attribute-value を expiry-time
+                                            に設定する。</li>
+                                    </ul> そうでなく、cookie-attribute-list に "Expires" 属性が含まれる（かつ "Max-Age" を含まない）場合: <ul
+                                        class="empty">
+                                        <li>persistent-flag を true にする。</li>
+                                        <li>cookie-attribute-list 内で最後に現れる "Expires" 属性の attribute-value を expiry-time
+                                            に設定する。</li>
+                                    </ul> それ以外の場合: <ul class="empty">
+                                        <li>persistent-flag を false にする。</li>
+                                        <li>expiry-time を最新の表現可能日時に設定する。</li>
+                                    </ul>
+                                </li>
+                                <li>もし cookie-attribute-list に "Domain" 属性があるなら: <ul class="empty">
+                                        <li>domain-attribute を cookie-attribute-list 内で最後に現れる "Domain" 属性の
+                                            attribute-value にする。</li>
+                                    </ul> それ以外の場合: <ul class="empty">
+                                        <li>domain-attribute を空文字列にする。</li>
+                                    </ul>
+                                </li>
+                                <li>ユーザーエージェントが "public suffix" を拒否するよう設定されていて、domain-attribute が public suffix の場合: <ul
+                                        class="empty">
+                                        <li>もし domain-attribute が正規化された request-host と同一なら: <ul class="empty">
+                                                <li>domain-attribute を空文字列にする。</li>
+                                            </ul> それ以外なら: <ul class="empty">
+                                                <li>クッキーを完全に無視して処理を中止する。</li>
+                                            </ul>
+                                        </li>
+                                        <li>注: "public suffix" は "com", "co.uk", "pvt.k12.wy.us"
+                                            のような公開レジストリで管理されるドメインです。可能であれば最新の public suffix リスト（例: Mozilla の
+                                            &lt;<a
+                                                href="http://publicsuffix.org/">http://publicsuffix.org/</a>&gt;）を使用することが推奨されます <em class="bcp14">SHOULD</em>。
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>もし domain-attribute が非空なら: <ul class="empty">
+                                        <li>正規化された request-host が domain-attribute に domain-match しない場合: <ul
+                                                class="empty">
+                                                <li>クッキーを完全に無視して処理を中止する。</li>
+                                            </ul> それ以外: <ul class="empty">
+                                                <li>host-only-flag を false に設定する。</li>
+                                                <li>cookie の domain を domain-attribute に設定する。</li>
+                                            </ul>
+                                        </li>
+                                    </ul> それ以外の場合: <ul class="empty">
+                                        <li>host-only-flag を true に設定する。</li>
+                                        <li>cookie の domain を正規化された request-host に設定する。</li>
+                                    </ul>
+                                </li>
+                                <li>もし cookie-attribute-list に "Path" 属性が含まれるなら、cookie の path を cookie-attribute-list
+                                    内で最後に現れる "Path" の attribute-value に設定する。そうでなければ cookie の path を request-uri の
+                                    default-path に設定する。</li>
+                                <li>もし cookie-attribute-list に "Secure" 属性が含まれるなら cookie の secure-only-flag を true
+                                    に、含まれないなら false に設定する。</li>
+                                <li>もし cookie-attribute-list に "HttpOnly" 属性が含まれるなら cookie の http-only-flag を true
+                                    に、含まれないなら false に設定する。</li>
+                                <li>もしクッキーが "非 HTTP" API から受け取られ、かつ cookie の http-only-flag
+                                    が設定されている場合、処理を中止してクッキーを完全に無視する。</li>
+                                <li>クッキーストアに同じ name, domain, path を持つクッキーが存在する場合: <ol>
+                                        <li>old-cookie を既存の該当クッキーとする（このアルゴリズムは同一の name/domain/path
+                                            を持つクッキーが最大1つであることを保証する）。</li>
+                                        <li>もし新しいクッキーが非 HTTP API から受け取られ old-cookie の http-only-flag
+                                            が設定されている場合、処理を中止して新しいクッキーを無視する。</li>
+                                        <li>新しいクッキーの creation-time を old-cookie の creation-time に合わせる。</li>
+                                        <li>old-cookie をクッキーストアから削除する。</li>
+                                    </ol>
+                                </li>
+                                <li>新しいクッキーをクッキーストアに挿入する。</li>
+                            </ol>
+                        </div>
+                        <div id="rfc.section.5.3.p.3">
+                            <p>クッキーは expiry-date が過去であれば "expired" と見なされます。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.4">
+                            <p>ユーザーエージェントは、クッキーストアに期限切れクッキーが存在する場合、すべての期限切れクッキーを削除しなければなりません <em
+                                    class="bcp14">MUST</em>。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.5">
+                            <p>任意の時点で、ドメインを共有するクッキー数が実装定義の上限（例えば 50 個）を超える場合、ユーザーエージェントは過剰クッキーを削除してもよい <em
+                                    class="bcp14">MAY</em>。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.6">
+                            <p>任意の時点で、クッキーストアが予め定めた上限（例えば 3000 個）を超えた場合、ユーザーエージェントは過剰クッキーを削除してもよい <em
+                                    class="bcp14">MAY</em>。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.7">
+                            <p>ユーザーエージェントが過剰クッキーを削除する場合、次の優先順でクッキーを削除しなければなりません <em class="bcp14">MUST</em>:</p>
+                            <ol>
+                                <li>期限切れクッキー。</li>
+                                <li>同じドメインフィールドを共有するクッキーの数が規定値を超えるもの。</li>
+                                <li>それ以外の全てのクッキー。</li>
+                            </ol>
+                        </div>
+                        <div id="rfc.section.5.3.p.8">
+                            <p>同じ削除優先度のクッキーが複数ある場合、ユーザーエージェントは last-access-date が最も古いクッキーを先に削除しなければなりません <em
+                                    class="bcp14">MUST</em>。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.9">
+                            <p>"現在のセッションが終了する"（ユーザーエージェントの定義）とき、ユーザーエージェントは persistent-flag が false
+                                に設定されたすべてのクッキーをクッキーストアから削除しなければなりません <em class="bcp14">MUST</em>。</p>
+                        </div>
+                    </section>
+                    <section id="cookie">
+                        <h3 id="rfc.section.5.4"><a href="#rfc.section.5.4">5.4.</a>&nbsp;<a href="#cookie">Cookie
+                                ヘッダー</a></h3>
+                        <div id="rfc.section.5.4.p.1">
+                            <p>ユーザーエージェントは保存されたクッキーを Cookie HTTP リクエストヘッダに含めます。</p>
+                        </div>
+                        <div id="rfc.section.5.4.p.2">
+                            <p>ユーザーエージェントは HTTP リクエストに複数の Cookie ヘッダフィールドを付与してはなりません <em class="bcp14">MUST NOT</em>。
+                            </p>
+                        </div>
+                        <div id="rfc.section.5.4.p.3">
+                            <p>ユーザーエージェントは Cookie ヘッダを完全に省略してもよい <em
+                                    class="bcp14">MAY</em>。例えば、サードパーティリクエスト時のクッキー送信をブロックしたい場合などです（<a
+                                    href="#third-party-cookies" title="Third-Party Cookies">セクション7.1</a>参照）。</p>
+                        </div>
+                        <div id="rfc.section.5.4.p.4">
+                            <p>ユーザーエージェントが Cookie ヘッダを付与する場合、cookie-string をヘッダ値として送信しなければなりません <em
+                                    class="bcp14">MUST</em>。</p>
+                        </div>
+                        <div id="rfc.section.5.4.p.5">
+                            <p>ユーザーエージェントはクッキーストアと request-uri から cookie-string を計算するのに次のアルゴリズムと同等のものを使用しなければなりません <em
+                                    class="bcp14">MUST</em>:</p>
+                            <ol>
+                                <li>cookie-list を以下を満たすクッキーストアからのクッキー集合とする: <ul>
+                                        <li>以下のいずれかを満たす: <ul class="empty">
+                                                <li>cookie の host-only-flag が true で、正規化された request-host が cookie の
+                                                    domain と同一である。</li>
+                                            </ul> または: <ul class="empty">
+                                                <li>cookie の host-only-flag が false で、正規化された request-host が cookie の
+                                                    domain に domain-match する。</li>
+                                            </ul>
+                                        </li>
+                                        <li>request-uri の path が cookie の path に path-match する。</li>
+                                        <li>cookie の secure-only-flag が true の場合、request-uri の scheme
+                                            はユーザーエージェントが「セキュア」と見なすプロトコルでなければならない。</li>
+                                        <li>cookie の http-only-flag が true の場合、cookie-string を非 HTTP API 用に生成しているときはその
+                                            cookie を除外する。</li>
+                                    </ul>
+                                </li>
+                                <li>ユーザーエージェントは cookie-list を次の順序でソートすることを推奨します <em class="bcp14">SHOULD</em>: <ul>
+                                        <li>パス長の長いクッキーを先にする。</li>
+                                        <li>同じ長さのパスを持つクッキー間では creation-time が早いものを先にする。</li>
+                                    </ul>注:
+                                    すべてのユーザーエージェントがこの順序でソートするわけではありませんが、この順序が当時の慣行を反映しており、一部のサーバーが誤ってこの順序に依存していたことがあります。
+                                </li>
+                                <li>cookie-list の各クッキーの last-access-time を現在日時に更新する。</li>
+                                <li>cookie-list を順に処理して cookie-string を直列化する: <ol>
+                                        <li>cookie の name、"="、value を出力する。</li>
+                                        <li>未処理のクッキーが残っている場合は "%x3B" と "%x20"（"; "）を出力する。</li>
+                                    </ol>
+                                </li>
+                            </ol>
+                            <p>注: cookie-string は名前に反してオクテット列であり、文字列列ではありません。cookie-string を文字列として表示する場合、ユーザーエージェントは
+                                UTF-8（<a href="#RFC3629"><cite
+                                        title="UTF-8, a transformation format of ISO 10646">[RFC3629]</cite></a>）でのデコードを試みるかもしれませんが、すべてのオクテット列が有効な
+                                UTF-8 とは限りません。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="implementation-considerations">
+                    <h2 id="rfc.section.6"><a href="#rfc.section.6">6.</a>&nbsp;<a
+                            href="#implementation-considerations">実装に関する考慮事項</a></h2>
+                    <section id="implementation-limits">
+                        <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a>&nbsp;<a
+                                href="#implementation-limits">制限</a></h3>
+                        <div id="rfc.section.6.1.p.1">
+                            <p>実際のユーザーエージェント実装には、保存可能なクッキーの数およびサイズに制限があります。一般的な用途のユーザーエージェントは、以下の最低限の能力をそれぞれ提供することが<em
+                                    class="bcp14">SHOULD</em>推奨されます：</p>
+                            <ul>
+                                <li>クッキーあたり少なくとも 4096 バイト（クッキーの名前、値、および属性の長さの合計で測定）。</li>
+                                <li>ドメインごとに少なくとも 50 個のクッキー。</li>
+                                <li>合計で少なくとも 3000 個のクッキー。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.6.1.p.2">
+                            <p>サーバーは、これらの実装上の制限に達するのを避け、また Cookie
+                                ヘッダーがすべてのリクエストに含まれることによるネットワーク帯域の最小化のために、可能な限り少数かつ小さなクッキーを利用することが<em
+                                    class="bcp14">SHOULD</em>推奨されます。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.3">
+                            <p>ユーザーが指示した場合やメモリ圧迫などにより、ユーザーエージェントが任意のクッキーをいつでも削除する可能性があるため、サーバーはユーザーエージェントが Cookie
+                                ヘッダーで一つ以上のクッキーを返さなかった場合でも、適切にフォールバックするよう設計すべきである（優雅に劣化させることが）<em
+                                    class="bcp14">SHOULD</em>推奨されます。</p>
+                        </div>
+                    </section>
+                    <section id="implementation-apis">
+                        <h3 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a>&nbsp;<a
+                                href="#implementation-apis">アプリケーションプログラミングインタフェース</a></h3>
+                        <div id="rfc.section.6.2.p.1">
+                            <p>Cookie および Set-Cookie ヘッダがこのような難解な構文を使う理由の一つは、多くのプラットフォーム（サーバー側とユーザーエージェント側の両方）が文字列ベースの
+                                API をクッキーに対して提供しており、アプリケーション層のプログラマが Cookie と Set-Cookie
+                                ヘッダで使われる構文の生成や解析を行う必要があるためです。多くのプログラマはこれを誤って実装し、相互運用性の問題を引き起こしてきました。</p>
+                        </div>
+                        <div id="rfc.section.6.2.p.2">
+                            <p>クッキーに対して文字列ベースの API を提供する代わりに、より意味的（セマンティック）な API を提供することはプラットフォームにとって有益です。本文書で具体的な API
+                                設計を推奨することは範囲外ですが、シリアライズされた日付文字列の代わりに抽象的な "Date" オブジェクトを受け入れるといった利点は明らかです。</p>
+                        </div>
+                    </section>
+                    <section id="idna-migration">
+                        <h3 id="rfc.section.6.3"><a href="#rfc.section.6.3">6.3.</a>&nbsp;<a href="#idna-migration">IDNA
+                                依存と移行</a></h3>
+                        <div id="rfc.section.6.3.p.1">
+                            <p>IDNA2008 <a href="#RFC5890"><cite
+                                        title="Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework">[RFC5890]</cite></a>
+                                は IDNA2003 <a href="#RFC3490"><cite
+                                        title="Internationalizing Domain Names in Applications (IDNA)">[RFC3490]</cite></a>
+                                を置き換えます。しかし、両仕様間には差異があり、ドメイン名ラベルの処理（変換など）に差が生じる場合があります。IDNA2003
+                                ベースのドメイン名ラベルが現存する移行期間がしばらく続くでしょう。ユーザーエージェントは IDNA2008 を実装することが<em
+                                    class="bcp14">SHOULD</em>推奨され、IDNA 移行を支援するために <a href="#UTS46"><cite
+                                        title="Unicode IDNA Compatibility Processing">[UTS46]</cite></a> や <a
+                                    href="#RFC5895"><cite
+                                        title="Mapping Characters for Internationalized Domain Names in Applications (IDNA) 2008">[RFC5895]</cite></a>
+                                を実装してもよい（<em class="bcp14">MAY</em>）です。もしユーザーエージェントが IDNA2008 を実装しないならば、ユーザーエージェントは
+                                IDNA2003 を実装しなければなりません（<em class="bcp14">MUST</em>）。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="privacy-considerations">
+                    <h2 id="rfc.section.7"><a href="#rfc.section.7">7.</a>&nbsp;<a
+                            href="#privacy-considerations">プライバシーに関する考慮事項</a></h2>
+                    <div id="rfc.section.7.p.1">
+                        <p>クッキーは、サーバーがユーザーを追跡する手段を提供するという点でしばしば批判されます。たとえば、多くの「ウェブ解析」会社は、ユーザーがある Web
+                            サイトに戻ってきたときや別のサイトを訪れたときにユーザーを認識するためにクッキーを使用します。クッキーは HTTP
+                            リクエスト間で永続化され、ホスト間で共有され得るため、追跡を容易にしますが、追跡のための唯一の手段ではありません。</p>
+                    </div>
+                    <section id="third-party-cookies">
+                        <h3 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a>&nbsp;<a
+                                href="#third-party-cookies">サードパーティクッキー</a></h3>
+                        <div id="rfc.section.7.1.p.1">
+                            <p>特に懸念されるのは、いわゆる「サードパーティ」クッキーです。HTML
+                                文書をレンダリングする際、ユーザーエージェントはしばしば他のサーバー（広告ネットワークなど）からリソースを要求します。これらのサードパーティサーバーは、ユーザーがそのサーバーを直接訪れたことがなくてもクッキーを使用してユーザーを追跡できます。例えば、ユーザーがあるサイトを訪れ、そのサイトにサードパーティのコンテンツが含まれており、後に同じサードパーティのコンテンツを含む別のサイトを訪れると、サードパーティは両サイト間でユーザーを追跡できます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.7.1.p.2">
+                            <p>一部のユーザーエージェントはサードパーティクッキーの振る舞いを制限します。たとえば、これらの一部はサードパーティのリクエストに対して Cookie
+                                ヘッダの送信を拒否します。また別のものはサードパーティのリクエストに対するレスポンスで Set-Cookie
+                                ヘッダの処理を拒否します。ユーザーエージェントはサードパーティクッキーのポリシーに関して大きく異なります。本書は、ユーザーエージェントがプライバシーと互換性のバランスを取るサードパーティクッキーポリシーを試験するための広い裁量を許容しますが、特定のサードパーティクッキーポリシーを推奨するものではありません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.7.1.p.3">
+                            <p>サードパーティクッキーのブロックポリシーは、サーバーが制限を回避してユーザーを追跡しようとすると、プライバシー目標の達成に効果的でないことが多いです。特に、協調する二つのサーバーは動的
+                                URL に識別情報を注入することで、クッキーを全く使用せずにユーザーを追跡できることが多々あります。</p>
+                        </div>
+                    </section>
+                    <section id="user-controls">
+                        <h3 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2.</a>&nbsp;<a
+                                href="#user-controls">ユーザーコントロール</a></h3>
+                        <div id="rfc.section.7.2.p.1">
+                            <p>ユーザーエージェントは、クッキーストア内のクッキーを管理するための仕組みをユーザーに提供することが<em
+                                    class="bcp14">SHOULD</em>推奨されます。たとえば、指定した期間に受け取ったすべてのクッキーを削除したり、特定のドメインに関連するすべてのクッキーを削除したりする機能を提供できます。さらに、多くのユーザーエージェントはユーザーに保存されているクッキーを検査させる
+                                UI を提供しています。</p>
+                        </div>
+                        <div id="rfc.section.7.2.p.2">
+                            <p>ユーザーエージェントは、クッキーを無効化するための仕組みをユーザーに提供することが<em
+                                    class="bcp14">SHOULD</em>推奨されます。クッキーが無効化されている場合、ユーザーエージェントは送信する HTTP リクエストに Cookie
+                                ヘッダを含めてはならず（<em class="bcp14">MUST NOT</em>）、受信した HTTP レスポンスの Set-Cookie
+                                ヘッダを処理してはなりません（<em class="bcp14">MUST</em>）。</p>
+                        </div>
+                        <div id="rfc.section.7.2.p.3">
+                            <p>一部のユーザーエージェントは、セッション間での永続的なクッキー保存を防ぐオプションをユーザーに提供します。そのように設定された場合、ユーザーエージェントは受け取ったすべてのクッキーを
+                                persistent-flag が false
+                                に設定されているかのように扱わなければなりません。多くの一般的なユーザーエージェントはこの機能を「プライベートブラウジング」モードとして提供しています（<a
+                                    href="#Aggarwal2010"><cite
+                                        title="An Analysis of Private Browsing Modes in Modern Browsers">[Aggarwal2010]</cite></a>）。
+                            </p>
+                        </div>
+                        <div id="rfc.section.7.2.p.4">
+                            <p>一部のユーザーエージェントは、クッキーストアへの個々の書き込みを承認させる機能をユーザーに提供します。多くの一般的な利用シナリオでは、これらの制御は多数のプロンプトを生成しますが、プライバシー重視の一部のユーザーはこれらの制御を有用と感じることがあります。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="expiration-dates">
+                        <h3 id="rfc.section.7.3"><a href="#rfc.section.7.3">7.3.</a>&nbsp;<a
+                                href="#expiration-dates">有効期限</a></h3>
+                        <div id="rfc.section.7.3.p.1">
+                            <p>サーバーはクッキーの有効期限を遠い未来に設定できますが、ほとんどのユーザーエージェントは実際に数十年にわたってクッキーを保持するわけではありません。恣意的に長過ぎる有効期限を選ぶのではなく、サーバーはクッキーの目的に基づいて適切な有効期限を選択し、ユーザーのプライバシーを促進することが<em
+                                    class="bcp14">SHOULD</em>推奨されます。例えば、典型的なセッション識別子は 2 週間で失効するよう設定するのが合理的でしょう。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="security-considerations">
+                    <h2 id="rfc.section.8"><a href="#rfc.section.8">8.</a>&nbsp;<a
+                            href="#security-considerations">セキュリティに関する考慮事項</a></h2>
+                    <section id="section-overview">
+                        <h3 id="rfc.section.8.1"><a href="#rfc.section.8.1">8.1.</a>&nbsp;<a
+                                href="#section-overview">概要</a></h3>
+                        <div id="rfc.section.8.1.p.1">
+                            <p>クッキーには多数のセキュリティ上の落とし穴があります。本節では、より顕著な問題点のいくつかを概観します。</p>
+                        </div>
+                        <div id="rfc.section.8.1.p.2">
+                            <p>特に、クッキーは開発者に認可（authorization）ではなく周辺権限（ambient
+                                authority）に依存するよう促すため、クロスサイトリクエストフォージェリ（CSRF）などの攻撃に脆弱になりがちです（<a href="#CSRF"><cite
+                                        title="Robust Defenses for Cross-Site Request Forgery">[CSRF]</cite></a>）。また、セッション識別子をクッキーに保存する場合、開発者はセッション固定（session
+                                fixation）の脆弱性を生むことがよくあります。</p>
+                        </div>
+                        <div id="rfc.section.8.1.p.3">
+                            <p>Transport-layer の暗号化（HTTPS
+                                等）は、ネットワーク攻撃者が被害者のクッキーを取得または改ざんするのを完全には防げません。なぜならクッキー・プロトコル自体に様々な脆弱性があるためです（下記の "弱い機密性"
+                                および "弱い完全性" を参照）。さらに、デフォルトではクッキーはネットワーク攻撃者からの機密性や完全性を保証しません（HTTPS と併用しても同様です）。</p>
+                        </div>
+                    </section>
+                    <section id="ambient-authority">
+                        <h3 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a>&nbsp;<a
+                                href="#ambient-authority">周辺権限</a></h3>
+                        <div id="rfc.section.8.2.p.1">
+                            <p>クッキーを用いてユーザーを認証するサーバーは、リモートの当事者がユーザーエージェントから HTTP リクエストを発行させる機能（例：HTTP リダイレクトや HTML
+                                フォームなど）を許すユーザーエージェントのためにセキュリティ脆弱性を被る可能性があります。これらのリクエストを発行する際、ユーザーエージェントはクッキーを添付してしまい、リモート当事者がクッキーの内容を知らなくても、サーバー上で不注意な権限行使を引き起こす可能性があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.8.2.p.2">
+                            <p>この問題は多くの呼び名（CSRF、confused deputy など）で呼ばれますが、根本はクッキーが周辺権限の一形式である点にあります。クッキーは URL
+                                による指示（designation）とクッキーによる認可（authorization）を分離するようサーバー運用者に促しがちです。その結果、ユーザーエージェントは攻撃者が指定したリソースに対して認可情報を供給してしまい、サーバーやクライアントが攻撃者の指定した操作をあたかもユーザーの承認があるかのように実行してしまう可能性があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.8.2.p.3">
+                            <p>認可にクッキーを使う代わりに、サーバー運用者は designation と authorization を結び付け、URL
+                                をケイパビリティとして扱うことを検討してもよいでしょう。クッキーに秘密情報を保存する代わりに、URL
+                                自体に秘密を保持してリモートエンティティがその秘密を供給するよう求めるアプローチです。この方法が万能ではないにせよ、適切に適用すればより堅牢なセキュリティにつながる場合があります。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="clear-text">
+                        <h3 id="rfc.section.8.3"><a href="#rfc.section.8.3">8.3.</a>&nbsp;<a href="#clear-text">平文</a>
+                        </h3>
+                        <div id="rfc.section.8.3.p.1">
+                            <p>セキュアチャネル（TLS 等）を通じて送信されない限り、Cookie および Set-Cookie ヘッダの情報は平文で送信されます。</p>
+                            <ol>
+                                <li>これらのヘッダに含まれるすべての機密情報は盗聴者に露出します。</li>
+                                <li>悪意のある中間者は、ヘッダを任意の方向に移動中に改ざんする可能性があり、予測不能な結果を招くことがあります。</li>
+                                <li>悪意のあるクライアントは送信前に Cookie ヘッダを改変する可能性があり、予測不能な結果を招くことがあります。</li>
+                            </ol>
+                        </div>
+                        <div id="rfc.section.8.3.p.2">
+                            <p>サーバーはクッキーの内容を暗号化および署名することを<em
+                                    class="bcp14">SHOULD</em>推奨します（サーバーが望む形式を用いて、ユーザーエージェントへ送信する際に）。しかし、クッキー内容の暗号化および署名は、攻撃者があるユーザーエージェントから別のユーザーエージェントへクッキーを移植したり、後で再生したりすることを防ぐものではありません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.8.3.p.3">
+                            <p>すべてのクッキーの内容を暗号化および署名することに加えて、より高いレベルのセキュリティが要求される場合、サーバーは Cookie および Set-Cookie
+                                ヘッダをセキュアチャネル上のみで利用することを<em
+                                    class="bcp14">SHOULD</em>推奨します。セキュアチャネルでクッキーを使用する場合、サーバーは全てのクッキーに Secure
+                                属性を設定することを<em class="bcp14">SHOULD</em>推奨します（詳細は <a href="#sane-secure"
+                                    title="The Secure Attribute">Section 4.1.2.5</a>）。もしサーバーが Secure
+                                属性を設定しなければ、セキュアチャネルによる保護は大部分が無効になります。</p>
+                        </div>
+                        <div id="rfc.section.8.3.p.4">
+                            <p>例えば、ウェブメールサーバーがセッション識別子をクッキーに保存し、通常 HTTPS でアクセスされるとします。サーバーがクッキーに Secure
+                                属性を設定していない場合、能動的なネットワーク攻撃者はユーザーエージェントからのアウトバウンド HTTP リクエストを傍受してそのリクエストを webmail サーバーへの
+                                HTTP にリダイレクトできます。たとえ webmail サーバーが HTTP
+                                接続を受け付けていなくても、ユーザーエージェントはリクエストにクッキーを含めます。能動的な攻撃者はこれらのクッキーを傍受し、サーバーに対して再生し、ユーザーのメール内容を窺い知ることができます。もしサーバーがクッキーに
+                                Secure 属性を設定していたなら、ユーザーエージェントは平文のリクエストにはクッキーを含めないため、このような問題は防げます。</p>
+                        </div>
+                    </section>
+                    <section id="session-identifiers">
+                        <h3 id="rfc.section.8.4"><a href="#rfc.section.8.4">8.4.</a>&nbsp;<a
+                                href="#session-identifiers">セッション識別子</a></h3>
+                        <div id="rfc.section.8.4.p.1">
+                            <p>クッキーにセッション情報を直接保存する代わりに（攻撃者に露出・再生される恐れがあるため）、サーバーは一般にクッキーにノンス（または「セッション識別子」）を保存します。サーバーは、ノンスをキーとして関連する状態情報を参照できます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.8.4.p.2">
+                            <p>セッション識別子クッキーを用いることで、攻撃者がクッキー内容を知った場合の損害を限定できます。ノンスはサーバーとの相互作用にのみ有用であり、クッキー自体に敏感な情報を含めるより安全です。さらに、単一のノンスを用いることで、攻撃者がサーバーとの二つのやり取りからクッキー内容を「継ぎ合わせる（splice）」ことを防ぎ、サーバーが予期せぬ動作をするのを防げます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.8.4.p.3">
+                            <p>ただし、セッション識別子の使用にもリスクはあります。たとえば、サーバーは「セッション固定（session
+                                fixation）」の脆弱性を避けるために注意を払うべきです。セッション固定攻撃は三段階で進行します。まず攻撃者が自分のユーザーエージェントのセッション識別子を犠牲者のユーザーエージェントに移植します。次に犠牲者がその識別子を使用してサーバーとやり取りし、識別子にユーザーの資格情報や機密情報を付与する可能性があります。最後に攻撃者はその識別子を使って直接サーバーとやり取りし、ユーザーの権限や機密情報を得る場合があります。サーバーはこの種の脆弱性を避ける対策を講じるべきです（<em
+                                    class="bcp14">SHOULD</em>）。</p>
+                        </div>
+                    </section>
+                    <section id="weak-confidentiality">
+                        <h3 id="rfc.section.8.5"><a href="#rfc.section.8.5">8.5.</a>&nbsp;<a
+                                href="#weak-confidentiality">弱い機密性</a></h3>
+                        <div id="rfc.section.8.5.p.1">
+                            <p>クッキーはポート単位での分離を提供しません。あるポートで読み取れるクッキーは、同じホストの別のポートで動作するサービスからも読み取れます。あるポートで書き込み可能なクッキーは、同じホストの別ポート上のサービスからも書き込み可能です。したがって、サーバーは同一ホストの異なるポートで相互に信頼しないサービスを実行し、それらの間でセキュリティに敏感な情報をクッキーで保存すべきではありません（<em
+                                    class="bcp14">SHOULD NOT</em>）。</p>
+                        </div>
+                        <div id="rfc.section.8.5.p.2">
+                            <p>クッキーはスキームによる分離も提供しません。通常は http と https スキームで使われますが、同じホストのクッキーは ftp や gopher
+                                等の他のスキームからも利用され得ます。このスキームによる分離の欠如は、HTML の document.cookie などの非 HTTP API
+                                でクッキーにアクセスできる場合に特に明白になりますが、処理要件自体にも存在します（例：gopher スキームで取得した URI を HTTP 経由で扱うことを考えてください）。
+                            </p>
+                        </div>
+                        <div id="rfc.section.8.5.p.3">
+                            <p>クッキーは常にパス単位での分離を提供するわけではありません。ネットワークレベルではあるパスのために保存されたクッキーは別のパスへ送信されませんが、一部のユーザーエージェントは
+                                HTML の document.cookie のような非 HTTP API
+                                を通じてクッキーを公開します。これらのユーザーエージェント（例えばウェブブラウザ）は異なるパスから取得したリソースを隔離しないため、あるパスから取得したリソースが別パス用に保存されたクッキーへアクセスできる場合があります。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="weak-integrity">
+                        <h3 id="rfc.section.8.6"><a href="#rfc.section.8.6">8.6.</a>&nbsp;<a
+                                href="#weak-integrity">弱い完全性</a></h3>
+                        <div id="rfc.section.8.6.p.1">
+                            <p>クッキーは同一組織内の兄弟ドメイン（およびそのサブドメイン）に対する完全性保証を提供しません。例えば foo.example.com と bar.example.com
+                                を考えると、foo.example.com は Domain 属性に "example.com" を指定したクッキーを設定でき（場合によっては bar.example.com
+                                が設定した既存の "example.com" クッキーを上書きすることもあり得ます）、ユーザーエージェントはそのクッキーを bar.example.com への HTTP
+                                リクエストに含めます。最悪の場合、bar.example.com はそのクッキーを自分が設定したものと区別できなくなります。foo.example.com はこの能力を利用して
+                                bar.example.com に対する攻撃を仕掛ける可能性があります。</p>
+                        </div>
+                        <div id="rfc.section.8.6.p.2">
+                            <p>Set-Cookie ヘッダは Path 属性をサポートしていますが、Path 属性は任意の Path 属性を Set-Cookie
+                                ヘッダで受け入れるため、完全性保護を提供しません。例えば、http://example.com/foo/bar へのリクエストへの応答で Path 属性に "/qux"
+                                を指定したクッキーを設定できてしまいます。したがって、サーバーは同一ホストの異なるパスで相互に信頼しないサービスを実行し、クッキーに機密な情報を保存すべきではありません（<em
+                                    class="bcp14">SHOULD NOT</em>）。</p>
+                        </div>
+                        <div id="rfc.section.8.6.p.3">
+                            <p>能動的なネットワーク攻撃者は、http://example.com/ からのレスポンスを偽装して Set-Cookie
+                                ヘッダを注入することで、https://example.com/ に送信される Cookie ヘッダへクッキーを挿入することも可能です。HTTPS の example.com
+                                サーバーは、これらのクッキーを HTTPS レスポンスで自身が設定したクッキーと区別できなくなります。能動的なネットワーク攻撃者はこの能力を使って、たとえ
+                                example.com が常に HTTPS を使用していても example.com に対する攻撃を仕掛ける可能性があります。</p>
+                        </div>
+                        <div id="rfc.section.8.6.p.4">
+                            <p>サーバーはクッキーの内容を暗号化および署名することでこれらの攻撃を部分的に軽減できます。しかし、暗号を用いるだけでは問題を完全に緩和できません。なぜなら攻撃者は正当な
+                                example.com サーバーから受け取ったクッキーを被害者のセッションで再生することが可能であり、予測不可能な結果を引き起こす可能性があるためです。</p>
+                        </div>
+                        <div id="rfc.section.8.6.p.5">
+                            <p>最後に、攻撃者は大量のクッキーを保存させることでユーザーエージェントにクッキーを削除させることができます。ユーザーエージェントが保存上限に達すると、いくつかのクッキーを強制的に削除しなければなりません。サーバーはユーザーエージェントがクッキーを保持し続けることを前提にしてはなりません（<em
+                                    class="bcp14">SHOULD NOT</em>）。</p>
+                        </div>
+                    </section>
+                    <section id="reliance-on-dns">
+                        <h3 id="rfc.section.8.7"><a href="#rfc.section.8.7">8.7.</a>&nbsp;<a href="#reliance-on-dns">DNS
+                                への依存</a></h3>
+                        <div id="rfc.section.8.7.p.1">
+                            <p>クッキーはセキュリティのために DNS に依存しています。DNS
+                                が部分的または完全に侵害された場合、クッキープロトコルはアプリケーションが要求するセキュリティ特性を提供できなくなる可能性があります。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="iana-considerations">
+                    <h2 id="rfc.section.9"><a href="#rfc.section.9">9.</a>&nbsp;<a href="#iana-considerations">IANA
+                            に関する考慮事項</a></h2>
+                    <div id="rfc.section.9.p.1">
+                        <p>恒久的なメッセージヘッダーフィールドのレジストリ（<a href="#RFC3864"><cite
+                                    title="Registration Procedures for Message Header Fields">[RFC3864]</cite></a>参照）は、以下の登録で更新されました。
+                        </p>
+                    </div>
+                    <section id="n-cookie">
+                        <h3 id="rfc.section.9.1"><a href="#rfc.section.9.1">9.1.</a>&nbsp;<a href="#n-cookie">Cookie</a>
+                        </h3>
+                        <div id="rfc.section.9.1.p.1">
+                            <p>ヘッダーフィールド名: Cookie</p>
+                        </div>
+                        <div id="rfc.section.9.1.p.2">
+                            <p>適用プロトコル: http</p>
+                        </div>
+                        <div id="rfc.section.9.1.p.3">
+                            <p>ステータス: standard</p>
+                        </div>
+                        <div id="rfc.section.9.1.p.4">
+                            <p>作者/変更管理者: IETF</p>
+                        </div>
+                        <div id="rfc.section.9.1.p.5">
+                            <p>仕様文書: 本仕様（<a href="#cookie" title="The Cookie Header">Section 5.4</a>）</p>
+                        </div>
+                    </section>
+                    <section id="n-set-cookie">
+                        <h3 id="rfc.section.9.2"><a href="#rfc.section.9.2">9.2.</a>&nbsp;<a
+                                href="#n-set-cookie">Set-Cookie</a></h3>
+                        <div id="rfc.section.9.2.p.1">
+                            <p>ヘッダーフィールド名: Set-Cookie</p>
+                        </div>
+                        <div id="rfc.section.9.2.p.2">
+                            <p>適用プロトコル: http</p>
+                        </div>
+                        <div id="rfc.section.9.2.p.3">
+                            <p>ステータス: standard</p>
+                        </div>
+                        <div id="rfc.section.9.2.p.4">
+                            <p>作者/変更管理者: IETF</p>
+                        </div>
+                        <div id="rfc.section.9.2.p.5">
+                            <p>仕様文書: 本仕様（<a href="#set-cookie" title="The Set-Cookie Header">Section 5.2</a>）</p>
+                        </div>
+                    </section>
+                    <section id="n-cookie2">
+                        <h3 id="rfc.section.9.3"><a href="#rfc.section.9.3">9.3.</a>&nbsp;<a
+                                href="#n-cookie2">Cookie2</a></h3>
+                        <div id="rfc.section.9.3.p.1">
+                            <p>ヘッダーフィールド名: Cookie2</p>
+                        </div>
+                        <div id="rfc.section.9.3.p.2">
+                            <p>適用プロトコル: http</p>
+                        </div>
+                        <div id="rfc.section.9.3.p.3">
+                            <p>ステータス: obsoleted</p>
+                        </div>
+                        <div id="rfc.section.9.3.p.4">
+                            <p>作者/変更管理者: IETF</p>
+                        </div>
+                        <div id="rfc.section.9.3.p.5" class="avoidbreakafter">
+                            <p>仕様文書: <a href="#RFC2965"><cite
+                                        title="HTTP State Management Mechanism">[RFC2965]</cite></a></p>
+                        </div>
+                    </section>
+                    <section id="n-set-cookie2">
+                        <h3 id="rfc.section.9.4"><a href="#rfc.section.9.4">9.4.</a>&nbsp;<a
+                                href="#n-set-cookie2">Set-Cookie2</a></h3>
+                        <div id="rfc.section.9.4.p.1">
+                            <p>ヘッダーフィールド名: Set-Cookie2</p>
+                        </div>
+                        <div id="rfc.section.9.4.p.2">
+                            <p>適用プロトコル: http</p>
+                        </div>
+                        <div id="rfc.section.9.4.p.3">
+                            <p>ステータス: obsoleted</p>
+                        </div>
+                        <div id="rfc.section.9.4.p.4">
+                            <p>作者/変更管理者: IETF</p>
+                        </div>
+                        <div id="rfc.section.9.4.p.5" class="avoidbreakafter">
+                            <p>仕様文書: <a href="#RFC2965"><cite
+                                        title="HTTP State Management Mechanism">[RFC2965]</cite></a></p>
+                        </div>
+                    </section>
+                </section>
+                <section id="rfc.references">
+                    <h2 id="rfc.section.10"><a href="#rfc.section.10">10.</a> 参照文献</h2>
+                    <section>
+                        <div id="rfc.references.1">
+                            <h3 id="rfc.section.10.1"><a href="#rfc.section.10.1">10.1.</a> 規範的参照文献</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="RFC1034">[<a href="#RFC1034" class="smpl">RFC1034</a>]</dt>
+                                <dd>Mockapetris, P., “<a href="https://www.rfc-editor.org/rfc/rfc1034.html">Domain names
+                                        - concepts and facilities</a>”, <a
+                                        href="https://www.rfc-editor.org/info/std13">STD 13</a>, RFC 1034, November
+                                    1987.</dd>
+                                <dt id="RFC1123">[<a href="#RFC1123" class="smpl">RFC1123</a>]</dt>
+                                <dd><a href="mailto:Braden@ISI.EDU">Braden, R.</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc1123.html">Requirements for Internet
+                                        Hosts - Application and Support</a>”, <a
+                                        href="https://www.rfc-editor.org/info/std3">STD 3</a>, RFC 1123, October 1989.
+                                </dd>
+                                <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                <dd><a href="mailto:sob@harvard.edu">Bradner, S.</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words for use in RFCs to
+                                        Indicate Requirement Levels</a>”, <a
+                                        href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 2119, March 1997.
+                                </dd>
+                                <dt id="RFC2616">[<a href="#RFC2616" class="smpl">RFC2616</a>]</dt>
+                                <dd><a href="mailto:fielding@ics.uci.edu">Fielding, R.</a>, <a
+                                        href="mailto:jg@w3.org">Gettys, J.</a>, <a
+                                        href="mailto:mogul@wrl.dec.com">Mogul, J.</a>, <a
+                                        href="mailto:frystyk@w3.org">Frystyk, H.</a>, <a
+                                        href="mailto:masinter@parc.xerox.com">Masinter, L.</a>, <a
+                                        href="mailto:paulle@microsoft.com">Leach, P.</a>, and <a
+                                        href="mailto:timbl@w3.org">T. Berners-Lee</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2616.html">Hypertext Transfer Protocol
+                                        -- HTTP/1.1</a>”, RFC 2616, June 1999.</dd>
+                                <dt id="RFC3490">[<a href="#RFC3490" class="smpl">RFC3490</a>]</dt>
+                                <dd>Faltstrom, P., Hoffman, P., and A. Costello, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc3490.html">Internationalizing Domain
+                                        Names in Applications (IDNA)</a>”, RFC 3490, March 2003.<br>Section 6.3（<a
+                                        href="#idna-migration" title="IDNA Dependency and Migration">IDNA
+                                        依存と移行</a>）で、廃止された仕様への規範的参照がなぜ必要かの説明があります。</dd>
+                                <dt id="RFC4790">[<a href="#RFC4790" class="smpl">RFC4790</a>]</dt>
+                                <dd>Newman, C., Duerst, M., and A. Gulbrandsen, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc4790.html">Internet Application Protocol
+                                        Collation Registry</a>”, RFC 4790, March 2007.</dd>
+                                <dt id="RFC5234">[<a href="#RFC5234" class="smpl">RFC5234</a>]</dt>
+                                <dd><a href="mailto:dcrocker@bbiw.net">Crocker, D., Ed.</a> and <a
+                                        href="mailto:paul.overell@thus.net">P. Overell</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5234.html">Augmented BNF for Syntax
+                                        Specifications: ABNF</a>”, <a href="https://www.rfc-editor.org/info/std68">STD
+                                        68</a>, RFC 5234, January 2008.</dd>
+                                <dt id="RFC5890">[<a href="#RFC5890" class="smpl">RFC5890</a>]</dt>
+                                <dd>Klensin, J., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5890.html">Internationalized Domain
+                                        Names for Applications (IDNA): Definitions and Document Framework</a>”, RFC
+                                    5890, August 2010.</dd>
+                                <dt id="USASCII">[<a href="#USASCII" class="smpl">USASCII</a>]</dt>
+                                <dd>American National Standards Institute, “Coded Character Set -- 7-bit American
+                                    Standard Code for Information Interchange”, ANSI X3.4, 1986.</dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section>
+                        <div id="rfc.references.2">
+                            <h3 id="rfc.section.10.2"><a href="#rfc.section.10.2">10.2.</a> 参考情報</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="RFC2109">[<a href="#RFC2109" class="smpl">RFC2109</a>]</dt>
+                                <dd><a href="mailto:dmk@bell-labs.com">Kristol, D.</a> and <a
+                                        href="mailto:montulli@netscape.com">L. Montulli</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2109.html">HTTP State Management
+                                        Mechanism</a>”, RFC 2109, February 1997.</dd>
+                                <dt id="RFC2965">[<a href="#RFC2965" class="smpl">RFC2965</a>]</dt>
+                                <dd><a href="mailto:dmk@bell-labs.com">Kristol, D.</a> and <a
+                                        href="mailto:lou@montulli.org">L. Montulli</a>, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2965.html">HTTP State Management
+                                        Mechanism</a>”, RFC 2965, October 2000.</dd>
+                                <dt id="RFC2818">[<a href="#RFC2818" class="smpl">RFC2818</a>]</dt>
+                                <dd>Rescorla, E., “<a href="https://www.rfc-editor.org/rfc/rfc2818.html">HTTP Over
+                                        TLS</a>”, RFC 2818, May 2000.</dd>
+                                <dt id="Netscape">[<a href="#Netscape" class="smpl">Netscape</a>]</dt>
+                                <dd>Netscape Communications Corp., “<a
+                                        href="http://web.archive.org/web/20020803110822/http://wp.netscape.com/newsref/std/cookie_spec.html">Persistent
+                                        Client State -- HTTP Cookies</a>”, 1999, &lt;<a
+                                        href="http://web.archive.org/web/20020803110822/http://wp.netscape.com/newsref/std/cookie_spec.html">http://web.archive.org/web/20020803110822/http://wp.netscape.com/newsref/std/cookie_spec.html</a>&gt;.
+                                </dd>
+                                <dt id="Kri2001">[<a href="#Kri2001" class="smpl">Kri2001</a>]</dt>
+                                <dd>Kristol, D., “<a href="http://arxiv.org/abs/cs.SE/0105018">HTTP Cookies: Standards,
+                                        Privacy, and Politics</a>”, ACM Transactions on Internet Technology Vol. 1, #2,
+                                    November 2001, &lt;<a
+                                        href="http://arxiv.org/abs/cs.SE/0105018">http://arxiv.org/abs/cs.SE/0105018</a>&gt;.
+                                </dd>
+                                <dt id="RFC3629">[<a href="#RFC3629" class="smpl">RFC3629</a>]</dt>
+                                <dd>Yergeau, F., “<a href="https://www.rfc-editor.org/rfc/rfc3629.html">UTF-8, a
+                                        transformation format of ISO 10646</a>”, <a
+                                        href="https://www.rfc-editor.org/info/std63">STD 63</a>, RFC 3629, November
+                                    2003.</dd>
+                                <dt id="RFC4648">[<a href="#RFC4648" class="smpl">RFC4648</a>]</dt>
+                                <dd>Josefsson, S., “<a href="https://www.rfc-editor.org/rfc/rfc4648.html">The Base16,
+                                        Base32, and Base64 Data Encodings</a>”, RFC 4648, October 2006.</dd>
+                                <dt id="RFC3864">[<a href="#RFC3864" class="smpl">RFC3864</a>]</dt>
+                                <dd>Klyne, G., Nottingham, M., and J. Mogul, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc3864.html">Registration Procedures for
+                                        Message Header Fields</a>”, <a href="https://www.rfc-editor.org/info/bcp90">BCP
+                                        90</a>, RFC 3864, September 2004.</dd>
+                                <dt id="RFC5895">[<a href="#RFC5895" class="smpl">RFC5895</a>]</dt>
+                                <dd>Resnick, P. and P. Hoffman, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5895.html">Mapping Characters for
+                                        Internationalized Domain Names in Applications (IDNA) 2008</a>”, RFC 5895,
+                                    September 2010.</dd>
+                                <dt id="UTS46">[<a href="#UTS46" class="smpl">UTS46</a>]</dt>
+                                <dd>Davis, M. and M. Suignard, “<a href="http://unicode.org/reports/tr46/">Unicode IDNA
+                                        Compatibility Processing</a>”, Unicode Technical Standards # 46, 2010, &lt;<a
+                                        href="http://unicode.org/reports/tr46/">http://unicode.org/reports/tr46/</a>&gt;.
+                                </dd>
+                                <dt id="CSRF">[<a href="#CSRF" class="smpl">CSRF</a>]</dt>
+                                <dd>Barth, A., Jackson, C., and J. Mitchell, “<a
+                                        href="http://portal.acm.org/citation.cfm?id=1455770.1455782">Robust Defenses for
+                                        Cross-Site Request Forgery</a>”, 2008, &lt;<a
+                                        href="http://portal.acm.org/citation.cfm?id=1455770.1455782">http://portal.acm.org/citation.cfm?id=1455770.1455782</a>&gt;.
+                                </dd>
+                                <dt id="Aggarwal2010">[<a href="#Aggarwal2010" class="smpl">Aggarwal2010</a>]</dt>
+                                <dd>Aggarwal, G., Burzstein, E., Jackson, C., and D. Boneh, “<a
+                                        href="http://www.usenix.org/events/sec10/tech/full_papers/Aggarwal.pdf">An
+                                        Analysis of Private Browsing Modes in Modern Browsers</a>”, 2010, &lt;<a
+                                        href="http://www.usenix.org/events/sec10/tech/full_papers/Aggarwal.pdf">http://www.usenix.org/events/sec10/tech/full_papers/Aggarwal.pdf</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                </section>
+                <section id="n-acknowledgements">
+                    <h2 id="rfc.section.A" class="np"><a href="#rfc.section.A">Appendix A.</a>&nbsp;<a
+                            href="#n-acknowledgements">謝辞</a></h2>
+                    <div id="rfc.section.A.p.1">
+                        <p>本書は RFC 2109 <a href="#RFC2109"><cite
+                                    title="HTTP State Management Mechanism">[RFC2109]</cite></a>
+                            を大いに参考にしています。我々はクッキーの仕様化に尽力した David M. Kristol と Lou Montulli に感謝します。特に David M. Kristol は
+                            IETF プロセスを乗り切る上で多大な助言を与えてくれました。本書に対する貴重なフィードバックをくれた Thomas Broyer、Tyler Close、Alissa
+                            Cooper、Bil Corry、corvid、Lisa Dusseault、Roy T. Fielding、Blake Frantz、Anne van Kesteren、Eran
+                            Hammer-Lahav、Jeff Hodges、Bjoern Hoehrmann、Achim Hoffmann、Georg Koppen、Dean McNamee、Alexey
+                            Melnikov、Mark Miller、Mark Pauley、Yngve N. Pettersen、Julian Reschke、Peter Saint-Andre、Mark
+                            Seaborn、Maciej Stachowiak、Daniel Stenberg、Tatsuhiro Tsujikawa、David Wagner、Dan Winship、Dan
+                            Witte の各氏に感謝します。</p>
+                    </div>
+                </section>
+                <section id="rfc.authors" class="avoidbreakinside">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>Adam Barth</b><br>
+                        University of California, Berkeley
+                        <br>Email: <a href="mailto:abarth@eecs.berkeley.edu">abarth@eecs.berkeley.edu</a><br>URI: <a
+                            href="http://www.adambarth.com/">http://www.adambarth.com/</a>
+                    </address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
