@@ -1,0 +1,1401 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 9729 - 隠蔽された HTTP 認証スキーム</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC9729">
+    <meta property="og:description" content="The Concealed HTTP Authentication Scheme">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc9729.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 The Concealed HTTP Authentication Scheme" href="#rfc.section.2">
+    <link rel="Chapter" title="3 Client Handling" href="#rfc.section.3">
+    <link rel="Chapter" title="4 Authentication Parameters" href="#rfc.section.4">
+    <link rel="Chapter" title="5 Example" href="#rfc.section.5">
+    <link rel="Chapter" title="6 Server Handling" href="#rfc.section.6">
+    <link rel="Chapter" title="7 Requirements on TLS Usage" href="#rfc.section.7">
+    <link rel="Chapter" title="8 Security Considerations" href="#rfc.section.8">
+    <link rel="Chapter" title="9 IANA Considerations" href="#rfc.section.9">
+    <link rel="Chapter" title="10 References" href="#rfc.section.10">
+    <link rel="Appendix" title="Acknowledgments" href="#rfc.section.unnumbered-4">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-unprompted-auth-12" rel="prev">
+    <link href="https://dx.doi.org/10.17487/rfc9729" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc9729.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="https://www.rfc-editor.org/info/rfc9729">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <meta name="keywords" content="secure, tunnels, masque, http-ng">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Schinazi, D.">
+    <meta name="dcterms.creator" content="Oliver, D.">
+    <meta name="dcterms.creator" content="Hoyland, J.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:9729">
+    <meta name="dcterms.issued" content="2025-02">
+    <meta name="dcterms.abstract"
+        content="Most HTTP authentication schemes are probeable in the sense that it is possible for an unauthenticated client to probe whether an origin serves resources that require authentication. It is possible for an origin to hide the fact that it requires authentication by not generating Unauthorized status codes; however, that only works with non-cryptographic authentication schemes: cryptographic signatures require a fresh nonce to be signed. Prior to this document, there was no existing way for the origin to share such a nonce without exposing the fact that it serves resources that require authentication. This document defines a new non-probeable cryptographic authentication scheme.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="Most HTTP authentication schemes are probeable in the sense that it is possible for an unauthenticated client to probe whether an origin serves resources that require authentication. It is possible for an origin to hide the fact that it requires authentication by not generating Unauthorized status codes; however, that only works with non-cryptographic authentication schemes: cryptographic signatures require a fresh nonce to be signed. Prior to this document, there was no existing way for the origin to share such a nonce without exposing the fact that it serves resources that require authentication. This document defines a new non-probeable cryptographic authentication scheme.">
+</head>
+
+<body onload="getMeta(9729,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>9729</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#conventions">慣習および定義</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#the-concealed-http-authentication-scheme">隠蔽された HTTP 認証スキーム</a></li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#client">クライアント処理</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#context">キーエクスポーター コンテキスト</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.3.1.1">3.1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#public-key-encoding">公開鍵のエンコーディング</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#output">キーエクスポーター出力</a></li>
+                                        <li><a href="#rfc.section.3.3">3.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#computation">署名計算</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#auth-params">認証パラメータ</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#parameter-k">k パラメータ</a></li>
+                                        <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#parameter-a">a パラメータ</a></li>
+                                        <li><a href="#rfc.section.4.3">4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#parameter-p">p パラメータ</a></li>
+                                        <li><a href="#rfc.section.4.4">4.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#parameter-s">s パラメータ</a></li>
+                                        <li><a href="#rfc.section.4.5">4.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#parameter-v">v パラメータ</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#example">例</a></li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#server-handling">サーバ処理</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#frontend-handling">フロントエンド処理</a></li>
+                                        <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#communication-between-frontend-and-backend">フロントエンドとバックエンド間の通信</a>
+                                        </li>
+                                        <li><a href="#rfc.section.6.3">6.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#backend">バックエンド処理</a></li>
+                                        <li><a href="#rfc.section.6.4">6.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#non-probeable-server-handling">プローブ不可能なサーバ処理</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#requirements-on-tls-usage">TLS 使用の要件</a></li>
+                                <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security">セキュリティに関する考慮事項</a></li>
+                                <li><a href="#rfc.section.9">9.</a>&nbsp;&nbsp;&nbsp;<a href="#iana">IANA に関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.9.1">9.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#iana-schemes">HTTP 認証スキームレジストリ</a></li>
+                                        <li><a href="#rfc.section.9.2">9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#iana-exporter-label">TLS キー素材エクスポーター ラベル</a></li>
+                                        <li><a href="#rfc.section.9.3">9.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#http-field-name">HTTP フィールド名</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.10">10.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references">参考文献</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.10.1">10.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">規範的参照文献</a></li>
+                                        <li><a href="#rfc.section.10.2">10.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.3">情報参考文献</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#acknowledgments">謝辞</a></li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネット技術タスクフォース (IETF)</td>
+                                <td class="text-right">D. Schinazi</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 9729</td>
+                                <td class="text-right">Google LLC</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: Standards Track</td>
+                                <td class="text-right">D. Oliver</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right">Guardian Project</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left"></td>
+                                <td class="text-right">J. Hoyland</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left"></td>
+                                <td class="text-right">Cloudflare Inc.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left"></td>
+                                <td class="text-right">2025年2月</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>隠蔽された HTTP 認証スキーム</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">要旨</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>ほとんどの HTTP 認証スキームはプローブ可能であり、認証されていないクライアントが当該オリジンが認証を要求するリソースを提供しているかどうかを調べることが可能です。オリジンは
+                            Unauthorized ステータスコードを生成しないことで認証を要求している事実を隠すことができますが、これは非暗号的な認証スキームにのみ有効です：暗号署名は新鮮な nonce
+                            の署名を必要とします。本書以前には、オリジンがそのような nonce
+                            を、認証を要求するリソースを提供している事実を露呈せずに共有する方法は存在しませんでした。本書は新しいプローブ不可能な暗号認証スキームを定義します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモの状態</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>これはインターネット標準トラック文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネット技術タスクフォース (IETF) の成果物です。IETF コミュニティの合意を表しており、公開審査を受け Internet Engineering Steering
+                            Group (IESG) により公開が承認されています。インターネット標準に関する詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc7841.html#section-2">RFC 7841 のセクション 2</a>
+                            を参照してください。
+                        </p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>本書の現行の状態、訂正情報 (errata)、およびフィードバックの提供方法に関する情報は <a
+                                href="https://www.rfc-editor.org/info/rfc9729">https://www.rfc-editor.org/info/rfc9729</a>
+                            で入手できます。
+                        </p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2025 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>)
+                            in effect on the date of publication of this document. Please review these documents
+                            carefully, as they describe your rights and restrictions with respect to this document. Code
+                            Components extracted from this document must include Revised BSD License text as described
+                            in Section 4.e of the Trust Legal Provisions and are provided without warranty as described
+                            in the Revised BSD License.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                            <ul>
+                                <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#conventions">慣習および定義</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#the-concealed-http-authentication-scheme">隠蔽された HTTP 認証スキーム</a></li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#client">クライアント処理</a>
+                            <ul>
+                                <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#context">キーエクスポーターコンテキスト</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.1.1">3.1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#public-key-encoding">公開鍵のエンコーディング</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#output">キーエクスポーター出力</a></li>
+                                <li><a href="#rfc.section.3.3">3.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#computation">署名の計算</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#auth-params">認証パラメータ</a>
+                            <ul>
+                                <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a href="#parameter-k">k
+                                        パラメータ</a></li>
+                                <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a href="#parameter-a">a
+                                        パラメータ</a></li>
+                                <li><a href="#rfc.section.4.3">4.3.</a>&nbsp;&nbsp;&nbsp;<a href="#parameter-p">p
+                                        パラメータ</a></li>
+                                <li><a href="#rfc.section.4.4">4.4.</a>&nbsp;&nbsp;&nbsp;<a href="#parameter-s">s
+                                        パラメータ</a></li>
+                                <li><a href="#rfc.section.4.5">4.5.</a>&nbsp;&nbsp;&nbsp;<a href="#parameter-v">v
+                                        パラメータ</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#example">例</a></li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#server-handling">サーバ処理</a>
+                            <ul>
+                                <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#frontend-handling">フロントエンド処理</a></li>
+                                <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#communication-between-frontend-and-backend">フロントエンドとバックエンド間の通信</a></li>
+                                <li><a href="#rfc.section.6.3">6.3.</a>&nbsp;&nbsp;&nbsp;<a href="#backend">バックエンド処理</a>
+                                </li>
+                                <li><a href="#rfc.section.6.4">6.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#non-probeable-server-handling">プローブ不可能なサーバ処理</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#requirements-on-tls-usage">TLS
+                                使用に関する要件</a></li>
+                        <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a href="#security">セキュリティに関する考慮事項</a></li>
+                        <li><a href="#rfc.section.9">9.</a>&nbsp;&nbsp;&nbsp;<a href="#iana">IANA に関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.9.1">9.1.</a>&nbsp;&nbsp;&nbsp;<a href="#iana-schemes">HTTP
+                                        認証スキームレジストリ</a></li>
+                                <li><a href="#rfc.section.9.2">9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#iana-exporter-label">TLS キー素材エクスポーター ラベル</a></li>
+                                <li><a href="#rfc.section.9.3">9.3.</a>&nbsp;&nbsp;&nbsp;<a href="#http-field-name">HTTP
+                                        フィールド名</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.10">10.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                            <ul>
+                                <li><a href="#rfc.section.10.1">10.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">規範的参照文献</a></li>
+                                <li><a href="#rfc.section.10.2">10.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.3">情報参考文献</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#acknowledgments">謝辞</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <hr class="hidden-print">
+                <section id="introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#introduction">はじめに</a></h2>
+                    <div id="rfc.section.1.p.1">
+                        <p><span class="tt">HTTP authentication schemes</span>（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-11">Section 11</a> of <a
+                                href="#RFC9110"><cite
+                                    title="HTTP Semantics">[HTTP]</cite></a>参照）は、オリジンが一部のリソースへのアクセスを認証済みのリクエストのみに制限することを可能にします。これらのスキームは通常、オリジンがクライアントに認証情報の提示を要求するチャレンジを伴いますが、クライアントが事前にそのような情報を送信することも可能です。これは、オリジンが「知る者のみ」にサービスや機能を提供し、その他の者にはその存在を示さないようにしたい場合に特に有用です。このような設計は、鍵配布のために外部で定義された仕組みに依存します。例えば、ある企業が従業員の認証情報を使ってウェブサイト経由で従業員向けのリモートアクセスを提供したり、特定の従業員にのみ限定的な特別機能を提供し、その機能の発見（またはプローブ）を難しくする、などのケースが考えられます。別の例として、より明確に定義されていないコミュニティのメンバーが、より大きな利用者基盤を持つ発行者から一時的な鍵を発行され、地理的・機能的に限定されたリソースへのアクセスを取得することがあります。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>デジタル署名ベースの HTTP 認証スキーム（例: <a href="#RFC7486"><cite
+                                    title="HTTP Origin-Bound Authentication (HOBA)">[HOBA]</cite></a>）は既に存在しますが、それらは署名入力の新鮮性を確保するためにオリジンが明示的に新しいチャレンジをクライアントに送ることに依存します。これにより、チャレンジを未認証クライアントへ送信する段階でオリジンがプローブ可能になってしまいます。本書ではプローブ不可能な新しい署名ベースの認証スキームを定義します。
+                        </p>
+                    </div>
+                    <section id="conventions">
+                        <h3 id="rfc.section.1.1"><a href="#rfc.section.1.1">1.1.</a>&nbsp;<a
+                                href="#conventions">慣習および定義</a></h3>
+                        <div id="rfc.section.1.1.p.1">
+                            <p>本書中のキーワード "<em class="bcp14">MUST</em>", "<em class="bcp14">MUST NOT</em>", "<em
+                                    class="bcp14">REQUIRED</em>", "<em class="bcp14">SHALL</em>", "<em
+                                    class="bcp14">SHALL NOT</em>", "<em class="bcp14">SHOULD</em>", "<em
+                                    class="bcp14">SHOULD NOT</em>", "<em class="bcp14">RECOMMENDED</em>", "<em
+                                    class="bcp14">NOT RECOMMENDED</em>", "<em class="bcp14">MAY</em>", および "<em
+                                    class="bcp14">OPTIONAL</em>" は、すべて大文字で表記される場合に限り BCP 14（<a href="#RFC2119"><cite
+                                        title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                                および <a href="#RFC8174"><cite
+                                        title="Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words">[RFC8174]</cite></a>）に従って解釈されます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.1.1.p.2">
+                            <p>本書は <a href="https://www.rfc-editor.org/rfc/rfc9000.html#section-1.3">Section 1.3</a> of
+                                <a href="#RFC9000"><cite
+                                        title="QUIC: A UDP-Based Multiplexed and Secure Transport">[QUIC]</cite></a>
+                                の記法を使用します。
+                            </p>
+                        </div>
+                        <div id="rfc.section.1.1.p.3">
+                            <p>本書のいくつかの例は長い行を含み、それらは <a href="#RFC8792"><cite
+                                        title="Handling Long Lines in Content of Internet-Drafts and RFCs">[RFC8792]</cite></a>
+                                に記載された折り畳み方で折り畳まれることがあります。</p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="the-concealed-http-authentication-scheme">
+                    <h2 id="rfc.section.2" class="np"><a href="#rfc.section.2">2.</a>&nbsp;<a
+                            href="#the-concealed-http-authentication-scheme">隠蔽された HTTP 認証スキーム</a></h2>
+                    <div id="rfc.section.2.p.1">
+                        <p>本書は "Concealed" HTTP 認証スキームを定義します。本スキームは非対称暗号を使用します。クライアントは key ID
+                            と公開/秘密鍵ペアを保有し、オリジンサーバは認可された key ID を対応する公開鍵へマッピングしたデータを保持します。</p>
+                    </div>
+                    <div id="rfc.section.2.p.2">
+                        <p>クライアントは TLS キー素材エクスポーターを用いて署名するためのデータを生成し（<a href="#client" title="Client Handling">Section
+                                3</a>参照）、その署名を Authorization（または Proxy-Authorization）ヘッダフィールドで送信します（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-11">Section 11</a> of <a
+                                href="#RFC9110"><cite
+                                    title="HTTP Semantics">[HTTP]</cite></a>参照）。署名および追加情報は認証パラメータでやり取りされます（<a
+                                href="#auth-params" title="Authentication Parameters">Section
+                                4</a>参照）。サーバはこれらを受け取ると、自身の既知鍵データベースのエントリに対して署名が検証できるかを確認できます。検証結果に基づき、サーバはクライアントへの応答（例えば特定リソースへのアクセス制限など）を決定できます。
+                        </p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="client">
+                    <h2 id="rfc.section.3" class="np"><a href="#rfc.section.3">3.</a>&nbsp;<a
+                            href="#client">クライアント処理</a></h2>
+                    <div id="rfc.section.3.p.1" class="avoidbreakafter">
+                        <p>クライアントがリクエストで Concealed HTTP 認証スキームを使用する際、次のパラメータを用いて TLS キー素材エクスポーターを使い認証証明を計算しなければなりません（<em
+                                class="bcp14">SHALL</em>）：</p>
+                    </div>
+                    <div id="rfc.section.3.p.2">
+                        <ul>
+                            <li>
+                                <div>
+                                    <p>ラベルは "EXPORTER-HTTP-Concealed-Authentication" に設定する。</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div>
+                                    <p>コンテキストは <a href="#context" title="Key Exporter Context">Section 3.1</a>
+                                        で説明する構造に設定する。</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div>
+                                    <p>エクスポーター出力長は 48 バイトに設定する（<a href="#output" title="Key Exporter Output">Section
+                                            3.2</a>参照）。</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.3.p.3">
+                        <p>注: TLS 1.3 のキー素材エクスポーターは <a
+                                href="https://www.rfc-editor.org/rfc/rfc8446.html#section-7.5">Section 7.5</a> of <a
+                                href="#RFC8446"><cite
+                                    title="The Transport Layer Security (TLS) Protocol Version 1.3">[TLS]</cite></a>、TLS
+                            1.2 のキー素材エクスポーターは <a href="#RFC5705"><cite
+                                    title="Keying Material Exporters for Transport Layer Security (TLS)">[KEY-EXPORT]</cite></a>
+                            に定義されています。</p>
+                    </div>
+                    <section id="context">
+                        <h3 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a>&nbsp;<a
+                                href="#context">キーエクスポーターコンテキスト</a></h3>
+                        <div id="rfc.section.3.1.p.1" class="avoidbreakafter">
+                            <p>TLS キーエクスポーターのコンテキストは <a href="#fig-context" title="Key Exporter Context Format">図 1</a>
+                                に示すとおりで、記法は <a href="https://www.rfc-editor.org/rfc/rfc9000.html#section-1.3">Section
+                                    1.3</a> of <a href="#RFC9000"><cite
+                                        title="QUIC: A UDP-Based Multiplexed and Secure Transport">[QUIC]</cite></a>
+                                に従います：</p>
+                        </div>
+                        <div id="fig-context"></div>
+                        <div id="rfc.figure.1">
+                            <div>
+                                <pre>
+  Signature Algorithm (16),
+  Key ID Length (i),
+  Key ID (..),
+  Public Key Length (i),
+  Public Key (..),
+  Scheme Length (i),
+  Scheme (..),
+  Host Length (i),
+  Host (..),
+  Port (16),
+  Realm Length (i),
+  Realm (..),
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 1: キーエクスポーターコンテキストのフォーマット</p>
+                        <div id="rfc.section.3.1.p.2" class="avoidbreakafter">
+                            <p>キーエクスポーターコンテキストは次のフィールドを含みます：</p>
+                        </div>
+                        <div id="rfc.section.3.1.p.3">
+                            <dl>
+                                <dt>Signature Algorithm:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div><span class="tt">s</span> パラメータで送信される署名スキーム（<a href="#parameter-s"
+                                            title="The s Parameter">Section 4.4</a>参照）。</div>
+                                </dd>
+                                <dt>Key ID:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div><span class="tt">k</span> パラメータで送信されるキー ID（<a href="#parameter-k"
+                                            title="The k Parameter">Section 4.1</a>参照）。</div>
+                                </dd>
+                                <dt>Public Key:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div>サーバがクライアントの署名を検証するために使う公開鍵。そのエンコーディングは <a href="#public-key-encoding"
+                                            title="Public Key Encoding">Section 3.1.1</a> に記載。</div>
+                                </dd>
+                                <dt>Scheme:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div>このリクエストのスキーム。URI のスキーム部分の形式（<a
+                                            href="https://www.rfc-editor.org/rfc/rfc3986.html#section-3.1">Section
+                                            3.1</a> of <a href="#RFC3986"><cite
+                                                title="Uniform Resource Identifier (URI): Generic Syntax">[URI]</cite></a>）に従ってエンコードされます。
+                                    </div>
+                                </dd>
+                                <dt>Host:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div>このリクエストのホスト。URI のホスト部分の形式（<a
+                                            href="https://www.rfc-editor.org/rfc/rfc3986.html#section-3.2.2">Section
+                                            3.2.2</a> of <a href="#RFC3986"><cite
+                                                title="Uniform Resource Identifier (URI): Generic Syntax">[URI]</cite></a>）に従ってエンコードされます。
+                                    </div>
+                                </dd>
+                                <dt>Port:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div>このリクエストのポート。ネットワークバイト順でエンコードされます。ポートは URI に含まれるか、使用中のスキームのデフォルトポートである点に注意（<a
+                                            href="https://www.rfc-editor.org/rfc/rfc3986.html#section-3.2.3">Section
+                                            3.2.3</a> of <a href="#RFC3986"><cite
+                                                title="Uniform Resource Identifier (URI): Generic Syntax">[URI]</cite></a>参照）。
+                                    </div>
+                                </dd>
+                                <dt>Realm:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div>realm 認証パラメータで送信される認証レルム（<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9110.html#section-11.5">Section
+                                            11.5</a> of <a href="#RFC9110"><cite
+                                                title="HTTP Semantics">[HTTP]</cite></a>参照）。realm
+                                        認証パラメータが存在しない場合、このフィールドは空でなければなりません（<em
+                                            class="bcp14">SHALL</em>）。本書はオリジンがクライアントへレルムを伝える手段を定義しません。クライアントが特定のレルムを使用するよう設定されていない場合、空のレルムを使用し、レルム認証パラメータを送信してはなりません（<em
+                                            class="bcp14">SHALL NOT</em>）。</div>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div id="rfc.section.3.1.p.4">
+                            <p>Signature Algorithm と Port フィールドは符号なし 16 ビット整数（ネットワークバイト順）でエンコードされます。Key ID、Public
+                                Key、Scheme、Host、Realm フィールドは長さ接頭文字付き文字列であり、それぞれの長さを表す Length フィールドが先に付きます。これらの長さフィールドは
+                                <a href="https://www.rfc-editor.org/rfc/rfc9000.html#section-16">Section 16</a> of <a
+                                    href="#RFC9000"><cite
+                                        title="QUIC: A UDP-Based Multiplexed and Secure Transport">[QUIC]</cite></a>
+                                にある可変長整数エンコーディングを用いてエンコードされ、必要最小限のバイト数でエンコードされなければなりません（<em class="bcp14">MUST</em>）。
+                            </p>
+                        </div>
+                        <section id="public-key-encoding">
+                            <h4 id="rfc.section.3.1.1"><a href="#rfc.section.3.1.1">3.1.1.</a>&nbsp;<a
+                                    href="#public-key-encoding">公開鍵のエンコーディング</a></h4>
+                            <div id="rfc.section.3.1.1.p.1" class="avoidbreakafter">
+                                <p>TLS キーエクスポーターコンテキストの "Public Key" フィールド（上記参照）と <span class="tt">a</span> パラメータ（<a
+                                        href="#parameter-a" title="The a Parameter">Section
+                                        4.2</a>参照）は同じ公開鍵を運びます。公開鍵のエンコーディングは利用される署名アルゴリズムによって決まります。以下のとおり：</p>
+                            </div>
+                            <div id="rfc.section.3.1.1.p.2">
+                                <dl>
+                                    <dt>RSASSA-PSS アルゴリズム:</dt>
+                                    <dd style="margin-left: 1.5em">
+                                        <div>公開鍵は RSAPublicKey 構造体（<a href="#RFC8017"><cite
+                                                    title="PKCS #1: RSA Cryptography Specifications Version 2.2">[PKCS1]</cite></a>）で、DER（<a
+                                                href="#X.690"><cite title="X.690">[X.690]</cite></a>）でエンコードされます。BER のうち
+                                            DER でないエンコーディングは拒否されなければなりません（<em class="bcp14">MUST</em>）。</div>
+                                    </dd>
+                                    <dt>ECDSA アルゴリズム:</dt>
+                                    <dd style="margin-left: 1.5em">
+                                        <div>公開鍵は TLS 1.3 の <a
+                                                href="https://www.rfc-editor.org/rfc/rfc8446.html#section-4.2.8.2">Section
+                                                4.2.8.2</a> に定義された UncompressedPointRepresentation 構造で、SignatureScheme
+                                            で指定された曲線を用います。</div>
+                                    </dd>
+                                    <dt>EdDSA アルゴリズム:</dt>
+                                    <dd style="margin-left: 1.5em">
+                                        <div>公開鍵は <a href="#RFC8032"><cite
+                                                    title="Edwards-Curve Digital Signature Algorithm (EdDSA)">[EdDSA]</cite></a>
+                                            に定義されるバイト列エンコーディングです。</div>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div id="rfc.section.3.1.1.p.3">
+                                <p>本書は他のアルゴリズムの公開鍵エンコーディングを定義しません。ある SignatureScheme を Concealed HTTP
+                                    認証スキームで使用可能にするためには、その公開鍵エンコーディングが対応文書で定義されている必要があります。</p>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="output">
+                        <h3 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a>&nbsp;<a
+                                href="#output">キーエクスポーター出力</a></h3>
+                        <div id="rfc.section.3.2.p.1" class="avoidbreakafter">
+                            <p>キーエクスポーター出力は 48 バイト長です。そのうち最初の 32 バイトは署名の入力の一部となり、次の 16
+                                バイトは署名とともに送信されます。これにより受信者がエクスポーターが正しい値を生成したことを確認できます。これは <a href="#fig-output"
+                                    title="Key Exporter Output Format">図 2</a> に示したとおりで、記法は <a
+                                    href="https://www.rfc-editor.org/rfc/rfc9000.html#section-1.3">Section 1.3</a> of <a
+                                    href="#RFC9000"><cite
+                                        title="QUIC: A UDP-Based Multiplexed and Secure Transport">[QUIC]</cite></a>
+                                に従います：</p>
+                        </div>
+                        <div id="fig-output"></div>
+                        <div id="rfc.figure.2">
+                            <div>
+                                <pre>
+  Signature Input (256),
+  Verification (128),
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 2: キーエクスポーター出力のフォーマット</p>
+                        <div id="rfc.section.3.2.p.2" class="avoidbreakafter">
+                            <p>キーエクスポーター出力は次のフィールドを含みます：</p>
+                        </div>
+                        <div id="rfc.section.3.2.p.3">
+                            <dl>
+                                <dt>Signature Input:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div>クライアントが選択した非対称秘密鍵で署名されるデータの一部（<a href="#computation"
+                                            title="Signature Computation">Section 3.3</a>参照）。</div>
+                                </dd>
+                                <dt>Verification:</dt>
+                                <dd style="margin-left: 1.5em">
+                                    <div>検証値は <span class="tt">v</span> パラメータでサーバへ送信されます（<a href="#parameter-v"
+                                            title="The v Parameter">Section 4.5</a>参照）。</div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section id="computation">
+                        <h3 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a>&nbsp;<a
+                                href="#computation">署名の計算</a></h3>
+                        <div id="rfc.section.3.3.p.1" class="avoidbreakafter">
+                            <p>Signature Input がキーエクスポーター出力から抽出されたら（<a href="#output"
+                                    title="Key Exporter Output">Section
+                                    3.2</a>参照）、静的データでプレフィックスを付けてから署名します。署名は次を連結したものに対して計算されます：</p>
+                        </div>
+                        <div id="rfc.section.3.3.p.2">
+                            <ul>
+                                <li>
+                                    <div>
+                                        <p>オクテット 32（0x20）を 64 回繰り返した文字列</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>コンテキスト文字列 "HTTP Concealed Authentication"</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>区切りとしての単一の 0 バイト</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>キーエクスポーター出力から抽出した Signature Input（<a href="#output"
+                                                title="Key Exporter Output">Section 3.2</a>参照）</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.3" class="avoidbreakafter">
+                            <p>例えば、Signature Input の 32 バイトがすべて 01 に設定されている場合、署名でカバーされる内容（16 進表記）は次のようになります：</p>
+                        </div>
+                        <div id="fig-sig-example"></div>
+                        <div id="rfc.figure.3">
+                            <div>
+                                <pre>
+2020202020202020202020202020202020202020202020202020202020202020
+2020202020202020202020202020202020202020202020202020202020202020
+48545450205369676E61747572652041757468656E7469636174696F6E
+00
+0101010101010101010101010101010101010101010101010101010101010101
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 3: 署名でカバーされる内容の例</p>
+                        <div id="rfc.section.3.3.p.4">
+                            <p>この静的プレフィックスの目的は、もし認証用の非対称鍵が別プロトコルで誤って再利用された場合に生じ得る問題を軽減するためです（再利用は禁止されていますが、詳細は <a
+                                    href="#security" title="Security Considerations">Section 8</a> を参照）。この構成は TLS 1.3 の
+                                CertificateVerify メッセージ（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc8446.html#section-4.4.3">Section 4.4.3</a>
+                                of <a href="#RFC8446"><cite
+                                        title="The Transport Layer Security (TLS) Protocol Version 1.3">[TLS]</cite></a>）のそれを踏襲しています。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.3.p.5">
+                            <p>生成された署名は <span class="tt">p</span> パラメータを用いてサーバに送信されます（<a href="#parameter-p"
+                                    title="The p Parameter">Section 4.3</a>参照）。</p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="auth-params">
+                    <h2 id="rfc.section.4" class="np"><a href="#rfc.section.4">4.</a>&nbsp;<a
+                            href="#auth-params">認証パラメータ</a></h2>
+                    <div id="rfc.section.4.p.1">
+                        <p>本仕様は以下の認証パラメータを定義します。</p>
+                    </div>
+                    <div id="rfc.section.4.p.2">
+                        <p>以下のバイト列はいずれも base64url（<a
+                                href="https://www.rfc-editor.org/rfc/rfc4648.html#section-5">Section 5</a> of <a
+                                href="#RFC4648"><cite
+                                    title="The Base16, Base32, and Base64 Data Encodings">[BASE64]</cite></a>参照）でエンコードされ、引用符やパディングは付けません。つまり、これらのバイト列認証パラメータの値は
+                            ASCII の英字、数字、ダッシュ、アンダースコア以外の文字を含んではなりません（<em class="bcp14">MUST NOT</em>）。</p>
+                    </div>
+                    <div id="rfc.section.4.p.3">
+                        <p>以下の整数は符号なしかつ先頭ゼロ無しでエンコードされます。つまり、この整数認証パラメータの値は数字以外の文字を含んではならず（<em class="bcp14">MUST
+                                NOT</em>）、値全体が "0" の場合を除いて先頭が 0 であってはなりません。</p>
+                    </div>
+                    <div id="rfc.section.4.p.4" class="avoidbreakafter">
+                        <p>以下は <a href="#RFC5234"><cite
+                                    title="Augmented BNF for Syntax Specifications: ABNF">[ABNF]</cite></a> の記法を用いた構文です：
+                        </p>
+                    </div>
+                    <div id="fig-param"></div>
+                    <div id="rfc.figure.4">
+                        <div>
+                            <pre class="inline">
+concealed-byte-sequence-param-value = *( ALPHA / DIGIT / "-" / "_" )
+concealed-integer-param-value =  %x31-39 1*4( DIGIT ) / "0"
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 4: 認証パラメータ値の ABNF</p>
+                    <section id="parameter-k">
+                        <h3 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a>&nbsp;<a href="#parameter-k">k
+                                パラメータ</a></h3>
+                        <div id="rfc.section.4.1.p.1">
+                            <p><em class="bcp14">必須</em>の "k"（キー
+                                ID）パラメータは、クライアントがどの鍵を使って認証したいかを識別するバイト列です。バックエンドはこれを用いて既知鍵のサーバ側データベース内のエントリを参照します（<a
+                                    href="#backend" title="Backend Handling">Section 6.3</a>参照）。</p>
+                        </div>
+                    </section>
+                    <section id="parameter-a">
+                        <h3 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a>&nbsp;<a href="#parameter-a">a
+                                パラメータ</a></h3>
+                        <div id="rfc.section.4.2.p.1">
+                            <p><em class="bcp14">必須</em>の
+                                "a"（公開鍵）パラメータは、サーバがクライアントの署名を検証するために用いる公開鍵を指定するバイト列です。これにより鍵の混同問題が回避されます（参照: <a
+                                    href="#SEEMS-LEGIT"><cite
+                                        title="Seems Legit: Automated Analysis of Subtle Attacks on Protocols That Use Signatures">[SEEMS-LEGIT]</cite></a>）。公開鍵のエンコーディングは
+                                <a href="#public-key-encoding" title="Public Key Encoding">Section 3.1.1</a> に記載されています。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="parameter-p">
+                        <h3 id="rfc.section.4.3"><a href="#rfc.section.4.3">4.3.</a>&nbsp;<a href="#parameter-p">p
+                                パラメータ</a></h3>
+                        <div id="rfc.section.4.3.p.1">
+                            <p><em class="bcp14">必須</em>の "p"（proof）パラメータは、クライアントが自身の key ID
+                                に対応する資格情報を保持していることを証明するために提示する証明を指定するバイト列です。</p>
+                        </div>
+                    </section>
+                    <section id="parameter-s">
+                        <h3 id="rfc.section.4.4"><a href="#rfc.section.4.4">4.4.</a>&nbsp;<a href="#parameter-s">s
+                                パラメータ</a></h3>
+                        <div id="rfc.section.4.4.p.1">
+                            <p><em class="bcp14">必須</em>の "s"（署名スキーム）パラメータは、<span class="tt">p</span>
+                                パラメータで送信される証明の計算に使用された署名スキームを指定する整数です。その値は 0 から 65535 の範囲の整数で、IANA の "TLS
+                                SignatureScheme" レジストリ（&lt;<a
+                                    href="https://www.iana.org/assignments/tls-parameters">https://www.iana.org/assignments/tls-parameters</a>&gt;）から取られます。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="parameter-v">
+                        <h3 id="rfc.section.4.5"><a href="#rfc.section.4.5">4.5.</a>&nbsp;<a href="#parameter-v">v
+                                パラメータ</a></h3>
+                        <div id="rfc.section.4.5.p.1">
+                            <p><em class="bcp14">必須</em>の
+                                "v"（verification）パラメータは、クライアントがキーエクスポーター出力を保持していることを証明するために提供する検証値を指定するバイト列です（詳細は <a
+                                    href="#output" title="Key Exporter Output">Section 3.2</a>
+                                参照）。これは、特定の入力に対して複数の入力に有効な署名を生成できる鍵が存在する署名スキームに関する問題を回避します（参照: <a
+                                    href="#SEEMS-LEGIT"><cite
+                                        title="Seems Legit: Automated Analysis of Subtle Attacks on Protocols That Use Signatures">[SEEMS-LEGIT]</cite></a>）。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="example">
+                    <h2 id="rfc.section.5" class="np"><a href="#rfc.section.5">5.</a>&nbsp;<a href="#example">例</a></h2>
+                    <div id="rfc.section.5.p.1" class="avoidbreakafter">
+                        <p>例えば、key ID が "basement" で署名アルゴリズムに Ed25519 <a href="#RFC8410"><cite
+                                    title="Algorithm Identifiers for Ed25519, Ed448, X25519, and X448 for Use in the Internet X.509 Public Key Infrastructure">[ED25519]</cite></a>
+                            を用いるクライアントは、以下のようなヘッダフィールドを生成する可能性があります：</p>
+                    </div>
+                    <div id="fig-hdr-example"></div>
+                    <div id="rfc.figure.5">
+                        <div>
+                            <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Authorization: Concealed \
+  k=YmFzZW1lbnQ, \
+  a=VGhpcyBpcyBh-HB1YmxpYyBrZXkgaW4gdXNl_GhlcmU, \
+  s=2055, \
+  v=dmVyaWZpY2F0aW9u_zE2Qg, \
+  p=QzpcV2luZG93c_xTeXN0ZW0zMlxkcml2ZXJz-ENyb3dkU\
+    3RyaWtlXEMtMDAwMDAwMDAyOTEtMD-wMC0w_DAwLnN5cw
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 5: ヘッダフィールドの例</p>
+                </section>
+                <hr class="hidden-print">
+                <section id="server-handling">
+                    <h2 id="rfc.section.6" class="np"><a href="#rfc.section.6">6.</a>&nbsp;<a
+                            href="#server-handling">サーバ処理</a></h2>
+                    <div id="rfc.section.6.p.1" class="avoidbreakafter">
+                        <p>本節ではサーバの役割を二つに分けます：</p>
+                    </div>
+                    <div id="rfc.section.6.p.2">
+                        <ul>
+                            <li>
+                                <div>
+                                    <p>「フロントエンド」はクライアントが作成した TLS または QUIC 接続を終端する HTTP サーバ上で稼働します。</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div>
+                                    <p>「バックエンド」は許容されたキー識別子と公開鍵のデータベースへアクセスできる HTTP サーバ上で稼働します。</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.6.p.3">
+                        <p>多くの導入では、フロントエンドとバックエンドの役割は単一の HTTP オリジンサーバ内に実装されることが想定されます（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-3.6">Section 3.6</a> of <a
+                                href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a>参照）。しかしながら、フロントエンドを HTTP
+                            ゲートウェイ（<a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-3.7">Section 3.7</a> of
+                            <a href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a>参照）とし、バックエンドを HTTP
+                            オリジンサーバとするように分割することもできます。
+                        </p>
+                    </div>
+                    <section id="frontend-handling">
+                        <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a>&nbsp;<a
+                                href="#frontend-handling">フロントエンド処理</a></h3>
+                        <div id="rfc.section.6.1.p.1">
+                            <p>フロントエンドが Concealed HTTP 認証スキームをチェックするよう設定されている場合、Authorization（または
+                                Proxy-Authorization）ヘッダフィールドを解析します。認証スキームが "Concealed" に設定されているとき、フロントエンドは <a
+                                    href="#auth-params" title="Authentication Parameters">Section 4</a>
+                                に定義されたとおり、すべての必須認証パラメータが存在し正しく解析可能であることを検証しなければなりません（<em
+                                    class="bcp14">MUST</em>）。もし任意のパラメータが欠落するか解析に失敗した場合、フロントエンドは Authorization（または
+                                Proxy-Authorization）ヘッダフィールド全体を無視しなければなりません（<em class="bcp14">MUST</em>）。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.2">
+                            <p>フロントエンドはこれらの認証パラメータからキーエクスポーター出力を計算します（<a href="#output"
+                                    title="Key Exporter Output">Section
+                                    3.2</a>参照）。その後、フロントエンドはヘッダフィールドとキーエクスポーター出力をバックエンドと共有します。</p>
+                        </div>
+                    </section>
+                    <section id="communication-between-frontend-and-backend">
+                        <h3 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a>&nbsp;<a
+                                href="#communication-between-frontend-and-backend">フロントエンドとバックエンド間の通信</a></h3>
+                        <div id="rfc.section.6.2.p.1">
+                            <p>フロントエンドとバックエンドの役割が同一マシン上で実装されている場合、単純な関数呼び出しで処理できます。</p>
+                        </div>
+                        <div id="rfc.section.6.2.p.2" class="avoidbreakafter">
+                            <p>役割が別々の HTTP サーバ間で分割されている場合、バックエンドはクライアントとフロントエンド間の TLS 接続から直接 TLS
+                                キー素材エクスポーターへアクセスできないため、フロントエンドがそれを明示的に送信する必要があります。本書はその目的のために "Concealed-Auth-Export"
+                                リクエストヘッダフィールドを定義します。Concealed-Auth-Export ヘッダフィールドの値は、48 バイトのキーエクスポーター出力（<a
+                                    href="#output" title="Key Exporter Output">Section 3.2</a>参照）を含む Structured Field
+                                Byte Sequence（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9651.html#section-3.3.5">Section 3.3.5</a>
+                                of <a href="#RFC9651"><cite
+                                        title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>参照）であり、パラメータは含みません。なお
+                                Structured Field Byte Sequence は非 URL 安全（standard base64）な variant の base64
+                                でエンコードされます。例えば：</p>
+                        </div>
+                        <div id="fig-int-hdr-example"></div>
+                        <div id="rfc.figure.6">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Concealed-Auth-Export: :VGhpc+BleGFtcGxlIFRMU/BleHBvcn\
+  Rlc+BvdXRwdXQ/aXMgNDggYnl0ZXMgI/+h:
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 6: Concealed-Auth-Export ヘッダフィールドの例</p>
+                        <div id="rfc.section.6.2.p.3">
+                            <p>フロントエンドは、元の未変更の Authorization（または Proxy-Authorization）ヘッダフィールドおよび新たに追加した
+                                Concealed-Auth-Export ヘッダフィールドを含めて HTTP リクエストをバックエンドへ転送しなければなりません（<em
+                                    class="bcp14">SHALL</em>）。</p>
+                        </div>
+                        <div id="rfc.section.6.2.p.4">
+                            <p>このメカニズムの安全性はキーエクスポーター出力が正しいことを前提とするため、バックエンドはフロントエンドがそれを真実に送信していると信頼する必要があります。この信頼関係は一般的で、フロントエンドは応答するためにすでに
+                                TLS 証明書の秘密鍵へアクセスする必要があることが多いからです。Concealed-Auth-Export ヘッダフィールドを解析する HTTP
+                                サーバは、送信元を信頼していることを確認していない限りそれを無視しなければなりません（<em
+                                    class="bcp14">MUST</em>）。同様に、Concealed-Auth-Export
+                                ヘッダフィールドを送信するフロントエンドは、クライアントから受け取った Concealed-Auth-Export
+                                ヘッダフィールドを転送しないようにしなければなりません（<em class="bcp14">MUST</em>）。</p>
+                        </div>
+                    </section>
+                    <section id="backend">
+                        <h3 id="rfc.section.6.3"><a href="#rfc.section.6.3">6.3.</a>&nbsp;<a
+                                href="#backend">バックエンド処理</a></h3>
+                        <div id="rfc.section.6.3.p.1" class="avoidbreakafter">
+                            <p>バックエンドが Authorization（または Proxy-Authorization）ヘッダフィールドとキーエクスポーター出力を受け取ったら、キー ID
+                                を自身の公開鍵データベースで検索します。バックエンドは次のチェックを行わなければなりません（<em class="bcp14">SHALL</em>）：</p>
+                        </div>
+                        <div id="rfc.section.6.3.p.2">
+                            <ul>
+                                <li>
+                                    <div>
+                                        <p>すべての必須認証パラメータが存在し <a href="#auth-params"
+                                                title="Authentication Parameters">Section 4</a>
+                                            に定義されたとおり正しく解析可能であることを検証する</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>キー ID がバックエンドのデータベースに存在し対応する公開鍵へマッピングされていることを確認する</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>データベースの公開鍵が Authorization（または Proxy-Authorization）ヘッダフィールド内のものと等しいことを検証する</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>Authorization（または
+                                            Proxy-Authorization）ヘッダフィールドの検証フィールドがキーエクスポーター出力から抽出されたものと一致することを検証する</p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p><a href="#computation" title="Signature Computation">Section 3.3</a>
+                                            に定義されたとおり暗号署名を検証する</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.6.3.p.3">
+                            <p>これらのチェックがすべて成功した場合、バックエンドはリクエストが正しく認証されたとみなして適切に応答できます（バックエンドはリクエストを別の HTTP
+                                サーバへ転送することもできます）。</p>
+                        </div>
+                        <div id="rfc.section.6.3.p.4">
+                            <p>上記のいずれかのチェックが失敗した場合、バックエンドは Authorization（または
+                                Proxy-Authorization）ヘッダフィールドが存在しなかったかのように扱わなければなりません（<em class="bcp14">MUST</em>）。</p>
+                        </div>
+                    </section>
+                    <section id="non-probeable-server-handling">
+                        <h3 id="rfc.section.6.4"><a href="#rfc.section.6.4">6.4.</a>&nbsp;<a
+                                href="#non-probeable-server-handling">プローブ不可能なサーバ処理</a></h3>
+                        <div id="rfc.section.6.4.p.1">
+                            <p>存在がプローブされないリソースを導入したいサーバは、未認証のクライアントに対してそれらのリソースに関する情報を決して露呈しないようにする必要があります。特に、そのようなサーバは認証失敗に対して、存在しないリソースに対して使用するのと同一の応答を返さなければなりません（<em
+                                    class="bcp14">MUST</em>）。例えば、401（Unauthorized）の代わりに 404（Not Found）を使用することが挙げられます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.4.p.2">
+                            <p>上述の認証チェックは計算に時間がかかることがあり、攻撃者は既知の存在しないリソースへのリクエストと、認証が必要な可能性のあるリソースへのリクエストのタイミングを比較することでこのメカニズムの使用を検出する可能性があります。サーバは、いくつかの存在しないリソースへの応答にわずかな遅延を導入することで認証検証のタイミングが観測されないように緩和できます。ただし、この遅延自体がこの機構の使用を明らかにしないように慎重に検討する必要があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.4.p.3">
+                            <p>プローブ不可能なリソースは、未認証ユーザにとって発見不能である必要もあります。例えば、サーバ運営者が未認証ユーザに対してある認証済みリソースを存在しないかのように偽装して隠したい場合、その運営者は当該リソースへのリンクを含む未認証ページや、未認証ユーザが当該リソースを発見するための他の帯域外手段が存在しないことを保証する必要があります。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="requirements-on-tls-usage">
+                    <h2 id="rfc.section.7" class="np"><a href="#rfc.section.7">7.</a>&nbsp;<a
+                            href="#requirements-on-tls-usage">TLS 使用に関する要件</a></h2>
+                    <div id="rfc.section.7.p.1">
+                        <p>本認証スキームは TLS を用いる HTTP の使用に対してのみ定義されます（<a href="#RFC8446"><cite
+                                    title="The Transport Layer Security (TLS) Protocol Version 1.3">[TLS]</cite></a>）。これは、典型的に
+                            HTTP/2（<a href="#RFC9113"><cite
+                                    title="HTTP/2">[HTTP/2]</cite></a>）や、トランスポートプロトコルが認証と鍵交換機構として TLS を使用する HTTP/3（<a
+                                href="#RFC9114"><cite title="HTTP/3">[HTTP/3]</cite></a>）を含みます（参照: <a
+                                href="#RFC9001"><cite title="Using TLS to Secure QUIC">[QUIC-TLS]</cite></a>）。</p>
+                    </div>
+                    <div id="rfc.section.7.p.2" class="avoidbreakafter">
+                        <p>TLS キー素材エクスポーターは TLS セッションに一意に結び付けられている場合にのみ認証に対して安全であるため（<a href="#RFC7627"><cite
+                                    title="Transport Layer Security (TLS) Session Hash and Extended Master Secret Extension">[RFC7627]</cite></a>）、Concealed
+                            認証スキームは以下のいずれかのプロパティを要求します：</p>
+                    </div>
+                    <div id="rfc.section.7.p.3">
+                        <ul>
+                            <li>
+                                <div>
+                                    <p>使用中の TLS バージョンが 1.3 以上であること（<a href="#RFC8446"><cite
+                                                title="The Transport Layer Security (TLS) Protocol Version 1.3">[TLS]</cite></a>）。
+                                    </p>
+                                </div>
+                            </li>
+                            <li>
+                                <div>
+                                    <p>使用中の TLS バージョンが 1.2 であり、extended master secret 拡張（<a href="#RFC7627"><cite
+                                                title="Transport Layer Security (TLS) Session Hash and Extended Master Secret Extension">[RFC7627]</cite></a>）がネゴシエートされていること。
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.7.p.4">
+                        <p>クライアントは上記のいずれのプロパティも満たさない接続上で Concealed HTTP 認証スキームを使用してはなりません（<em class="bcp14">MUST
+                                NOT</em>）。サーバが上記いずれのプロパティも満たさない接続上で本認証スキームを用いるリクエストを受け取った場合、サーバは認証が存在しなかったかのようにそのリクエストを扱わなければなりません（<em
+                                class="bcp14">MUST</em>）。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="security">
+                    <h2 id="rfc.section.8" class="np"><a href="#rfc.section.8">8.</a>&nbsp;<a
+                            href="#security">セキュリティに関する考慮事項</a></h2>
+                    <div id="rfc.section.8.p.1">
+                        <p>Concealed HTTP 認証スキームは、サーバがクライアントへ nonce
+                            を送信することなく、新鮮性を保証しつつオリジンサーバへクライアントが認証することを可能にします。これにより、サーバは一部リソースについて認証を受け付けながら、そのことを未認証クライアントに対して明らかにせずに済みます。また、クライアントが
+                            TLS Client Hello の平文拡張のために認証の存在を観測者へ漏らすことなく認証できる点も利点です。</p>
+                    </div>
+                    <div id="rfc.section.8.p.2">
+                        <p>上で述べた新鮮性は TLS キーエクスポーターによって提供されるため、基盤となる TLS 接続と同程度に古くなり得ます。サーバは GOAWAY フレーム（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9114.html#section-5.2">Section 5.2</a> of <a
+                                href="#RFC9114"><cite
+                                    title="HTTP/3">[HTTP/3]</cite></a>参照）等の仕組みでクライアントに新しい接続の作成を強制することにより、より強い新鮮性を要求できます。
+                        </p>
+                    </div>
+                    <div id="rfc.section.8.p.3">
+                        <p>本書で説明する認証証明は個々の HTTP
+                            リクエストに結び付いていません。同一接続上で同じ鍵を複数のリクエスト認証に使用する場合、それらはすべて同一になります。これはワイヤ上の圧縮を向上させますが、クライアント実装が単一の
+                            HTTP
+                            接続で異なるセキュリティコンテキストを多重化する場合、それらのコンテキストが互いのヘッダフィールドを読めないようにする必要があります。さもなければ、あるコンテキストが他のコンテキストの
+                            Authorization
+                            ヘッダフィールドをリプレイできてしまいます。この制約は現代のウェブブラウザで満たされています。もし攻撃者がブラウザを乗っ取り別コンテキストのメモリへアクセスできるようになれば、攻撃者は対応する鍵へもアクセスできる可能性があるため、リクエストに認証を結び付けることは実際上あまり利点がないでしょう。
+                        </p>
+                    </div>
+                    <div id="rfc.section.8.p.4">
+                        <p>Concealed HTTP 認証スキームで使用する認証用の非対称鍵は他プロトコルで再利用してはなりません（<em class="bcp14">MUST
+                                NOT</em>）。署名対象データへ静的プレフィックスを追加することでこの問題を緩和しようとしていますが（<a href="#computation"
+                                title="Signature Computation">Section 3.3</a>参照）、鍵の再利用は認証の安全性を損なう可能性があります。</p>
+                    </div>
+                    <div id="rfc.section.8.p.5">
+                        <p>本スキームを提供するオリジンは同一鍵を使うリクエストをリンク（関連付け）できます。ただし、使用される鍵が個々のオリジン固有である限り、リクエストはオリジン間でリンク可能にはなりません。
+                        </p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="iana">
+                    <h2 id="rfc.section.9" class="np"><a href="#rfc.section.9">9.</a>&nbsp;<a href="#iana">IANA
+                            に関する考慮事項</a></h2>
+                    <section id="iana-schemes">
+                        <h3 id="rfc.section.9.1"><a href="#rfc.section.9.1">9.1.</a>&nbsp;<a href="#iana-schemes">HTTP
+                                認証スキームレジストリ</a></h3>
+                        <div id="rfc.section.9.1.p.1" class="avoidbreakafter">
+                            <p>IANA は "HTTP Authentication Schemes" レジストリ（&lt;<a
+                                    href="https://www.iana.org/assignments/http-authschemes">https://www.iana.org/assignments/http-authschemes</a>&gt;）に以下のエントリを登録しました：
+                            </p>
+                        </div>
+                        <div id="rfc.section.9.1.p.2">
+                            <dl class="compact">
+                                <dt>Authentication Scheme Name:</dt>
+                                <dd style="margin-left: 1.5em">Concealed</dd>
+                                <dt>Reference:</dt>
+                                <dd style="margin-left: 1.5em">RFC 9729</dd>
+                                <dt>Notes:</dt>
+                                <dd style="margin-left: 1.5em">なし</dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section id="iana-exporter-label">
+                        <h3 id="rfc.section.9.2"><a href="#rfc.section.9.2">9.2.</a>&nbsp;<a
+                                href="#iana-exporter-label">TLS キー素材エクスポーター ラベル</a></h3>
+                        <div id="rfc.section.9.2.p.1" class="avoidbreakafter">
+                            <p>IANA は "TLS Exporter Labels" レジストリ（&lt;<a
+                                    href="https://www.iana.org/assignments/tls-parameters">https://www.iana.org/assignments/tls-parameters</a>&gt;）に以下のエントリを登録しました：
+                            </p>
+                        </div>
+                        <div id="rfc.section.9.2.p.2">
+                            <dl class="compact">
+                                <dt>Value:</dt>
+                                <dd style="margin-left: 1.5em">EXPORTER-HTTP-Concealed-Authentication</dd>
+                                <dt>DTLS-OK:</dt>
+                                <dd style="margin-left: 1.5em">N</dd>
+                                <dt>Recommended:</dt>
+                                <dd style="margin-left: 1.5em">Y</dd>
+                                <dt>Reference:</dt>
+                                <dd style="margin-left: 1.5em">RFC 9729</dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section id="http-field-name">
+                        <h3 id="rfc.section.9.3"><a href="#rfc.section.9.3">9.3.</a>&nbsp;<a
+                                href="#http-field-name">HTTP フィールド名</a></h3>
+                        <div id="rfc.section.9.3.p.1" class="avoidbreakafter">
+                            <p>IANA は "Hypertext Transfer Protocol (HTTP) Field Name Registry"（&lt;<a
+                                    href="https://www.iana.org/assignments/http-fields">https://www.iana.org/assignments/http-fields</a>&gt;）に以下のエントリを登録しました：
+                            </p>
+                        </div>
+                        <div id="rfc.section.9.3.p.2">
+                            <dl class="compact">
+                                <dt>Field Name:</dt>
+                                <dd style="margin-left: 1.5em">Concealed-Auth-Export</dd>
+                                <dt>Status:</dt>
+                                <dd style="margin-left: 1.5em">permanent</dd>
+                                <dt>Structured Type:</dt>
+                                <dd style="margin-left: 1.5em">Item</dd>
+                                <dt>Reference:</dt>
+                                <dd style="margin-left: 1.5em">RFC 9729</dd>
+                                <dt>Comments:</dt>
+                                <dd style="margin-left: 1.5em">なし</dd>
+                            </dl>
+                        </div>
+                    </section>
+                </section>
+                <section id="sec-combined-references" class="np">
+                    <div id="rfc.references">
+                        <h2 id="rfc.section.10"><a href="#rfc.section.10">10.</a> 参考文献</h2>
+                        <section id="sec-normative-references">
+                            <div id="rfc.references.2">
+                                <h3 id="rfc.section.10.1"><a href="#rfc.section.10.1">10.1.</a> 規範的参照文献</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="RFC5234">[<a href="#RFC5234" class="smpl">ABNF</a>]</dt>
+                                    <dd>...（参照情報は原文のまま）</dd>
+                                    <!-- 以下の参照リストは原文の英語表記のまま保持しています -->
+                                </dl>
+                            </div>
+                        </section>
+                        <section id="sec-informative-references">
+                            <div id="rfc.references.3">
+                                <h3 id="rfc.section.10.2"><a href="#rfc.section.10.2">10.2.</a> 情報参考文献</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="RFC8410">[<a href="#RFC8410" class="smpl">ED25519</a>]</dt>
+                                    <dd>...（参照情報は原文のまま）</dd>
+                                    <!-- 以下の参照リストは原文の英語表記のまま保持しています -->
+                                </dl>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="acknowledgments">
+                    <h2 id="rfc.section.unnumbered-4" class="np"><a href="#acknowledgments">謝辞</a></h2>
+                    <div id="rfc.section.unnumbered-4.p.1">
+                        <p>著者らは多くの IETF コミュニティメンバーに感謝します。本文書は多数の廊下での会話の成果です。特に、David Benjamin、Reese Enghardt、Nick
+                            Harper、Dennis Jackson、Ilari Liusvaara、François Michel、Lucas Pardue、Justin Richer、Ben
+                            Schwartz、Martin Thomson、Chris A. Wood に対して、そのレビューと貢献に感謝します。本書で説明するメカニズムは元々 MASQUE
+                            の最初の反復の一部でした（<a href="#I-D.schinazi-masque"><cite
+                                    title="The MASQUE Protocol">[MASQUE-ORIGINAL]</cite></a>）。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="rfc.authors" class="np">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>David Schinazi</b><br>Google LLC<br>1600 Amphitheatre Parkway<br>Mountain View, CA
+                        94043<br>United States of America<br>EMail: <a
+                            href="mailto:dschinazi.ietf@gmail.com">dschinazi.ietf@gmail.com</a></address>
+                    <address><b>David M. Oliver</b><br>Guardian Project<br>EMail: <a
+                            href="mailto:david@guardianproject.info">david@guardianproject.info</a><br>URI: <a
+                            href="https://guardianproject.info">https://guardianproject.info</a></address>
+                    <address><b>Jonathan Hoyland</b><br>Cloudflare Inc.<br>EMail: <a
+                            href="mailto:jonathan.hoyland@gmail.com">jonathan.hoyland@gmail.com</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>

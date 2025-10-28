@@ -1,0 +1,2159 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 7616 - HTTP ダイジェストアクセス認証</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC7616">
+    <meta property="og:description" content="HTTP Digest Access Authentication">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc7616.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 Syntax Convention" href="#rfc.section.2">
+    <link rel="Chapter" title="3 Digest Access Authentication Scheme" href="#rfc.section.3">
+    <link rel="Chapter" title="4 Internationalization Considerations" href="#rfc.section.4">
+    <link rel="Chapter" title="5 Security Considerations" href="#rfc.section.5">
+    <link rel="Chapter" title="6 IANA Considerations" href="#rfc.section.6">
+    <link rel="Chapter" title="7 References" href="#rfc.section.7">
+    <link rel="Appendix" title="A Changes from RFC 2617" href="#rfc.section.A">
+    <link rel="Appendix" title="B Acknowledgments" href="#rfc.section.B">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc7616.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="http://www.rfc-editor.org/info/rfc7616">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <meta name="keywords" content="HTTP, authentication scheme">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Shekh-Yusef, R.">
+    <meta name="dcterms.creator" content="Ahrens, D.">
+    <meta name="dcterms.creator" content="Bremer, S.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:7616">
+    <meta name="dcterms.issued" content="2015-09">
+    <meta name="dct.replaces" content="urn:ietf:rfc:2617">
+    <meta name="dcterms.abstract"
+        content="The Hypertext Transfer Protocol (HTTP) provides a simple challenge-response authentication mechanism that may be used by a server to challenge a client request and by a client to provide authentication information. This document defines the HTTP Digest Authentication scheme that can be used with the HTTP authentication mechanism.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="The Hypertext Transfer Protocol (HTTP) provides a simple challenge-response authentication mechanism that may be used by a server to challenge a client request and by a client to provide authentication information. This document defines the HTTP Digest Authentication scheme that can be used with the HTTP authentication mechanism.">
+</head>
+
+<body onload="getMeta(7616,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>7616</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#terminology">用語</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#syntax.convention">構文規約</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#examples">例</a></li>
+                                        <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#abnf">ABNF</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#digest.access.authentication.scheme">ダイジェストアクセス認証スキーム</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#overall.operation">全体の動作</a></li>
+                                        <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#representation.of.digest.values">ダイジェスト値の表現</a></li>
+                                        <li><a href="#rfc.section.3.3">3.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#www-authenticate.response.header">WWW-Authenticate
+                                                応答ヘッダーフィールド</a></li>
+                                        <li><a href="#rfc.section.3.4">3.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#authorization.request.header.field">Authorization ヘッダーフィールド</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.3.4.1">3.4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#response">レスポンス</a></li>
+                                                <li><a href="#rfc.section.3.4.2">3.4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#a1">A1</a></li>
+                                                <li><a href="#rfc.section.3.4.3">3.4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#rfc.section.3.4.3">A2</a></li>
+                                                <li><a href="#rfc.section.3.4.4">3.4.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#username.hashing">ユーザー名のハッシュ化</a></li>
+                                                <li><a href="#rfc.section.3.4.5">3.4.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#rfc.section.3.4.5">パラメータ値と引用文字列</a>
+                                                </li>
+                                                <li><a href="#rfc.section.3.4.6">3.4.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#rfc.section.3.4.6">各種考慮事項</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="#rfc.section.3.5">3.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#authenticaion-info.header.field">Authentication-Info および
+                                                Proxy-Authentication-Info ヘッダーフィールド</a></li>
+                                        <li><a href="#rfc.section.3.6">3.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#digest.operation">ダイジェスト操作</a></li>
+                                        <li><a href="#rfc.section.3.7">3.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.7">セキュリティプロトコル交渉</a></li>
+                                        <li><a href="#rfc.section.3.8">3.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#proxy-auth">Proxy-Authenticate および Proxy-Authorization</a></li>
+                                        <li><a href="#rfc.section.3.9">3.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.9">例</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.3.9.1">3.9.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#rfc.section.3.9.1">SHA-256 と MD5 の例</a></li>
+                                                <li><a href="#rfc.section.3.9.2">3.9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#rfc.section.3.9.2">SHA-512-256、文字セット、Userhash の例</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.4">国際化に関する考慮事項</a></li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security.considerations">セキュリティの考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.5.1">5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.1">制限事項</a></li>
+                                        <li><a href="#rfc.section.5.2">5.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.2">パスワードの保存</a></li>
+                                        <li><a href="#rfc.section.5.3">5.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.3">ダイジェスト認証を使用するクライアントの認証</a></li>
+                                        <li><a href="#rfc.section.5.4">5.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.4">限定使用の nonce 値</a></li>
+                                        <li><a href="#rfc.section.5.5">5.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#replay_attacks">リプレイ攻撃</a></li>
+                                        <li><a href="#rfc.section.5.6">5.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.6">複数の認証スキームによる弱点</a></li>
+                                        <li><a href="#rfc.section.5.7">5.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#online.dictionary.attacks">オンライン辞書攻撃</a></li>
+                                        <li><a href="#rfc.section.5.8">5.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#mitm">中間者攻撃</a></li>
+                                        <li><a href="#rfc.section.5.9">5.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.9">選択平文攻撃</a></li>
+                                        <li><a href="#rfc.section.5.10">5.10.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.10">事前計算辞書攻撃</a></li>
+                                        <li><a href="#rfc.section.5.11">5.11.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.11">バッチブルートフォース攻撃</a></li>
+                                        <li><a href="#rfc.section.5.12">5.12.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.12">パラメータの乱数性</a></li>
+                                        <li><a href="#rfc.section.5.13">5.13.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.5.13">まとめ</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#iana.considerations">IANA
+                                        に関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.6.1">HTTP ダイジェスト認証のためのハッシュアルゴリズム</a></li>
+                                        <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.6.2">ダイジェストスキームの登録</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.1">ノルマティブ参考文献</a></li>
+                                        <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">インフォマティブ参考文献</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.A">付録 A.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc2617.changes">RFC
+                                        2617 からの変更点</a></li>
+                                <li><a href="#rfc.section.B">付録 B.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.B">謝辞</a>
+                                </li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネット技術タスクフォース (IETF)</td>
+                                <td class="text-right">R. Shekh-Yusef, Editor</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 7616</td>
+                                <td class="text-right">Avaya</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Obsoletes: <a href="#RFC2617">2617</a></td>
+                                <td class="text-right">D. Ahrens</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: Standards Track</td>
+                                <td class="text-right">Independent</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right">S. Bremer</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left"></td>
+                                <td class="text-right">Netzkonform</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left"></td>
+                                <td class="text-right">2015年9月</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>HTTP ダイジェストアクセス認証</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">概要</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>Hypertext Transfer Protocol (HTTP)
+                            は、サーバーがクライアントのリクエストに対してチャレンジを行い、クライアントが認証情報を提供するために用いることができる簡易なチャレンジ・レスポンス認証メカニズムを提供します。本書は、HTTP
+                            の認証メカニズムで使用できる HTTP ダイジェスト認証スキームを定義します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモの状態</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>これはインターネット標準トラック文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネット技術タスクフォース (IETF) の成果物です。IETF コミュニティのコンセンサスを示しており、公開レビューを受け、Internet Engineering
+                            Steering Group (IESG) によって公開が承認されています。インターネット標準に関する詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc5741.html#section-2">RFC 5741 のセクション 2</a>
+                            を参照してください。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>この文書の現行の状態、訂正情報（errata）、およびフィードバックの方法については <a
+                                href="http://www.rfc-editor.org/info/rfc7616">http://www.rfc-editor.org/info/rfc7616</a>
+                            を参照してください。</p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2015 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in
+                            effect on the date of publication of this document. Please review these documents carefully,
+                            as they describe your rights and restrictions with respect to this document. Code Components
+                            extracted from this document must include Simplified BSD License text as described in
+                            Section 4.e of the Trust Legal Provisions and are provided without warranty as described in
+                            the Simplified BSD License.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.3">
+                        <p>This document may contain material from IETF Documents or IETF Contributions published or
+                            made publicly available before November 10, 2008. The person(s) controlling the copyright in
+                            some of this material may not have granted the IETF Trust the right to allow modifications
+                            of such material outside the IETF Standards Process. Without obtaining an adequate license
+                            from the person(s) controlling the copyright in such materials, this document may not be
+                            modified outside the IETF Standards Process, and derivative works of it may not be created
+                            outside the IETF Standards Process, except to format it for publication as an RFC or to
+                            translate it into languages other than English.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                            <ul>
+                                <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a href="#terminology">用語</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#syntax.convention">構文規約</a>
+                            <ul>
+                                <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a href="#examples">例</a></li>
+                                <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a href="#abnf">ABNF</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#digest.access.authentication.scheme">ダイジェストアクセス認証スキーム</a>
+                            <ul>
+                                <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#overall.operation">全体の動作</a></li>
+                                <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#representation.of.digest.values">ダイジェスト値の表現</a></li>
+                                <li><a href="#rfc.section.3.3">3.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#www-authenticate.response.header">WWW-Authenticate 応答ヘッダーフィールド</a></li>
+                                <li><a href="#rfc.section.3.4">3.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#authorization.request.header.field">Authorization ヘッダーフィールド</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.4.1">3.4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#response">レスポンス</a></li>
+                                        <li><a href="#rfc.section.3.4.2">3.4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#a1">A1</a></li>
+                                        <li><a href="#rfc.section.3.4.3">3.4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.4.3">A2</a></li>
+                                        <li><a href="#rfc.section.3.4.4">3.4.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#username.hashing">ユーザー名のハッシュ化</a></li>
+                                        <li><a href="#rfc.section.3.4.5">3.4.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.4.5">パラメータ値と引用文字列</a></li>
+                                        <li><a href="#rfc.section.3.4.6">3.4.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.4.6">各種考慮事項</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.3.5">3.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#authenticaion-info.header.field">Authentication-Info および
+                                        Proxy-Authentication-Info ヘッダーフィールド</a></li>
+                                <li><a href="#rfc.section.3.6">3.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#digest.operation">ダイジェスト操作</a></li>
+                                <li><a href="#rfc.section.3.7">3.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.3.7">セキュリティプロトコル交渉</a></li>
+                                <li><a href="#rfc.section.3.8">3.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#proxy-auth">Proxy-Authenticate および Proxy-Authorization</a></li>
+                                <li><a href="#rfc.section.3.9">3.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.3.9">例</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.9.1">3.9.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.9.1">SHA-256 と MD5 の例</a></li>
+                                        <li><a href="#rfc.section.3.9.2">3.9.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.3.9.2">SHA-512-256、文字セット、Userhash の例</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.4">国際化に関する考慮事項</a>
+                        </li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#security.considerations">セキュリティに関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.5.1">5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.1">制限事項</a></li>
+                                <li><a href="#rfc.section.5.2">5.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.2">パスワードの保存</a></li>
+                                <li><a href="#rfc.section.5.3">5.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.3">ダイジェスト認証を使用するクライアントの認証</a></li>
+                                <li><a href="#rfc.section.5.4">5.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.4">限定使用の nonce 値</a></li>
+                                <li><a href="#rfc.section.5.5">5.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#replay_attacks">リプレイ攻撃</a></li>
+                                <li><a href="#rfc.section.5.6">5.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.6">複数の認証スキームによる弱点</a>
+                                </li>
+                                <li><a href="#rfc.section.5.7">5.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#online.dictionary.attacks">オンライン辞書攻撃</a></li>
+                                <li><a href="#rfc.section.5.8">5.8.</a>&nbsp;&nbsp;&nbsp;<a href="#mitm">中間者攻撃</a></li>
+                                <li><a href="#rfc.section.5.9">5.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.9">選択平文攻撃</a></li>
+                                <li><a href="#rfc.section.5.10">5.10.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.10">事前計算辞書攻撃</a></li>
+                                <li><a href="#rfc.section.5.11">5.11.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.11">バッチブルートフォース攻撃</a></li>
+                                <li><a href="#rfc.section.5.12">5.12.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.12">パラメータの乱数性</a></li>
+                                <li><a href="#rfc.section.5.13">5.13.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.5.13">まとめ</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#iana.considerations">IANA
+                                に関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.6.1">HTTP
+                                        ダイジェスト認証のためのハッシュアルゴリズム</a></li>
+                                <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.6.2">ダイジェストスキームの登録</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                            <ul>
+                                <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.1">ノルマティブ参考文献</a></li>
+                                <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">インフォマティブ参考文献</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.A">付録 A.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc2617.changes">RFC 2617
+                                からの変更点</a></li>
+                        <li><a href="#rfc.section.B">付録 B.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.section.B">謝辞</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <section id="introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#introduction">はじめに</a></h2>
+                    <div id="rfc.section.1.p.1">
+                        <p>HTTP
+                            は、サーバーがクライアントのリクエストに対してチャレンジを行い、クライアントが認証情報を提供するために使用できる簡易なチャレンジ・レスポンス認証メカニズムを提供します。本書は、HTTP
+                            の認証メカニズムで使用できる HTTP ダイジェスト認証スキームを定義します。</p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>本書は <a href="#RFC2617"><cite
+                                    title="HTTP Authentication: Basic and Digest Access Authentication">[RFC2617]</cite></a>
+                            を拡張しますが、一般に後方互換性を保ちます。本仕様で導入された新機能については <a href="#rfc2617.changes"
+                                title="Changes from RFC 2617">付録 A</a> を参照してください。</p>
+                    </div>
+                    <div id="rfc.section.1.p.3">
+                        <p>チャレンジ・レスポンス認証メカニズムの詳細は "Hypertext Transfer Protocol (HTTP/1.1): Authentication"
+                            の仕様に記載されています（<a href="#RFC7235"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Authentication">[RFC7235]</cite></a>）。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.4">
+                        <p>本書は "Basic" 認証スキームの定義（<a href="#RFC7617"><cite
+                                    title="The 'Basic' HTTP Authentication Scheme">[RFC7617]</cite></a>）、"HTTP
+                            Authentication-Info and Proxy-Authentication-Info Response Header Fields"（<a
+                                href="#RFC7615"><cite
+                                    title="HTTP Authentication-Info and Proxy-Authentication-Info Response Header Fields">[RFC7615]</cite></a>）、および
+                            "Hypertext Transfer Protocol (HTTP/1.1): Authentication"（<a href="#RFC7235"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Authentication">[RFC7235]</cite></a>）と組み合わせて、<a
+                                href="#RFC2617"><cite
+                                    title="HTTP Authentication: Basic and Digest Access Authentication">[RFC2617]</cite></a>
+                            を廃止します。</p>
+                    </div>
+                    <section id="terminology">
+                        <h3 id="rfc.section.1.1"><a href="#rfc.section.1.1">1.1.</a>&nbsp;<a href="#terminology">用語</a>
+                        </h3>
+                        <div id="rfc.section.1.1.p.1">
+                            <p>本書で使用されるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD
+                                NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", および "OPTIONAL" は <a href="#RFC2119"><cite
+                                        title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                                に記載されたとおりに解釈されます。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="syntax.convention">
+                    <h2 id="rfc.section.2"><a href="#rfc.section.2">2.</a>&nbsp;<a href="#syntax.convention">構文規約</a>
+                    </h2>
+                    <section id="examples">
+                        <h3 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a>&nbsp;<a href="#examples">例</a></h3>
+                        <div id="rfc.section.2.1.p.1">
+                            <p>明瞭性と可読性のために、本書の例中の拡張パラメータやヘッダーフィールドおよびパラメータは複数行に分けられることがあります。本書でインデントされた行は、前の行の継続であることを意味します。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="abnf">
+                        <h3 id="rfc.section.2.2"><a href="#rfc.section.2.2">2.2.</a>&nbsp;<a href="#abnf">ABNF</a></h3>
+                        <div id="rfc.section.2.2.p.1">
+                            <p>本仕様は、<a href="#RFC5234"><cite
+                                        title="Augmented BNF for Syntax Specifications: ABNF">[RFC5234]</cite></a> の拡張
+                                Backus-Naur Form (ABNF) 表記法および <a href="#RFC7230"><cite
+                                        title="Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing">[RFC7230]</cite></a>
+                                の ABNF List 拡張を使用します。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="digest.access.authentication.scheme">
+                    <h2 id="rfc.section.3"><a href="#rfc.section.3">3.</a>&nbsp;<a
+                            href="#digest.access.authentication.scheme">ダイジェストアクセス認証スキーム</a></h2>
+                    <section id="overall.operation">
+                        <h3 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a>&nbsp;<a
+                                href="#overall.operation">全体の動作</a></h3>
+                        <div id="rfc.section.3.1.p.1">
+                            <p>ダイジェストスキームは単純なチャレンジ・レスポンスパラダイムに基づいています。ダイジェストスキームは nonce
+                                値を用いてチャレンジを行い、ユーザー名のハッシュ化がサポートされることを示す場合があります。有効なレスポンスは、ユーザー名、パスワード、与えられた nonce 値、HTTP
+                                メソッド、および要求された URI
+                                の非鍵付きダイジェストを含みます。このようにしてパスワードは平文で送信されず、サーバーからの指示に応じてユーザー名はハッシュ化できます。ユーザー名とパスワードは、本書で扱わない方法で事前に取り決められている必要があります。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="representation.of.digest.values">
+                        <h3 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a>&nbsp;<a
+                                href="#representation.of.digest.values">ダイジェスト値の表現</a></h3>
+                        <div id="rfc.section.3.2.p.1">
+                            <p>オプションのヘッダーフィールドにより、サーバーは非鍵付きダイジェストまたはダイジェストを生成するために使用するアルゴリズムを指定できます。本書は SHA-256 および
+                                SHA-512/256 アルゴリズムを追加します。後方互換性を保つために、MD5 アルゴリズムは依然としてサポートされますが、<em
+                                    class="bcp14">推奨されません</em>。</p>
+                        </div>
+                        <div id="rfc.section.3.2.p.2">
+                            <p>ダイジェストのサイズは使用されるアルゴリズムに依存します。ダイジェスト内のビットは、最上位ビットから最下位ビットへ、4 ビットずつ ASCII 表現に変換されます。各 4
+                                ビットの列は 0123456789abcdef の親しみのある 16 進表記で表されます。すなわち、2 進 0000 は '0'、0001 は '1'、...、1111 は
+                                'f' です。MD5 アルゴリズムを用いるとダイジェストは 32 文字の 16 進表現になり、SHA-256 と SHA-512/256 は 64 文字の 16
+                                進表現になります。</p>
+                        </div>
+                    </section>
+                    <section id="www-authenticate.response.header">
+                        <h3 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a>&nbsp;<a
+                                href="#www-authenticate.response.header">WWW-Authenticate 応答ヘッダーフィールド</a>
+                        </h3>
+                        <div id="rfc.section.3.3.p.1" class="avoidbreakafter">
+                            <p>サーバーがアクセス保護されたオブジェクトへのリクエストを受け取り、許容される Authorization ヘッダーフィールドが送られていない場合、サーバーは "401
+                                Unauthorized" ステータスコードと上記のフレームワークに従った Digest スキームを持つ WWW-Authenticate
+                                ヘッダーフィールドで応答します。ヘッダーフィールドの値には次のリストからのパラメータを含めることができます：</p>
+                        </div>
+                        <div id="rfc.section.3.3.p.2">
+                            <p>realm </p>
+                            <ul class="empty">
+                                <li>ユーザーにどのユーザー名とパスワードを使うべきかを示すために表示される文字列です。この文字列は、認証を行うホストの名前を少なくとも含め、さらにアクセス可能なユーザーの集合を示すこともあります。例として
+                                    "registered_users@example.com" があります。（詳細は <a
+                                        href="https://www.rfc-editor.org/rfc/rfc7235.html#section-2.2">RFC7235 セクション
+                                        2.2</a> を参照。）</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.3">
+                            <p>domain </p>
+                            <ul class="empty">
+                                <li>保護領域を定義する URI の引用符で囲まれた空白区切りのリスト（<a href="#RFC3986"><cite
+                                            title="Uniform Resource Identifier (URI): Generic Syntax">[RFC3986]</cite></a>
+                                    で指定）です。URI が path-absolute の場合、それは正規ルート URL に対する相対です。（詳細は <a
+                                        href="https://www.rfc-editor.org/rfc/rfc7235.html#section-2.2">RFC7235 セクション
+                                        2.2</a> を参照。）このリスト中の絶対 URI
+                                    は、ウェブオリジンとは異なるサーバーを参照することがあります。クライアントは、このリストを使用して同じ認証情報を送信できる URI の集合を決定できます：このリスト中の
+                                    URI がプレフィックスとなる任意の
+                                    URI（両者を絶対化した後）は同じ保護領域に属すると見なすことができます。このパラメータが省略されるか値が空の場合、クライアントは保護領域がウェブオリジン上のすべての
+                                    URI で構成されると仮定するべきです。</li>
+                                <li>このパラメータは Proxy-Authenticate
+                                    ヘッダーフィールドでは意味を持ちません（プロキシの保護領域は常にプロキシ全体です）。存在する場合は無視されなければなりません。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.4">
+                            <p>nonce </p>
+                            <ul class="empty">
+                                <li>サーバーが指定する文字列で、401 応答が行われるたびに一意に生成されるべきものです。この文字列は Base64 または 16
+                                    進データであることが望まれます。具体的には、ヘッダーフィールド行内で引用符付き文字列として渡されるため、ダブルクォート文字は適切にエスケープされない限り使用できません。
+                                </li>
+                                <li>nonce の内容は実装依存です。良好な実装の品質は適切な選択に依存します。例えば nonce は次のように構成されることがあります：<span
+                                        id="rfc.figure.u.1"><span>
+                                            <pre class="text">
+         timestamp H(timestamp ":" ETag ":" secret-data)
+</pre>
+                                        </span></span> </li>
+                                <li>ここで timestamp はサーバー生成の時刻で、好ましくはマイクロ秒やナノ秒などの非反復値を含みます；ETag は要求された実体に関連する HTTP ETag
+                                    ヘッダーフィールドの値；secret-data はサーバーのみが知るデータです。この形式の nonce
+                                    を用いる場合、サーバーはクライアントの認証ヘッダーフィールドを受け取った後にハッシュ部分を再計算し、それがヘッダーフィールドの nonce と一致しない場合、または
+                                    timestamp 値が十分に新しくない場合はリクエストを拒否できます。これによりサーバーは nonce の有効期間を制限できます。ETag
+                                    の含有は、リソースが更新された場合のリプレイ要求を防ぎます。nonce にクライアントの IP アドレスを含めると nonce
+                                    の再利用を同じクライアントに限定できるように見えますが、単一ユーザーのリクエストが異なるプロキシを経由することが多く、IP アドレス偽装も容易なため問題があります。
+                                </li>
+                                <li>実装はリプレイ攻撃から保護するために以前使用された nonce や以前使用されたダイジェストを受け付けない選択をするかもしれません。また、POST や PUT
+                                    のためにワンタイム nonce/ダイジェストを使用し、GET にはタイムスタンプを使う選択もあります。詳細は本書の <a
+                                        href="#security.considerations" title="Security Considerations">セクション 5</a>
+                                    を参照してください。</li>
+                                <li>nonce はクライアントにとって不透明です。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.5">
+                            <p>opaque </p>
+                            <ul class="empty">
+                                <li>サーバーが指定するデータ文字列で、クライアントは同一の保護領域内の後続リクエストの Authorization
+                                    ヘッダーフィールドでこの値を変更せずに返すべきです。Base64 や 16 進データであることが推奨されます。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.6">
+                            <p>stale </p>
+                            <ul class="empty">
+                                <li>前回のクライアントからのリクエストが nonce 値の陳腐化により拒否されたことを示す大文字小文字を区別しないフラグです。stale が true
+                                    の場合、クライアントはユーザーに再プロンプトすることなく新しい暗号化レスポンスで単にリクエストを再試行することを望むかもしれません。サーバーは nonce
+                                    が無効であるリクエストを受け取った場合にのみ stale を true に設定するべきです。stale が false、あるいは true 以外の値、または stale
+                                    パラメータが存在しない場合は、ユーザー名および/またはパスワードが無効であり、新しい値が取得されなければなりません。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.7">
+                            <p>algorithm </p>
+                            <ul class="empty">
+                                <li>ダイジェストおよび非鍵付きダイジェストを生成するために使用されたアルゴリズムを示す文字列です。存在しない場合は "MD5"
+                                    と見なされます。アルゴリズムが理解できない場合、チャレンジは無視されるべきです（複数ある場合は別のものを使用する）。</li>
+                                <li>ダイジェスト機構で使用されるとき、各アルゴリズムにはセッション変種と非セッション変種の 2 つのバリアントがあります。非セッション変種は
+                                    "&lt;algorithm&gt;"（例："SHA-256"）で表され、セッション変種は
+                                    "&lt;algorithm&gt;-sess"（例："SHA-256-sess"）で表されます。</li>
+                                <li>本書では、ダイジェストアルゴリズムを "data" に適用して得られる文字列を H(data) と表し、秘密 "secret" とデータ "data"
+                                    に対してダイジェストアルゴリズムを鍵付きで適用して得られる文字列を KD(secret, data) と表します。KD は Keyed Digest
+                                    を意味し、unq(X) は引用符付き文字列 X から周囲の引用符を取り、引用用スラッシュを除去した値を意味します。<span
+                                        id="rfc.figure.u.2"><span>
+                                            <pre class="inline">
+     For "&lt;algorithm&gt;" and "&lt;algorithm&gt;-sess"
+
+         H(data) = &lt;algorithm&gt;(data)
+
+     and
+
+         KD(secret, data) = H(concat(secret, ":", data))
+</pre>
+                                        </span></span>
+                                </li>
+                                <li>例えば：<span id="rfc.figure.u.3"><span>
+                                            <pre class="inline">
+     For the "SHA-256" and "SHA-256-sess" algorithms
+
+         H(data) = SHA-256(data)
+</pre>
+                                        </span></span> </li>
+                                <li>すなわち、ダイジェストは秘密とコロンとデータを連結したものに対する "&lt;algorithm&gt;"
+                                    の適用結果です。"&lt;algorithm&gt;-sess" は効率的なサードパーティ認証サーバーを可能にすることを意図しています；使用上の差異は <a
+                                        href="#a1" title="A1">セクション 3.4.2</a> の記述を参照してください。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.8">
+                            <p>qop </p>
+                            <ul class="empty">
+                                <li>このパラメータは全ての実装で使用される <em class="bcp14">MUST</em> です。これはサーバーがサポートする "quality of
+                                    protection" 値を示す一つ以上のトークンの引用符付き文字列です。"auth" は認証を示し、"auth-int"
+                                    は完全性保護を伴う認証を示します。レスポンスパラメータ値の計算については以下を参照してください。未認識のオプションは無視されなければなりません。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.9">
+                            <p>charset </p>
+                            <ul class="empty">
+                                <li>これはサーバーがサポートするエンコーディング方式を示すオプションのパラメータです。許可される値は "UTF-8" のみです。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.10">
+                            <p>userhash </p>
+                            <ul class="empty">
+                                <li>これはサーバーがユーザー名のハッシュ化をサポートすることを示すオプションのパラメータです。有効な値は "true" または "false" です。デフォルトは
+                                    "false" です。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.3.p.11">
+                            <p>歴史的理由により、送信者は次のパラメータについて引用符付き文字列構文のみを生成する <em class="bcp14">MUST</em> です：realm, domain,
+                                nonce, opaque, qop。</p>
+                        </div>
+                        <div id="rfc.section.3.3.p.12">
+                            <p>歴史的理由により、送信者は次のパラメータについて引用符付き文字列構文を生成してはならない <em class="bcp14">MUST NOT</em> です：stale,
+                                algorithm。</p>
+                        </div>
+                    </section>
+                    <section id="authorization.request.header.field">
+                        <h3 id="rfc.section.3.4"><a href="#rfc.section.3.4">3.4.</a>&nbsp;<a
+                                href="#authorization.request.header.field">Authorization ヘッダーフィールド</a></h3>
+                        <div id="rfc.section.3.4.p.1">
+                            <p>クライアントはリクエストを再試行し、Digest スキームによる Authorization ヘッダーフィールド行を送信することが期待されます。opaque および
+                                algorithm フィールドの値は、要求されるエンティティに対する WWW-Authenticate 応答ヘッダーフィールドで提供されたものと一致しなければなりません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.4.p.2" class="avoidbreakafter">
+                            <p>リクエストは次のリストからのパラメータを含めることができます：</p>
+                        </div>
+                        <div id="rfc.section.3.4.p.3">
+                            <p>response </p>
+                            <ul class="empty">
+                                <li>以下で定義されたように計算された 16 進数字列の文字列で、ユーザーがパスワードを知っていることを証明します。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.4">
+                            <p>username </p>
+                            <ul class="empty">
+                                <li>指定された realm 内のユーザー名。引用符付き文字列は平文の名前か、16 進表記のハッシュコードを含みます。ユーザー名に ABNF quoted-string
+                                    で許されない文字が含まれる場合は username* パラメータを使用できます。同じヘッダーオプションで username と username*
+                                    を両方送ることはエラーとして扱われなければなりません。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.5">
+                            <p>username* </p>
+                            <ul class="empty">
+                                <li>userhash パラメータ値が "false" に設定されていて、ユーザー名に ABNF quoted-string で許されない文字が含まれる場合、ユーザー名は
+                                    <a href="#RFC5987"><cite
+                                            title="Character Set and Language Encoding for HTTP Header Field Parameters">[RFC5987]</cite></a>
+                                    の拡張表記を用いてこのパラメータで送信できます。
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.6">
+                            <p>realm </p>
+                            <ul class="empty">
+                                <li><a href="#www-authenticate.response.header"
+                                        title="The WWW-Authenticate Response Header Field">セクション 3.3</a> の "realm"
+                                    定義を参照してください。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.7">
+                            <p>uri </p>
+                            <ul class="empty">
+                                <li>HTTP リクエストの有効なリクエスト URI（<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html#section-5.5">RFC7230 セクション
+                                        5.5</a>）。プロキシが転送中に要求ターゲット（"request-target", <a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html#section-3.1.1">RFC7230 セクション
+                                        3.1.1</a>）を変更することがあるためここに重複して示しています。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.8">
+                            <p>qop </p>
+                            <ul class="empty">
+                                <li>クライアントがメッセージに適用した "quality of protection" を示します。値は WWW-Authenticate
+                                    ヘッダーフィールドでサーバーが示した代替の一つでなければなりません。これらの値は response
+                                    の計算に影響します。これは単一トークンであり、WWW-Authenticate のような引用符付きの代替リストではないことに注意してください。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.9">
+                            <p>cnonce </p>
+                            <ul class="empty">
+                                <li>このパラメータは全ての実装で使用される <em class="bcp14">MUST</em> です。cnonce 値はクライアントが提供する不透明な引用符付き
+                                    ASCII のみの文字列で、選択平文攻撃を回避し、相互認証を提供し、ある程度のメッセージ完全性保護を行うためにクライアントとサーバー両方で使用されます。rspauth
+                                    および response 値の計算の説明を参照してください。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.10">
+                            <p>nc </p>
+                            <ul class="empty">
+                                <li>このパラメータは全ての実装で使用される <em class="bcp14">MUST</em> です。nc は "nonce count" を意味します。nc
+                                    値は、このリクエストで使用されている nonce 値でクライアントが送信したリクエスト数（現在のリクエストを含む）の 16 進カウントです。例えば、ある nonce
+                                    値に対する最初のリクエストではクライアントは "nc=00000001" を送信します。このパラメータの目的は、サーバーが自身のカウントを保持して同じ nc
+                                    値が二度見られた場合にリプレイを検出できるようにすることです。response 値の構成の説明を参照してください。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.11"><br></div>
+                        <div id="rfc.section.3.4.p.12">
+                            <p>userhash </p>
+                            <ul class="empty">
+                                <li>このオプションのパラメータはクライアントがユーザー名がハッシュ化されていることを示すために使用します。有効な値は "true" または "false" で、デフォルトは
+                                    "false" です。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.4.p.13">
+                            <p>歴史的理由により、送信者は次のパラメータについて引用符付き文字列構文のみを生成する <em class="bcp14">MUST</em> です：username, realm,
+                                nonce, uri, response, cnonce, opaque。</p>
+                        </div>
+                        <div id="rfc.section.3.4.p.14">
+                            <p>歴史的理由により、送信者は次のパラメータについて引用符付き文字列構文を生成してはならない <em class="bcp14">MUST NOT</em>
+                                です：algorithm, qop, nc。</p>
+                        </div>
+                        <div id="rfc.section.3.4.p.15">
+                            <p>パラメータまたはその値が不適切であるか、必須パラメータが欠けている場合、適切な応答は 4xx エラーコードです。レスポンスが無効な場合、ログにログイン失敗を記録することが <em
+                                    class="bcp14">SHOULD</em>
+                                です。単一クライアントからの繰り返されるログイン失敗は攻撃者によるパスワード推測の試みを示す可能性があります。サーバー実装はログに平文のパスワード（例えば username
+                                フィールドに入力されたもの）が入らないよう注意するべきです。</p>
+                        </div>
+                        <div id="rfc.section.3.4.p.16">
+                            <p>上記の response の定義はその値のエンコーディングを示します。以下の定義はその値がどのように計算されるかを示します。</p>
+                        </div>
+                        <section id="response">
+                            <h4 id="rfc.section.3.4.1"><a href="#rfc.section.3.4.1">3.4.1.</a>&nbsp;<a
+                                    href="#response">レスポンス</a></h4>
+                            <div id="rfc.section.3.4.1.p.1" class="avoidbreakafter">
+                                <p>qop 値が "auth" または "auth-int" の場合：</p>
+                            </div>
+                            <div id="rfc.figure.u.4">
+                                <div>
+                                    <pre class="inline">
+      response = &lt;"&gt; &lt; KD ( H(A1), unq(nonce)
+                                   ":" nc
+                                   ":" unq(cnonce)
+                                   ":" unq(qop)
+                                   ":" H(A2)
+                          ) &lt;"&gt;
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.4.1.p.2">
+                                <p>A1 と A2 の定義は以下を参照してください。</p>
+                            </div>
+                        </section>
+                        <section id="a1">
+                            <h4 id="rfc.section.3.4.2"><a href="#rfc.section.3.4.2">3.4.2.</a>&nbsp;<a href="#a1">A1</a>
+                            </h4>
+                            <div id="rfc.section.3.4.2.p.1" class="avoidbreakafter">
+                                <p>algorithm パラメータの値が "&lt;algorithm&gt;"（例："SHA-256"） の場合、A1 は次のとおりです：</p>
+                            </div>
+                            <div id="rfc.figure.u.5">
+                                <div>
+                                    <pre class="inline">
+      A1       = unq(username) ":" unq(realm) ":" passwd
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.4.2.p.2">
+                                <p>ここで</p>
+                            </div>
+                            <div id="rfc.figure.u.6">
+                                <div>
+                                    <pre class="inline">
+      passwd   = &lt; user's password &gt;
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.4.2.p.3" class="avoidbreakafter">
+                                <p>algorithm パラメータの値が "&lt;algorithm&gt;-sess"（例："SHA-256-sess"） の場合、A1
+                                    はサーバーからのチャレンジで提供された nonce 値（ここでは nonce-prime と呼ぶ）と、クライアントがレスポンスで提供する cnonce 値（ここでは
+                                    cnonce-prime と呼ぶ）を用いて次のように計算されます：</p>
+                            </div>
+                            <div id="rfc.figure.u.7">
+                                <div>
+                                    <pre class="inline">
+      A1       = H( unq(username) ":" unq(realm) ":" passwd )
+                     ":" unq(nonce-prime) ":" unq(cnonce-prime)
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.4.2.p.4">
+                                <p>これは各 "認証セッション" ごとに異なる "セッション鍵" を作成し、任意の一つの鍵でハッシュされる材料の量を制限します。（注：認証セッションの詳細は <a
+                                        href="#digest.operation" title="Digest Operation">セクション 3.6</a> を参照。）サーバーは A1
+                                    を作成するためにユーザー資格情報のハッシュのみを使用すればよいため、この構成はサードパーティの認証サービスと組み合わせてウェブサーバーが実際のパスワードを保持する必要がないように使える可能性があります。そうしたプロトコルの仕様は本仕様の範囲外です。
+                                </p>
+                            </div>
+                        </section>
+                        <section id="n-a2">
+                            <h4 id="rfc.section.3.4.3"><a href="#rfc.section.3.4.3">3.4.3.</a>&nbsp;<a
+                                    href="#n-a2">A2</a></h4>
+                            <div id="rfc.section.3.4.3.p.1" class="avoidbreakafter">
+                                <p>qop パラメータの値が "auth" または未指定の場合、A2 は次のとおりです：</p>
+                            </div>
+                            <div id="rfc.figure.u.8">
+                                <div>
+                                    <pre class="inline">
+      A2       = Method ":" request-uri
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.4.3.p.2" class="avoidbreakafter">
+                                <p>qop 値が "auth-int" の場合、A2 は次のとおりです：</p>
+                            </div>
+                            <div id="rfc.figure.u.9">
+                                <div>
+                                    <pre class="inline">
+      A2       = Method ":" request-uri ":" H(entity-body)
+</pre>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="username.hashing">
+                            <h4 id="rfc.section.3.4.4"><a href="#rfc.section.3.4.4">3.4.4.</a>&nbsp;<a
+                                    href="#username.hashing">ユーザー名のハッシュ化</a></h4>
+                            <div id="rfc.section.3.4.4.p.1">
+                                <p>ユーザー名のクライアントからサーバーへの転送を保護するために、サーバーは WWW-Authenticate ヘッダーフィールドで userhash パラメータを
+                                    "true" に設定することが <em class="bcp14">SHOULD</em> 推奨されます。</p>
+                            </div>
+                            <div id="rfc.section.3.4.4.p.2">
+                                <p>クライアントが userhash パラメータをサポートし、WWW-Authenticate ヘッダーフィールドの userhash パラメータ値が "true"
+                                    に設定されている場合、クライアントは資格情報をハッシュ化した後にユーザー名のハッシュを計算し、Authorization ヘッダーフィールドに userhash
+                                    パラメータを "true" として含めなければなりません。クライアントがユーザー名をハッシュ値として提供しないか、userhash パラメータを "true"
+                                    として提供しない場合、サーバーはリクエストを拒否してもよい（<em class="bcp14">MAY</em>）です。</p>
+                            </div>
+                            <div id="rfc.section.3.4.4.p.3" class="avoidbreakafter">
+                                <p>以下は、クライアントが資格情報をハッシュ化するために行う操作で、資格情報のハッシュに使用されるのと同じアルゴリズムを用いてユーザー名をハッシュ化します：</p>
+                            </div>
+                            <div id="rfc.figure.u.10">
+                                <div>
+                                    <pre class="inline">
+   username = H( unq(username) ":" unq(realm) )
+</pre>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="n-parameter-values-and-quoted-string">
+                            <h4 id="rfc.section.3.4.5"><a href="#rfc.section.3.4.5">3.4.5.</a>&nbsp;<a
+                                    href="#n-parameter-values-and-quoted-string">パラメータ値と引用文字列 (Parameter Values and
+                                    Quoted-String)</a>
+                            </h4>
+                            <div id="rfc.section.3.4.5.p.1">
+                                <p>多くのパラメータ値（たとえば username 値）は "quoted-string" として定義されていることに注意してください。しかし、"unq" 表記は A1
+                                    を形成する際に周囲の引用符が取り除かれることを示します。したがって、Authorization ヘッダーフィールドに次のようなフィールドが含まれている場合</p>
+                            </div>
+                            <div id="rfc.figure.u.11">
+                                <div>
+                                    <pre class="text">
+   username="Mufasa", realm="myhost@example.com"
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.4.5.p.2">
+                                <p>そしてユーザー Mufasa のパスワードが "Circle Of Life" であるならば、H(A1) は引用符なしで
+                                    H(Mufasa:myhost@example.com:Circle Of Life) となります。</p>
+                            </div>
+                            <div id="rfc.section.3.4.5.p.3">
+                                <p>ダイジェスト関数 H() が適用される文字列のいずれにも、当該引用文字列や実体本文の内容にその空白が存在しない限り、空白は許されません。例えば上に示した A1
+                                    の文字列は次のようにならなければなりません：</p>
+                            </div>
+                            <div id="rfc.figure.u.12">
+                                <div>
+                                    <pre class="text">
+   Mufasa:myhost@example.com:Circle Of Life
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.4.5.p.4">
+                                <p>コロンの両側に余分な空白があってはならず、ただしパスワード値内の語間にある空白はそのまま残ります。同様に、H()
+                                    によってダイジェストされる他の文字列も、それらのフィールドを区切るコロンの両側に空白を持っていてはなりません（その空白が元の引用文字列や実体本文にあった場合を除く）。
+                                </p>
+                            </div>
+                            <div id="rfc.section.3.4.5.p.5">
+                                <p>また、整合性保護が適用される場合（qop=auth-int）、H(entity-body)
+                                    は実体本文のハッシュであり、メッセージ本文そのものではない点に注意してください—送信者が転送符号化を適用する前に計算され、受信者がそれを取り除いた後に計算されます。これには
+                                    multipart 境界や任意の multipart コンテンツ型の各パートに埋め込まれたヘッダーフィールドが含まれることに留意してください。</p>
+                            </div>
+                        </section>
+                        <section id="n-various-considerations">
+                            <h4 id="rfc.section.3.4.6"><a href="#rfc.section.3.4.6">3.4.6.</a>&nbsp;<a
+                                    href="#n-various-considerations">諸般の考慮事項 (Various Considerations)</a></h4>
+                            <div id="rfc.section.3.4.6.p.1">
+                                <p>"Method" 値は US-ASCII の文字で表された HTTP リクエストメソッドであり、<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html#section-3.1.1">RFC 7230 のセクション
+                                        3.1.1</a> に規定されるとおりです。また "request-target" 値はリクエストラインの request-target であり、同じく <a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html#section-3.1.1">RFC 7230 セクション
+                                        3.1.1</a> に規定されています。これは "*"、"absolute-URI"、または <a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html#section-2.7">RFC 7230 セクション
+                                        2.7</a> に規定された "absolute-path" であっても <em class="bcp14">MUST</em>
+                                    要求ターゲットと一致しなければなりません。特に、request-target が "absolute-URI" の場合、uri パラメータも
+                                    "absolute-URI" であることが <em class="bcp14">MUST</em> 求められます。cnonce
+                                    値は選択平文攻撃を阻止する目的でクライアントが選ぶ値です。</p>
+                            </div>
+                            <div id="rfc.section.3.4.6.p.2">
+                                <p>認証を行うサーバーは、"uri" パラメータで指定されたリソースが Request-Line で指定されたリソースと同一であることを <em
+                                        class="bcp14">MUST</em> 確認しなければなりません。同一でない場合、サーバーは <em class="bcp14">SHOULD</em>
+                                    400 Bad Request
+                                    を返すべきです（これは攻撃の兆候である可能性があるため、サーバー実装者はこの種のエラーをログに記録することを検討してよいでしょう）。このフィールドにリクエスト URL
+                                    の情報を重複して含める目的は、中間プロキシがクライアントの Request-Line
+                                    を変更する可能性に対処するためです。変更された（しかし意味的に同等であると思われる）リクエストは、クライアントが計算したものと同じダイジェストを生じない可能性があります。
+                                </p>
+                            </div>
+                            <div id="rfc.section.3.4.6.p.3">
+                                <p>実装者は、認証済みトランザクションが共有キャッシュとどのように相互作用するかを認識しておくべきです（<a href="#RFC7234"><cite
+                                            title="Hypertext Transfer Protocol (HTTP/1.1): Caching">RFC7234</cite></a>
+                                    を参照）。</p>
+                            </div>
+                        </section>
+                    </section>
+                    <section id="authenticaion-info.header.field">
+                        <h3 id="rfc.section.3.5"><a href="#rfc.section.3.5">3.5.</a>&nbsp;<a
+                                href="#authenticaion-info.header.field">Authentication-Info および
+                                Proxy-Authentication-Info ヘッダーフィールド</a></h3>
+                        <div id="rfc.section.3.5.p.1">
+                            <p>Authentication-Info ヘッダーフィールドおよび Proxy-Authentication-Info ヘッダーフィールド（<a
+                                    href="#RFC7615"><cite
+                                        title="HTTP Authentication-Info and Proxy-Authentication-Info Response Header Fields">RFC7615</cite></a>）は、サーバーがクライアントレスポンスの認証成功に関する情報の一部を伝えるために
+                                <em class="bcp14">MAY</em> 使用できる汎用フィールドです。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.5.p.2" class="avoidbreakafter">
+                            <p>Digest 認証スキームは、確認応答（confirmation request）に Authentication-Info
+                                ヘッダーフィールドを追加し、次のリストからのパラメータを含めることが <em class="bcp14">MAY</em> あります：</p>
+                        </div>
+                        <div id="rfc.section.3.5.p.3">
+                            <p>nextnonce </p>
+                            <ul class="empty">
+                                <li>nextnonce パラメータの値は、サーバーがクライアントに将来の認証レスポンスで使用してほしいと望む nonce です。サーバーはワンタイム nonce
+                                    を実装する手段として、または nonce を変更するために Authentication-Info ヘッダーフィールドを nextnonce フィールド付きで送ることが
+                                    <em class="bcp14">MAY</em> あります。nextnonce フィールドが存在する場合、クライアントは次回のリクエストで
+                                    Authorization ヘッダーフィールドを構築する際にそれを使用すべきである（<em
+                                        class="bcp14">SHOULD</em>）とされています。クライアントがそれを使用しなかった場合、サーバーが "stale=true"
+                                    を付した再認証要求を行うことが <em class="bcp14">MAY</em> あります。
+                                    <ul class="empty">
+                                        <li>サーバー実装はこのメカニズムの使用が性能に与える影響を慎重に考慮するべきです；もし全てのレスポンスが次のリクエストで <em
+                                                class="bcp14">MUST</em> 使用される nextnonce
+                                            パラメータを含むなら、パイプライン化されたリクエストは不可能になります。要求のパイプライン化を可能にするために、古い nonce
+                                            値を制限時間内に許容するなどの性能とセキュリティのトレードオフを考慮するべきです。nc パラメータを使用すれば、新しいサーバー nonce
+                                            の大部分のセキュリティ上の利点を保持しつつパイプライン化への悪影響を軽減できます。</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.5.p.4">
+                            <p>qop </p>
+                            <ul class="empty">
+                                <li>サーバーがレスポンスに適用した "quality of protection" オプションを示します。値 "auth" は認証を示し、"auth-int"
+                                    は整合性保護付き認証を示します。サーバーはレスポンス中の qop パラメータに、対応するリクエストでクライアントが送った値と同じ値を使用するべきです（<em
+                                        class="bcp14">SHOULD</em>）。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.5.p.5">
+                            <p>rspauth </p>
+                            <ul class="empty">
+                                <li>rspauth パラメータのオプションのレスポンスダイジェストは相互認証をサポートします—サーバーはユーザーの秘密を知っていることを証明し、qop=auth-int
+                                    の場合はレスポンスの限定的な整合性保護も提供します。rspauth 値は Authorization ヘッダーフィールド内の response
+                                    と同様の方法で計算されますが、qop が "auth" に設定されているか Authorization ヘッダーフィールドで指定されていない場合、A2 は
+                                </li>
+                                <li><span id="rfc.figure.u.13"><span>
+                                            <pre class="inline">
+      A2       = ":" request-uri
+</pre>
+                                        </span></span> となり、"qop=auth-int" の場合は A2 は <span id="rfc.figure.u.14"><span>
+                                            <pre class="inline">
+      A2       = ":" request-uri ":" H(entity-body)
+</pre>
+                                        </span></span> となります。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.5.p.6">
+                            <p>cnonce および nc </p>
+                            <ul class="empty">
+                                <li>cnonce 値と nc 値は、このメッセージがレスポンスであるクライアントリクエストのためのものである値でなければなりません（<em
+                                        class="bcp14">MUST</em>）。rspauth、cnonce、および nc パラメータは、"qop=auth" または
+                                    "qop=auth-int" が指定されている場合に存在していなければなりません（<em class="bcp14">MUST</em>）。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.5.p.7">
+                            <p>Authentication-Info ヘッダーフィールドは、chunked transfer coding で転送される HTTP メッセージのトレーラに含めることができます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.5.p.8">
+                            <p>歴史的理由により、送信者は次のパラメータについて引用符付き文字列構文のみを生成する <em class="bcp14">MUST</em>
+                                です：nextnonce、rspauth、および cnonce。</p>
+                        </div>
+                        <div id="rfc.section.3.5.p.9">
+                            <p>歴史的理由により、送信者は次のパラメータについて引用符付き文字列構文を生成してはならない <em class="bcp14">MUST NOT</em> です：qop および
+                                nc。</p>
+                        </div>
+                        <div id="rfc.section.3.5.p.10">
+                            <p>歴史的理由により、nc 値は正確に 8 桁の 16 進数字でなければなりません（<em class="bcp14">MUST</em>）。</p>
+                        </div>
+                    </section>
+                    <section id="digest.operation">
+                        <h3 id="rfc.section.3.6"><a href="#rfc.section.3.6">3.6.</a>&nbsp;<a
+                                href="#digest.operation">ダイジェスト操作 (Digest Operation)</a></h3>
+                        <div id="rfc.section.3.6.p.1">
+                            <p>Authorization ヘッダーフィールドを受け取った際、サーバーは提出された username に対応するパスワードを参照してその妥当性をチェックすることが <em
+                                    class="bcp14">MAY</em> あります。次にサーバーはクライアントが行ったのと同じダイジェスト操作（例：MD5、SHA-256）を <em
+                                    class="bcp14">MUST</em> 行い、その結果を与えられた response 値と比較しなければなりません。</p>
+                        </div>
+                        <div id="rfc.section.3.6.p.2">
+                            <p>HTTP サーバーは実際にユーザーの平文パスワードを知る必要はないことに注意してください。サーバーが H(A1) を利用できる限り、Authorization
+                                ヘッダーフィールドの有効性は検証できます。</p>
+                        </div>
+                        <div id="rfc.section.3.6.p.3">
+                            <p>WWW-Authenticate
+                                チャレンジに対するクライアントのレスポンスは、その保護領域との認証セッションを開始します。認証セッションは、クライアントが保護領域内の任意のサーバーから別の
+                                WWW-Authenticate チャレンジを受け取るまで続きます。クライアントはユーザー名、パスワード、nonce、nonce count、および opaque
+                                値を認証セッションに関連付けて記憶し、同一の保護領域内の今後のリクエストで Authorization ヘッダーフィールドを構築するために使用することが <em
+                                    class="bcp14">SHOULD</em> です。Authorization ヘッダーフィールドは事前に送信することが <em
+                                    class="bcp14">MAY</em> されており、これによりサーバーの効率が向上し、認証チャレンジのための往復が回避されます。サーバーは古い
+                                Authorization ヘッダーフィールド情報を受け入れることが <em class="bcp14">MAY</em> ありますが、その場合含まれる nonce
+                                値が新鮮でない可能性があります。あるいはサーバーは新しい nonce 値を含む 401 応答を返してクライアントにリクエストの再試行を促すことが <em
+                                    class="bcp14">MAY</em> あります；この応答に "stale=true" を指定することで、サーバーはクライアントに新しい nonce
+                                で再試行するよう伝えますが、ユーザー名とパスワードの再入力は不要です。</p>
+                        </div>
+                        <div id="rfc.section.3.6.p.4">
+                            <p>クライアントがセッション期間中にサーバーから与えられた opaque パラメータの値を返すことが要求されるため、opaque
+                                データは認証セッション状態情報を運ぶために使用できます（ただし、そのような使用は nonce
+                                に状態を含めることでより簡単かつ安全に実現できます）。例えば、あるサーバーが実際のコンテンツを別のサーバー上で認証する責任を持つ場合、最初の 401 応答に domain
+                                パラメータで第2のサーバー上の URI を含め、opaque
+                                パラメータに状態情報を含めることでこれを達成できます。クライアントはリクエストを再試行し、その際サーバーは第2のサーバー上の URI を指す "HTTP
+                                Redirection" を返すかもしれません。クライアントはリダイレクトに従い、opaque データを含む Authorization ヘッダーフィールドを渡します。</p>
+                        </div>
+                        <div id="rfc.section.3.6.p.5">
+                            <p>プロキシは Digest アクセス認証スキームにおいて完全に透過的でなければなりません（<em
+                                    class="bcp14">MUST</em>）。つまり、WWW-Authenticate、Authentication-Info、および Authorization
+                                ヘッダーフィールドを変更せずに転送しなければなりません。プロキシがリクエストを転送する前にクライアントを認証したい場合は、下記の <a href="#proxy-auth"
+                                    title="Proxy-Authenticate and Proxy-Authorization">セクション 3.8</a> に記述される
+                                Proxy-Authenticate および Proxy-Authorization ヘッダーフィールドを用いて行うことができます。</p>
+                        </div>
+                    </section>
+                    <section id="n-security-protocol-negotiation">
+                        <h3 id="rfc.section.3.7"><a href="#rfc.section.3.7">3.7.</a>&nbsp;<a
+                                href="#n-security-protocol-negotiation">セキュリティプロトコル交渉 (Security Protocol
+                                Negotiation)</a></h3>
+                        <div id="rfc.section.3.7.p.1">
+                            <p>サーバーがクライアントが扱えるセキュリティスキームを把握できることは有用です。</p>
+                        </div>
+                        <div id="rfc.section.3.7.p.2">
+                            <p>サーバーが Digest
+                                を認証方法として要求したいが、クライアントがそれをサポートしているかどうかをサーバーが知らない可能性があります。クライアントは、サーバーが自分で扱えない認証スキームのみを指定した場合でも、穏やかにフォールバックすることが推奨されます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.3.7.p.3">
+                            <p>サーバーがリソースへのアクセスリクエストを受け取った際、サーバーは "401 Unauthorized" 応答でクライアントにチャレンジすることがあり、1 個以上の
+                                WWW-Authenticate ヘッダーフィールドを含めます。サーバーが複数のチャレンジで応答する場合、それらそれぞれは <em
+                                    class="bcp14">MUST</em>
+                                異なるダイジェストアルゴリズムを使用しなければなりません。サーバーは優先順（最も好ましいアルゴリズムから順）でこれらのチャレンジを応答に追加する <em
+                                    class="bcp14">MUST</em> があります。</p>
+                        </div>
+                        <div id="rfc.section.3.7.p.4">
+                            <p>本仕様は次のアルゴリズムを定義します：</p>
+                            <ul>
+                                <li>SHA2-256（実装必須）</li>
+                                <li>SHA2-512/256（バックアップアルゴリズムとして）</li>
+                                <li>MD5（後方互換性のため）。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.7.p.5">
+                            <p>クライアントが最初のチャレンジを受け取ったとき、ローカルポリシーが別段定めない限り、クライアントはサポートする最初のチャレンジを使用するべきです（<em
+                                    class="bcp14">SHOULD</em>）。</p>
+                        </div>
+                    </section>
+                    <section id="proxy-auth">
+                        <h3 id="rfc.section.3.8"><a href="#rfc.section.3.8">3.8.</a>&nbsp;<a
+                                href="#proxy-auth">Proxy-Authenticate および Proxy-Authorization</a></h3>
+                        <div id="rfc.section.3.8.p.1">
+                            <p>Digest 認証スキームは、Proxy-Authenticate および Proxy-Authorization
+                                ヘッダーフィールドを用いて、ユーザーからプロキシへの認証、プロキシ間の認証、またはプロキシからオリジンサーバーへの認証にも使用できます。これらのヘッダーフィールドは
+                                HTTP/1.1 仕様（RFC7235）のセクション <a
+                                    href="https://www.rfc-editor.org/rfc/rfc7235.html#section-4.3">4.3</a> および <a
+                                    href="https://www.rfc-editor.org/rfc/rfc7235.html#section-4.4">4.4</a> に規定された
+                                Proxy-Authenticate/Proxy-Authorization
+                                ヘッダーフィールドのインスタンスであり、その振る舞いはそこで述べられた制約の対象になります。プロキシ認証のトランザクションはここで既に述べたものと非常に類似しています。認証が必要なリクエストを受け取った場合、プロキシ/サーバーは
+                                "407 Proxy Authentication Required" 応答と "Proxy-Authenticate" ヘッダーフィールドを発行しなければなりません（<em
+                                    class="bcp14">MUST</em>）。Proxy-Authenticate ヘッダーフィールドで使用される digest-challenge
+                                は、上で定義した WWW-Authenticate ヘッダーフィールドのものと同一です（<a href="#www-authenticate.response.header"
+                                    title="The WWW-Authenticate Response Header Field">セクション 3.3</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.3.8.p.2">
+                            <p>クライアント/プロキシはその後、Proxy-Authorization ヘッダーフィールドを付けてリクエストを再送しなければなりません（<em
+                                    class="bcp14">MUST</em>）。パラメータは前述の Authorization ヘッダーフィールドに指定されたものと同様です（<a
+                                    href="#authorization.request.header.field"
+                                    title="The Authorization Header Field">セクション 3.4</a>）。</p>
+                        </div>
+                        <div id="rfc.section.3.8.p.3">
+                            <p>後続のレスポンスでは、サーバーは Authentication-Info ヘッダーフィールドと同じパラメータを持つ Proxy-Authentication-Info
+                                を送信します。</p>
+                        </div>
+                        <div id="rfc.section.3.8.p.4">
+                            <p>原理的には、クライアントはプロキシとエンドサーバーの両方に認証を求められることがありますが、同一のレスポンスで両方に求められることはありません。</p>
+                        </div>
+                    </section>
+                    <section id="n-examples">
+                        <h3 id="rfc.section.3.9"><a href="#rfc.section.3.9">3.9.</a>&nbsp;<a href="#n-examples">例
+                                (Examples)</a></h3>
+                        <section id="n-example-with-sha-256-and-md5">
+                            <h4 id="rfc.section.3.9.1"><a href="#rfc.section.3.9.1">3.9.1.</a>&nbsp;<a
+                                    href="#n-example-with-sha-256-and-md5">SHA-256 と MD5 の例 (Example with SHA-256 and
+                                    MD5)</a></h4>
+                            <div id="rfc.section.3.9.1.p.1">
+                                <p>次の例は、GET リクエストでアクセス保護されたドキュメントをサーバーから要求している状況を想定しています。ドキュメントの URI は
+                                    "http://www.example.org/dir/index.html" です。クライアントとサーバーはこのドキュメントに対するユーザー名が
+                                    "Mufasa"、パスワードが "Circle of Life"（3 単語の間にそれぞれ 1 つのスペース）であることを知っています。</p>
+                            </div>
+                            <div id="rfc.section.3.9.1.p.2" class="avoidbreakafter">
+                                <p>クライアントが最初にドキュメントを要求したとき、Authorization ヘッダーフィールドは送信されないため、サーバーは次のように応答します：</p>
+                            </div>
+                            <div id="rfc.figure.u.15">
+                                <div>
+                                    <pre class="text">
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Digest
+    realm="http-auth@example.org",
+    qop="auth, auth-int",
+    algorithm=SHA-256,
+    nonce="7ypf/xlj9XXwfDPEoM4URrv/xwf94BcCAzFZH4GiTo0v",
+    opaque="FQhe/qaU925kfnzjCev0ciny7QMkPqMAFRtzCUYo5tdS"
+WWW-Authenticate: Digest
+    realm="http-auth@example.org",
+    qop="auth, auth-int",
+    algorithm=MD5,
+    nonce="7ypf/xlj9XXwfDPEoM4URrv/xwf94BcCAzFZH4GiTo0v",
+    opaque="FQhe/qaU925kfnzjCev0ciny7QMkPqMAFRtzCUYo5tdS"
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.9.1.p.3" class="avoidbreakafter">
+                                <p>クライアントはユーザーにユーザー名とパスワードの入力を促すことができ、クライアントが MD5 ダイジェストを選択した場合、次の Authorization
+                                    ヘッダーフィールドを含む新しいリクエストで応答します：</p>
+                            </div>
+                            <div id="rfc.figure.u.16">
+                                <div>
+                                    <pre class="text">
+Authorization: Digest username="Mufasa",
+    realm="http-auth@example.org",
+    uri="/dir/index.html",
+    algorithm=MD5,
+    nonce="7ypf/xlj9XXwfDPEoM4URrv/xwf94BcCAzFZH4GiTo0v",
+    nc=00000001,
+    cnonce="f2/wE4q74E6zIJEtWaHKaf5wv/H5QzzpXusqGemxURZJ",
+    qop=auth,
+    response="8ca523f5e9506fed4657c9700eebdbec",
+    opaque="FQhe/qaU925kfnzjCev0ciny7QMkPqMAFRtzCUYo5tdS"
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.9.1.p.4" class="avoidbreakafter">
+                                <p>クライアントがレスポンス計算に SHA-256 アルゴリズムを使用することを選んだ場合、クライアントは次の Authorization
+                                    ヘッダーフィールドを含む新しいリクエストで応答します：</p>
+                            </div>
+                            <div id="rfc.figure.u.17">
+                                <div>
+                                    <pre class="text">
+Authorization: Digest username="Mufasa",
+    realm="http-auth@example.org",
+    uri="/dir/index.html",
+    algorithm=SHA-256,
+    nonce="7ypf/xlj9XXwfDPEoM4URrv/xwf94BcCAzFZH4GiTo0v",
+    nc=00000001,
+    cnonce="f2/wE4q74E6zIJEtWaHKaf5wv/H5QzzpXusqGemxURZJ",
+    qop=auth,
+    response="753927fa0e85d155564e2e272a28d1802ca10daf449
+       6794697cf8db5856cb6c1",
+    opaque="FQhe/qaU925kfnzjCev0ciny7QMkPqMAFRtzCUYo5tdS"
+</pre>
+                                </div>
+                            </div>
+                        </section>
+                        <section id="n-example-with-sha-512-256--charset--and-userhash">
+                            <h4 id="rfc.section.3.9.2"><a href="#rfc.section.3.9.2">3.9.2.</a>&nbsp;<a
+                                    href="#n-example-with-sha-512-256--charset--and-userhash">SHA-512-256、文字セット、Userhash
+                                    の例 (Example with SHA-512-256, Charset, and Userhash)</a></h4>
+                            <div id="rfc.section.3.9.2.p.1" class="avoidbreakafter">
+                                <p>次の例は、GET リクエストでアクセス保護されたドキュメントをサーバーから要求している状況を想定しています。要求の URI は
+                                    "http://api.example.org/doe.json" です。クライアントとサーバーは username の userhash を知っており、UTF-8
+                                    文字エンコーディングをサポートし、SHA-512-256 アルゴリズムを使用します。リクエストのユーザー名は "Jason Doe" の変種で、'a' は実際には
+                                    Unicode コードポイント U+00E4（"LATIN SMALL LETTER A WITH DIAERESIS"）であり、最初の 'o' は
+                                    U+00F8（"LATIN SMALL LETTER O WITH STROKE"）であるため、UTF-8 エンコーディングにより次のオクテット列になります：</p>
+                            </div>
+                            <div id="rfc.section.3.9.2.p.2"><span id="rfc.figure.u.18"><span>
+                                        <pre class="text">
+   J  U+00E4 s  U+00F8 n      D  o  e
+   4A C3A4   73 C3B8   6E 20 44  6F 65
+</pre>
+                                    </span></span></div>
+                            <div id="rfc.section.3.9.2.p.3">
+                                <p>パスワードは "Secret, or not?" です。</p>
+                            </div>
+                            <div id="rfc.section.3.9.2.p.4" class="avoidbreakafter">
+                                <p>クライアントが最初にドキュメントを要求したとき、Authorization ヘッダーフィールドは送信されないため、サーバーは次のように応答します：</p>
+                            </div>
+                            <div id="rfc.figure.u.19">
+                                <div>
+                                    <pre class="text">
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Digest
+    realm="api@example.org",
+    qop="auth",
+    algorithm=SHA-512-256,
+    nonce="5TsQWLVdgBdmrQ0XsxbDODV+57QdFR34I9HAbC/RVvkK",
+    opaque="HRPCssKJSGjCrkzDg8OhwpzCiGPChXYjwrI2QmXDnsOS",
+    charset=UTF-8,
+    userhash=true
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.9.2.p.5" class="avoidbreakafter">
+                                <p>クライアントは必要な資格情報をユーザーに入力させ、次の Authorization ヘッダーフィールドを付けて新しいリクエストを送信できます：</p>
+                            </div>
+                            <div id="rfc.figure.u.20">
+                                <div>
+                                    <pre class="text">
+Authorization: Digest
+    username="488869477bf257147b804c45308cd62ac4e25eb717
+       b12b298c79e62dcea254ec",
+    realm="api@example.org",
+    uri="/doe.json",
+    algorithm=SHA-512-256,
+    nonce="5TsQWLVdgBdmrQ0XsxbDODV+57QdFR34I9HAbC/RVvkK",
+    nc=00000001,
+    cnonce="NTg6RKcb9boFIAS3KrFK9BGeh+iDa/sm6jUMp2wds69v",
+    qop=auth,
+    response="ae66e67d6b427bd3f120414a82e4acff38e8ecd9101d
+       6c861229025f607a79dd",
+    opaque="HRPCssKJSGjCrkzDg8OhwpzCiGPChXYjwrI2QmXDnsOS",
+    userhash=true
+</pre>
+                                </div>
+                            </div>
+                            <div id="rfc.section.3.9.2.p.6" class="avoidbreakafter">
+                                <p>クライアントが何らかの理由でハッシュ化されたユーザー名を提供できない場合、次の Authorization ヘッダーフィールドで試行することができます：</p>
+                            </div>
+                            <div id="rfc.figure.u.21">
+                                <div>
+                                    <pre class="text">
+Authorization: Digest
+    username*=UTF-8''J%C3%A4s%C3%B8n%20Doe,
+    realm="api@example.org",
+    uri="/doe.json",
+    algorithm=SHA-512-256,
+    nonce="5TsQWLVdgBdmrQ0XsxbDODV+57QdFR34I9HAbC/RVvkK",
+    nc=00000001,
+    cnonce="NTg6RKcb9boFIAS3KrFK9BGeh+iDa/sm6jUMp2wds69v",
+    qop=auth,
+    response="ae66e67d6b427bd3f120414a82e4acff38e8ecd9101d
+       6c861229025f607a79dd",
+    opaque="HRPCssKJSGjCrkzDg8OhwpzCiGPChXYjwrI2QmXDnsOS",
+    userhash=false
+</pre>
+                                </div>
+                            </div>
+                        </section>
+                    </section>
+                </section>
+                <section id="n-internationalization-considerations">
+                    <h2 id="rfc.section.4"><a href="#rfc.section.4">4.</a>&nbsp;<a
+                            href="#n-internationalization-considerations">国際化に関する考慮事項</a></h2>
+                    <div id="rfc.section.4.p.1">
+                        <p>チャレンジにおいて、サーバーは A1（<a href="#a1" title="A1">セクション 3.4.2</a> を参照）およびユーザー名ハッシュ化（<a
+                                href="#username.hashing" title="Username Hashing">セクション 3.4.4</a>
+                            を参照）を生成する際にユーザーエージェントが使用することを期待する文字エンコーディングを表現するために、"charset" 認証パラメータ（大文字小文字を区別しない）を使用することが
+                            <em class="bcp14">SHOULD</em> です。
+                        </p>
+                    </div>
+                    <div id="rfc.section.4.p.2">
+                        <p>許容される値は "UTF-8" のみであり、大文字小文字を区別せずに一致させるものとします（詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc2978.html#section-2.3">RFC2978 セクション 2.3</a>
+                            を参照）。これは、サーバーがユーザー名とパスワードを Unicode 正規化形式 C（"NFC"、詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc5198.html#section-3">RFC5198 セクション 3</a>
+                            を参照）に変換し、UTF-8 文字エンコーディング方式（<a href="#RFC3629"><cite
+                                    title="UTF-8, a transformation format of ISO 10646">RFC3629</cite></a>）を用いてオクテットにエンコードすることを期待していることを示します。
+                        </p>
+                    </div>
+                    <div id="rfc.section.4.p.3">
+                        <p>ユーザー名については、受信側は <a href="https://www.rfc-editor.org/rfc/rfc7613.html#section-3.3">RFC7613
+                                セクション 3.3</a> に定義される "UsernameCasePreserved"
+                            プロファイルで定義されたすべての文字をサポートしなければなりません（":"（コロン）文字を除く）。</p>
+                    </div>
+                    <div id="rfc.section.4.p.4">
+                        <p>パスワードについては、受信側は <a href="https://www.rfc-editor.org/rfc/rfc7613.html#section-4.2">RFC7613
+                                セクション 4.2</a> に定義される "OpaqueString" プロファイルで定義されたすべての文字をサポートしなければなりません。</p>
+                    </div>
+                    <div id="rfc.section.4.p.5">
+                        <p>ユーザーエージェントがサーバーが示すエンコーディングをサポートしない場合、リクエストを失敗させることができます。</p>
+                    </div>
+                    <div id="rfc.section.4.p.6">
+                        <p>ユーザー名をハッシュで送信できず、かつ非 ASCII 文字を含む場合、クライアントは代わりに username* パラメータを含めることができます（値のエンコーディングは <a
+                                href="#RFC5987"><cite
+                                    title="Character Set and Language Encoding for Hypertext Transfer Protocol (HTTP) Header Field Parameters">RFC5987</cite></a>
+                            に定義されたものを使用）。</p>
+                    </div>
+                </section>
+                <section id="security.considerations">
+                    <h2 id="rfc.section.5"><a href="#rfc.section.5">5.</a>&nbsp;<a
+                            href="#security.considerations">セキュリティに関する考慮事項</a></h2>
+                    <section id="n-limitations">
+                        <h3 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a>&nbsp;<a
+                                href="#n-limitations">制限事項</a></h3>
+                        <div id="rfc.section.5.1.p.1">
+                            <p>人間が記憶しやすいパスワードと組み合わせて使用される場合、HTTP
+                                ダイジェスト認証は辞書攻撃に対して脆弱です。このような攻撃は、広く使われているアルゴリズム（安全とは見なされなくなったものを含む）に対する暗号解析攻撃よりはるかに容易です。言い換えれば、アルゴリズムの可変性はこの用途をより安全にはしません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.5.1.p.2">
+                            <p>したがって、ダイジェスト認証は十分なエントロピー（例：128 ビット以上）を持つパスワードと共にのみ使用することが <em class="bcp14">SHOULD</em>
+                                推奨されます。そのようなパスワードは通常人間が記憶できませんが、自動化されたウェブサービスには適しています。</p>
+                        </div>
+                        <div id="rfc.section.5.1.p.3">
+                            <p>ダイジェスト認証を使用する場合、それは HTTPS のような安全なチャネル上で行われることが <em class="bcp14">SHOULD</em> 推奨されます（<a
+                                    href="#RFC2818"><cite title="HTTP Over TLS">RFC2818</cite></a>）。</p>
+                        </div>
+                    </section>
+                    <section id="n-storing-passwords">
+                        <h3 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a>&nbsp;<a
+                                href="#n-storing-passwords">パスワードの保存</a></h3>
+                        <div id="rfc.section.5.2.p.1">
+                            <p>ダイジェスト認証では、認証エージェント（通常はサーバー）が特定の realm
+                                に関連付けられた「パスワードファイル」にユーザー名とパスワードに由来するデータを保存することが必要です。通常、これは username と H(A1) の対を含みます。ここで
+                                H(A1) は前述のとおりユーザー名、realm、およびパスワードのダイジェスト値です。</p>
+                        </div>
+                        <div id="rfc.section.5.2.p.2">
+                            <p>このことのセキュリティ上の含意は、このパスワードファイルが侵害された場合、攻撃者はその realm に属するサーバー上のドキュメントに即座にアクセスできる点です。標準的な
+                                UNIX
+                                パスワードファイルとは異なり、この情報は復号せずともサーバー上のドキュメントにアクセスするために利用され得ます。一方で、ユーザーのパスワードを得るには復号、あるいはより可能性が高いブルートフォース攻撃が必要です。このため、realm
+                                はパスワードファイルに保存されるダイジェストデータの一部になっています。これにより、あるダイジェスト認証パスワードファイルが侵害されても、同じユーザー名とパスワードを持つ他の
+                                realm が自動的に侵害されるわけではありません（ただしブルートフォース攻撃に晒される点には注意）。</p>
+                        </div>
+                        <div id="rfc.section.5.2.p.3">
+                            <p>重要なセキュリティ上の結果が二つあります。第一に、パスワードファイルは未暗号化パスワードを含むかのように保護されなければなりません。なぜなら、その realm
+                                に属するドキュメントへアクセスする目的では事実上そのように機能するからです。</p>
+                        </div>
+                        <div id="rfc.section.5.2.p.4">
+                            <p>第二の結果として、realm 文字列は単一ユーザーが使用する可能性のあるすべての realm の中で一意であることが <em class="bcp14">SHOULD</em>
+                                推奨されます。特に、realm 文字列は認証を行うホストの名前を含むべきです。クライアントがサーバーを認証できないことはダイジェスト認証の弱点です。</p>
+                        </div>
+                    </section>
+                    <section id="n-authentication-of-clients-using-digest-authentication">
+                        <h3 id="rfc.section.5.3"><a href="#rfc.section.5.3">5.3.</a>&nbsp;<a
+                                href="#n-authentication-of-clients-using-digest-authentication">ダイジェスト認証を使用するクライアントの認証</a>
+                        </h3>
+                        <div id="rfc.section.5.3.p.1">
+                            <p>ダイジェスト認証は、公開鍵ベースのメカニズムと比べると強い認証メカニズムを提供しません。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.2">
+                            <p>しかし、それは LDAP 用に提案された CRAM-MD5 のような方式よりはかなり強力です（参考：<a href="#RFC4513"><cite
+                                        title="Lightweight Directory Access Protocol (LDAP): Authentication Methods and Security Mechanisms">RFC4513</cite></a>
+                                および <a href="#RFC2195"><cite
+                                        title="IMAP/POP AUTHorize Extension for Simple Challenge/Response">RFC2195</cite></a>）。本仕様はより弱く危険な
+                                Basic 機構を置き換えることを意図しています。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.3">
+                            <p>ダイジェスト認証はユーザー名とパスワード自体を保護しますが、それ以外のリクエストおよびレスポンスに対する機密性保護は提供しません。盗聴者はそれらを取得できます。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.4">
+                            <p>ダイジェスト認証は双方向のメッセージに対して限定的な整合性保護を提供するのみです。もし "qop=auth-int" を使用する場合、WWW-Authenticate および
+                                Authorization ヘッダーフィールドの response パラメータ値計算に使用されるメッセージ部分（<a
+                                    href="#representation.of.digest.values"
+                                    title="Representation of Digest Values">セクション 3.2</a>
+                                を参照）は保護されます。しかしほとんどのヘッダーフィールドとその値は中間者攻撃によって改変され得ます。</p>
+                        </div>
+                        <div id="rfc.section.5.3.p.5">
+                            <p>安全な HTTP トランザクションに必要な多くの要件はダイジェスト認証では満たされません。そのような場合は TLS
+                                の方が適切です。特に、機密性保護が必要な取引はダイジェスト認証では実現できません。それでも、ダイジェスト認証が有用かつ適切な多くの機能は残ります。</p>
+                        </div>
+                    </section>
+                    <section id="n-limited-use-nonce-values">
+                        <h3 id="rfc.section.5.4"><a href="#rfc.section.5.4">5.4.</a>&nbsp;<a
+                                href="#n-limited-use-nonce-values">限定使用の nonce 値</a></h3>
+                        <div id="rfc.section.5.4.p.1">
+                            <p>ダイジェストスキームはレスポンス値の生成にサーバー指定の nonce を用います（<a href="#response" title="Response">セクション
+                                    3.4.1</a> を参照）。前述の nonce の例（<a href="#www-authenticate.response.header"
+                                    title="The WWW-Authenticate Response Header Field">セクション 3.3</a>）に示されるように、サーバーは
+                                nonce を特定のクライアント、特定のリソース、限定された期間または使用回数などにのみ使用できるよう構成することが <em class="bcp14">MAY</em>
+                                あります。こうすることでリプレイ攻撃に対する保護が強化されます（<a href="#replay_attacks" title="Replay Attacks">セクション
+                                    5.5</a> を参照）。しかし nonce の生成と検証方法には性能およびリソースの影響があります。例えば、サーバーは最近発行した各 nonce
+                                が返されたかどうかの記録を保持し、各レスポンスの Authentication-Info ヘッダーフィールドに next-nonce パラメータを送ることで各 nonce
+                                を一度だけ使用可能にすることが <em class="bcp14">MAY</em> あります。これは即時のリプレイ攻撃から保護しますが、nonce
+                                値をチェックするコストが高く、パイプライン化されたリクエストに対して認証失敗を引き起こす可能性があります（結果として stale nonce
+                                表示を返すことになります）。同様に、ETag 値のようなリクエスト固有の要素を取り込むと nonce
+                                の使用をそのバージョンのリソースに限定し、パイプライン化を妨げます。したがって、副作用のあるメソッドには有用ですが、副作用のないメソッドでは性能上受け入れ難いことがある点に注意してください。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="replay_attacks">
+                        <h3 id="rfc.section.5.5"><a href="#rfc.section.5.5">5.5.</a>&nbsp;<a
+                                href="#replay_attacks">リプレイ攻撃</a></h3>
+                        <div id="rfc.section.5.5.p.1">
+                            <p>ダイジェスト認証に対するリプレイ攻撃は、単純な GET
+                                リクエストに対しては通常無意味です。なぜなら、盗聴者はリプレイで得られる唯一のドキュメントを既に見ているからです。これは要求されたドキュメントの URI
+                                がクライアントリクエストでダイジェスト化され、サーバーはそのドキュメントのみを配信するためです。対照的に Basic
+                                認証では、盗聴者がユーザーのパスワードを得ると、そのパスワードで保護された任意のドキュメントにアクセス可能になります。</p>
+                        </div>
+                        <div id="rfc.section.5.5.p.2">
+                            <p>したがって、用途によってはリプレイ攻撃に対する保護が必要です。良好なダイジェスト実装はこれを様々な方法で実現できます。サーバー生成の nonce 値は実装依存ですが、クライアント
+                                IP、タイムスタンプ、リソースの ETag、およびサーバー秘密鍵のダイジェストを含めると（前述の推奨のように）リプレイ攻撃は容易ではありません。攻撃者はサーバーを偽装して異なる
+                                IP にドキュメントを配信させる必要があり、またタイムスタンプが期限切れになる前に攻撃を成功させなければなりません。nonce にクライアント IP
+                                とタイムスタンプを取り込み、トランザクション間で状態を保持しない実装を可能にすることができます。</p>
+                        </div>
+                        <div id="rfc.section.5.5.p.3">
+                            <p>リプレイを完全に許容しないアプリケーションでは、サーバーは二度目の使用が認められないワンタイム nonce 値を使用できます。これは nonce
+                                が期限切れになるまでサーバーがどの nonce が使用されたかを記憶するオーバーヘッドを必要としますが、リプレイ攻撃に対する有効な保護となります。</p>
+                        </div>
+                        <div id="rfc.section.5.5.p.4">
+                            <p>実装は POST や PUT リクエストに対するリプレイ攻撃の可能性に特別な注意を払う必要があります。サーバーがワンタイムまたは限定使用の nonce を用いない、あるいは
+                                "qop=auth-int"
+                                の整合性保護を要求しない限り、攻撃者は成功したリクエストから有効な資格情報を再生して偽のデータや別のメッセージ本文を送る可能性があります。整合性保護を使用しても、多くのヘッダーフィールドのメタデータは保護されません。適切な
+                                nonce の生成と検証は以前に使用された有効な資格情報の再生に対するいくつかの保護を提供しますが、<a href="#mitm"
+                                    title="Man-in-the-Middle Attacks">セクション 5.8</a> を参照してください。</p>
+                        </div>
+                    </section>
+                    <section id="n-weakness-created-by-multiple-authentication-schemes">
+                        <h3 id="rfc.section.5.6"><a href="#rfc.section.5.6">5.6.</a>&nbsp;<a
+                                href="#n-weakness-created-by-multiple-authentication-schemes">複数認証スキームによって生じる弱点</a></h3>
+                        <div id="rfc.section.5.6.p.1">
+                            <p>HTTP/1.1 サーバーは 401 応答で複数のチャレンジを返すことが <em class="bcp14">MAY</em>
+                                あります。各チャレンジは異なる認証スキームを使うことが <em class="bcp14">MAY</em>
+                                あります。ユーザーエージェントは理解する中で最も強力な認証スキームを選択し、そのチャレンジに基づいてユーザーから資格情報を要求しなければなりません（<em
+                                    class="bcp14">MUST</em>）。</p>
+                        </div>
+                        <div id="rfc.section.5.6.p.2">
+                            <p>サーバーが WWW-Authenticate
+                                ヘッダーフィールドで複数の認証スキームを提示する場合、結果として得られる認証の強度は提示されたスキームの中で最も弱いものと同じであることに注意してください。特定の攻撃シナリオについては下記の
+                                <a href="#online.dictionary.attacks" title="Online Dictionary Attacks">セクション 5.7</a>
+                                を参照してください。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="online.dictionary.attacks">
+                        <h3 id="rfc.section.5.7"><a href="#rfc.section.5.7">5.7.</a>&nbsp;<a
+                                href="#online.dictionary.attacks">オンライン辞書攻撃</a></h3>
+                        <div id="rfc.section.5.7.p.1">
+                            <p>攻撃者が盗聴できる場合、盗聴者は傍受した nonce/response
+                                ペアを用いて一般的な単語リストに対してテストできます。そのようなリストは通常、可能なすべてのパスワード数よりはるかに小さいです。各単語に対する response
+                                を計算するコストはチャレンジごとに一度支払われます。</p>
+                        </div>
+                        <div id="rfc.section.5.7.p.2">
+                            <p>サーバーはユーザーが辞書に載っているパスワードを選択できないように制限することでこの攻撃を軽減できます。</p>
+                        </div>
+                    </section>
+                    <section id="mitm">
+                        <h3 id="rfc.section.5.8"><a href="#rfc.section.5.8">5.8.</a>&nbsp;<a
+                                href="#mitm">中間者攻撃（MITM）</a></h3>
+                        <div id="rfc.section.5.8.p.1">
+                            <p>ダイジェスト認証は敵対的または乗っ取られたプロキシなどによる中間者（MITM）攻撃に対して脆弱です。これは盗聴のすべての問題を引き起こしますが、加えて攻撃者にいくつかの追加の機会を与えます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.5.8.p.2">
+                            <p>可能な MITM
+                                攻撃の一つは、意図的に弱い認証スキームを選択肢に追加し、クライアントが資格情報を露出するスキームを使用することを期待するものです（例えばパスワードを露出するもの）。このためクライアントは提示された選択肢の中で理解する最も強力なスキームを常に使用することが
+                                <em class="bcp14">SHOULD</em> 推奨されます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.5.8.p.3">
+                            <p>さらに悪質な MITM 攻撃は、提示されたすべての選択肢を削除して Basic
+                                認証のみを要求するチャレンジに置き換え、そこで得た平文資格情報を使ってオリジンサーバーに対してより強いスキームで認証するという方法です。特に悪質なのは、攻撃者が「無料」のプロキシキャッシュサービスを提供して騙す場合です。
+                            </p>
+                        </div>
+                        <div id="rfc.section.5.8.p.4">
+                            <p>ユーザーエージェントは、資格情報要求時に使用される認証スキームを視覚的に示したり、サーバーから要求された最強の認証スキームを記憶してより弱いものを使用する前に警告を出すなどの対策を検討すべきです。特定のサイトに対してダイジェスト認証を要求するようユーザーエージェントを設定することも有用かもしれません。
+                            </p>
+                        </div>
+                        <div id="rfc.section.5.8.p.5">
+                            <p>あるいは、敵対的なプロキシがクライアントをだまして攻撃者が望むリクエストを送らせる可能性もあります。もちろんこれは Basic
+                                認証に対する同等の攻撃よりは難しいですが、依然として現実的なリスクです。</p>
+                        </div>
+                    </section>
+                    <section id="n-chosen-plaintext-attacks">
+                        <h3 id="rfc.section.5.9"><a href="#rfc.section.5.9">5.9.</a>&nbsp;<a
+                                href="#n-chosen-plaintext-attacks">選択平文攻撃</a></h3>
+                        <div id="rfc.section.5.9.p.1">
+                            <p>ダイジェスト認証では、MITM や悪意のあるサーバーがクライアントがレスポンスを計算するために使用する nonce を任意に選べます。これを「選択平文」攻撃と呼びます。nonce
+                                を選べる能力は暗号解析を容易にすることが知られています。</p>
+                        </div>
+                        <div id="rfc.section.5.9.p.2">
+                            <p>しかし、選択平文を用いたダイジェストで使用される単方向関数を解析する方法は現時点では知られていません。</p>
+                        </div>
+                        <div id="rfc.section.5.9.p.3">
+                            <p>この攻撃への対策は、クライアントが cnonce パラメータを使用することです。これによりクライアントがハッシュへの入力を攻撃者に選ばせないように変化させることができます。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="n-precomputed-dictionary-attacks">
+                        <h3 id="rfc.section.5.10"><a href="#rfc.section.5.10">5.10.</a>&nbsp;<a
+                                href="#n-precomputed-dictionary-attacks">事前計算辞書攻撃</a></h3>
+                        <div id="rfc.section.5.10.p.1">
+                            <p>選択平文攻撃が可能な場合、攻撃者は任意の nonce
+                                に対して多くの一般的な単語のレスポンスを事前計算し、レスポンス/パスワードの辞書を保存できます。この事前計算は複数のマシンで並列に行えることが多く、選択平文攻撃を使ってそのチャレンジに対応するレスポンスを取得し、辞書からパスワードを参照するだけで済みます。パスワードが辞書に含まれていない場合でも一部は当てはまる可能性があります。攻撃者がチャレンジを選べるため、各パスワードに対するレスポンス計算コストは多くのパスワードを見つける際に分散されます。1
+                                億のパスワード/レスポンスペアを持つ辞書でも約 3.2 ギガバイトのディスク容量で済むと報告されています。</p>
+                        </div>
+                        <div id="rfc.section.5.10.p.2">
+                            <p>この攻撃への対策はクライアントが cnonce パラメータを使用することです。</p>
+                        </div>
+                    </section>
+                    <section id="n-batch-brute-force-attacks">
+                        <h3 id="rfc.section.5.11"><a href="#rfc.section.5.11">5.11.</a>&nbsp;<a
+                                href="#n-batch-brute-force-attacks">バッチブルートフォース攻撃</a></h3>
+                        <div id="rfc.section.5.11.p.1">
+                            <p>MITM は選択平文攻撃を実行して多くのユーザーから同じ nonce
+                                に対するレスポンスを収集できます。これにより、パスワード空間の任意の部分集合について一度の走査でその中のいずれかの nonce/response
+                                ペアを生成するすべてのパスワードを見つけられます。集めた nonce/response
+                                ペアの数に応じて、最初のパスワードを見つける時間が短縮されます。この探索は多くのマシンで並列に実行可能であり、単一のマシンでも大きなパスワード空間の部分集合を非常に短時間で検索できます—例えば
+                                6 文字以下のすべてのパスワード検索が数時間で完了したという報告があります。</p>
+                        </div>
+                        <div id="rfc.section.5.11.p.2">
+                            <p>この攻撃への対策はクライアントが cnonce パラメータを使用することです。</p>
+                        </div>
+                    </section>
+                    <section id="n-parameter-randomness">
+                        <h3 id="rfc.section.5.12"><a href="#rfc.section.5.12">5.12.</a>&nbsp;<a
+                                href="#n-parameter-randomness">パラメータの乱数性</a></h3>
+                        <div id="rfc.section.5.12.p.1">
+                            <p>このプロトコルのセキュリティは、クライアントおよびサーバーの nonce
+                                のようなランダムに選ばれるパラメータの乱数性に依存します。これらは強力なランダム源または適切にシードされた擬似乱数源によって生成されるべきです（詳細は <a
+                                    href="#RFC4086"><cite
+                                        title="Randomness Requirements for Security">RFC4086</cite></a> を参照）。</p>
+                        </div>
+                    </section>
+                    <section id="n-summary">
+                        <h3 id="rfc.section.5.13"><a href="#rfc.section.5.13">5.13.</a>&nbsp;<a
+                                href="#n-summary">まとめ</a></h3>
+                        <div id="rfc.section.5.13.p.1">
+                            <p>現代の暗号基準から見ると、ダイジェスト認証は弱いものです。しかし、多くの用途において Basic 認証の代替として有用です。Basic
+                                のいくつかの弱点を改善しますが、すべてを解消するわけではありません。その強度は実装に依存します。特に nonce
+                                の構造（サーバー実装に依存する）はリプレイ攻撃の難易度に影響を与えます。サーバー側でワンタイム nonce
+                                やダイジェストを受け入れることでリプレイの可能性を排除する実装もあれば、上で推奨したように単一 IP と単一 ETag または限定寿命に制限した nonce
+                                で満足する実装もあります。</p>
+                        </div>
+                        <div id="rfc.section.5.13.p.2">
+                            <p>要するに、どの準拠実装であっても暗号学的基準では相対的に弱いですが、どの準拠実装であっても Basic 認証よりははるかに優れているという点が重要です。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="iana.considerations">
+                    <h2 id="rfc.section.6"><a href="#rfc.section.6">6.</a>&nbsp;<a href="#iana.considerations">IANA
+                            に関する考慮事項</a></h2>
+                    <section id="n-hash-algorithms-for-http-digest-authentication">
+                        <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a>&nbsp;<a
+                                href="#n-hash-algorithms-for-http-digest-authentication">HTTP ダイジェスト認証のためのハッシュアルゴリズム</a>
+                        </h3>
+                        <div id="rfc.section.6.1.p.1">
+                            <p>本仕様は既存の "Hypertext Transfer Protocol (HTTP) Digest Algorithm Values" カテゴリの下に "Hash
+                                Algorithms for HTTP Digest Authentication" という新しい IANA レジストリを作成します。このレジストリは HTTP
+                                ダイジェスト認証で使用できるハッシュアルゴリズムを一覧化します。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.2" class="avoidbreakafter">
+                            <p>新しいハッシュアルゴリズムを登録する際には、次の情報を提供することが <em class="bcp14">MUST</em> です：</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.3">
+                            <p>Hash Algorithm </p>
+                            <ul class="empty">
+                                <li>ハッシュアルゴリズムのテキスト名。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.6.1.p.4">
+                            <p>Digest Size </p>
+                            <ul class="empty">
+                                <li>アルゴリズムの出力サイズ（ビット単位）。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.6.1.p.5">
+                            <p>Reference </p>
+                            <ul class="empty">
+                                <li>このレジストリにアルゴリズムを追加する仕様への参照。</li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.6.1.p.6">
+                            <p>このレジストリの更新ポリシーは Specification Required とします（<a href="#RFC5226"><cite
+                                        title="Guidelines for Writing an IANA Considerations Section in RFCs">RFC5226</cite></a>
+                                を参照）。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.7" class="avoidbreakafter">
+                            <p>初期レジストリには以下のエントリが含まれます：</p>
+                        </div>
+                        <div id="rfc.table.u.1" class="table table-condensed table-striped">
+                            <table class="table table-condensed table-striped full text-center">
+                                <thead>
+                                    <tr>
+                                        <th>Hash Algorithm</th>
+                                        <th>Digest Size</th>
+                                        <th>Reference</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-left">"MD5"</td>
+                                        <td class="text-left">128</td>
+                                        <td class="text-left">RFC 7616</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left">"SHA-512-256"</td>
+                                        <td class="text-left">256</td>
+                                        <td class="text-left">RFC 7616</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left">"SHA-256"</td>
+                                        <td class="text-left">256</td>
+                                        <td class="text-left">RFC 7616</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="rfc.section.6.1.p.8">
+                            <p>レジストリで定義される各アルゴリズムには "-sess" 変種（例：MD5-sess、SHA-256-sess 等）が存在し得ます。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.9">
+                            <p>既存の "HTTP Digest Algorithm Values" レジストリの目的を明確にし、二つのレジストリ間の混乱を避けるために、IANA
+                                は既存レジストリに以下の説明を追加しました：</p>
+                            <ul class="empty">
+                                <li>このレジストリは、RFC 3230 に記載されるとおり、HTTP メッセージ本文のダイジェストを作成する際に使用できるアルゴリズムを一覧化します。</li>
+                            </ul>
+                        </div>
+                    </section>
+                    <section id="n-digest-scheme-registration">
+                        <h3 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a>&nbsp;<a
+                                href="#n-digest-scheme-registration">ダイジェストスキームの登録</a></h3>
+                        <div id="rfc.section.6.2.p.1">
+                            <p>本仕様は "Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry" における Digest
+                                スキームの既存エントリを更新し、本仕様への新しい参照を追加します。</p>
+                        </div>
+                        <div id="rfc.section.6.2.p.2">
+                            <ul class="empty">
+                                <li>Authentication Scheme Name: Digest</li>
+                                <li>Pointer to specification text: RFC 7616</li>
+                            </ul>
+                        </div>
+                    </section>
+                </section>
+                <section id="rfc.references">
+                    <h2 id="rfc.section.7"><a href="#rfc.section.7">7.</a> References</h2>
+                    <section>
+                        <div id="rfc.references.1">
+                            <h3 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a> ノルマティブ参考文献</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                <dd>Bradner, S., “<a href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words for
+                                        use in RFCs to Indicate Requirement Levels</a>”, <a
+                                        href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 2119, <a
+                                        href="https://dx.doi.org/10.17487/RFC2119">DOI 10.17487/RFC2119</a>, March 1997,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
+                                </dd>
+                                <dt id="RFC2978">[<a href="#RFC2978" class="smpl">RFC2978</a>]</dt>
+                                <dd>Freed, N. and J. Postel, “<a href="https://www.rfc-editor.org/rfc/rfc2978.html">IANA
+                                        Charset Registration Procedures</a>”, <a
+                                        href="https://www.rfc-editor.org/info/bcp19">BCP 19</a>, RFC 2978, <a
+                                        href="https://dx.doi.org/10.17487/RFC2978">DOI 10.17487/RFC2978</a>, October
+                                    2000, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc2978">http://www.rfc-editor.org/info/rfc2978</a>&gt;.
+                                </dd>
+                                <dt id="RFC3629">[<a href="#RFC3629" class="smpl">RFC3629</a>]</dt>
+                                <dd>Yergeau, F., “<a href="https://www.rfc-editor.org/rfc/rfc3629.html">UTF-8, a
+                                        transformation format of ISO 10646</a>”, <a
+                                        href="https://www.rfc-editor.org/info/std63">STD 63</a>, RFC 3629, <a
+                                        href="https://dx.doi.org/10.17487/RFC3629">DOI 10.17487/RFC3629</a>, November
+                                    2003, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc3629">http://www.rfc-editor.org/info/rfc3629</a>&gt;.
+                                </dd>
+                                <dt id="RFC3986">[<a href="#RFC3986" class="smpl">RFC3986</a>]</dt>
+                                <dd>Berners-Lee, T., Fielding, R., and L. Masinter, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc3986.html">Uniform Resource Identifier
+                                        (URI): Generic Syntax</a>”, <a href="https://www.rfc-editor.org/info/std66">STD
+                                        66</a>, RFC 3986, <a href="https://dx.doi.org/10.17487/RFC3986">DOI
+                                        10.17487/RFC3986</a>, January 2005, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc3986">http://www.rfc-editor.org/info/rfc3986</a>&gt;.
+                                </dd>
+                                <dt id="RFC4086">[<a href="#RFC4086" class="smpl">RFC4086</a>]</dt>
+                                <dd>Eastlake 3rd, D., Schiller, J., and S. Crocker, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc4086.html">Randomness Requirements for
+                                        Security</a>”, <a href="https://www.rfc-editor.org/info/bcp106">BCP 106</a>, RFC
+                                    4086, <a href="https://dx.doi.org/10.17487/RFC4086">DOI 10.17487/RFC4086</a>, June
+                                    2005, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc4086">http://www.rfc-editor.org/info/rfc4086</a>&gt;.
+                                </dd>
+                                <dt id="RFC5198">[<a href="#RFC5198" class="smpl">RFC5198</a>]</dt>
+                                <dd>Klensin, J. and M. Padlipsky, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5198.html">Unicode Format for Network
+                                        Interchange</a>”, RFC 5198, <a href="https://dx.doi.org/10.17487/RFC5198">DOI
+                                        10.17487/RFC5198</a>, March 2008, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc5198">http://www.rfc-editor.org/info/rfc5198</a>&gt;.
+                                </dd>
+                                <dt id="RFC5234">[<a href="#RFC5234" class="smpl">RFC5234</a>]</dt>
+                                <dd>Crocker, D., Ed. and P. Overell, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5234.html">Augmented BNF for Syntax
+                                        Specifications: ABNF</a>”, <a href="https://www.rfc-editor.org/info/std68">STD
+                                        68</a>, RFC 5234, <a href="https://dx.doi.org/10.17487/RFC5234">DOI
+                                        10.17487/RFC5234</a>, January 2008, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc5234">http://www.rfc-editor.org/info/rfc5234</a>&gt;.
+                                </dd>
+                                <dt id="RFC5987">[<a href="#RFC5987" class="smpl">RFC5987</a>]</dt>
+                                <dd>Reschke, J., “<a href="https://www.rfc-editor.org/rfc/rfc5987.html">Character Set
+                                        and Language Encoding for Hypertext Transfer Protocol (HTTP) Header Field
+                                        Parameters</a>”, RFC 5987, <a href="https://dx.doi.org/10.17487/RFC5987">DOI
+                                        10.17487/RFC5987</a>, August 2010, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc5987">http://www.rfc-editor.org/info/rfc5987</a>&gt;.
+                                </dd>
+                                <dt id="RFC6454">[<a href="#RFC6454" class="smpl">RFC6454</a>]</dt>
+                                <dd>Barth, A., “<a href="https://www.rfc-editor.org/rfc/rfc6454.html">The Web Origin
+                                        Concept</a>”, RFC 6454, <a href="https://dx.doi.org/10.17487/RFC6454">DOI
+                                        10.17487/RFC6454</a>, December 2011, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc6454">http://www.rfc-editor.org/info/rfc6454</a>&gt;.
+                                </dd>
+                                <dt id="RFC7230">[<a href="#RFC7230" class="smpl">RFC7230</a>]</dt>
+                                <dd>Fielding, R., Ed. and J. Reschke, Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Message Syntax and Routing</a>”, RFC 7230, <a
+                                        href="https://dx.doi.org/10.17487/RFC7230">DOI 10.17487/RFC7230</a>, June 2014,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7230">http://www.rfc-editor.org/info/rfc7230</a>&gt;.
+                                </dd>
+                                <dt id="RFC7231">[<a href="#RFC7231" class="smpl">RFC7231</a>]</dt>
+                                <dd>Fielding, R., Ed. and J. Reschke, Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7231.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Semantics and Content</a>”, RFC 7231, <a
+                                        href="https://dx.doi.org/10.17487/RFC7231">DOI 10.17487/RFC7231</a>, June 2014,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7231">http://www.rfc-editor.org/info/rfc7231</a>&gt;.
+                                </dd>
+                                <dt id="RFC7234">[<a href="#RFC7234" class="smpl">RFC7234</a>]</dt>
+                                <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7234.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Caching</a>”, RFC 7234, <a
+                                        href="https://dx.doi.org/10.17487/RFC7234">DOI 10.17487/RFC7234</a>, June 2014,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7234">http://www.rfc-editor.org/info/rfc7234</a>&gt;.
+                                </dd>
+                                <dt id="RFC7235">[<a href="#RFC7235" class="smpl">RFC7235</a>]</dt>
+                                <dd>Fielding, R., Ed. and J. Reschke, Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7235.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Authentication</a>”, RFC 7235, <a
+                                        href="https://dx.doi.org/10.17487/RFC7235">DOI 10.17487/RFC7235</a>, June 2014,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7235">http://www.rfc-editor.org/info/rfc7235</a>&gt;.
+                                </dd>
+                                <dt id="RFC7613">[<a href="#RFC7613" class="smpl">RFC7613</a>]</dt>
+                                <dd>Saint-Andre, P. and A. Melnikov, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7613.html">Preparation, Enforcement, and
+                                        Comparison of Internationalized Strings Representing Usernames and
+                                        Passwords</a>”, RFC 7613, <a href="https://dx.doi.org/10.17487/RFC7613">DOI
+                                        10.17487/RFC7613</a>, August 2015, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7613">http://www.rfc-editor.org/info/rfc7613</a>&gt;.
+                                </dd>
+                                <dt id="RFC7615">[<a href="#RFC7615" class="smpl">RFC7615</a>]</dt>
+                                <dd>Reschke, J., “<a href="https://www.rfc-editor.org/rfc/rfc7615.html">HTTP
+                                        Authentication-Info and Proxy-Authentication-Info Response Header Fields</a>”,
+                                    RFC 7615, <a href="https://dx.doi.org/10.17487/RFC7615">DOI 10.17487/RFC7615</a>,
+                                    September 2015, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7615">http://www.rfc-editor.org/info/rfc7615</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section>
+                        <div id="rfc.references.2">
+                            <h3 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2.</a> 参考文献（参考資料）</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="RFC2195">[<a href="#RFC2195" class="smpl">RFC2195</a>]</dt>
+                                <dd>Klensin, J., Catoe, R., and P. Krumviede, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc2195.html">IMAP/POP AUTHorize Extension
+                                        for Simple Challenge/Response</a>”, RFC 2195, <a
+                                        href="https://dx.doi.org/10.17487/RFC2195">DOI 10.17487/RFC2195</a>, September
+                                    1997, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc2195">http://www.rfc-editor.org/info/rfc2195</a>&gt;.
+                                </dd>
+                                <dt id="RFC2617">[<a href="#RFC2617" class="smpl">RFC2617</a>]</dt>
+                                <dd>Franks, J., Hallam-Baker, P., Hostetler, J., Lawrence, S., Leach, P., Luotonen, A.,
+                                    and L. Stewart, “<a href="https://www.rfc-editor.org/rfc/rfc2617.html">HTTP
+                                        Authentication: Basic and Digest Access Authentication</a>”, RFC 2617, <a
+                                        href="https://dx.doi.org/10.17487/RFC2617">DOI 10.17487/RFC2617</a>, June 1999,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc2617">http://www.rfc-editor.org/info/rfc2617</a>&gt;.
+                                </dd>
+                                <dt id="RFC2818">[<a href="#RFC2818" class="smpl">RFC2818</a>]</dt>
+                                <dd>Rescorla, E., “<a href="https://www.rfc-editor.org/rfc/rfc2818.html">HTTP Over
+                                        TLS</a>”, RFC 2818, <a href="https://dx.doi.org/10.17487/RFC2818">DOI
+                                        10.17487/RFC2818</a>, May 2000, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc2818">http://www.rfc-editor.org/info/rfc2818</a>&gt;.
+                                </dd>
+                                <dt id="RFC4513">[<a href="#RFC4513" class="smpl">RFC4513</a>]</dt>
+                                <dd>Harrison, R., Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc4513.html">Lightweight Directory Access
+                                        Protocol (LDAP): Authentication Methods and Security Mechanisms</a>”, RFC 4513,
+                                    <a href="https://dx.doi.org/10.17487/RFC4513">DOI 10.17487/RFC4513</a>, June 2006,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc4513">http://www.rfc-editor.org/info/rfc4513</a>&gt;.
+                                </dd>
+                                <dt id="RFC5226">[<a href="#RFC5226" class="smpl">RFC5226</a>]</dt>
+                                <dd>Narten, T. and H. Alvestrand, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5226.html">Guidelines for Writing an
+                                        IANA Considerations Section in RFCs</a>”, <a
+                                        href="https://www.rfc-editor.org/info/bcp26">BCP 26</a>, RFC 5226, <a
+                                        href="https://dx.doi.org/10.17487/RFC5226">DOI 10.17487/RFC5226</a>, May 2008,
+                                    &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc5226">http://www.rfc-editor.org/info/rfc5226</a>&gt;.
+                                </dd>
+                                <dt id="RFC7617">[<a href="#RFC7617" class="smpl">RFC7617</a>]</dt>
+                                <dd>Reschke, J., “<a href="https://www.rfc-editor.org/rfc/rfc7617.html">The 'Basic' HTTP
+                                        Authentication Scheme</a>”, RFC 7617, <a
+                                        href="https://dx.doi.org/10.17487/RFC7617">DOI 10.17487/RFC7617</a>, September
+                                    2015, &lt;<a
+                                        href="http://www.rfc-editor.org/info/rfc7617">http://www.rfc-editor.org/info/rfc7617</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                </section>
+                <section id="rfc2617.changes">
+                    <h2 id="rfc.section.A" class="np"><a href="#rfc.section.A">Appendix A.</a>&nbsp;<a
+                            href="#rfc2617.changes">RFC 2617 からの変更点</a></h2>
+                    <div id="rfc.section.A.p.1">
+                        <p>本書は以下の変更を導入します：</p>
+                        <ul>
+                            <li>2 つの新しいアルゴリズム（SHA2-256 を必須、SHA2-512/256 をバックアップ）をサポートし、適切なアルゴリズム交渉を定義します。文書は互換性のために MD5
+                                サポートを維持しますが、後方互換性目的のみです。</li>
+                            <li>プライバシー目的で主にユーザー名ハッシュ化機能とそれに関連するパラメータを導入します。</li>
+                            <li>A1 計算およびユーザー名とパスワードのエンコーディングに影響を与えるさまざまな国際化上の考慮事項を追加します。</li>
+                            <li>HTTP ダイジェスト認証で使用できるハッシュアルゴリズムを一覧化する新しい IANA レジストリ "Hash Algorithms for HTTP Digest
+                                Authentication" を導入します。</li>
+                            <li>RFC 2069 との下位互換性を非推奨とします。</li>
+                        </ul>
+                    </div>
+                </section>
+                <section id="n-acknowledgments">
+                    <h2 id="rfc.section.B"><a href="#rfc.section.B">Appendix B.</a>&nbsp;<a
+                            href="#n-acknowledgments">謝辞</a></h2>
+                    <div id="rfc.section.B.p.1">
+                        <p>ダイジェスト機構とその動作を完全に記述するために、本書は <a href="#RFC2617"><cite
+                                    title="HTTP Authentication: Basic and Digest Access Authentication">RFC2617</cite></a>
+                            から多くの文を借用しています。本書の著者はその仕様の作成に関わった John Franks、Phillip M. Hallam-Baker、Jeffery L.
+                            Hostetler、Scott D. Lawrence、Paul J. Leach、Ari Luotonen、Lawrence C. Stewart に感謝します。</p>
+                    </div>
+                    <div id="rfc.section.B.p.2">
+                        <p>Julian Reschke に対する多数のレビュー、コメント、提案、および本文提供に特別な謝辞を捧げます。</p>
+                    </div>
+                    <div id="rfc.section.B.p.3">
+                        <p>著者は Stephen Farrell、Yoav Nir、Phillip Hallam-Baker、Manu Sporny、Paul Hoffman、Yaron Sheffer、Sean
+                            Turner、Geoff Baskwill、Eric Cooper、Bjoern Hoehrmann、Martin Durst、Peter Saint-Andre、Michael
+                            Sweet、Daniel Stenberg、Brett Tate、Paul Leach、Ilari Liusvaara、Gary Mort、Alexey
+                            Melnikov、Benjamin Kaduk、Kathleen Moriarty、Francis Dupont、Hilarie Orman、Ben Campbell
+                            に対して慎重なレビューとコメントを行ってくれたことに感謝します。</p>
+                    </div>
+                    <div id="rfc.section.B.p.4">
+                        <p>著者は Jonathan Stoke、Nico Williams、Harry Halpin、Phil Hunt
+                            に対して、本書のさまざまな側面を議論するメールリストでのコメントに感謝します。</p>
+                    </div>
+                    <div id="rfc.section.B.p.5">
+                        <p>著者は Paul Kyzivat と Dale Worley に対して、本書のいくつかの側面について慎重なレビューとフィードバックを行ってくれたことに感謝します。</p>
+                    </div>
+                    <div id="rfc.section.B.p.6">
+                        <p>著者はレジストリに関する助言をしてくれた Barry Leiba に感謝します。</p>
+                    </div>
+                </section>
+                <section id="rfc.authors" class="avoidbreakinside">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>Rifaat Shekh-Yusef</b> (編集者)<br>Avaya<br>250 Sidney Street<br>Belleville,
+                        Ontario<br>Canada<br>Phone: <a href="tel:+1-613-967-5267">+1-613-967-5267</a><br>EMail: <a
+                            href="mailto:rifaat.ietf@gmail.com">rifaat.ietf@gmail.com</a></address>
+                    <address><b>David Ahrens</b><br>Independent<br>California<br>United States<br>EMail: <a
+                            href="mailto:ahrensdc@gmail.com">ahrensdc@gmail.com</a></address>
+                    <address><b>Sophie Bremer</b><br>Netzkonform<br>Germany<br>EMail: <a
+                            href="mailto:sophie.bremer@netzkonform.de">sophie.bremer@netzkonform.de</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>

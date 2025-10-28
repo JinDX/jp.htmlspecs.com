@@ -1,0 +1,1250 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 8188 - HTTP の暗号化コンテンツエンコーディング</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC8188">
+    <meta property="og:description" content="Encrypted Content-Encoding for HTTP">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc8188.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 The 'aes128gcm' HTTP Content Coding" href="#rfc.section.2">
+    <link rel="Chapter" title="3 Examples" href="#rfc.section.3">
+    <link rel="Chapter" title="4 Security Considerations" href="#rfc.section.4">
+    <link rel="Chapter" title="5 IANA Considerations" href="#rfc.section.5">
+    <link rel="Chapter" title="6 References" href="#rfc.section.6">
+    <link rel="Appendix" title="A JWE Mapping" href="#rfc.section.A">
+    <link rel="Appendix" title="Acknowledgements" href="#rfc.section.unnumbered-1">
+    <link rel="convertedFrom" href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-encryption-encoding/">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc8188.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="http://www.rfc-editor.org/info/rfc8188">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Thomson, M.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:8188">
+    <meta name="dcterms.issued" content="2017-06">
+    <meta name="dcterms.abstract"
+        content="This memo introduces a content coding for HTTP that allows message payloads to be encrypted.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="This memo introduces a content coding for HTTP that allows message payloads to be encrypted.">
+</head>
+
+<body onload="getMeta(8188,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>8188</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.section.1.1">要件言語</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#aes128gcm">「aes128gcm」HTTP コンテンツコーディング</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#header">暗号化コンテンツコーディング ヘッダー</a></li>
+                                        <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#derivation">コンテンツ暗号鍵の導出</a></li>
+                                        <li><a href="#rfc.section.2.3">2.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#nonce">ノンス導出</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#examples">例</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#explicit">レスポンスの暗号化</a></li>
+                                        <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#encryption-with-multiple-records">複数レコードによる暗号化</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security-considerations">セキュリティの考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#automatic-decryption">自動復号</a></li>
+                                        <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#message-truncation">メッセージ切り詰め</a></li>
+                                        <li><a href="#rfc.section.4.3">4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#key-and-nonce-reuse">鍵とノンスの再利用</a></li>
+                                        <li><a href="#rfc.section.4.4">4.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#limits">データ暗号化の制限</a></li>
+                                        <li><a href="#rfc.section.4.5">4.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#content-integrity">コンテンツ整合性</a></li>
+                                        <li><a href="#rfc.section.4.6">4.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#leaking-information-in-header-fields">ヘッダーフィールドによる情報漏洩</a></li>
+                                        <li><a href="#rfc.section.4.7">4.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#poisoning-storage">ストレージの汚染</a></li>
+                                        <li><a href="#rfc.section.4.8">4.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sizing-and-timing-attacks">サイズ・タイミング攻撃</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#iana">IANA に関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.5.1">5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#the-aes128gcm-http-content-coding">「aes128gcm」HTTP
+                                                コンテンツコーディング</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.1">ノルマティブ参考文献</a></li>
+                                        <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">インフォマティブ参考文献</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.A">Appendix A.</a>&nbsp;&nbsp;&nbsp;<a href="#jwe">付録 A. JWE
+                                        マッピング</a></li>
+                                <li><a href="#acknowledgements">謝辞</a></li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネット技術タスクフォース (IETF)</td>
+                                <td class="text-right">M. Thomson</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 8188</td>
+                                <td class="text-right">Mozilla</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: Standards Track</td>
+                                <td class="text-right">2017年6月</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>HTTP 向け暗号化コンテンツエンコーディング</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">概要</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>本メモは、メッセージペイロードを暗号化できる HTTP 向けのコンテンツコーディングを導入します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモの状態</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>これはインターネット標準トラック文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネット技術タスクフォース (IETF) の成果物です。IETF コミュニティの合意を示しており、公開審査を経て Internet Engineering Steering
+                            Group (IESG) によって公開が承認されています。インターネット標準に関する詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc7841.html#section-2">RFC 7841 のセクション 2</a>
+                            を参照してください。
+                        </p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>この文書の現行の状態、訂正情報（errata）、およびフィードバックの方法については <a
+                                href="http://www.rfc-editor.org/info/rfc8188">http://www.rfc-editor.org/info/rfc8188</a>
+                            を参照してください。</p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in
+                            effect on the date of publication of this document. Please review these documents carefully,
+                            as they describe your rights and restrictions with respect to this document. Code Components
+                            extracted from this document must include Simplified BSD License text as described in
+                            Section 4.e of the Trust Legal Provisions and are provided without warranty as described in
+                            the Simplified BSD License.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">導入</a>
+                            <ul>
+                                <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.section.1.1">要件言語</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#aes128gcm">"aes128gcm" HTTP
+                                コンテンツコーディング</a>
+                            <ul>
+                                <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a href="#header">暗号化
+                                        コンテンツコーディング ヘッダー</a></li>
+                                <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#derivation">コンテンツ暗号鍵導出</a></li>
+                                <li><a href="#rfc.section.2.3">2.3.</a>&nbsp;&nbsp;&nbsp;<a href="#nonce">ノンス
+                                        導出</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#examples">例</a>
+                            <ul>
+                                <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#explicit">レスポンスの暗号化</a></li>
+                                <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#encryption-with-multiple-records">複数レコードによる暗号化</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#security-considerations">セキュリティ考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.4.1">4.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#automatic-decryption">自動復号</a></li>
+                                <li><a href="#rfc.section.4.2">4.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#message-truncation">メッセージの切り捨て</a></li>
+                                <li><a href="#rfc.section.4.3">4.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#key-and-nonce-reuse">鍵とノンスの再利用</a></li>
+                                <li><a href="#rfc.section.4.4">4.4.</a>&nbsp;&nbsp;&nbsp;<a href="#limits">データ暗号化の限界</a>
+                                </li>
+                                <li><a href="#rfc.section.4.5">4.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#content-integrity">コンテンツ整合性</a></li>
+                                <li><a href="#rfc.section.4.6">4.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#leaking-information-in-header-fields">ヘッダーフィールドにおける情報漏洩</a></li>
+                                <li><a href="#rfc.section.4.7">4.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#poisoning-storage">ストレージの汚染</a></li>
+                                <li><a href="#rfc.section.4.8">4.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#sizing-and-timing-attacks">サイズおよびタイミング攻撃</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a href="#iana">IANA に関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.5.1">5.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#the-aes128gcm-http-content-coding">"aes128gcm" HTTP コンテンツコーディング</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                            <ul>
+                                <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.1">ノルマティブ参考文献</a></li>
+                                <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">インフォマティブ参考文献</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.A">付録 A.</a>&nbsp;&nbsp;&nbsp;<a href="#jwe">JWE マッピング</a>
+                        </li>
+                        <li><a href="#acknowledgements">謝辞</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <section id="introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#introduction">導入</a></h2>
+                    <div id="rfc.section.1.p.1">
+                        <p>HTTP メッセージ（リクエストまたはレスポンス）の内容を暗号化して、ペイロードが保存された場合（例：HTTP
+                            PUT）に適切な鍵を持つ者だけが内容を読めるようにすることが望ましい場合があります。</p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>例えば、サーバー上にファイルを保存するがその内容を当該サーバーに知られたくない場合があります。さらに、その同じファイルは他のサーバーへ複製され（サーバーやネットワーク障害への耐性向上のため）、クライアントにダウンロードされ（オフライン利用のため）等が行われても、内容を露出させたくないことがあります。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.3">
+                        <p>これらの用途は、クライアントとサーバー間のチャネルのみを暗号化する Transport Layer Security (TLS) <a href="#RFC5246"><cite
+                                    title="The Transport Layer Security (TLS) Protocol Version 1.2">[RFC5246]</cite></a>
+                            の使用では満たされません。</p>
+                    </div>
+                    <div id="rfc.section.1.p.4">
+                        <p>本書は、これらやその他のユースケースに対応するための HTTP 用コンテンツコーディング（<a
+                                href="https://www.rfc-editor.org/rfc/rfc7231.html#section-3.1.2">RFC7231 セクション 3.1.2</a>
+                            を参照）を規定します。</p>
+                    </div>
+                    <div id="rfc.section.1.p.5">
+                        <p>このコンテンツコーディングは、<a href="#RFC4880"><cite
+                                    title="OpenPGP Message Format">[RFC4880]</cite></a>、<a href="#RFC5652"><cite
+                                    title="Cryptographic Message Syntax (CMS)">[RFC5652]</cite></a>、<a
+                                href="#RFC7516"><cite title="JSON Web Encryption (JWE)">[RFC7516]</cite></a>、および <a
+                                href="#XMLENC"><cite
+                                    title="XML Encryption Syntax and Processing Version 1.1">[XMLENC]</cite></a>
+                            のようなメッセージベースの暗号化フォーマットの直接的な適応ではありません。これらのフォーマットはストリーム処理には向かないため、HTTP
+                            に必要なストリーム処理に適しません。本仕様のフォーマットは、<a href="#RFC5116"><cite
+                                    title="An Interface and Algorithms for Authenticated Encryption">[RFC5116]</cite></a>
+                            に記載された低レベルの構成要素により近い形式に従います。</p>
+                    </div>
+                    <div id="rfc.section.1.p.6">
+                        <p>メッセージベースの暗号化フォーマットが同じプリミティブを使用する範囲で、本フォーマットは特定のプロファイルを持つ暗号化メッセージの列と見なせます。付録 A（<a href="#jwe"
+                                title="JWE Mapping">JWE マッピング</a>）では、本フォーマットが固定ヘッダを持つ JSON Web Encryption
+                            値の列とどのように整合するかを説明します。</p>
+                    </div>
+                    <div id="rfc.section.1.p.7">
+                        <p>このメカニズムは、コンテンツ暗号化を利用するより大きな設計の一部に過ぎない可能性があります。クライアントとサーバーが鍵を取得・識別する方法はユースケースに依存します。特に鍵管理システムは本書では記述しません。
+                        </p>
+                    </div>
+                    <section id="n-requirements-language">
+                        <h3 id="rfc.section.1.1"><a href="#rfc.section.1.1">1.1.</a>&nbsp;<a
+                                href="#n-requirements-language">要件言語</a></h3>
+                        <div id="rfc.section.1.1.p.1">
+                            <p>本書で使われるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD
+                                NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", および "OPTIONAL" は、BCP 14 の定義（<a
+                                    href="#RFC2119"><cite
+                                        title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>、および
+                                <a href="#RFC8174"><cite
+                                        title="Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words">[RFC8174]</cite></a>）に従って、大文字で示される場合に限り解釈されます。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <section id="aes128gcm">
+                    <h2 id="rfc.section.2"><a href="#rfc.section.2">2.</a>&nbsp;<a href="#aes128gcm">"aes128gcm"
+                            HTTP コンテンツコーディング</a></h2>
+                    <div id="rfc.section.2.p.1">
+                        <p>"aes128gcm" HTTP コンテンツコーディングは、Advanced Encryption Standard (AES) の Galois/Counter Mode (GCM)
+                            を用いてペイロードが暗号化されていることを示します（AEAD_AES_128_GCM として <a href="#RFC5116"><cite
+                                    title="An Interface and Algorithms for Authenticated Encryption">[RFC5116]</cite></a>
+                            に記載、Section 5.1 参照）。AEAD_AES_128_GCM アルゴリズムは 128 ビットの content-encryption key を使用します。</p>
+                    </div>
+                    <div id="rfc.section.2.p.2">
+                        <p>このコンテンツコーディングを使用するには鍵の知識が必要です。鍵の取得方法は本書では定めません。</p>
+                    </div>
+                    <div id="rfc.section.2.p.3">
+                        <p>"aes128gcm"
+                            は単一の固定セットの暗号プリミティブを使用します。暗号アルゴリズムの切り替えは新しいコンテンツコーディングスキームを定義することで達成します。これにより暗号化の使用交渉には
+                            Accept-Encoding ヘッダーフィールドだけで十分になります。</p>
+                    </div>
+                    <div id="rfc.section.2.p.4">
+                        <p>"aes128gcm" コンテンツコーディングは固定レコードサイズを使います。最終的なエンコーディングはヘッダー（<a href="#header"
+                                title="Encryption Content-Coding Header">Section 2.1</a> 参照）と、0
+                            個以上の固定長暗号化レコードで構成されます。最終レコードはレコードサイズより小さくなることがあります。</p>
+                    </div>
+                    <div id="rfc.section.2.p.5">
+                        <p>レコードサイズは暗号化される平文の各部分の長さを決定します。レコードサイズ ("rs") はコンテンツコーディングヘッダーに含まれます（<a href="#header"
+                                title="Encryption Content-Coding Header">Section 2.1</a> 参照）。</p>
+                    </div>
+                    <div id="rfc.figure.1">
+                        <div>
+                            <pre class="drawing">
++-----------+             content
+|   data    |             any length up to rs-17 octets
++-----------+
+     |
+     v
++-----------+-----+       add a delimiter octet (0x01 or 0x02)
+|   data    | pad |       then 0x00-valued octets to rs-16
++-----------+-----+       (or less on the last record)
+         |
+         v
++--------------------+    encrypt with AEAD_AES_128_GCM;
+|    ciphertext      |    final size is rs;
++--------------------+    the last record can be smaller
+</pre>
+                        </div>
+                    </div>
+                    <div id="rfc.section.2.p.6">
+                        <p>AEAD_AES_128_GCM は平文よりも 16 オクテット長い暗号文を生成します。したがって各レコードの未暗号化コンテンツはレコードサイズより 16
+                            オクテット短くなります。有効なレコードは常に少なくともパディング区切りオクテットと 16 オクテットの認証タグを含みます。</p>
+                    </div>
+                    <div id="rfc.section.2.p.7">
+                        <p>各レコードは単一のパディング区切りオクテットとそれに続く任意数のゼロオクテットを含みます。最後のレコードのパディング区切りオクテットは値 2 に設定され、その他のレコードは値 1
+                            になります。</p>
+                    </div>
+                    <div id="rfc.section.2.p.8">
+                        <p>復号時、パディング区切りはレコードの最後の非ゼロオクテットとして扱われます。レコードに非ゼロオクテットが存在しない場合、復号器は失敗しなければなりません。最後のレコードが値 2
+                            以外のパディング区切りを含む場合、または最後以外のレコードが値 1 以外のパディング区切りを含む場合、復号器は失敗しなければなりません。</p>
+                    </div>
+                    <div id="rfc.section.2.p.9">
+                        <p>各レコードの nonce はレコードのシーケンス番号と input-keying material から構成される 96 ビット値です。nonce 導出は <a
+                                href="#nonce" title="Nonce Derivation">Section 2.3</a> で扱います。</p>
+                    </div>
+                    <div id="rfc.section.2.p.10">
+                        <p>AEAD_AES_128_GCM に渡される additional data は長さゼロのオクテット列です。</p>
+                    </div>
+                    <div id="rfc.section.2.p.11">
+                        <p>このレコード構造の結果、範囲リクエスト（<a href="#RFC7233"><cite
+                                    title="Hypertext Transfer Protocol (HTTP/1.1): Range Requests">[RFC7233]</cite></a>）や暗号化ペイロード本体へのランダムアクセスはレコードサイズ単位の粒度で可能になります。範囲の端の部分レコードは復号できません。したがって、範囲リクエストはレコード境界で開始および終了するのが望ましいです。ただし、パディングの存在によって特定部分へのランダムアクセスが妨げられる可能性がある点に注意してください。
+                        </p>
+                    </div>
+                    <div id="rfc.section.2.p.12">
+                        <p>適切なレコードサイズの選択はトレードオフを伴います。小さいレコードサイズは復号済みオクテットをより速く解放でき、応答性が重要なアプリケーションに適しています。小さいレコードは暗号文に対するランダムアクセスが必要な場合の追加データも減らします。
+                        </p>
+                    </div>
+                    <div id="rfc.section.2.p.13">
+                        <p>ストリーミング、ランダムアクセス、任意のパディングに依存しないアプリケーションは大きなレコード、あるいは単一レコードを使えます。大きなレコードサイズは処理およびデータのオーバヘッドを削減します。
+                        </p>
+                    </div>
+                    <section id="header">
+                        <h3 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a>&nbsp;<a href="#header">暗号化
+                                コンテンツコーディング ヘッダー</a></h3>
+                        <div id="rfc.section.2.1.p.1">
+                            <p>このコンテンツコーディングは、コンテンツの復号に必要なすべてのパラメータ（鍵を除く）を含むヘッダーブロックを使用します。ヘッダーブロックはレコード列の先頭にメッセージ本文中に置かれます。
+                            </p>
+                        </div>
+                        <div id="rfc.figure.2">
+                            <div>
+                                <pre class="drawing">
++-----------+--------+-----------+---------------+
+| salt (16) | rs (4) | idlen (1) | keyid (idlen) |
++-----------+--------+-----------+---------------+
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.2.1.p.2">
+                            <dl>
+                                <dt>salt:</dt>
+                                <dd>"salt" パラメータは "aes128gcm" コンテンツコーディングヘッダーの最初の 16 オクテットで構成されます。同じ input-keying
+                                    material と異なる payload bodies に対して同じ "salt" 値を再利用してはなりません。各適用でランダムな salt を生成すれば
+                                    content-encryption key の再利用が極めて起こりにくくなります。</dd>
+                                <dt>rs:</dt>
+                                <dd>"rs"（record size）パラメータはネットワークバイトオーダーの符号なし 32 ビット整数で、レコードサイズ（オクテット単位）を表します。したがって
+                                    AEAD_AES_128_GCM に対する平文入力の 2^36-31 上限を超えることは不可能になります。18 未満の値は無効です。</dd>
+                                <dt>idlen:</dt>
+                                <dd>"idlen" パラメータは "keyid" パラメータの長さを定義する符号なし 8 ビット整数です。</dd>
+                                <dt>keyid:</dt>
+                                <dd>"keyid" パラメータは使用される鍵素材を識別するために使えます。このフィールドは "idlen"
+                                    によって決まる長さです。メッセージを受け取る受信者は鍵を取得する方法を知っていることが期待されます；"keyid" はその処理の入力になり得ます。"keyid"
+                                    は識別子をテキスト表示する必要がある場合に備え、UTF-8 エンコードされた文字列であることが <em class="tt">SHOULD</em> 推奨されます（<a
+                                        href="#RFC3629"><cite
+                                            title="UTF-8, a transformation format of ISO 10646">[RFC3629]</cite></a>
+                                    参照）。</dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section id="derivation">
+                        <h3 id="rfc.section.2.2"><a href="#rfc.section.2.2">2.2.</a>&nbsp;<a
+                                href="#derivation">コンテンツ暗号鍵導出</a></h3>
+                        <div id="rfc.section.2.2.p.1">
+                            <p>複数の異なる HTTP メッセージで鍵素材を再利用できるように、各メッセージごとに content-encryption key
+                                を導出します。content-encryption key は "salt" パラメータから HMAC ベースの鍵導出関数（HKDF、<a
+                                    href="#RFC5869"><cite
+                                        title="HMAC-based Extract-and-Expand Key Derivation Function (HKDF)">[RFC5869]</cite></a>）を用いて、SHA-256
+                                ハッシュ（<a href="#FIPS180-4"><cite
+                                        title="Secure Hash Standard (SHS)">[FIPS180-4]</cite></a>）で導出されます。</p>
+                        </div>
+                        <div id="rfc.section.2.2.p.2" class="avoidbreakafter">
+                            <p>"salt" パラメータの値は HKDF の salt 入力です。"keyid" パラメータで識別される鍵素材は HKDF への input-keying material
+                                (IKM) です。IKM は受信者に別途提供されることが期待されます。したがって HKDF の extract フェーズは擬似乱数鍵 (PRK) を次のように生成します：
+                            </p>
+                        </div>
+                        <div id="rfc.figure.3">
+                            <div>
+                                <pre class="inline">
+   PRK = HMAC-SHA-256 (salt, IKM)
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.2.2.p.3" class="avoidbreakafter">
+                            <p>HKDF への info パラメータは ASCII エンコードの文字列 "Content-Encoding:
+                                aes128gcm" と単一のゼロオクテットに設定されます：</p>
+                        </div>
+                        <div id="rfc.figure.4">
+                            <div>
+                                <pre class="inline">
+   cek_info = "Content-Encoding: aes128gcm" || 0x00
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.2.2.p.4">
+                            <dl>
+                                <dt>Note(1):</dt>
+                                <dd>オクテット列の連結は <span class="tt">||</span> 演算子で表されます。</dd>
+                                <dt>Note(2):</dt>
+                                <dd>ここで使用される文字列および <a href="#nonce" title="Nonce Derivation">Section 2.3</a>
+                                    で使用される文字列は、いくつかのプログラミング言語で使われる終端 0x00 オクテットを含みません。</dd>
+                            </dl>
+                        </div>
+                        <div id="rfc.section.2.2.p.5" class="avoidbreakafter">
+                            <p>AEAD_AES_128_GCM は 16 オクテット（128 ビット）の CEK を必要とするため、HKDF の長さ (L) は 16 です。したがって HKDF
+                                の第二ステップは単一の HMAC の最初の 16 オクテットに単純化できます：</p>
+                        </div>
+                        <div id="rfc.figure.5">
+                            <div>
+                                <pre class="inline">
+   CEK = HMAC-SHA-256(PRK, cek_info || 0x01)
+</pre>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="nonce">
+                        <h3 id="rfc.section.2.3"><a href="#rfc.section.2.3">2.3.</a>&nbsp;<a href="#nonce">ノンス導出</a>
+                        </h3>
+                        <div id="rfc.section.2.3.p.1">
+                            <p>AEAD_AES_128_GCM への nonce 入力は各レコードごとに構築されます。各レコードの nonce は 12 オクテット（96
+                                ビット）値で、レコードシーケンス番号、input-keying material、および "salt" パラメータから導出されます。</p>
+                        </div>
+                        <div id="rfc.section.2.3.p.2">
+                            <p>input-keying material と "salt" は、異なる info と長さ (L) パラメータで HKDF に入力されます。</p>
+                        </div>
+                        <div id="rfc.section.2.3.p.3" class="avoidbreakafter">
+                            <p>長さ (L) パラメータは 12 オクテットです。nonce の info パラメータは ASCII エンコードの文字列 "Content-Encoding: nonce"
+                                で、単一のゼロオクテットで終端されます：</p>
+                        </div>
+                        <div id="rfc.figure.6">
+                            <div>
+                                <pre class="inline">
+   nonce_info = "Content-Encoding: nonce" || 0x00
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.2.3.p.4">
+                            <p>その結果はレコードシーケンス番号と排他的論理和（XOR）で結合されて nonce を生成します。レコードシーケンス番号（SEQ）はネットワークバイトオーダーの 96
+                                ビット符号なし整数で、0 から始まります。</p>
+                        </div>
+                        <div id="rfc.section.2.3.p.5" class="avoidbreakafter">
+                            <p>したがって各レコードの最終 nonce は 12 オクテット値です：</p>
+                        </div>
+                        <div id="rfc.figure.7">
+                            <div>
+                                <pre class="inline">
+   NONCE = HMAC-SHA-256(PRK, nonce_info || 0x01) XOR SEQ
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.2.3.p.6">
+                            <p>この nonce 構成は、レコードの削除や並べ替えを防ぎます。</p>
+                        </div>
+                    </section>
+                </section>
+                <section id="examples">
+                    <h2 id="rfc.section.3"><a href="#rfc.section.3">3.</a>&nbsp;<a href="#examples">例</a></h2>
+                    <div id="rfc.section.3.p.1">
+                        <p>このセクションでは encrypted-content コーディングのいくつかの例を示します。</p>
+                    </div>
+                    <div id="rfc.section.3.p.2">
+                        <p>注：この節の例におけるすべてのバイナリ値は URL/ファイル名安全なアルファベットを用いた base64 エンコーディングです（<a href="#RFC4648"><cite
+                                    title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>）。これはリクエスト本文も含みます。書式上の制約に合わせて空白や改行を挿入しています。
+                        </p>
+                    </div>
+                    <section id="explicit">
+                        <h3 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a>&nbsp;<a
+                                href="#explicit">レスポンスの暗号化</a></h3>
+                        <div id="rfc.section.3.1.p.1">
+                            <p>ここでは、成功した HTTP GET レスポンスが暗号化されています。レコードサイズは 4096
+                                オクテットでパディングは行わず（単一オクテットのパディング区切りのみ）、したがって部分レコードのみが存在します。input-keying material
+                                は空文字列で識別されます（ヘッダー中の "keyid" フィールド長はゼロオクテット）。</p>
+                        </div>
+                        <div id="rfc.section.3.1.p.2">
+                            <p>この例での暗号化データは UTF-8 エンコードの文字列 "I am the walrus" です。input-keying material は base64url 表現
+                                "yqdlZ-tYemfogSmv7Ws5PQ" です。54 オクテットのコンテンツ本文は単一レコードを含み、表示上の都合で 71 文字の base64url
+                                で示されています。</p>
+                        </div>
+                        <div id="rfc.figure.8">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/octet-stream
+Content-Length: 54
+Content-Encoding: aes128gcm
+
+I1BsxtFttlv3u_Oo94xnmwAAEAAA-NAVub2qFgBEuQKRapoZu-IxkIva3MEB1PD-
+ly8Thjg
+</pre>
+                            </div>
+                        </div>
+                        <div id="rfc.section.3.1.p.3">
+                            <p>メディアタイプはコンテンツについての情報漏洩を避けるため "application/octet-stream"
+                                に変更されていることに注意してください。代替として（同等に）Content-Type ヘッダーフィールドを省略しても構いません。</p>
+                        </div>
+                        <div id="rfc.section.3.1.p.4" class="avoidbreakafter">
+                            <p>この例の中間値（すべて base64url 表記）：</p>
+                        </div>
+                        <div id="rfc.figure.9">
+                            <div>
+                                <pre class="inline">
+salt (from header) = I1BsxtFttlv3u_Oo94xnmw
+PRK = zyeH5phsIsgUyd4oiSEIy35x-gIi4aM7y0hCF8mwn9g
+CEK = _wniytB-ofscZDh4tbSjHw
+NONCE = Bcs8gkIRKLI8GeI8
+unencrypted data = SSBhbSB0aGUgd2FscnVzAg
+</pre>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="encryption-with-multiple-records">
+                        <h3 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a>&nbsp;<a
+                                href="#encryption-with-multiple-records">複数レコードによる暗号化</a></h3>
+                        <div id="rfc.section.3.2.p.1">
+                            <p>この例は input-keying material が "BO3ZVPxUlnLORbVGMpbT1Q" の場合を示します。この例では平文が 25
+                                オクテットごとのレコードに分割されます（ヘッダーの "rs" フィールドは 25）。最初のレコードには 1 バイトの 0x00
+                                パディングオクテットが含まれます。これは最初のレコードに 7 オクテット、二番目に 8 オクテットのメッセージが含まれることを意味します。ヘッダーには UTF-8
+                                エンコード文字列 "a1" の key identifier も含まれます。</p>
+                        </div>
+                        <div id="rfc.figure.10">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 200 OK
+Content-Length: 73
+Content-Encoding: aes128gcm
+
+uNCkWiNYzKTnBN9ji3-qWAAAABkCYTHOG8chz_gnvgOqdGYovxyjuqRyJFjEDyoF
+1Fvkj6hQPdPHI51OEUKEpgz3SsLWIqS_uA
+</pre>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+                <section id="security-considerations">
+                    <h2 id="rfc.section.4"><a href="#rfc.section.4">4.</a>&nbsp;<a
+                            href="#security-considerations">セキュリティ考慮事項</a></h2>
+                    <div id="rfc.section.4.p.1">
+                        <p>このメカニズムは、有効な送信者と受信者間で鍵の配布を管理する鍵管理フレームワークの存在を前提とします。鍵管理の定義は、このメカニズムを大きなアプリケーションやプロトコル、フレームワークに組み込む際の一部です。
+                        </p>
+                    </div>
+                    <div id="rfc.section.4.p.2">
+                        <p>暗号の実装（特に鍵管理）は困難になり得ます。例えば、実装は処理にかかる時間のようなサイドチャネルで鍵素材が露出する可能性に注意する必要があります。暗号アルゴリズムの良好な実装要件は時間とともに変化します。
+                        </p>
+                    </div>
+                    <section id="automatic-decryption">
+                        <h3 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a>&nbsp;<a
+                                href="#automatic-decryption">自動復号</a></h3>
+                        <div id="rfc.section.4.1.p.1">
+                            <p>コンテンツコーディングとして、"aes128gcm"
+                                コンテンツコーディングは受信者によって自動的に除去され、メッセージの最終的な利用者に明示されない方法で扱われる可能性があります。本メカニズムを使用してコンテンツ起源認証に依存する受信者は、"aes128gcm"
+                                コンテンツコーディングを含まないメッセージを拒否しなければなりません。</p>
+                        </div>
+                    </section>
+                    <section id="message-truncation">
+                        <h3 id="rfc.section.4.2"><a href="#rfc.section.4.2">4.2.</a>&nbsp;<a
+                                href="#message-truncation">メッセージの切り捨て</a></h3>
+                        <div id="rfc.section.4.2.p.1">
+                            <p>このコンテンツエンコーディングは大きなメッセージの逐次処理を許容するよう設計されています。また限定的に平文へのランダムアクセスを許します。コンテンツエンコーディングは受信者がメッセージが切り詰められたかどうかを検出できるようにします。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.2.p.2">
+                            <p>部分的に配信されたメッセージをあたかも完全に配信されたかのように処理してはなりません。例えば、部分配信されたメッセージを完全なものとしてキャッシュしてはなりません。</p>
+                        </div>
+                        <div id="rfc.section.4.2.p.3">
+                            <p>攻撃者が部分メッセージ処理を悪用して受信者を特定の中間状態に留める可能性があります。部分メッセージで処理を行う実装は、任意の中間処理状態が攻撃者に有利にならないことを保証する必要があります。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="key-and-nonce-reuse">
+                        <h3 id="rfc.section.4.3"><a href="#rfc.section.4.3">4.3.</a>&nbsp;<a
+                                href="#key-and-nonce-reuse">鍵とノンスの再利用</a></h3>
+                        <div id="rfc.section.4.3.p.1">
+                            <p>AES-GCM では同じ content-encryption key と nonce を用いて異なる平文を暗号化することは安全ではありません（<a
+                                    href="#RFC5116"><cite
+                                        title="An Interface and Algorithms for Authenticated Encryption">[RFC5116]</cite></a>
+                                参照）。本仕様は固定的に進行する nonce 値を使います。したがってコンテンツコーディングの各適用に対して新しい content-encryption key
+                                が必要です。input-keying material は再利用可能なため、content-encryption key が再利用されないように一意の "salt"
+                                パラメータが必要です。</p>
+                        </div>
+                        <div id="rfc.section.4.3.p.2">
+                            <p>もし content-encryption key が再利用される（つまり input-keying material と "salt"
+                                が再利用される）と、平文や認証鍵が露出し、暗号による保護が無効化される可能性があります。したがって同じ input-keying material
+                                を再利用する場合、"salt" パラメータは毎回一意でなければなりません。実装は各メッセージでランダムな "salt" を生成することを <em
+                                    class="bcp14">SHOULD</em> 推奨します。</p>
+                        </div>
+                    </section>
+                    <section id="limits">
+                        <h3 id="rfc.section.4.4"><a href="#rfc.section.4.4">4.4.</a>&nbsp;<a
+                                href="#limits">データ暗号化の限界</a></h3>
+                        <div id="rfc.section.4.4.p.1">
+                            <p>AEAD_AES_128_GCM が暗号化できるデータには制限があります。record size の最大値はヘッダー中の "rs" フィールドの大きさによって制約され（<a
+                                    href="#header" title="Encryption Content-Coding Header">Section 2.1</a> 参照）、単一の
+                                AEAD_AES_128_GCM 適用で 2^36-31 の制限に達しないようにします（<a href="#RFC5116"><cite
+                                        title="An Interface and Algorithms for Authenticated Encryption">[RFC5116]</cite></a>
+                                参照）。同一の input-keying material と salt から導出された鍵で暗号化できる平文の総量は、選択平文攻撃下での区別不能性（IND-CPA）を
+                                2^-40 に保つために 2^44.5 ブロック（16 オクテットブロック）未満でなければなりません（<a href="#AEBounds"><cite
+                                        title="Limits on Authenticated Encryption Use in TLS">[AEBounds]</cite></a> 参照）。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.4.p.2">
+                            <p>もしレコードサイズが 16 オクテットの倍数であれば、パディングとオーバーヘッドを含めても約 398 テラバイトを安全に暗号化できます。しかしレコードサイズが 16
+                                の倍数でない場合、部分的な AES ブロックが暗号化されるため安全に暗号化できる総量は減少します。最悪ケースはレコードサイズ 18 オクテットで、この場合最大 74
+                                テラバイトの平文しか安全に暗号化できず、そのうち少なくとも半分はパディングになります。</p>
+                        </div>
+                    </section>
+                    <section id="content-integrity">
+                        <h3 id="rfc.section.4.5"><a href="#rfc.section.4.5">4.5.</a>&nbsp;<a
+                                href="#content-integrity">コンテンツ整合性</a></h3>
+                        <div id="rfc.section.4.5.p.1">
+                            <p>このメカニズムはコンテンツ起源認証のみを提供します。認証タグは content-encryption key
+                                にアクセスできるエンティティが暗号化データを生成したことを保証します。</p>
+                        </div>
+                        <div id="rfc.section.4.5.p.2">
+                            <p>したがって、content-encryption key を持つ任意のエンティティが有効なコンテンツを生成でき、同じ HTTP
+                                メッセージを受け取るすべての受信者に対して有効と見なされます。</p>
+                        </div>
+                        <div id="rfc.section.4.5.p.3">
+                            <p>さらに、Content-Encoding ヘッダーフィールドおよび HTTP
+                                メッセージ本文の両方を改変できるエンティティは内容を置換できます。content-encryption key や input-keying material
+                                を持たない者はペイロード本文の一部を改変・置換することはできません。</p>
+                        </div>
+                    </section>
+                    <section id="leaking-information-in-header-fields">
+                        <h3 id="rfc.section.4.6"><a href="#rfc.section.4.6">4.6.</a>&nbsp;<a
+                                href="#leaking-information-in-header-fields">ヘッダーフィールドにおける情報漏洩</a>
+                        </h3>
+                        <div id="rfc.section.4.6.p.1">
+                            <p>ペイロード本文のみが暗号化されるため、ヘッダーフィールドに露出する情報は HTTP メッセージを読める者に見えてしまいます。これはサイドチャネル情報を露出する可能性があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.4.6.p.2">
+                            <p>例えば Content-Type ヘッダーフィールドはペイロード本文に関する情報を漏らし得ます。</p>
+                        </div>
+                        <div id="rfc.section.4.6.p.3" class="avoidbreakafter">
+                            <p>この脅威を軽減するための戦略はいくつかあり、アプリケーションの脅威モデルや利用者の情報漏洩許容度によります：</p>
+                        </div>
+                        <div id="rfc.section.4.6.p.4">
+                            <ol>
+                                <li>問題とならないと判断する。例えば保存されるすべてのコンテンツが "application/json"
+                                    など非常に一般的なメディアタイプであることが期待される場合、Content-Type を露出することは許容されるリスクかもしれません。</li>
+                                <li>機密情報と判断され、他手段で（アウトオブバンド、他の表現のヒント等）伝達可能な場合は、該当ヘッダーを省略・正規化します。Content-Type の場合は常に
+                                    Content-Type: application/octet-stream を送る（最も一般的なメディアタイプ）か、あるいは Content-Type
+                                    自体を送らないなどが考えられます。</li>
+                                <li>機密情報であり他に伝えられない場合は、application/http メディアタイプで HTTP メッセージをカプセル化し（<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html#section-8.3.2">RFC7230 Section
+                                        8.3.2</a> 参照）、その "外側" メッセージのペイロードとして暗号化します。</li>
+                            </ol>
+                        </div>
+                    </section>
+                    <section id="poisoning-storage">
+                        <h3 id="rfc.section.4.7"><a href="#rfc.section.4.7">4.7.</a>&nbsp;<a
+                                href="#poisoning-storage">ストレージの汚染</a></h3>
+                        <div id="rfc.section.4.7.p.1">
+                            <p>このメカニズムはデータ起源認証のみを提供し、メッセージ作成者の認証や認可を行いません。そのため、（例：HTTP 認証 <a href="#RFC7235"><cite
+                                        title="Hypertext Transfer Protocol (HTTP/1.1): Authentication">[RFC7235]</cite></a>
+                                による）追加の認証・認可が必要な場合があります。</p>
+                        </div>
+                        <div id="rfc.section.4.7.p.2">
+                            <p>特に、サーバーがペイロードを復号せずに HTTP PUT リクエストを受け入れると、リクエストが認証されていない場合に第三者がサービス拒否やストアの汚染を行う可能性が出てきます。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="sizing-and-timing-attacks">
+                        <h3 id="rfc.section.4.8"><a href="#rfc.section.4.8">4.8.</a>&nbsp;<a
+                                href="#sizing-and-timing-attacks">サイズおよびタイミング攻撃</a></h3>
+                        <div id="rfc.section.4.8.p.1">
+                            <p>本メカニズムを使うアプリケーションは、暗号化メッセージのサイズやそれらのタイミング、HTTP メソッド、URI
+                                等が機密情報を漏らす可能性があることに注意する必要があります。例として <a href="#NETFLIX"><cite
+                                        title="Identifying HTTPS-Protected Netflix Videos in Real-Time">[NETFLIX]</cite></a>
+                                や <a href="#CLINIC"><cite
+                                        title="I Know Why You Went to the Clinic: Risks and Realization of HTTPS Traffic Analysis">[CLINIC]</cite></a>
+                                を参照してください。</p>
+                        </div>
+                        <div id="rfc.section.4.8.p.2">
+                            <p>このリスクは本メカニズムが提供するパディングを用いることで軽減できます。あるいはコンテンツをセグメントに分割して別々に保管することで露出を減らすこともできます。HTTP/2 <a
+                                    href="#RFC7540"><cite
+                                        title="Hypertext Transfer Protocol Version 2 (HTTP/2)">[RFC7540]</cite></a> と
+                                TLS <a href="#RFC5246"><cite
+                                        title="The Transport Layer Security (TLS) Protocol Version 1.2">[RFC5246]</cite></a>
+                                の組み合わせは個々のメッセージサイズを隠すのに役立つかもしれません。</p>
+                        </div>
+                        <div id="rfc.section.4.8.p.3">
+                            <p>パディング戦略を策定することは困難です。良いパディング戦略は文脈に依存します。一般的な戦略には少数の固定長へパディングする、ある値の倍数へパディングする、または 2
+                                の累乗へパディングするなどがあります。優れた戦略でも受信者の処理活動が観察されるとサイズ情報が漏れることがあります。特にメッセージの末尾レコードがパディングのみで構成される場合は要注意です。サイズ情報漏洩を避けるには非パディングデータをレコードに分散することを推奨します。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <section id="iana">
+                    <h2 id="rfc.section.5"><a href="#rfc.section.5">5.</a>&nbsp;<a href="#iana">IANA に関する考慮事項</a>
+                    </h2>
+                    <section id="the-aes128gcm-http-content-coding">
+                        <h3 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a>&nbsp;<a
+                                href="#the-aes128gcm-http-content-coding">"aes128gcm" HTTP コンテンツコーディング</a></h3>
+                        <div id="rfc.section.5.1.p.1">
+                            <p>本メモは "HTTP Content Coding Registry" に "aes128gcm" HTTP コンテンツコーディングを登録します。詳細は <a
+                                    href="#aes128gcm" title="The 'aes128gcm' HTTP Content Coding">Section 2</a>
+                                を参照してください。</p>
+                        </div>
+                        <div id="rfc.section.5.1.p.2">
+                            <ul>
+                                <li>Name: aes128gcm</li>
+                                <li>Description: 128 ビットの content-encryption key を用いた AES-GCM 暗号化</li>
+                                <li>Reference: 本仕様書</li>
+                            </ul>
+                        </div>
+                    </section>
+                </section>
+                <section id="rfc.references">
+                    <h2 id="rfc.section.6"><a href="#rfc.section.6">6.</a> 参考文献</h2>
+                    <section>
+                        <div id="rfc.references.1">
+                            <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a> ノルマティブ参考文献</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="FIPS180-4">[<a href="#FIPS180-4" class="smpl">FIPS180-4</a>]</dt>
+                                <dd>National Institute of Standards and Technology, “<a
+                                        href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">Secure Hash
+                                        Standard (SHS)</a>”, FIPS PUB 180-4, August 2015, &lt;<a
+                                        href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf</a>&gt;.
+                                </dd>
+                                <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                <dd>Bradner, S., “<a href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words for
+                                        use in RFCs to Indicate Requirement Levels</a>”, BCP 14, RFC 2119, March 1997,
+                                    &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;.
+                                </dd>
+                                <dt id="RFC3629">[<a href="#RFC3629" class="smpl">RFC3629</a>]</dt>
+                                <dd>Yergeau, F., “<a href="https://www.rfc-editor.org/rfc/rfc3629.html">UTF-8, a
+                                        transformation format of ISO 10646</a>”, RFC 3629, November 2003, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc3629">https://www.rfc-editor.org/info/rfc3629</a>&gt;.
+                                </dd>
+                                <dt id="RFC5116">[<a href="#RFC5116" class="smpl">RFC5116</a>]</dt>
+                                <dd>McGrew, D., “<a href="https://www.rfc-editor.org/rfc/rfc5116.html">An Interface and
+                                        Algorithms for Authenticated Encryption</a>”, RFC 5116, January 2008, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc5116">https://www.rfc-editor.org/info/rfc5116</a>&gt;.
+                                </dd>
+                                <dt id="RFC5869">[<a href="#RFC5869" class="smpl">RFC5869</a>]</dt>
+                                <dd>Krawczyk, H. and P. Eronen, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5869.html">HMAC-based Extract-and-Expand
+                                        Key Derivation Function (HKDF)</a>”, RFC 5869, May 2010, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc5869">https://www.rfc-editor.org/info/rfc5869</a>&gt;.
+                                </dd>
+                                <dt id="RFC7230">[<a href="#RFC7230" class="smpl">RFC7230</a>]</dt>
+                                <dd>Fielding, R., Ed. and J. Reschke, Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7230.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Message Syntax and Routing</a>”, RFC 7230, June 2014, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc7230">https://www.rfc-editor.org/info/rfc7230</a>&gt;.
+                                </dd>
+                                <dt id="RFC7231">[<a href="#RFC7231" class="smpl">RFC7231</a>]</dt>
+                                <dd>Fielding, R., Ed. and J. Reschke, Ed., “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7231.html">Hypertext Transfer Protocol
+                                        (HTTP/1.1): Semantics and Content</a>”, RFC 7231, June 2014, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc7231">https://www.rfc-editor.org/info/rfc7231</a>&gt;.
+                                </dd>
+                                <dt id="RFC8174">[<a href="#RFC8174" class="smpl">RFC8174</a>]</dt>
+                                <dd>Leiba, B., “<a href="https://www.rfc-editor.org/rfc/rfc8174.html">Ambiguity of
+                                        Uppercase vs Lowercase in RFC 2119 Key Words</a>”, BCP 14, RFC 8174, May 2017,
+                                    &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                    <section>
+                        <div id="rfc.references.2">
+                            <h3 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a> インフォマティブ参考文献</h3>
+                            <dl class="dl-horizontal">
+                                <dt id="AEBounds">[<a href="#AEBounds" class="smpl">AEBounds</a>]</dt>
+                                <dd>Luykx, A. and K. Paterson, “<a
+                                        href="http://www.isg.rhul.ac.uk/~kp/TLS-AEbounds.pdf">Limits on Authenticated
+                                        Encryption Use in TLS</a>”, March 2016, &lt;<a
+                                        href="http://www.isg.rhul.ac.uk/~kp/TLS-AEbounds.pdf">http://www.isg.rhul.ac.uk/~kp/TLS-AEbounds.pdf</a>&gt;.
+                                </dd>
+                                <dt id="CLINIC">[<a href="#CLINIC" class="smpl">CLINIC</a>]</dt>
+                                <dd>Miller, B., Huang, L., Joseph, A., and J. Tygar, “<a
+                                        href="https://arxiv.org/abs/1403.0297">I Know Why You Went to the Clinic: Risks
+                                        and Realization of HTTPS Traffic Analysis</a>”, March 2014, &lt;<a
+                                        href="https://arxiv.org/abs/1403.0297">https://arxiv.org/abs/1403.0297</a>&gt;.
+                                </dd>
+                                <dt id="NETFLIX">[<a href="#NETFLIX" class="smpl">NETFLIX</a>]</dt>
+                                <dd>Reed, A. and M. Kranch, “Identifying HTTPS-Protected Netflix Videos in Real-Time”,
+                                    CODASPY '17, 2017.</dd>
+                                <dt id="RFC4648">[<a href="#RFC4648" class="smpl">RFC4648</a>]</dt>
+                                <dd>Josefsson, S., “<a href="https://www.rfc-editor.org/rfc/rfc4648.html">The Base16,
+                                        Base32, and Base64 Data Encodings</a>”, RFC 4648, October 2006, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc4648">https://www.rfc-editor.org/info/rfc4648</a>&gt;.
+                                </dd>
+                                <dt id="RFC4880">[<a href="#RFC4880" class="smpl">RFC4880</a>]</dt>
+                                <dd>Callas, J., ほか, “<a href="https://www.rfc-editor.org/rfc/rfc4880.html">OpenPGP
+                                        Message Format</a>”, RFC 4880, November 2007, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc4880">https://www.rfc-editor.org/info/rfc4880</a>&gt;.
+                                </dd>
+                                <dt id="RFC5246">[<a href="#RFC5246" class="smpl">RFC5246</a>]</dt>
+                                <dd>Dierks, T. and E. Rescorla, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc5246.html">The Transport Layer Security
+                                        (TLS) Protocol Version 1.2</a>”, RFC 5246, August 2008, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc5246">https://www.rfc-editor.org/info/rfc5246</a>&gt;.
+                                </dd>
+                                <dt id="RFC5652">[<a href="#RFC5652" class="smpl">RFC5652</a>]</dt>
+                                <dd>Housley, R., “<a href="https://www.rfc-editor.org/rfc/rfc5652.html">Cryptographic
+                                        Message Syntax (CMS)</a>”, RFC 5652, September 2009, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc5652">https://www.rfc-editor.org/info/rfc5652</a>&gt;.
+                                </dd>
+                                <dt id="RFC7233">[<a href="#RFC7233" class="smpl">RFC7233</a>]</dt>
+                                <dd>Fielding, R., ほか, “<a href="https://www.rfc-editor.org/rfc/rfc7233.html">Hypertext
+                                        Transfer Protocol (HTTP/1.1): Range Requests</a>”, RFC 7233, June 2014, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc7233">https://www.rfc-editor.org/info/rfc7233</a>&gt;.
+                                </dd>
+                                <dt id="RFC7235">[<a href="#RFC7235" class="smpl">RFC7235</a>]</dt>
+                                <dd>Fielding, R., ほか, “<a href="https://www.rfc-editor.org/rfc/rfc7235.html">Hypertext
+                                        Transfer Protocol (HTTP/1.1): Authentication</a>”, RFC 7235, June 2014, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc7235">https://www.rfc-editor.org/info/rfc7235</a>&gt;.
+                                </dd>
+                                <dt id="RFC7516">[<a href="#RFC7516" class="smpl">RFC7516</a>]</dt>
+                                <dd>Jones, M. and J. Hildebrand, “<a
+                                        href="https://www.rfc-editor.org/rfc/rfc7516.html">JSON Web Encryption
+                                        (JWE)</a>”, RFC 7516, May 2015, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc7516">https://www.rfc-editor.org/info/rfc7516</a>&gt;.
+                                </dd>
+                                <dt id="RFC7540">[<a href="#RFC7540" class="smpl">RFC7540</a>]</dt>
+                                <dd>Belshe, M., ほか, “<a href="https://www.rfc-editor.org/rfc/rfc7540.html">Hypertext
+                                        Transfer Protocol Version 2 (HTTP/2)</a>”, RFC 7540, May 2015, &lt;<a
+                                        href="https://www.rfc-editor.org/info/rfc7540">https://www.rfc-editor.org/info/rfc7540</a>&gt;.
+                                </dd>
+                                <dt id="XMLENC">[<a href="#XMLENC" class="smpl">XMLENC</a>]</dt>
+                                <dd>Eastlake, D., ほか, “<a href="http://www.w3.org/TR/2013/REC-xmlenc-core1-20130411">XML
+                                        Encryption Syntax and Processing Version 1.1</a>”, W3C REC, April 2013, &lt;<a
+                                        href="http://www.w3.org/TR/2013/REC-xmlenc-core1-20130411">http://www.w3.org/TR/2013/REC-xmlenc-core1-20130411</a>&gt;.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+                </section>
+                <section id="jwe">
+                    <h2 id="rfc.section.A" class="np"><a href="#rfc.section.A">付録 A.</a>&nbsp;<a href="#jwe">JWE
+                            マッピング</a></h2>
+                    <div id="rfc.section.A.p.1" class="avoidbreakafter">
+                        <p>"aes128gcm" コンテンツコーディングは、各固定長レコード（後続パディングを含む）に対応する JSON Web Encryption (JWE) <a
+                                href="#RFC7516"><cite title="JSON Web Encryption (JWE)">[RFC7516]</cite></a>
+                            オブジェクトの列と見なせます。JWE Compact Serialization で表現されうる JWE オブジェクトに次の変換が適用されます：</p>
+                    </div>
+                    <div id="rfc.section.A.p.2">
+                        <ul>
+                            <li>JWE Protected Header は { "alg": "dir", "enc": "A128GCM" } に固定され、direct encryption による
+                                AES-GCM（128 ビット CEK）を記述します。このヘッダーは送信されず、Content-Encoding ヘッダーフィールドの値で暗黙的に示されます。</li>
+                            <li>JWE Encrypted Key は direct 暗号化の規定に従い空です。</li>
+                            <li>各レコードの JWE Initialization Vector ("iv") は 96 ビットのレコードシーケンス番号（0 から始まる）と input-keying
+                                material から導出される値の XOR に設定されます（<a href="#nonce" title="Nonce Derivation">Section 2.3</a>
+                                参照）。この値も送信されません。</li>
+                            <li>最終的な値はヘッダー、JWE Ciphertext、JWE Authentication Tag を連結したもので、すべて base64url
+                                エンコードは行わずに表現します。これらフィールド間の "." 区切りは省略されます（フィールド長が既知であるため）。</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.A.p.3" class="avoidbreakafter">
+                        <p>したがって <a href="#explicit" title="Encryption of a Response">Section 3.1</a> の例は JWE Compact
+                            Serialization を用いて次のように表せます：</p>
+                    </div>
+                    <div id="rfc.figure.11">
+                        <div>
+                            <pre class="text">
+eyAiYWxnIjogImRpciIsICJlbmMiOiAiQTEyOEdDTSIgfQ..Bcs8gkIRKLI8GeI8.
+-NAVub2qFgBEuQKRapoZuw.4jGQi9rcwQHU8P6XLxOGOA
+</pre>
+                        </div>
+                    </div>
+                    <div id="rfc.section.A.p.4">
+                        <p>ここで第一行は固定された JWE Protected Header、空の JWE Encrypted Key、アルゴリズム的に決定された JWE Initialization
+                            Vector を表し、第二行はエンコード済み本文（JWE Ciphertext と JWE Authentication Tag に分割）を含みます。</p>
+                    </div>
+                </section>
+                <section id="acknowledgements">
+                    <h2 id="rfc.section.unnumbered-1"><a href="#acknowledgements">謝辞</a></h2>
+                    <div id="rfc.section.unnumbered-1.p.1">
+                        <p>Mark Nottingham は本書の初期著者の一人です。</p>
+                    </div>
+                    <div id="rfc.section.unnumbered-1.p.2">
+                        <p>以下の人々が有益な意見を提供しました：Richard Barnes, David Benjamin, Peter Beverloo, JR Conlin, Mike Jones,
+                            Stephen Farrell, Adam Langley, James Manger, John Mattsson, Julian Reschke, Eric Rescorla,
+                            Jim Schaad, Magnus Westerlund。</p>
+                    </div>
+                </section>
+                <section id="rfc.authors" class="avoidbreakinside">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>Martin Thomson</b><br>Mozilla<br>EMail: <a
+                            href="mailto:martin.thomson@gmail.com">martin.thomson@gmail.com</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,2798 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 9530 - ダイジェスト・フィールド</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC9530">
+    <meta property="og:description" content="Digest Fields">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc9530.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 The Content-Digest Field" href="#rfc.section.2">
+    <link rel="Chapter" title="3 The Repr-Digest Field" href="#rfc.section.3">
+    <link rel="Chapter" title="4 Integrity Preference Fields" href="#rfc.section.4">
+    <link rel="Chapter" title="5 Hash Algorithm Considerations and Registration" href="#rfc.section.5">
+    <link rel="Chapter" title="6 Security Considerations" href="#rfc.section.6">
+    <link rel="Chapter" title="7 IANA Considerations" href="#rfc.section.7">
+    <link rel="Chapter" title="8 References" href="#rfc.section.8">
+    <link rel="Appendix" title="A Resource Representation and Representation Data" href="#rfc.section.A">
+    <link rel="Appendix" title="B Examples of Unsolicited Digest" href="#rfc.section.B">
+    <link rel="Appendix" title="C Examples of Want-Repr-Digest Solicited Digest" href="#rfc.section.C">
+    <link rel="Appendix" title="D Sample Digest Values" href="#rfc.section.D">
+    <link rel="Appendix" title="E Migrating from RFC 3230" href="#rfc.section.E">
+    <link rel="Appendix" title="Acknowledgements" href="#rfc.section.unnumbered-4">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-digest-headers-13" rel="prev">
+    <link href="https://dx.doi.org/10.17487/rfc9530" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc9530.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="https://www.rfc-editor.org/info/rfc9530">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <meta name="keywords" content="Digest">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Polli, R.">
+    <meta name="dcterms.creator" content="Pardue, L.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:9530">
+    <meta name="dcterms.issued" content="2024-02">
+    <meta name="dct.replaces" content="urn:ietf:rfc:3230">
+    <meta name="dcterms.abstract"
+        content="This document defines HTTP fields that support integrity digests. The Content-Digest field can be used for the integrity of HTTP message content. The Repr-Digest field can be used for the integrity of HTTP representations. Want-Content-Digest and Want-Repr-Digest can be used to indicate a sender's interest and preferences for receiving the respective Integrity fields.This document obsoletes RFC 3230 and the Digest and Want-Digest HTTP fields.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="This document defines HTTP fields that support integrity digests. The Content-Digest field can be used for the integrity of HTTP message content. The Repr-Digest field can be used for the integrity of HTTP representations. Want-Content-Digest and Want-Repr-Digest can be used to indicate a sender's interest and preferences for receiving the respective Integrity fields.This document obsoletes RFC 3230 and the Digest and Want-Digest HTTP fields.">
+</head>
+
+<body onload="getMeta(9530,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>9530</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#document-structure">文書の構成</a></li>
+                                        <li><a href="#rfc.section.1.2">1.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#concept-overview">概念の概要</a></li>
+                                        <li><a href="#rfc.section.1.3">1.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#obsolete-3230">RFC 3230 の廃止</a></li>
+                                        <li><a href="#rfc.section.1.4">1.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#notational-conventions">表記規約</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#content-digest"> <span
+                                            class="tt">Content-Digest</span> フィールド</a></li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#representation-digest">
+                                        <span class="tt">Repr-Digest</span> フィールド</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#state-changing-requests"><span class="tt">Repr-Digest</span>
+                                                を状態変更するリクエストで使用する</a></li>
+                                        <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#digest-and-content-location"><span class="tt">Repr-Digest</span>
+                                                とレスポンスにおける Content-Location</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#want-fields">整合性優先フィールド</a></li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#algorithms">ハッシュアルゴリズムに関する考慮事項と登録</a></li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security">セキュリティに関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sec-limitations">HTTP メッセージは完全には保護されない</a></li>
+                                        <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#end-to-end-integrity">エンドツーエンドの整合性</a></li>
+                                        <li><a href="#rfc.section.6.3">6.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#usage-in-signatures">署名での使用</a></li>
+                                        <li><a href="#rfc.section.6.4">6.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#usage-in-trailer-fields">トレーラーフィールドでの使用</a></li>
+                                        <li><a href="#rfc.section.6.5">6.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#variations-within-content-encoding">Content-Encoding 内の変化</a>
+                                        </li>
+                                        <li><a href="#rfc.section.6.6">6.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sec-agility">アルゴリズムの柔軟性</a></li>
+                                        <li><a href="#rfc.section.6.7">6.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#sec-exhaustion">リソース消耗</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#iana-considerations">IANA
+                                        に関する考慮事項</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#http-field-name-registration">HTTP フィールド名の登録</a>
+                                        </li>
+                                        <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#establish-hash-algorithm-registry">HTTP
+                                                ダイジェストフィールド用ハッシュアルゴリズム登録の作成</a></li>
+                                        <li><a href="#rfc.section.7.3">7.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#deprecate-the-hypertext-transfer-protocol-http-digest-algorithm-values-registry">Hypertext
+                                                Transfer Protocol (HTTP) Digest Algorithm Values レジストリの廃止</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考資料</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.8.1">8.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">ノルマティブ参照</a></li>
+                                        <li><a href="#rfc.section.8.2">8.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.3">情報参考文献</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.A">Appendix A.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#resource-representation">リソース表現と表現データ</a></li>
+                                <li><a href="#rfc.section.B">Appendix B.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#examples-unsolicited">未要求の <span class="tt">Digest</span> の例</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.B.1">B.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#example-full-representation">サーバが完全な表現データを返す場合</a></li>
+                                        <li><a href="#rfc.section.B.2">B.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#server-returns-no-representation-data">サーバが表現データを返さない場合</a></li>
+                                        <li><a href="#rfc.section.B.3">B.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#server-returns-partial-representation-data">サーバが部分的な表現データを返す場合</a>
+                                        </li>
+                                        <li><a href="#rfc.section.B.4">B.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#client-and-server-provide-full-representation-data">クライアントとサーバが完全な表現データを提供する場合</a>
+                                        </li>
+                                        <li><a href="#rfc.section.B.5">B.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#client-provides-full-representation-data-server-provides-no-representation-data">クライアントが完全な表現データを提供し、サーバが表現データを提供しない場合</a>
+                                        </li>
+                                        <li><a href="#rfc.section.B.6">B.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#client-and-server-provide-full-representation-data-1">クライアントとサーバが完全な表現データを提供する場合</a>
+                                        </li>
+                                        <li><a href="#rfc.section.B.7">B.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#post-not-request-uri">POST レスポンスがリクエスト URI を参照しない場合</a></li>
+                                        <li><a href="#rfc.section.B.8">B.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#post-referencing-status">POST レスポンスがリクエストのステータスを示す場合</a></li>
+                                        <li><a href="#rfc.section.B.9">B.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#digest-with-patch"><span class="tt">Digest</span> と PATCH の併用</a>
+                                        </li>
+                                        <li><a href="#rfc.section.B.10">B.10.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#error-responses">エラーレスポンス</a></li>
+                                        <li><a href="#rfc.section.B.11">B.11.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#use-with-trailer-fields-and-transfer-coding">トレーラーフィールドと転送符号化での使用</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.C">Appendix C.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#examples-solicited"><span class="tt">Want-Repr-Digest</span> による要請された
+                                        <span class="tt">Digest</span> の例</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.C.1">C.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#server-selects-clients-least-preferred-algorithm">サーバがクライアントの最も好ましくないアルゴリズムを選択する場合</a>
+                                        </li>
+                                        <li><a href="#rfc.section.C.2">C.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#ex-server-selects-unsupported-algorithm">サーバがクライアントに未サポートのアルゴリズムを選択する場合</a>
+                                        </li>
+                                        <li><a href="#rfc.section.C.3">C.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#server-does-not-support-client-algorithm-and-returns-an-error">サーバがクライアントのアルゴリズムをサポートせずエラーを返す場合</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.D">Appendix D.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#sample-digest-values">サンプルの <span class="tt">Digest</span> 値</a>
+                                </li>
+                                <li><a href="#rfc.section.E">Appendix E.</a>&nbsp;&nbsp;&nbsp;<a href="#migrating">RFC
+                                        3230 からの移行</a></li>
+                                <li><a href="#acknowledgements">謝辞</a></li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネット技術タスクフォース (IETF)</td>
+                                <td class="text-right">R. Polli</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 9530</td>
+                                <td class="text-right">Team Digitale, Italian Government</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">廃止対象: <a href="#RFC3230">3230</a></td>
+                                <td class="text-right">L. Pardue</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">カテゴリ: Standards Track</td>
+                                <td class="text-right">Cloudflare</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right">2024年2月</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>ダイジェスト・フィールド</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>本書は整合性ダイジェストをサポートする HTTP フィールドを定義します。<span class="tt">Content-Digest</span> フィールドは HTTP
+                            メッセージのコンテンツの整合性のために使用できます。<span class="tt">Repr-Digest</span> フィールドは HTTP
+                            表現の整合性のために使用できます。<span class="tt">Want-Content-Digest</span> および <span
+                                class="tt">Want-Repr-Digest</span> は、それぞれの整合性フィールドの受信に対する送信者の関心や優先を示すために使用できます。</p>
+                    </div>
+                    <div id="rfc.abstract.p.2">
+                        <p>本書は RFC 3230 および <span class="tt">Digest</span> および <span class="tt">Want-Digest</span> HTTP
+                            フィールドを廃止します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモの状態</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>これはインターネット標準トラック文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネット技術タスクフォース (IETF) の成果物です。IETF コミュニティのコンセンサスを表しています。公開審査を受け、Internet Engineering
+                            Steering Group (IESG) によって公開が承認されています。インターネット標準に関する詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc7841.html#section-2">RFC 7841 のセクション 2</a>
+                            を参照してください。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>本書の現行の状態、訂正情報 (errata)、およびフィードバックの提供方法に関する情報は <a
+                                href="https://www.rfc-editor.org/info/rfc9530">https://www.rfc-editor.org/info/rfc9530</a>
+                            で入手できます。</p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2024 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>)
+                            in effect on the date of publication of this document. Please review these documents
+                            carefully, as they describe your rights and restrictions with respect to this document. Code
+                            Components extracted from this document must include Revised BSD License text as described
+                            in Section 4.e of the Trust Legal Provisions and are provided without warranty as described
+                            in the Revised BSD License.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                            <ul>
+                                <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#document-structure">文書の構成</a></li>
+                                <li><a href="#rfc.section.1.2">1.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#concept-overview">概念の概要</a></li>
+                                <li><a href="#rfc.section.1.3">1.3.</a>&nbsp;&nbsp;&nbsp;<a href="#obsolete-3230">RFC
+                                        3230 の廃止</a></li>
+                                <li><a href="#rfc.section.1.4">1.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#notational-conventions">表記規約</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#content-digest"><span
+                                    class="tt">Content-Digest</span> フィールド</a></li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a href="#representation-digest"><span
+                                    class="tt">Repr-Digest</span> フィールド</a>
+                            <ul>
+                                <li><a href="#rfc.section.3.1">3.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#state-changing-requests"><span class="tt">Repr-Digest</span>
+                                        を状態変更リクエストで使用する</a></li>
+                                <li><a href="#rfc.section.3.2">3.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#digest-and-content-location"><span class="tt">Repr-Digest</span>
+                                        とレスポンスにおける Content-Location</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#want-fields">整合性優先フィールド</a></li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#algorithms">ハッシュアルゴリズムに関する考慮事項と登録</a></li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#security">セキュリティに関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a href="#sec-limitations">HTTP
+                                        メッセージは完全には保護されない</a></li>
+                                <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#end-to-end-integrity">エンドツーエンドの整合性</a></li>
+                                <li><a href="#rfc.section.6.3">6.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#usage-in-signatures">署名での使用</a></li>
+                                <li><a href="#rfc.section.6.4">6.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#usage-in-trailer-fields">トレーラーフィールドでの使用</a></li>
+                                <li><a href="#rfc.section.6.5">6.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#variations-within-content-encoding">Content-Encoding 内の変化</a></li>
+                                <li><a href="#rfc.section.6.6">6.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#sec-agility">アルゴリズムの柔軟性</a></li>
+                                <li><a href="#rfc.section.6.7">6.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#sec-exhaustion">リソース消耗</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.7">7.</a>&nbsp;&nbsp;&nbsp;<a href="#iana-considerations">IANA
+                                に関する考慮事項</a>
+                            <ul>
+                                <li><a href="#rfc.section.7.1">7.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#http-field-name-registration">HTTP フィールド名の登録</a></li>
+                                <li><a href="#rfc.section.7.2">7.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#establish-hash-algorithm-registry">HTTP ダイジェストフィールド用ハッシュアルゴリズム登録の作成</a>
+                                </li>
+                                <li><a href="#rfc.section.7.3">7.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#deprecate-the-hypertext-transfer-protocol-http-digest-algorithm-values-registry">Hypertext
+                                        Transfer Protocol (HTTP) Digest Algorithm Values レジストリの廃止</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.8">8.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考資料</a>
+                            <ul>
+                                <li><a href="#rfc.section.8.1">8.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">ノルマティブ参照</a></li>
+                                <li><a href="#rfc.section.8.2">8.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.3">情報参考文献</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.A">Appendix A.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#resource-representation">リソース表現と表現データ</a></li>
+                        <li><a href="#rfc.section.B">Appendix B.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#examples-unsolicited">未要求の <span class="tt">Digest</span> の例</a>
+                            <ul>
+                                <li><a href="#rfc.section.B.1">B.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#example-full-representation">サーバが完全な表現データを返す場合</a>
+                                </li>
+                                <li><a href="#rfc.section.B.2">B.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#server-returns-no-representation-data">サーバが表現データを返さない場合</a></li>
+                                <li><a href="#rfc.section.B.3">B.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#server-returns-partial-representation-data">サーバが部分的な表現データを返す場合</a></li>
+                                <li><a href="#rfc.section.B.4">B.4.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#client-and-server-provide-full-representation-data">クライアントとサーバが完全な表現データを提供する場合</a>
+                                </li>
+                                <li><a href="#rfc.section.B.5">B.5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#client-provides-full-representation-data-server-provides-no-representation-data">クライアントが完全な表現データを提供し、サーバが表現データを提供しない場合</a>
+                                </li>
+                                <li><a href="#rfc.section.B.6">B.6.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#client-and-server-provide-full-representation-data-1">クライアントとサーバが完全な表現データを提供する場合</a>
+                                </li>
+                                <li><a href="#rfc.section.B.7">B.7.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#post-not-request-uri">POST レスポンスがリクエスト URI を参照しない場合</a></li>
+                                <li><a href="#rfc.section.B.8">B.8.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#post-referencing-status">POST レスポンスがリクエストのステータスを示す場合</a>
+                                </li>
+                                <li><a href="#rfc.section.B.9">B.9.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#digest-with-patch"><span class="tt">Digest</span> と PATCH の併用</a></li>
+                                <li><a href="#rfc.section.B.10">B.10.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#error-responses">エラーレスポンス</a></li>
+                                <li><a href="#rfc.section.B.11">B.11.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#use-with-trailer-fields-and-transfer-coding">トレーラーフィールドと転送符号化での使用</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.C">Appendix C.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#examples-solicited"><span class="tt">Want-Repr-Digest</span> による要請された <span
+                                    class="tt">Digest</span> の例</a>
+                            <ul>
+                                <li><a href="#rfc.section.C.1">C.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#server-selects-clients-least-preferred-algorithm">サーバがクライアントの最も好ましくないアルゴリズムを選択する場合</a>
+                                </li>
+                                <li><a href="#rfc.section.C.2">C.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#ex-server-selects-unsupported-algorithm">サーバがクライアントに未サポートのアルゴリズムを選択する場合</a>
+                                </li>
+                                <li><a href="#rfc.section.C.3">C.3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#server-does-not-support-client-algorithm-and-returns-an-error">サーバがクライアントのアルゴリズムをサポートせずエラーを返す場合</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.D">Appendix D.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#sample-digest-values">サンプルの <span class="tt">Digest</span> 値</a>
+                        </li>
+                        <li><a href="#rfc.section.E">Appendix E.</a>&nbsp;&nbsp;&nbsp;<a href="#migrating">RFC 3230
+                                からの移行</a></li>
+                        <li><a href="#acknowledgements">謝辞</a></li>
+                        <li><a href="#rfc.authors">著者の連絡先</a></li>
+                    </ul>
+                </div>
+                <hr class="hidden-print">
+                <section id="introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#introduction">はじめに</a></h2>
+                    <div id="rfc.section.1.p.1">
+                        <p>HTTP はコンテンツや表現のデータ整合性を保護する手段を定義していません。HTTP メッセージがエンドポイント間で転送される際、TCP チェックサムや TLS レコード (<a
+                                href="#RFC8446"><cite
+                                    title="The Transport Layer Security (TLS) Protocol Version 1.3">[TLS]</cite></a>)
+                            のような下位レイヤの機能や特性がある程度の整合性保護を提供することがあります。しかし、トランスポートに依存した整合性はアプリケーション層からは不透明であり、単一接続の範囲にのみ適用されるため実用性が限定されます。HTTP
+                            メッセージはしばしば複数の別個の接続のチェーンを経由して移動します。接続間ではデータ破損が発生する可能性があります。HTTP の整合性メカニズムは、エンドポイントや HTTP
+                            を使用するアプリケーションがデータ破損を検出し、それにどう対処するかを選択する手段を提供できます。例えば、システム境界を越えた障害検出や診断の支援がそのユースケースの一つです。</p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>本書は HTTP のための二つのダイジェスト整合性メカニズムを定義します。第一に、転送されるコンテンツに対するコンテンツ整合性（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-6.4">Section 6.4</a> of <a
+                                href="#RFC9110"><cite
+                                    title="HTTP Semantics">[HTTP]</cite></a>）。第二に、表現データの整合性であり、これは表現データに作用します（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.1">Section 8.1</a> of <a
+                                href="#RFC9110"><cite
+                                    title="HTTP Semantics">[HTTP]</cite></a>）。これにより、複数のリクエストや接続を用いて再構築されたリソースの整合性を検証するような高度なユースケースをサポートできます。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.3">
+                        <p>本書は <a href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a> を廃止し、したがって
+                            <span class="tt">Digest</span> および <span class="tt">Want-Digest</span> HTTP フィールドを廃止します。詳細は
+                            <a href="#obsolete-3230" title="Obsoleting RFC 3230">Section 1.3</a> を参照してください。
+                        </p>
+                    </div>
+                    <section id="document-structure">
+                        <h3 id="rfc.section.1.1"><a href="#rfc.section.1.1">1.1.</a>&nbsp;<a
+                                href="#document-structure">文書の構成</a></h3>
+                        <div id="rfc.section.1.1.p.1" class="avoidbreakafter">
+                            <p>本書は次の構成になっています：</p>
+                        </div>
+                        <div id="rfc.section.1.1.p.2">
+                            <ul>
+                                <li>
+                                    <div>
+                                        <p>リクエストおよびレスポンスのヘッダとトレーラフィールドの新しい定義。</p>
+                                    </div>
+                                    <div>
+                                        <ul>
+                                            <li><a href="#content-digest" title="The Content-Digest Field">Section 2</a>
+                                                (<span class="tt">Content-Digest</span>),</li>
+                                            <li><a href="#representation-digest" title="The Repr-Digest Field">Section
+                                                    3</a> (<span class="tt">Repr-Digest</span>), および</li>
+                                            <li><a href="#want-fields" title="Integrity Preference Fields">Section 4</a>
+                                                (<span class="tt">Want-Content-Digest</span> と <span
+                                                    class="tt">Want-Repr-Digest</span>).</li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>表現データ整合性に特有の考慮事項。</p>
+                                    </div>
+                                    <div>
+                                        <ul>
+                                            <li><a href="#state-changing-requests"
+                                                    title="Using Repr-Digest in State-Changing Requests">Section 3.1</a>
+                                                (状態変更リクエスト),</li>
+                                            <li><a href="#digest-and-content-location"
+                                                    title="Repr-Digest and Content-Location in Responses">Section
+                                                    3.2</a> (Content-Location),</li>
+                                            <li><a href="#resource-representation"
+                                                    title="Resource Representation and Representation Data">Appendix
+                                                    A</a> にはメッセージ交換における表現データの実例が含まれ、</li>
+                                            <li>付録 <a href="#examples-unsolicited"
+                                                    title="Examples of Unsolicited Digest">B</a> と <a
+                                                    href="#examples-solicited"
+                                                    title="Examples of Want-Repr-Digest Solicited Digest">C</a>
+                                                はメッセージ交換における <span class="tt">Repr-Digest</span> および <span
+                                                    class="tt">Want-Repr-Digest</span> フィールドの実例を含みます。</li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li><a href="#algorithms" title="Hash Algorithm Considerations and Registration">Section
+                                        5</a> ではハッシュアルゴリズムに関する考慮事項を示し、将来のエントリの登録手順を定義します。</li>
+                            </ul>
+                        </div>
+                    </section>
+                    <section id="concept-overview">
+                        <h3 id="rfc.section.1.2"><a href="#rfc.section.1.2">1.2.</a>&nbsp;<a
+                                href="#concept-overview">概念の概要</a></h3>
+                        <div id="rfc.section.1.2.p.1">
+                            <p>本書で定義される HTTP フィールドは HTTP の整合性に使用できます。送信者はハッシュアルゴリズムを選択し、HTTP
+                                メッセージに関連する入力からダイジェストを計算します。アルゴリズム識別子とダイジェストは HTTP
+                                フィールドで送信されます。受信者は整合性目的でダイジェストを検証できます。ハッシュアルゴリズムは "Hash Algorithms for HTTP Digest
+                                Fields" レジストリに登録されます（<a href="#establish-hash-algorithm-registry"
+                                    title="Creation of the Hash Algorithms for HTTP Digest Fields Registry">Section
+                                    7.2</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.1.2.p.2">
+                            <p>ダイジェストを計算するデータの選択は、HTTP メッセージのユースケースによって異なります。本書は HTTP の表現データと HTTP
+                                コンテンツのために別々のフィールドを提供します。</p>
+                        </div>
+                        <div id="rfc.section.1.2.p.3">
+                            <p>単純に HTTP コンテンツのバイト列のダイジェストが必要となるユースケースがあります。その場合、コンテンツのダイジェストをサポートするために <span
+                                    class="tt">Content-Digest</span> のリクエスト・レスポンスのヘッダおよびトレーラフィールドが定義されています（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-6.4">Section 6.4</a> of <a
+                                    href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a>）。詳細は <a
+                                    href="#content-digest" title="The Content-Digest Field">Section 2</a> を参照してください。</p>
+                        </div>
+                        <div id="rfc.section.1.2.p.4">
+                            <p>より高度なユースケースのために、選択された表現データにハッシュアルゴリズムを適用して計算されるダイジェストを含むリクエスト・レスポンスのヘッダおよびトレーラフィールドとして
+                                <span class="tt">Repr-Digest</span> が定義されています（<a href="#representation-digest"
+                                    title="The Repr-Digest Field">Section
+                                    3</a>）。選択された表現に基づくことで、メッセージのコンテンツをリソースの表現と見なすために何らかの操作が必要な場合や、範囲リクエストのように部分的な表現を伝達する場合に適用しやすくなります（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-14">Section 14</a> of <a
+                                    href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a> を参照）。
+                            </p>
+                        </div>
+                        <div id="rfc.section.1.2.p.5">
+                            <p><span class="tt">Content-Digest</span> と <span class="tt">Repr-Digest</span>
+                                はハッシュアルゴリズムの柔軟性（アジリティ）をサポートします。<span class="tt">Want-Content-Digest</span> および <span
+                                    class="tt">Want-Repr-Digest</span> フィールドは、それぞれ <span
+                                    class="tt">Content-Digest</span> と <span class="tt">Repr-Digest</span>
+                                の受信に対する関心やアルゴリズムの優先を表現するために使用できます。</p>
+                        </div>
+                        <div id="rfc.section.1.2.p.6">
+                            <p><span class="tt">Content-Digest</span> と <span class="tt">Repr-Digest</span>
+                                は総称して「Integrity fields（整合性フィールド）」と呼ばれます。<span class="tt">Want-Content-Digest</span> と
+                                <span class="tt">Want-Repr-Digest</span> は総称して「Integrity preference
+                                fields（整合性優先フィールド）」と呼ばれます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.1.2.p.7">
+                            <p>整合性フィールドは <span class="tt">Content-Encoding</span> および <span
+                                    class="tt">Content-Type</span> ヘッダフィールドに紐づきます。したがって、あるリソースは HTTP
+                                経由で転送される際に複数の異なるダイジェスト値を持つことがあります。</p>
+                        </div>
+                        <div id="rfc.section.1.2.p.8">
+                            <p>整合性フィールドは HTTP メッセージやフィールド自体には適用されません。ただし、メタデータを保護するデジタル署名のような他のメカニズムと組み合わせることで、HTTP
+                                交換のフェーズ全体や一部を保護することができます。例えば、HTTP Message Signatures <a href="#RFC9421"><cite
+                                        title="HTTP Message Signatures">[SIGNATURES]</cite></a>
+                                は整合性フィールドに署名するために使われ、HTTP コンテンツや表現データのカバレッジを提供できます。</p>
+                        </div>
+                        <div id="rfc.section.1.2.p.9">
+                            <p>本仕様は認証、認可、プライバシーの手段を定義しません。</p>
+                        </div>
+                    </section>
+                    <section id="obsolete-3230">
+                        <h3 id="rfc.section.1.3"><a href="#rfc.section.1.3">1.3.</a>&nbsp;<a href="#obsolete-3230">RFC
+                                3230 の廃止</a></h3>
+                        <div id="rfc.section.1.3.p.1">
+                            <p><a href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a> は HTTP
+                                の整合性のために <span class="tt">Digest</span> および <span class="tt">Want-Digest</span>
+                                フィールドを定義しました。また、「instance」や「instance manipulation」といった用語を導入し、選択された表現データ（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.1">Section 8.1</a> of <a
+                                    href="#RFC9110"><cite
+                                        title="HTTP Semantics">[HTTP]</cite></a>）のような概念を説明しました。これらの概念は現在では HTTP
+                                セマンティクスとしてより普遍的に定義され実装されています。</p>
+                        </div>
+                        <div id="rfc.section.1.3.p.2">
+                            <p>実装の経験から、<a href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a>
+                                の実装は「instance」の意味を一貫せず解釈してきたため、相互運用性の問題が生じていることがわかりました。最も一般的な問題は、ダイジェストを計算する際に（現在では）「メッセージコンテンツ」と呼ぶべきものを用いる誤りであり、本来意図されていた「表現データ」を用いるべきであった点に関するものです。興味深いことに、メッセージコンテンツのダイジェストが有益なユースケースもあるため、<a
+                                    href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a>
+                                に対する非準拠が意図的か非意図的かを判別するのは難しい場合があります。</p>
+                        </div>
+                        <div id="rfc.section.1.3.p.3">
+                            <p>そのような不一致や曖昧さに対処するため、本書は <a href="#RFC3230"><cite
+                                        title="Instance Digests in HTTP">[RFC3230]</cite></a> を廃止します。本書で定義される Integrity
+                                フィールド（<a href="#content-digest" title="The Content-Digest Field">Section 2</a> および <a
+                                    href="#representation-digest" title="The Repr-Digest Field">Section 3</a>）および
+                                Integrity 優先フィールド（<a href="#want-fields" title="Integrity Preference Fields">Section
+                                    4</a>）は、現在の HTTP セマンティクスとより整合し、意図された用途を明確に表す名前になっています。</p>
+                        </div>
+                    </section>
+                    <section id="notational-conventions">
+                        <h3 id="rfc.section.1.4"><a href="#rfc.section.1.4">1.4.</a>&nbsp;<a
+                                href="#notational-conventions">表記規約</a></h3>
+                        <div id="rfc.section.1.4.p.1">
+                            <p>本書中のキーワード "<em class="bcp14">MUST</em>", "<em class="bcp14">MUST NOT</em>", "<em
+                                    class="bcp14">REQUIRED</em>", "<em class="bcp14">SHALL</em>", "<em
+                                    class="bcp14">SHALL NOT</em>", "<em class="bcp14">SHOULD</em>", "<em
+                                    class="bcp14">SHOULD NOT</em>", "<em class="bcp14">RECOMMENDED</em>", "<em
+                                    class="bcp14">NOT RECOMMENDED</em>", "<em class="bcp14">MAY</em>", および "<em
+                                    class="bcp14">OPTIONAL</em>" は、すべて大文字で表示されるときに限り BCP 14 (<a href="#RFC2119"><cite
+                                        title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                                および <a href="#RFC8174"><cite
+                                        title="Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words">[RFC8174]</cite></a>)
+                                に記述されたとおりに解釈されます。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.2">
+                            <p>本書は拡張 ABNF（<a href="#RFC5234"><cite
+                                        title="Augmented BNF for Syntax Specifications: ABNF">[RFC5234]</cite></a>）およびそれを更新する文献（<a
+                                    href="#RFC7405"><cite
+                                        title="Case-Sensitive String Support in ABNF">[RFC7405]</cite></a>）を使用します。これには
+                                CR、LF、および CRLF の規則が含まれます。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.3">
+                            <p>本書は構文と解析の指定のために <a href="https://www.rfc-editor.org/rfc/rfc8941.html#section-3">Section
+                                    3</a> of <a href="#RFC8941"><cite
+                                        title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>
+                                からの用語（Boolean, Byte Sequence, Dictionary, Integer, List）を使用します。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.4">
+                            <p>本書中の "representation", "selected representation", "representation data", "representation
+                                metadata", "user agent", および "content" の定義は <a href="#RFC9110"><cite
+                                        title="HTTP Semantics">[HTTP]</cite></a> に従って解釈されます。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.5">
+                            <p>本書は長い行の折り畳み戦略として <a href="#RFC8792"><cite
+                                        title="Handling Long Lines in Content of Internet-Drafts and RFCs">[FOLDING]</cite></a>
+                                を使用します。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.6">
+                            <p>ハッシュアルゴリズム名はその定義文書で用いられる大文字小文字を尊重します（例: SHA-1, CRC32c）。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.7">
+                            <p>HTTP メッセージはアルゴリズムを Algorithm Key（algorithms）で示します。本文で Algorithm Key
+                                に言及する場合、それは引用符で囲まれます（例: "sha", "crc32c"）。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.8">
+                            <p>"checksum" という用語はバイト列にアルゴリズムを適用した出力を表し、"digest" はフィールド内に含まれる値にのみ用います。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.9">
+                            <p>"Integrity fields" は <span class="tt">Content-Digest</span> と <span
+                                    class="tt">Repr-Digest</span> の総称です。</p>
+                        </div>
+                        <div id="rfc.section.1.4.p.10">
+                            <p>"Integrity preference fields" は <span class="tt">Want-Repr-Digest</span> と <span
+                                    class="tt">Want-Content-Digest</span> の総称です。</p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="content-digest">
+                    <h2 id="rfc.section.2" class="np"><a href="#rfc.section.2">2.</a>&nbsp;<a
+                            href="#content-digest"><span class="tt">Content-Digest</span> フィールド</a></h2>
+                    <div id="rfc.section.2.p.1" class="avoidbreakafter">
+                        <p><span class="tt">Content-Digest</span> HTTP
+                            フィールドは、実際のメッセージコンテンツに適用されたハッシュアルゴリズムを用いて計算されるダイジェストをリクエスト及びレスポンスで伝達するために使用できます（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-6.4">Section 6.4</a> of <a
+                                href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a> を参照）。このフィールドは Dictionary
+                            型（<a href="https://www.rfc-editor.org/rfc/rfc8941.html#section-3.2">Section 3.2</a> of <a
+                                href="#RFC8941"><cite
+                                    title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>）であり、各エントリは次の通りです：
+                        </p>
+                    </div>
+                    <div id="rfc.section.2.p.2">
+                        <ul>
+                            <li>key はダイジェストの計算に用いるハッシュアルゴリズム（<a href="#algorithms"
+                                    title="Hash Algorithm Considerations and Registration">Section 5</a> を参照）を示します；</li>
+                            <li>value はダイジェスト計算で生成されたバイト出力をエンコードしたものを伝える Byte Sequence（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc8941.html#section-3.3.5">Section 3.3.5</a>
+                                of <a href="#RFC8941"><cite
+                                        title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>）です。</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.2.p.3" class="avoidbreakafter">
+                        <p>例えば：</p>
+                    </div>
+                    <div id="rfc.section.2.p.4">
+                        <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Content-Digest: \
+  sha-512=:YMAam51Jz/jOATT6/zvHrLVgOYTGFy1d6GJiOHTohq4yP+pgk4vf2aCs\
+  yRZOtw8MjkM7iw7yZ/WkppmM44T3qg==:
+</pre>
+                    </div>
+                    <div id="rfc.section.2.p.5">
+                        <p>Dictionary
+                            型を用いることで、異なるハッシュアルゴリズムを使って計算された複数のダイジェストを添付し、異なるまたは進化する能力を持つエンドポイント群をサポートできます。このようなアプローチは弱いアルゴリズムからの移行を支援することができます（<a
+                                href="#sec-agility" title="Algorithm Agility">Section 6.6</a> を参照）。</p>
+                    </div>
+                    <div id="rfc.section.2.p.6">
+                        <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Content-Digest: \
+  sha-256=:d435Qo+nKZ+gLcUHn7GQtQ72hiBVAgqoLsZnZPiTGPk=:,\
+  sha-512=:YMAam51Jz/jOATT6/zvHrLVgOYTGFy1d6GJiOHTohq4yP+pgk4vf2aCs\
+  yRZOtw8MjkM7iw7yZ/WkppmM44T3qg==:
+</pre>
+                    </div>
+                    <div id="rfc.section.2.p.7">
+                        <p>受信者は任意またはすべてのダイジェストを無視してもよい（<em
+                                class="bcp14">MAY</em>）。アプリケーション固有の挙動やローカルポリシーは、伝達されたダイジェストの処理や検証手順に追加の制約を課すことがあります。セキュリティ考慮事項は、ダイジェストを無視することに関連する問題（<a
+                                href="#sec-agility" title="Algorithm Agility">Section 6.6</a>）や複数ダイジェストの検証（<a
+                                href="#sec-exhaustion" title="Resource Exhaustion">Section 6.7</a>）に関する事項を扱います。</p>
+                    </div>
+                    <div id="rfc.section.2.p.8">
+                        <p>送信者は受信者が特定のハッシュアルゴリズムをサポートしているかどうかを知らなくてもダイジェストを送信してよい（<em
+                                class="bcp14">MAY</em>）。送信者は受信者がそれを無視することを知っていてダイジェストを送信してもよい（<em
+                                class="bcp14">MAY</em>）。</p>
+                    </div>
+                    <div id="rfc.section.2.p.9">
+                        <p><span class="tt">Content-Digest</span> はトレーラセクションで送信できます。この場合、<span
+                                class="tt">Content-Digest</span> はヘッダセクションにマージされ得ます。詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-6.5.1">Section 6.5.1</a> of <a
+                                href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a> を参照してください。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="representation-digest">
+                    <h2 id="rfc.section.3" class="np"><a href="#rfc.section.3">3.</a>&nbsp;<a
+                            href="#representation-digest"><span class="tt">Repr-Digest</span> フィールド</a></h2>
+                    <div id="rfc.section.3.p.1">
+                        <p><span class="tt">Repr-Digest</span> HTTP
+                            フィールドは、選択された表現データ全体に適用されたハッシュアルゴリズムを用いて計算されるダイジェストをリクエストおよびレスポンスで伝達するために使用できます（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.1">Section 8.1</a> of <a
+                                href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a> を参照）。</p>
+                    </div>
+                    <div id="rfc.section.3.p.2">
+                        <p>表現はメッセージに対する HTTP セマンティクスの影響を考慮します。例えば、コンテンツはレンジリクエストや HEAD
+                            のようなメソッドによって影響を受け得ますし、コンテンツが「オンザワイヤ」でどのように転送されるかは他の変換（例: HTTP/1.1 の transfer
+                            codings）に依存します（<a href="https://www.rfc-editor.org/rfc/rfc9112.html#section-6.1">Section
+                                6.1</a> of <a href="#RFC9112"><cite title="HTTP/1.1">[HTTP/1.1]</cite></a> を参照）。HTTP
+                            表現の概念を説明するために、いくつかの例を <a href="#resource-representation"
+                                title="Resource Representation and Representation Data">Appendix A</a> に示します。</p>
+                    </div>
+                    <div id="rfc.section.3.p.3">
+                        <p>メッセージに表現データがない場合でも、空文字列に対してダイジェストを計算することで表現データが送信されなかったことを主張することが可能です（<a
+                                href="#usage-in-signatures" title="Usage in Signatures">Section 6.3</a> を参照）。</p>
+                    </div>
+                    <div id="rfc.section.3.p.4" class="avoidbreakafter">
+                        <p><span class="tt">Repr-Digest</span> は Dictionary 型（<a
+                                href="https://www.rfc-editor.org/rfc/rfc8941.html#section-3.2">Section 3.2</a> of <a
+                                href="#RFC8941"><cite
+                                    title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>）であり、各エントリは次の通りです：
+                        </p>
+                    </div>
+                    <div id="rfc.section.3.p.5">
+                        <ul>
+                            <li>key はダイジェストの計算に用いるハッシュアルゴリズム（<a href="#algorithms"
+                                    title="Hash Algorithm Considerations and Registration">Section 5</a> を参照）を示します；</li>
+                            <li>value はダイジェスト計算で生成されたバイト出力をエンコードした Byte Sequence です。</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.3.p.6" class="avoidbreakafter">
+                        <p>例えば：</p>
+                    </div>
+                    <div id="rfc.section.3.p.7">
+                        <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Repr-Digest: \
+  sha-512=:YMAam51Jz/jOATT6/zvHrLVgOYTGFy1d6GJiOHTohq4yP+pgk4vf2aCs\
+  yRZOtw8MjkM7iw7yZ/WkppmM44T3qg==:
+</pre>
+                    </div>
+                    <div id="rfc.section.3.p.8">
+                        <p>Dictionary
+                            型を用いることで、異なるハッシュアルゴリズムを使って計算された複数のダイジェストを添付し、異なるまたは進化する能力を持つエンドポイント群をサポートできます。こうしたアプローチは弱いアルゴリズムからの移行を支援します（<a
+                                href="#sec-agility" title="Algorithm Agility">Section 6.6</a> を参照）。</p>
+                    </div>
+                    <div id="rfc.section.3.p.9">
+                        <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Repr-Digest: \
+  sha-256=:d435Qo+nKZ+gLcUHn7GQtQ72hiBVAgqoLsZnZPiTGPk=:,\
+  sha-512=:YMAam51Jz/jOATT6/zvHrLVgOYTGFy1d6GJiOHTohq4yP+pgk4vf2aCs\
+  yRZOtw8MjkM7iw7yZ/WkppmM44T3qg==:
+</pre>
+                    </div>
+                    <div id="rfc.section.3.p.10">
+                        <p>受信者は任意またはすべてのダイジェストを無視してもよい（<em
+                                class="bcp14">MAY</em>）。アプリケーション固有の挙動やローカルポリシーは、伝達されたダイジェストの処理や検証手順に追加の制約を課すことがあります。セキュリティ考慮事項は、ダイジェストを無視することに関連する問題（<a
+                                href="#sec-agility" title="Algorithm Agility">Section 6.6</a>）や複数ダイジェストの検証（<a
+                                href="#sec-exhaustion" title="Resource Exhaustion">Section 6.7</a>）に関する事項を扱います。</p>
+                    </div>
+                    <div id="rfc.section.3.p.11">
+                        <p>送信者は受信者が特定のハッシュアルゴリズムをサポートしているかどうかを知らなくてもダイジェストを送信してよい（<em
+                                class="bcp14">MAY</em>）。送信者は受信者がそれを無視することを知っていてダイジェストを送信してもよい（<em
+                                class="bcp14">MAY</em>）。</p>
+                    </div>
+                    <div id="rfc.section.3.p.12">
+                        <p><span class="tt">Repr-Digest</span> はトレーラセクションで送信できます。この場合、<span
+                                class="tt">Repr-Digest</span> はヘッダセクションにマージされ得ます。詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-6.5.1">Section 6.5.1</a> of <a
+                                href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a> を参照してください。</p>
+                    </div>
+                    <section id="state-changing-requests">
+                        <h3 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a>&nbsp;<a
+                                href="#state-changing-requests">状態変更リクエストでの <span class="tt">Repr-Digest</span> の使用</a>
+                        </h3>
+                        <div id="rfc.section.3.1.p.1">
+                            <p>状態変更リクエストに含まれる表現がターゲットリソースを記述していない場合、表現ダイジェストは表現データに対して計算されることが <em
+                                    class="bcp14">MUST</em> です。表現ダイジェストは完全な表現メタデータを必要とするため（<a
+                                    href="#representation-digest" title="The Repr-Digest Field">Section 3</a>
+                                を参照）、これが唯一の選択になります。</p>
+                        </div>
+                        <div id="rfc.section.3.1.p.2">
+                            <p>レスポンスにおいて、</p>
+                        </div>
+                        <div id="rfc.section.3.1.p.3">
+                            <ul>
+                                <li>表現がリクエストのステータスを記述する場合、<span class="tt">Repr-Digest</span> は同梱された表現に対して計算されることが <em
+                                        class="bcp14">MUST</em> です（<a href="#post-referencing-status"
+                                        title="POST Response Describes the Request Status">Appendix B.8</a> を参照）；</li>
+                                <li>参照されたリソースがある場合、<span class="tt">Repr-Digest</span> は参照されたリソースの選択された表現に対して計算されることが
+                                    <em class="bcp14">MUST</em> です。これは同梱された表現とは異なる場合があり得ます。
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="rfc.section.3.1.p.4">
+                            <p>後者の場合は、http のメソッドのセマンティクスに従って行われます。例えば <span class="tt">Content-Location</span>
+                                ヘッダフィールドを使用することがあります（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.7">Section 8.7</a> of <a
+                                    href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a> を参照）。対照的に、<span
+                                    class="tt">Location</span> ヘッダフィールドは表現メタデータではないため <span
+                                    class="tt">Repr-Digest</span> に影響を与えません。</p>
+                        </div>
+                        <div id="rfc.section.3.1.p.5">
+                            <p>例えば PATCH リクエストでは、表現メタデータがパッチ文書を示すため、表現ダイジェストはパッチ文書に対して計算されます（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc5789.html#section-2">Section 2</a> of <a
+                                    href="#RFC5789"><cite title="PATCH Method for HTTP">[PATCH]</cite></a>
+                                を参照）。一方、レスポンスではパッチされたリソースの選択された表現に対して表現ダイジェストが計算されます。</p>
+                        </div>
+                    </section>
+                    <section id="digest-and-content-location">
+                        <h3 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a>&nbsp;<a
+                                href="#digest-and-content-location"><span class="tt">Repr-Digest</span> とレスポンスにおける <span
+                                    class="tt">Content-Location</span></a></h3>
+                        <div id="rfc.section.3.2.p.1">
+                            <p>状態変更メソッドが <span class="tt">Content-Location</span>
+                                ヘッダフィールドを返す場合、同梱の表現はその値で識別されるリソースを参照し、<span class="tt">Repr-Digest</span>
+                                はそれに応じて計算されます。例は <a href="#post-not-request-uri"
+                                    title="POST Response Does Not Reference the Request URI">Appendix B.7</a> に示されています。
+                            </p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="want-fields">
+                    <h2 id="rfc.section.4" class="np"><a href="#rfc.section.4">4.</a>&nbsp;<a
+                            href="#want-fields">整合性優先フィールド</a></h2>
+                    <div id="rfc.section.4.p.1">
+                        <p>送信者は <span class="tt">Want-Content-Digest</span> または <span class="tt">Want-Repr-Digest</span>
+                            HTTP フィールドを使って、整合性フィールドに対する関心やハッシュアルゴリズムの優先度を示すことができます。これらはリクエストおよびレスポンスの両方で使用できます。</p>
+                    </div>
+                    <div id="rfc.section.4.p.2">
+                        <p><span class="tt">Want-Content-Digest</span> は送信者がリクエスト URI と表現メタデータに関連するメッセージで（<span
+                                class="tt">Content-Digest</span> フィールドを通じて）コンテンツダイジェストを受け取りたいことを示します。<span
+                                class="tt">Want-Repr-Digest</span> は送信者がリクエスト URI と表現メタデータに関連するメッセージで（<span
+                                class="tt">Repr-Digest</span> フィールドを通じて）表現ダイジェストを受け取りたいことを示します。</p>
+                    </div>
+                    <div id="rfc.section.4.p.3">
+                        <p>レスポンスで <span class="tt">Want-Content-Digest</span> または <span
+                                class="tt">Want-Repr-Digest</span>
+                            が使用されている場合、それはサーバがクライアントに将来のリクエストで該当する整合性フィールドを提供してほしいことを示します。</p>
+                    </div>
+                    <div id="rfc.section.4.p.4">
+                        <p>整合性優先フィールドはあくまでヒントに過ぎません。フィールドの受信者はそれを無視して任意のアルゴリズムで整合性フィールドを送信するか、またはフィールドをまったく省略することができます。例えば
+                            <a href="#ex-server-selects-unsupported-algorithm"
+                                title="Server Selects Algorithm Unsupported by Client">付録 C.2</a>
+                            を参照してください。優先度が無視されてもプロトコルエラーではありません。整合性フィールドおよび整合性優先フィールドを使用するアプリケーションは、本仕様に加えて期待や制約を定義することができます。無視された優先設定はアプリケーション固有の問題です。
+                        </p>
+                    </div>
+                    <div id="rfc.section.4.p.5" class="avoidbreakafter">
+                        <p><span class="tt">Want-Content-Digest</span> と <span class="tt">Want-Repr-Digest</span> は
+                            Dictionary 型であり、各エントリは次のようになります：</p>
+                    </div>
+                    <div id="rfc.section.4.p.6">
+                        <ul>
+                            <li>key はハッシュアルゴリズムを示します（<a href="#algorithms"
+                                    title="Hash Algorithm Considerations and Registration">セクション 5</a> を参照）；</li>
+                            <li>value は昇順の相対的な重み付け優先度を示す <span class="tt">Integer</span>（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc8941.html#section-3.3.1">RFC 8941 セクション
+                                    3.3.1</a>）で、0〜10 の範囲でなければなりません。1 が最も低い優先度、10 が最も高い優先度で、値 0 は「受け入れ不可」を意味します。</li>
+                        </ul>
+                    </div>
+                    <div id="rfc.section.4.p.7" class="avoidbreakafter">
+                        <p>例：</p>
+                    </div>
+                    <div id="rfc.section.4.p.8">
+                        <pre class="text">
+Want-Repr-Digest: sha-256=1
+Want-Repr-Digest: sha-512=3, sha-256=10, unixsum=0
+Want-Content-Digest: sha-256=1
+Want-Content-Digest: sha-512=3, sha-256=10, unixsum=0
+</pre>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="algorithms">
+                    <h2 id="rfc.section.5" class="np"><a href="#rfc.section.5">5.</a>&nbsp;<a
+                            href="#algorithms">ハッシュアルゴリズムに関する考慮事項と登録</a></h2>
+                    <div id="rfc.section.5.p.1">
+                        <p>整合性の目的で使用できるハッシュアルゴリズムには多種多様なものがあります。アルゴリズムの選択は、整合性のユースケース、実装上の要件や制約、あるいはアプリケーションの設計やワークフローなど、いくつかの要因に依存します。
+                        </p>
+                    </div>
+                    <div id="rfc.section.5.p.2">
+                        <p>初期のアルゴリズム群は IANA の "Hash Algorithms for HTTP Digest Fields" レジストリに登録されます。詳細は <a
+                                href="#establish-hash-algorithm-registry"
+                                title="Creation of the Hash Algorithms for HTTP Digest Fields Registry">セクション 7.2</a>
+                            を参照してください。追加のアルゴリズムは本節に記載された方針に従って登録できます。</p>
+                    </div>
+                    <div id="rfc.section.5.p.3">
+                        <p>各アルゴリズムには実装の選択を助けるためのステータスフィールドがあります。</p>
+                    </div>
+                    <div id="rfc.section.5.p.4">
+                        <p>ステータス値が "Active" のアルゴリズムは多くの用途に適しており、アプリケーションはこれらのアルゴリズムを使用することが<em
+                                class="bcp14">推奨</em>されます。これらは衝突攻撃、第一原像攻撃、第二原像攻撃に対する耐性を必要とする敵対的な状況で使用できます。敵対的な状況では、受け入れ可能な
+                            "Active" アルゴリズムの選択は状況が要求する保護レベルに依存します。詳細は <a href="#sec-agility"
+                                title="Algorithm Agility">セクション 6.6</a> を参照してください。</p>
+                    </div>
+                    <div id="rfc.section.5.p.5">
+                        <p>ステータス値が "Deprecated" のアルゴリズムはこれらの性質を満たさないか、既に弱点が知られているものです（<a href="#RFC6151"><cite
+                                    title="Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms">[NO-MD5]</cite></a>
+                            や <a href="#RFC6194"><cite
+                                    title="Security Considerations for the SHA-0 and SHA-1 Message-Digest Algorithms">[NO-SHA]</cite></a>
+                            を参照）。これらのアルゴリズムはデータ破損に対する整合性の維持には使用できる場合がありますが、認証のために Integrity
+                            フィールドの値に署名するなどの潜在的に敵対的な設定では<em class="bcp14">使用してはなりません</em>。これらのアルゴリズムの使用を許容することは、例えば以前に <a
+                                href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a>
+                            を使用していたアプリケーションや、本仕様へ移行中のもの（<a href="#migrating" title="Migrating from RFC 3230">付録
+                                E</a>）で、既に計算済みのダイジェスト値のコレクションを保持しているようなケースで、再計算による運用上の過度な負担を避けるのに役立つことがあります。ただし、そうしたアプリケーションも本節の要件から免除されるわけではありません。遺産的な理由や履歴がないアプリケーションは、"Active"
+                            ステータスのアルゴリズムを使用する方針に従うべきです。</p>
+                    </div>
+                    <div id="rfc.section.5.p.6">
+                        <p>アルゴリズムの柔軟性（agility）に関する議論は <a href="#sec-agility" title="Algorithm Agility">セクション 6.6</a>
+                            に示されています。</p>
+                    </div>
+                    <div id="rfc.section.5.p.7" class="avoidbreakafter">
+                        <p>"Hash Algorithms for HTTP Digest Fields" レジストリへの登録要求は Specification Required ポリシーを使用します（<a
+                                href="https://www.rfc-editor.org/rfc/rfc8126.html#section-4.6">RFC 8126 セクション
+                                4.6</a>）。要求は次のテンプレートを使用してください：</p>
+                    </div>
+                    <div id="rfc.section.5.p.8">
+                        <dl>
+                            <dt>Algorithm Key:</dt>
+                            <dd style="margin-left: 1.5em">Content-Digest、Repr-Digest、Want-Content-Digest、または
+                                Want-Repr-Digest フィールドの Dictionary メンバーキーで使用される Structured Fields のキー値。</dd>
+                            <dt>Status:</dt>
+                            <dd style="margin-left: 1.5em">アルゴリズムのステータス。選択肢は次のとおりです：</dd>
+                            <dt></dt>
+                            <dd style="margin-left: 1.5em">
+                                <div>
+                                    <dl>
+                                        <dt>"Active":</dt>
+                                        <dd style="margin-left: 1.5em">既知の問題がないアルゴリズム</dd>
+                                        <dt>"Provisional":</dt>
+                                        <dd style="margin-left: 1.5em">未検証のアルゴリズム</dd>
+                                        <dt>"Deprecated":</dt>
+                                        <dd style="margin-left: 1.5em">非推奨または安全でないアルゴリズム</dd>
+                                    </dl>
+                                </div>
+                            </dd>
+                            <dt>Description:</dt>
+                            <dd style="margin-left: 1.5em">アルゴリズムの短い説明。</dd>
+                            <dt>Reference(s):</dt>
+                            <dd style="margin-left: 1.5em">Algorithm Key とアルゴリズムの技術的詳細を定義する主要な文書への参照。</dd>
+                        </dl>
+                    </div>
+                    <div id="rfc.section.5.p.9">
+                        <p>登録要求をレビューする際、指定された専門家は要求されたステータスに注意を払うべきです。ステータス値は標準化の状況と、IETF
+                            やセキュリティ関連の標準化団体（SDO）などの関連する利害関係グループの広範な意見を反映すべきです。"Active"
+                            ステータスは、弱く破損しているか実験的なアルゴリズムには適しません。もし登録要求がそのようなアルゴリズムを "Active" として登録しようとする場合、指定専門家は
+                            "Deprecated" または "Provisional" を代替ステータスとして提案すべきです。</p>
+                    </div>
+                    <div id="rfc.section.5.p.10">
+                        <p>登録要求をレビューする際、指定専門家は "Deprecated" または "Provisional" のステータスを理由に要求を拒否することはできません。</p>
+                    </div>
+                    <div id="rfc.section.5.p.11">
+                        <p>既存登録のフィールドを更新または変更する要求は許可されます。例えば、アルゴリズムのステータスをセキュリティ環境の変化に伴って "Active" から "Deprecated"
+                            に移行することが可能です。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="security">
+                    <h2 id="rfc.section.6" class="np"><a href="#rfc.section.6">6.</a>&nbsp;<a
+                            href="#security">セキュリティに関する考慮事項</a></h2>
+                    <section id="sec-limitations">
+                        <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a>&nbsp;<a
+                                href="#sec-limitations">HTTP メッセージは完全には保護されない</a></h3>
+                        <div id="rfc.section.6.1.p.1">
+                            <p>本書は HTTP の表現データまたはコンテンツのデータ整合性を保護する仕組みを規定しますが、HTTP のヘッダやトレーラフィールド全体を保護するものではありません。</p>
+                        </div>
+                        <div id="rfc.section.6.1.p.2">
+                            <p>整合性フィールドは HTTP
+                                メッセージに対する悪意ある改ざんに対する一般的な保護を意図したものではありません。追加のセキュリティメカニズムがない場合、経路上の悪意ある行為者はダイジェスト値を完全に削除するか、改変した表現データやコンテンツに対して新しいダイジェスト値を計算して置き換えることができます。この攻撃は、TLS
+                                やデジタル署名（例えば HTTP Message Signatures <a href="#RFC9421"><cite
+                                        title="HTTP Message Signatures">[SIGNATURES]</cite></a>）と組み合わせることで軽減できます。</p>
+                        </div>
+                    </section>
+                    <section id="end-to-end-integrity">
+                        <h3 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a>&nbsp;<a
+                                href="#end-to-end-integrity">エンドツーエンドの整合性</a></h3>
+                        <div id="rfc.section.6.2.p.1">
+                            <p>整合性フィールドは、実装上の誤り、望ましくない「変換プロキシ」（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-7.7">RFC 9110 セクション
+                                    7.7</a>
+                                を参照）、またはデータが複数のホップやシステム境界を通過する際に行われるその他の操作による表現データやコンテンツの改変を検出するのに役立ちます。単純なエンドツーエンドの表現データ整合性の仕組みでも、ユーザエージェントがリソース取得の成功を検証してから
+                                HTML パーサやビデオプレーヤー等に渡すことができる点で有用です。</p>
+                        </div>
+                        <div id="rfc.section.6.2.p.2">
+                            <p>これらのメカニズムのみを使用しても、複数ホップにわたる HTTP
+                                メッセージのメタデータが任意の段階で改変され得るため、完全なエンドツーエンドの整合性は提供されないことに注意してください。メタデータを保護する方法については <a
+                                    href="#usage-in-signatures" title="Usage in Signatures">セクション 6.3</a> を参照してください。</p>
+                        </div>
+                    </section>
+                    <section id="usage-in-signatures">
+                        <h3 id="rfc.section.6.3"><a href="#rfc.section.6.3">6.3.</a>&nbsp;<a
+                                href="#usage-in-signatures">署名での使用</a></h3>
+                        <div id="rfc.section.6.3.p.1">
+                            <p>デジタル署名はチェックサムと組み合わせてメッセージの発信元の特定を確実にするために広く用いられます（<a href="#FIPS186-5"><cite
+                                        title="Digital Signature Standard (DSS)">[FIPS186-5]</cite></a>）。そのような署名は一つまたは複数の
+                                HTTP フィールドを保護できますが、整合性フィールドを含める場合には追加の考慮事項があります。</p>
+                        </div>
+                        <div id="rfc.section.6.3.p.2">
+                            <p>整合性フィールドと組み合わせるデジタル署名の型や形式には制限はありません。ひとつの方法として、HTTP Message Signatures <a
+                                    href="#RFC9421"><cite title="HTTP Message Signatures">[SIGNATURES]</cite></a>
+                                と組み合わせることが考えられます。</p>
+                        </div>
+                        <div id="rfc.section.6.3.p.3">
+                            <p>ダイジェストは明示的に「表現メタデータ」（例: <span class="tt">Content-Type</span>, <span
+                                    class="tt">Content-Encoding</span>
+                                等）の影響を受けます。整合性フィールドを保護する署名が他の「表現メタデータ」を保護していない場合、通信は改ざんに晒される可能性があります。例えば、攻撃者が <span
+                                    class="tt">Content-Type</span>
+                                の値を操作して受信者でのダイジェスト検証を失敗させ、アプリケーションが表現にアクセスできないようにすることが考えられます。このような攻撃は両端のリソースを消費します。詳しくは
+                                <a href="#digest-and-content-location"
+                                    title="Repr-Digest and Content-Location in Responses">セクション 3.2</a> も参照してください。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.3.p.4">
+                            <p>署名は整合性フィールドを適用する際に敵対的な環境と見なされることが多いでしょう（<a href="#algorithms"
+                                    title="Hash Algorithm Considerations and Registration">セクション 5</a> を参照）。<span
+                                    class="tt">Repr-Digest</span>
+                                は署名と組み合わせた場合に興味深い可能性を提供します。例えば、送信するコンテンツがない場合に空文字列のダイジェストをメッセージに含め、それを署名すれば、受信者はコンテンツが事故や意図的な操作で追加されたかどうかを検出できます。逆のシナリオもサポートされます。コンテンツのための整合性フィールドを含めてそれに署名することにより、受信者はコンテンツが削除された箇所を検出できます。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.3.p.5">
+                            <p>整合性フィールドの任意の改変は署名検証に影響を与える可能性があります。改変の例としては、ダイジェストの重複除去や異なるフィールド値の結合などがあります（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-5.2">RFC 9110 セクション
+                                    5.2</a> を参照）。</p>
+                        </div>
+                    </section>
+                    <section id="usage-in-trailer-fields">
+                        <h3 id="rfc.section.6.4"><a href="#rfc.section.6.4">6.4.</a>&nbsp;<a
+                                href="#usage-in-trailer-fields">トレーラーフィールドでの使用</a></h3>
+                        <div id="rfc.section.6.4.p.1">
+                            <p>整合性フィールドをトレーラセクションで送信する前に、送信者は仲介者がトレーラを削除することが明示的に許されている点を考慮すべきです（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-6.5.2">RFC 9110 セクション
+                                    6.5.2</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.6.4.p.2">
+                            <p>整合性フィールドがトレーラセクションで使用される場合、フィールド値はコンテンツの後に受信されます。トレーラ前にコンテンツを先行処理するとダイジェスト検証ができず、無効なデータを処理してしまう可能性があります。
+                            </p>
+                        </div>
+                        <div id="rfc.section.6.4.p.3">
+                            <p>トレーラで整合性フィールドを使う利点の一つは、送信中にバイトをハッシュできる点です。しかし、コンテンツを処理する方法によってはこの利点が無効化されるアルゴリズムを設計することも可能です。例えば、Merkle
+                                Integrity Content Encoding <a href="#I-D.thomson-http-mice"><cite
+                                        title="Merkle Integrity Content Encoding">[MICE]</cite></a>
+                                はコンテンツを逆順で処理することを要求します。これは完全なデータが利用可能でなければならないことを意味し、ヘッダに整合性フィールドを含める場合とトレーラに含める場合で処理差がほとんどなくなります。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="variations-within-content-encoding">
+                        <h3 id="rfc.section.6.5"><a href="#rfc.section.6.5">6.5.</a>&nbsp;<a
+                                href="#variations-within-content-encoding">Content-Encoding 内の変化</a></h3>
+                        <div id="rfc.section.6.5.p.1">
+                            <p>コンテンツ符号化の仕組みはさまざまなエンコーディングパラメータをサポートすることがあり、同じ入力コンテンツが異なる出力を生むことがあります。例えば GZIP
+                                は複数の圧縮レベルをサポートします。こうしたエンコーディングパラメータは一般に表現メタデータとして伝達されません。例えば異なる圧縮レベルはすべて同じ
+                                "Content-Encoding: gzip" フィールドを使用します。ほかの例として、nonce やタイムスタンプに依存するエンコーディング（RFC 8188 の
+                                aes128gcm 等）があります。</p>
+                        </div>
+                        <div id="rfc.section.6.5.p.2">
+                            <p>コンテンツ符号化内に変動が存在し得るため、整合性フィールドが示すチェックサムは、全コンテンツを保存しない限り「保存時（at
+                                rest）」の整合性の証明として使用することはできません。</p>
+                        </div>
+                    </section>
+                    <section id="sec-agility">
+                        <h3 id="rfc.section.6.6"><a href="#rfc.section.6.6">6.6.</a>&nbsp;<a
+                                href="#sec-agility">アルゴリズムの柔軟性</a></h3>
+                        <div id="rfc.section.6.6.p.1">
+                            <p>ハッシュアルゴリズムのセキュリティ特性は固定的ではありません。アルゴリズムの柔軟性（agility）は、実装が IANA の "Hash Algorithms for HTTP
+                                Digest Fields" レジストリからハッシュアルゴリズムを選択できる柔軟性を提供することで達成されます（<a
+                                    href="#establish-hash-algorithm-registry"
+                                    title="Creation of the Hash Algorithms for HTTP Digest Fields Registry">セクション
+                                    7.2</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.6.6.p.2">
+                            <p>弱いアルゴリズムからの移行は、<span class="tt">Want-Content-Digest</span> や <span
+                                    class="tt">Want-Repr-Digest</span> を使ったハッシュアルゴリズムのネゴシエーション（<a href="#want-fields"
+                                    title="Integrity Preference Fields">セクション 4</a>
+                                を参照）や、送信側が複数のダイジェストを送信して受信側が選択する方法によってサポートされます。ダイジェストをセキュリティ目的で依存する受信者は、受け入れる最も弱いアルゴリズムの脆弱性に対して脆弱になります。複数の値を送信することは受信者がそれらを無視した場合にリソースを消費することになるため注意が必要です（<a
+                                    href="#representation-digest" title="The Repr-Digest Field">セクション 3</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.6.6.p.3">
+                            <p>アルゴリズムの柔軟性は強力なアルゴリズムへの移行を可能にしますが、弱いアルゴリズムの使用を防ぐものではありません。整合性フィールドはハッシュアルゴリズムのダウングレードや置換攻撃に対する緩和策を提供しません（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc6211.html#section-1">RFC 6211 セクション 1</a>
+                                を参照）。そのような攻撃から守るために、エンドポイントはサポートするアルゴリズム集合を強いものに制限し、TLS やデジタル署名でフィールドの値を保護することが考えられます。
+                            </p>
+                        </div>
+                    </section>
+                    <section id="sec-exhaustion">
+                        <h3 id="rfc.section.6.7"><a href="#rfc.section.6.7">6.7.</a>&nbsp;<a
+                                href="#sec-exhaustion">リソース消耗</a></h3>
+                        <div id="rfc.section.6.7.p.1">
+                            <p>整合性フィールドの検証は計算資源を消費します。リソース枯渇を避けるため、実装はアルゴリズム種別、検証回数、コンテンツサイズの制限を設けることができます。そのような場合、検証を完全にスキップするか、より優先度の高いアルゴリズムの検証失敗を無視することでダウングレード攻撃の可能性が残ります（<a
+                                    href="#sec-agility" title="Algorithm Agility">セクション 6.6</a> を参照）。</p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="iana-considerations">
+                    <h2 id="rfc.section.7" class="np"><a href="#rfc.section.7">7.</a>&nbsp;<a
+                            href="#iana-considerations">IANA に関する考慮事項</a></h2>
+                    <section id="http-field-name-registration">
+                        <h3 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a>&nbsp;<a
+                                href="#http-field-name-registration">HTTP フィールド名の登録</a></h3>
+                        <div id="rfc.section.7.1.p.1" class="avoidbreakafter">
+                            <p>IANA は "Hypertext Transfer Protocol (HTTP) Field Name Registry"（<a href="#RFC9110"><cite
+                                        title="HTTP Semantics">[HTTP]</cite></a>）を以下の表のように更新しました：</p>
+                        </div>
+                        <div class="table table-condensed table-striped">
+                            <table class="v3 text-center">
+                                <caption>表 1: Hypertext Transfer Protocol (HTTP) Field Name Registry の更新</caption>
+                                <thead>
+                                    <tr>
+                                        <th class="text-left" colspan="1" rowspan="1">フィールド名</th>
+                                        <th class="text-left" colspan="1" rowspan="1">ステータス</th>
+                                        <th class="text-left" colspan="1" rowspan="1">参照</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1"><span
+                                                class="tt">Content-Digest</span></td>
+                                        <td class="text-left" colspan="1" rowspan="1">permanent</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#content-digest"
+                                                title="The Content-Digest Field">セクション 2</a> of RFC 9530</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1"><span
+                                                class="tt">Repr-Digest</span></td>
+                                        <td class="text-left" colspan="1" rowspan="1">permanent</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#representation-digest"
+                                                title="The Repr-Digest Field">セクション 3</a> of RFC 9530</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1"><span
+                                                class="tt">Want-Content-Digest</span></td>
+                                        <td class="text-left" colspan="1" rowspan="1">permanent</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#want-fields"
+                                                title="Integrity Preference Fields">セクション 4</a> of RFC 9530</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1"><span
+                                                class="tt">Want-Repr-Digest</span></td>
+                                        <td class="text-left" colspan="1" rowspan="1">permanent</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#want-fields"
+                                                title="Integrity Preference Fields">セクション 4</a> of RFC 9530</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1"><span class="tt">Digest</span>
+                                        </td>
+                                        <td class="text-left" colspan="1" rowspan="1">obsoleted</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC3230"><cite
+                                                    title="Instance Digests in HTTP">[RFC3230]</cite></a>, <a
+                                                href="#obsolete-3230" title="Obsoleting RFC 3230">セクション 1.3</a> of RFC
+                                            9530</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1"><span
+                                                class="tt">Want-Digest</span></td>
+                                        <td class="text-left" colspan="1" rowspan="1">obsoleted</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC3230"><cite
+                                                    title="Instance Digests in HTTP">[RFC3230]</cite></a>, <a
+                                                href="#obsolete-3230" title="Obsoleting RFC 3230">セクション 1.3</a> of RFC
+                                            9530</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <section id="establish-hash-algorithm-registry">
+                        <h3 id="rfc.section.7.2"><a href="#rfc.section.7.2">7.2.</a>&nbsp;<a
+                                href="#establish-hash-algorithm-registry">Hash Algorithms for HTTP Digest Fields
+                                レジストリの作成</a></h3>
+                        <div id="rfc.section.7.2.p.1">
+                            <p>IANA は新しい "Hash Algorithms for HTTP Digest Fields" レジストリを &lt;<a
+                                    href="https://www.iana.org/assignments/http-digest-hash-alg/">https://www.iana.org/assignments/http-digest-hash-alg/</a>&gt;
+                                に作成し、<a href="#iana-hash-algorithm-table" title="Initial Hash Algorithms">表 2</a>
+                                のエントリで初期 populated を行いました。新規登録の手順は <a href="#algorithms"
+                                    title="Hash Algorithm Considerations and Registration">セクション 5</a> に記載されています。</p>
+                        </div>
+                        <div class="table table-condensed table-striped" id="iana-hash-algorithm-table">
+                            <table class="v3 text-center">
+                                <caption>表 2: 初期ハッシュアルゴリズム</caption>
+                                <thead>
+                                    <tr>
+                                        <th class="text-left" colspan="1" rowspan="1">Algorithm Key</th>
+                                        <th class="text-left" colspan="1" rowspan="1">Status</th>
+                                        <th class="text-left" colspan="1" rowspan="1">Description</th>
+                                        <th class="text-left" colspan="1" rowspan="1">Reference</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">sha-512</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Active</td>
+                                        <td class="text-left" colspan="1" rowspan="1">SHA-512 アルゴリズム</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC6234"><cite
+                                                    title="US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)">[RFC6234]</cite></a>,
+                                            <a href="#RFC4648"><cite
+                                                    title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>,
+                                            RFC 9530
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">sha-256</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Active</td>
+                                        <td class="text-left" colspan="1" rowspan="1">SHA-256 アルゴリズム</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC6234"><cite
+                                                    title="US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)">[RFC6234]</cite></a>,
+                                            <a href="#RFC4648"><cite
+                                                    title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>,
+                                            RFC 9530
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">md5</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Deprecated</td>
+                                        <td class="text-left" colspan="1" rowspan="1">MD5 アルゴリズム。衝突攻撃に対して脆弱です（<a
+                                                href="#RFC6151"><cite
+                                                    title="Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms">[NO-MD5]</cite></a>
+                                            および <a href="#CMU-836068"><cite
+                                                    title="MD5 vulnerable to collision attacks">[CMU-836068]</cite></a>
+                                            を参照）。</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC1321"><cite
+                                                    title="The MD5 Message-Digest Algorithm">[RFC1321]</cite></a>, <a
+                                                href="#RFC4648"><cite
+                                                    title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>,
+                                            RFC 9530</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">sha</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Deprecated</td>
+                                        <td class="text-left" colspan="1" rowspan="1">SHA-1 アルゴリズム。衝突攻撃に対して脆弱です（<a
+                                                href="#RFC6194"><cite
+                                                    title="Security Considerations for the SHA-0 and SHA-1 Message-Digest Algorithms">[NO-SHA]</cite></a>
+                                            および <a href="#IACR-2020-014"><cite
+                                                    title="SHA-1 is a Shambles">[IACR-2020-014]</cite></a> を参照）。</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC3174"><cite
+                                                    title="US Secure Hash Algorithm 1 (SHA1)">[RFC3174]</cite></a>, <a
+                                                href="#RFC4648"><cite
+                                                    title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>,
+                                            <a href="#RFC6234"><cite
+                                                    title="US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)">[RFC6234]</cite></a>,
+                                            RFC 9530
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">unixsum</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Deprecated</td>
+                                        <td class="text-left" colspan="1" rowspan="1">UNIX の "sum" コマンドが使用するアルゴリズム</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC4648"><cite
+                                                    title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>,
+                                            <a href="#RFC6234"><cite
+                                                    title="US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)">[RFC6234]</cite></a>,
+                                            <a href="#UNIX"><cite
+                                                    title="The Single UNIX Specification, Version 2 - 6 Vol Set for UNIX 98">[UNIX]</cite></a>,
+                                            <span class="nobr">RFC 9530</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">unixcksum</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Deprecated</td>
+                                        <td class="text-left" colspan="1" rowspan="1">UNIX の "cksum" コマンドが使用するアルゴリズム
+                                        </td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC4648"><cite
+                                                    title="The Base16, Base32, and Base64 Data Encodings">[RFC4648]</cite></a>,
+                                            <a href="#RFC6234"><cite
+                                                    title="US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)">[RFC6234]</cite></a>,
+                                            <a href="#UNIX"><cite
+                                                    title="The Single UNIX Specification, Version 2 - 6 Vol Set for UNIX 98">[UNIX]</cite></a>,
+                                            <span class="nobr">RFC 9530</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">adler</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Deprecated</td>
+                                        <td class="text-left" colspan="1" rowspan="1">ADLER32 アルゴリズム</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a href="#RFC1950"><cite
+                                                    title="ZLIB Compressed Data Format Specification version 3.3">[RFC1950]</cite></a>,
+                                            RFC 9530</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-left" colspan="1" rowspan="1">crc32c</td>
+                                        <td class="text-left" colspan="1" rowspan="1">Deprecated</td>
+                                        <td class="text-left" colspan="1" rowspan="1">CRC32c アルゴリズム</td>
+                                        <td class="text-left" colspan="1" rowspan="1"><a
+                                                href="https://www.rfc-editor.org/rfc/rfc9260.html#appendix-A">Appendix
+                                                A</a> of <a href="#RFC9260"><cite
+                                                    title="Stream Control Transmission Protocol">[RFC9260]</cite></a>,
+                                            RFC 9530</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <section id="deprecate-the-hypertext-transfer-protocol-http-digest-algorithm-values-registry">
+                        <h3 id="rfc.section.7.3"><a href="#rfc.section.7.3">7.3.</a>&nbsp;<a
+                                href="#deprecate-the-hypertext-transfer-protocol-http-digest-algorithm-values-registry">Hypertext
+                                Transfer Protocol (HTTP) Digest Algorithm Values レジストリの廃止</a></h3>
+                        <div id="rfc.section.7.3.p.1" class="avoidbreakafter">
+                            <p>IANA は &lt;<a
+                                    href="https://www.iana.org/assignments/http-dig-alg/">https://www.iana.org/assignments/http-dig-alg/</a>&gt;
+                                にある "Hypertext Transfer Protocol (HTTP) Digest Algorithm Values"
+                                レジストリを廃止し、そのレジストリ上の注記を次のテキストに置き換えました：</p>
+                        </div>
+                        <div id="rfc.section.7.3.p.2">
+                            <blockquote>
+                                <p>このレジストリは廃止されています。なぜなら本レジストリは <span class="tt">Digest</span> および <span
+                                        class="tt">Want-Digest</span> フィールドと共に使用可能なアルゴリズムを列挙しており、これらは <a
+                                        href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a>
+                                    によって定義されていましたが、RFC 9530 によって廃止されたためです。登録は閉じられていませんが、新規登録は代わりに <a
+                                        href="https://www.iana.org/assignments/http-digest-hash-alg/">Hash Algorithms
+                                        for HTTP Digest Fields</a> レジストリの使用が推奨されます。</p>
+                            </blockquote>
+                        </div>
+                    </section>
+                </section>
+                <section class="np">
+                    <div id="rfc.references">
+                        <h2 id="rfc.section.8"><a href="#rfc.section.8">8.</a> 参考資料</h2>
+                        <section>
+                            <div id="rfc.references.2">
+                                <h3 id="rfc.section.8.1"><a href="#rfc.section.8.1">8.1.</a> 規範的参照文献</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="RFC8792">[<a href="#RFC8792" class="smpl">FOLDING</a>]</dt>
+                                    <dd>Watsen, K., Auerswald, E., Farrel, A., and Q. Wu、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8792.html">Handling Long Lines in
+                                            Content of Internet-Drafts and RFCs</a>」、RFC 8792、<a
+                                            href="https://dx.doi.org/10.17487/RFC8792">DOI
+                                            10.17487/RFC8792</a>、2020年6月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8792">https://www.rfc-editor.org/info/rfc8792</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC9110">[<a href="#RFC9110" class="smpl">HTTP</a>]</dt>
+                                    <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9110.html">HTTP Semantics</a>」、<a
+                                            href="https://www.rfc-editor.org/info/std97">STD 97</a>、RFC 9110、<a
+                                            href="https://dx.doi.org/10.17487/RFC9110">DOI
+                                            10.17487/RFC9110</a>、2022年6月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9110">https://www.rfc-editor.org/info/rfc9110</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC1321">[<a href="#RFC1321" class="smpl">RFC1321</a>]</dt>
+                                    <dd>Rivest, R., 「<a href="https://www.rfc-editor.org/rfc/rfc1321.html">The MD5
+                                            Message-Digest Algorithm</a>」、RFC 1321、<a
+                                            href="https://dx.doi.org/10.17487/RFC1321">DOI
+                                            10.17487/RFC1321</a>、1992年4月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc1321">https://www.rfc-editor.org/info/rfc1321</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC1950">[<a href="#RFC1950" class="smpl">RFC1950</a>]</dt>
+                                    <dd>Deutsch, P. and J-L. Gailly, 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc1950.html">ZLIB Compressed Data
+                                            Format Specification version 3.3</a>」、RFC 1950、<a
+                                            href="https://dx.doi.org/10.17487/RFC1950">DOI
+                                            10.17487/RFC1950</a>、1996年5月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc1950">https://www.rfc-editor.org/info/rfc1950</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                    <dd>Bradner, S., 「<a href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words
+                                            for use in RFCs to Indicate Requirement Levels</a>」、<a
+                                            href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>、RFC 2119、<a
+                                            href="https://dx.doi.org/10.17487/RFC2119">DOI
+                                            10.17487/RFC2119</a>、1997年3月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC3174">[<a href="#RFC3174" class="smpl">RFC3174</a>]</dt>
+                                    <dd>Eastlake 3rd, D. and P. Jones, 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc3174.html">US Secure Hash Algorithm
+                                            1 (SHA1)</a>」、RFC 3174、<a href="https://dx.doi.org/10.17487/RFC3174">DOI
+                                            10.17487/RFC3174</a>、2001年9月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc3174">https://www.rfc-editor.org/info/rfc3174</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC4648">[<a href="#RFC4648" class="smpl">RFC4648</a>]</dt>
+                                    <dd>Josefsson, S., 「<a href="https://www.rfc-editor.org/rfc/rfc4648.html">The
+                                            Base16, Base32, and Base64 Data Encodings</a>」、RFC 4648、<a
+                                            href="https://dx.doi.org/10.17487/RFC4648">DOI
+                                            10.17487/RFC4648</a>、2006年10月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc4648">https://www.rfc-editor.org/info/rfc4648</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC5234">[<a href="#RFC5234" class="smpl">RFC5234</a>]</dt>
+                                    <dd>Crocker, D., Ed. and P. Overell, 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc5234.html">Augmented BNF for Syntax
+                                            Specifications: ABNF</a>」、<a
+                                            href="https://www.rfc-editor.org/info/std68">STD 68</a>、RFC 5234、<a
+                                            href="https://dx.doi.org/10.17487/RFC5234">DOI
+                                            10.17487/RFC5234</a>、2008年1月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc5234">https://www.rfc-editor.org/info/rfc5234</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC6234">[<a href="#RFC6234" class="smpl">RFC6234</a>]</dt>
+                                    <dd>Eastlake 3rd, D. and T. Hansen, 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6234.html">US Secure Hash Algorithms
+                                            (SHA and SHA-based HMAC and HKDF)</a>」、RFC 6234、<a
+                                            href="https://dx.doi.org/10.17487/RFC6234">DOI
+                                            10.17487/RFC6234</a>、2011年5月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6234">https://www.rfc-editor.org/info/rfc6234</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC7405">[<a href="#RFC7405" class="smpl">RFC7405</a>]</dt>
+                                    <dd>Kyzivat, P., 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7405.html">Case-Sensitive String
+                                            Support in ABNF</a>」、RFC 7405、<a
+                                            href="https://dx.doi.org/10.17487/RFC7405">DOI
+                                            10.17487/RFC7405</a>、2014年12月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7405">https://www.rfc-editor.org/info/rfc7405</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC8126">[<a href="#RFC8126" class="smpl">RFC8126</a>]</dt>
+                                    <dd>Cotton, M., Leiba, B., and T. Narten, 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8126.html">Guidelines for Writing an
+                                            IANA Considerations Section in RFCs</a>」、<a
+                                            href="https://www.rfc-editor.org/info/bcp26">BCP 26</a>、RFC 8126、<a
+                                            href="https://dx.doi.org/10.17487/RFC8126">DOI
+                                            10.17487/RFC8126</a>、2017年6月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8126">https://www.rfc-editor.org/info/rfc8126</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC8174">[<a href="#RFC8174" class="smpl">RFC8174</a>]</dt>
+                                    <dd>Leiba, B., 「<a href="https://www.rfc-editor.org/rfc/rfc8174.html">Ambiguity of
+                                            Uppercase vs Lowercase in RFC 2119 Key Words</a>」、<a
+                                            href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>、RFC 8174、<a
+                                            href="https://dx.doi.org/10.17487/RFC8174">DOI
+                                            10.17487/RFC8174</a>、2017年5月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC8941">[<a href="#RFC8941" class="smpl">STRUCTURED-FIELDS</a>]</dt>
+                                    <dd>Nottingham, M. and P-H. Kamp, 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc8941.html">Structured Field Values
+                                            for HTTP</a>」、RFC 8941、<a href="https://dx.doi.org/10.17487/RFC8941">DOI
+                                            10.17487/RFC8941</a>、2021年2月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8941">https://www.rfc-editor.org/info/rfc8941</a>&gt;。
+                                    </dd>
+                                </dl>
+                            </div>
+                        </section>
+                        <section>
+                            <div id="rfc.references.3">
+                                <h3 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a> 参考情報（Informative
+                                    References）</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="CMU-836068">[<a href="#CMU-836068" class="smpl">CMU-836068</a>]</dt>
+                                    <dd>Carnegie Mellon University, Software Engineering Institute、「<a
+                                            href="https://www.kb.cert.org/vuls/id/836068/">MD5 vulnerable to collision
+                                            attacks</a>」、2008年12月、&lt;<a
+                                            href="https://www.kb.cert.org/vuls/id/836068/">https://www.kb.cert.org/vuls/id/836068/</a>&gt;。
+                                    </dd>
+                                    <dt id="FIPS186-5">[<a href="#FIPS186-5" class="smpl">FIPS186-5</a>]</dt>
+                                    <dd>National Institute of Standards and Technology (NIST)、「<a
+                                            href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf">Digital
+                                            Signature Standard (DSS)</a>」、FIPS PUB 186-5、<a
+                                            href="https://dx.doi.org/10.6028/NIST.FIPS.186-5">DOI
+                                            10.6028/NIST.FIPS.186-5</a>、2023年2月、&lt;<a
+                                            href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf">https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC9112">[<a href="#RFC9112" class="smpl">HTTP/1.1</a>]</dt>
+                                    <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., 「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9112.html">HTTP/1.1</a>」、<a
+                                            href="https://www.rfc-editor.org/info/std99">STD 99</a>、RFC 9112、<a
+                                            href="https://dx.doi.org/10.17487/RFC9112">DOI
+                                            10.17487/RFC9112</a>、2022年6月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9112">https://www.rfc-editor.org/info/rfc9112</a>&gt;。
+                                    </dd>
+                                    <dt id="IACR-2020-014">[<a href="#IACR-2020-014" class="smpl">IACR-2020-014</a>]
+                                    </dt>
+                                    <dd>Leurent, G. and T. Peyrin、「<a href="https://eprint.iacr.org/2020/014.pdf">SHA-1
+                                            is a Shambles</a>」、2020年1月、&lt;<a
+                                            href="https://eprint.iacr.org/2020/014.pdf">https://eprint.iacr.org/2020/014.pdf</a>&gt;。
+                                    </dd>
+                                    <dt id="I-D.thomson-http-mice">[<a href="#I-D.thomson-http-mice"
+                                            class="smpl">MICE</a>]</dt>
+                                    <dd>Thomson, M. and J. Yasskin、「<a
+                                            href="https://datatracker.ietf.org/doc/html/draft-thomson-http-mice-03">Merkle
+                                            Integrity Content Encoding</a>」、<a
+                                            href="https://datatracker.ietf.org/doc/draft-thomson-http-mice">作業中の文書</a>、draft-thomson-http-mice-03、2018年8月、&lt;<a
+                                            href="https://datatracker.ietf.org/doc/html/draft-thomson-http-mice-03">https://datatracker.ietf.org/doc/html/draft-thomson-http-mice-03</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC6151">[<a href="#RFC6151" class="smpl">NO-MD5</a>]</dt>
+                                    <dd>Turner, S. and L. Chen、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6151.html">Updated Security
+                                            Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms</a>」、
+                                        RFC 6151、<a href="https://dx.doi.org/10.17487/RFC6151">DOI
+                                            10.17487/RFC6151</a>、2011年3月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6151">https://www.rfc-editor.org/info/rfc6151</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC6194">[<a href="#RFC6194" class="smpl">NO-SHA</a>]</dt>
+                                    <dd>Polk, T., Chen, L., Turner, S., and P. Hoffman、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc6194.html">Security Considerations
+                                            for the SHA-0 and SHA-1 Message-Digest Algorithms</a>」、RFC 6194、<a
+                                            href="https://dx.doi.org/10.17487/RFC6194">DOI
+                                            10.17487/RFC6194</a>、2011年3月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6194">https://www.rfc-editor.org/info/rfc6194</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC5789">[<a href="#RFC5789" class="smpl">PATCH</a>]</dt>
+                                    <dd>Dusseault, L. and J. Snell、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc5789.html">PATCH Method for
+                                            HTTP</a>」、RFC 5789、<a href="https://dx.doi.org/10.17487/RFC5789">DOI
+                                            10.17487/RFC5789</a>、2010年3月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc5789">https://www.rfc-editor.org/info/rfc5789</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC3230">[<a href="#RFC3230" class="smpl">RFC3230</a>]</dt>
+                                    <dd>Mogul, J. and A. Van Hoff、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc3230.html">Instance Digests in
+                                            HTTP</a>」、RFC 3230、<a href="https://dx.doi.org/10.17487/RFC3230">DOI
+                                            10.17487/RFC3230</a>、2002年1月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc3230">https://www.rfc-editor.org/info/rfc3230</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC6211">[<a href="#RFC6211" class="smpl">RFC6211</a>]</dt>
+                                    <dd>Schaad, J., 「<a href="https://www.rfc-editor.org/rfc/rfc6211.html">Cryptographic
+                                            Message Syntax (CMS) Algorithm Identifier Protection Attribute</a>」、RFC
+                                        6211、<a href="https://dx.doi.org/10.17487/RFC6211">DOI
+                                            10.17487/RFC6211</a>、2011年4月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc6211">https://www.rfc-editor.org/info/rfc6211</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC7396">[<a href="#RFC7396" class="smpl">RFC7396</a>]</dt>
+                                    <dd>Hoffman, P. and J. Snell、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc7396.html">JSON Merge Patch</a>」、RFC
+                                        7396、<a href="https://dx.doi.org/10.17487/RFC7396">DOI
+                                            10.17487/RFC7396</a>、2014年10月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7396">https://www.rfc-editor.org/info/rfc7396</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC7696">[<a href="#RFC7696" class="smpl">RFC7696</a>]</dt>
+                                    <dd>Housley, R., 「<a href="https://www.rfc-editor.org/rfc/rfc7696.html">Guidelines
+                                            for Cryptographic Algorithm Agility and Selecting Mandatory-to-Implement
+                                            Algorithms</a>」、<a href="https://www.rfc-editor.org/info/bcp201">BCP
+                                            201</a>、RFC 7696、<a href="https://dx.doi.org/10.17487/RFC7696">DOI
+                                            10.17487/RFC7696</a>、2015年11月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc7696">https://www.rfc-editor.org/info/rfc7696</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC8188">[<a href="#RFC8188" class="smpl">RFC8188</a>]</dt>
+                                    <dd>Thomson, M., 「<a href="https://www.rfc-editor.org/rfc/rfc8188.html">Encrypted
+                                            Content-Encoding for HTTP</a>」、RFC 8188、<a
+                                            href="https://dx.doi.org/10.17487/RFC8188">DOI
+                                            10.17487/RFC8188</a>、2017年6月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8188">https://www.rfc-editor.org/info/rfc8188</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC9260">[<a href="#RFC9260" class="smpl">RFC9260</a>]</dt>
+                                    <dd>Stewart, R., Tüxen, M., and K. Nielsen、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9260.html">Stream Control
+                                            Transmission Protocol</a>」、RFC 9260、<a
+                                            href="https://dx.doi.org/10.17487/RFC9260">DOI
+                                            10.17487/RFC9260</a>、2022年6月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9260">https://www.rfc-editor.org/info/rfc9260</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC9457">[<a href="#RFC9457" class="smpl">RFC9457</a>]</dt>
+                                    <dd>Nottingham, M., Wilde, E., and S. Dalal、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9457.html">Problem Details for HTTP
+                                            APIs</a>」、RFC 9457、<a href="https://dx.doi.org/10.17487/RFC9457">DOI
+                                            10.17487/RFC9457</a>、2023年7月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9457">https://www.rfc-editor.org/info/rfc9457</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC9421">[<a href="#RFC9421" class="smpl">SIGNATURES</a>]</dt>
+                                    <dd>Backman, A., Ed., Richer, J., Ed., and M. Sporny、「<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9421.html">HTTP Message
+                                            Signatures</a>」、RFC 9421、<a href="https://dx.doi.org/10.17487/RFC9421">DOI
+                                            10.17487/RFC9421</a>、2024年2月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9421">https://www.rfc-editor.org/info/rfc9421</a>&gt;。
+                                    </dd>
+                                    <dt id="RFC8446">[<a href="#RFC8446" class="smpl">TLS</a>]</dt>
+                                    <dd>Rescorla, E., 「<a href="https://www.rfc-editor.org/rfc/rfc8446.html">The
+                                            Transport Layer Security (TLS) Protocol Version 1.3</a>」、RFC 8446、<a
+                                            href="https://dx.doi.org/10.17487/RFC8446">DOI
+                                            10.17487/RFC8446</a>、2018年8月、&lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8446">https://www.rfc-editor.org/info/rfc8446</a>&gt;。
+                                    </dd>
+                                    <dt id="UNIX">[<a href="#UNIX" class="smpl">UNIX</a>]</dt>
+                                    <dd>The Open Group、"The Single UNIX Specification, Version 2 - 6 Vol Set for UNIX
+                                        98"、1998年1月。</dd>
+                                </dl>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="resource-representation">
+                    <h2 id="rfc.section.A" class="np"><a href="#rfc.section.A">Appendix A.</a>&nbsp;<a
+                            href="#resource-representation">リソース表現と表現データ</a></h2>
+                    <div id="rfc.section.A.p.1">
+                        <p>以下の例は、表現メタデータ、コンテンツ変換、およびメソッドがメッセージとコンテンツに与える影響を示します。これらの例は網羅的ではありません。</p>
+                    </div>
+                    <div id="rfc.section.A.p.2">
+                        <p>特に明記されていない限り、例は LF に続く JSON オブジェクト <span class="tt">{"hello": "world"}</span>
+                            に基づきます。コンテンツに非可視文字（例えばエンコードされた場合）が含まれる場合は、16進エンコードされたバイト列として示します。</p>
+                    </div>
+                    <div id="rfc.section.A.p.3">
+                        <p>例えばクライアントが PUT メソッドを使って JSON オブジェクトをアップロードしたいとします。この場合、application/json の <span
+                                class="tt">Content-Type</span> を使い、コンテンツ符号化を行わずに送信できます。</p>
+                    </div>
+                    <div id="rfc.figure.1">
+                        <div>
+                            <pre class="text">
+PUT /entries/1234 HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+Content-Length: 19
+
+{"hello": "world"}
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 1: コンテンツ符号化なしで JSON オブジェクトを含むリクエスト</p>
+                    <div id="rfc.section.A.p.4">
+                        <p>しかし、コンテンツ符号化は一般的に用いられます。クライアントは同じデータを GZIP 符号化してアップロードすることもできます（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.4.1.3">RFC 9110 セクション
+                                8.4.1.3</a> を参照）。この場合、符号化のオーバーヘッドにより <span class="tt">Content-Length</span> は大きな値になります。
+                        </p>
+                    </div>
+                    <div id="ex-put-gz"></div>
+                    <div id="rfc.figure.2">
+                        <div>
+                            <pre class="text">
+PUT /entries/1234 HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+Content-Encoding: gzip
+Content-Length: 39
+
+1F 8B 08 00 88 41 37 64 00 FF
+AB 56 CA 48 CD C9 C9 57 B2 52
+50 2A CF 2F CA 49 51 AA E5 02
+00 D9 E4 31 E7 13 00 00 00
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 2: GZIP エンコードされた JSON オブジェクトを含むリクエスト</p>
+                    <div id="rfc.section.A.p.5">
+                        <p>GZIP 符号化されたデータを <span class="tt">Content-Encoding</span>
+                            を示さずに送ると、コンテンツは不正なものになります。この場合、サーバはエラーで応答することができます。</p>
+                    </div>
+                    <div id="rfc.figure.3">
+                        <div>
+                            <pre class="text">
+PUT /entries/1234 HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+
+Content-Length: 39
+
+1F 8B 08 00 88 41 37 64 00 FF
+AB 56 CA 48 CD C9 C9 57 B2 52
+50 2A CF 2F CA 49 51 AA E5 02
+00 D9 E4 31 E7 13 00 00 00
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 3: 不正な JSON を含むリクエスト</p>
+                    <div id="rfc.figure.4">
+                        <div>
+                            <pre class="text">
+HTTP/1.1 400 Bad Request
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 4: 不正なコンテンツに対するエラーレスポンス</p>
+                    <div id="rfc.section.A.p.6">
+                        <p>Range リクエストは転送されるメッセージコンテンツに影響します。以下の例では、クライアントは <span class="tt">/entries/1234</span>（LF に続く
+                            JSON オブジェクト <span class="tt">{"hello":
+                                "world"}</span>）にアクセスしていますが、優先するコンテンツ符号化と特定のバイト範囲を指定しています。</p>
+                    </div>
+                    <div id="rfc.figure.5">
+                        <div>
+                            <pre class="text">
+GET /entries/1234 HTTP/1.1
+Host: foo.example
+Accept-Encoding: gzip
+Range: bytes=1-7
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 5: 部分コンテンツのリクエスト</p>
+                    <div id="rfc.section.A.p.7">
+                        <p>サーバはクライアントの要求を満たし、部分表現で応答します（図 2 に示した JSON オブジェクトの最初の10バイトに相当）。</p>
+                    </div>
+                    <div id="rfc.figure.6">
+                        <div>
+                            <pre class="text">
+HTTP/1.1 206 Partial Content
+Content-Encoding: gzip
+Content-Type: application/json
+Content-Range: bytes 0-9/39
+
+1F 8B 08 00 A5 B4 BD 62 02 FF
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 6: GZIP エンコードされた表現からの部分レスポンス</p>
+                    <div id="rfc.section.A.p.8">
+                        <p>コンテンツ符号化やレンジリクエスト以外にも、メソッドは転送されるメッセージコンテンツに影響を与えることがあります。例えば、HEAD
+                            リクエストへの応答はコンテンツを持ちませんが、この例では <span class="tt">Content-Length</span> を含めています（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-8.6">RFC 9110 セクション 8.6</a>
+                            を参照）。</p>
+                    </div>
+                    <div id="rfc.figure.7">
+                        <div>
+                            <pre class="text">
+HEAD /entries/1234 HTTP/1.1
+Host: foo.example
+Accept: application/json
+Accept-Encoding: gzip
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 7: HEAD リクエスト</p>
+                    <div id="rfc.figure.8">
+                        <div>
+                            <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Encoding: gzip
+Content-Length: 39
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 8: HEAD リクエストへのレスポンス（空コンテンツ）</p>
+                    <div id="rfc.section.A.p.9">
+                        <p>最後に、レスポンスのセマンティクスはターゲット URI と同梱表現を切り離すことがあります。以下の例では、クライアントは <span
+                                class="tt">/authors/</span> に対して POST リクエストを行いますが、レスポンスには同梱表現が <span
+                                class="tt">/authors/123</span> にあるリソースを参照していることを示す <span
+                                class="tt">Content-Location</span> ヘッダーフィールドが含まれています。この例では <span
+                                class="tt">Content-Length</span> は送信されていない点に注意してください。</p>
+                    </div>
+                    <div id="rfc.figure.9">
+                        <div>
+                            <pre class="text">
+POST /authors/ HTTP/1.1
+Host: foo.example
+Accept: application/json
+Content-Type: application/json
+
+{"author": "Camilleri"}
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 9: POST リクエスト</p>
+                    <div id="rfc.figure.10">
+                        <div>
+                            <pre class="text">
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Location: /authors/123
+Location: /authors/123
+
+{"id": "123", "author": "Camilleri"}
+</pre>
+                        </div>
+                    </div>
+                    <p class="figure">図 10: Content-Location ヘッダを含むレスポンス</p>
+                </section>
+                <hr class="hidden-print">
+                <section id="examples-unsolicited">
+                    <h2 id="rfc.section.B" class="np"><a href="#rfc.section.B">Appendix B.</a>&nbsp;<a
+                            href="#examples-unsolicited">未要求の <span class="tt">Digest</span> の例</a></h2>
+                    <div id="rfc.section.B.p.1">
+                        <p>以下の例は、クライアントが <span class="tt">Want-Content-Digest</span> または <span
+                                class="tt">Want-Repr-Digest</span> を用いて要求しなくても、サーバが <span
+                                class="tt">Content-Digest</span> または <span class="tt">Repr-Digest</span>
+                            フィールドを返すやり取りの例を示します。</p>
+                    </div>
+                    <div id="rfc.section.B.p.2">
+                        <p>いくつかの例にはコンテンツに JSON
+                            オブジェクトが含まれます。表示の都合上、行長制限に収まるオブジェクトは先頭に空白を付けずに一行で示します。行長制限を超えるオブジェクトは複数行（各キーと値ごとに1行）に分け、先頭に2つのスペースを付けて示します。
+                        </p>
+                    </div>
+                    <div id="rfc.section.B.p.3">
+                        <p>本書で定義されたチェックサム機構はメディアタイプに依存せず、特定フォーマットの正規化アルゴリズムは提供しません。例は空白を含めた状態で計算されています。例は両方のフィールドを含むことがありますが、<span
+                                class="tt">Content-Digest</span> と <span class="tt">Repr-Digest</span> は独立して返され得ます。</p>
+                    </div>
+                    <section id="example-full-representation">
+                        <h3 id="rfc.section.B.1"><a href="#rfc.section.B.1">B.1.</a>&nbsp;<a
+                                href="#example-full-representation">サーバが完全な表現データを返す場合</a></h3>
+                        <div id="rfc.section.B.1.p.1">
+                            <p>この例では、メッセージコンテンツが完全な表現データを伝えます。したがってレスポンスでは、<span class="tt">Content-Digest</span> と
+                                <span class="tt">Repr-Digest</span> の両方が JSON オブジェクト <span class="tt">{"hello":
+                                    "world"}</span>（LF に続く）に対して計算され、同じ値になります。
+                            </p>
+                        </div>
+                        <div id="rfc.figure.11">
+                            <div>
+                                <pre class="text">
+GET /items/123 HTTP/1.1
+Host: foo.example
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 11: アイテム取得のための GET リクエスト</p>
+                        <div id="rfc.figure.12">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 19
+Content-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+
+{"hello": "world"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 12: 同一の <span class="tt">Repr-Digest</span> と <span
+                                class="tt">Content-Digest</span> を含むレスポンス</p>
+                    </section>
+                    <section id="server-returns-no-representation-data">
+                        <h3 id="rfc.section.B.2"><a href="#rfc.section.B.2">B.2.</a>&nbsp;<a
+                                href="#server-returns-no-representation-data">サーバが表現データを返さない場合</a></h3>
+                        <div id="rfc.section.B.2.p.1">
+                            <p>この例では、HEAD リクエストを使ってリソースのチェックサムを取得します。</p>
+                        </div>
+                        <div id="rfc.section.B.2.p.2">
+                            <p>レスポンスの <span class="tt">Content-Digest</span> フィールド値は空のコンテンツに対して計算されています。<span
+                                    class="tt">Repr-Digest</span> は JSON オブジェクト <span class="tt">{"hello":
+                                    "world"}</span>（LF に続く）に対して計算されていますが、コンテンツがないため表示されていません。</p>
+                        </div>
+                        <div id="rfc.figure.13">
+                            <div>
+                                <pre class="text">
+HEAD /items/123 HTTP/1.1
+Host: foo.example
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 13: アイテムの HEAD リクエスト</p>
+                        <div id="rfc.figure.14">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Digest: \
+  sha-256=:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=:
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 14: 両方の <span class="tt">Content-Digest</span> と <span
+                                class="tt">Repr-Digest</span> を含むレスポンス（空コンテンツ）</p>
+                    </section>
+                    <section id="server-returns-partial-representation-data">
+                        <h3 id="rfc.section.B.3"><a href="#rfc.section.B.3">B.3.</a>&nbsp;<a
+                                href="#server-returns-partial-representation-data">サーバが部分的な表現データを返す場合</a></h3>
+                        <div id="rfc.section.B.3.p.1">
+                            <p>この例では、クライアントがレンジリクエストを行い、サーバが部分コンテンツで応答します。</p>
+                        </div>
+                        <div id="rfc.figure.15">
+                            <div>
+                                <pre class="text">
+GET /items/123 HTTP/1.1
+Host: foo.example
+Range: bytes=10-18
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 15: 部分コンテンツのリクエスト</p>
+                        <div id="rfc.figure.16">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 206 Partial Content
+Content-Type: application/json
+Content-Range: bytes 10-18/19
+Content-Digest: \
+  sha-256=:jjcgBDWNAtbYUXI37CVG3gRuGOAjaaDRGpIUFsdyepQ=:
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+
+"world"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 16: 両方の <span class="tt">Content-Digest</span> と <span
+                                class="tt">Repr-Digest</span> を含む部分レスポンス</p>
+                        <div id="rfc.section.B.3.p.2" class="avoidbreakafter">
+                            <p>上のレスポンスメッセージでは、<span class="tt">Repr-Digest</span> と <span
+                                    class="tt">Content-Digest</span> が異なることに注意してください。<span class="tt">Repr-Digest</span>
+                                のフィールド値は JSON オブジェクト全体 <span class="tt">{"hello": "world"}</span>（LF
+                                に続く）を横断して計算され、次のように現れます：
+                            </p>
+                        </div>
+                        <div id="rfc.section.B.3.p.3">
+                            <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+</pre>
+                        </div>
+                        <div id="rfc.section.B.3.p.4" class="avoidbreakafter">
+                            <p>しかし、メッセージコンテンツがバイト 10-18 に制限されているため、<span class="tt">Content-Digest</span> のフィールド値はシーケンス
+                                <span class="tt">"world"}</span>（LF に続く）に対して計算され、次のようになります：
+                            </p>
+                        </div>
+                        <div id="rfc.section.B.3.p.5">
+                            <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+Content-Digest: \
+  sha-256=:jjcgBDWNAtbYUXI37CVG3gRuGOAjaaDRGpIUFsdyepQ=:
+</pre>
+                        </div>
+                    </section>
+                    <section id="client-and-server-provide-full-representation-data">
+                        <h3 id="rfc.section.B.4"><a href="#rfc.section.B.4">B.4.</a>&nbsp;<a
+                                href="#client-and-server-provide-full-representation-data">クライアントとサーバが完全な表現データを提供する場合</a>
+                        </h3>
+                        <div id="rfc.section.B.4.p.1">
+                            <p>リクエストには同梱表現に対して計算された <span class="tt">Repr-Digest</span> フィールド値が含まれています。また、クライアントは Brotli
+                                符号化をサポートすることを示す <span class="tt">Accept-Encoding: br</span> ヘッダーフィールドを含めています。</p>
+                        </div>
+                        <div id="rfc.section.B.4.p.2">
+                            <p>レスポンスには選択された表現が Brotli で符号化されていることを示す <span class="tt">Content-Encoding: br</span>
+                                が含まれます。したがって、<span class="tt">Repr-Digest</span> のフィールド値はリクエストと異なります。</p>
+                        </div>
+                        <div id="rfc.section.B.4.p.3">
+                            <p>表示の都合上、レスポンスボディは非表示文字を含むため 16 進エンコードされたバイト列として表示されています。</p>
+                        </div>
+                        <div id="rfc.figure.17">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+PUT /items/123 HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+Accept-Encoding: br
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg=:
+
+{"hello": "world"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 17: <span class="tt">Digest</span> を含む PUT リクエスト</p>
+                        <div id="rfc.figure.18">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Location: /items/123
+Content-Encoding: br
+Content-Length: 23
+Repr-Digest: \
+  sha-256=:d435Qo+nKZ+gLcUHn7GQtQ72hiBVAgqoLsZnZPiTGPk=:
+
+8B 08 80 7B 22 68 65 6C 6C 6F
+22 3A 20 22 77 6F 72 6C 64 22
+7D 0A 03
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 18: エンコード済レスポンスの <span class="tt">Digest</span></p>
+                    </section>
+                    <section id="client-provides-full-representation-data-server-provides-no-representation-data">
+                        <h3 id="rfc.section.B.5"><a href="#rfc.section.B.5">B.5.</a>&nbsp;<a
+                                href="#client-provides-full-representation-data-server-provides-no-representation-data">クライアントが完全な表現データを提供し、サーバが表現データを提供しない場合</a>
+                        </h3>
+                        <div id="rfc.section.B.5.p.1">
+                            <p>リクエストの <span class="tt">Repr-Digest</span> フィールド値は、同梱コンテンツ（LF に続く JSON オブジェクト <span
+                                    class="tt">{"hello": "world"}</span>）に対して計算されています。</p>
+                        </div>
+                        <div id="rfc.section.B.5.p.2">
+                            <p>レスポンスの <span class="tt">Repr-Digest</span> フィールド値は、レスポンスにコンテンツが含まれない場合でも <span
+                                    class="tt">Content-Encoding: br</span> を含む表現メタデータに依存します。</p>
+                        </div>
+                        <div id="rfc.section.B.5.p.3">
+                            <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+PUT /items/123 HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+Content-Length: 19
+Accept-Encoding: br
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg==:
+
+{"hello": "world"}
+</pre>
+                        </div>
+                        <div id="rfc.figure.19">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 204 No Content
+Content-Type: application/json
+Content-Encoding: br
+Repr-Digest: sha-256=:d435Qo+nKZ+gLcUHn7GQtQ72hiBVAgqoLsZnZPiTGPk=:
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 19: <span class="tt">Digest</span> を含む空のレスポンス</p>
+                    </section>
+                    <section id="client-and-server-provide-full-representation-data-1">
+                        <h3 id="rfc.section.B.6"><a href="#rfc.section.B.6">B.6.</a>&nbsp;<a
+                                href="#client-and-server-provide-full-representation-data-1">クライアントとサーバが完全な表現データを提供する場合</a>
+                        </h3>
+                        <div id="rfc.section.B.6.p.1">
+                            <p>レスポンスは異なるアルゴリズムを使った二つのダイジェスト値を含みます。</p>
+                        </div>
+                        <div id="rfc.section.B.6.p.2">
+                            <p>表示の都合上、レスポンスボディは非表示文字を含むため 16 進エンコードされたバイト列として表示されています。</p>
+                        </div>
+                        <div id="rfc.figure.20">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+PUT /items/123 HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+Accept-Encoding: br
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg==:
+
+{"hello": "world"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 20: <span class="tt">Digest</span> を含む PUT リクエスト</p>
+                        <div id="rfc.figure.21">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Encoding: br
+Content-Location: /items/123
+Repr-Digest: \
+  sha-256=:d435Qo+nKZ+gLcUHn7GQtQ72hiBVAgqoLsZnZPiTGPk=:,\
+  sha-512=:db7fdBbgZMgX1Wb2MjA8zZj+rSNgfmDCEEXM8qLWfpfoNY0sCpHAzZbj\
+  09X1/7HAb7Od5Qfto4QpuBsFbUO3dQ==:
+
+8B 08 80 7B 22 68 65 6C 6C 6F
+22 3A 20 22 77 6F 72 6C 64 22
+7D 0A 03
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 21: エンコード済コンテンツの <span class="tt">Digest</span></p>
+                    </section>
+                    <section id="post-not-request-uri">
+                        <h3 id="rfc.section.B.7"><a href="#rfc.section.B.7">B.7.</a>&nbsp;<a
+                                href="#post-not-request-uri">POST レスポンスがリクエスト URI を参照しない場合</a></h3>
+                        <div id="rfc.section.B.7.p.1">
+                            <p>リクエストの <span class="tt">Repr-Digest</span> フィールド値は同梱表現（LF に続く JSON オブジェクト <span
+                                    class="tt">{"title": "New Title"}</span>）に対して計算されます（<a
+                                    href="#state-changing-requests"
+                                    title="Using Repr-Digest in State-Changing Requests">セクション 3.1</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.B.7.p.2">
+                            <p>レスポンスに同梱された表現は複数行の JSON オブジェクト（LF に続く）で、<span class="tt">Content-Location</span>
+                                によって識別されるリソースを参照します（<a
+                                    href="https://www.rfc-editor.org/rfc/rfc9110.html#section-6.4.2">RFC 9110 セクション
+                                    6.4.2</a> を参照）。したがって、アプリケーションは <span class="tt">Repr-Digest</span> を <span
+                                    class="tt">Content-Location</span> によって参照されるリソースと関連付けて使用できます。</p>
+                        </div>
+                        <div id="rfc.figure.22">
+                            <div>
+                                <pre class="text">
+POST /books HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+Accept: application/json
+Accept-Encoding: identity
+Repr-Digest: sha-256=:mEkdbO7Srd9LIOegftO0aBX+VPTVz7/CSHes2Z27gc4=:
+
+{"title": "New Title"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 22: <span class="tt">Digest</span> を含む POST リクエスト</p>
+                        <div id="rfc.figure.23">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Location: /books/123
+Location: /books/123
+Repr-Digest: sha-256=:uVSlinTTdQUwm2On4k8TJUikGN1bf/Ds8WPX4oe0h9I=:
+
+{
+  "id": "123",
+  "title": "New Title"
+}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 23: リソースの <span class="tt">Digest</span> を含むレスポンス</p>
+                    </section>
+                    <section id="post-referencing-status">
+                        <h3 id="rfc.section.B.8"><a href="#rfc.section.B.8">B.8.</a>&nbsp;<a
+                                href="#post-referencing-status">POST レスポンスがリクエストのステータスを示す場合</a></h3>
+                        <div id="rfc.section.B.8.p.1">
+                            <p>リクエストの <span class="tt">Repr-Digest</span> フィールド値は同梱表現（LF に続く JSON オブジェクト <span
+                                    class="tt">{"title": "New Title"}</span>）に対して計算されています（<a
+                                    href="#state-changing-requests"
+                                    title="Using Repr-Digest in State-Changing Requests">セクション 3.1</a> を参照）。</p>
+                        </div>
+                        <div id="rfc.section.B.8.p.2">
+                            <p>レスポンスに同梱された表現はリクエストの状態を記述しており、したがって <span class="tt">Repr-Digest</span>
+                                はその同梱表現に対して計算されます。これは複数行の JSON オブジェクト（LF に続く）です。</p>
+                        </div>
+                        <div id="rfc.section.B.8.p.3">
+                            <p>レスポンスの <span class="tt">Repr-Digest</span> は <span class="tt">Location</span>
+                                によって参照されるリソースと明示的な関係を持ちません。</p>
+                        </div>
+                        <div id="rfc.figure.24">
+                            <div>
+                                <pre class="text">
+POST /books HTTP/1.1
+Host: foo.example
+Content-Type: application/json
+Accept: application/json
+Accept-Encoding: identity
+Repr-Digest: sha-256=:mEkdbO7Srd9LIOegftO0aBX+VPTVz7/CSHes2Z27gc4=:
+
+{"title": "New Title"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 24: <span class="tt">Digest</span> を含む POST リクエスト</p>
+                        <div id="rfc.figure.25">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 201 Created
+Content-Type: application/json
+Repr-Digest: sha-256=:yXIGDTN5VrfoyisKlXgRKUHHMs35SNtyC3szSz1dbO8=:
+Location: /books/123
+
+{
+  "status": "created",
+  "id": "123",
+  "ts": 1569327729,
+  "instance": "/books/123"
+}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 25: 表現の <span class="tt">Digest</span> を含むレスポンス</p>
+                    </section>
+                    <section id="digest-with-patch">
+                        <h3 id="rfc.section.B.9"><a href="#rfc.section.B.9">B.9.</a>&nbsp;<a
+                                href="#digest-with-patch"><span class="tt">Digest</span> と PATCH の併用</a></h3>
+                        <div id="rfc.section.B.9.p.1">
+                            <p>このケースは、ターゲットリソースがターゲット URI を反映する POST リクエストに類似しています。</p>
+                        </div>
+                        <div id="rfc.section.B.9.p.2">
+                            <p>PATCH リクエストは <span class="tt">application/merge-patch+json</span> メディアタイプを使用します（<a
+                                    href="#RFC7396"><cite title="JSON Merge Patch">RFC7396</cite></a> を参照）。<span
+                                    class="tt">Repr-Digest</span> はパッチ文書に対応するコンテンツ（LF に続く JSON オブジェクト <span
+                                    class="tt">{"title": "New Title"}</span>）に対して計算されます。</p>
+                        </div>
+                        <div id="rfc.section.B.9.p.3">
+                            <p>レスポンスの <span class="tt">Repr-Digest</span> フィールド値は、パッチされたリソースの完全な表現に対して計算されます。これは複数行の
+                                JSON オブジェクト（LF に続く）です。</p>
+                        </div>
+                        <div id="fig-patch"></div>
+                        <div id="rfc.figure.26">
+                            <div>
+                                <pre class="text">
+PATCH /books/123 HTTP/1.1
+Host: foo.example
+Content-Type: application/merge-patch+json
+Accept: application/json
+Accept-Encoding: identity
+Repr-Digest: sha-256=:mEkdbO7Srd9LIOegftO0aBX+VPTVz7/CSHes2Z27gc4=:
+
+{"title": "New Title"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 26: <span class="tt">Digest</span> を含む PATCH リクエスト</p>
+                        <div id="rfc.figure.27">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/json
+Repr-Digest: sha-256=:uVSlinTTdQUwm2On4k8TJUikGN1bf/Ds8WPX4oe0h9I=:
+
+{
+  "id": "123",
+  "title": "New Title"
+}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 27: 表現の <span class="tt">Digest</span> を含むレスポンス</p>
+                        <div id="rfc.section.B.9.p.4">
+                            <p>同じ <span class="tt">Repr-Digest</span> フィールド値を持ちコンテンツがない <span class="tt">204 No
+                                    Content</span> のレスポンスも妥当であったことに注意してください。その場合、<span class="tt">Content-Digest</span>
+                                は空コンテンツに対して計算されます。</p>
+                        </div>
+                    </section>
+                    <section id="error-responses">
+                        <h3 id="rfc.section.B.10"><a href="#rfc.section.B.10">B.10.</a>&nbsp;<a
+                                href="#error-responses">エラーレスポンス</a></h3>
+                        <div id="rfc.section.B.10.p.1">
+                            <p>エラーレスポンスでは、表現データは必ずしもターゲットリソースを参照するわけではありません。代わりにエラーの表現を参照します。</p>
+                        </div>
+                        <div id="rfc.section.B.10.p.2">
+                            <p>以下の例では、クライアントは図 26（<a href="#fig-patch" title="PATCH Request with Digest">PATCH
+                                    リクエスト</a>）の同じリクエストを /books/123 に送信してリソースをパッチしようとしました。しかし、リソースが存在しないためサーバは 404
+                                を生成し、<a href="#RFC9457"><cite title="Problem Details for HTTP APIs">RFC9457</cite></a>
+                                に従ってエラーを記述する本文を返します。</p>
+                        </div>
+                        <div id="rfc.section.B.10.p.3">
+                            <p>レスポンスの <span class="tt">Repr-Digest</span> フィールド値はこの同梱表現に対して計算されています。これは複数行の JSON
+                                オブジェクト（LF に続く）です。</p>
+                        </div>
+                        <div id="rfc.figure.28">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+Repr-Digest: sha-256=:EXB0S2VF2H7ijkAVJkH1Sm0pBho0iDZcvVUHHXTTZSA=:
+
+{
+  "title": "Not Found",
+  "detail": "Cannot PATCH a non-existent resource",
+  "status": 404
+}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 28: エラー表現の <span class="tt">Digest</span> を含むレスポンス</p>
+                    </section>
+                    <hr class="hidden-print">
+                    <section id="use-with-trailer-fields-and-transfer-coding">
+                        <h3 id="rfc.section.B.11"><a href="#rfc.section.B.11">B.11.</a>&nbsp;<a
+                                href="#use-with-trailer-fields-and-transfer-coding">トレーラーフィールドおよび転送符号化との併用</a></h3>
+                        <div id="rfc.section.B.11.p.1">
+                            <p>オリジンサーバはストリーミング中にダイジェスト値を計算できるように、<span class="tt">Repr-Digest</span>
+                                をトレーラーフィールドとして送信することがあります。
+                                これによりリソース消費を軽減できます。<span class="tt">Repr-Digest</span> のフィールド値は <a
+                                    href="#example-full-representation"
+                                    title="Server Returns Full Representation Data">付録
+                                    B.1</a> のものと同一です。<span class="tt">Repr-Digest</span>
+                                は一つ以上の転送符号化の使用と無関係となるよう設計されているためです（参照: <a href="#representation-digest"
+                                    title="The Repr-Digest Field">セクション 3</a>）。</p>
+                        </div>
+                        <div id="rfc.section.B.11.p.2">
+                            <p>以下の応答コンテンツでは、文字列 "\r\n" が CRLF バイトを表します。</p>
+                        </div>
+                        <div id="rfc.figure.29">
+                            <div>
+                                <pre class="text">
+GET /items/123 HTTP/1.1
+Host: foo.example
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 29: GET リクエスト</p>
+                        <div id="rfc.figure.30">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Transfer-Encoding: chunked
+Trailer: Repr-Digest
+
+8\r\n
+{"hello"\r\n
+8\r\n
+: "world\r\n
+3\r\n
+"}\n\r\n
+0\r\n
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg==:\r\n
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 30: トレーラに <span class="tt">Digest</span> を含むチャンク応答</p>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="examples-solicited">
+                    <h2 id="rfc.section.C" class="np"><a href="#rfc.section.C">Appendix C.</a>&nbsp;<a
+                            href="#examples-solicited">Want-Repr-Digest による要請された <span class="tt">Digest</span> の例</a>
+                    </h2>
+                    <div id="rfc.section.C.p.1">
+                        <p>以下の例は、クライアントが <span class="tt">Want-Repr-Digest</span> を使って <span
+                                class="tt">Repr-Digest</span> を要請するやり取りを示します。<span class="tt">Content-Digest</span> および
+                            <span class="tt">Want-Content-Digest</span> の振る舞いは同一です。
+                        </p>
+                    </div>
+                    <div id="rfc.section.C.p.2">
+                        <p>いくつかの例ではコンテンツに JSON
+                            オブジェクトが含まれます。表示上の都合から、行長制限に完全に収まるオブジェクトは先頭スペースなしのコンパクト形式で一行に示します。行長制限を超えるオブジェクトは複数行（キーと値ごとに1行）で示し、先頭に二つのスペースを付けて表示します。
+                        </p>
+                    </div>
+                    <div id="rfc.section.C.p.3">
+                        <p>本書で説明するチェックサム機構はメディアタイプに依存せず、特定フォーマットの正規化アルゴリズムは提供しません。例は空白を含めた状態で計算されています。</p>
+                    </div>
+                    <section id="server-selects-clients-least-preferred-algorithm">
+                        <h3 id="rfc.section.C.1"><a href="#rfc.section.C.1">C.1.</a>&nbsp;<a
+                                href="#server-selects-clients-least-preferred-algorithm">サーバがクライアントの最も低い優先度のアルゴリズムを選択する場合</a>
+                        </h3>
+                        <div id="rfc.section.C.1.p.1">
+                            <p>クライアントはダイジェストを要求し "sha" を好むと示します。サーバはそれでも "sha-256" で応答して構いません。</p>
+                        </div>
+                        <div id="rfc.figure.31">
+                            <div>
+                                <pre class="text">
+GET /items/123 HTTP/1.1
+Host: foo.example
+Want-Repr-Digest: sha-256=3, sha=10
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 31: <span class="tt">Want-Repr-Digest</span> を含む GET リクエスト</p>
+                        <div id="rfc.figure.32">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Repr-Digest: \
+  sha-256=:RK/0qy18MlBSVnWgjwz6lZEWjP/lF5HF9bvEF8FabDg==:
+
+{"hello": "world"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 32: 異なるアルゴリズムによるレスポンス</p>
+                    </section>
+                    <section id="ex-server-selects-unsupported-algorithm">
+                        <h3 id="rfc.section.C.2"><a href="#rfc.section.C.2">C.2.</a>&nbsp;<a
+                                href="#ex-server-selects-unsupported-algorithm">サーバがクライアント未サポートのアルゴリズムを選択する場合</a></h3>
+                        <div id="rfc.section.C.2.p.1">
+                            <p>クライアントはサポートする唯一のアルゴリズムとして "sha" を要求します。サーバは必ずしも "sha" を含む応答を返す義務はなく、別のアルゴリズムを使用します。</p>
+                        </div>
+                        <div id="rfc.figure.33">
+                            <div>
+                                <pre class="text">
+GET /items/123 HTTP/1.1
+Host: foo.example
+Want-Repr-Digest: sha=10
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 33: <span class="tt">Want-Repr-Digest</span> を含む GET リクエスト</p>
+                        <div id="rfc.figure.34">
+                            <div>
+                                <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Repr-Digest: \
+  sha-512=:YMAam51Jz/jOATT6/zvHrLVgOYTGFy1d6GJiOHTohq4yP+pgk4vf2aCs\
+  yRZOtw8MjkM7iw7yZ/WkppmM44T3qg==:
+
+{"hello": "world"}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 34: クライアント未サポートのアルゴリズムによるレスポンス</p>
+                    </section>
+                    <section id="server-does-not-support-client-algorithm-and-returns-an-error">
+                        <h3 id="rfc.section.C.3"><a href="#rfc.section.C.3">C.3.</a>&nbsp;<a
+                                href="#server-does-not-support-client-algorithm-and-returns-an-error">サーバがクライアントのアルゴリズムをサポートせずエラーを返す場合</a>
+                        </h3>
+                        <div id="rfc.section.C.3.p.1">
+                            <p><a href="#ex-server-selects-unsupported-algorithm"
+                                    title="Server Selects Algorithm Unsupported by Client">付録 C.2</a>
+                                はサーバがクライアントの優先ダイジェストアルゴリズムを無視する例です。代わりにサーバはリクエストを拒否して 4xx や 5xx
+                                のようなエラーステータスコードで応答することもできます。本仕様はステータスコード選択に関する要件を定めませんが、以下は一例を示しています。</p>
+                        </div>
+                        <div id="rfc.section.C.3.p.2">
+                            <p>この例ではクライアントは "sha" の <span class="tt">Repr-Digest</span> を要求し、サーバは問題の詳細（<a
+                                    href="#RFC9457"><cite
+                                        title="Problem Details for HTTP APIs">RFC9457</cite></a>）を含むエラーを返します。問題の詳細にはサーバがサポートするハッシュアルゴリズムの一覧が含まれます。これはあくまで例であり、本仕様はそのようなコンテンツの形式や要件を定義しません。
+                            </p>
+                        </div>
+                        <div id="rfc.figure.35">
+                            <div>
+                                <pre class="text">
+GET /items/123 HTTP/1.1
+Host: foo.example
+Want-Repr-Digest: sha=10
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 35: <span class="tt">Want-Repr-Digest</span> を含む GET リクエスト</p>
+                        <div id="rfc.figure.36">
+                            <div>
+                                <pre class="text">
+HTTP/1.1 400 Bad Request
+Content-Type: application/problem+json
+
+{
+  "title": "Bad Request",
+  "detail": "Supported hashing algorithms: sha-256, sha-512",
+  "status": 400
+}
+</pre>
+                            </div>
+                        </div>
+                        <p class="figure">図 36: サポートされているアルゴリズムを通知するレスポンス</p>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="sample-digest-values">
+                    <h2 id="rfc.section.D" class="np"><a href="#rfc.section.D">Appendix D.</a>&nbsp;<a
+                            href="#sample-digest-values">サンプルの <span class="tt">Digest</span> 値</a></h2>
+                    <div id="rfc.section.D.p.1">
+                        <p>この節は異なるハッシュアルゴリズムによるダイジェスト値の例を示します。入力値は JSON オブジェクト <span class="tt">{"hello":
+                                "world"}</span> です。ダイジェスト値はそれぞれ該当するハッシュアルゴリズムを入力に対して実行し、出力バイトを Byte Sequence
+                            シリアライゼーションに通すことで生成されています。詳細は <a
+                                href="https://www.rfc-editor.org/rfc/rfc8941.html#section-4.1.8">RFC 8941 セクション
+                                4.1.8</a> を参照してください。</p>
+                    </div>
+                    <div id="rfc.section.D.p.2">
+                        <pre class="text">
+NOTE: '\' line wrapping per RFC 8792
+
+sha-512 -   :WZDPaVn/7XgHaAy8pmojAkGWoRx2UFChF41A2svX+TaPm+\
+            AbwAgBWnrIiYllu7BNNyealdVLvRwEmTHWXvJwew==:
+
+sha-256 -   :X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+
+md5 -       :Sd/dVLAcvNLSq16eXua5uQ==:
+
+sha -       :07CavjDP4u3/TungoUHJO/Wzr4c=:
+
+unixsum -   :GQU=:
+
+unixcksum - :7zsHAA==:
+
+adler -     :OZkGFw==:
+
+crc32c -    :Q3lHIA==:
+</pre>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="migrating">
+                    <h2 id="rfc.section.E" class="np"><a href="#rfc.section.E">Appendix E.</a>&nbsp;<a
+                            href="#migrating">RFC 3230 からの移行</a></h2>
+                    <div id="rfc.section.E.p.1">
+                        <p>HTTP ダイジェストはハッシュアルゴリズムを入力データに適用して計算されます。<a href="#RFC3230"><cite
+                                    title="Instance Digests in HTTP">[RFC3230]</cite></a> は入力データを "instance"
+                            と定義していましたが、この用語は後に HTTP セマンティクスの "representation" に置き換えられました。いくつかの RFC3230 実装が "instance" を
+                            HTTP コンテンツと誤解していたことがあると理解されています。<span class="tt">Digest</span>
+                            フィールドでコンテンツを用いることは誤りであり、RFC3230 を実装するピア間での相互運用性問題を引き起こします。</p>
+                    </div>
+                    <div id="rfc.section.E.p.2">
+                        <p><a href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a> は常に、現在 HTTP
+                            が定義する選択された表現データを用いることを意図していました。ダイジェストと表現の概念は <span class="tt">Repr-Digest</span> フィールドの定義（<a
+                                href="#representation-digest" title="The Repr-Digest Field">セクション 3</a>）と併せて説明されています。
+                        </p>
+                    </div>
+                    <div id="rfc.section.E.p.3">
+                        <p><span class="tt">Digest</span> と <span class="tt">Repr-Digest</span> の構文は異なりますが、本ドキュメントが
+                            <span class="tt">Repr-Digest</span> に関して示す考慮事項や例は、同じ入力データに作用するため <span
+                                class="tt">Digest</span> にも等しく適用されます。参照: セクション <a href="#state-changing-requests"
+                                title="Using Repr-Digest in State-Changing Requests">3.1</a>, <a href="#security"
+                                title="Security Considerations">6</a>, および <a href="#usage-in-signatures"
+                                title="Usage in Signatures">6.3</a>。
+                        </p>
+                    </div>
+                    <div id="rfc.section.E.p.4">
+                        <p><a href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a> は <span
+                                class="tt">Digest</span> フィールドで HTTP メッセージコンテンツのダイジェストを伝える手段を提供することはできませんでした。<span
+                                class="tt">Content-Digest</span> がその機能を提供します。</p>
+                    </div>
+                    <div id="rfc.section.E.p.5">
+                        <p><a href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a>
+                            はアルゴリズムが出力エンコーディング形式を定義することを許容しており、その結果 base64、hex、decimal のような混在した形式が生じました。Structured
+                            Fields を用いることにより、<span class="tt">Content-Digest</span> と <span
+                                class="tt">Repr-Digest</span> は単一のエンコーディング形式のみを使用します。詳しくは <a
+                                href="#sample-digest-values" title="Sample Digest Values">付録 D</a> を参照してください。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="acknowledgements">
+                    <h2 id="rfc.section.unnumbered-4" class="np"><a href="#acknowledgements">謝辞</a></h2>
+                    <div id="rfc.section.unnumbered-4.p.1">
+                        <p>本書は <a href="#RFC3230"><cite title="Instance Digests in HTTP">[RFC3230]</cite></a>
+                            のアイデアに基づいているため、Jeff Mogul と Arthur Van Hoff に感謝します。RFC3230 を刷新するという元々の着想は、MICE
+                            コンテンツ符号化をレビューする際の Mark Nottingham、Jeffrey Yasskin、Martin Thomson との興味深い議論から生じました。</p>
+                    </div>
+                    <div id="rfc.section.unnumbered-4.p.2">
+                        <p>本書への貴重な寄与をしてくれた Julian Reschke
+                            に感謝します。また、バグ報告、鋭い質問、原稿の作成やレビュー、未解決問題の評価を通じて本仕様の改善に寄与してくれた以下の協力者にも感謝します: Mike Bishop, Brian
+                            Campbell, Matthew Kerwin, James Manger, Tommy Pauly, Sean Turner, Justin Richer, および Erik
+                            Wilde。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="rfc.authors" class="np">
+                    <h2><a href="#rfc.authors">著者の連絡先</a></h2>
+                    <address><b>Roberto Polli</b><br>Team Digitale, Italian Government<br>Italy<br>EMail: <a
+                            href="mailto:robipolli@gmail.com">robipolli@gmail.com</a></address>
+                    <address><b>Lucas Pardue</b><br>Cloudflare<br>EMail: <a
+                            href="mailto:lucas@lucaspardue.com">lucas@lucaspardue.com</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
