@@ -180,6 +180,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS Positioned Layout Module Level 3](https://jp.htmlspecs.com/css/css-position-3)（[Source](https://www.w3.org/TR/2025/WD-css-position-3-20251007/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Positioned Layout Module Level 4](https://jp.htmlspecs.com/css/css-position-4)（[Source](https://www.w3.org/TR/2025/WD-css-position-4-20251007/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Box Sizing Module Level 3](https://jp.htmlspecs.com/css/css-sizing-3)（[Source](https://www.w3.org/TR/2021/WD-css-sizing-3-20211217/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Box Sizing Module Level 4](https://jp.htmlspecs.com/css/css-sizing-4)（[Source](https://www.w3.org/TR/2021/WD-css-sizing-4-20210520/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Box Alignment Module Level 3](https://jp.htmlspecs.com/css/css-align-3)（[Source](https://www.w3.org/TR/2025/WD-css-align-3-20250311/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Overflow Module Level 3](https://jp.htmlspecs.com/css/css-overflow-3)（[Source](https://www.w3.org/TR/2025/WD-css-overflow-3-20251007/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Overflow Module Level 4](https://jp.htmlspecs.com/css/css-overflow-4)（[Source](https://www.w3.org/TR/2023/WD-css-overflow-4-20230321/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
