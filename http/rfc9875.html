@@ -1,0 +1,794 @@
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+<html lang="ja-JP">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>RFC 9875 - HTTP キャッシュグループ</title>
+    <script>
+        function getMeta(rfcno, container) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://www.rfc-editor.org/rfc/rfc" + rfcno + ".json", true);
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var data = JSON.parse(xhr.response);
+
+                        var cont = document.getElementById(container);
+                        // empty the container
+                        while (cont.firstChild) {
+                            cont.removeChild(myNode.firstChild);
+                        }
+
+                        var c = data.status;
+                        if (c) {
+                            var bld = newElementWithText("b", c);
+                            cont.appendChild(bld);
+                        } else {
+                            cont.appendChild(newElementWithText("i", "(document status unknown)"));
+                        }
+
+                        c = data.updated_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Updated by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.obsoleted_by;
+                        if (c && c.length > 0 && c[0] !== null && c[0].length > 0) {
+                            cont.appendChild(newElement("br"));
+                            cont.appendChild(newText("Obsoleted by: "));
+                            appendRfcLinks(cont, c);
+                        }
+
+                        c = data.errata_url;
+                        if (c) {
+                            cont.appendChild(newElement("br"));
+                            var link = newElementWithText("a", "errata");
+                            link.setAttribute("href", c);
+                            var errata = newElementWithText("i", "This document has ");
+                            errata.appendChild(link);
+                            errata.appendChild(newText("."));
+                            cont.appendChild(errata);
+                        }
+
+                        cont.style.display = "block";
+                    } else {
+                        console.error(xhr.statusText);
+                    }
+                }
+            };
+            xhr.onerror = function (e) {
+                console.error(xhr.status + " " + xhr.statusText);
+            };
+            xhr.send(null);
+        }
+        function appendRfcLinks(parent, updates) {
+            var template = "https://www.rfc-editor.org/rfc/rfc{rfc}.html";
+            for (var i = 0; i < updates.length; i++) {
+                var rfc = updates[i].trim().toLowerCase();
+                if (rfc.substring(0, 3) == "rfc") {
+                    var no = parseInt(rfc.substring(3), 10);
+
+                    var link = newElement("a");
+                    link.setAttribute("href", template.replace("{rfc}", no));
+                    link.appendChild(newText(no));
+                    parent.appendChild(link);
+                } else {
+                    parent.appendChild(newText(rfc));
+                }
+                if (i != updates.length - 1) {
+                    parent.appendChild(newText(", "));
+                }
+            }
+        }
+
+        // DOM helpers
+        function newElement(name) {
+            return document.createElement(name);
+        }
+        function newElementWithText(name, txt) {
+            var e = document.createElement(name);
+            e.appendChild(newText(txt));
+            return e;
+        }
+        function newText(text) {
+            return document.createTextNode(text);
+        }
+    </script>
+    <script>
+        function anchorRewrite() {
+            map = {};
+            if (window.location.hash.length >= 1) {
+                var fragid = window.location.hash.substr(1);
+                if (fragid) {
+                    if (!document.getElementById(fragid)) {
+                        var prefix = "rfc.";
+                        var mapped = map[fragid];
+                        if (mapped) {
+                            window.location.hash = mapped;
+                        } else if (fragid.indexOf("section-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(8).replace("-", ".p.");
+                        } else if (fragid.indexOf("appendix-") == 0) {
+                            window.location.hash = prefix + "section." + fragid.substring(9).replace("-", ".p.");
+                        } else if (fragid.indexOf("s-") == 0) {
+                            var postfix = fragid.substring(2);
+                            if (postfix.startsWith("abstract")) {
+                                window.location.hash = prefix + postfix;
+                            } else if (postfix.startsWith("note-")) {
+                                window.location.hash = prefix + "note." + postfix.substring(5).replace("-", ".p.");
+                            } else {
+                                window.location.hash = prefix + "section." + postfix.replace("-", ".p.");
+                            }
+                        } else if (fragid.indexOf("p-") == 0) {
+                            var r = fragid.substring(2);
+                            var p = r.indexOf("-");
+                            if (p >= 0) {
+                                window.location.hash = prefix + "section." + r.substring(0, p) + ".p." + r.substring(p + 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        window.addEventListener('hashchange', anchorRewrite);
+        window.addEventListener('DOMContentLoaded', anchorRewrite);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RFC9875">
+    <meta property="og:description" content="HTTP Cache Groups">
+    <meta property="og:url" content="https://httpwg.org/specs/rfc9875.html">
+    <meta property="og:site_name" content="IETF HTTP Working Group Specifications">
+    <meta property="og:image" content="https://httpwg.org/assets/favicon/apple-icon-180x180.png">
+    <link rel="stylesheet" type="text/css"
+        href="https://httpwg.org/assets/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 80px;
+            position: relative;
+        }
+
+        .table.header th,
+        .table.header td {
+            border-top: none;
+            padding: 0;
+        }
+
+        #sidebar {
+            margin-top: -10px;
+            height: 90%;
+            overflow-y: auto;
+            font-size: 90%;
+        }
+
+        #rfc\.meta {
+            width: 40%;
+            float: right
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .filename {
+            color: rgb(119, 119, 119);
+            font-size: 23px;
+            font-weight: normal;
+            height: auto;
+            line-height: 23px;
+        }
+
+        dl {
+            margin-left: 1em;
+        }
+
+        dl.dl-horizontal {
+            margin-left: 0;
+        }
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.nohang>dt {
+            float: none;
+        }
+
+        dl>dd {
+            margin-bottom: .5em;
+        }
+
+        dl.compact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        ul.empty {
+            list-style-type: none;
+        }
+
+        ul.empty li {
+            margin-top: .5em;
+        }
+
+        td.reference {
+            padding-right: 1em;
+            vertical-align: top;
+        }
+
+        .feedback {
+            position: fixed;
+            bottom: 5px;
+            right: 5px;
+        }
+
+        .fbbutton {
+            margin-left: 5px;
+        }
+
+        h1 a,
+        h2 a,
+        h3 a,
+        h4 a,
+        h5 a,
+        h6 a {
+            color: rgb(51, 51, 51);
+        }
+
+        span.tt {
+            font: 11pt consolas, monospace;
+            font-size-adjust: none;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://httpwg.org/assets/site.css">
+    <link rel="Contents" href="#rfc.toc">
+    <link rel="Author" href="#rfc.authors">
+    <link rel="License" href="#rfc.copyrightnotice">
+    <link rel="Chapter" title="1 Introduction" href="#rfc.section.1">
+    <link rel="Chapter" title="2 The Cache-Groups Response Header Field" href="#rfc.section.2">
+    <link rel="Chapter" title="3 The Cache-Group-Invalidation Response Header Field" href="#rfc.section.3">
+    <link rel="Chapter" title="4 IANA Considerations" href="#rfc.section.4">
+    <link rel="Chapter" title="5 Security Considerations" href="#rfc.section.5">
+    <link rel="Chapter" title="6 References" href="#rfc.section.6">
+    <link rel="Appendix" title="Acknowledgements" href="#rfc.section.unnumbered-4">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-httpbis-cache-groups-07" rel="prev">
+    <link href="https://dx.doi.org/10.17487/rfc9875" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link rel="Alternate" title="Plain Text Version" href="http://www.ietf.org/rfc/rfc9875.txt">
+    <link rel="Help" title="RFC-Editor's Status Page" href="https://www.rfc-editor.org/info/rfc9875">
+    <meta name="viewport" content="initial-scale=1">
+    <meta name="generator"
+        content="https://github.com/mnot/RFCBootstrap XSLT vendor: Saxonica http://www.saxonica.com/">
+    <meta name="keywords" content="HTTP, Caching, Invalidation">
+    <link rel="schema.dcterms" href="http://purl.org/dc/terms/">
+    <meta name="dcterms.creator" content="Nottingham, M.">
+    <meta name="dcterms.identifier" content="urn:ietf:rfc:9875">
+    <meta name="dcterms.issued" content="2025-10">
+    <meta name="dcterms.abstract"
+        content="This specification introduces a means of describing the relationships between stored responses in HTTP caches, grouping them by associating a stored response with one or more strings.">
+    <meta name="dcterms.isPartOf" content="urn:issn:2070-1721">
+    <meta name="description"
+        content="This specification introduces a means of describing the relationships between stored responses in HTTP caches, grouping them by associating a stored response with one or more strings.">
+</head>
+
+<body onload="getMeta(9875,'rfc.meta');">
+    <nav class="navbar navbar-dark bg-dark d-print-none navbar-expand-lg fixed-top ps-3 pe-3" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand" href="https://httpwg.org/"><img src="https://httpwg.org/assets/http.svg"
+                    height="23"></a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+
+            <div class="navbar-nav me-auto">
+
+                <a class="nav-item ms-1 text-white" href="https://httpwg.org/specs/">📄 Documentation</a>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Work in
+                        Progress</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/http-extensions/">HTTP Extensions</a></li>
+                        <li class="dropdown-item"><a
+                                href="https://github.com/httpwg/admin/issues?q=is%3Aissue+is%3Aopen+label%3Aadoption">Future
+                                Work</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown ms-4">
+                    <a href="#" class="nav-item dropdown-toggle text-white" data-bs-toggle="dropdown">Participate</a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-item"><a href="https://httpwg.org/about/">About the HTTP Working Group</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/CONTRIBUTING.html">Contribution Policy</a>
+                        </li>
+                        <li class="dropdown-item"><a href="http://datatracker.ietf.org/wg/httpbis/charter/">WG
+                                Charter</a></li>
+                        <li class="dropdown-item"><a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">Group
+                                Mailing List 📨</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/wg-materials/">Meeting Materials</a></li>
+                        <li class="dropdown-item"><a href="https://httpwg.org/admin/editors/">Document Editor
+                                Resources</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+    <div class="container" id="top">
+        <div class="row">
+            <div class="col-lg-4 order-last d-none d-lg-block" id="sidebar" role="navigation">
+                <div class="navbar">
+                    <div class="navbar-brand"><a href="#top"><strong>RFC </strong>9875</a></div><br clear="all">
+                    <div class="">
+                        <div class="toc ">
+                            <ul>
+                                <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#notational-conventions">記法上の規則</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a href="#cache-groups">
+                                        Cache-Groups 応答ヘッダーフィールド</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#identify">グループ化されたレスポンスの識別</a></li>
+                                        <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#cache-behaviour">キャッシュ動作</a>
+                                            <ul>
+                                                <li><a href="#rfc.section.2.2.1">2.2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                        href="#invalidation">無効化</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#cache-group-invalidation">Cache-Group-Invalidation 応答ヘッダーフィールド</a></li>
+                                <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a href="#iana-considerations">IANA
+                                        に関する事項</a></li>
+                                <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#security-considerations">セキュリティに関する考察</a></li>
+                                <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.2">規範的参考文献</a></li>
+                                        <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#rfc.references.3">参考情報</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#acknowledgements">謝辞</a></li>
+                                <li><a href="#rfc.authors">著者の連絡先</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 order-first main" role="main">
+                <header>
+                    <table class="table table-condensed header" id="rfc.headerblock">
+                        <tbody>
+                            <tr>
+                                <td class="text-left">インターネット技術標準化タスクフォース（IETF）</td>
+                                <td class="text-right">M. Nottingham</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">Request for Comments: 9875</td>
+                                <td class="text-right">Cloudflare</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">分類: 標準化作業</td>
+                                <td class="text-right">2025年10月</td>
+                            </tr>
+                            <tr>
+                                <td class="text-left">ISSN: 2070-1721</td>
+                                <td class="text-right"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="rfc.title">
+                        <h1>HTTP キャッシュグループ</h1>
+                    </div>
+                </header>
+                <hr>
+                <h2 id="rfc.abstract"><a href="#rfc.abstract">要約</a></h2>
+                <div class="lead">
+                    <div id="rfc.abstract.p.1">
+                        <p>本仕様は、HTTPキャッシュ内の保存されたレスポンス同士の関係を記述する手段を導入し、保存レスポンスを1つ以上の文字列に関連付けることでグループ化します。</p>
+                    </div>
+                </div>
+                <aside id="rfc.meta" class="alert alert-info"></aside>
+                <section id="rfc.status">
+                    <h2><a href="#rfc.status">このメモのステータス</a></h2>
+                    <div id="rfc.boilerplate.1.p.1">
+                        <p>本書はインターネット標準化トラック文書です。</p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.2">
+                        <p>本書はインターネット技術標準化タスクフォース（IETF）の成果物です。本書は IETF
+                            コミュニティのコンセンサスを表しており、パブリックレビューを受け、さらにインターネット技術指導グループ（IESG）による公開の承認を受けています。インターネット標準に関するさらなる情報は<a
+                                href="https://www.rfc-editor.org/rfc/rfc7841.html#section-2">RFC
+                                7841のセクション2</a>を参照してください。
+                        </p>
+                    </div>
+                    <div id="rfc.boilerplate.1.p.3">
+                        <p>本書の現状、訂正情報、およびフィードバックの提供方法については<a
+                                href="https://www.rfc-editor.org/info/rfc9875">https://www.rfc-editor.org/info/rfc9875</a>でご確認いただけます。
+                        </p>
+                    </div>
+                </section>
+                <section id="rfc.copyrightnotice">
+                    <h2><a href="#rfc.copyrightnotice">Copyright Notice</a></h2>
+                    <div id="rfc.boilerplate.2.p.1">
+                        <p>Copyright (c) 2025 IETF Trust and the persons identified as the document authors. All rights
+                            reserved.</p>
+                    </div>
+                    <div id="rfc.boilerplate.2.p.2">
+                        <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF
+                            Documents (<a
+                                href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>)
+                            in effect on the date of publication of this document. Please review these documents
+                            carefully, as they describe your rights and restrictions with respect to this document. Code
+                            Components extracted from this document must include Revised BSD License text as described
+                            in Section 4.e of the Trust Legal Provisions and are provided without warranty as described
+                            in the Revised BSD License.</p>
+                    </div>
+                </section>
+                <div class="toc d-lg-none">
+                    <ul>
+                        <li><a href="#rfc.section.1">1.</a>&nbsp;&nbsp;&nbsp;<a href="#introduction">はじめに</a>
+                            <ul>
+                                <li><a href="#rfc.section.1.1">1.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#notational-conventions">記法の規則</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.2">2.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#cache-groups">Cache-Groups応答ヘッダーフィールド</a>
+                            <ul>
+                                <li><a href="#rfc.section.2.1">2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#identify">グループ化されたレスポンスの識別</a></li>
+                                <li><a href="#rfc.section.2.2">2.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#cache-behaviour">キャッシュ動作</a>
+                                    <ul>
+                                        <li><a href="#rfc.section.2.2.1">2.2.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                                href="#invalidation">無効化</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#rfc.section.3">3.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#cache-group-invalidation">Cache-Group-Invalidation応答ヘッダーフィールド</a></li>
+                        <li><a href="#rfc.section.4">4.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#iana-considerations">IANAに関する事項</a></li>
+                        <li><a href="#rfc.section.5">5.</a>&nbsp;&nbsp;&nbsp;<a
+                                href="#security-considerations">セキュリティに関する考察</a></li>
+                        <li><a href="#rfc.section.6">6.</a>&nbsp;&nbsp;&nbsp;<a href="#rfc.references">参考文献</a>
+                            <ul>
+                                <li><a href="#rfc.section.6.1">6.1.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.2">規範的参考文献</a></li>
+                                <li><a href="#rfc.section.6.2">6.2.</a>&nbsp;&nbsp;&nbsp;<a
+                                        href="#rfc.references.3">参考情報</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#acknowledgements">謝辞</a></li>
+                        <li><a href="#rfc.authors">著者連絡先</a></li>
+                    </ul>
+                </div>
+                <hr class="hidden-print">
+                <section id="introduction">
+                    <h2 id="rfc.section.1" class="np"><a href="#rfc.section.1">1.</a>&nbsp;<a
+                            href="#introduction">はじめに</a></h2>
+                    <div id="rfc.section.1.p.1">
+                        <p>HTTPキャッシュ<a href="#RFC9111"><cite
+                                    title="HTTP Caching">[HTTP-CACHING]</cite></a>は、単一リソースの粒度で動作します。一つの保存レスポンスの新鮮さは他のレスポンスには影響しません。この粒度はキャッシュを効率的にすることができ、例えばページが異なるキャッシュ要件を持つ多くのアセットで構成される場合に有効です。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.2">
+                        <p>しかし、保存レスポンス間の関係性を活用することで、キャッシュ効率を向上できる場合もあります。</p>
+                    </div>
+                    <div id="rfc.section.1.p.3">
+                        <p>例えば、関連するリソースのセットを無効化する必要がよくあります。これは状態を変更するリクエストが他のリソースにも副作用を及ぼす場合や、単に管理上の理由（例:「サイトのこの部分を無効化」）による場合があります。レスポンスをグループ化することは、これらの関係を表現する専用の方法を提供し、URL構造などに頼る必要がなくなります。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.4">
+                        <p>無効化イベントの共有に加えて、グループ化によって示される関係は、キャッシュがその動作を最適化するため（例: キャッシュ排除アルゴリズムの運用を通知するなど）にも利用できます。</p>
+                    </div>
+                    <div id="rfc.section.1.p.5">
+                        <p><a href="#cache-groups"
+                                title="The Cache-Groups Response Header Field">セクション2</a>では、HTTPキャッシュ内の保存レスポンス同士の関係を記述するために、それらのレスポンスをそれらの関係を反映した1つ以上のグループへ関連付ける手段を導入します。また、キャッシュがその情報を利用してグループ内メンバーに無効化イベントを適用する方法についても述べます。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.6">
+                        <p><a href="#cache-group-invalidation"
+                                title="The Cache-Group-Invalidation Response Header Field">セクション3</a>では、そのようなイベントの新たな発生源として、状態変更レスポンスがグループ無効化を引き起こすことを可能にするHTTP応答ヘッダーフィールドを紹介します。
+                        </p>
+                    </div>
+                    <div id="rfc.section.1.p.7">
+                        <p>これらの仕組みは、一つのキャッシュ内、かつ単一オリジンサーバーに関連付けられた保存レスポンス間で動作します（<a href="#identify"
+                                title="Identifying Grouped Responses">セクション2.1</a>参照）。それらは、複数のキャッシュ間で状態を同期する問題（例:
+                            階層やメッシュ内）や、異なるオリジンの保存レスポンスの関連付けには対応していません。</p>
+                    </div>
+                    <section id="notational-conventions">
+                        <h3 id="rfc.section.1.1"><a href="#rfc.section.1.1">1.1.</a>&nbsp;<a
+                                href="#notational-conventions">記法の規則</a></h3>
+                        <div id="rfc.section.1.1.p.1">
+                            <p>本書で使われている"<em class="bcp14">MUST</em>"、"<em class="bcp14">MUST NOT</em>"、"<em
+                                    class="bcp14">REQUIRED</em>"、"<em class="bcp14">SHALL</em>"、"<em class="bcp14">SHALL
+                                    NOT</em>"、"<em class="bcp14">SHOULD</em>"、"<em class="bcp14">SHOULD NOT</em>"、"<em
+                                    class="bcp14">RECOMMENDED</em>"、"<em class="bcp14">NOT RECOMMENDED</em>"、"<em
+                                    class="bcp14">MAY</em>"、"<em class="bcp14">OPTIONAL</em>"というキーワードは、 <span
+                                    class="nobr">BCP 14</span> <a href="#RFC2119"><cite
+                                        title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</cite></a>
+                                <a href="#RFC8174"><cite
+                                        title="Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words">[RFC8174]</cite></a>
+                                で説明されている通り、かつここに示すように全て大文字の場合のみに該当します。
+                            </p>
+                        </div>
+                        <div id="rfc.section.1.1.p.2">
+                            <p>本仕様では、<a href="#RFC9651"><cite
+                                        title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>から以下の用語を使用します:
+                                List（リスト）、String（文字列）、およびParameter（パラメータ）。</p>
+                        </div>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="cache-groups">
+                    <h2 id="rfc.section.2" class="np"><a href="#rfc.section.2">2.</a>&nbsp;<a
+                            href="#cache-groups">Cache-Groups応答ヘッダーフィールド</a></h2>
+                    <div id="rfc.section.2.p.1">
+                        <p>Cache-Groups応答ヘッダーフィールドは、文字列のリスト（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9651.html#section-3.1">3.1</a> および <a
+                                href="https://www.rfc-editor.org/rfc/rfc9651.html#section-3.3.3">3.3.3</a> <a
+                                href="#RFC9651"><cite
+                                    title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>
+                            参照）です。リストの各メンバーは、そのレスポンスが属するグループを識別する値です。これらの文字列は不透明であり、発行サーバーには意味があるかもしれませんが、キャッシュはその構造や内容を（グループを一意に識別する以外は）解釈しません。
+                        </p>
+                    </div>
+                    <div id="rfc.section.2.p.2">
+                        <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: application/javascript
+Cache-Control: max-age=3600
+Cache-Groups: "scripts"
+</pre>
+                    </div>
+                    <div id="rfc.section.2.p.3">
+                        <p>メンバーの順序に意味はありません。認識されないパラメータは無視するものとします。</p>
+                    </div>
+                    <div id="rfc.section.2.p.4">
+                        <p>実装は1つのフィールド値内に少なくとも32個のグループと各メンバーは最大32文字までをサポート<em
+                                class="bcp14">しなければなりません（MUST）</em>。ただし、HTTPフィールド長の一般的な制限により実際のサイズが制約される場合があります。</p>
+                    </div>
+                    <section id="identify">
+                        <h3 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a>&nbsp;<a
+                                href="#identify">グループ化されたレスポンスの識別</a></h3>
+                        <div id="rfc.section.2.1.p.1" class="avoidbreakafter">
+                            <p>同じキャッシュ内に保存されている2つのレスポンスが、以下全ての条件を満たすとき、同じグループに属するとみなします：</p>
+                        </div>
+                        <div id="rfc.section.2.1.p.2">
+                            <ol type="1">
+                                <li>
+                                    <div>
+                                        <p>両方のレスポンスにCache-Groups応答ヘッダーフィールドが含まれ、そのリスト内の任意の位置に同じ文字列が（大文字小文字を区別して）含まれる。
+                                        </p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div>
+                                        <p>両方が同じURIオリジン（<a
+                                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-4.3.1">セクション4.3.1</a>
+                                            <a href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a>参照）を持つ。
+                                        </p>
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                    </section>
+                    <section id="cache-behaviour">
+                        <h3 id="rfc.section.2.2"><a href="#rfc.section.2.2">2.2.</a>&nbsp;<a
+                                href="#cache-behaviour">キャッシュ動作</a></h3>
+                        <section id="invalidation">
+                            <h4 id="rfc.section.2.2.1"><a href="#rfc.section.2.2.1">2.2.1.</a>&nbsp;<a
+                                    href="#invalidation">無効化</a></h4>
+                            <div id="rfc.section.2.2.1.p.1">
+                                <p>キャッシュが保存されたレスポンスを無効化する場合、そのレスポンスとグループを共有する（<a href="#identify"
+                                        title="Identifying Grouped Responses">セクション2.1</a>）他の保存レスポンスも<em
+                                        class="bcp14">無効化してもよい（MAY）</em>。ただし、グループ化による無効化が連鎖することはなく、この仕組みはカスケードしません。</p>
+                            </div>
+                            <div id="rfc.section.2.2.1.p.2">
+                                <p>キャッシュ拡張によって、上記の要件を明示的に強めることができます。例えば、ターゲット型キャッシュ制御ヘッダーフィールド<a href="#RFC9213"><cite
+                                            title="Targeted HTTP Cache Control">[TARGETED]</cite></a>は、それを処理するキャッシュに対し、該当レスポンスの無効化を求めることがあります。
+                                </p>
+                            </div>
+                        </section>
+                    </section>
+                </section>
+                <hr class="hidden-print">
+                <section id="cache-group-invalidation">
+                    <h2 id="rfc.section.3" class="np"><a href="#rfc.section.3">3.</a>&nbsp;<a
+                            href="#cache-group-invalidation">Cache-Group-Invalidation応答ヘッダーフィールド</a></h2>
+                    <div id="rfc.section.3.p.1">
+                        <p>Cache-Group-Invalidation応答ヘッダーフィールドは文字列のリストです（<a
+                                href="https://www.rfc-editor.org/rfc/rfc9651.html#section-3.1">3.1</a>, <a
+                                href="https://www.rfc-editor.org/rfc/rfc9651.html#section-3.3.3">3.3.3</a> <a
+                                href="#RFC9651"><cite
+                                    title="Structured Field Values for HTTP">[STRUCTURED-FIELDS]</cite></a>参照）。リストの各メンバーは、そのレスポンスが無効化するグループ（<a
+                                href="#invalidation" title="Invalidation">セクション2.2.1</a>参照）を識別する値です。</p>
+                    </div>
+                    <div id="rfc.section.3.p.2" class="avoidbreakafter">
+                        <p>例えば、2つのキャッシュグループに副作用を持つPOSTリクエストのあと、該当するレスポンスはこれらのグループのいずれかまたは両方に関連する保存レスポンスを無効化するべきであることを次のように示せます：
+                        </p>
+                    </div>
+                    <div id="rfc.section.3.p.3">
+                        <pre class="text">
+HTTP/1.1 200 OK
+Content-Type: text/html
+Cache-Group-Invalidation: "eurovision-results", "australia"
+</pre>
+                    </div>
+                    <div id="rfc.section.3.p.4">
+                        <p>Cache-Group-Invalidation ヘッダーフィールドは、安全なメソッドのリクエスト（例: GET、<a
+                                href="https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.1">セクション9.2.1</a> <a
+                                href="#RFC9110"><cite title="HTTP Semantics">[HTTP]</cite></a>
+                            参照）へのレスポンスでは無視されなければなりません<em class="bcp14">（MUST）</em>。</p>
+                    </div>
+                    <div id="rfc.section.3.p.5">
+                        <p>キャッシュは、非安全リクエストに対するレスポンスでCache-Group-Invalidation
+                            ヘッダーフィールドを受信した場合、そのリスト内いずれかのグループとグループを共有する（<a href="#identify"
+                                title="Identifying Grouped Responses">セクション2.1</a>参照）保存レスポンスを<em
+                                class="bcp14">無効化してもよい（MAY）</em>です。</p>
+                    </div>
+                    <div id="rfc.section.3.p.6">
+                        <p>キャッシュ拡張によって、上記の要件を明示的に強めることができます。たとえば、ターゲット型キャッシュ制御ヘッダーフィールド<a href="#RFC9213"><cite
+                                    title="Targeted HTTP Cache Control">[TARGETED]</cite></a>は、キャッシュがCache-Group-Invalidationシグナルを尊重することを要求する場合があります。
+                        </p>
+                    </div>
+                    <div id="rfc.section.3.p.7">
+                        <p>メンバーの順序に意味はありません。認識されないパラメータは無視するものとします。</p>
+                    </div>
+                    <div id="rfc.section.3.p.8">
+                        <p>実装は1つのフィールド値内に少なくとも32個のグループと各メンバーは最大32文字までを<em
+                                class="bcp14">サポートしなければなりません（MUST）</em>。一般的なHTTPフィールド長の制約により実際のサイズが制限される場合があります。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="iana-considerations">
+                    <h2 id="rfc.section.4" class="np"><a href="#rfc.section.4">4.</a>&nbsp;<a
+                            href="#iana-considerations">IANAに関する事項</a></h2>
+                    <div id="rfc.section.4.p.1" class="avoidbreakafter">
+                        <p>IANAは「Hypertext Transfer Protocol (HTTP) Field Name Registry」に以下の項目を追加しました：</p>
+                    </div>
+                    <div id="rfc.section.4.p.2">
+                        <dl class="compact">
+                            <dt>フィールド名:</dt>
+                            <dd style="margin-left: 1.5em">Cache-Groups</dd>
+                            <dt>ステータス:</dt>
+                            <dd style="margin-left: 1.5em">permanent</dd>
+                            <dt>参照:</dt>
+                            <dd style="margin-left: 1.5em">RFC 9875</dd>
+                        </dl>
+                    </div>
+                    <div id="rfc.section.4.p.3">
+                        <dl class="compact">
+                            <dt>フィールド名:</dt>
+                            <dd style="margin-left: 1.5em">Cache-Group-Invalidation</dd>
+                            <dt>ステータス:</dt>
+                            <dd style="margin-left: 1.5em">permanent</dd>
+                            <dt>参照:</dt>
+                            <dd style="margin-left: 1.5em">RFC 9875</dd>
+                        </dl>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="security-considerations">
+                    <h2 id="rfc.section.5" class="np"><a href="#rfc.section.5">5.</a>&nbsp;<a
+                            href="#security-considerations">セキュリティに関する考察</a></h2>
+                    <div id="rfc.section.5.p.1">
+                        <p>この仕組みにより、同じオリジンを共有するリソース相互の無効化が可能になります。そのため、マルチパーティ（「共有ホスティング」と呼ばれることもあります）を代表するオリジンでは、あるパーティが他者のリソースと自身のリソースを同じグループにしたり、他者への副作用を持つ信号を送信できる場合があります。
+                        </p>
+                    </div>
+                    <div id="rfc.section.5.p.2">
+                        <p>こうしたリスクを低減したい共有ホストは、本仕様で定義されるヘッダーフィールドへのアクセスを制御できます。</p>
+                    </div>
+                </section>
+                <section id="sec-combined-references" class="np">
+                    <div id="rfc.references">
+                        <h2 id="rfc.section.6"><a href="#rfc.section.6">6.</a> 参考文献</h2>
+                        <section id="sec-normative-references">
+                            <div id="rfc.references.2">
+                                <h3 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a> 規範的参考文献</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="RFC9111">[<a href="#RFC9111" class="smpl">HTTP-CACHING</a>]</dt>
+                                    <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9111.html">HTTP Caching</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std98">STD 98</a>, RFC 9111, <a
+                                            href="https://dx.doi.org/10.17487/RFC9111">DOI 10.17487/RFC9111</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9111">https://www.rfc-editor.org/info/rfc9111</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC9110">[<a href="#RFC9110" class="smpl">HTTP</a>]</dt>
+                                    <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9110.html">HTTP Semantics</a>”, <a
+                                            href="https://www.rfc-editor.org/info/std97">STD 97</a>, RFC 9110, <a
+                                            href="https://dx.doi.org/10.17487/RFC9110">DOI 10.17487/RFC9110</a>, June
+                                        2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9110">https://www.rfc-editor.org/info/rfc9110</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC2119">[<a href="#RFC2119" class="smpl">RFC2119</a>]</dt>
+                                    <dd>Bradner, S., “<a href="https://www.rfc-editor.org/rfc/rfc2119.html">Key words
+                                            for use in RFCs to Indicate Requirement Levels</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 2119, <a
+                                            href="https://dx.doi.org/10.17487/RFC2119">DOI 10.17487/RFC2119</a>, March
+                                        1997, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC8174">[<a href="#RFC8174" class="smpl">RFC8174</a>]</dt>
+                                    <dd>Leiba, B., “<a href="https://www.rfc-editor.org/rfc/rfc8174.html">Ambiguity of
+                                            Uppercase vs Lowercase in RFC 2119 Key Words</a>”, <a
+                                            href="https://www.rfc-editor.org/info/bcp14">BCP 14</a>, RFC 8174, <a
+                                            href="https://dx.doi.org/10.17487/RFC8174">DOI 10.17487/RFC8174</a>, May
+                                        2017, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;.
+                                    </dd>
+                                    <dt id="RFC9651">[<a href="#RFC9651" class="smpl">STRUCTURED-FIELDS</a>]</dt>
+                                    <dd>Nottingham, M. and P-H. Kamp, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9651.html">Structured Field Values
+                                            for HTTP</a>”, RFC 9651, <a href="https://dx.doi.org/10.17487/RFC9651">DOI
+                                            10.17487/RFC9651</a>, September 2024, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9651">https://www.rfc-editor.org/info/rfc9651</a>&gt;.
+                                    </dd>
+                                </dl>
+                            </div>
+                        </section>
+                        <section id="sec-informative-references">
+                            <div id="rfc.references.3">
+                                <h3 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a> 参考情報</h3>
+                                <dl class="dl-horizontal">
+                                    <dt id="RFC9213">[<a href="#RFC9213" class="smpl">TARGETED</a>]</dt>
+                                    <dd>Ludin, S., Nottingham, M., and Y. Wu, “<a
+                                            href="https://www.rfc-editor.org/rfc/rfc9213.html">Targeted HTTP Cache
+                                            Control</a>”, RFC 9213, <a href="https://dx.doi.org/10.17487/RFC9213">DOI
+                                            10.17487/RFC9213</a>, June 2022, &lt;<a
+                                            href="https://www.rfc-editor.org/info/rfc9213">https://www.rfc-editor.org/info/rfc9213</a>&gt;.
+                                    </dd>
+                                </dl>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="acknowledgements">
+                    <h2 id="rfc.section.unnumbered-4" class="np"><a href="#acknowledgements">謝辞</a></h2>
+                    <div id="rfc.section.unnumbered-4.p.1">
+                        <p>Stephen Ludin氏のレビューとご意見に感謝します。</p>
+                    </div>
+                </section>
+                <hr class="hidden-print">
+                <section id="rfc.authors" class="np">
+                    <h2><a href="#rfc.authors">著者連絡先</a></h2>
+                    <address><b>Mark Nottingham</b><br>Cloudflare<br>Melbourne<br>Australia<br>EMail: <a
+                            href="mailto:mnot@mnot.net">mnot@mnot.net</a><br>URI: <a
+                            href="https://www.mnot.net/">https://www.mnot.net/</a></address>
+                </section>
+            </div>
+        </div>
+    </div>
+    <script src="https://httpwg.org/assets/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://httpwg.org/assets/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
