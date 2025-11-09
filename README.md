@@ -54,7 +54,9 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web Locks API](https://jp.htmlspecs.com/web-locks)（[Source](https://www.w3.org/TR/2025/WD-web-locks-20250924/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### デバイスとハードウェアアクセス
-- [Pointer Events](https://jp.htmlspecs.com/pointerevents2)（[Source](https://www.w3.org/TR/2019/REC-pointerevents2-20190404/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [Pointer Events Level 2](https://jp.htmlspecs.com/pointerevents2)（[Source](https://www.w3.org/TR/2019/REC-pointerevents2-20190404/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [Pointer Events Level 3](https://jp.htmlspecs.com/pointerevents3)（[Source](https://www.w3.org/TR/2025/CR-pointerevents3-20251106/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
+- [Pointer Events Level 4](https://jp.htmlspecs.com/pointerevents4)（[Source](https://www.w3.org/TR/2025/WD-pointerevents4-20251022/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Serial API](https://jp.htmlspecs.com/serial)（[Source](https://wicg.github.io/serial/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebHID API](https://jp.htmlspecs.com/webhid)（[Source](https://wicg.github.io/webhid/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebUSB API](https://jp.htmlspecs.com/webusb)（[Source](https://wicg.github.io/webusb/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
