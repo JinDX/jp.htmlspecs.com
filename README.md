@@ -5,8 +5,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/multipage/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [ECMAScript® 2026 Language Specification](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），- [How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
 - [ECMAScript® 2026 Internationalization API Specification](https://jp.htmlspecs.com/ecma402/)（[Source](https://tc39.es/ecma402/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2025/CRD-wasm-js-api-2-20251102/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2025/CRD-wasm-web-api-2-20251102/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2025/CRD-wasm-js-api-2-20251114/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2025/CRD-wasm-web-api-2-20251114/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [DOM](https://jp.htmlspecs.com/dom/)（[Source](https://dom.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [URL](https://jp.htmlspecs.com/url/)（[Source](https://url.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [URL Pattern](https://jp.htmlspecs.com/urlpattern/)（[Source](https://urlpattern.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
