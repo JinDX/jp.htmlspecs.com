@@ -104,7 +104,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Deprecation Reporting](https://jp.htmlspecs.com/deprecation-reporting/)（[Source](https://wicg.github.io/deprecation-reporting/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Page Lifecycle](https://jp.htmlspecs.com/page-lifecycle/)（[Source](https://wicg.github.io/page-lifecycle/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Server Timing](https://jp.htmlspecs.com/server-timing/)（[Source](https://www.w3.org/TR/2023/WD-server-timing-20230411/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Paint Timing](https://jp.htmlspecs.com/paint-timing/)（[Source](https://www.w3.org/TR/2025/WD-paint-timing-20251020/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Paint Timing](https://jp.htmlspecs.com/paint-timing/)（[Source](https://www.w3.org/TR/2025/WD-paint-timing-20251119/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Event Timing API](https://jp.htmlspecs.com/event-timing/)（[Source](https://www.w3.org/TR/2025/WD-event-timing-20251017/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### セキュリティと認証
