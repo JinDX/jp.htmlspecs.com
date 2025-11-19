@@ -306,7 +306,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### メソッド
 - [PATCH Method for HTTP](https://jp.htmlspecs.com/http/rfc5789.html)（[Source](https://httpwg.org/specs/rfc5789.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
-### 状态码
+### ステータスコード
 - [Additional HTTP Status Codes](https://jp.htmlspecs.com/http/rfc6585.html)（[Source](https://httpwg.org/specs/rfc6585.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [An HTTP Status Code to Report Legal Obstacles](https://jp.htmlspecs.com/http/rfc7725.html)（[Source](https://httpwg.org/specs/rfc7725.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [An HTTP Status Code for Indicating Hints](https://jp.htmlspecs.com/http/rfc8297.html)（[Source](https://httpwg.org/specs/rfc8297.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
