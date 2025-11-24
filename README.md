@@ -52,7 +52,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Storage](https://jp.htmlspecs.com/storage/)（[Source](https://storage.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [File API](https://jp.htmlspecs.com/FileAPI/)（[Source](https://www.w3.org/TR/2024/WD-FileAPI-20241204/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [File System](https://jp.htmlspecs.com/fs/)（[Source](https://fs.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)（[Source](https://cookiestore.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
+- [File System Access API](https://jp.htmlspecs.com/file-system-access/)（[Source](https://wicg.github.io/file-system-access/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
+- [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)（[Source](https://cookiestore.spec.whatwg.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [File and Directory Entries API](https://jp.htmlspecs.com/entries-api/)（[Source](https://wicg.github.io/entries-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web Locks API](https://jp.htmlspecs.com/web-locks/)（[Source](https://www.w3.org/TR/2025/WD-web-locks-20250924/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
