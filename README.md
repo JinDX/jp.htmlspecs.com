@@ -38,7 +38,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [ActivityPub](https://jp.htmlspecs.com/activitypub/)（[Source](https://www.w3.org/TR/2018/REC-activitypub-20180123/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [WebTransport](https://jp.htmlspecs.com/webtransport/)（[Source](https://www.w3.org/TR/2025/WD-webtransport-20251118/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Service Workers](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2025/CRD-service-workers-20251113/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [Push API](https://jp.htmlspecs.com/push-api/)（[Source](https://www.w3.org/TR/2025/WD-push-api-20250925/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Push API](https://jp.htmlspecs.com/push-api/)（[Source](https://www.w3.org/TR/2025/WD-push-api-20251124/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebRTC](https://jp.htmlspecs.com/webrtc/)（[Source](https://www.w3.org/TR/2025/REC-webrtc-20250313/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Payment Request API](https://jp.htmlspecs.com/payment-request/)（[Source](https://www.w3.org/TR/2025/CRD-payment-request-20250930/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Payment Handler API](https://jp.htmlspecs.com/payment-handler/)（[Source](https://www.w3.org/TR/2025/WD-payment-handler-20250927/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
