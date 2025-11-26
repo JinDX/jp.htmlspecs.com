@@ -37,7 +37,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [WebSub](https://jp.htmlspecs.com/websub/)（[Source](https://www.w3.org/TR/2018/REC-websub-20180123/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [ActivityPub](https://jp.htmlspecs.com/activitypub/)（[Source](https://www.w3.org/TR/2018/REC-activitypub-20180123/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [WebTransport](https://jp.htmlspecs.com/webtransport/)（[Source](https://www.w3.org/TR/2025/WD-webtransport-20251118/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Service Workers](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2025/CRD-service-workers-20251113/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2025/CRD-service-workers-20251126/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Push API](https://jp.htmlspecs.com/push-api/)（[Source](https://www.w3.org/TR/2025/WD-push-api-20251125/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebRTC](https://jp.htmlspecs.com/webrtc/)（[Source](https://www.w3.org/TR/2025/REC-webrtc-20250313/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Payment Request API](https://jp.htmlspecs.com/payment-request/)（[Source](https://www.w3.org/TR/2025/CRD-payment-request-20250930/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
@@ -52,8 +52,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Storage](https://jp.htmlspecs.com/storage/)（[Source](https://storage.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [File API](https://jp.htmlspecs.com/FileAPI/)（[Source](https://www.w3.org/TR/2024/WD-FileAPI-20241204/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [File System](https://jp.htmlspecs.com/fs/)（[Source](https://fs.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [File System Access API](https://jp.htmlspecs.com/file-system-access/)（[Source](https://wicg.github.io/file-system-access/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)（[Source](https://cookiestore.spec.whatwg.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [File System Access API](https://jp.htmlspecs.com/file-system-access/)（[Source](https://wicg.github.io/file-system-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)（[Source](https://cookiestore.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [File and Directory Entries API](https://jp.htmlspecs.com/entries-api/)（[Source](https://wicg.github.io/entries-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web Locks API](https://jp.htmlspecs.com/web-locks/)（[Source](https://www.w3.org/TR/2025/WD-web-locks-20250924/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
