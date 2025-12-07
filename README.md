@@ -65,6 +65,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web Locks API](https://jp.htmlspecs.com/web-locks/)（[Source](https://www.w3.org/TR/2025/WD-web-locks-20250924/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Data on the Web Best Practices](https://jp.htmlspecs.com/dwbp/)（[Source](https://www.w3.org/TR/2017/REC-dwbp-20170131/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [GraphQL](https://jp.htmlspecs.com/graphql/)（[Source](https://spec.graphql.org/draft/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [OpenAPI Specification v3.2.0](https://jp.htmlspecs.com/openapi/)（[Source](https://spec.openapis.org/oas/latest.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### デバイスとハードウェアアクセス
 - [Pointer Events Level 2](https://jp.htmlspecs.com/pointerevents2/)（[Source](https://www.w3.org/TR/2019/REC-pointerevents2-20190404/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
