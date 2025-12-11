@@ -55,6 +55,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Periodic Background Sync](https://jp.htmlspecs.com/periodic-background-sync/)（[Source](https://wicg.github.io/periodic-background-sync/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [User-Agent Client Hints](https://jp.htmlspecs.com/ua-client-hints/)（[Source](https://wicg.github.io/ua-client-hints/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Beacon](https://jp.htmlspecs.com/beacon/)（[Source](https://www.w3.org/TR/2022/CRD-beacon-20220803/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Network Error Logging](https://jp.htmlspecs.com/network-error-logging/)（[Source](https://www.w3.org/TR/2025/WD-network-error-logging-20250505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### ストレージとデータ
 - [Indexed Database API 3.0](https://jp.htmlspecs.com/IndexedDB/)（[Source](https://www.w3.org/TR/2025/WD-IndexedDB-3-20250813/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
