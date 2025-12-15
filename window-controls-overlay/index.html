@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        ウィンドウコントロールオーバーレイ
+    </title>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script class="remove">
+        // All config options at https://respec.org/docs/
+        var respecConfig = {
+            mdn: true,
+            specStatus: "CG-DRAFT",
+            editors: [{
+                name: "Diego González",
+                url: "https://twitter.com/diekus",
+                company: "Microsoft",
+                companyURL: "https://www.microsoft.com"
+            }],
+            github: "WICG/window-controls-overlay",
+            shortName: "window-controls-overlay",
+            xref: {
+                profile: "web-platform",
+                specs: [
+                    "appmanifest",
+                    "cssom-view",
+                    "geometry-1",
+                    "manifest-incubations",
+                    "MEDIAQUERIES-5"
+                ]
+            },
+            group: "wicg",
+
+        };
+    </script>
+</head>
+
+<body>
+    <section id="abstract">
+        <p>
+            この文書は、Web開発者がデスクトップ環境で実行されているインストール済みWebアプリケーションのタイトルバー領域を制御できる一連の技術を規定しています。これらの技術は (<abbr
+                title="Window Controls Overlay">WCO</abbr>) として知られています。
+        </p>
+    </section>
+    <section id="sotd">
+        <p>
+            本ドラフトは、WCOおよびそれで説明されている技術の標準化プロセスの出発点として意図されたものです。記載されている技術は、他のワーキンググループの別仕様に移動される可能性があります。
+        </p>
+    </section>
+    <section class="informative">
+        <h2>
+            はじめに
+        </h2>
+        <p>
+            モバイル以外のデバイスを対象としたアプリケーションは、一般的にタイトルバーを持つフレーム内でホストされます。タイトルバーは通常、ウィンドウの最上部に横長に表示され、アクティブなプログラムやドキュメント名、[=window
+            controls=] を示す UI 要素です。現代のアプリケーションは、タイトルバー領域を利用して UI コンテンツを表示し、より良いUXを創出できます。
+        </p>
+        <p>
+            ユーザーエージェント（UA）のフレーム内にホストされたインストール済みWebアプリでは、希望する表示モードを指定することでフレームをある程度カスタマイズできます。開発者は [=manifest=] ファイルの
+            `display`
+            メンバーを用いてアプリケーションの要件に最も適したモードを選択できます。しかし、これらのモードは制限があり、タイトルバーの完全な制御はできません。そのため、インストール済みアプリに没入型でネイティブのようなタイトルバーを作成したい開発者はこのメンバーだけでは実現できません。代わりに、クライアント領域は予約済みのタイトルバー領域の直下から始まり、特に画面サイズの小さい携帯端末ではアプリ領域が狭くなってしまいます。
+        </p>
+        <p>
+            WCO により、[=window controls=] を [=overlaid=]
+            でフレーム上に残しつつ、Webコンテンツが従来タイトルバー領域だった箇所にも描画できるようになり、カスタムタイトルバーUIが作成できるようになります。
+        </p><img src="https://wicg.github.io/window-controls-overlay/spec-wco.png" alt="コントロール領域を示すブランクなウィンドウフレーム">
+        <section>
+            <h3>
+                例
+            </h3>
+            <aside class="example">
+                <p>
+                    タイトルバー領域にdivを配置する例
+                </p>
+                <pre class="css">
+            .titleBar {
+              position: fixed;
+              left: env(titlebar-area-x, 0);
+              top: env(titlebar-area-y, 0);
+              width: env(titlebar-area-width, 100%);
+              height: env(titlebar-area-height, 40px);
+              app-region: drag;
+          }
+          </pre>
+                <pre>
+            &lt;div class="titlebar"&gt;
+              これはタイトルバー領域のWebコンテンツです！
+            &lt;div&gt;
+          </pre>
+            </aside>
+        </section>
+        <aside class="note">
+            <p>
+                WCO 機能はウィンドウでアプリケーションをホストするパラダイムを用いる環境で有用です。ノッチや不規則な形状のビューポート、ハードウェア制約に合わせたレイアウトは本仕様の範囲外です。
+            </p>
+            <p>
+                デスクトップのような環境におけるウィンドウパラダイムは、長年にわたり情報アーキテクチャ管理に効果的であることが証明されています。このパラダイムは進化を続けており、その一環として現代のアプリが、それまでタイトルバー用に予約されていた領域を制御できるようになります。WCOは、ネイティブ技術で作られたアプリが今日利用できるのと同様な方法で、これを可能にします。
+            </p>
+            <p>
+                <strong>ノッチやその他のハードウェア要素が、いかなるプラットフォームでもアプリウィンドウのタイトルバー領域に干渉することはありません。</strong>
+                これらはOSのステータスやメニュー領域の一部と重なることがありますが、これはホストOSが完全に処理します。WCO機能はノッチと重なりうる領域は扱いません。
+            </p>
+            <p>
+                ノッチ周辺には十分なスペースが確保されず、任意の位置や必ずしも長方形とは限りません。さらに、ノッチを持つデバイスのベンダーが示す多くのGUIガイドラインでは、ノッチ付近のコンテンツ配置を推奨していません。
+            </p>
+        </aside>
+    </section>
+    <section>
+        <h2>
+            概念
+        </h2>
+        <ul>
+            <li>
+                <dfn>ウィンドウコントロールオーバーレイ</dfn>：非モバイル環境で実行されるインストール済みWebアプリケーション向けの機能で、JSやCSSを用いて[=title bar
+                area=]上にビューポートを拡張できるようにします。
+            </li>
+            <li>
+                <dfn>タイトルバー領域</dfn>：WCOが有効な場合、これはタイトルバーが占めるウィンドウフレーム上の領域で、[=controls of the
+                window=]を格納する[=overlay=]に該当する領域は含まれません。
+            </li>
+            <li>
+                <dfn data-lt="controls of the window">ウィンドウコントロール</dfn>：
+                OSが各アプリケーションで一貫して使用するインターフェース要素で、ユーザーがアプリケーションを制御する特定の操作を実行できるようにします。[=window controls=]
+                の典型的な操作には最小化、最大化／復元、閉じるボタンなどが含まれます。
+            </li>
+            <li>
+                <dfn data-lt="overlaid">オーバーレイ</dfn> of [=window controls=]： [=window controls=]
+                を格納し、ビューポート上に重ねて表示される領域です。
+            </li><img src="https://wicg.github.io/window-controls-overlay/spec-wco-areas.png"
+                alt="ウィンドウコントロールが丸で示されたウィンドウフレーム">
+        </ul>
+    </section>
+    <section>
+        <h2>
+            `Navigator`インターフェースの拡張
+        </h2>
+        <p>
+            [[HTML]] 仕様は <dfn>Navigator</dfn> インターフェースを定義しており、本仕様ではこれを拡張します：
+        </p>
+        <pre class="idl">
+        [SecureContext, Exposed=(Window)]
+        partial interface Navigator {
+          [SameObject] readonly attribute WindowControlsOverlay windowControlsOverlay;
+        };
+      </pre>
+    </section>
+    <section>
+        <h2>
+            `Window`インターフェースの拡張
+        </h2>
+        <section>
+            <h3>
+                内部スロット
+            </h3>
+            <table class="simple">
+                <thead>
+                    <tr>
+                        <th>
+                            内部スロット
+                        </th>
+                        <th>
+                            初期値
+                        </th>
+                        <th>
+                            説明
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <dfn data-dfn-for="Window">[[\TitleBarArea]]</dfn>
+                        </td>
+                        <td>
+                            タイトルバー領域用の空の[=struct=]。
+                        </td>
+                        <td>
+                            タイトルバー領域を定義する値（`x`, `y`, `width`, `height`）を格納する[=struct=]。
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </section>
+    <section data-dfn-for='WindowControlsOverlay' data-link-for='WindowControlsOverlay'>
+        <h2>
+            <dfn>WindowControlsOverlay</dfn> インターフェース
+        </h2>
+        <pre class='idl' data-cite="DOM HTML">
+        [Exposed=Window]
+        interface WindowControlsOverlay : EventTarget {
+          readonly attribute boolean visible;
+          DOMRect getTitlebarAreaRect();
+          attribute EventHandler ongeometrychange;
+        };
+
+        [Exposed=Window]
+        interface WindowControlsOverlayGeometryChangeEvent : Event {
+          constructor(DOMString type, WindowControlsOverlayGeometryChangeEventInit eventInitDict);
+          [SameObject] readonly attribute DOMRect titlebarAreaRect;
+          readonly attribute boolean visible;
+        };
+
+        dictionary WindowControlsOverlayGeometryChangeEventInit : EventInit {
+          required DOMRect titlebarAreaRect;
+          boolean visible = false;
+        };
+      </pre>
+        <section>
+            <h3>
+                <dfn>visible</dfn> 属性
+            </h3>
+            <p>
+                `visible` 属性は [=boolean=] で、{{Window/window}}.[[\TitleBarArea]] の値が0でない場合に `true` を返します。
+            </p>
+        </section>
+        <section>
+            <h3>
+                <dfn>getTitlebarAreaRect</dfn> メソッド
+            </h3>
+            <p>
+                `getTitlebarAreaRect()` メソッドは、Webコンテンツが表示可能な利用可能領域を表すDOMRectを返します。このタイトルバー領域は[=window controls=]
+                [=overlay=]の下部領域は含みません。
+            </p><img src="https://wicg.github.io/window-controls-overlay/spec-wco-gbr.png"
+                alt="getTitlebarAreaRectメソッドが返す領域の図解">
+            <aside class="note">
+                <p>
+                    WCO機能が有効な場合、クライアントビューポートは特別な描画処理を行いません。コンテンツはブラウザウィンドウ内で表示されるのと同様に表示されます。[=window controls=] が
+                    [=overlaid=] される領域にコンテンツが隠れないようにするため、開発者は `getTitlebarAreaRect` メソッドや [=title bar area env
+                    variables=] を活用する必要があります。
+                </p>
+            </aside>
+            <aside class="note">
+                <p>
+                    WCOをサポートしないユーザーエージェントの場合でも、[=manifest/display_override=] に[=manifest/display=]
+                    を利用したり、CSS変数やJSオブジェクトで妥当なフォールバックを指定できます。
+                </p>
+            </aside>
+        </section>
+        <section>
+            <h3>
+                <dfn>ongeometrychange</dfn> 属性
+            </h3>
+            <p>
+                `ongeometrychange` 属性は"change"型イベントに対応したイベントハンドラーです。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>
+            新しい [=display mode/window-controls-overlay=] [=display mode=] の追加
+            </code>
+        </h2>
+        <p>
+            本仕様は次の[=display mode=]を定義します：
+        </p>
+        <dl>
+            <dt>
+                <dfn data-export="" data-dfn-for="display mode">
+                    window-controls-overlay
+                </dfn>
+            </dt>
+            <dd>
+                Webアプリケーションは、ネイティブOSのウィンドウコントロールは表示したまま、Webコンテンツをタイトルバー領域まで拡張して表示できます。また、Webコンテンツ内に[=draggable region=]
+                を指定し、カスタムタイトルバーを作成することも可能です。
+            </dd>
+        </dl>
+        <p>
+            <code>[=display mode/window-controls-overlay=]</code>
+            [=display mode=] はmanifestの <code>[=manifest/display_override=]</code> メンバーで指定できます。
+        </p>
+        <aside class="issue">
+            <p>
+                TO DO: これは他仕様で扱われるべき機能のドラフトテキストです。本ドキュメントが最終稿となるわけではありません。（manifest/manifest incubations）
+            </p>
+        </aside>
+    </section>
+    <section>
+        <h2>
+            <dfn>タイトルバー領域用環境変数</dfn>
+        </h2>
+        <aside class="issue">
+            <p>
+                TO DO: これは他仕様で扱われるべき機能のドラフトテキストです。本ドキュメントが最終稿となるわけではありません。（CSS）
+            </p>
+        </aside>
+        <section>
+            <h3>
+                <dfn>タイトルバー領域env変数</dfn>
+            </h3>
+            <table dfn-type="value" dfn-for="env()">
+                <tr>
+                    <th>
+                        名前
+                    </th>
+                    <th>
+                        値
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        <dfn>`titlebar-area-x`</dfn>
+                    </td>
+                    <td>
+                        <a href="https://drafts.csswg.org/css-values-3/#length-value">length</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <dfn>`titlebar-area-y`</dfn>
+                    </td>
+                    <td>
+                        <a href="https://drafts.csswg.org/css-values-3/#length-value">length</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <dfn>`titlebar-area-width`</dfn>
+                    </td>
+                    <td>
+                        <a href="https://drafts.csswg.org/css-values-3/#length-value">length</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <dfn>`titlebar-area-height`</dfn>
+                    </td>
+                    <td>
+                        <a href="https://drafts.csswg.org/css-values-3/#length-value">length</a>
+                    </td>
+                </tr>
+            </table>
+            <p>
+                [=タイトルバー領域用環境変数=]
+                は4つのenv変数で、ビューポート内の始点と幅・高さによって長方形領域を定義します。この領域はタイトルバーの利用可能な領域であり、その範囲内に動的なWebコンテンツを配置できます。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>
+            CSSOMとの統合
+        </h2>
+        <p>
+            本仕様は [[cssom-view]] 仕様と連携し、<a href="https://www.w3.org/TR/cssom-view-1/#run-the-resize-steps">以下のアルゴリズム</a>
+            を修正します：
+        </p>
+        <p>
+            ビューポートで[=Window/resize=] アルゴリズムを実行する際、ステップ1の後に [=resize the title bar area=] を実行します。
+        </p>
+    </section>
+    <section>
+        <h2>
+            アルゴリズム
+        </h2>
+        <section>
+            <h3>
+                タイトルバー領域のリサイズ
+            </h3>
+            <p>
+                ウィンドウ |win| の <dfn data-lt="title bar region resizes">タイトルバー領域をリサイズする</dfn>には、次の手順を実行します：
+            </p>
+            <ol>
+                <li>|win| の [=overlay=] の幅または高さが（例：ユーザーがブラウザウィンドウをリサイズした、ページのズーム、[=overlay=]
+                    上に他UIが表示・非表示になった等により）前回実行時から変更されている場合、{{Window/window}} オブジェクトに `ongeometrychange` イベントを[=fire an
+                    event=] し、[=overlay area information=] を[=update=] します。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                オーバーレイ領域情報の更新
+            </h3>
+            <p>
+                <dfn>overlay area informationを更新する</dfn>には、次の手順を実行します：
+            </p>
+            <ol class="algorithm">
+                <li>|ovls| を、ウィンドウフレーム上の [=window controls=] を含む[=overlays=] で定義される領域の[=list=] とする。
+                </li>
+                <li>|tba| を、利用可能なタイトルバー領域を表す空の{{DOMRect}}オブジェクトとする。
+                    <ol>
+                        <li>もし|ovls|にオーバーレイ領域が1つだけある場合、|tba|を、フレーム端から|ovls|の内端までを包含する{{DOMRect}}とする。
+                        </li>
+                        <li>|ovls|に2つ以上ある場合、|tba|を、|ovls|内の領域の交点から[=document=]の <a
+                                href="https://drafts.csswg.org/css2/#viewport">viewport</a> までを囲む{{DOMRect}}とする。
+                        </li>
+                        <li>|tba| の高さは|ovls|各領域の高さと揃える。
+                        </li>
+                    </ol>
+                </li>
+                <li>{{Window/window}}.[[\TitleBarArea]] を |tba| と同じにする。
+                </li>
+                <li>[=タイトルバー領域用環境変数=] に{{Window/window}}.[[\TitleBarArea]] の情報を反映させる。
+                </li>
+            </ol>
+        </section>
+    </section>
+    <section>
+        <h2>
+            セキュリティとプライバシーに関する考慮事項
+        </h2>
+        <section>
+            <h3>
+                セキュリティ
+            </h3>
+            <section>
+                <h4>
+                    なりすましリスク
+                </h4>
+                <p>
+                    インストール済みWebアプリをフレーム無しで表示することで、それまでユーザーエージェントが管理していた信頼領域でのコンテンツなりすましのリスクが生じます。
+                </p>
+                <p>
+                    現在のChromium系ブラウザでは、`standalone`
+                    モード時、初回起動時はWebページタイトルが左に、ページのオリジンが右（その後に「設定など」ボタンとウィンドウコントロール）にタイトルバー内で表示されます。数秒後、オリジンのテキストは消えます。
+                </p>
+                <p>
+                    RTL構成のブラウザでは、このレイアウトが反転し、オリジンが左にきます。オーバーレイの右端との間に十分なパディングがないと、攻撃者が例えば "evil.ltd" のオリジンに信頼される
+                    "google.com" を付加した文字列を配置でき、ユーザーに信頼できるサイトだと錯覚させる恐れがあります。
+                </p>
+            </section>
+            <section>
+                <h4>
+                    範囲外ナビゲーション
+                </h4>
+                <p>
+                    インストール済みWebアプリには、ユーザーがアプリ定義スコープから外れたことを示すセキュリティ指標も存在します。範囲外に移動した際は、タイトルバーとWebコンテンツの間に黒いバーが表示され、以下の情報が含まれます：
+                </p>
+                <ul>
+                    <li>ワンクリックでスコープ内に戻れる「閉じる」ボタン
+                    </li>
+                    <li>クリックするとセキュリティ情報ポップアップが開くセキュリティアイコン
+                    </li>
+                    <li>サイトのオリジンとタイトル
+                    </li>
+                </ul>
+                <p>
+                    ウィンドウコントロールオーバーレイが有効な場合、ユーザーが範囲外に移動すると、オーバーレイは一時的に通常のタイトルバーに置き換えられます。スコープ内に戻ると、タイトルバーは非表示になり、再びオーバーレイが表示されます。
+                </p>
+            </section>
+        </section>
+        <section>
+            <h3>
+                プライバシー
+            </h3>
+            <p>
+                ウィンドウコントロールオーバーレイを有効にすると、オーバーレイのサイズがOSやテキスト倍率、OSフォントサイズ、OSズーム倍率、Webコンテンツのズーム倍率などに依存するため、フィンガープリントの表面積が増します。
+            </p>
+            <p>
+                ただし、これはインストール済みのデスクトップWebアプリでwindow controls
+                overlay機能を利用する場合に限ります。一般的なブラウザ利用には該当しません。さらに、windowControlsOverlay
+                APIはインストール済みWebアプリ内に埋め込まれたiframeには提供されません。
+            </p>
+        </section>
+    </section>
+    <section class="appendix informative" id="acknowledgments">
+        <h2>
+            謝辞
+        </h2>
+        <p>
+            Amanda Baker氏、Joshua Bell氏、Yoav Weiss氏に多大なる貢献を感謝いたします。
+        </p>
+    </section>
+    <section id="conformance"></section>
+</body>
+
+</html>
