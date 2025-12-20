@@ -128,6 +128,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Paint Timing](https://jp.htmlspecs.com/paint-timing/)（[Source](https://www.w3.org/TR/2025/WD-paint-timing-20251119/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Largest Contentful Paint](https://jp.htmlspecs.com/largest-contentful-paint/)（[Source](https://www.w3.org/TR/2025/WD-largest-contentful-paint-20250911/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Event Timing API](https://jp.htmlspecs.com/event-timing/)（[Source](https://www.w3.org/TR/2025/WD-event-timing-20251017/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Prefetch](https://jp.htmlspecs.com/prefetch/)（[Source](https://wicg.github.io/nav-speculation/prefetch.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### セキュリティと認証
 - [Web Authentication: An API for accessing Public Key Credentials Level 2](https://jp.htmlspecs.com/webauthn-2/)（[Source](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
