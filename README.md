@@ -239,6 +239,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### ナビゲーション
 - [CSS Spatial Navigation Level 1](https://jp.htmlspecs.com/css/css-nav-1/)（[Source](https://www.w3.org/TR/2019/WD-css-nav-1-20191126/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Scroll To Text Fragment](https://jp.htmlspecs.com/css/scroll-to-text-fragment/)（[Source](https://wicg.github.io/scroll-to-text-fragment/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### 書字モード
 - [CSS Writing Modes Level 3](https://jp.htmlspecs.com/css/css-writing-modes-3/)（[Source](https://www.w3.org/TR/2019/REC-css-writing-modes-3-20191210/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
