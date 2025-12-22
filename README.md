@@ -161,7 +161,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [WebCodecs](https://jp.htmlspecs.com/webcodecs/)（[Source](https://www.w3.org/TR/2025/WD-webcodecs-20251124/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Session](https://jp.htmlspecs.com/mediasession/)（[Source](https://www.w3.org/TR/2025/WD-mediasession-20250919/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Capabilities](https://jp.htmlspecs.com/media-capabilities/)（[Source](https://www.w3.org/TR/2025/WD-media-capabilities-20251125/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Image Capture](https://jp.htmlspecs.com/image-capture/)（[Source](https://www.w3.org/TR/2025/WD-image-capture-20250423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MediaStream Image Capture](https://jp.htmlspecs.com/image-capture/)（[Source](https://www.w3.org/TR/2025/WD-image-capture-20250423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Encrypted Media Extensions](https://jp.htmlspecs.com/encrypted-media-2/)（[Source](https://www.w3.org/TR/2025/WD-encrypted-media-2-20251126/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebXR Device API](https://jp.htmlspecs.com/webxr/)（[Source](https://www.w3.org/TR/2025/CRD-webxr-20251001/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Portable Network Graphics (PNG) 3](https://jp.htmlspecs.com/png-3/)（[Source](https://www.w3.org/TR/2025/REC-png-3-20250624/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
