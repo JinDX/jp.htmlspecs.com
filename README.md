@@ -89,6 +89,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Screen Orientation](https://jp.htmlspecs.com/screen-orientation/)（[Source](https://www.w3.org/TR/2025/WD-screen-orientation-20251021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Screen Wake Lock](https://jp.htmlspecs.com/screen-wake-lock/)（[Source](https://www.w3.org/TR/2024/WD-screen-wake-lock-20241024/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Idle Detection API](https://jp.htmlspecs.com/idle-detection/)（[Source](https://wicg.github.io/idle-detection/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Web Speech API](https://jp.htmlspecs.com/web-speech-api/)（[Source](https://webaudio.github.io/web-speech-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [EyeDropper API](https://jp.htmlspecs.com/eyedropper-api/)（[Source](https://wicg.github.io/eyedropper-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Fullscreen](https://jp.htmlspecs.com/fullscreen/)（[Source](https://fullscreen.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Screen Capture](https://jp.htmlspecs.com/screen-capture/)（[Source](https://www.w3.org/TR/2025/WD-screen-capture-20250717/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
