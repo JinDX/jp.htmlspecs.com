@@ -76,6 +76,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Data on the Web Best Practices](https://jp.htmlspecs.com/dwbp/)（[Source](https://www.w3.org/TR/2017/REC-dwbp-20170131/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [GraphQL](https://jp.htmlspecs.com/graphql/)（[Source](https://spec.graphql.org/draft/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [OpenAPI Specification v3.2.0](https://jp.htmlspecs.com/openapi/)（[Source](https://spec.openapis.org/oas/latest.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Storage Access API](https://jp.htmlspecs.com/storage-access/)（[Source](https://privacycg.github.io/storage-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### デバイスとハードウェアアクセス
 - [Pointer Events Level 2](https://jp.htmlspecs.com/pointerevents2/)（[Source](https://www.w3.org/TR/2019/REC-pointerevents2-20190404/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
@@ -100,6 +101,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Badging API](https://jp.htmlspecs.com/badging/)（[Source](https://www.w3.org/TR/2025/WD-badging-20251006/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard/)（[Source](https://www.w3.org/TR/2022/WD-virtual-keyboard-20220505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Window Controls Overlay](https://jp.htmlspecs.com/window-controls-overlay/)（[Source](https://wicg.github.io/window-controls-overlay/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Window Management](https://jp.htmlspecs.com/window-management/)（[Source](https://www.w3.org/TR/2024/WD-window-management-20240607/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web Share API](https://jp.htmlspecs.com/web-share/)（[Source](https://www.w3.org/TR/2023/REC-web-share-20230530/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Web Audio API](https://jp.htmlspecs.com/webaudio/)（[Source](https://www.w3.org/TR/2024/WD-webaudio-1.1-20241105/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Geolocation API](https://jp.htmlspecs.com/geolocation/)（[Source](https://www.w3.org/TR/2025/REC-geolocation-20251029/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
