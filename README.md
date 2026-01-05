@@ -393,6 +393,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Hypertext Transfer Protocol (HTTP) Client-Initiated Content-Encoding](https://jp.htmlspecs.com/http/rfc7694.html)（[Source](https://httpwg.org/specs/rfc7694.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Prefer Header for HTTP](https://jp.htmlspecs.com/http/rfc7240.html)（[Source](https://httpwg.org/specs/rfc7240.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Web Linking](https://jp.htmlspecs.com/http/rfc8288.html)（[Source](https://httpwg.org/specs/rfc8288.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [HTTP Client Hints](https://jp.htmlspecs.com/http/rfc8942.html)（[Source](https://httpwg.org/specs/rfc8942.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Compression Dictionary Transport](https://jp.htmlspecs.com/http/rfc9842.html)（[Source](https://httpwg.org/specs/rfc9842.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
 ### 接続および中継拡張
