@@ -141,6 +141,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Observable](https://jp.htmlspecs.com/observable/)（[Source](https://wicg.github.io/observable/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Long Tasks API](https://jp.htmlspecs.com/longtasks-1/)（[Source](https://www.w3.org/TR/2024/WD-longtasks-1-20240524/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Prioritized Task Scheduling](https://jp.htmlspecs.com/scheduling-apis/)（[Source](https://wicg.github.io/scheduling-apis/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [requestIdleCallback()](https://jp.htmlspecs.com/request-idle-callback/)（[Source](https://www.w3.org/TR/2025/WD-requestidlecallback-20250521/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Reporting API](https://jp.htmlspecs.com/reporting-1/)（[Source](https://www.w3.org/TR/2025/WD-reporting-1-20250611/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Deprecation Reporting](https://jp.htmlspecs.com/deprecation-reporting/)（[Source](https://wicg.github.io/deprecation-reporting/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Page Lifecycle](https://jp.htmlspecs.com/page-lifecycle/)（[Source](https://wicg.github.io/page-lifecycle/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
