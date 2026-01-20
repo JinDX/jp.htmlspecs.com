@@ -154,7 +154,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Prefetch](https://jp.htmlspecs.com/prefetch/)（[Source](https://wicg.github.io/nav-speculation/prefetch.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Prerendering Revamped](https://jp.htmlspecs.com/prerendering/)（[Source](https://wicg.github.io/nav-speculation/prerendering.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Performance measure memory](https://wicg.github.io/performance-measure-memory/)（[Source](https://wicg.github.io/performance-measure-memory/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2025/WD-device-memory-1-20251211/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2026/WD-device-memory-1-20260119/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### セキュリティと認証
 - [Web Authentication: An API for accessing Public Key Credentials Level 2](https://jp.htmlspecs.com/webauthn-2/)（[Source](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
