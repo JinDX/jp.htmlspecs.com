@@ -1071,40 +1071,37 @@ Copyright Notice
         JWE JSONシリアル化は<a href="#section-7.2">セクション7.2</a>で説明されています。
 
 
-<span class="h3"><a class="selflink" id="section-5.2" href="#section-5.2">5.2</a>.  Message Decryption</span>
+<span class="h3"><a class="selflink" id="section-5.2" href="#section-5.2">5.2</a>.  メッセージの復号</span>
 
-   The message decryption process is the reverse of the encryption
-   process.  The order of the steps is not significant in cases where
-   there are no dependencies between the inputs and outputs of the
-   steps.  If any of these steps fail, the encrypted content cannot be
-   validated.
+   メッセージの復号プロセスは暗号化プロセスの逆である。
+   ステップ間の入出力に依存関係がない場合、ステップの順序は重要ではない。
+   これらのステップのいずれかが失敗した場合、暗号化された内容を
+   検証することはできない。
 
-   When there are multiple recipients, it is an application decision
-   which of the recipients' encrypted content must successfully validate
-   for the JWE to be accepted.  In some cases, encrypted content for all
-   recipients must successfully validate or the JWE will be considered
-   invalid.  In other cases, only the encrypted content for a single
-   recipient needs to be successfully validated.  However, in all cases,
-   the encrypted content for at least one recipient MUST successfully
-   validate or the JWE MUST be considered invalid.
+   複数の受信者が存在する場合、どの受信者の暗号化された内容が成功裏に
+   検証される必要があるかはアプリケーションの判断による。一部のケースでは、
+   全ての受信者の暗号化内容が成功裏に検証される必要がある場合もあり、
+   そうでない場合、JWE は無効とみなされる。他のケースでは、単一の受信者の
+   暗号化内容が成功裏に検証されるだけで十分となる場合もある。しかし、全ての
+   ケースにおいて、少なくとも1人の受信者の暗号化された内容が成功裏に
+   検証されなければならず（MUST）、そうでなければJWE は無効とみなされる（MUST）。
 
-   1.   Parse the JWE representation to extract the serialized values
-        for the components of the JWE.  When using the JWE Compact
-        Serialization, these components are the base64url-encoded
-        representations of the JWE Protected Header, the JWE Encrypted
-        Key, the JWE Initialization Vector, the JWE Ciphertext, and the
-        JWE Authentication Tag, and when using the JWE JSON
-        Serialization, these components also include the base64url-
-        encoded representation of the JWE AAD and the unencoded JWE
-        Shared Unprotected Header and JWE Per-Recipient Unprotected
-        Header values.  When using the JWE Compact Serialization, the
-        JWE Protected Header, the JWE Encrypted Key, the JWE
-        Initialization Vector, the JWE Ciphertext, and the JWE
-        Authentication Tag are represented as base64url-encoded values
-        in that order, with each value being separated from the next by
-        a single period ('.') character, resulting in exactly four
-        delimiting period characters being used.  The JWE JSON
-        Serialization is described in <a href="#section-7.2">Section 7.2</a>.
+   1.   JWE 表現を解析して、JWE コンポーネントの直列化された値を
+        抽出する。JWE Compact Serialization を使用する場合、
+        これらのコンポーネントは JWE Protected Header、JWE Encrypted
+        Key、JWE Initialization Vector、JWE Ciphertext、および
+        JWE Authentication Tag の base64url エンコードされた構成要素の
+        表現であり、JWE JSON Serialization を使用した場合には、
+        これらの構成要素に加えて JWE AAD の base64url エンコード表現と
+        エンコードされていない JWE Shared Unprotected Header や
+        JWE Per-Recipient Unprotected Header 値も含まれる。JWE Compact
+        Serialization を使用する場合、JWE Protected Header、
+        JWE Encrypted Key、JWE Initialization Vector、
+        JWE Ciphertext、および JWE Authentication Tag は
+        その順序で base64url エンコードされた値で表現され、それぞれの
+        値は単一のピリオド('.')文字で区切られ、結果として正確に4つの
+        区切りピリオド文字が使用される。JWE JSON Serialization に
+        関する説明は<a href="#section-7.2">Section 7.2</a>を参照。
 
 
 
@@ -1114,109 +1111,92 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   2.   Base64url decode the encoded representations of the JWE
-        Protected Header, the JWE Encrypted Key, the JWE Initialization
-        Vector, the JWE Ciphertext, the JWE Authentication Tag, and the
-        JWE AAD, following the restriction that no line breaks,
-        whitespace, or other additional characters have been used.
+   2.   JWE Protected Header、JWE Encrypted Key、JWE Initialization
+        Vector、JWE Ciphertext、JWE Authentication Tag、および
+        JWE AAD のエンコードされた表現を base64url デコードする。
+        改行や空白、その他の追加文字が使用されていない制約に従う。
 
-   3.   Verify that the octet sequence resulting from decoding the
-        encoded JWE Protected Header is a UTF-8-encoded representation
-        of a completely valid JSON object conforming to <a href="./rfc7159">RFC 7159</a>
-        [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>]; let the JWE Protected Header be this JSON object.
+   3.   デコードされた JWE Protected Header のオクテット列が完全に有効な
+        JSON オブジェクトであり、<a href="./rfc7159">RFC 7159</a>に準拠して
+        UTF-8エンコードされていることを検証する。そのJSONオブジェクトを
+        JWE Protected Header とする。
 
-   4.   If using the JWE Compact Serialization, let the JOSE Header be
-        the JWE Protected Header.  Otherwise, when using the JWE JSON
-        Serialization, let the JOSE Header be the union of the members
-        of the JWE Protected Header, the JWE Shared Unprotected Header
-        and the corresponding JWE Per-Recipient Unprotected Header, all
-        of which must be completely valid JSON objects.  During this
-        step, verify that the resulting JOSE Header does not contain
-        duplicate Header Parameter names.  When using the JWE JSON
-        Serialization, this restriction includes that the same Header
-        Parameter name also MUST NOT occur in distinct JSON object
-        values that together comprise the JOSE Header.
+   4.   JWE Compact Serialization を使用する場合、JOSE Header を
+        JWE Protected Header とする。そうでない場合、JWE JSON
+        Serialization を使用する際には、JOSE Header は JWE Protected
+        Header、JWE Shared Unprotected Header、そして対応する JWE
+        Per-Recipient Unprotected Header のメンバーの和集合とする。
+        このステップでは、得られた JOSE Header に重複したヘッダーパラメータ
+        名が含まれていないことを確認する。JWE JSON Serialization を
+        使用する場合、この制約は、JOSE Header を構成する異なる JSON
+        オブジェクト値に重複するヘッダパラメータ名が存在していない
+        ことを含む。
 
-   5.   Verify that the implementation understands and can process all
-        fields that it is required to support, whether required by this
-        specification, by the algorithms being used, or by the "crit"
-        Header Parameter value, and that the values of those parameters
-        are also understood and supported.
+   5.   実装がこの仕様、使用されているアルゴリズム、あるいは
+        "crit" ヘッダパラメータ値によって求められる全てのフィールドを
+        認識し、処理でき、これらのパラメータ値も理解され、サポートされて
+        いるかを確認する。
 
-   6.   Determine the Key Management Mode employed by the algorithm
-        specified by the "alg" (algorithm) Header Parameter.
+   6.   "alg"（アルゴリズム）ヘッダーパラメータで指定されたアルゴリズムが
+        使用する鍵管理モードを特定する。
 
-   7.   Verify that the JWE uses a key known to the recipient.
+   7.   JWE が受信者の既知の鍵を使用しているかどうか検証する。
 
-   8.   When Direct Key Agreement or Key Agreement with Key Wrapping are
-        employed, use the key agreement algorithm to compute the value
-        of the agreed upon key.  When Direct Key Agreement is employed,
-        let the CEK be the agreed upon key.  When Key Agreement with Key
-        Wrapping is employed, the agreed upon key will be used to
-        decrypt the JWE Encrypted Key.
+   8.   Direct Key Agreement または Key Agreement with Key Wrapping
+        が使用されている場合、鍵合意アルゴリズムを使用して、合意された
+        鍵の値を計算する。Direct Key Agreement が使用されている場合、
+        CEK を合意鍵とする。Key Agreement with Key Wrapping を使用
+        している場合、合意された鍵は JWE Encrypted Key を復号するため
+        に使用される。
 
-   9.   When Key Wrapping, Key Encryption, or Key Agreement with Key
-        Wrapping are employed, decrypt the JWE Encrypted Key to produce
-        the CEK.  The CEK MUST have a length equal to that required for
-        the content encryption algorithm.  Note that when there are
-        multiple recipients, each recipient will only be able to decrypt
-        JWE Encrypted Key values that were encrypted to a key in that
-        recipient's possession.  It is therefore normal to only be able
+   9.   Key Wrapping、Key Encryption、または Key Agreement with Key
+        Wrapping が使用されている場合、JWE Encrypted Key を復号して
+        CEK を生成する。CEK の長さはコンテント暗号アルゴリズムで要求
+        される長さに等しい必要がある（MUST）。受信者が複数いる場合、
+        それぞれの受信者はその受信者が所有する鍵に対して暗号化された
+        JWE Encrypted Key 値を復号するため、通常、1つの受信者が復号を
+        試みる対象となる per-recipient JWE Encrypted Key 値は1つのみで
+        ある。また、タイミング攻撃を緩和するためのセキュリティ
+        上の考慮については、<a href="#section-11.5">Section 11.5</a>を
+        参照。
 
+   10.  Direct Key Agreement または Direct Encryption が使用されている
+        場合、JWE Encrypted Key 値が空のオクテット列であることを検証する。
 
+   11.  Direct Encryption が使用されている場合、CEK を共有の対称鍵とする。
 
-<span class="grey">Jones &amp; Hildebrand           Standards Track                   [Page 18]</span></pre>
-<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-19" ></span>
-<span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
+   12.  この受信者に対して CEK を特定できたかどうか記録する。
 
+   13.  JWE JSON Serialization を使用している場合、このプロセス
+        （ステップ4-12）を、表現に含まれる各受信者に繰り返す。
 
-        to decrypt one of the per-recipient JWE Encrypted Key values to
-        obtain the CEK value.  Also, see <a href="#section-11.5">Section 11.5</a> for security
-        considerations on mitigating timing attacks.
+   14.  Encoded Protected Header 値を計算する：BASE64URL(UTF8(JWE 
+        Protected Header))。JWE Protected Header が存在しない場合
+        （JWE JSON Serialization を使用し、"protected" メンバが存在
+        しない場合に限る）、この値を空文字列とする。
 
-   10.  When Direct Key Agreement or Direct Encryption are employed,
-        verify that the JWE Encrypted Key value is an empty octet
-        sequence.
+   15.  Additional Authenticated Data 暗号化パラメータを
+        ASCII(Encoded Protected Header) とする。ただし、
+        JWE AAD 値が存在する場合（JWE JSON Serialization を使用
+        している場合に限る）、代わりに Additional Authenticated Data
+        暗号化パラメータを ASCII(Encoded Protected Header || '.' ||
+        BASE64URL(JWE AAD)) とする。
 
-   11.  When Direct Encryption is employed, let the CEK be the shared
-        symmetric key.
+   16.  指定されたコンテンツ暗号化アルゴリズムを使用して
+        CEK・JWE Initialization Vector・Additional Authenticated Data
+        値・JWE Authentication Tag （これは計算への認証タグ入力）を
+        用いて JWE Ciphertext を復号し、アルゴリズムで指定された方式
+        に従って JWE Authentication Tag を検証する。認証タグが
+        正しくない場合、復号データを何も出力せず入力を拒否する。
 
-   12.  Record whether the CEK could be successfully determined for this
-        recipient or not.
+   17.  "zip" パラメータが含まれていた場合、指定された圧縮アルゴリズム
+        に従い復号された平文を解凍する。
 
-   13.  If the JWE JSON Serialization is being used, repeat this process
-        (steps 4-12) for each recipient contained in the representation.
-
-   14.  Compute the Encoded Protected Header value BASE64URL(UTF8(JWE
-        Protected Header)).  If the JWE Protected Header is not present
-        (which can only happen when using the JWE JSON Serialization and
-        no "protected" member is present), let this value be the empty
-        string.
-
-   15.  Let the Additional Authenticated Data encryption parameter be
-        ASCII(Encoded Protected Header).  However, if a JWE AAD value is
-        present (which can only be the case when using the JWE JSON
-        Serialization), instead let the Additional Authenticated Data
-        encryption parameter be ASCII(Encoded Protected Header || '.' ||
-        BASE64URL(JWE AAD)).
-
-   16.  Decrypt the JWE Ciphertext using the CEK, the JWE Initialization
-        Vector, the Additional Authenticated Data value, and the JWE
-        Authentication Tag (which is the Authentication Tag input to the
-        calculation) using the specified content encryption algorithm,
-        returning the decrypted plaintext and validating the JWE
-        Authentication Tag in the manner specified for the algorithm,
-        rejecting the input without emitting any decrypted output if the
-        JWE Authentication Tag is incorrect.
-
-   17.  If a "zip" parameter was included, uncompress the decrypted
-        plaintext using the specified compression algorithm.
-
-   18.  If there was no recipient for which all of the decryption steps
-        succeeded, then the JWE MUST be considered invalid.  Otherwise,
-        output the plaintext.  In the JWE JSON Serialization case, also
-        return a result to the application indicating for which of the
-        recipients the decryption succeeded and failed.
+   18.  全ての復号処理が成功した受信者が存在しない場合は JWE を無効と
+        みなす（MUST）。それ以外の場合は平文を出力する。
+        JWE JSON Serialization の場合、どの受信者の復号が成功
+        したか、また失敗したかをアプリケーションに報告する結果も
+        返す。
 
 
 
@@ -1226,38 +1206,45 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   Finally, note that it is an application decision which algorithms may
-   be used in a given context.  Even if a JWE can be successfully
-   decrypted, unless the algorithms used in the JWE are acceptable to
-   the application, it SHOULD consider the JWE to be invalid.
+   最後に、どのアルゴリズムが特定のコンテキストで使用されるかは
+   アプリケーションの判断であることに留意すること。JWE が正常に復号
+   可能であったとしても、JWE で使用されているアルゴリズムがアプリ
+   ケーションで許容可能なものでない限り、それを無効とみなすべきである
+   （SHOULD）。
 
-<span class="h3"><a class="selflink" id="section-5.3" href="#section-5.3">5.3</a>.  String Comparison Rules</span>
+<span class="h3"><a class="selflink" id="section-5.3" href="#section-5.3">5.3</a>.  文字列比較規則</span>
 
-   The string comparison rules for this specification are the same as
-   those defined in Section 5.3 of [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>].
+   本仕様における文字列比較規則は、
+   [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>] のセクション5.3で
+   定義されているものと同一です。
 
-<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  Key Identification</span>
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  キー識別</span>
 
-   The key identification methods for this specification are the same as
-   those defined in Section 6 of [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>], except that the key being
-   identified is the public key to which the JWE was encrypted.
+   本仕様でのキー識別方法は、
+   [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>] のセクション6で
+   定義されているものと同じですが、識別される
+   キーはJWEが暗号化された公開鍵である点が
+   異なります。
 
-<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  Serializations</span>
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  シリアライズ</span>
 
-   JWEs use one of two serializations: the JWE Compact Serialization or
-   the JWE JSON Serialization.  Applications using this specification
-   need to specify what serialization and serialization features are
-   used for that application.  For instance, applications might specify
-   that only the JWE JSON Serialization is used, that only JWE JSON
-   Serialization support for a single recipient is used, or that support
-   for multiple recipients is used.  JWE implementations only need to
-   implement the features needed for the applications they are designed
-   to support.
+   JWEは2つのシリアライズ方法のうちいずれかを
+   使用します：JWEコンパクトシリアライズまたは
+   JWE JSONシリアライズ。本仕様を利用するアプリ
+   ケーションは、そのアプリケーションで使用する
+   シリアライズ方法および機能を指定する必要があり
+   ます。たとえば、JWE JSONシリアライズのみを使用
+   する、単一受信者向けのJWE JSONシリアライズのみ
+   サポートする、または複数受信者のサポートを含める
+   ことを指定する場合があります。JWE実装は、設計
+   されたアプリケーションが必要とする機能のみを
+   実装すればよいです。
 
-<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  JWE Compact Serialization</span>
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  JWEコンパクトシリアライズ</span>
 
-   The JWE Compact Serialization represents encrypted content as a
-   compact, URL-safe string.  This string is:
+   JWEコンパクトシリアライズは、暗号化された内容を
+   コンパクトかつURLセーフな文字列として表現します。
+   この文字列は以下の通りです：
 
       BASE64URL(UTF8(JWE Protected Header)) || '.' ||
       BASE64URL(JWE Encrypted Key) || '.' ||
@@ -1265,71 +1252,84 @@ Copyright Notice
       BASE64URL(JWE Ciphertext) || '.' ||
       BASE64URL(JWE Authentication Tag)
 
-   Only one recipient is supported by the JWE Compact Serialization and
-   it provides no syntax to represent JWE Shared Unprotected Header, JWE
-   Per-Recipient Unprotected Header, or JWE AAD values.
+   JWEコンパクトシリアライズがサポートする
+   受信者は1人のみであり、JWE共有非保護ヘッダー、
+   JWE受信者別非保護ヘッダー、またはJWE AAD値
+   を表現する構文はありません。
 
-<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  JWE JSON Serialization</span>
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  JWE JSONシリアライズ</span>
 
-   The JWE JSON Serialization represents encrypted content as a JSON
-   object.  This representation is neither optimized for compactness nor
-   URL safe.
+   JWE JSONシリアライズは、暗号化された内容を
+   JSONオブジェクトとして表現します。この表現は
+   コンパクト性のために最適化されておらず、
+   URLセーフでもありません。
 
 
 
-<span class="grey">Jones &amp; Hildebrand           Standards Track                   [Page 20]</span></pre>
+<span class="grey">Jones & Hildebrand           Standards Track                   [Page 20]</span></pre>
 <hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-21" ></span>
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   Two closely related syntaxes are defined for the JWE JSON
-   Serialization: a fully general syntax, with which content can be
-   encrypted to more than one recipient, and a flattened syntax, which
-   is optimized for the single-recipient case.
+   JWE JSONシリアライズには、密接に関連する2つの
+   構文が定義されています：複数の受信者に内容を
+   暗号化できる完全な一般的構文と、単一受信者向けに
+   最適化されたフラット構文です。
 
-<span class="h4"><a class="selflink" id="section-7.2.1" href="#section-7.2.1">7.2.1</a>.  General JWE JSON Serialization Syntax</span>
+<span class="h4"><a class="selflink" id="section-7.2.1" href="#section-7.2.1">7.2.1</a>.  一般的JWE JSONシリアライズ構文</span>
 
-   The following members are defined for use in top-level JSON objects
-   used for the fully general JWE JSON Serialization syntax:
+   完全な一般的JWE JSONシリアライズ構文で使用
+   されるトップレベルJSONオブジェクトには、以下の
+   メンバーが定義されます：
 
    protected
-      The "protected" member MUST be present and contain the value
-      BASE64URL(UTF8(JWE Protected Header)) when the JWE Protected
-      Header value is non-empty; otherwise, it MUST be absent.  These
-      Header Parameter values are integrity protected.
+      JWE Protected Headerの値が空でない場合、
+      "protected" メンバーは必ず存在し、値は
+      BASE64URL(UTF8(JWE Protected Header))に
+      しなければなりません。そうでない場合は省略
+      しなければなりません。これらのヘッダー
+      パラメータは完全性保護されます。
 
    unprotected
-      The "unprotected" member MUST be present and contain the value JWE
-      Shared Unprotected Header when the JWE Shared Unprotected Header
-      value is non-empty; otherwise, it MUST be absent.  This value is
-      represented as an unencoded JSON object, rather than as a string.
-      These Header Parameter values are not integrity protected.
+      JWE Shared Unprotected Headerの値が空で
+      ない場合、"unprotected"メンバーは必ず存在し
+      その値はJWE Shared Unprotected Headerで
+      なければなりません。この値は文字列ではなく
+      エンコードされていないJSONオブジェクトで表現
+      されます。これらのヘッダーパラメータは完全性
+      保護されません。
 
    iv
-      The "iv" member MUST be present and contain the value
-      BASE64URL(JWE Initialization Vector) when the JWE Initialization
-      Vector value is non-empty; otherwise, it MUST be absent.
+      JWE Initialization Vectorの値が空でない場合、
+      "iv"メンバーは必ず存在し、その値は
+      BASE64URL(JWE Initialization Vector)
+      でなければなりません。そうでない場合は
+      省略しなければなりません。
 
    aad
-      The "aad" member MUST be present and contain the value
-      BASE64URL(JWE AAD)) when the JWE AAD value is non-empty;
-      otherwise, it MUST be absent.  A JWE AAD value can be included to
-      supply a base64url-encoded value to be integrity protected but not
-      encrypted.
+      JWE AAD値が空でない場合、"aad"メンバーは
+      必ず存在し、その値はBASE64URL(JWE AAD)で
+      なければなりません。そうでない場合は省略
+      しなければなりません。JWE AAD値は、base64url
+      エンコードされた値で、完全性保護はされるが
+      暗号化はされていない値を含めるために使えます。
 
    ciphertext
-      The "ciphertext" member MUST be present and contain the value
-      BASE64URL(JWE Ciphertext).
+      "ciphertext"メンバーは必ず存在し、その値は
+      BASE64URL(JWE Ciphertext)でなければなりません。
 
    tag
-      The "tag" member MUST be present and contain the value
-      BASE64URL(JWE Authentication Tag) when the JWE Authentication Tag
-      value is non-empty; otherwise, it MUST be absent.
+      JWE Authentication Tagの値が空でない場合、
+      "tag"メンバーは必ず存在し、その値は
+      BASE64URL(JWE Authentication Tag)で
+      なければなりません。そうでない場合は省略
+      しなければなりません。
 
    recipients
-      The "recipients" member value MUST be an array of JSON objects.
-      Each object contains information specific to a single recipient.
-      This member MUST be present with exactly one array element per
+      "recipients"メンバー値は必ずJSONオブジェクト
+      の配列でなければなりません。各オブジェクトは
+      単一受信者に固有の情報を含みます。このメンバー
+      は受信者ごとに正確に1つの配列要素が必要です
 
 
 
@@ -1338,54 +1338,53 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-      recipient, even if some or all of the array element values are the
-      empty JSON object "{}" (which can happen when all Header Parameter
-      values are shared between all recipients and when no encrypted key
-      is used, such as when doing Direct Encryption).
+      recipientについては、配列要素の一部またはすべての値が
+      空のJSONオブジェクト "{}" であっても存在します（これは、
+      すべてのHeader Parameter値がすべてのrecipient間で共有され、
+      かつ暗号化キーが使用されない、例えばDirect Encryptionの場合など
+      に発生します）。
 
-   The following members are defined for use in the JSON objects that
-   are elements of the "recipients" array:
+   次のメンバーは "recipients" 配列の要素である
+   JSONオブジェクトで使用するために定義されています。
 
    header
-      The "header" member MUST be present and contain the value JWE Per-
-      Recipient Unprotected Header when the JWE Per-Recipient
-      Unprotected Header value is non-empty; otherwise, it MUST be
-      absent.  This value is represented as an unencoded JSON object,
-      rather than as a string.  These Header Parameter values are not
-      integrity protected.
+      "header" メンバーは、JWE Per-Recipient Unprotected Headerの値が空
+      でない場合には必ず存在しその値を含まなければなりません。
+      そうでない場合は省略しなければなりません。この値は
+      文字列としてではなく、そのままのJSONオブジェクトとして
+      表現されます。これらのHeader Parameter値は
+      完全性の保護を受けません。
 
    encrypted_key
-      The "encrypted_key" member MUST be present and contain the value
-      BASE64URL(JWE Encrypted Key) when the JWE Encrypted Key value is
-      non-empty; otherwise, it MUST be absent.
+      "encrypted_key" メンバーは、JWE Encrypted Keyの値が非空の場合には
+      必ず存在し、値BASE64URL(JWE Encrypted Key)を含めなければなりません。
+      そうでない場合は省略しなければなりません。
 
-   At least one of the "header", "protected", and "unprotected" members
-   MUST be present so that "alg" and "enc" Header Parameter values are
-   conveyed for each recipient computation.
+   "header"、"protected"、"unprotected" のうち少なくとも1つのメンバー
+   が存在しなければならず、各recipientの計算のために "alg" および
+   "enc" Header Parameter値が伝達されます。
 
-   Additional members can be present in both the JSON objects defined
-   above; if not understood by implementations encountering them, they
-   MUST be ignored.
+   上記で定義されたJSONオブジェクトには追加のメンバーを含める
+   ことができます。もし実装がそれらを理解できなくても、
+   無視されなければなりません。
 
-   Some Header Parameters, including the "alg" parameter, can be shared
-   among all recipient computations.  Header Parameters in the JWE
-   Protected Header and JWE Shared Unprotected Header values are shared
-   among all recipients.
+   一部のHeader Parameter（"alg"パラメータなど）は全recipient処理で
+   共有できます。JWE Protected HeaderおよびJWE Shared Unprotected
+   Header内のHeader Parameterは全recipientで共有されます。
 
-   The Header Parameter values used when creating or validating per-
-   recipient ciphertext and Authentication Tag values are the union of
-   the three sets of Header Parameter values that may be present: (1)
-   the JWE Protected Header represented in the "protected" member, (2)
-   the JWE Shared Unprotected Header represented in the "unprotected"
-   member, and (3) the JWE Per-Recipient Unprotected Header represented
-   in the "header" member of the recipient's array element.  The union
-   of these sets of Header Parameters comprises the JOSE Header.  The
-   Header Parameter names in the three locations MUST be disjoint.
+   recipientごとに暗号文や認証タグを生成または検証する際に使われる
+   ヘッダーパラメータ値は、(1) "protected" メンバーで表されるJWE
+   Protected Header、(2) "unprotected" メンバーで表されるJWE Shared
+   Unprotected Header、(3) recipient配列要素の "header" メンバーで
+   表されるJWE Per-Recipient Unprotected Header、の3つのセットの
+   ユニオン（和集合）です。これらを合わせてJOSE Headerと呼びます。
+   この3箇所におけるHeader Parameter名は互いに重複してはなりません。
 
-   Each JWE Encrypted Key value is computed using the parameters of the
-   corresponding JOSE Header value in the same manner as for the JWE
-   Compact Serialization.  This has the desirable property that each JWE
-   Encrypted Key value in the "recipients" array is identical to the
+   各JWE Encrypted Key値は対応するJOSE Header値のパラメータを使い
+   JWE Compact Serializationと同様の方法で計算されます。
+   これにより "recipients" 配列の各JWE Encrypted Key値が、同じ
+   パラメータに対するJWE Compact Serializationで計算される値と
+   一致するという好ましい特性が得られます。
 
 
 
@@ -1394,51 +1393,49 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   value that would have been computed for the same parameter in the JWE
-   Compact Serialization.  Likewise, the JWE Ciphertext and JWE
-   Authentication Tag values match those produced for the JWE Compact
-   Serialization, provided that the JWE Protected Header value (which
-   represents the integrity-protected Header Parameter values) matches
-   that used in the JWE Compact Serialization.
+   同様に、JWE CiphertextとJWE Authentication Tagの値も、
+   JWE Protected Header値（完全性保護されたHeader Parameter値）が
+   JWE Compact Serializationで使われたものと一致するならば、
+   Compact Serializationで生成されたものと一致します。
 
-   All recipients use the same JWE Protected Header, JWE Initialization
-   Vector, JWE Ciphertext, and JWE Authentication Tag values, when
-   present, resulting in potentially significant space savings if the
-   message is large.  Therefore, all Header Parameters that specify the
-   treatment of the plaintext value MUST be the same for all recipients.
-   This primarily means that the "enc" (encryption algorithm) Header
-   Parameter value in the JOSE Header for each recipient and any
-   parameters of that algorithm MUST be the same.
+   すべてのrecipientは、JWE Protected Header、JWE Initialization
+   Vector、JWE Ciphertext、JWE Authentication Tag（存在する場合）を
+   共通で使用します。メッセージが大きい場合は大きな
+   スペース節約となり得ます。そのため、平文の扱いに関する
+   すべてのHeader Parameterはすべてのrecipientで同じで
+   なければなりません。具体的には各recipientのJOSE Headerにある
+   "enc"（暗号化アルゴリズム）Header Parameter値およびそのパラメータは
+   全員で同一でなければなりません。
 
-   In summary, the syntax of a JWE using the general JWE JSON
-   Serialization is as follows:
+   要約すると、一般的なJWE JSON Serializationを用いたJWEの構文は
+   次の通りです：
 
      {
-      "protected":"&lt;integrity-protected shared header contents&gt;",
-      "unprotected":&lt;non-integrity-protected shared header contents&gt;,
+      "protected":"&lt;完全性保護済み共有ヘッダー内容&gt;",
+      "unprotected":&lt;完全性保護されない共有ヘッダー内容&gt;,
       "recipients":[
-       {"header":&lt;per-recipient unprotected header 1 contents&gt;,
-        "encrypted_key":"&lt;encrypted key 1 contents&gt;"},
+       {"header":&lt;recipientごとの非保護ヘッダー1内容&gt;,
+        "encrypted_key":"&lt;暗号化キー1内容&gt;"},
        ...
-       {"header":&lt;per-recipient unprotected header N contents&gt;,
-        "encrypted_key":"&lt;encrypted key N contents&gt;"}],
-      "aad":"&lt;additional authenticated data contents&gt;",
-      "iv":"&lt;initialization vector contents&gt;",
-      "ciphertext":"&lt;ciphertext contents&gt;",
-      "tag":"&lt;authentication tag contents&gt;"
+       {"header":&lt;recipientごとの非保護ヘッダーN内容&gt;,
+        "encrypted_key":"&lt;暗号化キーN内容&gt;"}],
+      "aad":"&lt;付加認証データ内容&gt;",
+      "iv":"&lt;初期化ベクター内容&gt;",
+      "ciphertext":"&lt;暗号文内容&gt;",
+      "tag":"&lt;認証タグ内容&gt;"
      }
 
-   See <a href="#appendix-A.4">Appendix A.4</a> for an example JWE using the general JWE JSON
-   Serialization syntax.
+   一般的なJWE JSON Serialization構文で記述されたJWEの例については
+   <a href="#appendix-A.4">Appendix A.4</a> を参照してください。
 
 <span class="h4"><a class="selflink" id="section-7.2.2" href="#section-7.2.2">7.2.2</a>.  Flattened JWE JSON Serialization Syntax</span>
 
-   The flattened JWE JSON Serialization syntax is based upon the general
-   syntax, but flattens it, optimizing it for the single-recipient case.
-   It flattens it by removing the "recipients" member and instead
-   placing those members defined for use in the "recipients" array (the
-   "header" and "encrypted_key" members) in the top-level JSON object
-   (at the same level as the "ciphertext" member).
+   Flattened JWE JSON Serialization構文は、一般構文を基にしていま
+   すが、単一recipientケース向けに最適化し、"recipients"メンバーを
+   削除して配列で使われていた"header"や"encrypted_key"メンバーを
+   ( "ciphertext" メンバーと同じレベルで ) 最上位JSONオブジェクトに
+   移します。
+
 
 
 
@@ -1450,53 +1447,54 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   The "recipients" member MUST NOT be present when using this syntax.
-   Other than this syntax difference, JWE JSON Serialization objects
-   using the flattened syntax are processed identically to those using
-   the general syntax.
+   この構文を使用する場合、"recipients" メンバーは
+   含めてはなりません。この構文上の違い以外、flat構文を使う
+   JWE JSON Serializationオブジェクトは、一般構文のものと
+   同様に処理されます。
 
-   In summary, the syntax of a JWE using the flattened JWE JSON
-   Serialization is as follows:
+   要約すると、flattened JWE JSON Serializationを用いたJWEの
+   構文は以下の通りです：
 
      {
-      "protected":"&lt;integrity-protected header contents&gt;",
-      "unprotected":&lt;non-integrity-protected header contents&gt;,
-      "header":&lt;more non-integrity-protected header contents&gt;,
-      "encrypted_key":"&lt;encrypted key contents&gt;",
-      "aad":"&lt;additional authenticated data contents&gt;",
-      "iv":"&lt;initialization vector contents&gt;",
-      "ciphertext":"&lt;ciphertext contents&gt;",
-      "tag":"&lt;authentication tag contents&gt;"
+      "protected":"&lt;完全性保護済みヘッダー内容&gt;",
+      "unprotected":&lt;完全性保護されないヘッダー内容&gt;,
+      "header":&lt;さらに非保護のヘッダー内容&gt;,
+      "encrypted_key":"&lt;暗号化キー内容&gt;",
+      "aad":"&lt;付加認証データ内容&gt;",
+      "iv":"&lt;初期化ベクター内容&gt;",
+      "ciphertext":"&lt;暗号文内容&gt;",
+      "tag":"&lt;認証タグ内容&gt;"
      }
 
-   Note that when using the flattened syntax, just as when using the
-   general syntax, any unprotected Header Parameter values can reside in
-   either the "unprotected" member or the "header" member, or in both.
+   flatten構文利用時も、一般構文の場合と同様に、どの非保護
+   ヘッダーパラメータ値も "unprotected"メンバーまたは"header"
+   メンバー、あるいは両方に存在できます。
 
-   See <a href="#appendix-A.5">Appendix A.5</a> for an example JWE using the flattened JWE JSON
-   Serialization syntax.
+   flatten JWE JSON Serialization構文の例については
+   <a href="#appendix-A.5">Appendix A.5</a> を参照してください。
 
 <span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  TLS Requirements</span>
 
-   The Transport Layer Security (TLS) requirements for this
-   specification are the same as those defined in Section 8 of [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>].
+   この仕様のTransport Layer Security (TLS)要件は
+   [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>] の セクション8と同じです。
 
 <span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  Distinguishing between JWS and JWE Objects</span>
 
-   There are several ways of distinguishing whether an object is a JWS
-   or JWE.  All these methods will yield the same result for all legal
-   input values; they may yield different results for malformed inputs.
+   オブジェクトがJWSかJWEかを区別する方法はいくつかあります。
+   これらの方法は、すべての正しい入力値に対して同じ結果を返し、
+   不正な入力で異なる結果になる場合があります。
 
-   o  If the object is using the JWS Compact Serialization or the JWE
-      Compact Serialization, the number of base64url-encoded segments
-      separated by period ('.') characters differs for JWSs and JWEs.
-      JWSs have three segments separated by two period ('.') characters.
-      JWEs have five segments separated by four period ('.') characters.
+   o  オブジェクトがJWS Compact SerializationまたはJWE
+      Compact Serializationを使用している場合、ピリオド('.')で
+      区切られたbase64urlエンコードセグメントの数が
+      JWSとJWEで異なります。JWSは2つのピリオド('.')で区切られた
+      3つのセグメントを持ち、JWEは4つのピリオド('.')で
+      区切られた5つのセグメントを持ちます。
 
-   o  If the object is using the JWS JSON Serialization or the JWE JSON
-      Serialization, the members used will be different.  JWSs have a
-      "payload" member and JWEs do not.  JWEs have a "ciphertext" member
-      and JWSs do not.
+   o  オブジェクトがJWS JSON SerializationまたはJWE JSON
+      Serializationを使っている場合、利用されるメンバーが
+      異なります。JWSは"payload"メンバーを持ちJWEは持ちません。
+      JWEは"ciphertext"メンバーを持ちJWSは持ちません。
 
 
 
@@ -1506,49 +1504,42 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   o  The JOSE Header for a JWS can be distinguished from the JOSE
-      Header for a JWE by examining the "alg" (algorithm) Header
-      Parameter value.  If the value represents a digital signature or
-      MAC algorithm, or is the value "none", it is for a JWS; if it
-      represents a Key Encryption, Key Wrapping, Direct Key Agreement,
-      Key Agreement with Key Wrapping, or Direct Encryption algorithm,
-      it is for a JWE.  (Extracting the "alg" value to examine is
-      straightforward when using the JWS Compact Serialization or the
-      JWE Compact Serialization and may be more difficult when using the
-      JWS JSON Serialization or the JWE JSON Serialization.)
+   o  JWSのJOSEヘッダーは"alg"（アルゴリズム）ヘッダーパラメータ値を調べることでJWEのJOSEヘッダーと区別できる。
+      その値がデジタル署名またはMACアルゴリズム、もしくは値"none"であればJWS用である。
+      それが鍵暗号化、鍵ラッピング、直接鍵合意、鍵ラッピングを伴う鍵合意、または直接暗号化アルゴリズムの場合はJWE用となる。
+      （"alg"値の抽出はJWSコンパクトシリアライゼーションやJWEコンパクトシリアライゼーションでは容易であり、
+      JWS JSONシリアライゼーションやJWE JSONシリアライゼーションの場合はより難しくなる場合がある。）
 
-   o  The JOSE Header for a JWS can also be distinguished from the JOSE
-      Header for a JWE by determining whether an "enc" (encryption
-      algorithm) member exists.  If the "enc" member exists, it is a
-      JWE; otherwise, it is a JWS.
+   o  また、JWSのJOSEヘッダーは"enc"（暗号化アルゴリズム）メンバーの有無によってもJWEのJOSEヘッダーと区別できる。
+      "enc"メンバーが存在する場合はJWE、それ以外はJWSである。
 
-<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  IANA Considerations</span>
+<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  IANAに関する考慮事項</span>
 
-<span class="h3"><a class="selflink" id="section-10.1" href="#section-10.1">10.1</a>.  JSON Web Signature and Encryption Header Parameters Registration</span>
+<span class="h3"><a class="selflink" id="section-10.1" href="#section-10.1">10.1</a>.  JSON Web署名および暗号ヘッダーパラメータ登録</span>
 
-   This section registers the Header Parameter names defined in
-   <a href="#section-4.1">Section 4.1</a> in the IANA "JSON Web Signature and Encryption Header
-   Parameters" registry established by [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>].
+   本節では<a href="#section-4.1">4.1節</a>で定義されるヘッダーパラメータ名を
+   IANAによって設立された「JSON Web Signature and Encryption Header Parameters」レジストリに登録する
+   （[<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>]）。
 
-<span class="h4"><a class="selflink" id="section-10.1.1" href="#section-10.1.1">10.1.1</a>.  Registry Contents</span>
+<span class="h4"><a class="selflink" id="section-10.1.1" href="#section-10.1.1">10.1.1</a>.  レジストリ内容</span>
 
-   o  Header Parameter Name: "alg"
-   o  Header Parameter Description: Algorithm
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.1">Section&nbsp;4.1.1 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "alg"
+   o  ヘッダーパラメータ説明: アルゴリズム
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.1">RFC 7516 第4.1.1節</a>
 
-   o  Header Parameter Name: "enc"
-   o  Header Parameter Description: Encryption Algorithm
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.2">Section&nbsp;4.1.2 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "enc"
+   o  ヘッダーパラメータ説明: 暗号化アルゴリズム
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.2">RFC 7516 第4.1.2節</a>
 
-   o  Header Parameter Name: "zip"
-   o  Header Parameter Description: Compression Algorithm
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.3">Section&nbsp;4.1.3 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "zip"
+   o  ヘッダーパラメータ説明: 圧縮アルゴリズム
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.3">RFC 7516 第4.1.3節</a>
 
 
 
@@ -1562,54 +1553,54 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   o  Header Parameter Name: "jku"
-   o  Header Parameter Description: JWK Set URL
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.4">Section&nbsp;4.1.4 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "jku"
+   o  ヘッダーパラメータ説明: JWKセットURL
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.4">RFC 7516 第4.1.4節</a>
 
-   o  Header Parameter Name: "jwk"
-   o  Header Parameter Description: JSON Web Key
-   o  Header Parameter Usage Location(s): JWE
+   o  ヘッダーパラメータ名: "jwk"
+   o  ヘッダーパラメータ説明: JSON Web Key
+   o  ヘッダーパラメータ使用場所: JWE
 
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.5">Section&nbsp;4.1.5 of RFC 7516</a>
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.5">RFC 7516 第4.1.5節</a>
 
-   o  Header Parameter Name: "kid"
-   o  Header Parameter Description: Key ID
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.6">Section&nbsp;4.1.6 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "kid"
+   o  ヘッダーパラメータ説明: 鍵ID
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.6">RFC 7516 第4.1.6節</a>
 
-   o  Header Parameter Name: "x5u"
-   o  Header Parameter Description: X.509 URL
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.7">Section&nbsp;4.1.7 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "x5u"
+   o  ヘッダーパラメータ説明: X.509 URL
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.7">RFC 7516 第4.1.7節</a>
 
-   o  Header Parameter Name: "x5c"
-   o  Header Parameter Description: X.509 Certificate Chain
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.8">Section&nbsp;4.1.8 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "x5c"
+   o  ヘッダーパラメータ説明: X.509証明書チェーン
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.8">RFC 7516 第4.1.8節</a>
 
-   o  Header Parameter Name: "x5t"
-   o  Header Parameter Description: X.509 Certificate SHA-1 Thumbprint
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.9">Section&nbsp;4.1.9 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "x5t"
+   o  ヘッダーパラメータ説明: X.509証明書SHA-1サムプリント
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.9">RFC 7516 第4.1.9節</a>
 
-   o  Header Parameter Name: "x5t#S256"
-   o  Header Parameter Description: X.509 Certificate SHA-256 Thumbprint
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.10">Section&nbsp;4.1.10 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "x5t#S256"
+   o  ヘッダーパラメータ説明: X.509証明書SHA-256サムプリント
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.10">RFC 7516 第4.1.10節</a>
 
-   o  Header Parameter Name: "typ"
-   o  Header Parameter Description: Type
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.11">Section&nbsp;4.1.11 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "typ"
+   o  ヘッダーパラメータ説明: タイプ
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.11">RFC 7516 第4.1.11節</a>
 
 
 
@@ -1618,48 +1609,38 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   o  Header Parameter Name: "cty"
-   o  Header Parameter Description: Content Type
-   o  Header Parameter Usage Location(s): JWE
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.12">Section&nbsp;4.1.12 of RFC 7516</a>
+   o  ヘッダーパラメータ名: "cty"
+   o  ヘッダーパラメータ説明: コンテントタイプ
+   o  ヘッダーパラメータ使用場所: JWE
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.12">RFC 7516 第4.1.12節</a>
 
-   o  Header Parameter Name: "crit"
-   o  Header Parameter Description: Critical
-   o  Header Parameter Usage Location(s): JWE
+   o  ヘッダーパラメータ名: "crit"
+   o  ヘッダーパラメータ説明: クリティカル
+   o  ヘッダーパラメータ使用場所: JWE
 
-   o  Change Controller: IESG
-   o  Specification Document(s): <a href="./rfc7516#section-4.1.13">Section&nbsp;4.1.13 of RFC 7516</a>
+   o  変更管理者: IESG
+   o  仕様書: <a href="./rfc7516#section-4.1.13">RFC 7516 第4.1.13節</a>
 
-<span class="h2"><a class="selflink" id="section-11" href="#section-11">11</a>.  Security Considerations</span>
+<span class="h2"><a class="selflink" id="section-11" href="#section-11">11</a>.  セキュリティに関する考慮事項</span>
 
-   All of the security issues that are pertinent to any cryptographic
-   application must be addressed by JWS/JWE/JWK agents.  Among these
-   issues are protecting the user's asymmetric private and symmetric
-   secret keys and employing countermeasures to various attacks.
+   いかなる暗号アプリケーションに関係するすべてのセキュリティ課題はJWS/JWE/JWKエージェントによって対処されなければならない。
+   これらの課題には、利用者の非対称秘密鍵および共通鍵シークレットの保護や、多様な攻撃への対策が含まれる。
 
-   All the security considerations in the JWS specification also apply
-   to this specification.  Likewise, all the security considerations in
-   XML Encryption 1.1 [<a href="#ref-W3C.REC-xmlenc-core1-20130411">W3C.REC-xmlenc-core1-20130411</a>] also apply, other
-   than those that are XML specific.
+   JWS仕様に記載されているすべてのセキュリティ考慮事項は、この仕様にも該当する。
+   同様に、XML Encryption 1.1 [<a href="#ref-W3C.REC-xmlenc-core1-20130411">W3C.REC-xmlenc-core1-20130411</a>]におけるすべてのセキュリティ考慮事項も、XML固有の場合を除き適用される。
 
-<span class="h3"><a class="selflink" id="section-11.1" href="#section-11.1">11.1</a>.  Key Entropy and Random Values</span>
+<span class="h3"><a class="selflink" id="section-11.1" href="#section-11.1">11.1</a>.  鍵エントロピーとランダム値</span>
 
-   See Section 10.1 of [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>] for security considerations on key entropy
-   and random values.  In addition to the uses of random values listed
-   there, note that random values are also used for Content Encryption
-   Keys (CEKs) and Initialization Vectors (IVs) when performing
-   encryption.
+   鍵エントロピーとランダム値に関するセキュリティの考慮事項は[<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>]の10.1節を参照のこと。
+   そこで挙げられている用途に加えて、暗号処理中にはコンテンツ暗号鍵（CEK）や初期化ベクトル（IV）にもランダム値が使用されることに注意。
 
-<span class="h3"><a class="selflink" id="section-11.2" href="#section-11.2">11.2</a>.  Key Protection</span>
+<span class="h3"><a class="selflink" id="section-11.2" href="#section-11.2">11.2</a>.  鍵の保護</span>
 
-   See Section 10.2 of [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>] for security considerations on key
-   protection.  In addition to the keys listed there that must be
-   protected, implementations performing encryption must protect the key
-   encryption key and the Content Encryption Key.  Compromise of the key
-   encryption key may result in the disclosure of all contents protected
-   with that key.  Similarly, compromise of the Content Encryption Key
-   may result in disclosure of the associated encrypted content.
+   鍵の保護に関するセキュリティ考慮事項は[<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>]の10.2節を参照のこと。
+   そこで挙げられている鍵に加え、暗号を実施する実装では鍵暗号化鍵およびコンテンツ暗号鍵も保護しなければならない。
+   鍵暗号化鍵が漏洩すると、その鍵で保護されたすべての内容が漏えいする危険がある。
+   同様に、コンテンツ暗号鍵の漏洩は関連する暗号化されたコンテンツの漏洩につながる。
 
 
 
@@ -1674,46 +1655,32 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h3"><a class="selflink" id="section-11.3" href="#section-11.3">11.3</a>.  Using Matching Algorithm Strengths</span>
+<span class="h3"><a class="selflink" id="section-11.3" href="#section-11.3">11.3</a>.  アルゴリズム強度の一致利用</span>
 
-   Algorithms of matching strengths should be used together whenever
-   possible.  For instance, when AES Key Wrap is used with a given key
-   size, using the same key size is recommended when AES GCM is also
-   used.  If the key encryption and content encryption algorithms are
-   different, the effective security is determined by the weaker of the
-   two algorithms.
+   可能な限り、同等の強度を持つアルゴリズムを組み合わせて使用するべきです。例えば、AESキーラップに特定の鍵サイズを使用している場合、
+   AES GCMでも同じ鍵サイズを使用することが推奨されます。鍵暗号化アルゴリズムとコンテンツ暗号化アルゴリズムが異なる場合、
+   実効的なセキュリティ強度はその二つのうち弱い方によって決まります。
 
-   Also, see <a href="./rfc3766">RFC 3766</a> [<a href="./rfc3766" title="&quot;Determining Strengths For Public Keys Used For Exchanging Symmetric Keys&quot;">RFC3766</a>] for information on determining strengths
-   for public keys used for exchanging symmetric keys.
+   また、公開鍵による対称鍵交換の強度判定に関する詳細は<a href="./rfc3766">RFC 3766</a>
+   [<a href="./rfc3766" title="&quot;Determining Strengths For Public Keys Used For Exchanging Symmetric Keys&quot;">RFC3766</a>]を参照のこと。
 
-<span class="h3"><a class="selflink" id="section-11.4" href="#section-11.4">11.4</a>.  Adaptive Chosen-Ciphertext Attacks</span>
+<span class="h3"><a class="selflink" id="section-11.4" href="#section-11.4">11.4</a>.  適応型選択暗号文攻撃</span>
 
-   When decrypting, particular care must be taken not to allow the JWE
-   recipient to be used as an oracle for decrypting messages.  <a href="./rfc3218">RFC 3218</a>
-   [<a href="./rfc3218" title="&quot;Preventing the Million Message Attack on Cryptographic Message Syntax&quot;">RFC3218</a>] should be consulted for specific countermeasures to attacks
-   on RSAES-PKCS1-v1_5.  An attacker might modify the contents of the
-   "alg" Header Parameter from "RSA-OAEP" to "RSA1_5" in order to
-   generate a formatting error that can be detected and used to recover
-   the CEK even if RSAES-OAEP was used to encrypt the CEK.  It is
-   therefore particularly important to report all formatting errors to
-   the CEK, Additional Authenticated Data, or ciphertext as a single
-   error when the encrypted content is rejected.
+   復号時に、JWE受信者がメッセージ復号のオラクルとして利用されることのないよう、特に注意を払う必要がある。
+   <a href="./rfc3218">RFC 3218</a> [<a href="./rfc3218" title="&quot;Preventing the Million Message Attack on Cryptographic Message Syntax&quot;">RFC3218</a>]で
+   RSAES-PKCS1-v1_5に対する攻撃への具体的対策が記載されているので参照のこと。
+   攻撃者は"alg"ヘッダーパラメータを"RSA-OAEP"から"RSA1_5"へ変更し、CEKの回復に利用できる書式エラーを発生させる可能性がある（たとえCEKがRSAES-OAEPで暗号化されていても）。
+   したがって、暗号化内容の拒否時には、CEK・追加認証データ・暗号文いずれの書式エラーも必ず一括のエラーとして通知することが重要である。
 
-   Additionally, this type of attack can be prevented by restricting the
-   use of a key to a limited set of algorithms -- usually one.  This
-   means, for instance, that if the key is marked as being for
-   "RSA-OAEP" only, any attempt to decrypt a message using the "RSA1_5"
-   algorithm with that key should fail immediately due to invalid use of
-   the key.
+   さらに、この種の攻撃は鍵の利用を特定のアルゴリズム、通常はひとつに限定することで防ぐことができる。
+   すなわち、鍵が"RSA-OAEP"専用とマークされている場合、その鍵で"RSA1_5"アルゴリズムを使ってメッセージを復号しようとした場合は
+   即座に無効利用として失敗しなければならない。
 
-<span class="h3"><a class="selflink" id="section-11.5" href="#section-11.5">11.5</a>.  Timing Attacks</span>
+<span class="h3"><a class="selflink" id="section-11.5" href="#section-11.5">11.5</a>.  タイミング攻撃</span>
 
-   To mitigate the attacks described in <a href="./rfc3218">RFC 3218</a> [<a href="./rfc3218" title="&quot;Preventing the Million Message Attack on Cryptographic Message Syntax&quot;">RFC3218</a>], the
-   recipient MUST NOT distinguish between format, padding, and length
-   errors of encrypted keys.  It is strongly recommended, in the event
-   of receiving an improperly formatted key, that the recipient
-   substitute a randomly generated CEK and proceed to the next step, to
-   mitigate timing attacks.
+   <a href="./rfc3218">RFC 3218</a> [<a href="./rfc3218" title="&quot;Preventing the Million Message Attack on Cryptographic Message Syntax&quot;">RFC3218</a>]で述べられている
+   攻撃を緩和するために、受信者は暗号鍵の書式・パディング・長さエラーを区別してはならない。
+   不正なフォーマットの鍵を受信した場合には、ランダム生成したCEKで次のステップへ進めることが強く推奨される。これはタイミング攻撃の緩和のためである。
 
 
 
@@ -1730,52 +1697,52 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h2"><a class="selflink" id="section-12" href="#section-12">12</a>.  References</span>
+<span class="h2"><a class="selflink" id="section-12" href="#section-12">12</a>.  参考文献</span>
 
-<span class="h3"><a class="selflink" id="section-12.1" href="#section-12.1">12.1</a>.  Normative References</span>
+<span class="h3"><a class="selflink" id="section-12.1" href="#section-12.1">12.1</a>.  規範的参照</span>
 
    [<a id="ref-JWA">JWA</a>]      Jones, M., "JSON Web Algorithms (JWA)", <a href="./rfc7518">RFC 7518</a>,
-              DOI 10.17487/RFC7518, May 2015,
+              DOI 10.17487/RFC7518, 2015年5月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc7518">http://www.rfc-editor.org/info/rfc7518</a>&gt;.
 
    [<a id="ref-JWK">JWK</a>]      Jones, M., "JSON Web Key (JWK)", <a href="./rfc7517">RFC 7517</a>,
-              DOI 10.17487/RFC7517, May 2015,
+              DOI 10.17487/RFC7517, 2015年5月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc7517">http://www.rfc-editor.org/info/rfc7517</a>&gt;.
 
    [<a id="ref-JWS">JWS</a>]      Jones, M., Bradley, J., and N. Sakimura, "JSON Web
-              Signature (JWS)", <a href="./rfc7515">RFC 7515</a>, DOI 10.17487/RFC7515, May
-              2015, &lt;<a href="https://www.rfc-editor.org/info/rfc7515">http://www.rfc-editor.org/info/rfc7515</a>&gt;.
+              Signature (JWS)", <a href="./rfc7515">RFC 7515</a>, DOI 10.17487/RFC7515, 2015年5月,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7515">http://www.rfc-editor.org/info/rfc7515</a>&gt;.
 
    [<a id="ref-RFC1951">RFC1951</a>]  Deutsch, P., "DEFLATE Compressed Data Format Specification
-              version 1.3", <a href="./rfc1951">RFC 1951</a>, DOI 10.17487/RFC1951, May 1996,
+              version 1.3", <a href="./rfc1951">RFC 1951</a>, DOI 10.17487/RFC1951, 1996年5月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc1951">http://www.rfc-editor.org/info/rfc1951</a>&gt;.
 
    [<a id="ref-RFC20">RFC20</a>]    Cerf, V., "ASCII format for Network Interchange", STD 80,
-              <a href="./rfc20">RFC 20</a>, DOI 10.17487/RFC0020, October 1969,
+              <a href="./rfc20">RFC 20</a>, DOI 10.17487/RFC0020, 1969年10月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc20">http://www.rfc-editor.org/info/rfc20</a>&gt;.
 
    [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>,
-              DOI 10.17487/RFC2119, March 1997,
+              DOI 10.17487/RFC2119, 1997年3月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
 
    [<a id="ref-RFC3629">RFC3629</a>]  Yergeau, F., "UTF-8, a transformation format of ISO
-              10646", STD 63, <a href="./rfc3629">RFC 3629</a>, DOI 10.17487/RFC3629, November
-              2003, &lt;<a href="https://www.rfc-editor.org/info/rfc3629">http://www.rfc-editor.org/info/rfc3629</a>&gt;.
+              10646", STD 63, <a href="./rfc3629">RFC 3629</a>, DOI 10.17487/RFC3629, 2003年11月,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc3629">http://www.rfc-editor.org/info/rfc3629</a>&gt;.
 
    [<a id="ref-RFC4949">RFC4949</a>]  Shirey, R., "Internet Security Glossary, Version 2",
-              FYI 36, <a href="./rfc4949">RFC 4949</a>, DOI 10.17487/RFC4949, August 2007,
+              FYI 36, <a href="./rfc4949">RFC 4949</a>, DOI 10.17487/RFC4949, 2007年8月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc4949">http://www.rfc-editor.org/info/rfc4949</a>&gt;.
 
    [<a id="ref-RFC5280">RFC5280</a>]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key
               Infrastructure Certificate and Certificate Revocation List
-              (CRL) Profile", <a href="./rfc5280">RFC 5280</a>, DOI 10.17487/RFC5280, May 2008,
+              (CRL) Profile", <a href="./rfc5280">RFC 5280</a>, DOI 10.17487/RFC5280, 2008年5月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc5280">http://www.rfc-editor.org/info/rfc5280</a>&gt;.
 
    [<a id="ref-RFC7159">RFC7159</a>]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
-              Interchange Format", <a href="./rfc7159">RFC 7159</a>, DOI 10.17487/RFC7159, March
-              2014, &lt;<a href="https://www.rfc-editor.org/info/rfc7159">http://www.rfc-editor.org/info/rfc7159</a>&gt;.
+              Interchange Format", <a href="./rfc7159">RFC 7159</a>, DOI 10.17487/RFC7159, 2014年3月,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7159">http://www.rfc-editor.org/info/rfc7159</a>&gt;.
 
 
 
@@ -1789,7 +1756,7 @@ Copyright Notice
    [<a id="ref-UNICODE">UNICODE</a>]  The Unicode Consortium, "The Unicode Standard",
               &lt;<a href="http://www.unicode.org/versions/latest/">http://www.unicode.org/versions/latest/</a>&gt;.
 
-<span class="h3"><a class="selflink" id="section-12.2" href="#section-12.2">12.2</a>.  Informative References</span>
+<span class="h3"><a class="selflink" id="section-12.2" href="#section-12.2">12.2</a>.  情報的参照</span>
 
    [<a id="ref-AES">AES</a>]      National Institute of Standards and Technology (NIST),
               "Advanced Encryption Standard (AES)", FIPS PUB 197,
@@ -1802,33 +1769,33 @@ Copyright Notice
 
    [<a id="ref-JSMS">JSMS</a>]     Rescorla, E. and J. Hildebrand, "JavaScript Message
               Security Format", Work in Progress,
-              <a href="./draft-rescorla-jsms-00">draft-rescorla-jsms-00</a>, March 2011.
+              <a href="./draft-rescorla-jsms-00">draft-rescorla-jsms-00</a>, 2011年3月.
 
    [<a id="ref-NIST.800-38D">NIST.800-38D</a>]
               National Institute of Standards and Technology (NIST),
               "Recommendation for Block Cipher Modes of Operation:
               Galois/Counter Mode (GCM) and GMAC", NIST PUB 800-38D,
-              November 2007, &lt;<a href="http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf">http://csrc.nist.gov/publications/</a>
+              2007年11月, &lt;<a href="http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf">http://csrc.nist.gov/publications/</a>
               <a href="http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf">nistpubs/800-38D/SP-800-38D.pdf</a>&gt;.
 
    [<a id="ref-RFC3218">RFC3218</a>]  Rescorla, E., "Preventing the Million Message Attack on
               Cryptographic Message Syntax", <a href="./rfc3218">RFC 3218</a>,
-              DOI 10.17487/RFC3218, January 2002,
+              DOI 10.17487/RFC3218, 2002年1月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc3218">http://www.rfc-editor.org/info/rfc3218</a>&gt;.
 
    [<a id="ref-RFC3447">RFC3447</a>]  Jonsson, J. and B. Kaliski, "Public-Key Cryptography
               Standards (PKCS) #1: RSA Cryptography Specifications
-              Version 2.1", <a href="./rfc3447">RFC 3447</a>, DOI 10.17487/RFC3447, February
-              2003, &lt;<a href="https://www.rfc-editor.org/info/rfc3447">http://www.rfc-editor.org/info/rfc3447</a>&gt;.
+              Version 2.1", <a href="./rfc3447">RFC 3447</a>, DOI 10.17487/RFC3447, 2003年2月,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc3447">http://www.rfc-editor.org/info/rfc3447</a>&gt;.
 
    [<a id="ref-RFC3766">RFC3766</a>]  Orman, H. and P. Hoffman, "Determining Strengths For
               Public Keys Used For Exchanging Symmetric Keys", <a href="https://www.rfc-editor.org/bcp/bcp86">BCP 86</a>,
-              <a href="./rfc3766">RFC 3766</a>, DOI 10.17487/RFC3766, April 2004,
+              <a href="./rfc3766">RFC 3766</a>, DOI 10.17487/RFC3766, 2004年4月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc3766">http://www.rfc-editor.org/info/rfc3766</a>&gt;.
 
    [<a id="ref-RFC4086">RFC4086</a>]  Eastlake 3rd, D., Schiller, J., and S. Crocker,
               "Randomness Requirements for Security", <a href="https://www.rfc-editor.org/bcp/bcp106">BCP 106</a>, <a href="./rfc4086">RFC 4086</a>,
-              DOI 10.17487/RFC4086, June 2005,
+              DOI 10.17487/RFC4086, 2005年6月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc4086">http://www.rfc-editor.org/info/rfc4086</a>&gt;.
 
 
@@ -1843,14 +1810,14 @@ Copyright Notice
 
 
    [<a id="ref-RFC5652">RFC5652</a>]  Housley, R., "Cryptographic Message Syntax (CMS)", STD 70,
-              <a href="./rfc5652">RFC 5652</a>, DOI 10.17487/RFC5652, September 2009,
+              <a href="./rfc5652">RFC 5652</a>, DOI 10.17487/RFC5652, 2009年9月,
               &lt;<a href="https://www.rfc-editor.org/info/rfc5652">http://www.rfc-editor.org/info/rfc5652</a>&gt;.
 
    [<a id="ref-W3C.REC-xmlenc-core1-20130411">W3C.REC-xmlenc-core1-20130411</a>]
               Eastlake, D., Reagle, J., Hirsch, F., and T. Roessler,
               "XML Encryption Syntax and Processing Version 1.1", World
               Wide Web Consortium Recommendation
-              REC-xmlenc-core1-20130411, April 2013,
+              REC-xmlenc-core1-20130411, 2013年4月,
               &lt;<a href="http://www.w3.org/TR/2013/REC-xmlenc-core1-20130411/">http://www.w3.org/TR/2013/REC-xmlenc-core1-20130411/</a>&gt;.
 
 
@@ -1898,16 +1865,15 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  JWE Examples</span>
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  JWEの例</span>
 
-   This section provides examples of JWE computations.
+   本節ではJWE計算の例を示します。
 
-<span class="h3"><a class="selflink" id="appendix-A.1" href="#appendix-A.1">A.1</a>.  Example JWE using RSAES-OAEP and AES GCM</span>
+<span class="h3"><a class="selflink" id="appendix-A.1" href="#appendix-A.1">A.1</a>.  RSAES-OAEPとAES GCMを用いたJWEの例</span>
 
-   This example encrypts the plaintext "The true sign of intelligence is
-   not knowledge but imagination." to the recipient using RSAES-OAEP for
-   key encryption and AES GCM for content encryption.  The
-   representation of this plaintext (using JSON array notation) is:
+   この例では、平文 "The true sign of intelligence is
+   not knowledge but imagination." を受信者へ暗号化します。鍵暗号化にはRSAES-OAEPを、
+   コンテンツ暗号化にはAES GCMを使用します。平文の表現（JSON配列表記）は次の通りです：
 
    [84, 104, 101, 32, 116, 114, 117, 101, 32, 115, 105, 103, 110, 32,
    111, 102, 32, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 99,
@@ -1915,27 +1881,23 @@ Copyright Notice
    101, 100, 103, 101, 32, 98, 117, 116, 32, 105, 109, 97, 103, 105,
    110, 97, 116, 105, 111, 110, 46]
 
-<span class="h4"><a class="selflink" id="appendix-A.1.1" href="#appendix-A.1.1">A.1.1</a>.  JOSE Header</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.1" href="#appendix-A.1.1">A.1.1</a>.  JOSE ヘッダー</span>
 
-   The following example JWE Protected Header declares that:
+   以下の例のJWE保護ヘッダーは次のことを宣言しています：
 
-   o  The Content Encryption Key is encrypted to the recipient using the
-      RSAES-OAEP algorithm to produce the JWE Encrypted Key.
-   o  Authenticated encryption is performed on the plaintext using the
-      AES GCM algorithm with a 256-bit key to produce the ciphertext and
-      the Authentication Tag.
+   o  コンテンツ暗号鍵（CEK）はRSAES-OAEPアルゴリズムを用いて受信者に暗号化され、JWE暗号化鍵が生成される。
+   o  平文に対して認証付き暗号化がAES GCMアルゴリズム（256ビット鍵）で行われ、暗号文と認証タグが生成される。
 
      {"alg":"RSA-OAEP","enc":"A256GCM"}
 
-   Encoding this JWE Protected Header as BASE64URL(UTF8(JWE Protected
-   Header)) gives this value:
+   このJWE保護ヘッダーをBASE64URL(UTF8(JWE Protected
+   Header))としてエンコードすると次の値になります：
 
      eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ
 
-<span class="h4"><a class="selflink" id="appendix-A.1.2" href="#appendix-A.1.2">A.1.2</a>.  Content Encryption Key (CEK)</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.2" href="#appendix-A.1.2">A.1.2</a>.  コンテンツ暗号鍵（CEK）</span>
 
-   Generate a 256-bit random CEK.  In this example, the value (using
-   JSON array notation) is:
+   256ビットのランダムなCEKを生成します。本例では値（JSON配列表記）は次の通りです：
 
    [177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154,
    212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122,
@@ -1954,12 +1916,9 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h4"><a class="selflink" id="appendix-A.1.3" href="#appendix-A.1.3">A.1.3</a>.  Key Encryption</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.3" href="#appendix-A.1.3">A.1.3</a>.  鍵の暗号化</span>
 
-   Encrypt the CEK with the recipient's public key using the RSAES-OAEP
-   algorithm to produce the JWE Encrypted Key.  This example uses the
-   RSA key represented in JSON Web Key [<a href="#ref-JWK" title="&quot;JSON Web Key (JWK)&quot;">JWK</a>] format below (with line
-   breaks within values for display purposes only):
+   受信者の公開鍵を用いてRSAES-OAEPアルゴリズムでCEKを暗号化し、JWE暗号化鍵を生成します。本例では以下のJSON Web Key [<a href="#ref-JWK" title="&quot;JSON Web Key (JWK)&quot;">JWK</a>]形式のRSA鍵を使用します（表示上の都合で値の途中に改行があります）：
 
      {"kty":"RSA",
       "n":"oahUIoWw0K0usKNuOR6H4wkf4oBUXHTxRvgb48E-BVvxkeDNjbC4he8rUW
@@ -2010,7 +1969,7 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   The resulting JWE Encrypted Key value is:
+   結果として得られるJWE暗号化鍵の値は次の通りです：
 
    [56, 163, 154, 192, 58, 53, 222, 4, 105, 218, 136, 218, 29, 94, 203,
    22, 150, 92, 129, 94, 211, 232, 53, 89, 41, 60, 138, 56, 196, 216,
@@ -2031,8 +1990,7 @@ Copyright Notice
    172, 99, 226, 233, 73, 37, 124, 42, 72, 49, 242, 35, 127, 184, 134,
    117, 114, 135, 206]
 
-   Encoding this JWE Encrypted Key as BASE64URL(JWE Encrypted Key) gives
-   this value (with line breaks for display purposes only):
+   このJWE暗号化鍵をBASE64URL(JWE Encrypted Key)としてエンコードすると（表示のために改行あり）次の値になります：
 
      OKOawDo13gRp2ojaHV7LFpZcgV7T6DVZKTyKOMTYUmKoTCVJRgckCL9kiMT03JGe
      ipsEdY3mx_etLbbWSrFr05kLzcSr4qKAq7YN7e9jwQRb23nfa6c9d-StnImGyFDb
@@ -2041,15 +1999,14 @@ Copyright Notice
      1860ppamavo35UgoRdbYaBcoh9QcfylQr66oc6vFWXRcZ_ZT2LawVCWTIy3brGPi
      6UklfCpIMfIjf7iGdXKHzg
 
-<span class="h4"><a class="selflink" id="appendix-A.1.4" href="#appendix-A.1.4">A.1.4</a>.  Initialization Vector</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.4" href="#appendix-A.1.4">A.1.4</a>.  初期化ベクトル</span>
 
-   Generate a random 96-bit JWE Initialization Vector.  In this example,
-   the value is:
+   96ビットのランダムなJWE初期化ベクトルを生成します。本例の値は次の通りです：
 
    [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219]
 
-   Encoding this JWE Initialization Vector as BASE64URL(JWE
-   Initialization Vector) gives this value:
+   このJWE初期化ベクトルをBASE64URL(JWE
+   Initialization Vector)としてエンコードすると次の値になります：
 
      48V1_ALb6US04U3b
 
@@ -2066,21 +2023,19 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h4"><a class="selflink" id="appendix-A.1.5" href="#appendix-A.1.5">A.1.5</a>.  Additional Authenticated Data</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.5" href="#appendix-A.1.5">A.1.5</a>.  追加認証データ</span>
 
-   Let the Additional Authenticated Data encryption parameter be
-   ASCII(BASE64URL(UTF8(JWE Protected Header))).  This value is:
+   追加認証データ（Additional Authenticated Data）暗号化パラメータを
+   ASCII(BASE64URL(UTF8(JWE Protected Header)))とします。この値は次の通りです：
 
    [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 83, 85, 48, 69,
    116, 84, 48, 70, 70, 85, 67, 73, 115, 73, 109, 86, 117, 89, 121, 73,
    54, 73, 107, 69, 121, 78, 84, 90, 72, 81, 48, 48, 105, 102, 81]
 
-<span class="h4"><a class="selflink" id="appendix-A.1.6" href="#appendix-A.1.6">A.1.6</a>.  Content Encryption</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.6" href="#appendix-A.1.6">A.1.6</a>.  コンテンツ暗号化</span>
 
-   Perform authenticated encryption on the plaintext with the AES GCM
-   algorithm using the CEK as the encryption key, the JWE Initialization
-   Vector, and the Additional Authenticated Data value above, requesting
-   a 128-bit Authentication Tag output.  The resulting ciphertext is:
+   CEKを暗号化鍵として、JWE初期化ベクトルおよび上記の追加認証データを用い、
+   AES GCMアルゴリズムで平文に対して認証付き暗号化を行い、128ビットの認証タグを要求します。得られた暗号文は次の通りです：
 
    [229, 236, 166, 241, 53, 191, 115, 196, 174, 43, 73, 109, 39, 122,
    233, 96, 140, 206, 120, 52, 51, 237, 48, 11, 190, 219, 186, 80, 111,
@@ -2088,19 +2043,18 @@ Copyright Notice
    123, 143, 168, 226, 73, 216, 176, 144, 138, 247, 106, 60, 16, 205,
    160, 109, 64, 63, 192]
 
-   The resulting Authentication Tag value is:
+   得られた認証タグの値は次の通りです：
 
    [92, 80, 104, 49, 133, 25, 161, 215, 173, 101, 219, 211, 136, 91,
    210, 145]
 
-   Encoding this JWE Ciphertext as BASE64URL(JWE Ciphertext) gives this
-   value (with line breaks for display purposes only):
+   このJWE暗号文をBASE64URL(JWE Ciphertext)としてエンコードすると（表示のために改行あり）次の値になります：
 
      5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6ji
      SdiwkIr3ajwQzaBtQD_A
 
-   Encoding this JWE Authentication Tag as BASE64URL(JWE Authentication
-   Tag) gives this value:
+   このJWE認証タグをBASE64URL(JWE Authentication
+   Tag)としてエンコードすると次の値になります：
 
      XFBoMYUZodetZdvTiFvSkQ
 
@@ -2122,16 +2076,15 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h4"><a class="selflink" id="appendix-A.1.7" href="#appendix-A.1.7">A.1.7</a>.  Complete Representation</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.7" href="#appendix-A.1.7">A.1.7</a>.  完全な表現</span>
 
-   Assemble the final representation: The Compact Serialization of this
-   result is the string BASE64URL(UTF8(JWE Protected Header)) || '.' ||
+   最終表現を組み立てます：この結果のコンパクト・シリアライゼーションは文字列
+   BASE64URL(UTF8(JWE Protected Header)) || '.' ||
    BASE64URL(JWE Encrypted Key) || '.' || BASE64URL(JWE Initialization
    Vector) || '.' || BASE64URL(JWE Ciphertext) || '.' || BASE64URL(JWE
-   Authentication Tag).
+   Authentication Tag) です。
 
-   The final result in this example (with line breaks for display
-   purposes only) is:
+   本例の最終結果（表示のために改行あり）は次の通りです：
 
      eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.
      OKOawDo13gRp2ojaHV7LFpZcgV7T6DVZKTyKOMTYUmKoTCVJRgckCL9kiMT03JGe
@@ -2145,23 +2098,16 @@ Copyright Notice
      SdiwkIr3ajwQzaBtQD_A.
      XFBoMYUZodetZdvTiFvSkQ
 
-<span class="h4"><a class="selflink" id="appendix-A.1.8" href="#appendix-A.1.8">A.1.8</a>.  Validation</span>
+<span class="h4"><a class="selflink" id="appendix-A.1.8" href="#appendix-A.1.8">A.1.8</a>.  検証</span>
 
-   This example illustrates the process of creating a JWE with
-   RSAES-OAEP for key encryption and AES GCM for content encryption.
-   These results can be used to validate JWE decryption implementations
-   for these algorithms.  Note that since the RSAES-OAEP computation
-   includes random values, the encryption results above will not be
-   completely reproducible.  However, since the AES GCM computation is
-   deterministic, the JWE Encrypted Ciphertext values will be the same
-   for all encryptions performed using these inputs.
+   この例は、鍵暗号化にRSAES-OAEP、コンテンツ暗号化にAES GCMを用いてJWEを作成する過程を示しています。
+   これらの結果は、これらのアルゴリズムを用いたJWE復号の実装を検証するために使用できます。RSAES-OAEPの計算にはランダム値が含まれるため、上記の暗号化結果は完全に再現可能ではないことに注意してください。
+   しかし、AES GCMの計算は決定的であるため、これらの入力を用いて行われるすべての暗号化に対してJWE暗号化された暗号文の値は同一になります。
 
-<span class="h3"><a class="selflink" id="appendix-A.2" href="#appendix-A.2">A.2</a>.  Example JWE using RSAES-PKCS1-v1_5 and AES_128_CBC_HMAC_SHA_256</span>
+<span class="h3"><a class="selflink" id="appendix-A.2" href="#appendix-A.2">A.2</a>.  RSAES-PKCS1-v1_5とAES_128_CBC_HMAC_SHA_256を用いたJWEの例</span>
 
-   This example encrypts the plaintext "Live long and prosper." to the
-   recipient using RSAES-PKCS1-v1_5 for key encryption and
-   AES_128_CBC_HMAC_SHA_256 for content encryption.  The representation
-   of this plaintext (using JSON array notation) is:
+   この例では、平文 "Live long and prosper." を受信者へ暗号化します。鍵暗号化にはRSAES-PKCS1-v1_5を、
+   コンテンツ暗号化にはAES_128_CBC_HMAC_SHA_256を使用します。平文の表現（JSON配列表記）は次の通りです：
 
    [76, 105, 118, 101, 32, 108, 111, 110, 103, 32, 97, 110, 100, 32,
    112, 114, 111, 115, 112, 101, 114, 46]
@@ -2178,31 +2124,27 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h4"><a class="selflink" id="appendix-A.2.1" href="#appendix-A.2.1">A.2.1</a>.  JOSE Header</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.1" href="#appendix-A.2.1">A.2.1</a>.  JOSE ヘッダー</span>
 
-   The following example JWE Protected Header declares that:
+   以下の例のJWE保護ヘッダーは次のことを宣言しています：
 
-   o  The Content Encryption Key is encrypted to the recipient using the
-      RSAES-PKCS1-v1_5 algorithm to produce the JWE Encrypted Key.
-   o  Authenticated encryption is performed on the plaintext using the
-      AES_128_CBC_HMAC_SHA_256 algorithm to produce the ciphertext and
-      the Authentication Tag.
+   o  コンテンツ暗号鍵（CEK）はRSAES-PKCS1-v1_5アルゴリズムを用いて受信者に暗号化され、JWE暗号化鍵が生成される。
+   o  平文に対して認証付き暗号化がAES_128_CBC_HMAC_SHA_256アルゴリズムで行われ、暗号文と認証タグが生成される。
 
      {"alg":"RSA1_5","enc":"A128CBC-HS256"}
 
-   Encoding this JWE Protected Header as BASE64URL(UTF8(JWE Protected
-   Header)) gives this value:
+   このJWE保護ヘッダーをBASE64URL(UTF8(JWE Protected
+   Header))としてエンコードすると次の値になります：
 
      eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0
 
-<span class="h4"><a class="selflink" id="appendix-A.2.2" href="#appendix-A.2.2">A.2.2</a>.  Content Encryption Key (CEK)</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.2" href="#appendix-A.2.2">A.2.2</a>.  コンテンツ暗号鍵（CEK）</span>
 
-   Generate a 256-bit random CEK.  In this example, the key value is:
+   256ビットのランダムなCEKを生成します。本例の鍵値は次の通りです：
 
    [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
    206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156,
    44, 207]
-
 
 
 
@@ -2234,12 +2176,11 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h4"><a class="selflink" id="appendix-A.2.3" href="#appendix-A.2.3">A.2.3</a>.  Key Encryption</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.3" href="#appendix-A.2.3">A.2.3</a>.  鍵の暗号化</span>
 
-   Encrypt the CEK with the recipient's public key using the
-   RSAES-PKCS1-v1_5 algorithm to produce the JWE Encrypted Key.  This
-   example uses the RSA key represented in JSON Web Key [<a href="#ref-JWK" title="&quot;JSON Web Key (JWK)&quot;">JWK</a>] format
-   below (with line breaks within values for display purposes only):
+   受信者の公開鍵を使用してCEKを
+   RSAES-PKCS1-v1_5アルゴリズムで暗号化し、JWE暗号化鍵を生成します。 この
+   例では、以下のJSON Web Key [<a href="#ref-JWK" title="&quot;JSON Web Key (JWK)&quot;">JWK</a>]形式で表されたRSA鍵を使用します（表示の便宜上、値の途中に改行があります）:
 
      {"kty":"RSA",
       "n":"sXchDaQebHnPiGvyDOAT4saGEUetSyo9MKLOoWFsueri23bOdgWp4Dy1Wl
@@ -2290,7 +2231,7 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   The resulting JWE Encrypted Key value is:
+   結果として得られるJWE暗号化鍵の値は次の通りです：
 
    [80, 104, 72, 58, 11, 130, 236, 139, 132, 189, 255, 205, 61, 86, 151,
    176, 99, 40, 44, 233, 176, 189, 205, 70, 202, 169, 72, 40, 226, 181,
@@ -2311,8 +2252,7 @@ Copyright Notice
    101, 151, 125, 56, 112, 111, 248, 29, 232, 90, 29, 147, 110, 169,
    146, 114, 165, 204, 71, 136, 41, 252]
 
-   Encoding this JWE Encrypted Key as BASE64URL(JWE Encrypted Key) gives
-   this value (with line breaks for display purposes only):
+   このJWE暗号化鍵をBASE64URL(JWE Encrypted Key)としてエンコードすると（表示のために改行あり）次の値になります：
 
      UGhIOguC7IuEvf_NPVaXsGMoLOmwvc1GyqlIKOK1nN94nHPoltGRhWhw7Zx0-kFm
      1NJn8LE9XShH59_i8J0PH5ZZyNfGy2xGdULU7sHNF6Gp2vPLgNZ__deLKxGHZ7Pc
@@ -2321,16 +2261,16 @@ Copyright Notice
      rkXds2vE4X-ncOIM8hAYHHi29NX0mcKiRaD0-D-ljQTP-cFPgwCp6X-nZZd9OHBv
      -B3oWh2TbqmScqXMR4gp_A
 
-<span class="h4"><a class="selflink" id="appendix-A.2.4" href="#appendix-A.2.4">A.2.4</a>.  Initialization Vector</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.4" href="#appendix-A.2.4">A.2.4</a>.  初期化ベクトル</span>
 
-   Generate a random 128-bit JWE Initialization Vector.  In this
-   example, the value is:
+   128ビットのランダムなJWE初期化ベクトルを生成します。 この
+   例では、値は次の通りです：
 
    [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104,
    101]
 
-   Encoding this JWE Initialization Vector as BASE64URL(JWE
-   Initialization Vector) gives this value:
+   このJWE初期化ベクトルをBASE64URL(JWE
+   Initialization Vector)としてエンコードすると次の値になります：
 
      AxY8DCtDaGlsbGljb3RoZQ
 
@@ -2346,51 +2286,47 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h4"><a class="selflink" id="appendix-A.2.5" href="#appendix-A.2.5">A.2.5</a>.  Additional Authenticated Data</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.5" href="#appendix-A.2.5">A.2.5</a>.  追加認証データ</span>
 
-   Let the Additional Authenticated Data encryption parameter be
-   ASCII(BASE64URL(UTF8(JWE Protected Header))).  This value is:
+   追加認証データ（Additional Authenticated Data）暗号化パラメータを
+   ASCII(BASE64URL(UTF8(JWE Protected Header))).  この値は次の通りです：
 
    [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 83, 85, 48, 69,
    120, 88, 122, 85, 105, 76, 67, 74, 108, 98, 109, 77, 105, 79, 105,
    74, 66, 77, 84, 73, 52, 81, 48, 74, 68, 76, 85, 104, 84, 77, 106, 85,
    50, 73, 110, 48]
 
-<span class="h4"><a class="selflink" id="appendix-A.2.6" href="#appendix-A.2.6">A.2.6</a>.  Content Encryption</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.6" href="#appendix-A.2.6">A.2.6</a>.  コンテンツ暗号化</span>
 
-   Perform authenticated encryption on the plaintext with the
-   AES_128_CBC_HMAC_SHA_256 algorithm using the CEK as the encryption
-   key, the JWE Initialization Vector, and the Additional Authenticated
-   Data value above.  The steps for doing this using the values from
-   <a href="#appendix-A.3">Appendix A.3</a> are detailed in <a href="#appendix-B">Appendix B</a>.  The resulting ciphertext
-   is:
+   CEKを暗号化鍵として、JWE初期化ベクトルおよび上記の追加認証データを用い、
+   AES_128_CBC_HMAC_SHA_256アルゴリズムで平文に対して認証付き暗号化を行います。  
+   <a href="#appendix-A.3">Appendix A.3</a>の値を用いてこれを行う手順は<a href="#appendix-B">Appendix B</a>に詳述されています。  得られた暗号文は次の通りです：
 
    [40, 57, 83, 181, 119, 33, 133, 148, 198, 185, 243, 24, 152, 230, 6,
    75, 129, 223, 127, 19, 210, 82, 183, 230, 168, 33, 215, 104, 143,
    112, 56, 102]
 
-   The resulting Authentication Tag value is:
+   得られた認証タグの値は次の通りです：
 
-   [246, 17, 244, 190, 4, 95, 98, 3, 231, 0, 115, 157, 242, 203, 100,
+   [246, 17, 244, 190, 04, 95, 98, 03, 231, 00, 115, 157, 242, 203, 100,
    191]
 
-   Encoding this JWE Ciphertext as BASE64URL(JWE Ciphertext) gives this
-   value:
+   このJWE暗号文をBASE64URL(JWE Ciphertext)としてエンコードすると次の値になります：
 
      KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY
 
-   Encoding this JWE Authentication Tag as BASE64URL(JWE Authentication
-   Tag) gives this value:
+   このJWE認証タグをBASE64URL(JWE Authentication
+   Tag)としてエンコードすると次の値になります：
 
      9hH0vgRfYgPnAHOd8stkvw
 
-<span class="h4"><a class="selflink" id="appendix-A.2.7" href="#appendix-A.2.7">A.2.7</a>.  Complete Representation</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.7" href="#appendix-A.2.7">A.2.7</a>.  完全な表現</span>
 
-   Assemble the final representation: The Compact Serialization of this
-   result is the string BASE64URL(UTF8(JWE Protected Header)) || '.' ||
+   最終表現を組み立てます：この結果のコンパクト・シリアライゼーションは文字列
+   BASE64URL(UTF8(JWE Protected Header)) || '.' ||
    BASE64URL(JWE Encrypted Key) || '.' || BASE64URL(JWE Initialization
    Vector) || '.' || BASE64URL(JWE Ciphertext) || '.' || BASE64URL(JWE
-   Authentication Tag).
+   Authentication Tag) です。
 
 
 
@@ -2402,8 +2338,7 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   The final result in this example (with line breaks for display
-   purposes only) is:
+   本例の最終結果（表示のために改行あり）は次の通りです：
 
      eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.
      UGhIOguC7IuEvf_NPVaXsGMoLOmwvc1GyqlIKOK1nN94nHPoltGRhWhw7Zx0-kFm
@@ -2416,38 +2351,26 @@ Copyright Notice
      KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY.
      9hH0vgRfYgPnAHOd8stkvw
 
-<span class="h4"><a class="selflink" id="appendix-A.2.8" href="#appendix-A.2.8">A.2.8</a>.  Validation</span>
+<span class="h4"><a class="selflink" id="appendix-A.2.8" href="#appendix-A.2.8">A.2.8</a>.  検証</span>
 
-   This example illustrates the process of creating a JWE with
-   RSAES-PKCS1-v1_5 for key encryption and AES_CBC_HMAC_SHA2 for content
-   encryption.  These results can be used to validate JWE decryption
-   implementations for these algorithms.  Note that since the
-   RSAES-PKCS1-v1_5 computation includes random values, the encryption
-   results above will not be completely reproducible.  However, since
-   the AES-CBC computation is deterministic, the JWE Encrypted
-   Ciphertext values will be the same for all encryptions performed
-   using these inputs.
+   この例は、鍵暗号化にRSAES-PKCS1-v1_5を、コンテンツ暗号化にAES_CBC_HMAC_SHA2を用いてJWEを作成する過程を示しています。  
+   これらの結果は、これらのアルゴリズムを用いたJWE復号の実装を検証するために使用できま��。RSAES-PKCS1-v1_5の計算にはランダム値が含まれるため、上記の暗号化結果は完全に再現可能ではないことに注意してください。  
+   ただし、AES-CBCの計算は決定的であるため、これらの入力を用いて行われるすべての暗号化に対してJWE暗号化された暗号文の値は同一になります。
 
-<span class="h3"><a class="selflink" id="appendix-A.3" href="#appendix-A.3">A.3</a>.  Example JWE Using AES Key Wrap and AES_128_CBC_HMAC_SHA_256</span>
+<span class="h3"><a class="selflink" id="appendix-A.3" href="#appendix-A.3">A.3</a>.  AES Key WrapとAES_128_CBC_HMAC_SHA_256を用いたJWEの例</span>
 
-   This example encrypts the plaintext "Live long and prosper." to the
-   recipient using AES Key Wrap for key encryption and
-   AES_128_CBC_HMAC_SHA_256 for content encryption.  The representation
-   of this plaintext (using JSON array notation) is:
+   この例では、平文 "Live long and prosper." を受信者へ暗号化します。鍵暗号化にはAES Key Wrapを、
+   コンテンツ暗号化にはAES_128_CBC_HMAC_SHA_256を使用します。平文の表現（JSON配列表記）は次の通りです：
 
    [76, 105, 118, 101, 32, 108, 111, 110, 103, 32, 97, 110, 100, 32,
    112, 114, 111, 115, 112, 101, 114, 46]
 
-<span class="h4"><a class="selflink" id="appendix-A.3.1" href="#appendix-A.3.1">A.3.1</a>.  JOSE Header</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.1" href="#appendix-A.3.1">A.3.1</a>.  JOSE ヘッダー</span>
 
-   The following example JWE Protected Header declares that:
+   以下の例のJWE保護ヘッダーは次のことを宣言しています：
 
-   o  The Content Encryption Key is encrypted to the recipient using the
-      AES Key Wrap algorithm with a 128-bit key to produce the JWE
-      Encrypted Key.
-   o  Authenticated encryption is performed on the plaintext using the
-      AES_128_CBC_HMAC_SHA_256 algorithm to produce the ciphertext and
-      the Authentication Tag.
+   o  コンテンツ暗号鍵（CEK）はAES Key Wrapアルゴリズムを128ビット鍵で用いて受信者に暗号化され、JWE暗号化鍵が生成される。
+   o  平文に対して認証付き暗号化がAES_128_CBC_HMAC_SHA_256アルゴリズムで行われ、暗号文と認証タグが生成される。
 
      {"alg":"A128KW","enc":"A128CBC-HS256"}
 
@@ -2458,50 +2381,47 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   Encoding this JWE Protected Header as BASE64URL(UTF8(JWE Protected
-   Header)) gives this value:
+   このJWE保護ヘッダーをBASE64URL(UTF8(JWE Protected
+   Header))としてエンコードすると次の値になります：
 
      eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0
 
-<span class="h4"><a class="selflink" id="appendix-A.3.2" href="#appendix-A.3.2">A.3.2</a>.  Content Encryption Key (CEK)</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.2" href="#appendix-A.3.2">A.3.2</a>.  コンテンツ暗号鍵（CEK）</span>
 
-   Generate a 256-bit random CEK.  In this example, the value is:
+   256ビットのランダムなCEKを生成します。本例では、値は次の通りです：
 
    [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
    206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156,
    44, 207]
 
-<span class="h4"><a class="selflink" id="appendix-A.3.3" href="#appendix-A.3.3">A.3.3</a>.  Key Encryption</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.3" href="#appendix-A.3.3">A.3.3</a>.  鍵の暗号化</span>
 
-   Encrypt the CEK with the shared symmetric key using the AES Key Wrap
-   algorithm to produce the JWE Encrypted Key.  This example uses the
-   symmetric key represented in JSON Web Key [<a href="#ref-JWK" title="&quot;JSON Web Key (JWK)&quot;">JWK</a>] format below:
+   共有の対称鍵を用いてCEKをAES Key Wrapアルゴリズムで暗号化し、JWE暗号化鍵を生成します。本例では以下のJSON Web Key [<a href="#ref-JWK" title="&quot;JSON Web Key (JWK)&quot;">JWK</a>]形式の対称鍵を使用します：
 
      {"kty":"oct",
       "k":"GawgguFyGrWKav7AX4VKUg"
      }
 
-   The resulting JWE Encrypted Key value is:
+   結果として得られるJWE暗号化鍵の値は次の通りです：
 
    [232, 160, 123, 211, 183, 76, 245, 132, 200, 128, 123, 75, 190, 216,
    22, 67, 201, 138, 193, 186, 9, 91, 122, 31, 246, 90, 28, 139, 57, 3,
    76, 124, 193, 11, 98, 37, 173, 61, 104, 57]
 
-   Encoding this JWE Encrypted Key as BASE64URL(JWE Encrypted Key) gives
-   this value:
+   このJWE暗号化鍵をBASE64URL(JWE Encrypted Key)としてエンコードすると次の値になります：
 
      6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ
 
-<span class="h4"><a class="selflink" id="appendix-A.3.4" href="#appendix-A.3.4">A.3.4</a>.  Initialization Vector</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.4" href="#appendix-A.3.4">A.3.4</a>.  初期化ベクトル</span>
 
-   Generate a random 128-bit JWE Initialization Vector.  In this
-   example, the value is:
+   128ビットのランダムなJWE初期化ベクトルを生成します。 この
+   例では、値は次の通りです：
 
    [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104,
    101]
 
-   Encoding this JWE Initialization Vector as BASE64URL(JWE
-   Initialization Vector) gives this value:
+   このJWE初期化ベクトルをBASE64URL(JWE
+   Initialization Vector)としてエンコードすると次の値になります：
 
      AxY8DCtDaGlsbGljb3RoZQ
 
@@ -2514,51 +2434,46 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-<span class="h4"><a class="selflink" id="appendix-A.3.5" href="#appendix-A.3.5">A.3.5</a>.  Additional Authenticated Data</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.5" href="#appendix-A.3.5">A.3.5</a>.  追加認証データ</span>
 
-   Let the Additional Authenticated Data encryption parameter be
-   ASCII(BASE64URL(UTF8(JWE Protected Header))).  This value is:
+   追加認証データ（Additional Authenticated Data）暗号化パラメータを
+   ASCII(BASE64URL(UTF8(JWE Protected Header))).  この値は次の通りです：
 
    [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 66, 77, 84, 73, 52,
    83, 49, 99, 105, 76, 67, 74, 108, 98, 109, 77, 105, 79, 105, 74, 66,
    77, 84, 73, 52, 81, 48, 74, 68, 76, 85, 104, 84, 77, 106, 85, 50, 73,
    110, 48]
 
-<span class="h4"><a class="selflink" id="appendix-A.3.6" href="#appendix-A.3.6">A.3.6</a>.  Content Encryption</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.6" href="#appendix-A.3.6">A.3.6</a>.  コンテンツ暗号化</span>
 
-   Perform authenticated encryption on the plaintext with the
-   AES_128_CBC_HMAC_SHA_256 algorithm using the CEK as the encryption
-   key, the JWE Initialization Vector, and the Additional Authenticated
-   Data value above.  The steps for doing this using the values from
-   this example are detailed in <a href="#appendix-B">Appendix B</a>.  The resulting ciphertext
-   is:
+   CEKを暗号化鍵として、JWE初期化ベクトルおよび上記の追加認証データを用い、
+   AES_128_CBC_HMAC_SHA_256アルゴリズムで平文に対して認証付き暗号化を行います。 この例の値を用いてこれを行う手順は<a href="#appendix-B">Appendix B</a>に詳述されています。 得られた暗号文は次の通りです：
 
    [40, 57, 83, 181, 119, 33, 133, 148, 198, 185, 243, 24, 152, 230, 6,
    75, 129, 223, 127, 19, 210, 82, 183, 230, 168, 33, 215, 104, 143,
    112, 56, 102]
 
-   The resulting Authentication Tag value is:
+   得られた認証タグの値は次の通りです：
 
    [83, 73, 191, 98, 104, 205, 211, 128, 201, 189, 199, 133, 32, 38,
    194, 85]
 
-   Encoding this JWE Ciphertext as BASE64URL(JWE Ciphertext) gives this
-   value:
+   このJWE暗号文をBASE64URL(JWE Ciphertext)としてエンコードすると次の値になります：
 
      KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY
 
-   Encoding this JWE Authentication Tag as BASE64URL(JWE Authentication
-   Tag) gives this value:
+   このJWE認証タグをBASE64URL(JWE Authentication
+   Tag)としてエンコードすると次の値になります：
 
      U0m_YmjN04DJvceFICbCVQ
 
-<span class="h4"><a class="selflink" id="appendix-A.3.7" href="#appendix-A.3.7">A.3.7</a>.  Complete Representation</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.7" href="#appendix-A.3.7">A.3.7</a>.  完全な表現</span>
 
-   Assemble the final representation: The Compact Serialization of this
-   result is the string BASE64URL(UTF8(JWE Protected Header)) || '.' ||
+   最終表現を組み立てます：この結果のコンパクト・シリアライゼーションは文字列
+   BASE64URL(UTF8(JWE Protected Header)) || '.' ||
    BASE64URL(JWE Encrypted Key) || '.' || BASE64URL(JWE Initialization
    Vector) || '.' || BASE64URL(JWE Ciphertext) || '.' || BASE64URL(JWE
-   Authentication Tag).
+   Authentication Tag) です。
 
 
 
@@ -2570,8 +2485,7 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   The final result in this example (with line breaks for display
-   purposes only) is:
+   本例の最終結果（表示のために改行あり）は次の通りです：
 
      eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0.
      6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ.
@@ -2579,34 +2493,18 @@ Copyright Notice
      KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY.
      U0m_YmjN04DJvceFICbCVQ
 
-<span class="h4"><a class="selflink" id="appendix-A.3.8" href="#appendix-A.3.8">A.3.8</a>.  Validation</span>
+<span class="h4"><a class="selflink" id="appendix-A.3.8" href="#appendix-A.3.8">A.3.8</a>.  検証</span>
 
-   This example illustrates the process of creating a JWE with AES Key
-   Wrap for key encryption and AES GCM for content encryption.  These
-   results can be used to validate JWE decryption implementations for
-   these algorithms.  Also, since both the AES Key Wrap and AES GCM
-   computations are deterministic, the resulting JWE value will be the
-   same for all encryptions performed using these inputs.  Since the
-   computation is reproducible, these results can also be used to
-   validate JWE encryption implementations for these algorithms.
+   この例は、鍵暗号化にAES Key Wrapを、コンテンツ暗号化にAES GCMを用いてJWEを作成する過程を示しています。  
+   これらの結果は、これらのアルゴリズムを用いたJWE復号の実装を検証するために使用できます。また、AES Key WrapとAES GCMの計算はどちらも決定的であるため、これらの入力を用いて行われるすべての暗号化に対して得られるJWE値は同一になります。計算が再現可能であるため、これらの結果はこれらのアルゴリズムのJWE暗号化実装を検証するためにも使用できます。
 
-<span class="h3"><a class="selflink" id="appendix-A.4" href="#appendix-A.4">A.4</a>.  Example JWE Using General JWE JSON Serialization</span>
+<span class="h3"><a class="selflink" id="appendix-A.4" href="#appendix-A.4">A.4</a>.  一般的なJWE JSONシリアライゼーションを用いたJWEの例</span>
 
-   This section contains an example using the general JWE JSON
-   Serialization syntax.  This example demonstrates the capability for
-   encrypting the same plaintext to multiple recipients.
+   この節には一般的なJWE JSONシリアライゼーション構文を用いた例が含まれます。この例は同一の平文を複数の受信者へ暗号化する機能を示しています。
 
-   Two recipients are present in this example.  The algorithm and key
-   used for the first recipient are the same as that used in
-   <a href="#appendix-A.2">Appendix A.2</a>.  The algorithm and key used for the second recipient
-   are the same as that used in <a href="#appendix-A.3">Appendix A.3</a>.  The resulting JWE
-   Encrypted Key values are therefore the same; those computations are
-   not repeated here.
+   この例には2つの受信者が存在します。最初の受信者に使用されるアルゴリズムと鍵は<a href="#appendix-A.2">Appendix A.2</a>で使用されたものと同じです。2番目の受信者に使用されるアルゴリズムと鍵は<a href="#appendix-A.3">Appendix A.3</a>で使用されたものと同じです。したがって、結果として得られるJWE暗号化鍵の値は同じであり、それらの計算はここでは繰り返されません。
 
-   The plaintext, the CEK, JWE Initialization Vector, and JWE Protected
-   Header are shared by all recipients (which must be the case, since
-   the ciphertext and Authentication Tag are also shared).
-
+   平文、CEK、JWE初期化ベクトル、およびJWE保護ヘッダーはすべての受信者で共有されます（暗号文と認証タグも共有されるため、これが必須です）。
 
 
 
@@ -2628,11 +2526,10 @@ Copyright Notice
 
 <span class="h4"><a class="selflink" id="appendix-A.4.1" href="#appendix-A.4.1">A.4.1</a>.  JWE Per-Recipient Unprotected Headers</span>
 
-   The first recipient uses the RSAES-PKCS1-v1_5 algorithm to encrypt
-   the CEK.  The second uses AES Key Wrap to encrypt the CEK.  Key ID
-   values are supplied for both keys.  The two JWE Per-Recipient
-   Unprotected Header values used to represent these algorithms and key
-   IDs are:
+   最初の受信者はCEKを暗号化するためにRSAES-PKCS1-v1_5アルゴリズムを使用します。
+   2番目の受信者はCEKを暗号化するた��にAES Key Wrapを使用します。 どちらの鍵にも
+   Key ID 値が付与されています。 これらのアルゴリズムと鍵IDを表すために使用される
+   2つのJWE受信者ごとの非保護ヘッダー値は次のとおりです:
 
      {"alg":"RSA1_5","kid":"2011-04-29"}
 
@@ -2642,32 +2539,27 @@ Copyright Notice
 
 <span class="h4"><a class="selflink" id="appendix-A.4.2" href="#appendix-A.4.2">A.4.2</a>.  JWE Protected Header</span>
 
-   Authenticated encryption is performed on the plaintext using the
-   AES_128_CBC_HMAC_SHA_256 algorithm to produce the common JWE
-   Ciphertext and JWE Authentication Tag values.  The JWE Protected
-   Header value representing this is:
+   平文に対して認証付き暗号化がAES_128_CBC_HMAC_SHA_256アルゴリズムを用いて行われ、
+   共通のJWE暗号文およびJWE認証タグ値が生成されます。 これを表すJWE保護ヘッダー値は次の通りです：
 
      {"enc":"A128CBC-HS256"}
 
-   Encoding this JWE Protected Header as BASE64URL(UTF8(JWE Protected
-   Header)) gives this value:
+   このJWE保護ヘッダーをBASE64URL(UTF8(JWE Protected
+   Header))としてエンコードすると次の値になります：
 
      eyJlbmMiOiJBMTI4Q0JDLUhTMjU2In0
 
 <span class="h4"><a class="selflink" id="appendix-A.4.3" href="#appendix-A.4.3">A.4.3</a>.  JWE Shared Unprotected Header</span>
 
-   This JWE uses the "jku" Header Parameter to reference a JWK Set.
-   This is represented in the following JWE Shared Unprotected Header
-   value as:
+   このJWEはJWKセットを参照するために"jku"ヘッダーパラメータを使用します。
+   これは次のJWE共有非保護ヘッダー値で表されます：
 
      {"jku":"https://server.example.com/keys.jwks"}
 
 <span class="h4"><a class="selflink" id="appendix-A.4.4" href="#appendix-A.4.4">A.4.4</a>.  Complete JOSE Header Values</span>
 
-   Combining the JWE Per-Recipient Unprotected Header, JWE Protected
-   Header, and JWE Shared Unprotected Header values supplied, the JOSE
-   Header values used for the first and second recipient, respectively,
-   are:
+   JWE受信者ごとの非保護ヘッダー、JWE保護ヘッダー、およびJWE共有非保護ヘッダーの値を
+   組み合わせると、最初の受信者および2番目の受信者に使用されるJOSEヘッダー値はそれぞれ次のとおりです：
 
      {"alg":"RSA1_5",
       "kid":"2011-04-29",
@@ -2691,37 +2583,34 @@ Copyright Notice
 
 <span class="h4"><a class="selflink" id="appendix-A.4.5" href="#appendix-A.4.5">A.4.5</a>.  Additional Authenticated Data</span>
 
-   Let the Additional Authenticated Data encryption parameter be
-   ASCII(BASE64URL(UTF8(JWE Protected Header))).  This value is:
+   追加認証データ暗号化パラメータをASCII(BASE64URL(UTF8(JWE Protected Header)))とします。
+   この値は次の通りです：
 
    [101, 121, 74, 108, 98, 109, 77, 105, 79, 105, 74, 66, 77, 84, 73,
    52, 81, 48, 74, 68, 76, 85, 104, 84, 77, 106, 85, 50, 73, 110, 48]
 
 <span class="h4"><a class="selflink" id="appendix-A.4.6" href="#appendix-A.4.6">A.4.6</a>.  Content Encryption</span>
 
-   Perform authenticated encryption on the plaintext with the
-   AES_128_CBC_HMAC_SHA_256 algorithm using the CEK as the encryption
-   key, the JWE Initialization Vector, and the Additional Authenticated
-   Data value above.  The steps for doing this using the values from
-   <a href="#appendix-A.3">Appendix A.3</a> are detailed in <a href="#appendix-B">Appendix B</a>.  The resulting ciphertext
-   is:
+   CEKを暗号鍵として、JWE初期化ベクトルおよび上記の追加認証データを用いて
+   AES_128_CBC_HMAC_SHA_256アルゴリズムで平文に対して認証付き暗号化を行います。  
+   <a href="#appendix-A.3">Appendix A.3</a>の値を用いてこれを行う手順は
+   <a href="#appendix-B">Appendix B</a>に詳述されています。  得られた暗号文は次の通りです：
 
    [40, 57, 83, 181, 119, 33, 133, 148, 198, 185, 243, 24, 152, 230, 6,
    75, 129, 223, 127, 19, 210, 82, 183, 230, 168, 33, 215, 104, 143,
    112, 56, 102]
 
-   The resulting Authentication Tag value is:
+   得られた認証タグの値は次の通りです：
 
    [51, 63, 149, 60, 252, 148, 225, 25, 92, 185, 139, 245, 35, 2, 47,
    207]
 
-   Encoding this JWE Ciphertext as BASE64URL(JWE Ciphertext) gives this
-   value:
+   このJWE暗号文をBASE64URL(JWE Ciphertext)としてエンコードすると次の値になります：
 
      KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY
 
-   Encoding this JWE Authentication Tag as BASE64URL(JWE Authentication
-   Tag) gives this value:
+   このJWE認証タグをBASE64URL(JWE Authentication
+   Tag)としてエンコードすると次の値になります：
 
      Mz-VPPyU4RlcuYv1IwIvzw
 
@@ -2740,8 +2629,8 @@ Copyright Notice
 
 <span class="h4"><a class="selflink" id="appendix-A.4.7" href="#appendix-A.4.7">A.4.7</a>.  Complete JWE JSON Serialization Representation</span>
 
-   The complete JWE JSON Serialization for these values is as follows
-   (with line breaks within values for display purposes only):
+   これらの値の完全なJWE JSONシリアライゼーションは次のとおりです
+   （値内の改行は表示目的のみにあります）:
 
      {
       "protected":
@@ -2772,17 +2661,11 @@ Copyright Notice
 
 <span class="h3"><a class="selflink" id="appendix-A.5" href="#appendix-A.5">A.5</a>.  Example JWE Using Flattened JWE JSON Serialization</span>
 
-   This section contains an example using the flattened JWE JSON
-   Serialization syntax.  This example demonstrates the capability for
-   encrypting the plaintext to a single recipient in a flattened JSON
-   structure.
+   この節には、flattened JWE JSON シリアライゼーション構文を用いた例が含まれます。
+   この例は、平文を単一受信者に対して平坦化されたJSON構造で暗号化する機能を示しています。
 
-   The values in this example are the same as those for the second
-   recipient of the previous example in <a href="#appendix-A.4">Appendix A.4</a>.
-
-
-
-
+   この例の値は、<a href="#appendix-A.4">Appendix A.4</a>の前の例の2番目の受信者の
+   値と同じです。
 
 
 
@@ -2816,27 +2699,23 @@ Copyright Notice
 
 <span class="h2"><a class="selflink" id="appendix-B" href="#appendix-B">Appendix B</a>.  Example AES_128_CBC_HMAC_SHA_256 Computation</span>
 
-   This example shows the steps in the AES_128_CBC_HMAC_SHA_256
-   authenticated encryption computation using the values from the
-   example in <a href="#appendix-A.3">Appendix A.3</a>.  As described where this algorithm is
-   defined in Sections <a href="#section-5.2">5.2</a> and <a href="#section-5.2.3">5.2.3</a> of JWA, the AES_CBC_HMAC_SHA2
-   family of algorithms are implemented using Advanced Encryption
-   Standard (AES) in Cipher Block Chaining (CBC) mode with Public-Key
-   Cryptography Standards (PKCS) #7 padding to perform the encryption
-   and an HMAC SHA-2 function to perform the integrity calculation -- in
-   this case, HMAC SHA-256.
+   この例は、<a href="#appendix-A.3">Appendix A.3</a>の例の値を使用した
+   AES_128_CBC_HMAC_SHA_256 認証付き暗号化計算の手順を示します。JWAの
+   <a href="#section-5.2">5.2節</a>および<a href="#section-5.2.3">5.2.3節</a>で
+   このアルゴリズムが定義されているように、AES_CBC_HMAC_SHA2ファミリは
+   暗号化を行うためにパディング付きのブロック暗号モード（AES-CBC）を使用し、
+   整合性計算のためにHMAC SHA-2関数（ここではHMAC SHA-256）を使用して実装されます。
 
 <span class="h3"><a class="selflink" id="appendix-B.1" href="#appendix-B.1">B.1</a>.  Extract MAC_KEY and ENC_KEY from Key</span>
 
-   The 256 bit AES_128_CBC_HMAC_SHA_256 key K used in this example
-   (using JSON array notation) is:
+   この例で使用される256ビットのAES_128_CBC_HMAC_SHA_256鍵K（JSON配列表記）は次の通りです:
 
    [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
    206, 107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156,
    44, 207]
 
-   Use the first 128 bits of this key as the HMAC SHA-256 key MAC_KEY,
-   which is:
+   この鍵の最初の128ビットをHMAC SHA-256鍵であるMAC_KEYとして使用します。
+   それは次の通りです：
 
    [4, 211, 31, 197, 84, 157, 252, 254, 11, 100, 157, 250, 63, 170, 106,
    206]
@@ -2850,25 +2729,23 @@ Copyright Notice
 <span class="grey"><a href="./rfc7516">RFC 7516</a>                JSON Web Encryption (JWE)               May 2015</span>
 
 
-   Use the last 128 bits of this key as the AES-CBC key ENC_KEY, which
-   is:
+   この鍵の後半の128ビットをAES-CBC鍵であるENC_KEYとして使用します。それは次の通りです：
 
    [107, 124, 212, 45, 111, 107, 9, 219, 200, 177, 0, 240, 143, 156, 44,
    207]
 
-   Note that the MAC key comes before the encryption key in the input
-   key K; this is in the opposite order of the algorithm names in the
-   identifiers "AES_128_CBC_HMAC_SHA_256" and "A128CBC-HS256".
+   MAC鍵は入力鍵Kの先頭に位置し、これは識別子"AES_128_CBC_HMAC_SHA_256"や
+   "A128CBC-HS256"におけるアルゴリズム名の順序とは逆の順序であることに注意してください。
 
 <span class="h3"><a class="selflink" id="appendix-B.2" href="#appendix-B.2">B.2</a>.  Encrypt Plaintext to Create Ciphertext</span>
 
-   Encrypt the plaintext with AES in CBC mode using PKCS #7 padding
-   using the ENC_KEY above.  The plaintext in this example is:
+   上記のENC_KEYを用いてPKCS #7パディングを施したAES CBCモードで平文を暗号化します。
+   この例の平文は次の通りです：
 
    [76, 105, 118, 101, 32, 108, 111, 110, 103, 32, 97, 110, 100, 32,
    112, 114, 111, 115, 112, 101, 114, 46]
 
-   The encryption result is as follows, which is the ciphertext output:
+   暗号化の結果は次の通りで、これが暗号文出力です：
 
    [40, 57, 83, 181, 119, 33, 133, 148, 198, 185, 243, 24, 152, 230, 6,
    75, 129, 223, 127, 19, 210, 82, 183, 230, 168, 33, 215, 104, 143,
@@ -2876,22 +2753,21 @@ Copyright Notice
 
 <span class="h3"><a class="selflink" id="appendix-B.3" href="#appendix-B.3">B.3</a>.  64-Bit Big-Endian Representation of AAD Length</span>
 
-   The Additional Authenticated Data (AAD) in this example is:
+   この例の追加認証データ（AAD）は次の通りです：
 
    [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 66, 77, 84, 73, 52,
    83, 49, 99, 105, 76, 67, 74, 108, 98, 109, 77, 105, 79, 105, 74, 66,
    77, 84, 73, 52, 81, 48, 74, 68, 76, 85, 104, 84, 77, 106, 85, 50, 73,
    110, 48]
 
-   This AAD is 51-bytes long, which is 408-bits long.  The octet string
-   AL, which is the number of bits in AAD expressed as a big-endian
-   64-bit unsigned integer is:
+   このAADは51バイト長、すなわち408ビット長です。AADのビット数をビッグエンディアンの
+   64ビット符号なし整数として表したオクテット列ALは次の通りです：
 
    [0, 0, 0, 0, 0, 0, 1, 152]
 
 <span class="h3"><a class="selflink" id="appendix-B.4" href="#appendix-B.4">B.4</a>.  Initialization Vector Value</span>
 
-   The Initialization Vector value used in this example is:
+   この例で使用される初期化ベクトルの値は次の通りです：
 
    [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104,
    101]
@@ -2908,8 +2784,8 @@ Copyright Notice
 
 <span class="h3"><a class="selflink" id="appendix-B.5" href="#appendix-B.5">B.5</a>.  Create Input to HMAC Computation</span>
 
-   Concatenate the AAD, the Initialization Vector, the ciphertext, and
-   the AL value.  The result of this concatenation is:
+   AAD、初期化ベクトル、暗号文、AL値を連結してHMAC計算への入力を作成します。
+   この連結の結果は次の通りです：
 
    [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 66, 77, 84, 73, 52,
    83, 49, 99, 105, 76, 67, 74, 108, 98, 109, 77, 105, 79, 105, 74, 66,
@@ -2921,8 +2797,7 @@ Copyright Notice
 
 <span class="h3"><a class="selflink" id="appendix-B.6" href="#appendix-B.6">B.6</a>.  Compute HMAC Value</span>
 
-   Compute the HMAC SHA-256 of the concatenated value above.  This
-   result M is:
+   上記の連結値のHMAC SHA-256を計算します。結果Mは次の通りです：
 
    [83, 73, 191, 98, 104, 205, 211, 128, 201, 189, 199, 133, 32, 38,
    194, 85, 9, 84, 229, 201, 219, 135, 44, 252, 145, 102, 179, 140, 105,
@@ -2930,30 +2805,29 @@ Copyright Notice
 
 <span class="h3"><a class="selflink" id="appendix-B.7" href="#appendix-B.7">B.7</a>.  Truncate HMAC Value to Create Authentication Tag</span>
 
-   Use the first half (128 bits) of the HMAC output M as the
-   Authentication Tag output T.  This truncated value is:
+   HMAC出力Mの最初の半分（128ビット）を認証タグ出力Tとして使用します。
+   この切り詰めた値は次の通りです：
 
    [83, 73, 191, 98, 104, 205, 211, 128, 201, 189, 199, 133, 32, 38,
    194, 85]
 
 Acknowledgements
 
-   Solutions for encrypting JSON content were also explored by "JSON
-   Simple Encryption" [<a href="#ref-JSE" title="&quot;JSON Simple Encryption&quot;">JSE</a>] and "JavaScript Message Security Format"
-   [<a href="#ref-JSMS" title="&quot;JavaScript Message Security Format&quot;">JSMS</a>], both of which significantly influenced this document.  This
-   document attempts to explicitly reuse as many of the relevant
-   concepts from XML Encryption 1.1 [<a href="#ref-W3C.REC-xmlenc-core1-20130411">W3C.REC-xmlenc-core1-20130411</a>] and
-   <a href="./rfc5652">RFC 5652</a> [<a href="./rfc5652" title="&quot;Cryptographic Message Syntax (CMS)&quot;">RFC5652</a>] as possible, while utilizing simple, compact JSON-
-   based data structures.
+   JSONコンテンツの暗号化に関する解法は "JSON Simple Encryption"
+   [<a href="#ref-JSE" title="&quot;JSON Simple Encryption&quot;">JSE</a>] および
+   "JavaScript Message Security Format" [<a href="#ref-JSMS" title="&quot;JavaScript Message Security Format&quot;">JSMS</a>] に
+   よっても検討され、本書書類に大きな影響を与えました。 本書はXML Encryption 1.1
+   [<a href="#ref-W3C.REC-xmlenc-core1-20130411">W3C.REC-xmlenc-core1-20130411</a>] および
+   <a href="./rfc5652">RFC 5652</a> [<a href="./rfc5652" title="&quot;Cryptographic Message Syntax (CMS)&quot;">RFC5652</a>] の関連概念を可能な限り明示的に再利用しつつ、
+   シンプルでコンパクトなJSONベースのデータ構造を利用することを試みています。
 
-   Special thanks are due to John Bradley, Eric Rescorla, and Nat
-   Sakimura for the discussions that helped inform the content of this
-   specification; to Eric Rescorla and Joe Hildebrand for allowing the
-   reuse of text from [<a href="#ref-JSMS" title="&quot;JavaScript Message Security Format&quot;">JSMS</a>] in this document; and to Eric Rescorla for
-   co-authoring many drafts of this specification.
+   本仕様の内容を形成する議論に貢献した John Bradley、Eric Rescorla、Nat
+   Sakimura に特別な謝意を表します。また、[<a href="#ref-JSMS" title="&quot;JavaScript Message Security Format&quot;">JSMS</a>]からの文
+   章再利用を許可してくれた Eric Rescorla および Joe Hildebrand に感謝します。さらに
+   本仕様の多くの草案を共著した Eric Rescorla にも感謝します。
 
-   Thanks to Axel Nennker, Emmanuel Raviart, Brian Campbell, and Edmund
-   Jay for validating the examples in this specification.
+   また、本仕様の例を検証してくれた Axel Nennker、Emmanuel Raviart、Brian Campbell、
+   Edmund Jay に感謝します。
 
 
 
@@ -3012,9 +2886,9 @@ Authors' Addresses
 
 
 
-
 Jones &amp; Hildebrand           Standards Track                   [Page 51]
 </pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
 
 </body>
 </html>
