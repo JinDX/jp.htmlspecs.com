@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="ja-JP" class="RFC BCP">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="Common,Latin" name="scripts">
+    <meta content="initial-scale=1.0" name="viewport">
+    <title>RFC 8725: JSON Web Token ベストカレントプラクティス</title>
+    <meta content="Yaron Sheffer" name="author">
+    <meta content="Dick Hardt" name="author">
+    <meta content="Michael B. Jones" name="author">
+    <meta content="
+   JSON Web トークン（JWTとしても知られる）は、URLセーフなJSONベースのセキュリティトークンで、
+   署名および/または暗号化可能な一連のクレームを含んでいます。
+   JWTは広く使用され、数多くのプロトコルやアプリケーションで、デジタルアイデンティティ分野だけでなく
+   他のアプリケーション領域でも、シンプルなセキュリティトークン形式として展開されています。
+   本ベストカレントプラクティス文書はRFC 7519を更新し、JWTの安全な実装と展開に
+   つながる実践的な指針を提供します。
+" name="description">
+
+    <meta content="xml2rfc 2.40.0" name="generator">
+    <meta content="JSON Web Token" name="keyword">
+    <meta content="JWT" name="keyword">
+    <meta content="JSON Object Signing and Encryption" name="keyword">
+    <meta content="JOSE" name="keyword">
+    <meta content="JSON Web Signature" name="keyword">
+    <meta content="JWS" name="keyword">
+    <meta content="JSON Web Encryption" name="keyword">
+    <meta content="JWE" name="keyword">
+    <meta content="attacks" name="keyword">
+    <meta content="Claims" name="keyword">
+    <meta content="Security" name="keyword">
+    <meta content="Cryptography" name="keyword">
+    <meta content="8725" name="rfc.number">
+    <link href="rfc8725.xml" rel="alternate" type="application/rfc+xml">
+    <link href="#copyright" rel="license">
+    <style type="text/css">
+        /*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necssary during the development of the v3
+  formatters.
+
+*/
+
+        /* fonts */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+        /* Sans-serif */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Serif');
+        /* Serif (print) */
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+        /* Monospace */
+
+        @viewport {
+            zoom: 1.0;
+            width: extend-to-zoom;
+        }
+
+        @-ms-viewport {
+            width: extend-to-zoom;
+            zoom: 1.0;
+        }
+
+        /* general and mobile first */
+        html {}
+
+        body {
+            max-width: 90%;
+            margin: 1.5em auto;
+            color: #222;
+            background-color: #fff;
+            font-size: 14px;
+            font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .ears {
+            display: none;
+        }
+
+        /* headings */
+        #title,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        #title {
+            clear: both;
+            border-bottom: 1px solid #ddd;
+            margin: 0 0 0.5em 0;
+            padding: 1em 0 0.5em;
+        }
+
+        .author {
+            padding-bottom: 4px;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin: 1em 0;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-top: -20px;
+            /* provide offset for in-page anchors */
+            padding-top: 33px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h4 {
+            font-size: 16px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h5,
+        h6 {
+            font-size: 14px;
+        }
+
+        #n-copyright-notice {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1em;
+            margin-bottom: 1em;
+        }
+
+        /* general structure */
+        p {
+            padding: 0;
+            margin: 0 0 1em 0;
+            text-align: left;
+        }
+
+        div,
+        span {
+            position: relative;
+        }
+
+        div {
+            margin: 0;
+        }
+
+        .alignRight.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignRight.art-text pre {
+            padding: 0;
+        }
+
+        .alignRight {
+            margin: 1em 0;
+        }
+
+        .alignRight>*:first-child {
+            border: none;
+            margin: 0;
+            float: right;
+            clear: both;
+        }
+
+        .alignRight>*:nth-child(2) {
+            clear: both;
+            display: block;
+            border: none;
+        }
+
+        svg {
+            display: block;
+        }
+
+        .alignCenter.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignCenter.art-text pre {
+            padding: 0;
+        }
+
+        .alignCenter {
+            margin: 1em 0;
+        }
+
+        .alignCenter>*:first-child {
+            border: none;
+            /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+            display: table;
+            margin: 0 auto;
+        }
+
+        /* lists */
+        ol,
+        ul {
+            padding: 0;
+            margin: 0 0 1em 2em;
+        }
+
+        ol ol,
+        ul ul,
+        ol ul,
+        ul ol {
+            margin-left: 1em;
+        }
+
+        li {
+            margin: 0 0 0.25em 0;
+        }
+
+        .ulCompact li {
+            margin: 0;
+        }
+
+        ul.empty,
+        .ulEmpty {
+            list-style-type: none;
+        }
+
+        ul.empty li,
+        .ulEmpty li {
+            margin-top: 0.5em;
+        }
+
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact {
+            line-height: 100%;
+            margin: 0 0 0 2em;
+        }
+
+        /* definition lists */
+        dl {}
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        /* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+        dl>dd {
+            margin-bottom: .8em;
+            min-height: 1.3em;
+        }
+
+        dl.compact>dd,
+        .dlCompact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        /* links */
+        a {
+            text-decoration: none;
+        }
+
+        a[href] {
+            color: #22e;
+            /* Arlen: WCAG 2019 */
+        }
+
+        a[href]:hover {
+            background-color: #f2f2f2;
+        }
+
+        figcaption a[href],
+        a[href].selfRef {
+            color: #222;
+        }
+
+        /* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+        /* Figures */
+        tt,
+        code,
+        pre,
+        code {
+            background-color: #f9f9f9;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        pre {
+            border: 1px solid #eee;
+            margin: 0;
+            padding: 1em;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        figure blockquote {
+            margin: 0.8em 0.4em 0.4em;
+        }
+
+        figcaption {
+            font-style: italic;
+            margin: 0 0 1em 0;
+        }
+
+        @media screen {
+            pre {
+                overflow-x: auto;
+                max-width: 100%;
+                max-width: calc(100% - 22px);
+            }
+        }
+
+        /* aside, blockquote */
+        aside,
+        blockquote {
+            margin-left: 0;
+            padding: 1.2em 2em;
+        }
+
+        blockquote {
+            background-color: #f9f9f9;
+            color: #111;
+            /* Arlen: WCAG 2019 */
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin: 1em 0;
+        }
+
+        cite {
+            display: block;
+            text-align: right;
+            font-style: italic;
+        }
+
+        /* tables */
+        table {
+            width: 100%;
+            margin: 0 0 1em;
+            border-collapse: collapse;
+            border: 1px solid #eee;
+        }
+
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+            padding: 0.5em 0.75em;
+        }
+
+        th {
+            text-align: left;
+            background-color: #e9e9e9;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f5f5f5;
+        }
+
+        table caption {
+            font-style: italic;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        table p {
+            /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+            margin: 0;
+        }
+
+        /* pilcrow */
+        a.pilcrow {
+            color: #666;
+            /* Arlen: AHDJ 2019 */
+            text-decoration: none;
+            visibility: hidden;
+            user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        @media screen {
+
+            aside:hover>a.pilcrow,
+            p:hover>a.pilcrow,
+            blockquote:hover>a.pilcrow,
+            div:hover>a.pilcrow,
+            li:hover>a.pilcrow,
+            pre:hover>a.pilcrow {
+                visibility: visible;
+            }
+
+            a.pilcrow:hover {
+                background-color: transparent;
+            }
+        }
+
+        /* misc */
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+
+        .bcp14 {
+            font-variant: small-caps;
+        }
+
+        .role {
+            font-variant: all-small-caps;
+        }
+
+        /* info block */
+        #identifiers {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        #identifiers dt {
+            width: 3em;
+            clear: left;
+        }
+
+        #identifiers dd {
+            float: left;
+            margin-bottom: 0;
+        }
+
+        #identifiers .authors .author {
+            display: inline-block;
+            margin-right: 1.5em;
+        }
+
+        #identifiers .authors .org {
+            font-style: italic;
+        }
+
+        /* The prepared/rendered info at the very bottom of the page */
+        .docInfo {
+            color: #666;
+            /* Arlen: WCAG 2019 */
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 2em;
+        }
+
+        .docInfo .prepared {
+            float: left;
+        }
+
+        .docInfo .prepared {
+            float: right;
+        }
+
+        /* table of contents */
+        #toc {
+            padding: 0.75em 0 2em 0;
+            margin-bottom: 1em;
+        }
+
+        nav.toc ul {
+            margin: 0 0.5em 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        nav.toc li {
+            line-height: 1.3em;
+            margin: 0.75em 0;
+            padding-left: 1.2em;
+            text-indent: -1.2em;
+        }
+
+        /* references */
+        .references dt {
+            text-align: right;
+            font-weight: bold;
+            min-width: 7em;
+        }
+
+        .references dd {
+            margin-left: 8em;
+            overflow: auto;
+        }
+
+        .refInstance {
+            margin-bottom: 1.25em;
+        }
+
+        .references .ascii {
+            margin-bottom: 0.25em;
+        }
+
+        /* index */
+        .index ul {
+            margin: 0 0 0 1em;
+            padding: 0;
+            list-style: none;
+        }
+
+        .index ul ul {
+            margin: 0;
+        }
+
+        .index li {
+            margin: 0;
+            text-indent: -2em;
+            padding-left: 2em;
+            padding-bottom: 5px;
+        }
+
+        .indexIndex {
+            margin: 0.5em 0 1em;
+        }
+
+        .index a {
+            font-weight: 700;
+        }
+
+        /* make the index two-column on all but the smallest screens */
+        @media (min-width: 600px) {
+            .index ul {
+                -moz-column-count: 2;
+                -moz-column-gap: 20px;
+            }
+
+            .index ul ul {
+                -moz-column-count: 1;
+                -moz-column-gap: 0;
+            }
+        }
+
+        /* authors */
+        address.vcard {
+            font-style: normal;
+            margin: 1em 0;
+        }
+
+        address.vcard .nameRole {
+            font-weight: 700;
+            margin-left: 0;
+        }
+
+        address.vcard .label {
+            font-family: "Noto Sans", Arial, Helvetica, sans-serif;
+            margin: 0.5em 0;
+        }
+
+        address.vcard .type {
+            display: none;
+        }
+
+        .alternative-contact {
+            margin: 1.5em 0 1em;
+        }
+
+        hr.addr {
+            border-top: 1px dashed;
+            margin: 0;
+            color: #ddd;
+            max-width: calc(100% - 16px);
+        }
+
+        /* temporary notes */
+        .rfcEditorRemove::before {
+            position: absolute;
+            top: 0.2em;
+            right: 0.2em;
+            padding: 0.2em;
+            content: "The RFC Editor will remove this note";
+            color: #9e2a00;
+            /* Arlen: WCAG 2019 */
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+        }
+
+        .rfcEditorRemove {
+            position: relative;
+            padding-top: 1.8em;
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            border-radius: 3px;
+        }
+
+        .cref {
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            padding: 2px 4px;
+        }
+
+        .crefSource {
+            font-style: italic;
+        }
+
+        /* alternative layout for smaller screens */
+        @media screen and (max-width: 1023px) {
+            body {
+                padding-top: 2em;
+            }
+
+            #title {
+                padding: 1em 0;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-top: -18px;
+                /* provide offset for in-page anchors */
+                padding-top: 38px;
+            }
+
+            #identifiers dd {
+                max-width: 60%;
+            }
+
+            #toc {
+                position: fixed;
+                z-index: 2;
+                top: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+                background-color: inherit;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #toc h2 {
+                margin: -1px 0 0 0;
+                padding: 4px 0 4px 6px;
+                padding-right: 1em;
+                min-width: 190px;
+                font-size: 1.1em;
+                text-align: right;
+                background-color: #444;
+                color: white;
+                cursor: pointer;
+            }
+
+            #toc h2::before {
+                /* css hamburger */
+                float: right;
+                position: relative;
+                width: 1em;
+                height: 1px;
+                left: -164px;
+                margin: 6px 0 0 0;
+                background: white none repeat scroll 0 0;
+                box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+                content: "";
+            }
+
+            #toc nav {
+                display: none;
+                padding: 0.5em 1em 1em;
+                overflow: auto;
+                height: calc(100vh - 48px);
+                border-left: 1px solid #ddd;
+            }
+        }
+
+        /* alternative layout for wide screens */
+        @media screen and (min-width: 1024px) {
+            body {
+                max-width: 724px;
+                margin: 42px auto;
+                padding-left: 1.5em;
+                padding-right: 29em;
+            }
+
+            #toc {
+                position: fixed;
+                top: 42px;
+                right: 42px;
+                width: 25%;
+                margin: 0;
+                padding: 0 1em;
+                z-index: 1;
+            }
+
+            #toc h2 {
+                border-top: none;
+                border-bottom: 1px solid #ddd;
+                font-size: 1em;
+                font-weight: normal;
+                margin: 0;
+                padding: 0.25em 1em 1em 0;
+            }
+
+            #toc nav {
+                display: block;
+                height: calc(90vh - 84px);
+                bottom: 0;
+                padding: 0.5em 0 0;
+                overflow: auto;
+            }
+
+            img {
+                /* future proofing */
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* pagination */
+        @media print {
+            body {
+
+                width: 100%;
+            }
+
+            p {
+                orphans: 3;
+                widows: 3;
+            }
+
+            #n-copyright-notice {
+                border-bottom: none;
+            }
+
+            #toc,
+            #n-introduction {
+                page-break-before: always;
+            }
+
+            #toc {
+                border-top: none;
+                padding-top: 0;
+            }
+
+            figure,
+            pre {
+                page-break-inside: avoid;
+            }
+
+            figure {
+                overflow: scroll;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                page-break-after: avoid;
+            }
+
+            h2+*,
+            h3+*,
+            h4+*,
+            h5+*,
+            h6+* {
+                page-break-before: avoid;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-size: 10pt;
+            }
+
+            table {
+                border: 1px solid #ddd;
+            }
+
+            td {
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        /* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+        /*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+        @page :first {
+            padding-top: 0;
+
+            @top-left {
+                content: normal;
+                border: none;
+            }
+
+            @top-center {
+                content: normal;
+                border: none;
+            }
+
+            @top-right {
+                content: normal;
+                border: none;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin-bottom: 45mm;
+            padding-top: 20px;
+            /* The follwing is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+            /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+        }
+
+        /* Changes introduced to fix issues found during implementation */
+        /* Make sure links are clickable even if overlapped by following H* */
+        a {
+            z-index: 2;
+        }
+
+        /* Separate body from document info even without intervening H1 */
+        section {
+            clear: both;
+        }
+
+
+        /* Top align author divs, to avoid names without organization dropping level with org names */
+        .author {
+            vertical-align: top;
+        }
+
+        /* Leave room in document info to show Internet-Draft on one line */
+        #identifiers dt {
+            width: 8em;
+        }
+
+        /* Don't waste quite as much whitespace between label and value in doc info */
+        #identifiers dd {
+            margin-left: 1em;
+        }
+
+        /* Give floating toc a background color (needed when it's a div inside section */
+        #toc {
+            background-color: white;
+        }
+
+        /* Make the collapsed ToC header render white on gray also when it's a link */
+        @media screen and (max-width: 1023px) {
+
+            #toc h2 a,
+            #toc h2 a:link,
+            #toc h2 a:focus,
+            #toc h2 a:hover,
+            #toc a.toplink,
+            #toc a.toplink:hover {
+                color: white;
+                background-color: #444;
+                text-decoration: none;
+            }
+        }
+
+        /* Give the bottom of the ToC some whitespace */
+        @media screen and (min-width: 1024px) {
+            #toc {
+                padding: 0 0 1em 1em;
+            }
+        }
+
+        /* Style section numbers with more space between number and title */
+        .section-number {
+            padding-right: 0.5em;
+        }
+
+        /* prevent monospace from becoming overly large */
+        tt,
+        code,
+        pre,
+        code {
+            font-size: 95%;
+        }
+
+        /* Fix the height/width aspect for ascii art*/
+        pre.sourcecode,
+        .art-text pre {
+            line-height: 1.12;
+        }
+
+
+        /* Add styling for a link in the ToC that points to the top of the document */
+        a.toplink {
+            float: right;
+            margin-right: 0.5em;
+        }
+
+        /* Fix the dl styling to match the RFC 7992 attributes */
+        dl>dt,
+        dl.dlParallel>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.dlNewline>dt {
+            float: none;
+        }
+
+        /* Provide styling for table cell text alignment */
+        table td.text-left,
+        table th.text-left {
+            text-align: left;
+        }
+
+        table td.text-center,
+        table th.text-center {
+            text-align: center;
+        }
+
+        table td.text-right,
+        table th.text-right {
+            text-align: right;
+        }
+
+        /* Make the alternative author contact informatio look less like just another
+   author, and group it closer with the primary author contact information */
+        .alternative-contact {
+            margin: 0.5em 0 0.25em 0;
+        }
+
+        address .non-ascii {
+            margin: 0 0 0 2em;
+        }
+
+        /* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+        table {
+            width: auto;
+        }
+
+        /* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+        .references dd {
+            overflow: visible;
+        }
+
+        /* Control caption placement */
+        caption {
+            caption-side: bottom;
+        }
+
+        /* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+        address.vcard {
+            max-width: 30em;
+            margin-right: auto;
+        }
+
+        /* For address alignment dependent on LTR or RTL scripts */
+        address div.left {
+            text-align: left;
+        }
+
+        address div.right {
+            text-align: right;
+        }
+
+        /* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+        table.right {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        table.center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table.left {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Give the table caption label the same styling as the figcaption */
+        caption a[href] {
+            color: #222;
+        }
+
+        @media print {
+            .toplink {
+                display: none;
+            }
+
+            /* avoid overwriting the top border line with the ToC header */
+            #toc {
+                padding-top: 1px;
+            }
+
+            /* Avoid page breaks inside dl and author address entries */
+            .vcard {
+                page-break-inside: avoid;
+            }
+
+        }
+
+        /* Avoid wrapping of URLs in references */
+        @media screen {
+            .references a {
+                white-space: nowrap;
+            }
+        }
+
+        /* Tweak the bcp14 keyword presentation */
+        .bcp14 {
+            font-variant: small-caps;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Tweak the invisible space above H* in order not to overlay links in text above */
+        h2 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 31px;
+        }
+
+        h3 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        h4 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        /* Float artwork pilcrow to the right */
+        @media screen {
+            .artwork a.pilcrow {
+                display: block;
+                line-height: 0.7;
+                margin-top: 0.15em;
+            }
+        }
+
+        /* Make pilcrows on dd visible */
+        @media screen {
+            dd:hover>a.pilcrow {
+                visibility: visible;
+            }
+        }
+
+        /* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+        .alignLeft.art-text,
+        .alignCenter.art-text,
+        .alignRight.art-text {
+            margin-bottom: 0;
+        }
+
+        .alignLeft,
+        .alignCenter,
+        .alignRight {
+            margin: 1em 0 0 0;
+        }
+
+        /* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+        @media print {
+            a.pilcrow {
+                display: none;
+            }
+        }
+
+        /* Styling for the external metadata */
+        div#external-metadata {
+            background-color: #eee;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+            display: none;
+        }
+
+        div#internal-metadata {
+            padding: 0.5em;
+            /* to match the external-metadata padding */
+        }
+
+        /* Styling for title RFC Number */
+        h1#rfcnum {
+            clear: both;
+            margin: 0 0 -1em;
+            padding: 1em 0 0 0;
+        }
+
+        /* Make .olPercent look the same as <ol><li> */
+        dl.olPercent>dd {
+            margin: 0 0 0.25em 0;
+            min-height: initial;
+        }
+
+        /* Give aside some styling to set it apart */
+        aside {
+            border-left: 1px solid #ddd;
+            margin: 1em 0 1em 2em;
+            padding: 0.2em 2em;
+        }
+
+        aside>dl,
+        aside>ol,
+        aside>ul,
+        aside>table,
+        aside>p {
+            margin-bottom: 0.5em;
+        }
+
+        /* Additional page break settings */
+        @media print {
+
+            figcaption,
+            table caption {
+                page-break-before: avoid;
+            }
+        }
+
+        /* Font size adjustments for print */
+        @media print {
+            body {
+                font-size: 10pt;
+                line-height: normal;
+                max-width: 96%;
+            }
+
+            h1 {
+                font-size: 1.72em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2*1.2 */
+            h2 {
+                font-size: 1.44em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2 */
+            h3 {
+                font-size: 1.2em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2 */
+            h4 {
+                font-size: 1em;
+                padding-top: 1.5em;
+            }
+
+            h5,
+            h6 {
+                font-size: 1em;
+                margin: initial;
+                padding: 0.5em 0 0.3em;
+            }
+        }
+
+        /* Sourcecode margin in print, when there's no pilcrow */
+        @media print {
+
+            .artwork,
+            .sourcecode {
+                margin-bottom: 1em;
+            }
+        }
+
+        /*
+  The margin-left: 0 on <dd> removes all distinction
+  between levels from nested <dl>s.  Undo that.
+*/
+        dl.olPercent>dd,
+        dd {
+            margin-left: revert;
+        }
+
+        /* Avoid narrow tables forcing too narrow table captions, which may render badly */
+        table {
+            min-width: 20em;
+        }
+
+        /* ol type a */
+        ol.type-a {
+            list-style-type: lower-alpha;
+        }
+
+        ol.type-A {
+            list-style-type: upper-alpha;
+        }
+
+        ol.type-i {
+            list-style-type: lower-roman;
+        }
+
+        ol.type-I {
+            list-style-type: lower-roman;
+        }
+    </style>
+    <link href="https://www.rfc-editor.org/rfc/rfc8725/rfc-local.css" rel="stylesheet" type="text/css">
+    <link href="https://dx.doi.org/10.17487/rfc8725" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-oauth-jwt-bcp-07" rel="prev">
+</head>
+
+<body>
+    <script src="https://www.rfc-editor.org/js/metadata.min.js"></script>
+    <table class="ears">
+        <thead>
+            <tr>
+                <td class="left">RFC 8725</td>
+                <td class="center">JWT BCP</td>
+                <td class="right">2020年2月</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td class="left">Sheffer, et al.</td>
+                <td class="center">ベストカレントプラクティス</td>
+                <td class="right">[Page]</td>
+            </tr>
+        </tfoot>
+    </table>
+    <div id="external-metadata" class="document-information"></div>
+    <div id="internal-metadata" class="document-information">
+        <dl id="identifiers">
+            <dt class="label-stream">Stream:</dt>
+            <dd class="stream">Internet Engineering Task Force (IETF)</dd>
+            <dt class="label-rfc">RFC:</dt>
+            <dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc8725" class="eref">8725</a></dd>
+            <dt class="label-bcp">BCP:</dt>
+            <dd class="bcp">225</dd>
+            <dt class="label-updates">Updates:</dt>
+            <dd class="updates">
+                <a href="https://www.rfc-editor.org/rfc/rfc7519" class="eref">7519</a>
+            </dd>
+            <dt class="label-category">Category:</dt>
+            <dd class="category">ベストカレントプラクティス</dd>
+            <dt class="label-published">Published:</dt>
+            <dd class="published">
+                <time datetime="2020-02" class="published">2020年2月</time>
+            </dd>
+            <dt class="label-issn">ISSN:</dt>
+            <dd class="issn">2070-1721</dd>
+            <dt class="label-authors">Authors:</dt>
+            <dd class="authors">
+                <div class="author">
+                    <div class="author-name">Y. Sheffer</div>
+                    <div class="org">Intuit</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">D. Hardt</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">M. Jones</div>
+                    <div class="org">Microsoft</div>
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <h1 id="rfcnum">RFC 8725</h1>
+    <h1 id="title">JSON Web Token ベストカレントプラクティス</h1>
+    <section id="section-abstract">
+        <h2 id="abstract"><a href="#abstract" class="selfRef">概要</a></h2>
+        <p id="section-abstract-1">JSON Web トークン（JWTとしても知られる）は、URLセーフなJSONベースのセキュリティ
+            トークンで、署名および/または暗号化可能な一連のクレームを含みます。
+            JWTは広く使用され、数多くのプロトコルやアプリケーションで、デジタルアイデンティティ分野だけでなく
+            他のアプリケーション領域でも、シンプルなセキュリティトークン形式として展開されています。
+            本ベストカレントプラクティス文書はRFC 7519を更新し、JWTの安全な実装と展開に
+            つながる実践的な指針を提供します。<a href="#section-abstract-1" class="pilcrow">¶</a>
+        </p>
+    </section>
+    <div id="status-of-memo">
+        <section id="section-boilerplate.1">
+            <h2 id="name-status-of-this-memo">
+                <a href="#name-status-of-this-memo" class="section-name selfRef">本メモのステータス</a>
+            </h2>
+            <p id="section-boilerplate.1-1">
+                このメモはインターネットのベストカレントプラクティスを文書化したものです。<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.1-2">
+                本文書はInternet Engineering Task Force
+                (IETF)の成果物です。IETFコミュニティのコンセンサスを反映しています。
+                公開レビューを経て、Internet Engineering Steering Group (IESG) により出版が承認されています。
+                BCPに関する詳細はRFC 7841の第2節に記載されています。<a href="#section-boilerplate.1-2" class="pilcrow">¶</a>
+            </p>
+            <p id="section-boilerplate.1-3">
+                本文書の現状、訂正情報、およびフィードバックの提供方法については
+                <span><a
+                        href="https://www.rfc-editor.org/info/rfc8725">https://www.rfc-editor.org/info/rfc8725</a></span>で確認できます。<a
+                    href="#section-boilerplate.1-3" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="copyright">
+        <section id="section-boilerplate.2">
+            <h2 id="name-copyright-notice">
+                <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+            </h2>
+            <p id="section-boilerplate.2-1">
+                Copyright (c) 2020 IETF Trust and the persons identified as the
+                document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.2-2">
+                This document is subject to BCP 78 and the IETF Trust's Legal
+                Provisions Relating to IETF Documents
+                (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>)
+                in effect on the date of
+                publication of this document. Please review these documents
+                carefully, as they describe your rights and restrictions with
+                respect to this document. Code Components extracted from this
+                document must include Simplified BSD License text as described in
+                Section 4.e of the Trust Legal Provisions and are provided without
+                warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2"
+                    class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="toc">
+        <section id="section-toc.1">
+            <a href="#" onclick="scroll(0,0)" class="toplink">▲</a>
+            <h2 id="name-table-of-contents">
+                <a href="#name-table-of-contents" class="section-name selfRef">目次</a>
+            </h2>
+            <nav class="toc">
+                <ul class="toc ulEmpty">
+                    <li class="toc ulEmpty" id="section-toc.1-1.1">
+                        <p id="section-toc.1-1.1.1"><a href="#section-1" class="xref">1</a>. <a
+                                href="#name-introduction" class="xref">はじめに</a><a href="#section-toc.1-1.1.1"
+                                class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.1.2.1">
+                                <p id="section-toc.1-1.1.2.1.1"><a href="#section-1.1" class="xref">1.1</a>. <a
+                                        href="#name-target-audience" class="xref">対象読者</a><a
+                                        href="#section-toc.1-1.1.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.1.2.2">
+                                <p id="section-toc.1-1.1.2.2.1"><a href="#section-1.2" class="xref">1.2</a>. <a
+                                        href="#name-conventions-used-in-this-do" class="xref">本文書で使用される規約</a><a
+                                        href="#section-toc.1-1.1.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.2">
+                        <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>. <a
+                                href="#name-threats-and-vulnerabilities" class="xref">脅威と脆弱性</a><a
+                                href="#section-toc.1-1.2.1" class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.1">
+                                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>. <a
+                                        href="#name-weak-signatures-and-insuffi" class="xref">弱い署名と不十分な署名検証</a><a
+                                        href="#section-toc.1-1.2.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.2">
+                                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>. <a
+                                        href="#name-weak-symmetric-keys" class="xref">弱い対称鍵</a><a
+                                        href="#section-toc.1-1.2.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.3">
+                                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="xref">2.3</a>. <a
+                                        href="#name-incorrect-composition-of-en" class="xref">暗号化と署名の不正な組み合わせ</a><a
+                                        href="#section-toc.1-1.2.2.3.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.4">
+                                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="xref">2.4</a>. <a
+                                        href="#name-plaintext-leakage-through-a" class="xref">暗号文長の分析による平文漏洩</a><a
+                                        href="#section-toc.1-1.2.2.4.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.5">
+                                <p id="section-toc.1-1.2.2.5.1"><a href="#section-2.5" class="xref">2.5</a>. <a
+                                        href="#name-insecure-use-of-elliptic-cu" class="xref">楕円曲線暗号の安全でない使用</a><a
+                                        href="#section-toc.1-1.2.2.5.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.6">
+                                <p id="section-toc.1-1.2.2.6.1"><a href="#section-2.6" class="xref">2.6</a>. <a
+                                        href="#name-multiplicity-of-json-encodi" class="xref">JSONエンコーディングの多重性</a><a
+                                        href="#section-toc.1-1.2.2.6.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.7">
+                                <p id="section-toc.1-1.2.2.7.1"><a href="#section-2.7" class="xref">2.7</a>. <a
+                                        href="#name-substitution-attacks" class="xref">置換攻撃</a><a
+                                        href="#section-toc.1-1.2.2.7.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.8">
+                                <p id="section-toc.1-1.2.2.8.1"><a href="#section-2.8" class="xref">2.8</a>. <a
+                                        href="#name-cross-jwt-confusion" class="xref">クロスJWT混同</a><a
+                                        href="#section-toc.1-1.2.2.8.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.9">
+                                <p id="section-toc.1-1.2.2.9.1"><a href="#section-2.9" class="xref">2.9</a>. <a
+                                        href="#name-indirect-attacks-on-the-ser" class="xref">サーバーに対する間接攻撃</a><a
+                                        href="#section-toc.1-1.2.2.9.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.3">
+                        <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>. <a
+                                href="#name-best-practices" class="xref">ベストプラクティス</a><a href="#section-toc.1-1.3.1"
+                                class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.1">
+                                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="xref">3.1</a>. <a
+                                        href="#name-perform-algorithm-verificat" class="xref">アルゴリズムの検証を行う</a><a
+                                        href="#section-toc.1-1.3.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.2">
+                                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="xref">3.2</a>. <a
+                                        href="#name-use-appropriate-algorithms" class="xref">適切なアルゴリズムを使用する</a><a
+                                        href="#section-toc.1-1.3.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.3">
+                                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="xref">3.3</a>. <a
+                                        href="#name-validate-all-cryptographic-" class="xref">すべての暗号操作を検証する</a><a
+                                        href="#section-toc.1-1.3.2.3.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.4">
+                                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="xref">3.4</a>. <a
+                                        href="#name-validate-cryptographic-inpu" class="xref">暗号入力を検証する</a><a
+                                        href="#section-toc.1-1.3.2.4.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.5">
+                                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="xref">3.5</a>. <a
+                                        href="#name-ensure-cryptographic-keys-h"
+                                        class="xref">暗号鍵が十分なエントロピーを持つことを確認する</a><a href="#section-toc.1-1.3.2.5.1"
+                                        class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.6">
+                                <p id="section-toc.1-1.3.2.6.1"><a href="#section-3.6" class="xref">3.6</a>. <a
+                                        href="#name-avoid-compression-of-encryp" class="xref">暗号入力の圧縮を避ける</a><a
+                                        href="#section-toc.1-1.3.2.6.1" class="pilcrow">¶</a>
+                                </p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.7">
+                                <p id="section-toc.1-1.3.2.7.1"><a href="#section-3.7" class="xref">3.7</a>. <a
+                                        href="#name-use-utf-8" class="xref">UTF-8を使用する</a><a
+                                        href="#section-toc.1-1.3.2.7.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.8">
+                                <p id="section-toc.1-1.3.2.8.1"><a href="#section-3.8" class="xref">3.8</a>. <a
+                                        href="#name-validate-issuer-and-subject" class="xref">発行者と対象を検証する</a><a
+                                        href="#section-toc.1-1.3.2.8.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.9">
+                                <p id="section-toc.1-1.3.2.9.1"><a href="#section-3.9" class="xref">3.9</a>. <a
+                                        href="#name-use-and-validate-audience" class="xref">受信者を使用および検証する</a><a
+                                        href="#section-toc.1-1.3.2.9.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.10">
+                                <p id="section-toc.1-1.3.2.10.1"><a href="#section-3.10" class="xref">3.10</a>. <a
+                                        href="#name-do-not-trust-received-claim" class="xref">受信したクレームを信頼しない</a><a
+                                        href="#section-toc.1-1.3.2.10.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.11">
+                                <p id="section-toc.1-1.3.2.11.1"><a href="#section-3.11" class="xref">3.11</a>. <a
+                                        href="#name-use-explicit-typing" class="xref">明示的な型指定を使用する</a><a
+                                        href="#section-toc.1-1.3.2.11.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.3.2.12">
+                                <p id="section-toc.1-1.3.2.12.1"><a href="#section-3.12" class="xref">3.12</a>. <a
+                                        href="#name-use-mutually-exclusive-vali"
+                                        class="xref">異なる種類のJWTに対して相互排他的な検証ルールを使用する</a><a
+                                        href="#section-toc.1-1.3.2.12.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.4">
+                        <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>. <a
+                                href="#name-security-considerations" class="xref">セキュリティ上の考慮事項</a><a
+                                href="#section-toc.1-1.4.1" class="pilcrow">¶</a></p>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.5">
+                        <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>. <a
+                                href="#name-iana-considerations" class="xref">IANAに関する考慮事項</a><a
+                                href="#section-toc.1-1.5.1" class="pilcrow">¶</a></p>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.6">
+                        <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>. <a href="#name-references"
+                                class="xref">参考文献</a><a href="#section-toc.1-1.6.1" class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.6.2.1">
+                                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="xref">6.1</a>. <a
+                                        href="#name-normative-references" class="xref">引用文献（必須）</a><a
+                                        href="#section-toc.1-1.6.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.6.2.2">
+                                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="xref">6.2</a>. <a
+                                        href="#name-informative-references" class="xref">参考文献（補助）</a><a
+                                        href="#section-toc.1-1.6.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.7">
+                        <p id="section-toc.1-1.7.1"><a href="#section-appendix.a" class="xref"></a><a
+                                href="#name-acknowledgements" class="xref">謝辞</a><a href="#section-toc.1-1.7.1"
+                                class="pilcrow">¶</a></p>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.8">
+                        <p id="section-toc.1-1.8.1"><a href="#section-appendix.b" class="xref"></a><a
+                                href="#name-authors-addresses" class="xref">著者の連絡先</a><a href="#section-toc.1-1.8.1"
+                                class="pilcrow">¶</a></p>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+    </div>
+    <div id="introduction">
+        <section id="section-1">
+            <h2 id="name-introduction">
+                <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction"
+                    class="section-name selfRef">導入</a>
+            </h2>
+            <p id="section-1-1">
+                JSON Web Token（JWT）はURLセーフなJSONベースのセキュリティトークンで、
+                署名や暗号化が可能なクレーム群を含むことができます。
+                JWT仕様は、セキュリティ関連情報を1箇所にまとめて保護できる点と、
+                幅広く利用可能なツールで簡単に実装できる点から急速に普及しました。
+                JWTがよく使われる応用分野の1つはデジタルID情報の表現であり、
+                OpenID ConnectのIDトークンやOAuth 2.0のアクセストークン・リフレッシュトークンなどが含まれます。
+                詳細は導入環境によって異なります。<a href="#section-1-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-2">
+                JWT仕様が公開されて以来、実装や運用上の攻撃がいくつか報告されています。
+                これらは、セキュリティ機構が十分に規定されていなかったこと、
+                実装が不完全であったこと、またアプリケーションによる誤用が原因です。<a href="#section-1-2" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-3">
+                本文書の目的は、JWTの安全な実装および運用を促進することです。
+                多くの推奨事項は、JSON Web Signature（JWS）、
+                JSON Web Encryption（JWE）、およびJSON Web Algorithms（JWA）で定義される
+                暗号化機構の実装・使用に関するものです。
+                その他はJWTのクレームの使用に関する推奨事項です。<a href="#section-1-3" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-4">
+                これらは、ほとんどの実装・運用シナリオにおけるJWT使用の最小限の推奨事項です。
+                本文書を参照する他の仕様では、特定の状況に応じてより厳しい要件を定める場合があります。
+                その場合、実装者はより厳しい要件に従うことが推奨されます。
+                なお、本書は最低限の基準を示すものであり、より強力な選択肢を採用することも可能です。<a href="#section-1-4" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-5">
+                アルゴリズムの強度や攻撃の現実性に関する知識は迅速に変化します。
+                セキュリティに関するBCP（Best Current Practice）は時点に依存するため、
+                読者は本書の修正や更新情報を確認することが推奨されます。<a href="#section-1-5" class="pilcrow">¶</a>
+            </p>
+
+            <div id="target-audience">
+                <section id="section-1.1">
+                    <h3 id="name-target-audience">
+                        <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-target-audience"
+                            class="section-name selfRef">対象読者</a>
+                    </h3>
+                    <p id="section-1.1-1">
+                        本文書の対象読者は以下の通りです。<a href="#section-1.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <ul>
+                        <li id="section-1.1-2.1">
+                            JWTライブラリ（およびそれに用いられるJWS/JWEライブラリ）を実装する人。<a href="#section-1.1-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-1.1-2.2">
+                            そのようなライブラリを用いるコードを実装する人（ライブラリで提供されていない機構を自前で扱う場合も含む）。<a href="#section-1.1-2.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-1.1-2.3">
+                            JWTに依存する仕様を開発する人、IETF内外を問わず。<a href="#section-1.1-2.3" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+            <div id="conventions-used-in-this-document">
+                <section id="section-1.2">
+                    <h3 id="name-conventions-used-in-this-do">
+                        <a href="#section-1.2" class="section-number selfRef">1.2. </a><a
+                            href="#name-conventions-used-in-this-do" class="section-name selfRef">本文書で使用する表記法</a>
+                    </h3>
+                    <p id="section-1.2-1">
+                        本文書で使用されるキーワード "<span class="bcp14">MUST</span>",
+                        "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>",
+                        "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>",
+                        "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>",
+                        "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+                        "<span class="bcp14">MAY</span>", "<span class="bcp14">OPTIONAL</span>" は、
+                        BCP 14 に従って解釈されます。
+                        ただし、すべて大文字で書かれた場合に限ります。<a href="#section-1.2-1" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="threats-and-vulnerabilities">
+        <section id="section-2">
+            <h2 id="name-threats-and-vulnerabilities">
+                <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-threats-and-vulnerabilities"
+                    class="section-name selfRef">脅威と脆弱性</a>
+            </h2>
+            <p id="section-2-1">このセクションでは、JWTの実装および展開における既知および潜在的な問題のいくつかを示す。
+                各問題の説明の後には、その問題に対する1つ以上の軽減策への参照が続く。<a href="#section-2-1" class="pilcrow">¶</a></p>
+            <div id="weak-signatures-and-insufficient-signature-validation">
+                <section id="section-2.1">
+                    <h3 id="name-weak-signatures-and-insuffi">
+                        <a href="#section-2.1" class="section-number selfRef">2.1. </a><a
+                            href="#name-weak-signatures-and-insuffi" class="section-name selfRef">弱い署名と不十分な署名検証</a>
+                    </h3>
+                    <p id="section-2.1-1">署名されたJSON Web Tokenは、暗号アルゴリズムの変更性を容易にするために、
+                        "alg" ヘッダパラメータの形で署名アルゴリズムを明示的に示す。
+                        これに加え、一部のライブラリやアプリケーションの設計上の欠陥により、いくつかの攻撃が発生している。<a href="#section-2.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <ul>
+                        <li id="section-2.1-2.1">攻撃者によってアルゴリズムを "none" に変更でき、一部のライブラリは
+                            この値を信頼して署名をチェックせずにJWTを「検証」してしまう。<a href="#section-2.1-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-2.1-2.2"> "RS256" (RSA、2048ビット) のパラメータ値が "HS256" (HMAC、SHA-256) に
+                            変更され、一部のライブラリはRSA公開鍵をHMACの共有秘密として使用して
+                            HMAC-SHA256で署名を検証しようとする場合がある（参照 <span>[<a href="#McLean" class="xref">McLean</a>]</span> および
+                            <span>[<a href="#CVE-2015-9235" class="xref">CVE-2015-9235</a>]</span>）。<a
+                                href="#section-2.1-2.2" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <p id="section-2.1-3">軽減策については、セクション <a href="#algorithm-verification" class="xref">3.1</a> および <a
+                            href="#appropriate-algorithms" class="xref">3.2</a> を参照。<a href="#section-2.1-3"
+                            class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="weak-symmetric-keys">
+                <section id="section-2.2">
+                    <h3 id="name-weak-symmetric-keys">
+                        <a href="#section-2.2" class="section-number selfRef">2.2. </a><a
+                            href="#name-weak-symmetric-keys" class="section-name selfRef">弱い対称鍵</a>
+                    </h3>
+                    <p id="section-2.2-1">さらに、一部のアプリケーションは "HS256" のような鍵付きメッセージ認証コード（MAC）アルゴリズムを使用してトークンに署名するが、
+                        エントロピーが不十分な弱い対称鍵（人間が覚えやすいパスワードなど）を使用している場合がある。
+                        このような鍵は、攻撃者がトークンを入手した場合、オフラインの総当たり攻撃や辞書攻撃に対して脆弱である。<span>[<a href="#Langkemper"
+                                class="xref">Langkemper</a>]</span>。<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+                    <p id="section-2.2-2">軽減策については、<a href="#key-entropy" class="xref">セクション3.5</a> を参照。<a
+                            href="#section-2.2-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="incorrect-composition-of-encryption-and-signature">
+                <section id="section-2.3">
+                    <h3 id="name-incorrect-composition-of-en">
+                        <a href="#section-2.3" class="section-number selfRef">2.3. </a><a
+                            href="#name-incorrect-composition-of-en" class="section-name selfRef">暗号化と署名の不適切な組み合わせ</a>
+                    </h3>
+                    <p id="section-2.3-1">JWEで暗号化されたJWTを復号してJWS署名されたオブジェクトを取得する一部のライブラリは、
+                        内部署名を常に検証するわけではない。<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+                    <p id="section-2.3-2">軽減策については、<a href="#validate-crypto" class="xref">セクション3.3</a> を参照。<a
+                            href="#section-2.3-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="plaintext-leakage-through-analysis-of-ciphertext-length">
+                <section id="section-2.4">
+                    <h3 id="name-plaintext-leakage-through-a">
+                        <a href="#section-2.4" class="section-number selfRef">2.4. </a><a
+                            href="#name-plaintext-leakage-through-a" class="section-name selfRef">暗号文の長さ分析による平文漏洩</a>
+                    </h3>
+                    <p id="section-2.4-1">多くの暗号アルゴリズムは、平文の長さに関する情報を漏洩する。漏洩量はアルゴリズムや運用モードに依存する。
+                        平文が最初に圧縮されている場合、この問題は悪化する。なぜなら、圧縮後の平文の長さ、ひいては暗号文の長さは元の平文の長さだけでなく、内容にも依存するからである。
+                        圧縮攻撃は、攻撃者が制御できるデータが秘密データと同じ圧縮空間にある場合に特に強力であり、これはHTTPSに対する一部の攻撃で見られる。<a href="#section-2.4-1"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-2.4-2">圧縮と暗号化の一般的な背景については <span>[<a href="#Kelsey" class="xref">Kelsey</a>]</span> を、
+                        HTTPクッキーに対する攻撃の具体例については <span>[<a href="#Alawatugoda" class="xref">Alawatugoda</a>]</span>
+                        を参照。<a href="#section-2.4-2" class="pilcrow">¶</a></p>
+                    <p id="section-2.4-3">軽減策については、<a href="#no-compression" class="xref">セクション3.6</a> を参照。<a
+                            href="#section-2.4-3" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="insecure-use-of-elliptic-curve-encryption">
+                <section id="section-2.5">
+                    <h3 id="name-insecure-use-of-elliptic-cu">
+                        <a href="#section-2.5" class="section-number selfRef">2.5. </a><a
+                            href="#name-insecure-use-of-elliptic-cu" class="section-name selfRef">楕円曲線暗号の不安全な使用</a>
+                    </h3>
+                    <p id="section-2.5-1"> <span>[<a href="#Sanso" class="xref">Sanso</a>]</span> によると、いくつかのJavaScript
+                        Object Signing and Encryption (JOSE) ライブラリは、
+                        楕円曲線鍵共有（"ECDH-ES"アルゴリズム）を実行する際に入力を正しく検証できない。
+                        攻撃者が無効な曲線点を使用した任意のJWEを送信し、その無効な曲線点で復号した平文を観察できる場合、この脆弱性を利用して受信者の秘密鍵を回復することができる。<a
+                            href="#section-2.5-1" class="pilcrow">¶</a></p>
+                    <p id="section-2.5-2">軽減策については、<a href="#validate-inputs" class="xref">セクション3.4</a> を参照。<a
+                            href="#section-2.5-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="multiplicity-of-json-encodings">
+                <section id="section-2.6">
+                    <h3 id="name-multiplicity-of-json-encodi">
+                        <a href="#section-2.6" class="section-number selfRef">2.6. </a><a
+                            href="#name-multiplicity-of-json-encodi" class="section-name selfRef">JSONエンコーディングの多様性</a>
+                    </h3>
+                    <p id="section-2.6-1">以前のJSONフォーマット（廃止された <span>[<a href="#RFC7159" class="xref">RFC7159</a>]</span>
+                        など）は、UTF-8、UTF-16、UTF-32など複数の文字エンコーディングを許可していた。
+                        現在の標準 <span>[<a href="#RFC8259" class="xref">RFC8259</a>]</span>
+                        では、内部的な「閉じたエコシステム」内での使用を除き、UTF-8のみを許可している。
+                        この曖昧さにより、古い実装や閉じた環境で使用される実装が非標準のエンコーディングを生成する可能性があり、JWTが受信者によって誤解される可能性がある。
+                        これにより、悪意のある送信者が受信者の検証チェックを回避することができる。<a href="#section-2.6-1" class="pilcrow">¶</a></p>
+                    <p id="section-2.6-2">軽減策については、<a href="#use-utf8" class="xref">セクション3.7</a> を参照。<a
+                            href="#section-2.6-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="substitution">
+                <section id="section-2.7">
+                    <h3 id="name-substitution-attacks">
+                        <a href="#section-2.7" class="section-number selfRef">2.7. </a><a
+                            href="#name-substitution-attacks" class="section-name selfRef">置換攻撃</a>
+                    </h3>
+                    <p id="section-2.7-1">受信者が本来意図されたJWTを別の受信者で使用しようとする攻撃が存在する。
+                        例えば、OAuth 2.0 <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> アクセストークンが正当に
+                        意図されたOAuth 2.0保護リソースに提示された場合、その保護リソースが同じアクセストークンを
+                        意図されていない別の保護リソースに提示し、アクセスを試みる可能性がある。
+                        このような状況を検出できない場合、攻撃者が本来アクセス権のないリソースにアクセスできる可能性がある。<a href="#section-2.7-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.7-2">軽減策については、セクション <a href="#validate-iss-sub" class="xref">3.8</a>
+                        および <a href="#use-aud" class="xref">3.9</a> を参照。<a href="#section-2.7-2" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="cross-jwt-confusion">
+                <section id="section-2.8">
+                    <h3 id="name-cross-jwt-confusion">
+                        <a href="#section-2.8" class="section-number selfRef">2.8. </a><a
+                            href="#name-cross-jwt-confusion" class="section-name selfRef">JWTの混同</a>
+                    </h3>
+                    <p id="section-2.8-1">JWTが異なるプロトコルや多様なアプリケーション領域で使用されるにつれ、
+                        ある目的で発行されたJWTが他の目的で悪用されることを防ぐことがますます重要になる。
+                        これは特定の置換攻撃の一種であることに注意。
+                        JWTが他の種類のJWTと混同されうるアプリケーションコンテキストで使用される場合、
+                        このような置換攻撃を防ぐために軽減策 <span class="bcp14">MUST</span> が必要である。<a href="#section-2.8-1"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-2.8-2">軽減策については、セクション <a href="#validate-iss-sub" class="xref">3.8</a>、<a
+                            href="#use-aud" class="xref">3.9</a>、
+                        <a href="#use-typ" class="xref">3.11</a>、および <a href="#preventing-confusion"
+                            class="xref">3.12</a> を参照。<a href="#section-2.8-2" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="indirect-attacks-on-the-server">
+                <section id="section-2.9">
+                    <h3 id="name-indirect-attacks-on-the-ser">
+                        <a href="#section-2.9" class="section-number selfRef">2.9. </a><a
+                            href="#name-indirect-attacks-on-the-ser" class="section-name selfRef">サーバーに対する間接攻撃</a>
+                    </h3>
+                    <p id="section-2.9-1">さまざまなJWTクレームは、受信者がデータベースやLDAP検索などのルックアップ操作を行うために使用される。
+                        他には、同様にサーバーがルックアップするURLなどがある。
+                        これらのクレームはいずれも、攻撃者によって注入攻撃やサーバーサイドリクエストフォージェリ（SSRF）攻撃のベクターとして利用される可能性がある。<a href="#section-2.9-1"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-2.9-2">軽減策については、<a href="#do-not-trust-claims" class="xref">セクション3.10</a> を参照。<a
+                            href="#section-2.9-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="BP">
+        <section id="section-3">
+            <h2 id="name-best-practices">
+                <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-best-practices"
+                    class="section-name selfRef">ベストプラクティス</a>
+            </h2>
+            <p id="section-3-1">以下に列挙するベストプラクティスは、前節で示した脅威を軽減するために実務者が適用すべきものです。<a href="#section-3-1"
+                    class="pilcrow">¶</a></p>
+            <div id="algorithm-verification">
+                <section id="section-3.1">
+                    <h3 id="name-perform-algorithm-verificat">
+                        <a href="#section-3.1" class="section-number selfRef">3.1. </a><a
+                            href="#name-perform-algorithm-verificat" class="section-name selfRef">アルゴリズム検証を実施する</a>
+                    </h3>
+                    <p id="section-3.1-1">ライブラリは呼び出し元がサポートされるアルゴリズムの集合を指定できるようにし<span
+                            class="bcp14">MUST</span>、暗号操作を行う際にそれ以外のアルゴリズムを使用してはならない<span class="bcp14">MUST NOT</span>。
+                        ライブラリは "alg" または "enc" ヘッダが暗号操作で使用されるのと同じアルゴリズムを指定していることを<span class="bcp14">MUST</span>
+                        確保する必要がある。
+                        さらに、各キーは厳密に一つのアルゴリズムでのみ使用されるべきであり、そのことは暗号操作が実行される際に確認されなければならない<span
+                            class="bcp14">MUST</span>。<a href="#section-3.1-1" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="appropriate-algorithms">
+                <section id="section-3.2">
+                    <h3 id="name-use-appropriate-algorithms">
+                        <a href="#section-3.2" class="section-number selfRef">3.2. </a><a
+                            href="#name-use-appropriate-algorithms" class="section-name selfRef">適切なアルゴリズムを使用する</a>
+                    </h3>
+                    <p id="section-3.2-1">[<a href="https://www.rfc-editor.org/rfc/rfc7515#section-5.2"
+                            class="relref">セクション5.2</a> of [<a href="#RFC7515" class="xref">RFC7515</a>]</span>が述べるように、
+                        「特定の文脈でどのアルゴリズムが使用できるかはアプリケーションの判断である。たとえ JWS が正常に検証できたとしても、JWS
+                        で使用されたアルゴリズムがアプリケーションにとって受け入れられるものでない限り、アプリケーションは当該 JWS を無効とみなすべきである」とある。<a
+                            href="#section-3.2-1" class="pilcrow">¶</a></p>
+                    <p id="section-3.2-2">したがって、アプリケーションは暗号的に現在安全とされるアルゴリズムのみを許可し<span
+                            class="bcp14">MUST</span>、アプリケーションのセキュリティ要件を満たす必要がある。
+                        この集合は新しいアルゴリズムの導入や既存アルゴリズムが暗号的弱点により非推奨になるに従って時間とともに変化する。
+                        よってアプリケーションは暗号のアジリティを可能にするよう設計されなければならない<span class="bcp14">MUST</span>。<a href="#section-3.2-2"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-3.2-3">とはいえ、JWT が TLS
+                        のような輸送層でエンドツーエンドに暗号的に保護されており、かつその輸送が暗号的に現在安全なアルゴリズムを使用している場合、JWT に別の暗号保護層を適用する必要はないかもしれない。
+                        そのような場合、"none" アルゴリズムの使用は完全に容認され得る。
+                        "none" アルゴリズムは JWT が他の手段によって暗号的に保護されている場合にのみ使用されるべきである。
+                        "none" を使用する JWT は、署名が任意であるアプリケーション文脈で用いられることが多く、その場合、URL 安全なクレーム表現と処理は署名あり・なしの両方で同一にできる。
+                        JWT ライブラリは明示的に呼び出し元に要求されない限り "none" を使用して JWT を生成すべきでない<span class="bcp14">SHOULD NOT</span>。
+                        同様に、JWT ライブラリは明示的に呼び出し元に要求されない限り "none" を使用する JWT を消費すべきでない<span class="bcp14">SHOULD
+                            NOT</span>。<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+                    <p id="section-3.2-4">アプリケーションは次のアルゴリズム固有の推奨事項に従うべきである<span class="bcp14">SHOULD</span>：<a
+                            href="#section-3.2-4" class="pilcrow">¶</a></p>
+                    <ul>
+                        <li id="section-3.2-5.1">すべての RSA-PKCS1 v1.5 暗号化アルゴリズム（<span>[<a href="#RFC8017"
+                                    class="xref">RFC8017</a>], <a
+                                    href="https://www.rfc-editor.org/rfc/rfc8017#section-7.2"
+                                    class="relref">セクション7.2</a></span>）を避け、
+                            RSAES-OAEP
+                            （<span>[<a href="#RFC8017" class="xref">RFC8017</a>], <a
+                                    href="https://www.rfc-editor.org/rfc/rfc8017#section-7.1"
+                                    class="relref">セクション7.1</a></span>）を好むべきである。<a href="#section-3.2-5.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-3.2-5.2">楕円曲線デジタル署名アルゴリズム（ECDSA）署名 <span>[<a href="#ANSI-X962-2005"
+                                    class="xref">ANSI-X962-2005</a>]</span> は、署名される各メッセージに対して一意のランダム値を必要とする。
+                            もしランダム値の一部のビットでも複数メッセージ間で予測可能であれば、署名スキームの安全性は損なわれる可能性がある。最悪の場合、攻撃者によって秘密鍵が回復されることもあり得る。これらの攻撃に対抗するために、JWT
+                            ライブラリは決定論的な手法（<span>[<a href="#RFC6979" class="xref">RFC6979</a>]</span>で定義される）を用いて ECDSA
+                            を実装することを推奨する<span class="bcp14">SHOULD</span>。
+                            この手法は既存の ECDSA 検証者と完全に互換性があるため、新たなアルゴリズム識別子を必要とせずに実装できる。<a href="#section-3.2-5.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <div id="validate-crypto">
+                <section id="section-3.3">
+                    <h3 id="name-validate-all-cryptographic-">
+                        <a href="#section-3.3" class="section-number selfRef">3.3. </a><a
+                            href="#name-validate-all-cryptographic-" class="section-name selfRef">すべての暗号操作を検証する</a>
+                    </h3>
+                    <p id="section-3.3-1">JWT で使用されるすべての暗号操作は検証されるべきであり、いずれかが検証に失敗した場合は JWT 全体を拒否しなければならない<span
+                            class="bcp14">MUST</span>。
+                        これはヘッダパラメータが単一のセットである JWT に限らず、外側と内側の両方の操作が検証されるべきネストされた JWT
+                        に対しても同様であり、これらはアプリケーションによって提供されるキーとアルゴリズムを用いて検証されなければならない<span class="bcp14">MUST</span>。<a
+                            href="#section-3.3-1" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="validate-inputs">
+                <section id="section-3.4">
+                    <h3 id="name-validate-cryptographic-inpu">
+                        <a href="#section-3.4" class="section-number selfRef">3.4. </a><a
+                            href="#name-validate-cryptographic-inpu" class="section-name selfRef">暗号入力を検証する</a>
+                    </h3>
+                    <p id="section-3.4-1">楕円曲線ディフィー・ヘルマン鍵共有（"ECDH-ES"）のような一部の暗号操作は、指定された楕円曲線上にない点やその他の無効な点（例: <span>[<a
+                                href="#Valenta" class="xref">Valenta</a>]</span>、セクション7.1）を含む無効な値を入力として取る可能性がある。
+                        JWS/JWE ライブラリ自体がこれらの入力を使用する前に検証するか、あるいは基盤となる暗号ライブラリがそれを行う（またはその両方）必要がある。<a href="#section-3.4-1"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-3.4-2">楕円曲線ディフィー・ヘルマン
+                        Ephemeral-Static（ECDH-ES）のエフェメラル公開鍵（epk）入力は、受信者が選択した楕円曲線に従って検証されるべきである。NIST の素数位数曲線
+                        P-256、P-384、P-521 の場合、検証は"Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete
+                        Logarithm Cryptography" のセクション5.6.2.3.4（ECC 部分公開鍵検証ルーチン）に従って行われるべきである<span>[<a
+                                href="#nist-sp-800-56a-r3" class="xref">nist-sp-800-56a-r3</a>]</span>。
+                        "X25519" または "X448" のアルゴリズムが使用される場合は、<span>[<a href="#RFC8037" class="xref">RFC8037</a>]</span>
+                        に記載されたセキュリティ考慮事項が適用される。<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="key-entropy">
+                <section id="section-3.5">
+                    <h3 id="name-ensure-cryptographic-keys-h">
+                        <a href="#section-3.5" class="section-number selfRef">3.5. </a><a
+                            href="#name-ensure-cryptographic-keys-h"
+                            class="section-name selfRef">暗号鍵が十分なエントロピーを有していることを保証する</a>
+                    </h3>
+                    <p id="section-3.5-1">キーのエントロピーとランダム値に関する助言は、[<a
+                            href="https://www.rfc-editor.org/rfc/rfc7515#section-10.1" class="relref">RFC7515
+                            セクション10.1</a>]および[<a href="https://www.rfc-editor.org/rfc/rfc7518#section-8.8"
+                            class="relref">RFC7518 セクション8.8</a>]のパスワードに関する考慮事項に従うべきであり、これらは守られなければならない<span
+                            class="bcp14">MUST</span>。特に、人間が記憶可能なパスワードを "HS256" のような keyed-MAC
+                        アルゴリズムのキーとして直接使用してはならない<span class="bcp14">MUST NOT</span>。
+                        さらに、パスワードはコンテンツ暗号化よりも鍵暗号化を行うためにのみ使用されるべきであり、その詳細は [<a
+                            href="https://www.rfc-editor.org/rfc/rfc7518#section-4.8" class="relref">RFC7518
+                            セクション4.8</a>] に記載されている。鍵暗号化に用いる場合でも、パスワードベースの暗号化は総当たり攻撃の対象となる点に注意する必要がある。<a
+                            href="#section-3.5-1" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="no-compression">
+                <section id="section-3.6">
+                    <h3 id="name-avoid-compression-of-encryp">
+                        <a href="#section-3.6" class="section-number selfRef">3.6. </a><a
+                            href="#name-avoid-compression-of-encryp" class="section-name selfRef">暗号化入力の圧縮を避ける</a>
+                    </h3>
+                    <p id="section-3.6-1">データの圧縮は暗号化の前に行うべきではない<span class="bcp14">SHOULD
+                            NOT</span>。圧縮されたデータはしばしば平文に関する情報を明らかにするためである。<a href="#section-3.6-1" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="use-utf8">
+                <section id="section-3.7">
+                    <h3 id="name-use-utf-8">
+                        <a href="#section-3.7" class="section-number selfRef">3.7. </a><a href="#name-use-utf-8"
+                            class="section-name selfRef">UTF-8 を使用する</a>
+                    </h3>
+                    <p id="section-3.7-1"><span>[<a href="#RFC7515" class="xref">RFC7515</a>]</span>、<span>[<a
+                                href="#RFC7516" class="xref">RFC7516</a>]</span>、および <span>[<a href="#RFC7519"
+                                class="xref">RFC7519</a>]</span> はすべて、ヘッダパラメータおよび JWT クレームセットで使用される JSON のエンコードおよびデコードに
+                        UTF-8 を使用することを指定している。これは最新の JSON 仕様書 <span>[<a href="#RFC8259" class="xref">RFC8259</a>]</span>
+                        とも一致する。
+                        実装およびアプリケーションはこれを行い、これらの目的のために他の Unicode エンコーディングを使用したり許容したりしてはならない<span
+                            class="bcp14">MUST</span>。<a href="#section-3.7-1" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="validate-iss-sub">
+                <section id="section-3.8">
+                    <h3 id="name-validate-issuer-and-subject">
+                        <a href="#section-3.8" class="section-number selfRef">3.8. </a><a
+                            href="#name-validate-issuer-and-subject" class="section-name selfRef">発行者と主体を検証する</a>
+                    </h3>
+                    <p id="section-3.8-1">JWT に "iss"（発行者）クレームが含まれる場合、アプリケーションは JWT
+                        の暗号操作に使用された暗号鍵が発行者に属することを検証しなければならない<span class="bcp14">MUST</span>。
+                        もし属していない場合、アプリケーションは JWT を拒否しなければならない<span class="bcp14">MUST</span>。<a href="#section-3.8-1"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-3.8-2">発行者が所有する鍵を特定する手段はアプリケーション固有である。一例として、OpenID Connect <span>[<a
+                                href="#OpenID.Core" class="xref">OpenID.Core</a>]</span> の発行者値は JSON メタデータ文書を参照する
+                        "https" URL であり、その文書には発行者の鍵が JWK セットとして取得される "jwks_uri" 値（"https" URL）を含む。このメカニズムは <span>[<a
+                                href="#RFC8414" class="xref">RFC8414</a>]</span>
+                        でも使用される。その他のアプリケーションは異なる手段で鍵と発行者を結び付ける場合がある。<a href="#section-3.8-2" class="pilcrow">¶</a></p>
+                    <p id="section-3.8-3">同様に、JWT に
+                        "sub"（主体）クレームが含まれる場合、アプリケーションは主体値が有効な主体および/またはアプリケーションにおける発行者-主体の組と対応していることを検証しなければならない<span
+                            class="bcp14">MUST</span>。
+                        これには発行者がアプリケーションによって信頼されていることの確認を含む場合がある。もし発行者、主体、またはその組が無効であれば、アプリケーションは JWT を拒否しなければならない<span
+                            class="bcp14">MUST</span>。<a href="#section-3.8-3" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="use-aud">
+                <section id="section-3.9">
+                    <h3 id="name-use-and-validate-audience">
+                        <a href="#section-3.9" class="section-number selfRef">3.9. </a><a
+                            href="#name-use-and-validate-audience" class="section-name selfRef">オーディエンスを使用し検証する</a>
+                    </h3>
+                    <p id="section-3.9-1">同じ発行者が複数の依存当事者またはアプリケーション向けに JWT を発行できる場合、JWT は "aud"（オーディエンス）クレームを含み、その値を使用して
+                        JWT が意図された当事者によって使用されているか、攻撃者によって意図しない当事者に差し替えられていないかを判断できるようにしなければならない<span
+                            class="bcp14">MUST</span>。<a href="#section-3.9-1" class="pilcrow">¶</a></p>
+                    <p id="section-3.9-2">そのような場合、依存当事者やアプリケーションはオーディエンス値を検証しなければならない<span class="bcp14">MUST</span>。
+                        もしオーディエンス値が存在しないか受信者に関連付けられていない場合、JWT を拒否しなければならない<span class="bcp14">MUST</span>。<a
+                            href="#section-3.9-2" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="do-not-trust-claims">
+                <section id="section-3.10">
+                    <h3 id="name-do-not-trust-received-claim">
+                        <a href="#section-3.10" class="section-number selfRef">3.10. </a><a
+                            href="#name-do-not-trust-received-claim" class="section-name selfRef">受け取ったクレームを信用しない</a>
+                    </h3>
+                    <p id="section-3.10-1">"kid"（キーID）ヘッダは依存アプリケーションが鍵検索を行うために使用される。アプリケーションはこれが SQL や LDAP
+                        インジェクションの脆弱性を生じさせないよう、受け取った値を検証および/またはサニタイズすることを保証すべきである。<a href="#section-3.10-1"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-3.10-2">同様に、任意の URL を含み得る "jku"（JWK セット URL）や "x5u"（X.509
+                        URL）ヘッダを盲目的にたどることは、サーバーサイドリクエストフォージェリ（SSRF）攻撃を招く可能性がある。アプリケーションはそのような攻撃に対して保護すべきであり<span
+                            class="bcp14">SHOULD</span>、例えば URL を許可された場所のホワイトリストに照合し、GET
+                        リクエストでクッキーが送信されないことを確保する等の対策を講じるべきである。<a href="#section-3.10-2" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="use-typ">
+                <section id="section-3.11">
+                    <h3 id="name-use-explicit-typing">
+                        <a href="#section-3.11" class="section-number selfRef">3.11. </a><a
+                            href="#name-use-explicit-typing" class="section-name selfRef">明示的な型指定を使用する</a>
+                    </h3>
+                    <p id="section-3.11-1">場合によっては、ある種類の JWT が別の種類と混同されることがある。もし特定の種類の JWT がそのような混乱の対象となるなら、その JWT は明示的な
+                        JWT 型値を含めることができ、検証ルールは型のチェックを指定することができる。このメカニズムはそのような混同を防ぐことができる。
+                        明示的な JWT 型指定は "typ" ヘッダパラメータを使用して行われる。例えば、<span>[<a href="#RFC8417"
+                                class="xref">RFC8417</a>]</span> 仕様は Security Event Tokens (SET) の明示的な型指定を行うために
+                        "application/secevent+jwt" メディアタイプを使用する。<a href="#section-3.11-1" class="pilcrow">¶</a></p>
+                    <p id="section-3.11-2">[<a href="https://www.rfc-editor.org/rfc/rfc7515#section-4.1.9"
+                            class="relref">RFC7515 セクション4.1.9</a>] における "typ" の定義によれば、"typ" 値から "application/"
+                        プレフィックスを省略することが推奨される<span class="bcp14">RECOMMENDED</span>。
+                        したがって、例えば SET の型を明示的に含めるために使用される "typ" 値は "secevent+jwt" であるべきだ<span
+                            class="bcp14">SHOULD</span>。
+                        JWT に明示的な型指定が用いられる場合、"application/example+jwt" の形式のメディアタイプ名を使用することが推奨される<span
+                            class="bcp14">RECOMMENDED</span>。ここで "example" は特定の JWT 種類の識別子に置き換えられる。<a
+                            href="#section-3.11-2" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-3.11-3">ネストされた JWT に明示的な型指定を適用する場合、明示的な型値を含む "typ" ヘッダパラメータはネストされた JWT の内側の
+                        JWT（ペイロードが JWT クレームセットである JWT）に存在しなければならない<span class="bcp14">MUST</span>。
+                        場合によっては、全体のネストされた JWT を明示的に型指定するために外側の JWT にも同じ "typ" ヘッダパラメータ値が存在することがある。<a
+                            href="#section-3.11-3" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-3.11-4">明示的な型指定を用いても既存の種類の JWT からの曖昧性を完全に解消できないことがある点に注意せよ。既存の種類の JWT に対する検証ルールはしばしば
+                        "typ" ヘッダパラメータ値を使用していないからである。
+                        新しい JWT の用途に対しては明示的な型指定が推奨される<span class="bcp14">RECOMMENDED</span>。<a href="#section-3.11-4"
+                            class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="preventing-confusion">
+                <section id="section-3.12">
+                    <h3 id="name-use-mutually-exclusive-vali">
+                        <a href="#section-3.12" class="section-number selfRef">3.12. </a><a
+                            href="#name-use-mutually-exclusive-vali" class="section-name selfRef">異なる種類の JWT
+                            に対して相互に排他的な検証ルールを使用する</a>
+                    </h3>
+                    <p id="section-3.12-1">各 JWT の適用は、必要および任意の JWT クレームとそれらに関連する検証ルールを指定するプロファイルを定義する。
+                        同一の発行者が複数種類の JWT を発行できる場合、それらの JWT に対する検証ルールは相互に排他的になるように記述されなければならず<span
+                            class="bcp14">MUST</span>、間違った種類の JWT を拒否すること。
+                        JWT をある文脈から別の文脈へ差し替えられることを防ぐために、アプリケーション開発者は複数の戦略を用いることができる：<a href="#section-3.12-1"
+                            class="pilcrow">¶</a></p>
+                    <ul>
+                        <li id="section-3.12-2.1">異なる種類の JWT に対して明示的な型指定を使用する。すると異なる "typ" 値を用いて JWT の種類を区別できる。<a
+                                href="#section-3.12-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-3.12-2.2">必要なクレームの集合や要求されるクレーム値を変える。するとある種類の JWT
+                            に対する検証ルールは、異なるクレームや値を持つものを拒否する。<a href="#section-3.12-2.2" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-3.12-2.3">必要なヘッダパラメータの集合や要求されるヘッダパラメータ値を変える。するとある種類の JWT
+                            に対する検証ルールは、異なるヘッダパラメータや値を持つものを拒否する。<a href="#section-3.12-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-3.12-2.4">異なる種類の JWT に対して異なる鍵を使用する。するとある種類の JWT を検証するために使用される鍵は他の種類の JWT
+                            を検証できず、失敗する。<a href="#section-3.12-2.4" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-3.12-2.5">同一の発行者からの異なる用途の JWT に対して異なる "aud" 値を使用する。するとオーディエンス検証は不適切な文脈に差し替えられた
+                            JWT を拒否する。<a href="#section-3.12-2.5" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-3.12-2.6">異なる種類の JWT に対して異なる発行者を使用する。すると異なる "iss" 値を用いて JWT の種類を分離できる。<a
+                                href="#section-3.12-2.6" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <p id="section-3.12-3">JWT の用途とアプリケーションの多様性を考えると、異なる種類の JWT
+                        を区別するための型、必要なクレーム、値、ヘッダパラメータ、鍵の使用、発行者の最良の組み合わせは、一般にアプリケーション固有である。
+                        新しい JWT アプリケーションに関しては、<a href="#use-typ" class="xref">セクション3.11</a>で述べたように、明示的な型指定の使用が推奨される<span
+                            class="bcp14">RECOMMENDED</span>。<a href="#section-3.12-3" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="security-considerations">
+        <section id="section-4">
+            <h2 id="name-security-considerations">
+                <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-security-considerations"
+                    class="section-name selfRef">セキュリティに関する考慮事項</a>
+            </h2>
+            <p id="section-4-1">この文書全体は、JSON Web Token を実装および展開する際の
+                セキュリティに関する考慮事項について述べています。<a href="#section-4-1" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="iana-considerations">
+        <section id="section-5">
+            <h2 id="name-iana-considerations">
+                <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-iana-considerations"
+                    class="section-name selfRef">IANA に関する考慮事項</a>
+            </h2>
+            <p id="section-5-1">この文書には IANA に対するアクションはありません。<a href="#section-5-1" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <section id="section-6">
+        <h2 id="name-references">
+            <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-references"
+                class="section-name selfRef">参考文献</a>
+        </h2>
+        <section id="section-6.1">
+            <h3 id="name-normative-references">
+                <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-normative-references"
+                    class="section-name selfRef">規範的参照</a>
+            </h3>
+            <dl class="references">
+                <dt id="nist-sp-800-56a-r3">[nist-sp-800-56a-r3]</dt>
+                <dd>
+                    <span class="refAuthor">Barker, E.</span><span class="refAuthor">, Chen, L.</span><span
+                        class="refAuthor">, Roginsky, A.</span><span class="refAuthor">, Vassilev, A.</span><span
+                        class="refAuthor">, and R. Davis</span>, <span class="refTitle">"Recommendation for Pair-Wise
+                        Key-Establishment Schemes Using Discrete Logarithm Cryptography"</span>, <span
+                        class="seriesInfo">NIST Special Publication 800-56A Revision 3</span>, <span
+                        class="seriesInfo">DOI 10.6028/NIST.SP.800-56Ar3</span>, <time datetime="2018-04">April
+                        2018</time>, <span>&lt;<a
+                            href="https://doi.org/10.6028/NIST.SP.800-56Ar3">https://doi.org/10.6028/NIST.SP.800-56Ar3</a>&gt;</span>.
+                </dd>
+                <dt id="RFC2119">[RFC2119]</dt>
+                <dd>
+                    <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to
+                        Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span
+                        class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time
+                        datetime="1997-03">March 1997</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>.
+                </dd>
+                <dt id="RFC6979">[RFC6979]</dt>
+                <dd>
+                    <span class="refAuthor">Pornin, T.</span>, <span class="refTitle">"Deterministic Usage of the
+                        Digital Signature Algorithm (DSA) and Elliptic Curve Digital Signature Algorithm
+                        (ECDSA)"</span>, <span class="seriesInfo">RFC 6979</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6979</span>, <time datetime="2013-08">August 2013</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6979">https://www.rfc-editor.org/info/rfc6979</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7515">[RFC7515]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span><span class="refAuthor">, Bradley, J.</span><span
+                        class="refAuthor">, and N. Sakimura</span>, <span class="refTitle">"JSON Web Signature
+                        (JWS)"</span>, <span class="seriesInfo">RFC 7515</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7515</span>, <time datetime="2015-05">May 2015</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7515">https://www.rfc-editor.org/info/rfc7515</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7516">[RFC7516]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span><span class="refAuthor"> and J. Hildebrand</span>, <span
+                        class="refTitle">"JSON Web Encryption (JWE)"</span>, <span class="seriesInfo">RFC 7516</span>,
+                    <span class="seriesInfo">DOI 10.17487/RFC7516</span>, <time datetime="2015-05">May 2015</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7516">https://www.rfc-editor.org/info/rfc7516</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7518">[RFC7518]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Algorithms (JWA)"</span>,
+                    <span class="seriesInfo">RFC 7518</span>, <span class="seriesInfo">DOI 10.17487/RFC7518</span>,
+                    <time datetime="2015-05">May 2015</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7518">https://www.rfc-editor.org/info/rfc7518</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7519">[RFC7519]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span><span class="refAuthor">, Bradley, J.</span><span
+                        class="refAuthor">, and N. Sakimura</span>, <span class="refTitle">"JSON Web Token
+                        (JWT)"</span>, <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7519</span>, <time datetime="2015-05">May 2015</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8017">[RFC8017]</dt>
+                <dd>
+                    <span class="refAuthor">Moriarty, K., Ed.</span><span class="refAuthor">, Kaliski, B.</span><span
+                        class="refAuthor">, Jonsson, J.</span><span class="refAuthor">, and A. Rusch</span>, <span
+                        class="refTitle">"PKCS #1: RSA Cryptography Specifications Version 2.2"</span>, <span
+                        class="seriesInfo">RFC 8017</span>, <span class="seriesInfo">DOI 10.17487/RFC8017</span>, <time
+                        datetime="2016-11">November 2016</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8017">https://www.rfc-editor.org/info/rfc8017</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8037">[RFC8037]</dt>
+                <dd>
+                    <span class="refAuthor">Liusvaara, I.</span>, <span class="refTitle">"CFRG Elliptic Curve
+                        Diffie-Hellman (ECDH) and Signatures in JSON Object Signing and Encryption (JOSE)"</span>, <span
+                        class="seriesInfo">RFC 8037</span>, <span class="seriesInfo">DOI 10.17487/RFC8037</span>, <time
+                        datetime="2017-01">January 2017</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8037">https://www.rfc-editor.org/info/rfc8037</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8174">[RFC8174]</dt>
+                <dd>
+                    <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs
+                        Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span
+                        class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time
+                        datetime="2017-05">May 2017</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8259">[RFC8259]</dt>
+                <dd>
+                    <span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation
+                        (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span
+                        class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time
+                        datetime="2017-12">December 2017</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;</span>.
+                </dd>
+            </dl>
+        </section>
+        <section id="section-6.2">
+            <h3 id="name-informative-references">
+                <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-informative-references"
+                    class="section-name selfRef">情報的参照</a>
+            </h3>
+            <dl class="references">
+                <dt id="Alawatugoda">[Alawatugoda]</dt>
+                <dd>
+                    <span class="refAuthor">Alawatugoda, J.</span><span class="refAuthor">, Stebila, D.</span><span
+                        class="refAuthor">, and C. Boyd</span>, <span class="refTitle">"Protecting Encrypted Cookies
+                        from Compression Side-Channel Attacks"</span>, <span class="refContent">Financial Cryptography
+                        and Data Security, pp. 86-106</span>, <span class="seriesInfo">DOI
+                        10.1007/978-3-662-47854-7_6</span>, <time datetime="2015-07">July 2015</time>, <span>&lt;<a
+                            href="https://doi.org/10.1007/978-3-662-47854-7_6">https://doi.org/10.1007/978-3-662-47854-7_6</a>&gt;</span>.
+                </dd>
+                <dt id="ANSI-X962-2005">[ANSI-X962-2005]</dt>
+                <dd>
+                    <span class="refAuthor">American National Standards Institute</span>, <span class="refTitle">"Public
+                        Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature
+                        Algorithm (ECDSA)"</span>, <span class="seriesInfo">ANSI X9.62-2005</span>, <time
+                        datetime="2005-11">November 2005</time>.
+                </dd>
+                <dt id="CVE-2015-9235">[CVE-2015-9235]</dt>
+                <dd>
+                    <span class="refAuthor">NIST</span>, <span class="refTitle">"CVE-2015-9235 Detail"</span>, <span
+                        class="refContent">National Vulnerability Database</span>, <time datetime="2018-05">May
+                        2018</time>, <span>&lt;<a
+                            href="https://nvd.nist.gov/vuln/detail/CVE-2015-9235">https://nvd.nist.gov/vuln/detail/CVE-2015-9235</a>&gt;</span>.
+                </dd>
+                <dt id="Kelsey">[Kelsey]</dt>
+                <dd>
+                    <span class="refAuthor">Kelsey, J.</span>, <span class="refTitle">"Compression and Information
+                        Leakage of Plaintext"</span>, <span class="refContent">Fast Software Encryption, pp.
+                        263-276</span>, <span class="seriesInfo">DOI 10.1007/3-540-45661-9_21</span>, <time
+                        datetime="2002-07">July 2002</time>, <span>&lt;<a
+                            href="https://doi.org/10.1007/3-540-45661-9_21">https://doi.org/10.1007/3-540-45661-9_21</a>&gt;</span>.
+                </dd>
+                <dt id="Langkemper">[Langkemper]</dt>
+                <dd>
+                    <span class="refAuthor">Langkemper, S.</span>, <span class="refTitle">"Attacking JWT
+                        authentication"</span>, <time datetime="2016-09">September 2016</time>, <span>&lt;<a
+                            href="https://www.sjoerdlangkemper.nl/2016/09/28/attacking-jwt-authentication/">https://www.sjoerdlangkemper.nl/2016/09/28/attacking-jwt-authentication/</a>&gt;</span>.
+                </dd>
+                <dt id="McLean">[McLean]</dt>
+                <dd>
+                    <span class="refAuthor">McLean, T.</span>, <span class="refTitle">"Critical vulnerabilities in JSON
+                        Web Token libraries"</span>, <time datetime="2015-03">March 2015</time>, <span>&lt;<a
+                            href="https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/">https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/</a>&gt;</span>.
+                </dd>
+                <dt id="OpenID.Core">[OpenID.Core]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N.</span><span class="refAuthor">, Bradley, J.</span><span
+                        class="refAuthor">, Jones, M.</span><span class="refAuthor">, de Medeiros, B.</span><span
+                        class="refAuthor">, and C. Mortimore</span>, <span class="refTitle">"OpenID Connect Core 1.0
+                        incorporating errata set 1"</span>, <time datetime="2014-11">November 2014</time>, <span>&lt;<a
+                            href="https://openid.net/specs/openid-connect-core-1_0.html">https://openid.net/specs/openid-connect-core-1_0.html</a>&gt;</span>.
+                </dd>
+                <dt id="RFC6749">[RFC6749]</dt>
+                <dd>
+                    <span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"The OAuth 2.0 Authorization
+                        Framework"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6749</span>, <time datetime="2012-10">October 2012</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6749">https://www.rfc-editor.org/info/rfc6749</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7159">[RFC7159]</dt>
+                <dd>
+                    <span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation
+                        (JSON) Data Interchange Format"</span>, <span class="seriesInfo">RFC 7159</span>, <span
+                        class="seriesInfo">DOI 10.17487/RFC7159</span>, <time datetime="2014-03">March 2014</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7159">https://www.rfc-editor.org/info/rfc7159</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7517">[RFC7517]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Key (JWK)"</span>, <span
+                        class="seriesInfo">RFC 7517</span>, <span class="seriesInfo">DOI 10.17487/RFC7517</span>, <time
+                        datetime="2015-05">May 2015</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7517">https://www.rfc-editor.org/info/rfc7517</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8414">[RFC8414]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span><span class="refAuthor">, Sakimura, N.</span><span
+                        class="refAuthor">, and J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization
+                        Server Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC8414</span>, <time datetime="2018-06">June 2018</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8414">https://www.rfc-editor.org/info/rfc8414</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8417">[RFC8417]</dt>
+                <dd>
+                    <span class="refAuthor">Hunt, P., Ed.</span><span class="refAuthor">, Jones, M.</span><span
+                        class="refAuthor">, Denniss, W.</span><span class="refAuthor">, and M. Ansari</span>, <span
+                        class="refTitle">"Security Event Token (SET)"</span>, <span class="seriesInfo">RFC 8417</span>,
+                    <span class="seriesInfo">DOI 10.17487/RFC8417</span>, <time datetime="2018-07">July 2018</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8417">https://www.rfc-editor.org/info/rfc8417</a>&gt;</span>.
+                </dd>
+                <dt id="Sanso">[Sanso]</dt>
+                <dd>
+                    <span class="refAuthor">Sanso, A.</span>, <span class="refTitle">"Critical Vulnerability Uncovered
+                        in JSON Encryption"</span>, <time datetime="2017-03">March 2017</time>, <span>&lt;<a
+                            href="https://blogs.adobe.com/security/2017/03/critical-vulnerability-uncovered-in-json-encryption.html">https://blogs.adobe.com/security/2017/03/critical-vulnerability-uncovered-in-json-encryption.html</a>&gt;</span>.
+                </dd>
+                <dt id="Valenta">[Valenta]</dt>
+                <dd>
+                    <span class="refAuthor">Valenta, L.</span><span class="refAuthor">, Sullivan, N.</span><span
+                        class="refAuthor">, Sanso, A.</span><span class="refAuthor">, and N. Heninger</span>, <span
+                        class="refTitle">"In search of CurveSwap: Measuring elliptic curve implementations in the
+                        wild"</span>, <time datetime="2018-03">March 2018</time>, <span>&lt;<a
+                            href="https://ia.cr/2018/298">https://ia.cr/2018/298</a>&gt;</span>.
+                </dd>
+            </dl>
+        </section>
+    </section>
+    <div id="acknowledgements">
+        <section id="section-appendix.a">
+            <h2 id="name-acknowledgements">
+                <a href="#name-acknowledgements" class="section-name selfRef">謝辞</a>
+            </h2>
+            <p id="section-appendix.a-1">JWE および JWT の実装者に対して "ECDH-ES" の無効点攻撃を注意喚起してくれた
+                <span class="contact-name">Antonio Sanso</span> に感謝します。<span class="contact-name">Tim McLean</span> は
+                RSA/HMAC 混同攻撃を公開しました <span>[<a href="#McLean" class="xref">McLean</a>]</span>。
+                明示的な型指定の使用を提唱してくれた <span class="contact-name">Nat Sakimura</span> に感謝します。多くのコメントをくれた
+                <span class="contact-name">Neil Madden</span> に感謝します。またレビューをしてくれた
+                <span class="contact-name">Carsten Bormann</span>,
+                <span class="contact-name">Brian Campbell</span>,
+                <span class="contact-name">Brian Carpenter</span>,
+                <span class="contact-name">Alissa Cooper</span>,
+                <span class="contact-name">Roman Danyliw</span>,
+                <span class="contact-name">Ben Kaduk</span>,
+                <span class="contact-name">Mirja Kühlewind</span>,
+                <span class="contact-name">Barry Leiba</span>,
+                <span class="contact-name">Eric Rescorla</span>,
+                <span class="contact-name">Adam Roach</span>,
+                <span class="contact-name">Martin Vigoureux</span>,
+                and <span class="contact-name">Éric Vyncke</span>
+                に感謝します。<a href="#section-appendix.a-1" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="authors-addresses">
+        <section id="section-appendix.b">
+            <h2 id="name-authors-addresses">
+                <a href="#name-authors-addresses" class="section-name selfRef">著者の連絡先</a>
+            </h2>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Yaron Sheffer</span></div>
+                <div dir="auto" class="left"><span class="org">Intuit</span></div>
+                <div class="email">
+                    <span>電子メール:</span>
+                    <a href="mailto:yaronf.ietf@gmail.com" class="email">yaronf.ietf@gmail.com</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Dick Hardt</span></div>
+                <div class="email">
+                    <span>電子メール:</span>
+                    <a href="mailto:dick.hardt@gmail.com" class="email">dick.hardt@gmail.com</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Michael B. Jones</span></div>
+                <div dir="auto" class="left"><span class="org">Microsoft</span></div>
+                <div class="email">
+                    <span>電子メール:</span>
+                    <a href="mailto:mbj@microsoft.com" class="email">mbj@microsoft.com</a>
+                </div>
+                <div class="url">
+                    <span>URI:</span>
+                    <a href="https://self-issued.info/" class="url">https://self-issued.info/</a>
+                </div>
+            </address>
+        </section>
+    </div>
+    <script>var toc = document.getElementById("toc");
+        var tocToggle = toc.querySelector("h2");
+        var tocNav = toc.querySelector("nav");
+
+        // mobile menu toggle
+        tocToggle.onclick = function (event) {
+            if (window.innerWidth < 1024) {
+                var tocNavDisplay = tocNav.currentStyle ? tocNav.currentStyle.display : getComputedStyle(tocNav, null).display;
+                if (tocNavDisplay == "none") {
+                    tocNav.style.display = "block";
+                } else {
+                    tocNav.style.display = "none";
+                }
+            }
+        }
+
+        // toc anchor scroll to anchor
+        tocNav.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (event.target.nodeName == 'A') {
+                if (window.innerWidth < 1024) {
+                    tocNav.style.display = "none";
+                }
+                var href = event.target.getAttribute("href");
+                var anchorId = href.substr(1);
+                var anchor = document.getElementById(anchorId);
+                anchor.scrollIntoView(true);
+                window.history.pushState("", "", href);
+            }
+        });
+
+        // switch toc mode when window resized
+        window.onresize = function () {
+            if (window.innerWidth < 1024) {
+                tocNav.style.display = "none";
+            } else {
+                tocNav.style.display = "block";
+            }
+        }
+    </script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>

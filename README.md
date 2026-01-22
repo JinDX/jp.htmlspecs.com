@@ -180,6 +180,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [JSON Web Encryption (JWE)](https://jp.htmlspecs.com/jwe/)（[Source](https://www.rfc-editor.org/rfc/rfc7516) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [JSON Web Key (JWK)](https://jp.htmlspecs.com/jwk/)（[Source](https://www.rfc-editor.org/rfc/rfc7517) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [JSON Web Algorithms (JWA)](https://jp.htmlspecs.com/jwa/)（[Source](https://www.rfc-editor.org/rfc/rfc7518) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [JWT Best Current Practices](https://jp.htmlspecs.com/jwt-bcp/)（[Source](https://www.rfc-editor.org/rfc/rfc8725) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
 ### メディアとグラフィックス
 - [WebGPU](https://jp.htmlspecs.com/webgpu/)（[Source](https://www.w3.org/TR/2026/CRD-webgpu-20260112/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
