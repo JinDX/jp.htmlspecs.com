@@ -129,7 +129,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Vibration API](https://jp.htmlspecs.com/vibration/)（[Source](https://www.w3.org/TR/2025/CRD-vibration-20250212/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Accelerometer](https://jp.htmlspecs.com/accelerometer/)（[Source](https://www.w3.org/TR/2025/CRD-accelerometer-20250212/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Magnetometer](https://jp.htmlspecs.com/magnetometer/)（[Source](https://www.w3.org/TR/2025/WD-magnetometer-20250212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Gyroscope](https://jp.htmlspecs.com/gyroscope/)（[Source](https://www.w3.org/TR/2024/CRD-gyroscope-20241008/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Gyroscope](https://jp.htmlspecs.com/gyroscope/)（[Source](https://www.w3.org/TR/2026/CRD-gyroscope-20260202/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
 ### パフォーマンスとオブザーバ
 - [Performance Timeline](https://jp.htmlspecs.com/performance-timeline/)（[Source](https://www.w3.org/TR/2025/CRD-performance-timeline-20250521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
