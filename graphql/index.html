@@ -2564,14 +2564,17 @@ and return the updated number of likes on the story
                                     data-name="Name">Name</a></span><span class="spec-butnot"><span
                                     class="spec-t">on</span></span></span></div>
                 </div>
-                <p data-source="spec/Section%202%20--%20Language.md#L588">フラグメントは GraphQL における主要な再利用単位です。</p>
-                <p data-source="spec/Section%202%20--%20Language.md#L590-L593">
-                    フラグメントを使うことで、繰り返し現れるフィールド選択を再利用でき、ドキュメント内の重複テキストを削減できます。インラインフラグメントは、インターフェースやユニオンに対して型条件に基づいてフィールドを条件付きで含めるために選択内で直接使用できます。
-                </p>
-                <p data-source="spec/Section%202%20--%20Language.md#L595-L596">例えば、あるユーザーの友達や共通の友達について共通の情報を取得したい場合:
+                <p data-source="spec/Section%202%20--%20Language.md#L588">フラグメントは、GraphQLにおける構成の主要な
+                    単位です。</p>
+                <p data-source="spec/Section%202%20--%20Language.md#L590-L593">クライアントアプリケーションの各データ消費コンポーネント（関数、
+                    クラス、UI 要素など）は、専用のフラグメントで必要なデータを宣言すべきです。これらのフラグメントは、コンポーネント自体の使用に従って構成され、
+                    サーバーに送信する GraphQL オペレーションを形成できます。</p>
+                <p data-source="spec/Section%202%20--%20Language.md#L595-L597">例えば、あるロジックでプロフィールをレンダリングするために
+                    <code>id</code>、<code>name</code>、<code>profilePic</code>が必要で、そして
+                    そのロジックをユーザーの友人および共通の友人にも適用したい場合：
                 </p>
                 <pre id="example-bcf38" class="spec-example" data-language="graphql"
-                    data-source="spec/Section%202%20--%20Language.md#L598-L613"><a href="#example-bcf38">Example № 17</a><code><span class="token keyword">query</span> <span class="token definition-query function">noFragments</span> <span class="token punctuation">{</span>
+                    data-source="spec/Section%202%20--%20Language.md#L599-L614"><a href="#example-bcf38">Example № 17</a><code><span class="token keyword">query</span> <span class="token definition-query function">noFragments</span> <span class="token punctuation">{</span>
   <span class="token property-query">user</span><span class="token punctuation">(</span><span class="token attr-name">id</span><span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token property-query">friends</span><span class="token punctuation">(</span><span class="token attr-name">first</span><span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
       <span class="token property">id</span>
@@ -2586,30 +2589,37 @@ and return the updated number of likes on the story
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-                <p data-source="spec/Section%202%20--%20Language.md#L615-L616">
-                    繰り返しのフィールドはフラグメントに抽出して、親フラグメントや操作で合成できます。</p>
-                <pre id="example-c9b3e" class="spec-example" data-language="graphql"
-                    data-source="spec/Section%202%20--%20Language.md#L618-L636"><a href="#example-c9b3e">Example № 18</a><code><span class="token keyword">query</span> <span class="token definition-query function">withFragments</span> <span class="token punctuation">{</span>
+                <p data-source="spec/Section%202%20--%20Language.md#L616-L617">プロフィールのレンダリングに必要なフィールドは
+                    フラグメントに抽出でき、親フラグメントまたはオペレーションによって合成できます。</p>
+                <pre id="example-b3c35" class="spec-example" data-language="graphql"
+                    data-source="spec/Section%202%20--%20Language.md#L619-L630"><a href="#example-b3c35">Example № 18</a><code><span class="token keyword">query</span> <span class="token definition-query function">withFragments</span> <span class="token punctuation">{</span>
   <span class="token property-query">user</span><span class="token punctuation">(</span><span class="token attr-name">id</span><span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token property-query">friends</span><span class="token punctuation">(</span><span class="token attr-name">first</span><span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token operator">...</span><span class="token fragment function">friendFields</span>
+      <span class="token operator">...</span><span class="token fragment function">friendProfile</span>
     <span class="token punctuation">}</span>
     <span class="token property-query">mutualFriends</span><span class="token punctuation">(</span><span class="token attr-name">first</span><span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-      <span class="token operator">...</span><span class="token fragment function">friendFields</span>
+      <span class="token operator">...</span><span class="token fragment function">friendProfile</span>
     <span class="token punctuation">}</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-
-<span class="token description string">"<span class="token language-markdown">Common fields for a user's friends.</span>"</span>
-<span class="token keyword">fragment</span> <span class="token fragment function">friendFields</span> <span class="token keyword">on</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
+</code></pre>
+                <pre id="example-52b22" class="spec-example" data-language="graphql"
+                    data-source="spec/Section%202%20--%20Language.md#L632-L639"><a href="#example-52b22">Example № 19</a><code><span class="token description string">"<span class="token language-markdown">Fields required to render a friend's profile</span>"</span>
+<span class="token keyword">fragment</span> <span class="token fragment function">friendProfile</span> <span class="token keyword">on</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
   <span class="token property">id</span>
   <span class="token property">name</span>
   <span class="token property-query">profilePic</span><span class="token punctuation">(</span><span class="token attr-name">size</span><span class="token punctuation">:</span> <span class="token number">50</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-                <p data-source="spec/Section%202%20--%20Language.md#L638-L640">
-                    フラグメントはスプレッド演算子（<code>...</code>）を使って利用されます。フラグメントで選択された全てのフィールドが、フラグメント呼び出しと同じレベルのフィールド選択に追加されます。これは複数レベルにわたるフラグメントスプレッドを通じても行われます。
+                <p data-source="spec/Section%202%20--%20Language.md#L641-L643">もしプロフィールのレンダリングロジックがもはや
+                    <code>name</code>を必要としない場合、<code>name</code>フィールドは
+                    <code>friendProfile</code>フラグメントから削除でき、フラグメントが使用される両方の場所で
+                    取得されなくなります。
                 </p>
+                <p data-source="spec/Section%202%20--%20Language.md#L645-L647">フラグメントは
+                    スプレッド演算子（<code>...</code>）を使用して消費されます。フラグメントで選択されたすべてのフィールドは、フィールド
+                    選択に、フラグメント呼び出しと同じレベルで追加されます。これは複数レベルの
+                    フラグメントスプレッドを通じて発生します。</p>
                 <p data-source="spec/Section%202%20--%20Language.md#L642">例えば:</p>
                 <pre id="example-fb6c3" class="spec-example" data-language="graphql"
                     data-source="spec/Section%202%20--%20Language.md#L644-L665"><a href="#example-fb6c3">Example № 19</a><code><span class="token keyword">query</span> <span class="token definition-query function">withNestedFragments</span> <span class="token punctuation">{</span>
