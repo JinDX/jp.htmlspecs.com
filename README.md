@@ -155,6 +155,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Prerendering Revamped](https://jp.htmlspecs.com/prerendering/)（[Source](https://wicg.github.io/nav-speculation/prerendering.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Performance measure memory](https://wicg.github.io/performance-measure-memory/)（[Source](https://wicg.github.io/performance-measure-memory/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2026/WD-device-memory-1-20260119/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Layout Instability API](https://jp.htmlspecs.com/layout-instability/)（[Source](https://wicg.github.io/layout-instability/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### セキュリティと認証
 - [Web Authentication: An API for accessing Public Key Credentials Level 2](https://jp.htmlspecs.com/webauthn-2/)（[Source](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
@@ -170,7 +171,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Referrer Policy](https://jp.htmlspecs.com/referrer-policy/)（[Source](https://www.w3.org/TR/2017/CR-referrer-policy-20170126/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Fetch Metadata Request Headers](https://jp.htmlspecs.com/fetch-metadata/)（[Source](https://www.w3.org/TR/2025/WD-fetch-metadata-20250401/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Mixed Content](https://jp.htmlspecs.com/mixed-content/)（[Source](https://www.w3.org/TR/2023/CRD-mixed-content-20230223/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1/)（[Source](https://www.w3.org/TR/2025/WD-credential-management-1-20251028/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1/)（[Source](https://www.w3.org/TR/2026/WD-credential-management-1-20260213/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Federated Credential Management API (FedCM)](https://jp.htmlspecs.com/fedcm/)（[Source](https://www.w3.org/TR/2024/WD-fedcm-1-20240820/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Private State Token API](https://jp.htmlspecs.com/trust-token-api/)（[Source](https://wicg.github.io/trust-token-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Trusted Types](https://jp.htmlspecs.com/trusted-types/)（[Source](https://www.w3.org/TR/2025/WD-trusted-types-20251103/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
