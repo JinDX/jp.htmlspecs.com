@@ -1,5 +1,5 @@
 # jp.htmlspecs.com
-HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐📡🇯🇵
+HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐📡
 
 ### コア仕様
 - [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/multipage/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
