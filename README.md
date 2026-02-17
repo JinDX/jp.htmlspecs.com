@@ -138,7 +138,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Intersection Observer](https://jp.htmlspecs.com/intersection-observer/)（[Source](https://www.w3.org/TR/2023/WD-intersection-observer-20231018/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Resize Observer](https://jp.htmlspecs.com/resize-observer/)（[Source](https://www.w3.org/TR/2020/WD-resize-observer-1-20200211/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Navigation Timing Level 2](https://jp.htmlspecs.com/navigation-timing-2/)（[Source](https://www.w3.org/TR/2025/WD-navigation-timing-2-20251205/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Resource Timing](https://jp.htmlspecs.com/resource-timing/)（[Source](https://www.w3.org/TR/2025/CRD-resource-timing-20251209/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Resource Timing](https://jp.htmlspecs.com/resource-timing/)（[Source](https://www.w3.org/TR/2026/CRD-resource-timing-20260217/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [User Timing Level 2](https://jp.htmlspecs.com/user-timing-2/)（[Source](https://www.w3.org/TR/2019/REC-user-timing-2-20190226/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Observable](https://jp.htmlspecs.com/observable/)（[Source](https://wicg.github.io/observable/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Long Tasks API](https://jp.htmlspecs.com/longtasks-1/)（[Source](https://www.w3.org/TR/2024/WD-longtasks-1-20240524/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
