@@ -250,7 +250,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### メディアクエリ
 - [Media Queries Level 3](https://jp.htmlspecs.com/css/mediaqueries-3/)（[Source](https://www.w3.org/TR/2024/REC-mediaqueries-3-20240521/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [Media Queries Level 4](https://jp.htmlspecs.com/css/mediaqueries-4/)（[Source](https://www.w3.org/TR/2021/CRD-mediaqueries-4-20211225/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Media Queries Level 4](https://jp.htmlspecs.com/css/mediaqueries-4/)（[Source](https://www.w3.org/TR/2026/CRD-mediaqueries-4-20260219/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Media Queries Level 5](https://jp.htmlspecs.com/css/mediaqueries-5/)（[Source](https://www.w3.org/TR/2021/WD-mediaqueries-5-20211218/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### レイアウト
