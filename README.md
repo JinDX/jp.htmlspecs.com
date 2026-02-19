@@ -246,6 +246,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS Text Decoration Level 3](https://jp.htmlspecs.com/css/css-text-decor-3/)（[Source](https://www.w3.org/TR/2022/CRD-css-text-decor-3-20220505/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [CSS Text Decoration Level 4](https://jp.htmlspecs.com/css/css-text-decor-4/)（[Source](https://www.w3.org/TR/2022/WD-css-text-decor-4-20220504/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Ruby Layout Module Level 1](https://jp.htmlspecs.com/css/css-ruby-1/)（[Source](https://www.w3.org/TR/2022/WD-css-ruby-1-20221231/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Rhythm Module Level 1](https://jp.htmlspecs.com/css/css-rhythm-1/)（[Source](https://www.w3.org/TR/2026/WD-css-rhythm-1-20260217/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### メディアクエリ
 - [Media Queries Level 3](https://jp.htmlspecs.com/css/mediaqueries-3/)（[Source](https://www.w3.org/TR/2024/REC-mediaqueries-3-20240521/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
