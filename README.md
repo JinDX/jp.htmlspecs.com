@@ -101,7 +101,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [EyeDropper API](https://jp.htmlspecs.com/eyedropper-api/)（[Source](https://wicg.github.io/eyedropper-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Fullscreen](https://jp.htmlspecs.com/fullscreen/)（[Source](https://fullscreen.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Screen Capture](https://jp.htmlspecs.com/screen-capture/)（[Source](https://www.w3.org/TR/2025/WD-screen-capture-20250717/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [UI Events](https://jp.htmlspecs.com/uievents/)（[Source](https://www.w3.org/TR/2026/WD-uievents-20260210/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [UI Events](https://jp.htmlspecs.com/uievents/)（[Source](https://www.w3.org/TR/2026/WD-uievents-20260221/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [UI Events KeyboardEvent code Values](https://jp.htmlspecs.com/uievents-code/)（[Source](https://www.w3.org/TR/2025/REC-uievents-code-20250422/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Keyboard Map](https://jp.htmlspecs.com/keyboard-map/)（[Source](https://wicg.github.io/keyboard-map/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Contact Picker API](https://jp.htmlspecs.com/contact-picker/)（[Source](https://www.w3.org/TR/2024/WD-contact-picker-20240708/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
