@@ -7,8 +7,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [ECMAScript® 2026 Internationalization API Specification](https://jp.htmlspecs.com/ecma402/)（[Source](https://tc39.es/ecma402/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Language Tags and Locale Identifiers for the World Wide Web](https://jp.htmlspecs.com/ltli/)（[Source](https://www.w3.org/TR/2020/WD-ltli-20201007) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Source map format specification](https://jp.htmlspecs.com/ecma426/)（[Source](https://tc39.es/ecma426/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-js-api-2-20260216/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-web-api-2-20260216/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-js-api-2-20260224/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-web-api-2-20260224/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [DOM](https://jp.htmlspecs.com/dom/)（[Source](https://dom.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [EditContext API](https://jp.htmlspecs.com/edit-context/)（[Source](https://www.w3.org/TR/2025/WD-edit-context-20251112/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [URL](https://jp.htmlspecs.com/url/)（[Source](https://url.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
@@ -40,7 +40,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [ARIA in HTML](https://jp.htmlspecs.com/html-aria/)（[Source](https://www.w3.org/TR/2025/REC-html-aria-20250805/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Accessible Name and Description Computation 1.1](https://jp.htmlspecs.com/accname-1.1/)（[Source](https://www.w3.org/TR/2018/REC-accname-1.1-20181218/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Accessibility Conformance Testing (ACT) Rules Format 1.1](https://jp.htmlspecs.com/act-rules-format/)（[Source](https://www.w3.org/TR/2026/REC-act-rules-format-1.1-20260205/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [Using ARIA](https://jp.htmlspecs.com/using-aria/)（[Source](https://www.w3.org/TR/2018/WD-using-aria-20180927/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Using ARIA](https://jp.htmlspecs.com/using-aria/)（[Source](https://www.w3.org/TR/2026/DISC-using-aria-20260224/) ![Discontinued Draft](https://img.shields.io/badge/DISC-ffcc00)）
 
 ### ネットワークと通信
 - [Fetch](https://jp.htmlspecs.com/fetch/)（[Source](https://fetch.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
