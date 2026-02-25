@@ -174,7 +174,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1/)（[Source](https://www.w3.org/TR/2026/WD-credential-management-1-20260213/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Federated Credential Management API (FedCM)](https://jp.htmlspecs.com/fedcm/)（[Source](https://www.w3.org/TR/2024/WD-fedcm-1-20240820/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Private State Token API](https://jp.htmlspecs.com/trust-token-api/)（[Source](https://wicg.github.io/trust-token-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Trusted Types](https://jp.htmlspecs.com/trusted-types/)（[Source](https://www.w3.org/TR/2025/WD-trusted-types-20251103/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Trusted Types](https://jp.htmlspecs.com/trusted-types/)（[Source](https://www.w3.org/TR/2026/WD-trusted-types-20260224/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Clear Site Data](https://jp.htmlspecs.com/clear-site-data/)（[Source](https://www.w3.org/TR/2017/WD-clear-site-data-20171130/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [JSON Web Token (JWT)](https://jp.htmlspecs.com/jwt/)（[Source](https://www.rfc-editor.org/rfc/rfc7519) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [JSON Web Signature (JWS)](https://jp.htmlspecs.com/jws/)（[Source](https://www.rfc-editor.org/rfc/rfc7515) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
