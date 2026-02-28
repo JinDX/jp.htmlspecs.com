@@ -275,7 +275,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS Overflow Module Level 3](https://jp.htmlspecs.com/css/css-overflow-3/)（[Source](https://www.w3.org/TR/2025/WD-css-overflow-3-20251007/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Overflow Module Level 4](https://jp.htmlspecs.com/css/css-overflow-4/)（[Source](https://www.w3.org/TR/2023/WD-css-overflow-4-20230321/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Overflow Module Level 5](https://jp.htmlspecs.com/css/css-overflow-5/)（[Source](https://www.w3.org/TR/2024/WD-css-overflow-5-20241217/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [CSS Gap Decorations Module Level 1](https://jp.htmlspecs.com/css/css-gaps-1/)（[Source](https://www.w3.org/TR/2025/WD-css-gaps-1-20250417/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Gap Decorations Module Level 1](https://jp.htmlspecs.com/css/css-gaps-1/)（[Source](https://www.w3.org/TR/2026/WD-css-gaps-1-20260227/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Anchor Positioning Module Level 1](https://jp.htmlspecs.com/css/css-anchor-position-1/)（[Source](https://www.w3.org/TR/2026/WD-css-anchor-position-1-20260130/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Anchor Positioning Module Level 2](https://jp.htmlspecs.com/css/css-anchor-position-2/)（[Source](https://www.w3.org/TR/2025/WD-css-anchor-position-2-20251021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Paged Media Module Level 3](https://jp.htmlspecs.com/css/css-page-3/)（[Source](https://www.w3.org/TR/2023/WD-css-page-3-20230914/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
