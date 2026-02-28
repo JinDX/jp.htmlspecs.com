@@ -219,7 +219,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### 色
 - [CSS Color Module Level 3](https://jp.htmlspecs.com/css/css-color-3/)（[Source](https://www.w3.org/TR/2022/REC-css-color-3-20220118/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [CSS Color Module Level 4](https://jp.htmlspecs.com/css/css-color-4/)（[Source](https://www.w3.org/TR/2025/CRD-css-color-4-20260227/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [CSS Color Module Level 5](https://jp.htmlspecs.com/css/css-color-5/)（[Source](https://www.w3.org/TR/2026/WD-css-color-5-20260113/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Color Module Level 5](https://jp.htmlspecs.com/css/css-color-5/)（[Source](https://www.w3.org/TR/2026/WD-css-color-5-20260227/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Color Adjustment Module Level 1](https://jp.htmlspecs.com/css/css-color-adjust-1/)（[Source](https://www.w3.org/TR/2025/CR-css-color-adjust-1-20251216/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [CSS Color HDR Module Level 1](https://jp.htmlspecs.com/css/css-color-hdr-1/)（[Source](https://www.w3.org/TR/2025/WD-css-color-hdr-1-20251202/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Filter Effects Module Level 1](https://jp.htmlspecs.com/css/filter-effects-1/)（[Source](https://www.w3.org/TR/2018/WD-filter-effects-1-20181218/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
