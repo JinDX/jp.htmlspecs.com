@@ -34,7 +34,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### アクセシビリティ
 - [Web Content Accessibility Guidelines (WCAG) 2.2](https://jp.htmlspecs.com/WCAG22/)（[Source](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [W3C Accessibility Guidelines (WCAG) 3.0](https://jp.htmlspecs.com/wcag-3.0/)（[Source](https://www.w3.org/TR/2025/WD-wcag-3.0-20250904/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [W3C Accessibility Guidelines (WCAG) 3.0](https://jp.htmlspecs.com/wcag-3.0/)（[Source](https://www.w3.org/TR/2026/WD-wcag-3.0-20260303/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.2](https://jp.htmlspecs.com/wai-aria-1.2/)（[Source](https://www.w3.org/TR/2023/REC-wai-aria-1.2-20230606/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.3](https://jp.htmlspecs.com/wai-aria-1.3/)（[Source](https://www.w3.org/TR/2024/WD-wai-aria-1.3-20240123/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [ARIA in HTML](https://jp.htmlspecs.com/html-aria/)（[Source](https://www.w3.org/TR/2025/REC-html-aria-20250805/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
