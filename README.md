@@ -184,7 +184,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [JWT Best Current Practices](https://jp.htmlspecs.com/jwt-bcp/)（[Source](https://www.rfc-editor.org/rfc/rfc8725) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
 ### メディアとグラフィックス
-- [WebGPU](https://jp.htmlspecs.com/webgpu/)（[Source](https://www.w3.org/TR/2026/CRD-webgpu-20260303/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebGPU](https://jp.htmlspecs.com/webgpu/)（[Source](https://www.w3.org/TR/2026/CRD-webgpu-20260310/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [WebGPU Shading Language](https://jp.htmlspecs.com/WGSL/)（[Source](https://www.w3.org/TR/2026/CRD-WGSL-20260129/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Scalable Vector Graphics (SVG) 2](https://jp.htmlspecs.com/SVG2/)（[Source](https://www.w3.org/TR/2018/CR-SVG2-20181004/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture/)（[Source](https://www.w3.org/TR/2026/WD-picture-in-picture-20260303/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
