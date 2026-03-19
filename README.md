@@ -160,7 +160,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### セキュリティと認証
 - [Web Authentication: An API for accessing Public Key Credentials Level 2](https://jp.htmlspecs.com/webauthn-2/)（[Source](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Web Authentication: An API for accessing Public Key Credentials Level 3](https://jp.htmlspecs.com/webauthn-3/)（[Source](https://www.w3.org/TR/2026/CR-webauthn-3-20260113/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260302/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260319/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api/)（[Source](https://wicg.github.io/sanitizer-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Subresource Integrity (SRI)](https://jp.htmlspecs.com/sri/)（[Source](https://www.w3.org/TR/2016/REC-SRI-20160623/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20260311/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
