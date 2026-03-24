@@ -134,7 +134,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### パフォーマンスとオブザーバ
 - [Performance Timeline](https://jp.htmlspecs.com/performance-timeline/)（[Source](https://www.w3.org/TR/2025/CRD-performance-timeline-20250521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Compute Pressure API](https://jp.htmlspecs.com/compute-pressure/)（[Source](https://www.w3.org/TR/2025/CRD-compute_pressure-20250521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [High Resolution Time](https://jp.htmlspecs.com/hr-time-3/)（[Source](https://www.w3.org/TR/2026/WD-hr-time-3-20260302/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [High Resolution Time](https://jp.htmlspecs.com/hr-time-3/)（[Source](https://www.w3.org/TR/2026/WD-hr-time-3-20260324/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Intersection Observer](https://jp.htmlspecs.com/intersection-observer/)（[Source](https://www.w3.org/TR/2023/WD-intersection-observer-20231018/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Resize Observer](https://jp.htmlspecs.com/resize-observer/)（[Source](https://www.w3.org/TR/2020/WD-resize-observer-1-20200211/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Navigation Timing Level 2](https://jp.htmlspecs.com/navigation-timing-2/)（[Source](https://www.w3.org/TR/2026/WD-navigation-timing-2-20260225/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
