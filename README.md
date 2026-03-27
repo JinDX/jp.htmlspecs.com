@@ -154,7 +154,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Prefetch](https://jp.htmlspecs.com/prefetch/)（[Source](https://wicg.github.io/nav-speculation/prefetch.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Prerendering Revamped](https://jp.htmlspecs.com/prerendering/)（[Source](https://wicg.github.io/nav-speculation/prerendering.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Performance measure memory](https://wicg.github.io/performance-measure-memory/)（[Source](https://wicg.github.io/performance-measure-memory/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2026/WD-device-memory-1-20260119/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2026/WD-device-memory-1-20260327/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Layout Instability API](https://jp.htmlspecs.com/layout-instability/)（[Source](https://wicg.github.io/layout-instability/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### セキュリティと認証
