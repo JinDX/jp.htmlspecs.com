@@ -30,7 +30,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Test Utils](https://jp.htmlspecs.com/testutils/)（[Source](https://testutils.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Minimum common web API](https://jp.htmlspecs.com/min-common-api/)（[Source](https://min-common-api.proposal.wintertc.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [MathML Core](https://jp.htmlspecs.com/mathml-core/)（[Source](https://www.w3.org/TR/2025/CR-mathml-core-20250624/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
-- [MathML4](https://jp.htmlspecs.com/mathml4/)（[Source](https://www.w3.org/TR/2026/WD-mathml4-20260318/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MathML4](https://jp.htmlspecs.com/mathml4/)（[Source](https://www.w3.org/TR/2026/WD-mathml4-20260328/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### アクセシビリティ
 - [Web Content Accessibility Guidelines (WCAG) 2.2](https://jp.htmlspecs.com/WCAG22/)（[Source](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
