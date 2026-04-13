@@ -4,7 +4,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### コア仕様
 - [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/multipage/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [ECMAScript® 2027 Language Specification](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），- [How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
-- [ECMAScript® 2026 Internationalization API Specification](https://jp.htmlspecs.com/ecma402/)（[Source](https://tc39.es/ecma402/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [ECMAScript® 2027 Internationalization API Specification](https://jp.htmlspecs.com/ecma402/)（[Source](https://tc39.es/ecma402/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Language Tags and Locale Identifiers for the World Wide Web](https://jp.htmlspecs.com/ltli/)（[Source](https://www.w3.org/TR/2020/WD-ltli-20201007) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Source map format specification](https://jp.htmlspecs.com/ecma426/)（[Source](https://tc39.es/ecma426/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-js-api-2-20260409/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
@@ -376,7 +376,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [index](https://jp.htmlspecs.com/http/)（[Source](https://httpwg.org/specs/)）
 
 ### コア仕様
-- [HTTP Semantics (RFC 9110)](https://jp.htmlspecs.com/http/rfc9110.html)（[Source](https://httpwg.org/specs/rfc9110.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [HTTP Semantics](https://jp.htmlspecs.com/http/rfc9110.html)（[Source](https://httpwg.org/specs/rfc9110.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [HTTP Caching](https://jp.htmlspecs.com/http/rfc9111.html)（[Source](https://httpwg.org/specs/rfc9111.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [HTTP/1.1](https://jp.htmlspecs.com/http/rfc9112.html)（[Source](https://httpwg.org/specs/rfc9112.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [HTTP/2](https://jp.htmlspecs.com/http/rfc9113.html)（[Source](https://httpwg.org/specs/rfc9113.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
