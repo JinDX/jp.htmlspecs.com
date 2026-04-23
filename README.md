@@ -234,7 +234,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### フォント
 - [CSS Fonts Module Level 3](https://jp.htmlspecs.com/css/css-fonts-3/)（[Source](https://www.w3.org/TR/2018/REC-css-fonts-3-20180920/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [CSS Fonts Module Level 4](https://jp.htmlspecs.com/css/css-fonts-4/)（[Source](https://www.w3.org/TR/2026/WD-css-fonts-4-20260303/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Fonts Module Level 4](https://jp.htmlspecs.com/css/css-fonts-4/)（[Source](https://www.w3.org/TR/2026/WD-css-fonts-4-20260422/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Fonts Module Level 5](https://jp.htmlspecs.com/css/css-fonts-5/)（[Source](https://www.w3.org/TR/2026/WD-css-fonts-5-20260303/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Font Loading Module Level 3](https://jp.htmlspecs.com/css/css-font-loading/)（[Source](https://www.w3.org/TR/2023/WD-css-font-loading-3-20230406/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
