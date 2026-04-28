@@ -106,7 +106,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Keyboard Map](https://jp.htmlspecs.com/keyboard-map/)（[Source](https://wicg.github.io/keyboard-map/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Contact Picker API](https://jp.htmlspecs.com/contact-picker/)（[Source](https://www.w3.org/TR/2024/WD-contact-picker-20240708/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Notifications API](https://jp.htmlspecs.com/notifications/)（[Source](https://notifications.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [Badging API](https://jp.htmlspecs.com/badging/)（[Source](https://www.w3.org/TR/2025/WD-badging-20251006/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Badging API](https://jp.htmlspecs.com/badging/)（[Source](https://www.w3.org/TR/2026/WD-badging-20260427/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard/)（[Source](https://www.w3.org/TR/2022/WD-virtual-keyboard-20220505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Window Controls Overlay](https://jp.htmlspecs.com/window-controls-overlay/)（[Source](https://wicg.github.io/window-controls-overlay/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Window Management](https://jp.htmlspecs.com/window-management/)（[Source](https://www.w3.org/TR/2024/WD-window-management-20240607/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
