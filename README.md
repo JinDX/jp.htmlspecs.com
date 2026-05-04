@@ -50,6 +50,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [WebSub](https://jp.htmlspecs.com/websub/)（[Source](https://www.w3.org/TR/2018/REC-websub-20180123/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [ActivityPub](https://jp.htmlspecs.com/activitypub/)（[Source](https://www.w3.org/TR/2018/REC-activitypub-20180123/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Activity Streams 2.0](https://jp.htmlspecs.com/activitystreams-core/)（[Source](https://www.w3.org/TR/2017/REC-activitystreams-core-20170523/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [Private Network Access](https://jp.htmlspecs.com/private-network-access/)（[Source](https://wicg.github.io/private-network-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Linked Data Notifications](https://jp.htmlspecs.com/ldn/)（[Source](https://www.w3.org/TR/2017/REC-ldn-20170502/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Webmention](https://jp.htmlspecs.com/webmention/)（[Source](https://www.w3.org/TR/2017/REC-webmention-20170112/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Micropub](https://jp.htmlspecs.com/micropub/)（[Source](https://www.w3.org/TR/2017/REC-micropub-20170523/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
