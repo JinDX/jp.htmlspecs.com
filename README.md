@@ -166,7 +166,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260319/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api/)（[Source](https://wicg.github.io/sanitizer-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Subresource Integrity (SRI)](https://jp.htmlspecs.com/sri/)（[Source](https://www.w3.org/TR/2016/REC-SRI-20160623/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20260421/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20260505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Self-Review Questionnaire: Security and Privacy](https://jp.htmlspecs.com/security-privacy-questionnaire/)（[Source](https://www.w3.org/TR/2025/NOTE-security-privacy-questionnaire-20250418/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Permissions Policy](https://jp.htmlspecs.com/permissions-policy/)（[Source](https://www.w3.org/TR/2025/WD-permissions-policy-1-20251006/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Global Privacy Control (GPC)](https://jp.htmlspecs.com/gpc/)（[Source](https://www.w3.org/TR/2026/WD-gpc-20260423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
