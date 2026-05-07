@@ -40,6 +40,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.3](https://jp.htmlspecs.com/wai-aria-1.3/)（[Source](https://www.w3.org/TR/2024/WD-wai-aria-1.3-20240123/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Core Accessibility API Mappings 1.2](https://jp.htmlspecs.com/core-aam-1.2/)（[Source](https://www.w3.org/TR/2026/CRD-core-aam-1.2-20260430/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [HTML Accessibility API Mappings 1.0](https://jp.htmlspecs.com/html-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-html-aam-1.0-20260430/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [SVG Accessibility API Mappings](https://jp.htmlspecs.com/svg-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-svg-aam-1.0-20260430/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WAI-ARIA Graphics Module](https://jp.htmlspecs.com/graphics-aria-1.0/)（[Source](https://www.w3.org/TR/2018/REC-graphics-aria-1.0-20181002/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [ARIA in HTML](https://jp.htmlspecs.com/html-aria/)（[Source](https://www.w3.org/TR/2026/REC-html-aria-20260415/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Accessible Name and Description Computation 1.1](https://jp.htmlspecs.com/accname-1.1/)（[Source](https://www.w3.org/TR/2018/REC-accname-1.1-20181218/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
