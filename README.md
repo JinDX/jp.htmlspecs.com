@@ -222,6 +222,9 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### 開発者ツール
 - [Console](https://jp.htmlspecs.com/console/)（[Source](https://console.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 
+### テストと自動化
+- [WebDriver](https://jp.htmlspecs.com/webdriver2/)（[Source](https://www.w3.org/TR/2026/WD-webdriver2-20260430/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+
 ## CSS
 - [CSS current work](https://jp.htmlspecs.com/css/)（[Source](https://www.w3.org/Style/CSS/current-work)）
 - [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)），- [How to Read](https://jp.htmlspecs.com/css/read/)（[Source](https://www.w3.org/Style/CSS/read)）
