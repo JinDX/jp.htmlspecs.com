@@ -224,7 +224,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### テストと自動化
 - [WebDriver](https://jp.htmlspecs.com/webdriver2/)（[Source](https://www.w3.org/TR/2026/WD-webdriver2-20260507/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [WebDriver BiDi](https://htmlspecs.com/webdriver-bidi/)（[Source](https://www.w3.org/TR/2026/WD-webdriver-bidi-20260319/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [WebDriver BiDi](https://jp.htmlspecs.com/webdriver-bidi/)（[Source](https://www.w3.org/TR/2026/WD-webdriver-bidi-20260319/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ## CSS
 - [CSS current work](https://jp.htmlspecs.com/css/)（[Source](https://www.w3.org/Style/CSS/current-work)）
