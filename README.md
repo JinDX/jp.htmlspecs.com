@@ -22,6 +22,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Infra](https://jp.htmlspecs.com/infra/)（[Source](https://infra.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Web User Agents](https://jp.htmlspecs.com/web-user-agents/)（[Source](https://www.w3.org/TR/2026/DNOTE-web-user-agents-20260319/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Web Application Manifest](https://jp.htmlspecs.com/appmanifest/)（[Source](https://www.w3.org/TR/2026/WD-appmanifest-20260507/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Web App Launch Handler API](https://jp.htmlspecs.com/web-app-launch/)（[Source](https://wicg.github.io/web-app-launch/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web App Manifest - Application Information](https://jp.htmlspecs.com/manifest-app-info/)（[Source](https://www.w3.org/TR/2023/NOTE-manifest-app-info-20230821/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Compatibility](https://jp.htmlspecs.com/compat/)（[Source](https://compat.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Web Platform Design Principles](https://jp.htmlspecs.com/design-principles/)（[Source](https://www.w3.org/TR/2026/NOTE-design-principles-20260224/) ![Note](https://img.shields.io/badge/NOTE-309c40)）

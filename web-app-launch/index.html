@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        Web App Launch Handler API
+    </title>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script class='remove'>
+        var respecConfig = {
+            specStatus: "CG-DRAFT",
+            github: {
+                repoURL: "WICG/web-app-launch",
+                branch: "main"
+            },
+            group: "wicg",
+            editors: [{
+                name: "Alan Cutter",
+                company: "Google Inc.",
+                companyURL: "https://google.com",
+                w3cid: 110742
+            }],
+            xref: {
+                specs: [
+                    "appmanifest",
+                    "file-system-access",
+                    "fs",
+                    "html",
+                    "infra",
+                    "mediaqueries",
+                    "permissions",
+                    "url",
+                    "web-platform"
+                ]
+            }
+            // To add eventually:
+            //  - mdn: true
+            //  - caniuse: "web-app-launch-handler"
+        };
+    </script>
+</head>
+
+<body data-cite="Web-Share encoding">
+    <section id="abstract">
+        <p>
+            この仕様は、すでに開いているアプリインスタンスに関して、Web アプリケーションが
+            アプリ起動の挙動を構成できるようにする API を定義する。
+            この API は、音楽プレイヤーなどの単一インスタンス Web アプリの
+            ニーズに応えることを目的としている。
+        </p>
+    </section>
+    <section id="sotd">
+    </section>
+    <section>
+        <h2>
+            前提条件
+        </h2>
+        <p>
+            この API を実装するには、ユーザーエージェントは
+            [[[appmanifest]]] をサポートしなければならない。
+        </p>
+    </section>
+    <section class="informative" data-link-for="WebAppManifest">
+        <h2>
+            使用例
+        </h2>
+        <p>
+            音楽プレイヤーアプリは、音楽の再生を中断することなく、
+            アプリショートカットによる起動を既存のウィンドウへ送ることを望む。
+            この音楽アプリは、次に示すように [[[appmanifest]]] に
+            [=manifest/launch_handler=] エントリを追加することになる。
+        </p>
+        <pre class="example json" title="manifest.webmanifest">
+      {
+        "name": "Music Player",
+        "shortcuts": [{
+          "name": "Now Playing",
+          "url": "/"
+        }, {
+          "name": "Library",
+          "url": "/library"
+        }, {
+          "name": "Favorites",
+          "url": "/favorites"
+        }, {
+          "name": "Discover",
+          "url": "/discover"
+        }],
+        "launch_handler": {
+          "client_mode": "focus-existing"
+        }
+      }
+      </pre>
+        <p>
+            [=manifest/client_mode=] パラメーターを
+            [=client mode/focus-existing=] に設定すると、
+            アプリ起動は、既存のアプリインスタンス（存在する場合）を、
+            現在の文書からナビゲートさせることなくフォーカスする。
+        </p>
+        <p>
+            {{LaunchParams}} は、音楽プレイヤーがその
+            {{LaunchConsumer}} 内で {{LaunchParams/targetURL}} を読み取り、
+            スクリプトで処理できるように、{{Window/launchQueue}} に
+            キュー投入される。例：
+        </p>
+        <pre class="example javascript" title="page.js">
+        window.launchQueue.setConsumer((launchParams) => {
+          const url = launchParams.targetURL;
+          // If the URL is to one of the app sections, updates the app view to
+          // that section without interrupting currently playing music.
+          if (maybeFocusAppSection(url)) {
+            return;
+          }
+          // Could not handle the launch in-place, just navigate the page
+          // (interrupts any playing music).
+          location.href = url;
+        });
+      </pre>
+        <p>
+            すでに音楽プレイヤーアプリを使って音楽を聴いているユーザーが、
+            "Library" アプリショートカットを起動すると、/library へのアプリ起動が
+            トリガーされる。この起動は既存のアプリインスタンスへルーティングされ、
+            ページの {{Window/launchQueue}} にキュー投入される。そして、割り当てられた
+            {{LaunchConsumer}} を通じて、現在の音楽再生に影響を与えることなく、
+            音楽プレイヤーのライブラリセクションをフォーカスする。
+        </p>
+    </section>
+    <section data-link-for="WebAppManifest">
+        <h2>
+            Web App Manifest への拡張
+        </h2>
+        <p>
+            次の手順は、<a data-cite="!appmanifest#dfn-extension-point">拡張ポイント</a>、
+            すなわち
+            <a data-cite="appmanifest#dfn-processing-a-manifest">manifest を処理する</a>
+            手順に追加される。
+        </p>
+        <ol>
+            <li>[=ordered map=] |json:ordered map| と [=ordered map=]
+                |manifest:ordered map| を与えて、[=processing the launch_handler member=]
+                の手順を実行する。
+            </li>
+        </ol>
+        <section>
+            <h3>
+                [=manifest/launch_handler=] メンバー
+            </h3>
+            <p>
+                <dfn data-dfn-for="manifest">`launch_handler`</dfn> は、
+                Web アプリ起動がどのように挙動すべきかの構成を含む
+                辞書である。
+            </p>
+            <p class="note">
+                [=manifest/client_mode=] が唯一のメンバーであるにもかかわらず、
+                [=manifest/launch_handler=] は辞書である。これは、将来ほかの種類の
+                挙動が必要になった場合に、さらにメンバーを追加できる余地を
+                与えるためである。
+            </p>
+            <p>
+                [=ordered map=] |json:ordered map|、[=ordered map=]
+                |manifest:ordered map| が与えられたときの、
+                <dfn>processing the launch_handler member</dfn> の手順は次のとおりである。
+            </p>
+            <ol class="algorithm">
+                <li>|json|["launch_handler"] が [=map/exist=] しない場合は、戻る。
+                </li>
+                <li>|json|["launch_handler"] の型が [=ordered map=] でない場合は、
+                    戻る。
+                </li>
+                <li>|manifest|["launch_handler"] を新しい [=ordered map=] に設定する。
+                </li>
+                <li>|json|["launch_handler"], |manifest|["launch_handler"] を渡して
+                    [=Process the `client_mode` member=]。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                [=manifest/client_mode=] メンバー
+            </h3>
+            <p>
+                [=manifest/launch_handler=] の
+                <dfn data-dfn-for="manifest">`client_mode`</dfn> メンバーは、
+                1 つ以上の [=client mode targets=] を指定する [=string=] または
+                [=strings=] のリストである。[=client mode target=] は、
+                Web アプリ起動に使用する特定のクライアント選択および
+                ナビゲーション挙動を宣言する。
+            </p>
+            <p>
+                ユーザーエージェントは、プラットフォームの制約に応じて、
+                [=client mode targets=] のサブセットのみをサポートしてもよい
+                （例：モバイルデバイスは、複数のアプリインスタンスを同時に
+                サポートしない場合がある）。
+            </p>
+            <p>
+            <p>
+                <dfn>client mode targets</dfn> は次のとおりである。
+            </p>
+            <dl>
+                <dt>
+                    <dfn data-dfn-for="client mode">auto</dfn>
+                </dt>
+                <dd>
+                    ユーザーエージェントの既定の起動ルーティング挙動が使用される。
+                    <p class="note">
+                        ユーザーエージェントは、プラットフォームに最も適したものを
+                        決定することが期待される。たとえば、単一のアプリインスタンス
+                        のみをサポートするモバイルデバイスでは、ユーザーエージェントは
+                        `navigate-existing` を使用してもよい。一方、複数のウィンドウを
+                        サポートするデスクトップデバイスでは、データ損失を避けるために
+                        `navigate-new` を使用してもよい。
+                    </p>
+                </dd>
+                <dt>
+                    <dfn data-dfn-for="client mode">navigate-new</dfn>
+                </dt>
+                <dd>
+                    起動のターゲット URL を読み込むために、新しい Web アプリクライアントが作成される。
+                </dd>
+                <dt>
+                    <dfn data-dfn-for="client mode">navigate-existing</dfn>
+                </dt>
+                <dd>
+                    既存の Web アプリクライアントが開いている場合、それはフォーカスされ、
+                    起動のターゲット URL へナビゲートされる。既存の Web
+                    アプリクライアントがない場合は、代わりに [=client mode/navigate-new=]
+                    挙動が使用される。
+                </dd>
+                <dt>
+                    <dfn data-dfn-for="client mode">focus-existing</dfn>
+                </dt>
+                <dd>
+                    既存の Web アプリクライアントが開いている場合、それはフォーカスされるが、
+                    起動のターゲット URL へはナビゲートされない。代わりに、ターゲット URL
+                    は {{LaunchParams}} を介して伝達される。既存の Web アプリクライアントが
+                    ない場合は、代わりに [=client mode/navigate-new=] 挙動が使用される。
+                    <p class="warning">
+                        起動の {{LaunchParams}} を受け取り、それに対して何かを行うには、
+                        ページが {{Window/launchQueue}} に {{LaunchConsumer}} を設定しておく
+                        必要がある。ページが何も処理しない場合、起動のユーザー体験は
+                        壊れているように見える可能性が高い。
+                    </p>
+                </dd>
+            </dl>
+            </p>
+            <p>
+                [=ordered map=] |json_launch_handler:ordered map|、
+                [=ordered map=] |manifest_launch_handler:ordered map| が与えられたとき、
+                <dfn>process the `client_mode` member</dfn> するには、次を実行する。
+            </p>
+            <ol class="algorithm">
+                <li>|json_launch_handler|["client_mode"] が [=map/exist=] しない場合は、
+                    戻る。
+                </li>
+                <li>|json_launch_handler|["client_mode"] の型が
+                    [=list=] の場合：
+                    <ol class="algorithm">
+                        <li>|json_launch_handler|["client_mode"] の
+                            |entry| それぞれについて [=list/For each=]：
+                            <ol class="algorithm">
+                                <li>|entry| の型が [=string=] でない場合は、続行する。
+                                </li>
+                                <li>|entry| がユーザーエージェントによってサポートされている場合、
+                                    |manifest_launch_handler|["client_mode"] を |entry| に設定して
+                                    戻る。
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+                <li>|json_launch_handler|["client_mode"] が [=string=] であり、
+                    ユーザーエージェントによってサポートされている場合、
+                    |manifest_launch_handler|["client_mode"] を
+                    |json_launch_handler|["client_mode"] に設定して戻る。
+                </li>
+                <li>|manifest_launch_handler|["client_mode"] を [=client mode/auto=] に設定する。
+                </li>
+            </ol>
+            <p class="note">
+                `client_mode` は文字列のリストを受け入れる。これによりサイトは、
+                推奨する [=client mode target=] がユーザーエージェントまたは
+                プラットフォームでサポートされていない場合に使用する、フォールバックの
+                [=client mode targets=] を指定できる。リスト内で最初にサポートされている
+                [=client mode target=] エントリが使用される。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>
+            Web アプリ起動の処理
+        </h2>
+        <section>
+            <h2>
+                処理付きで Web アプリを起動する
+            </h2>
+            <p>
+                この仕様は、[=manifest/launch_handler=] の挙動を含めるため、
+                既存の [=launch a web application=] アルゴリズムを、
+                [=launch a web application with handling=] の手順に置き換える。
+            </p>
+            <p>
+                <dfn data-export="" data-lt="launching a web application with handling">
+                    launch a web application with handling</dfn> する手順は、
+                次のアルゴリズムで与えられる。このアルゴリズムは、
+                [=Document/processed manifest=] |manifest:processed manifest|、
+                任意の [=URL=] または {{LaunchParams}} |params|、
+                任意の [=POST resource=] |POST resource| を取り、
+                [=application context=] を返す。
+            </p>
+            <ol class="algorithm">
+                <li>|params| が与えられていない場合、|params| を
+                    |manifest|.[=manifest/start_url=] に設定する。
+                </li>
+                <li>|params| が [=URL=] の場合、{{LaunchParams/targetURL}} を
+                    |params| に設定した新しい {{LaunchParams}} に |params| を設定する。
+                </li>
+                <li>Assert: |params|.{{LaunchParams/targetURL}} は |manifest| の
+                    [=manifest/within scope=] である。
+                </li>
+                <li>|manifest|、|params|、|POST resource| を渡して
+                    [=prepare an application context=] する手順を実行した結果に、
+                    |application context| を設定する。
+                </li>
+                <li>|params| を、|application context| の文書の {{Window/launchQueue}} の
+                    [=unconsumed launch params=] に追加する。
+                </li>
+                <li>|application context| の [=navigable/active document=] の
+                    {{Window/launchQueue}} に対して、[=process unconsumed launch params=]
+                    する手順を実行する。
+                    <p class="note">
+                        |application context| は [=assigned launch consumer=] を持つ
+                        既存のインスタンスである可能性があるため、新たに追加された
+                        {{LaunchParams}} を処理する必要がある。
+                    </p>
+                </li>
+            </ol>
+            <p>
+                <dfn>prepare an application context</dfn> する手順は、次のアルゴリズムで
+                与えられる。このアルゴリズムは、
+                [=Document/processed manifest=] |manifest:processed manifest|、
+                {{LaunchParams}} |launch params|、任意の [=POST
+                resource=] |POST resource| を取り、[=application context=] を返す。
+            </p>
+            <ol class="algorithm">
+                <li>[=client mode target=] |client_mode| を
+                    |manifest|.[=manifest/launch_handler=].[=manifest/client_mode=] とする。
+                </li>
+                <li>|client_mode| が [=client mode/auto=] の場合、ユーザーエージェントが
+                    最も適切であると判断したものに従い、|client_mode| を
+                    [=client mode/navigate-new=] または
+                    [=client mode/navigate-existing=] のいずれかに設定する。
+                </li>
+                <li>
+                    <p>|client mode| で分岐し、次の下位手順を実行する：</p>
+                    <dl class="switch">
+                        <dt>[=client mode/navigate-new=]</code>
+                        <dd>
+                            <ol class="algorithm">
+                                <li>|manifest|、|launch
+                                    params|.{{LaunchParams/targetURL}}、|POST resource| を渡して
+                                    [=create a new application context=] する手順を実行した結果を返す。
+                                </li>
+                            </ol>
+                        <dt>[=client mode/navigate-existing=] または
+                            [=client mode/focus-existing=]</code>
+                        <dd>
+                            <ol class="algorithm">
+                                <li>|manifest| が [=applied=] された [=application context=] が
+                                    存在しない場合：
+                                    <ol>
+                                        <li>
+                                            |manifest|、
+                                            |launch params|.{{LaunchParams/targetURL}}、|POST
+                                            resource| を渡して [=create a new application context=]
+                                            する手順を実行した結果を返す。
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>|application context| を、|manifest| が [=applied=] された
+                                    [=application context=] とする。複数ある場合は、
+                                    ユーザーエージェントが最も適切なものを選択する。
+                                    <p class="note">
+                                        適切な選択戦略としては、最も最近フォーカスされていたものを
+                                        選ぶことが考えられる。
+                                    </p>
+                                </li>
+                                <li>
+                                    |client mode| が [=client mode/focus-existing=] であり、
+                                    |application context| の
+                                    <a data-cite="html#nav-current-history-entry">現在の
+                                        セッション履歴エントリ</a>の
+                                    <a data-cite="html#she-url">URL</a> が |manifest| の
+                                    [=manifest/within scope=] である場合：
+                                    <ol>
+                                        <li>|application context| のビューポートをフォーカスする。
+                                        </li>
+                                        <li>|application context| を返す。
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>
+                                    |POST resource| を渡して、|application context| を
+                                    |launch params|.{{LaunchParams/targetURL}} へ [=Navigate=] する。
+                                </li>
+                                <li>|application context| を返す。
+                                </li>
+                            </ol>
+                    </dl>
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h2>
+                [=unconsumed launch params=] の処理
+            </h2>
+            <p>
+                {{LaunchQueue}} |queue| が与えられたときの
+                <dfn>process unconsumed launch params</dfn> する手順は次のとおりである。
+            </p>
+            <ol>
+                <li>[=assigned launch consumer=] |consumer| が
+                    |queue| に設定されている場合：
+                    <ol>
+                        <li>|queue| の [=unconsumed launch params=] の
+                            |launch_params:LaunchParams| それぞれについて [=list/For each=]：
+                            <ol>
+                                <li>|consumer| を |launch_params| で呼び出す。
+                                </li>
+                            </ol>
+                        </li>
+                        <li>|queue| の [=unconsumed launch params=] を空リストに設定する。
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </section>
+    </section>
+    <section>
+        <h2>
+            アプリ起動に対するスクリプトインターフェイス
+        </h2>
+        <section data-dfn-for="LaunchParams">
+            <h3>
+                <dfn>LaunchParams</dfn> インターフェイス
+            </h3>
+            <ul class="issue">
+                <li>これは
+                    <a href="https://wicg.github.io/manifest-incubations/index.html#launch-queue-and-launch-params">
+                        Manifest Incubations</a> から変更なしで直接コピーされたものであり、この
+                    [=manifest/launch_handler=] 仕様が、その置き換え先になるべきである。
+                </li>
+                <li>{{LaunchParams}} は辞書であるべきである。
+                </li>
+                <li>{{LaunchParams/targetURL}} は nullable であるべきではない。
+                </li>
+                <li>{{LaunchParams/files}} は任意であるべきである
+                </li>
+                <li>{{LaunchParams/targetURL}} 以外のメンバーについては、
+                    起動の種類を示すために、undefined でないものは 1 つだけであるべきである。
+                </li>
+            </ul>
+            <pre class="idl">
+          [Exposed=Window] interface LaunchParams {
+            readonly attribute DOMString? targetURL;
+            readonly attribute FrozenArray&lt;FileSystemHandle&gt; files;
+          };
+        </pre>
+            <p>
+                {{LaunchParams/targetURL}} は、アプリケーションの
+                [=manifest/within scope=] でなければならない、起動の [=URL=] を表す。
+            </p>
+            <p>
+                {{LaunchParams/files}} 内のすべての |file handle:FileSystemHandle| について、
+                {{FileSystemPermissionDescriptor/mode}} を
+                {{FileSystemPermissionMode/"readwrite"}} に設定してファイルシステム権限を
+                照会した場合、{{PermissionState/"granted"}} を返さなければならない。
+            </p>
+        </section>
+        <section data-dfn-for="LaunchConsumer">
+            <h3>
+                <dfn>LaunchConsumer</dfn> 関数
+            </h3>
+            <pre class="idl">
+          callback LaunchConsumer = any (LaunchParams params);
+        </pre>
+        </section>
+        <section data-dfn-for="LaunchQueue">
+            <h3>
+                <dfn>LaunchQueue</dfn> インターフェイス
+            </h3>
+            <pre class="idl">
+          partial interface Window {
+            readonly attribute LaunchQueue launchQueue;
+          };
+
+          [Exposed=Window] interface LaunchQueue {
+            undefined setConsumer(LaunchConsumer consumer);
+          };
+        </pre>
+            <p>
+                {{LaunchQueue}} は、初期状態で空の {{LaunchParams}} の
+                [=list=] である <dfn>unconsumed launch params</dfn> を持つ。
+            </p>
+            <p>
+                {{LaunchQueue}} は、初期状態で null である任意の {{LaunchConsumer}}、
+                すなわち <dfn>assigned launch consumer</dfn> を持つ。
+            </p>
+            <section>
+                <h2>
+                    <dfn>setConsumer</dfn> メソッド
+                </h2>
+                <p>
+                    {{LaunchQueue/setConsumer(consumer)}} メソッド手順は次のとおりである。
+                </p>
+                <ol class="algorithm">
+                    <li>[=assigned launch consumer=] を |consumer| に設定する。
+                    </li>
+                    <li>[=process unconsumed launch params=] する手順を実行する。
+                    </li>
+                </ol>
+            </section>
+            <p class="note">
+                {{LaunchParams}} は、起動イベントの発火とページスクリプトによる
+                イベントリスナーの取り付けとの間の競合状態を避けるために、
+                イベント経由ではなく {{LaunchQueue}} 経由で文書へ渡される。
+                対照的に、{{LaunchQueue}} は、{{LaunchConsumer}} が設定されるまで、
+                キュー投入されたすべての {{LaunchParams}} をバッファする。
+            </p>
+        </section>
+    </section>
+    <section class="informative" data-cite="secure-contexts">
+        <h2>
+            アクセシビリティ
+        </h2>
+        <p>
+            この仕様には、既知のアクセシビリティ上の考慮事項はない。
+        </p>
+    </section>
+    <section id="priv-sec">
+        <h2>
+            プライバシーおよびセキュリティの考慮事項
+        </h2>
+        <p>
+            実装は、[=manifest/client_mode=] が
+            [=client mode/focus-existing=] である起動について
+            [=launching a web application with handling=] する際、注意を払うべきである。
+            これらの起動は、[=manifest/navigation scope=] の外部に URL を
+            漏えいしてはならない。これは、[=Document/processed manifest=]
+            |manifest| が与えられた場合、両方向に適用される。
+        <ul>
+            <li>
+                Web アプリケーション起動は、|manifest| の [=manifest/within scope=] ではない
+                {{LaunchParams/targetURL}} を使用してはならない。
+            </li>
+            <li>
+                {{LaunchParams}} は、|manifest| の [=manifest/within
+                scope=] ではない <a data-cite="html#nav-current-history-entry">
+                    現在のセッション履歴エントリ</a>の
+                <a data-cite="html#she-url">URL</a> を持つ [=application
+                context=] にキュー投入されてはならない。
+            </li>
+        </ul>
+        </p>
+        <p>
+        </p>
+    </section>
+    <section id="conformance"></section>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
