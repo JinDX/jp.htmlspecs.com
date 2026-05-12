@@ -1,0 +1,2707 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        Manifest Incubations
+    </title>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"></script>
+    <script class='remove'>
+        // See https://github.com/w3c/respec/wiki/ for how to configure ReSpec
+        var respecConfig = {
+            specStatus: "CG-DRAFT",
+            editors: [{
+                name: "Daniel Murphy"
+            }],
+            group: "wicg",
+            github: "WICG/manifest-incubations",
+            shortName: "manifest-incubations",
+            xref: {
+                specs: [
+                    "appmanifest",
+                    "dom",
+                    "file-system-access",
+                    "fs",
+                    "mimesniff",
+                    "urlpattern",
+                    "web-app-launch",
+                    "window-controls-overlay"
+                ],
+                profile: "web-platform",
+            },
+        };
+    </script>
+</head>
+
+<body data-cite="MEDIAQUERIES-5">
+    <section id="abstract">
+        <p>
+            Chromium が出荷済みだが、他のユーザーエージェントからの
+            コミットメント／実装がない、<a href="https://www.w3.org/TR/appmanifest/">Web Application Manifest</a>
+            拡張およびインキュベーションのための機能仕様。
+            これらの機能を explainer として保持する代わりに、ここでより
+            公式に文書化する。
+        </p>
+    </section>
+    <section id="sotd">
+        <p>
+            これは非公式な提案である。
+        </p>
+    </section>
+    <section>
+        <h2>
+            <code><dfn data-export="" data-dfn-for=
+        "manifest">display_override</dfn></code> メンバー
+        </h2>
+        <p>
+            高度な用途では、[=manifest/display_override=] メンバーを使用して、
+            開発者が Web アプリケーションに対して好ましい
+            <a data-cite="appmanifest#dfn-display">表示モード</a>を選択できるように、
+            <a data-cite="appmanifest#dfn-display-modes-list">表示モードリスト値</a>の
+            カスタムフォールバック順序を指定できる。その値は [=display mode=] である。
+        </p>
+        <p>
+            [=application manifest=] の [=manifest/display_override=] メンバーは、
+            [=display mode/window-controls-overlay=] や [=display mode/unframed=] などの
+            拡張を含む
+            <a>sequence</a> の
+            <a data-cite="appmanifest#dfn-display-modes-list">表示モードリスト値</a>である。
+            このメンバーは、[=display mode=] に対する開発者の好ましい
+            フォールバックチェーンを表す。このフィールドは [=manifest/display=]
+            メンバーを上書きする。ユーザーエージェントがここで指定された
+            [=display mode=] のいずれもサポートしていない場合、
+            [=manifest/display=] メンバーを考慮することへフォールバックする。
+            アルゴリズム手順については、
+            <a data-cite="appmanifest#dfn-process-the-display-member">display
+                メンバーの処理</a>を参照。
+        </p>
+        <p>
+            次の手順は、
+            <a data-cite="appmanifest#dfn-steps-for-determining-the-web-app-s-chosen-display-mode">
+                Web アプリの選択された表示モードを決定する</a>における
+            [=application manifest/processing extension-point=] に追加される。
+        </p>
+        <ol>
+            <li>|manifest:ordered map|.[=manifest/display_override=] メンバーの
+                |candidate_display_mode:DisplayModeType| それぞれについて [=list/For each=]：
+                <ol class="algorithm">
+                    <li><a data-cite="appmanifest/#dfn-display-modes-list">表示
+                            モードリスト</a>が |candidate_display_mode:DisplayModeType| を含む場合、
+                        その |candidate_display_mode:DisplayModeType| を返す
+                    </li>
+                    <li>|candidate_display_mode:DisplayModeType| が [=display
+                        mode/window-controls-overlay=] であり、ユーザーエージェントがこれを
+                        サポートする場合、その |candidate_display_mode:DisplayModeType| を返す。
+                    </li>
+                    <li>|candidate_display_mode:DisplayModeType| が [=display
+                        mode/tabbed=] であり、ユーザーエージェントがこれをサポートする場合、
+                        その |candidate_display_mode:DisplayModeType| を返す。
+                    </li>
+                </ol>
+            </li>
+        </ol>
+        <p class="note">
+            このメンバーは、開発者が自分の表示モードのフォールバック順序を
+            明示的に制御したい場合、または基本の
+            <a data-cite="appmanifest/#dfn-display-modes-list">表示モード
+                リスト</a>では利用できないモードのためなど、高度な場合にのみ
+            使用されることを意図している。そうでない場合、ほとんどのユースケースでは
+            [=manifest/display=] メンバーで十分である。
+        </p>
+        <section>
+            <h3>
+                概念
+            </h3>
+            <ul>
+                <li>
+                    <dfn data-lt="controls of the window">ウィンドウコントロール</dfn>：
+                    オペレーティングシステムがアプリケーション間で一貫して使用する
+                    インターフェイス要素であり、ユーザーがアプリケーションを制御する
+                    特定の操作を実行できるようにする。[=window controls=] における
+                    一般的な操作には、最小化、最大化／復元、閉じるボタンが含まれる。
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h3>
+                表示モード拡張
+            </h3>
+            <p>
+                通常の <a data-cite="appmanifest#dfn-display-modes-list">表示モード</a>に加えて、
+                [=manifest/display_override=] はそれに対する特定の拡張もサポートする。
+            </p>
+            <dl>
+                <dt>
+                    <dfn data-export="" data-dfn-for="display mode">unframed</dfn>
+                </dt>
+                <dd>
+                    isolated web application には、ホストネイティブのタイトルバーや
+                    [=window controls=] が表示されず、Web コンテンツがタイトルバー領域
+                    全体へ拡張される。アプリは Web コンテンツ内に [=draggable region=] を
+                    指定して、カスタマイズされたタイトルバーを作成できる。
+                </dd>
+                <dt>
+                    [=display mode/window-controls-overlay=]
+                </dt>
+                <dt>
+                    <dfn data-export="" data-dfn-for="display mode">tabbed</dfn>
+                </dt>
+                <dd>
+                    Web アプリケーションは、複数の [=application contexts=] を単一の
+                    オペレーティングシステムレベルのウィンドウに結合できる。たとえば、
+                    これはユーザーエージェントが、ユーザーが application contexts 間を
+                    切り替えられるようにタブストリップ UI を表示することを意味し得る。
+                </dd>
+            </dl>
+            <section class="informative">
+                <h4>
+                    [=manifest/display_override=] の使用例
+                </h4>
+                <p>
+                    次は、<code>standalone</code> よりも <code>minimal-ui</code>
+                    <a data-cite="appmanifest#dfn-display-mode">表示モード</a>を優先するが、
+                    <code>minimal-ui</code> がサポートされていない場合は
+                    <code>browser</code> ではなく <code>standalone</code> へフォールバックする
+                    [=manifest=] を示す。
+                </p>
+                <pre class="example json" title="display_override usage manifest">
+            {
+              "name": "Recipe Zone",
+              "description": "All of the recipes!",
+              "icons": [{
+                "src": "icon/hd_hi",
+                "sizes": "128x128"
+              }],
+              "start_url": "/index.html",
+              "display_override": ["minimal-ui"],
+              "display": "standalone",
+              "theme_color": "yellow",
+              "background_color": "red"
+            }
+          </pre>
+            </section>
+        </section>
+        <section>
+            <h3>
+                <dfn data-export="" data-lt="draggable region">ドラッグ可能な
+                    領域</dfn>の定義
+            </h3>
+            <p class="issue" title="At risk feature">
+                [=app-region=] CSS プロパティはどのユーザーエージェントにも実装されて
+                いないため、at risk である。なお、一部のユーザーエージェントは
+                同じ目的のために非標準 CSS プロパティ
+                <dfn data-export="" data-lt="-webkit-app-region">`-webkit-app-region`</dfn>
+                を使用する。
+            </p>
+            <p>
+                <dfn data-export="" data-lt="app-region">`app-region`</dfn>
+                プロパティは、たとえばタイトルバー内のどの領域または要素が
+                ドラッグ可能であるかを CSS で定義するために使用できる。
+            </p>
+            <ul>
+                <li>要素のドラッグを有効にするには、`drag` に設定しなければならない。
+                </li>
+                <li>要素のドラッグを無効にするには、`no-drag` に設定しなければならない。
+                </li>
+            </ul>
+        </section>
+    </section>
+    <section>
+        <h2>
+            manifest の処理への拡張
+        </h2>
+        <p>
+            この仕様によって追加される新しい拡張およびインキュベーション機能
+            すべてを容易にするため、ユーザーエージェントは [=processing a manifest=] における
+            <a data-cite="appmanifest#dfn-processing-extension-point-of-web-manifest">拡張
+                ポイント</a>で、[=URL=]
+            |document URL:URL|、[=URL=] |manifest URL:URL|、[=ordered map=]
+            |json:ordered map|、および [=ordered map=] |manifest:ordered map| に
+            アクセスして、次を実行するべきである：
+        </p>
+        <ol>
+            <li>|json|、|manifest| および
+                |manifest URL| を渡して [=Process the `tab_strip` member=]。
+            </li>
+            <li>|json|、|manifest|
+                および |manifest URL| を渡して [=Process the `note_taking` member=]。
+            </li>
+            <li>|json| および
+                |manifest| を渡して [=Process the `protocol_handlers` member=]。
+            </li>
+            <li>|json|、|manifest|
+                および |manifest URL| を渡して [=Process the `file_handlers` member=]。
+            </li>
+            <li>|json| および
+                |manifest| を渡して [=Process the `related_applications` member=]。
+            </li>
+            <li>|json| および
+                |manifest| を渡して [=Process the `scope_extensions` member=]。
+            </li>
+            <li>|json|、|manifest|
+                および |manifest URL| を渡して [=Process the `migrate_from` member=]。
+            </li>
+            <li>|json|、|manifest|
+                および |manifest URL| を渡して [=Process the `migrate_to` member=]。
+            </li>
+        </ol>
+    </section>
+    <section>
+        <h2>
+            <code><dfn>tab_strip</dfn></code> メンバー
+        </h2>
+        <p>
+            <a data-cite="appmanifest#web-application-manifest">Web Application
+                Manifest</a> の `tab_strip` メンバーは、アプリケーションが
+            [=display mode/tabbed=] 表示モードでどのように挙動することを意図しているか
+            についての情報を含む
+            <a data-cite="appmanifest#dfn-object">オブジェクト</a>である。
+            これは次のメンバーを持つ：
+        </p>
+        <ul>
+            <li>[=tab_strip/home_tab=]
+            </li>
+            <li>[=tab_strip/new_tab_button=]
+            </li>
+        </ul>
+        <section>
+            <h3>
+                <code><dfn>home_tab</dfn></code> メンバー
+            </h3>
+            <p>
+                [=tab_strip=] オブジェクトの `home_tab` メンバーは、アプリケーションの
+                トップレベルメニューとして機能することを意図した特別な「ホームタブ」に
+                関する情報を含む ordered map である。これは次のメンバーを含む：
+            </p>
+            <ul>
+                <li>[=home_tab/scope_patterns=]
+                </li>
+            </ul>
+            <p>
+                <code><dfn>scope_patterns</dfn></code> メンバーは、
+                [=manifest URL=] に相対的な [=within home tab scope|ホームタブのスコープ=]
+                を定義する {{URLPatternInput}} のリストである。
+            </p>
+            <aside class="note">
+                各スコープパターンは、URL のように見えるが
+                "<code>*</code>" をワイルドカード文字として持つ文字列、または
+                "<code>*</code>" ワイルドカードを持つ別々の URL コンポーネントを含む
+                辞書のいずれかである。詳細については [[urlpattern]] を参照。
+            </aside>
+            <p>
+                アプリケーションの適用済み [=display mode=] が [=display mode/tabbed=] であり、
+                [=Document/processed manifest=] が [=tab_strip=] メンバーの非 null な
+                [=home_tab=] メンバーを含む場合、そのアプリケーションは
+                <dfn>ホームタブを持つ</dfn>。
+            </p>
+            <p>
+                <dfn>ホームタブコンテキスト</dfn>は、他の application contexts と比べて
+                特別なプロパティを持つ任意の [=application context=] である。
+                アプリケーションが [=has a home tab=] 場合、すべてのアプリケーション
+                ウィンドウは [=home tab context=] を備えるべきである。そうでない場合、
+                アプリケーションウィンドウは [=home tab context=] を持つべきではない。
+            </p>
+            <p>
+                [=home tab context=] がどのように提示されるかはユーザーエージェントの
+                裁量に委ねられるが、通常の application contexts とは異なる外観を
+                持つべきである。
+            </p>
+            <p>
+                [=URL=] |url:URL| は、次の場合に限り
+                <dfn>ホームタブスコープ内</dfn>であると言われる：
+            </p>
+            <ul>
+                <li>アプリケーションが [=has a home tab=]、かつ
+                </li>
+                <li>|url| が manifest の [=manifest/within scope=] であり、かつ
+                </li>
+                <li>次の少なくとも 1 つ：
+                    <ul>
+                        <li>|url| が [=start URL=] と [=URL/equals=] であり、
+                            [=URL/equals/exclude fragments=] が true に設定されている、または
+                        </li>
+                        <li>[=Document/processed manifest=] の [=tab_strip=] メンバーの
+                            [=home_tab=] メンバーの [=scope_patterns=] メンバーの任意の要素と
+                            |url| を与えて [=URL pattern/match=] を適用した結果が
+                            {{URLPatternResult}} を返す。
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <p>
+                URL は [=within home tab scope=] でない場合、<dfn>ホームタブスコープ外</dfn>である。
+            </p>
+            <aside class="note">
+                <p>
+                    「ホームタブスコープ」（すなわち [=within home tab scope=] である
+                    [=URLs=] の集合）は、[=home tab context=] がナビゲートされ得る
+                    URL の集合である。アプリケーション内で [=within home tab scope=] の
+                    URL へのすべてのナビゲーションは [=home tab context=] で実行され、
+                    [=outside of home tab scope=] の URL へのすべてのナビゲーションは、
+                    必要に応じて作成される別の [=application context=]
+                    （すなわち別のタブ）で実行される。アプリケーションの [=start URL=] は、
+                    （アプリケーションが [=has a home tab=] 場合）常にホームタブスコープの
+                    一部である。
+                </p>
+                <p>
+                    [=start URL=] との照合のためには、[=URL/fragment=] は無視されるが、
+                    [=URL/query=] は正確に一致しなければならない。
+                </p>
+                <p>
+                    アプリケーションが [=has a home tab|ホームタブを持たない=] 場合、
+                    ホームタブスコープは空集合であり、すべての URL は
+                    [=outside of home tab scope=] である。
+                </p>
+            </aside>
+            <section>
+                <h3>
+                    すべてのウィンドウはホームタブを持つ
+                </h3>
+                <p>
+                    アプリケーションが [=has a home tab=] 場合、新しいアプリケーション
+                    ウィンドウが作成されるたびに（たとえばアプリケーションの起動時、
+                    またはタブを新しいウィンドウへ移動するとき）、ユーザーエージェントは
+                    そのウィンドウ内に新しい [=home tab context=] を作成しなければならない。
+                    新しく作成された [=home tab context=] は、定義上
+                    [=within home tab scope=] である [=start URL=] へナビゲートされるべきである。
+                </p>
+            </section>
+            <section>
+                <h3>
+                    ホームタブスコープに関するナビゲーション
+                </h3>
+                <p>
+                    [=home tab context=] に関連付けられた [=top-level traversable=] を、
+                    [=outside of home tab scope=] である [=URL=] |url:URL| へ
+                    [=navigate|ナビゲート=] するとき、次の手順が実行される：
+                </p>
+                <ol>
+                    <li><code>"_blank"</code> のターゲットおよび noopener true で
+                        navigable を選択した結果を、[=top-level traversable=]
+                        |tab:toplevel traversable| とする。
+                    </li>
+                    <li>home-tab traversable を [=navigating=] する代わりに、
+                        同じパラメーターで |tab| を [=navigate=] する。
+                    </li>
+                    <li>現在の [=application manifest=] を |tab| の
+                        [=top-level browsing context=] に [=applied|適用=] する。
+                    </li>
+                    <li>ユーザーエージェントは |tab| を home-tab navigable と同じ
+                        ウィンドウに配置するべきである。
+                    </li>
+                    <li>|tab| をフォーカスする。
+                    </li>
+                </ol>
+                <p class="issue" data-number="98"></p>
+                <p>
+                    [=display mode/tabbed=] の [=display mode=] を持つ
+                    [=top-level traversable=] であって [=home tab context=] に関連付けられて
+                    いないもの（すなわち非ホームタブ）を、[=within home tab scope=] である
+                    [=URL=] |url:URL| へ [=navigate|ナビゲート=] するとき、次の手順が
+                    実行される：
+                </p>
+                <ol>
+                    <li>|hometab:toplevel traversable| を、現在のウィンドウに関連付けられた
+                        [=home tab context=] の [=top-level traversable=] とする。
+                    </li>
+                    <li>top-level traversable を [=navigating=] する代わりに、
+                        同じパラメーターで |hometab| を [=navigate=] する。
+                    </li>
+                    <li>|hometab| をフォーカスする。
+                    </li>
+                </ol>
+                <aside class="note">
+                    ホームタブから [=outside of home tab scope=] の URL へのナビゲーションは、
+                    新しい通常のタブを開き、既存の文書をホームタブに開いたままにする。
+                    同様に、通常のタブから [=within home tab scope=] の URL への
+                    ナビゲーションはホームタブで開かれ、そのナビゲーションを開始した
+                    タブには既存の文書が開いたまま残る。開発者は、これらのどちらの場合にも、
+                    残された文書が予期しない状態にならないようにするべきである。
+                </aside>
+            </section>
+            <section class="informative">
+                <h3>
+                    ホームタブ不変条件
+                </h3>
+                <p>
+                    上記の規則は、[=has a home tab|ホームタブを持つ=] アプリケーションについて、
+                    次の不変条件が常に真であることを保証することを意図している：
+                </p>
+                <ul>
+                    <li>すべてのアプリケーションウィンドウは正確に 1 つの
+                        [=home tab context=] を持ち、
+                    </li>
+                    <li>すべての [=home tab context=] のアクティブ文書の
+                        [=Document/URL=] は [=within home tab scope=] であり
+                        （文書の URL が作成時以降に変更されていない限り）、
+                    </li>
+                    <li>すべての非ホームタブ [=application context=] のアクティブ文書の
+                        [=Document/URL=] は [=outside of home tab scope=] である
+                        （文書の URL が作成時以降に変更されていない限り）。
+                    </li>
+                </ul>
+                <p>
+                    ユーザーエージェントは、文書が [=URL/fragment=] を変更したり、
+                    {{History}} API を使用して表示 URL をホームタブスコープ内外へ変更したり
+                    しても、ナビゲーションが発生していないため、文書をホームタブコンテキストと
+                    非ホームタブコンテキストの間で動的に移動しない。このため、上記の不変条件は、
+                    文書が作成された時点で持っていた [=Document/URLs=] のみを考慮する。
+                </p>
+                <p>
+                    URL を変更することで「ナビゲートしたふり」をする single-page applications では、
+                    これにより、上記の不変条件を破る望ましくない挙動が生じる可能性がある
+                    （例：ユーザーがホームタブ内のリンクをクリックして URL を非ホームページへ
+                    動的に変更しても、実際にはナビゲートしていないため、ホームタブ内に
+                    留まる）。この状況を避けるため、アプリケーションは tabbed application mode
+                    にあることを検出し、URL を変更する代わりに、ホームタブスコープの内外へ
+                    実際のナビゲーションを行うように挙動を変更できる。
+                </p>
+            </section>
+        </section>
+        <section>
+            <h3>
+                <code><dfn>new_tab_button</dfn></code> メンバー
+            </h3>
+            <p>
+                [=tab_strip/new_tab_button=] メンバーは、クリック／有効化されたときに
+                アプリケーションウィンドウ内で新しい [=application context=] を開く
+                UI アフォーダンス（ボタンなど）の挙動を記述する ordered map である。
+                これは次のメンバーを持つ：
+            </p>
+            <ul>
+                <li>[=new_tab_button/url=]
+                </li>
+            </ul>
+            <p>
+                <code><dfn data-dfn-for="new_tab_button">url</dfn></code> メンバーは、
+                [=manifest URL=] に相対的な URL を表す文字列であり、
+                [=Document/processed manifest=] の [=manifest/within scope=] である。
+            </p>
+            <p>
+                [=Document/processed manifest=] の [=new_tab_button=] の
+                [=new_tab_button/url=] メンバーが [=outside of home tab scope=] である場合、
+                アプリケーションは <dfn>新しいタブボタンを持つ</dfn>。アプリケーションが
+                [=has a new tab button|新しいタブボタンを持たない=] 場合、
+                ユーザーエージェントは「新しいタブ」アフォーダンスをエンドユーザーに
+                利用可能にするべきではない。
+            </p>
+            <aside class="note">
+                <p>
+                    新しいタブボタンの URL が [=within home tab scope=] である場合、
+                    そのボタンは利用できなくなる。この規則は必要である。そうでなければ、
+                    a) 新しいタブボタンが [=within home tab scope=] の非ホームタブを開くことを
+                    意味し、上記の 3 番目のホームタブ不変条件に違反するか、
+                    b) 新しいタブボタンが単にホームタブをフォーカスするだけになり、
+                    冗長で混乱を招く UI になるためである。
+                </p>
+                <p>
+                    [=new_tab_button/url=] の既定値は [=start URL=] である。
+                    これは、アプリケーションが [=has a home tab=] 場合、
+                    ボタンは既定で利用できなくなることを意味する。
+                </p>
+            </aside>
+            <p>
+                エンドユーザーによって新しいタブボタンが有効化されたとき、次の手順が
+                実行される：
+            </p>
+            <ol>
+                <li>現在のウィンドウ内に [=Create a new application context=] し、
+                    それをフォーカスする。
+                </li>
+                <li>[=new_tab_button=] の [=new_tab_button/url=] メンバーの値へ
+                    ナビゲートする。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h2>
+                `tab_strip` メンバーの処理
+            </h2>
+            <p>
+                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、
+                および [=URL=] |manifest URL:URL| が与えられたとき、
+                <dfn>process the `tab_strip` member</dfn> するには、
+                [=processing a manifest=] における
+                <a data-cite="appmanifest#dfn-processing-extension-point-of-web-manifest">
+                    拡張ポイント</a>で次を実行する：
+            </p>
+            <ol>
+                <li>|manifest|["tab_strip"] を新しい [=ordered map=] に設定する。
+                </li>
+                <li>|json|["tab_strip"] が存在しない、または |json|["tab_strip"] が
+                    [=ordered map=] でない場合：
+                    <ol>
+                        <li>|manifest|["tab_strip"]["new_tab_button"]["url"] を
+                            |manifest|["start_url"] に設定する。
+                        </li>
+                        <li>戻る。
+                        </li>
+                    </ol>
+                </li>
+                <li>|json|["tab_strip"]、
+                    |manifest|["tab_strip"]、および |manifest URL| を渡して
+                    [=Process the `home_tab` member=]。
+                </li>
+                <li>
+                    |json|["tab_strip"]、|manifest|["tab_strip"]、|manifest URL|、および
+                    |manifest|["start_url"] を渡して [=Process the `new_tab_button` member=]。
+                </li>
+            </ol>
+            <section>
+                <h3>
+                    `home_tab` メンバーの処理
+                </h3>
+                <p>
+                    [=ordered map=] |json tab strip:ordered map|、[=ordered map=]
+                    |manifest tab strip:ordered map|、および [=URL=] |manifest URL:URL| が
+                    与えられたとき、<dfn>process the `home_tab` member</dfn> するには、
+                    次を実行する：
+                </p>
+                <ol>
+                    <li>|json tab strip|["home_tab"] が存在しない、または |json tab
+                        strip|["home_tab"] が [=ordered map=] でない場合、戻る。
+                    </li>
+                    <li>|home tab:ordered map| を新しい [=ordered map=] とする。
+                    </li>
+                    <li>|json tab
+                        strip|["home_tab"]["scope_patterns"]、|home tab| および |manifest
+                        URL| を渡して [=Process the `scope_patterns` member=]。
+                    </li>
+                    <li>|manifest tab strip|["home_tab"] を |home tab| に設定する。
+                    </li>
+                </ol>
+            </section>
+            <section>
+                <h3>
+                    `new_tab_button` メンバーの処理
+                </h3>
+                <p>
+                    [=ordered map=] |json tab strip:ordered map|、[=ordered map=]
+                    |manifest tab strip:ordered map|、[=URL=] |manifest URL:URL|、および
+                    [=URL=] |start URL:URL| が与えられたとき、
+                    <dfn>process the `new_tab_button` member</dfn> するには、次を実行する：
+                </p>
+                <ol>
+                    <li>|manifest tab strip|["new_tab_button"]["url"] を |start
+                        URL| に設定する。
+                    </li>
+                    <li>|json tab strip|["new_tab_button"] が存在しない、または |json
+                        tab strip|["new_tab_button"] が [=ordered map=] でない場合、戻る。
+                    </li>
+                    <li>|url:URL| を、|manifest URL| を基底
+                        URL として |json tab strip|["new_tab_button"]["url"] を
+                        [=URL Parser|解析=] した結果とする。
+                    </li>
+                    <li>|url| が failure の場合、戻る。
+                    </li>
+                    <li>|url| が |manifest URL| の [=URL/within scope=] でない場合、戻る。
+                    </li>
+                    <li>|manifest tab strip|["new_tab_button"]["url"] を |url| に設定する。
+                    </li>
+                </ol>
+            </section>
+            <section>
+                <h3>
+                    `scope_patterns` メンバーの処理
+                </h3>
+                <p>
+                    [=ordered map=] |json home tab:ordered map|、[=ordered map=]
+                    |manifest home tab:ordered map| および [=URL=] |manifest URL:URL| が
+                    与えられたとき、<dfn>process the `scope_patterns` member</dfn> するには、
+                    次を実行する：
+                </p>
+                <ol>
+                    <li>|processed scope patterns:list| を新しい [=list=] とする。
+                    </li>
+                    <li>|manifest home tab|["scope_patterns"] を |processed scope
+                        patterns| に設定する。
+                    </li>
+                    <li>|json home tab|["scope_patterns"] が存在しない、または |json
+                        home tab|["scope_patterns"] が [=list=] でない場合、戻る。
+                    </li>
+                    <li>|json home
+                        tab|["scope_patterns"] の |entry:URLPatternInit| それぞれについて：
+                        <ol>
+                            <li>|entry| と |manifest URL| を与えて
+                                [=build a URL pattern from an infra value|infra 値から URL パターンを構築=]
+                                した結果を |pattern:URL pattern| とする。この処理が例外を投げるか
+                                null を返す場合、続行する。
+                            </li>
+                            <li>|pattern| を |processed scope patterns| に追加する。
+                            </li>
+                        </ol>
+                    </li>
+                </ol>
+                <p class="issue" data-number="97"></p>
+            </section>
+        </section>
+        <section class="informative">
+            <h2>
+                使用例
+            </h2>
+            <pre class="example json" title="Tabbed application manifest">
+        {
+          "name": "Tabbed App Example",
+          "start_url": "/",
+          "display": "standalone",
+          "display_override": ["tabbed"],
+          "tab_strip": {
+            "home_tab": {
+              "scope_patterns": [
+                {"pathname": "/"},
+                {"pathname": "/index.html"}
+              ]
+            },
+            "new_tab_button": {
+              "url": "/create"
+            }
+          }
+        }
+        </pre>
+            <p>
+                この例は、tabbed mode がサポートされていない場合に単一文書の
+                standalone window へフォールバックする tabbed web app である。
+                メイン index ページ（<code>/</code> または
+                <code>/index.html</code>）へのすべてのナビゲーションは
+                [=home tab context=] で開かれる。新しいタブボタンは
+                <code>/create</code> で新しいタブを開く。
+            </p>
+            <p>
+                [=tab_strip/home_tab/scope_patterns=] と照合するとき、URL の
+                [=URL/query=] 部分は既定で無視されることに注意
+                （したがって <code>/index.html?utm_source=foo</code> への
+                ナビゲーションはホームタブで開かれる）。しかし、[=start URL=] と
+                照合するとき、[=URL/query=] は正確に一致しなければならないため、
+                クエリを無視したいサイトは、[=start URL=] の
+                [=URL/path=] をスコープパターンとして明示的に含めることが推奨される。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>
+            `share_target` メンバー
+        </h2>
+        <p>
+            `share_target` メンバーは、Web アプリケーションを共有アクション
+            （例：テキスト、URL、またはファイルの共有）の「ターゲット」として登録する。
+            `share_target` メンバーは [[[web-share-target]]] 仕様の一部である。
+        </p>
+    </section>
+    <section>
+        <h2>
+            <code><dfn>note_taking</dfn></code> メンバー
+        </h2>
+        <p>
+            <a data-cite="appmanifest#web-application-manifest">Web Application
+                Manifest</a> の `note_taking` メンバーは、ノート作成に関連する情報を
+            含む <a data-cite="appmanifest#dfn-object">オブジェクト</a>である。
+            これは次のメンバーを持つ：
+        </p>
+        <ul>
+            <li>[=note_taking/new_note_url=]
+            </li>
+        </ul>
+        <p>
+            ユーザーエージェントは、これらのメンバーを使用して、その Web アプリケーションを
+            ノート作成機能を持つアプリケーションとして異なる扱いにしてもよい
+            （例：オペレーティングシステムのノート作成サーフェスとの統合）。
+        </p>
+        <section>
+            <h3>
+                <code><dfn data-dfn-for="note_taking">new_note_url</dfn></code>
+                メンバー
+            </h3>
+            <p>
+                [=note_taking=] `new_note_url` メンバーは、ユーザーが Web アプリケーションを
+                使用して新しいノートを取りたいとき（例：オペレーティングシステムの
+                ショートカットアイコンやキーボードショートカットから）に、
+                ユーザーエージェントに読み込ませることを開発者が望む
+                <a data-cite="url#concept-url">URL</a> を表す [=string=] である。
+            </p>
+            <p>
+                `new_note_url` メンバーは純粋に助言的であり、ユーザーエージェントは
+                それを<a data-cite="appmanifest#dfn-ignore">無視</a>してもよく、
+                それを使用するかどうかをエンドユーザーが選択できるようにしてもよい。
+                ユーザーエージェントは、エンドユーザーがそれを変更できるようにしてもよい。
+            </p>
+            <aside class="note">
+                <p>
+                    `new_note_url` メンバーは
+                    <a data-cite="appmanifest#dfn-manifest-url">manifest
+                        URL</a> を基底 URL として解析され、
+                    manifest の [=manifest/within scope=] でない場合は無視される。
+                </p>
+            </aside>
+        </section>
+        <section class="informative">
+            <h3>
+                使用例
+            </h3>
+            <p>
+                次は、ノート作成アプリケーション用の [=manifest=] を示す。
+            </p>
+            <pre class="example json" title="Note-taking application">
+          {
+            "name": "My Note Taking App",
+            "description": "You can take notes!",
+            "icons": [{
+              "src": "icon/hd_hi",
+              "sizes": "128x128"
+            }],
+            "start_url": "/index.html",
+            "display": "standalone",
+            "note_taking": {
+              "new_note_url": "/new_note.html"
+            }
+          }
+        </pre>
+        </section>
+        <section>
+            <h3>
+                `note_taking` メンバーの処理
+            </h3>
+            <p>
+                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、
+                [=URL=] |manifest_URL:URL| が与えられたとき、
+                <dfn>process the `note_taking` member</dfn> するには、
+                [=processing a manifest=] における
+                <a
+                    data-cite="appmanifest#dfn-processing-extension-point-of-web-manifest">拡張
+                    ポイント</a>で次を実行する：
+            </p>
+            <ol class="algorithm">
+                <li>|json|["note_taking"] が [=map/exist=] しない場合、戻る。
+                </li>
+                <li>|json|["note_taking"] の型が [=ordered map=] でない場合、
+                    戻る。
+                </li>
+                <li>|manifest|["note_taking"] を新しい [=ordered map=] に設定する。
+                </li>
+                <li>|json|["note_taking"], |manifest|["note_taking"], および |manifest URL| を
+                    渡して [=process the `new_note_url` member=]。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                `new_note_url` メンバーの処理
+            </h3>
+            <p>
+                [=ordered map=] |json_note_taking:ordered map|、[=ordered map=]
+                |manifest_note_taking:ordered map|、[=URL=] |manifest_URL:URL| が
+                与えられたとき、<dfn>process the `new_note_url` member</dfn> するには、
+                次を実行する：
+            </p>
+            <ol class="algorithm">
+                <li>|json_note_taking|["new_note_url"] が [=map/exist=] しない場合、
+                    戻る。
+                </li>
+                <li>|json_note_taking|["new_note_url"] の型が
+                    [=string=] でない場合、戻る。
+                </li>
+                <li>|new_note_url:URL| を、|manifest URL| を基底
+                    URL として |json_note_taking|["new_note_url"] を
+                    [=URL Parser|解析=] した結果とする。
+                </li>
+                <li>|new_note_url| が failure の場合、戻る。
+                </li>
+                <li>|new_note_url| が |manifest
+                    URL| の [=manifest/within scope=] でない場合、戻る。
+                </li>
+                <li>manifest_note_taking["new_note_url"] を |new_note_url| に設定する。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                `new_note_url` の起動
+            </h3>
+            <p>
+                <a data-cite="appmanifest#dfn-processed-manifest">処理済み manifest</a>
+                |manifest:processed manifest| が与えられたとき、
+                <dfn>launch the `new_note_url`</dfn> するには、次の手順を実行する：
+            </p>
+            <ol>
+                <li>|manifest|["note_taking"] が [=map/exist=] しない場合、戻る。
+                </li>
+                <li>|manifest|["note_taking"]["new_note_url"] が
+                    [=map/exist=] しない場合、戻る。
+                </li>
+                <li>|manifest|["note_taking"]["new_note_url"] の型が
+                    [=URL=] でない場合、戻る。
+                </li>
+                <li>|manifest| を |manifest| に、
+                    |target URL| を |manifest|["note_taking"]["new_note_url"] に設定して、
+                    [=launch a web application=] する手順を実行する。
+                </li>
+            </ol>
+            <p>
+                ユーザーエージェントは、通常はユーザーアフォーダンスへの応答として、
+                任意の時点で、与えられた [=installed web application=] について
+                [=launch the `new_note_url`=] してもよい。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>
+            `protocol_handlers` メンバー
+        </h2>
+        <p>
+            [=manifest's=] <code><dfn data-dfn-for=
+        "manifest">protocol_handlers</dfn></code> メンバーは、
+            Web アプリケーションが URL プロトコルを処理できるようにする
+            <a>protocol handler description</a> の配列である。
+        </p>
+        <p>
+            インストール時、ユーザーエージェントは次と整合する対話を通じて、
+            オペレーティングシステムに protocol handler を登録するべきである：
+        </p>
+        <ul>
+            <li>プロトコルに対して複数の登録済み handler がある場合、OS は
+                どのアプリがそれを開くべきかをユーザーが選択できるようにし、
+                さらに既定のアプリを設定できるようにする。
+            </li>
+            <li>登録済みプロトコルをクリックすると、登録済みアプリケーションが起動される。
+                これが Web アプリである場合、[=HTML=] で定義された
+                [=invoke a protocol handler=] 手順を実行する。そこでは、
+                ユーザーエージェントは [=url=] へナビゲートするべきであり、
+                適切なブラウジングコンテキストは新しいトップレベルブラウジングコンテキストに
+                設定される。
+            </li>
+        </ul>
+        <aside class="note">
+            Protocol handlers は、たとえば、あるアプリが別のアプリを直接呼び出し、
+            カスタムプロトコルリンクを介してデータを渡す Web アプリ通信に使用できる。
+        </aside>
+        <section>
+            <h3>
+                `protocol_handlers` メンバーの処理
+            </h3>
+            <p>
+                [=object=] |json:JSON|、|manifest:ordered map| が与えられたとき、
+                <dfn>process the `protocol_handlers` member</dfn> するには：
+            </p>
+            <ol>
+                <li>|json:JSON|["|protocol_handlers|"] の新しい [=list=] を
+                    |processedProtocolHandlers| とする。
+                </li>
+                <li>manifest["|protocol_handlers|"] を
+                    |processedProtocolHandlers| に設定する。
+                </li>
+                <li>|protocol_handler|（<a>protocol handler
+                        description</a>）それぞれについて [=list/For each=]：
+                    <ol>
+                        <li>|protocol_handler|["protocol"] または
+                            |protocol_handler|["url"] が undefined の場合、[=iteration/continue=]。
+                        </li>
+                        <li>|protocol_handler|["protocol"]、| protocol_handler|["url"] を、
+                            |manifest URL| を基底 URL として、かつ [=this=] の関連する
+                            [=environment settings object=] を使用して、
+                            [=normalize protocol handler parameters=] を実行した結果を
+                            (|normalizedProtocol:string|, |normalizedUrl:URL|) とする。
+                            結果が failure の場合、[=iteration/continue=]。
+                        </li>
+                        <li>|normalizedUrl| が |manifest| の [=manifest/within scope=] でない場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|processedProtocolHandlers| が |normalizedUrl| を
+                            [=list/contains=] する場合、[=iteration/continue=]。
+                        </li>
+                        <li>|protocol_handler| を |processedProtocolHandlers| に
+                            [=List/Append=] する。
+                        </li>
+                    </ol>
+                </li>
+                <li>|processedProtocolHandlers| それぞれについて [=list/For each=]、
+                    ユーザーエージェントは [=register a protocol handler=] するべきである。
+                </li>
+            </ol>
+            <p>
+                ユーザーエージェントは、ホストオペレーティングシステムでプロトコルの
+                既定 handler として [=protocol handler description=]
+                <var>protocol_handler</var>s を登録する前に、ユーザーに許可を求めるべきである。
+                ユーザーエージェントは、ホストオペレーティングシステムの慣例または制限との
+                一貫性を保つため、提示される [=protocol handler description=]
+                <var>protocol_handlers</var> のリストを切り詰めてもよい。
+            </p>
+            <aside class="example">
+                <p>
+                    次の例では、開発者は 2 つの [=protocol
+                    handler description=] <var>protocol_handler</var>s を含めている。
+                    manifest の URL が
+                    <samp>https://example.com/manifest.webmanifest</samp> であると仮定する：
+                </p>
+                <ul>
+                    <li>最初の protocol handler は、"web+music" URL
+                        （例：web+music://#1234）を処理するために登録される。
+                        有効化されると、ユーザーエージェントは新しい
+                        [=top-level browsing context=] をインスタンス化し、
+                        <samp>https://example.com/play?songId=web+music://%231234</samp>
+                        へナビゲートすることになる。
+                    </li>
+                    <li>2 番目の protocol handler は無視される。提供されたプロトコルが
+                        "web+" で始まっておらず、[=safelisted schemes=] の一部でもないためである。
+                    </li>
+                </ul>
+                <pre class="json">
+            {
+              "protocol_handlers": [
+                {
+                  "protocol": "web+music",
+                  "url": "/play?songId=%s"
+                },
+                {
+                  "protocol": "store",
+                  "url": "/buy?songId=%s"
+                }
+              ]
+            }
+          </pre>
+            </aside>
+        </section>
+        <section>
+            <h2>
+                Protocol handler 項目
+            </h2>
+            <p>
+                各 <dfn>protocol handler description</dfn> は、Web アプリケーションが
+                処理したいプロトコルを表す [=object=] であり、
+                [=manifest/protocol_handlers=] メンバーに対応する。
+                これは次のメンバーを持つ：
+            </p>
+            <ul>
+                <li>[=protocol handler description/protocol=]
+                </li>
+                <li>[=protocol handler description/url=]
+                </li>
+            </ul>
+            <p>
+                ユーザーエージェントは、これらの値を使用して、Web アプリケーションを
+                operating system の handler として登録するべきである。
+                ユーザーが protocol handler URL を有効化したとき、ユーザーエージェントは
+                <a>handling a protocol launch</a> を実行するべきである。
+            </p>
+            <p class="note">
+                [[HTML]] の {{NavigatorContentUtils/registerProtocolHandler()}} は、
+                Web サイトが特定のプロトコルの可能な handler として自分自身を登録することを
+                可能にする。<a>protocol handler description</a> に対する
+                有効な [=protocol handler description/protocol=] および
+                [=protocol handler description/url=] の値を構成するものは、その API で定義される。
+                なお、[[HTML]] API は、ここで [=protocol handler description/protocol=] を
+                使用する場所で <code>scheme</code> を使用するが、同じ制限が適用される。
+            </p>
+            <section>
+                <h3>
+                    `protocol` メンバー
+                </h3>
+                <p>
+                    <a>protocol handler description</a> の <code><dfn data-dfn-for=
+            "protocol handler description">protocol</dfn></code> メンバーは、
+                    処理されるプロトコル（`mailto` または
+                    `web+auth` など）を表す <a>string</a> である。
+                </p>
+                <p>
+                    <a>protocol handler description</a> の
+                    [=protocol handler description/protocol=] メンバーは、
+                    [[HTML]] で定義される
+                    {{NavigatorContentUtils/registerProtocolHandler()}} の
+                    <code>scheme</code> 引数と同等である。
+                </p>
+            </section>
+            <section>
+                <h3>
+                    `url` メンバー
+                </h3>
+                <p>
+                    <a>protocol handler description</a> の <code><dfn data-dfn-for=
+            "protocol handler description">url</dfn></code> メンバーは、
+                    関連付けられたプロトコルが有効化されたときに開かれる、
+                    アプリケーションの [=manifest/within scope=] である
+                    <a>URL</a> である。
+                </p>
+                <p>
+                    <a>protocol
+                        handler description</a> の [=protocol handler description/url=] メンバーは、
+                    [[HTML]] で定義される {{NavigatorContentUtils/registerProtocolHandler()}} の
+                    <code>url</code> 引数と同等である。
+                </p>
+            </section>
+            <section>
+                <h3>
+                    <dfn>プロトコル起動の処理</dfn>
+                </h3>
+                <p>
+                    [=manifest=] <var>manifest</var> を持つ
+                    <a>protocol handler description</a>
+                    <var>protocol_handler</var> が呼び出されたとき、
+                    それは [=invoke a protocol handler=] に使用される同じ手順を通る。
+                    その際、ユーザーエージェントは <var>resultURL</var> へ
+                    [=navigating=] する代わりに、<var>manifest</var> と
+                    <var>resultURL</var> を渡して [=launch a web application=] するべきである。
+                </p>
+                <p class="issue">
+                    これはこのように [=invoke a protocol handler=] を呼び出して変更するべきではない。
+                    <var>resultURL</var> の計算は、汎用の別個のアルゴリズムへ
+                    抽出されるべきである。
+                </p>
+            </section>
+        </section>
+        <section>
+            <h2>
+                プライバシー上の考慮事項：既定の protocol handler
+            </h2>
+            <p>
+                オペレーティングシステムの機能によっては、protocol handler は、ユーザーが
+                明示的に知ることなく、与えられたプロトコルの「既定」handler
+                （例：与えられたプロトコルの起動を自動的に処理する）になる可能性がある。
+                起こり得る悪用を防ぐため、ユーザーエージェントは次のような保護を
+                採用してもよい：
+            </p>
+            <ul>
+                <li>[=invoke a protocol handler=] の処理を実行する前に
+                    明示的なユーザー同意を要求する。
+                </li>
+                <li>上記のダイアログへの応答、またはユーザー操作によって、
+                    Web アプリケーションの OS 登録を protocol handling entity として削除する。
+                </li>
+                <li>[=installation=] 時に protocol handler 登録を確認する。
+                </li>
+            </ul>
+            <p>
+                ユーザーエージェントが protocol handler entity の登録を削除する場合、
+                ユーザーが Web アプリおよびプロトコルをオペレーティングシステムに
+                再登録できる UX を提供するべきである。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h3>
+            `file_handlers` メンバー
+        </h3>
+        <p>
+            [=manifest's=] <code><dfn data-export="" data-dfn-for=
+        "manifest">file_handlers</dfn></code> メンバーは、
+            アプリ自体の外部から発生するファイルを開くアクションをアプリがどのように
+            処理するかについての指示を提供する [=list=] である。
+        </p>
+        <p>
+            登録済み file-handling applications の管理、提示、および選択は、
+            オペレーティングシステムの裁量に委ねられる。
+        </p>
+        <p>
+            [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、
+            [=URL=] |manifest_url:URL| が与えられたとき、
+            <dfn>process the `file_handlers` member</dfn> するには：
+        </p>
+        <ol class="algorithm">
+            <li>|processedFileHandlers:list| を新しい [=list=] とする。
+            </li>
+            <li>|manifest|["file_handlers"] を |processedFileHandlers| に設定する。
+            </li>
+            <li>|json|["file_handlers"] が [=map/exist=] しない、または
+                |json|["file_handlers"] が [=list=] でない場合、戻る。
+            </li>
+            <li>|json|["file_handlers"] の |entry:ordered map| それぞれについて [=list/For each=]：
+                <ol>
+                    <li>|entry|、[=manifest/start_url=]、[=manifest/scope=]、
+                        および |manifest_url| を用いて [=process a file handler
+                        item=] した結果を |file_handler:ordered map| とする。
+                    </li>
+                    <li>|file_handler| が failure の場合、[=iteration/continue=]。
+                    </li>
+                    <li>|file_handler| を |processedFileHandlers| に [=list/Append=] する。
+                    </li>
+                </ol>
+            </li>
+        </ol>
+        <p>
+            [=installation=] 時に、ユーザーエージェントは [=register
+            file handlers=] する処理を実行するべきである。
+        </p>
+        <section data-cite="file-system-access">
+            <h2>
+                File Handler 項目
+            </h2>
+            <p>
+                各 <dfn data-local-lt="file handler">file handler</dfn> は、
+                アプリケーションのスコープ内の URL であって、それが受け入れる
+                [=file types=] を伴う起動を処理できるものを表す。
+                これは次のメンバーを持つ：
+            </p>
+            <ul>
+                <li>[=file handler/action=]
+                </li>
+                <li>[=file handler/name=]
+                </li>
+                <li>[=file handler/accept=]
+                </li>
+                <li>[=file handler/icons=]
+                </li>
+            </ul>
+            <p>
+                ユーザーエージェントは、これらのメンバーを使用して Web アプリケーションを
+                オペレーティングシステム上の [=file type=] と関連付けることができる。
+            </p>
+            <p>
+                <dfn>file type</dfn> は [=MIME type=] および／または
+                [=file extension=] によって定義できる。OS がそのファイルに
+                [=MIME type=] があると判断する場合、またはその名前が特定の
+                [=file extension=] で終わる場合、そのファイルは file type に属する。
+                <dfn>file extension</dfn> は "." で始まり、
+                <a data-cite="file-system-access#valid-suffix-code-points">有効な
+                    suffix code
+                    points</a>のみを含む文字列である。さらに、[=file extensions=] は
+                16 コードポイントの長さに制限される。
+            </p>
+            <section>
+                <h3>
+                    `action` メンバー
+                </h3>
+                <p>
+                    [=file handler=] の <code><dfn data-dfn-for=
+            "file handler">action</dfn></code> メンバーは、
+                    <a data-cite="appmanifest#dfn-manifest-url">manifest URL</a> に
+                    相対的な URL を表す <a>string</a> であり、
+                    <a data-cite="appmanifest#dfn-processed-manifest">処理済み
+                        manifest</a> の [=manifest/within scope=] である。
+                    この URL は [=execute a file handler
+                    launch=] する手順でナビゲートされる。
+                </p>
+            </section>
+            <section>
+                <h3>
+                    `name` メンバー
+                </h3>
+                <p>
+                    [=file handler=] の <code><dfn data-dfn-for=
+            "file handler">name</dfn></code> メンバーは、
+                    ユーザーに対して file type を識別する <a>string</a> である。
+                    [=User agents=] は、file handler の登録中にこの情報を
+                    オペレーティングシステムへ渡してもよい。
+                </p>
+                <aside class="note">
+                    <p>
+                        [=file handler/name=] は、file type を人間が読める形式で
+                        識別し説明するために使用され、通常、Web アプリがその file type の
+                        既定 handler になっている場合にのみ OS サーフェス（ファイルブラウザーなど）
+                        に表示される。これはカスタム file types に最も有用である。
+                    </p>
+                </aside>
+            </section>
+            <section>
+                <h3>
+                    `icons` メンバー
+                </h3>
+                <p>
+                    <a>file handler</a> の <code><dfn data-dfn-for=
+            "file handler">icons</dfn></code> メンバーは、
+                    [=file type=] のグラフィカルな表現として機能するアイコンを列挙する。
+                    ユーザーエージェントは、file handler の登録中にこの情報を
+                    オペレーティングシステムへ渡してもよい。
+                </p>
+                <aside class="note">
+                    [=file handler/icons=] メンバーは、その handler に関連付けられた
+                    すべてのファイルを表す画像（または異なるサイズの画像の集合）であることが
+                    期待される。これは通常、アプリケーションロゴではなく、文書（紙片など）のように
+                    見えるが、そのファイルがどのアプリケーションに関連付けられているかを示唆する
+                    要素（ロゴなど）を含む場合がある。[=file handler/name=] と同様に、
+                    これは通常、アプリが file type の既定 handler になっている場合にのみ表示される。
+                </aside>
+            </section>
+            <section>
+                <h3>
+                    `accept` メンバー
+                </h3>
+                <p>
+                    [=file handler=] の <code><dfn data-dfn-for=
+            "file handler">accept</dfn></code> メンバーは、
+                    [=MIME types=] を [=file extensions=] のリストに対応付ける
+                    <a>dictionary</a> である。
+                </p>
+                <p>
+                    [=User agents=] は、[=file handler/accept=] エントリが一致する拡張子を
+                    持つファイルにのみ適用されることを強制しなければならない。
+                </p>
+                <p>
+                    [=register file handlers=] するために、一部のオペレーティングシステムは
+                    [=MIME types=] を必要とし、一部は [=file extensions=] を必要とする。
+                    したがって manifest は、各 [=file
+                    handler/accept=] エントリについて常に両方を提供しなければならない。
+                </p>
+                <p>
+                    完全な [=MIME types=] に加えて、たとえば
+                    <code>"image/*"</code> ですべての画像形式を（提供された
+                    [=file extensions=] のリストにも適用されるものとして）照合するために、
+                    [=MIME type=] の subtype として <code>"*"</code> を使用できる。
+                </p>
+                <aside class="note">
+                    たとえば Linux では、[=MIME type=] と [=file extension=] の両方が
+                    <code>xdg-mime</code> ユーティリティで使用され、Web アプリケーションが
+                    指定された [=MIME type=] と特定の file extension の両方を持つ
+                    ファイルを開けることを指定する。Windows では [=file
+                    extensions=] のみが使用されるため、[=MIME types=] は無視される。
+                </aside>
+            </section>
+            <section>
+                <h3>
+                    `launch_type` メンバー
+                </h3>
+                <p>
+                    [=file handler=] の <code><dfn data-dfn-for=
+            "file handler">launch_type</dfn></code> メンバーは、
+                    この handler にルーティングされたファイルに対してアプリがどのように
+                    起動されるかを決定する <a>string</a> である。可能な値は
+                    `"single-client"` と `"multiple-clients"` である。提供されない場合、
+                    既定で `"single-client"` になる。
+                </p>
+                <p>
+                    [=file handler=] が一連のファイルに一致すると判断された場合、
+                    [=user agent=] は [=file handler/launch_type=] を使用して、アプリが
+                    各ファイルに対して 1 回ずつ起動されるか
+                    （`"multiple-clients"`）、すべてのファイルに対して 1 回だけ起動されるか
+                    （`"single-client"`）を制御するべきである。{{LaunchParams/files}} を参照。
+                    ユーザーエージェントは、異なる [=file handlers=] からのファイルを
+                    1 つの起動イベントに結合してはならない。
+                </p>
+                <aside class="note">
+                    <p>
+                        アプリが 1 つのファイルをウィンドウまたはタブごとに 1 つだけ表示することを
+                        意図している場合、`"multiple-clients"` が適用されるべきである。
+                        そうでない場合、1 つのインスタンスが起動され、開かれたすべてのファイルが
+                        {{LaunchParams/files}} 配列を介して渡される。
+                    </p>
+                    <p>
+                        このフィールドはプラットフォームの制限の対象となる。Windows は
+                        複数のファイルでアプリを起動することは決してないが、1 ファイルずつ
+                        複数回 1 つのアプリを起動する。そのため、このフィールドは Windows では
+                        効果がなく、すべての起動は実質的に `"multiple-clients"` である。
+                    </p>
+                </aside>
+            </section>
+        </section>
+        <section>
+            <h2>
+                file handler 項目の処理
+            </h2>
+            <p>
+                [=ordered map=] |item:ordered map|、[=URL=] |start_url:URL|、
+                [=URL=] |scope:URL|、および [=URL=] |manifest URL:URL| が与えられたとき、
+                <dfn>process a file handler item</dfn> するには：
+            </p>
+            <ol class="algorithm">
+                <li>次のいずれかが true の場合、failure を返す：
+                    <ul>
+                        <li>|item|["action"] が [=map/exist=] しない、または
+                            [=string=] でない。
+                        </li>
+                        <li>|item|["accept"] が [=map/exist=] しない。
+                        </li>
+                        <li>|item|["accept"] が [=dictionary=] でない。
+                        </li>
+                        <li>|item|["accept"] が [=map/is empty=] である。
+                        </li>
+                    </ul>
+                </li>
+                <li>|url:URL| を、|manifest_url URL| を基底 URL として
+                    |item|["action"] を [=URL Parser|解析=] した結果とする。
+                </li>
+                <li>|url| が failure の場合、failure を返す。
+                </li>
+                <li>|url| が |scope| の [=manifest/within scope=] でない場合、
+                    failure を返す。
+                </li>
+                <li>|launch_type:string| を、"single-client" で初期化された
+                    新しい [=string=] とする。
+                </li>
+                <li>|item|["launch_type"] が [=map/exists=] し、
+                    "multiple-clients" である場合、|launch_type| を |item|["launch_type"] に設定する。
+                </li>
+                <li>|accept:ordered map| を新しい [=ordered map=] とする。
+                </li>
+                <li>|item|["accept"] の |mime_type_string:string| → |extensions| について
+                    [=map/for each=]
+                    <ol>
+                        <li>|extensions| が [=list=] でない場合、[=iteration/continue=]。
+                        </li>
+                        <li>|extensions| が [=list/empty=] の場合、[=iteration/continue=]。
+                        </li>
+                        <li>|extensions| が [=string=] でない項目を [=list/contains=] する場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|extensions| が文字 `.` で始まらない文字列を [=list/contains=] する場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|extensions| が 16 文字より長い文字列を [=list/contains=] する場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|mime_type_string| に対して [=parse a mime type=] の手順を実行した結果を
+                            |mime_type_parsed:mime type| とする。
+                        </li>
+                        <li>|mime_type_parsed:mime type| が failure の場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|mime_type_parsed/type| が [[IANA-MEDIA-TYPES]] における
+                            top-level type として列挙されていない場合、[=iteration/continue=]。
+                        </li>
+                        <li>|accept|[|mime_type_string|] を |extensions| に設定する。
+                        </li>
+                    </ol>
+                </li>
+                <li>|accept:ordered map| が空の場合、failure を返す。
+                </li>
+                <li>|file_handler:ordered map| を |ordered map| «[ "action" →
+                    |url|, "name" → |item|["name"], "launch_type" → |launch_type|,
+                    "accept" → |accept| ]» とする。
+                </li>
+                <li>
+                    |item|["icons"]、|file_handler|、
+                    |manifest URL|、および "icons" を渡して、
+                    <a data-cite="appmanifest#dfn-process-image-resources">画像リソースを
+                        処理する</a>。
+                </li>
+                <li>|file_handler| を返す。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h2>
+                file handler 起動の実行
+            </h2>
+            <p>
+                <dfn>execute a file handler launch</dfn> する手順は、
+                次のアルゴリズムで与えられる。このアルゴリズムは [=list=] |files:list| と、
+                [=processing a manifest=] からの結果を保持する [=ordered map=]
+                |manifest:ordered_map| を取る。
+            </p>
+            <ol class="algorithm">
+                <li>|file_handlers:list| を |manifest|["file_handlers"] とする。
+                </li>
+                <li>|file_handlers:list| が null の場合、戻る。
+                </li>
+                <li>|launches:ordered map| を [=ordered map=] とする。
+                </li>
+                <li>|files| の |filename:string| それぞれについて [=list/for each=]
+                    <ol>
+                        <li>|file_handlers:list| の |file_handler:ordered_map| それぞれについて
+                            [=list/for each=]：
+                            <ol>
+                                <li>|file_handler|["accept"] の |mime_type_string:string| →
+                                    |extensions:list| について [=map/for each=]
+                                    <ol>
+                                        <li>|extensions| の |extension:string| それぞれについて [=list/for each=]：
+                                            <ol>
+                                                <li>|filename| が |extension| で終わらない場合、
+                                                    [=iteration/continue=]。
+                                                </li>
+                                                <li>|launches|[|file_handler|] が [=map/exists=] する場合、
+                                                    |filename| を
+                                                    |launches|[|file_handler|] に [=list/append=] する。
+                                                </li>
+                                                <li>そうでない場合、|launches|[|file_handler|] を
+                                                    単一要素 |filename| を持つ [=list=] に設定する。
+                                                </li>
+                                                <li>|files| の次の要素へ [=iteration/Continue=] する。
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+                <li>|launches| の |file_handler| → |files:list| について [=map/for each=]
+                    <ol>
+                        <li>|file_handler|["launch_type"] が
+                            "multiple-clients" に等しい場合
+                            <ol>
+                                <li>|files| の |file| それぞれについて [=list/for each=]
+                                    <ol>
+                                        <li>{{LaunchParams/targetURL}} を
+                                            |file_handler|["action"] に設定し、{{LaunchParams/files}} を
+                                            |file| に対応する単一の {{FileSystemHandle}} 要素を持つ
+                                            {{FrozenArray}} に設定した、新しい {{LaunchParams}}
+                                            |params:LaunchParams| とする。
+                                        </li>
+                                        <li>|manifest| と |params| を渡して
+                                            [=Launch a web application with handling=]。
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                        <li>そうでない場合、
+                            <ol>
+                                <li>{{LaunchParams/targetURL}} を |file_handler|["action"] に設定し、
+                                    {{LaunchParams/files}} を |files| によって名付けられたファイルパスに
+                                    対応する {{FileSystemHandle}} の {{FrozenArray}} に設定した、
+                                    新しい {{LaunchParams}} |params:LaunchParams| とする。
+                                </li>
+                                <li>|manifest| と |params| を渡して
+                                    [=Launch a web application with handling=]。
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                file handler の登録
+            </h3>
+            <p>
+                ユーザーエージェントは、次と整合するように、ホスト
+                オペレーティングシステムに <dfn>register file handlers</dfn> するべきである：
+            </p>
+            <ul>
+                <li>アプリは、ネイティブファイルブラウザーや、与えられたファイルまたは
+                    file type を処理できるアプリのリストを表示するその他のサーフェスなど、
+                    適切な OS サーフェスに公開される。
+                </li>
+                <li>アプリは、関連付けられた file types についてシステムの既定 handler になる
+                    候補である。
+                </li>
+            </ul>
+            <p>
+                ユーザーエージェントは、機能を維持し乱用を防ぐため、
+                [=file extensions=] の総集合を切り詰めてもよい。
+                ユーザーエージェントは、特定の filetypes との関連付けを防いでもよい。
+            </p>
+        </section>
+        <section>
+            <h3>
+                プライバシー上の考慮事項：既定の file handler。
+            </h3>
+            <p>
+                オペレーティングシステムの機能によっては、[=file handler=] はユーザーが
+                明示的に知ることなく、与えられた [=file type=] の既定 handler となり、
+                与えられた file type の起動を自動的に処理する可能性がある。
+                起こり得る悪用を防ぐため、[=user agents=] は
+                [=execute a file handler launch=] する処理を開始するために、
+                明示的なユーザー同意を要求してもよい。同意が求められる場合、
+                ユーザーエージェントは、その決定が永続的であることをユーザーが指定できるように
+                するべきであり、そのように指定された場合は、Web アプリケーションの OS 登録を
+                file handling entity として削除するべきである。
+            </p>
+        </section>
+        <section>
+            <h3>
+                プライバシー上の考慮事項：名前とアイコン。
+            </h3>
+            <p>
+                各 file handler の名前とアイコンは、ユーザーがそれらを確認するための
+                指定された方法がないため、プライバシーおよびセキュリティ上センシティブで
+                あり得る。このため、[=user agents=] は、代替の文字列やアイコンを優先して
+                これらを無視する、または OS の既定値へフォールバックすることを選択してもよい。
+            </p>
+        </section>
+        <section class="informative">
+            <h3>
+                file handler を持つ manifest の例
+            </h3>
+            <p>
+                次の例では、Web アプリケーションは 3 つの異なる file handler を持つ。
+            </p>
+            <aside class="example">
+                <pre class="json">
+            {
+              "name": "Grafr",
+              "file_handlers": [
+                {
+                  "action": "/open-csv",
+                  "accept": {
+                    "text/csv": [ ".csv" ],
+                    "text/plain": [ ".txt" ]
+                  }
+                },
+                {
+                  "action": "/open-svg",
+                  "accept": {
+                    "image/svg+xml": [ ".svg" ]
+                  }
+                },
+                {
+                  "action": "/open-grafr",
+                  "name": "Grafr graph",
+                  "accept": {
+                    "application/vnd.grafr-graph": [
+                      ".grafr", ".graf"
+                    ]
+                  },
+                  "launch_type": "multiple-clients",
+                  "icons": [
+                    {
+                      "src": "/grafr-file.png",
+                      "sizes": "144x144"
+                    }
+                  ]
+                }
+              ]
+            }
+          </pre>
+            </aside>
+        </section>
+    </section>
+    <section>
+        <h3>
+            `related_applications` メンバー
+        </h3>
+        <p>
+            <dfn>related application</dfn> は、基盤となるアプリケーションプラットフォームから
+            アクセス可能であり、Web アプリケーションと関係を持つアプリケーションである。
+        </p>
+        <p>
+            [=manifest's=] <code><dfn data-export="" data-dfn-for=
+        "manifest">related_applications</dfn></code> メンバーは
+            <a>related
+                applications</a> を列挙し、Web アプリケーションと
+            <a>related applications</a> の間のそのような関係を示すものとして機能する。
+            この関係は一方向であり、列挙されたアプリケーションが同じ関係を主張しない限り、
+            <a>user agent</a> は双方向の endorsement を仮定してはならない。
+        </p>
+        <p>
+            `related_applications` の使用例としては、その情報を使用して Web アプリケーションに
+            関する詳細情報を収集する crawler、またはユーザーが Web アプリケーションを
+            インストールしたい場合に、列挙されたアプリケーションを代替として提案する
+            ブラウザーなどが考えられる。
+        </p>
+        <p>
+            [=ordered map=] |json:ordered map| および [=ordered map=]
+            |manifest:ordered map| が与えられたとき、
+            <dfn>process the `related_applications` member</dfn> するには：
+        </p>
+        <ol class="algorithm">
+            <li>|relatedApplications:list| を新しい [=list=] とする。
+            </li>
+            <li>|manifest|["related_applications"] を |relatedApplications| に設定する。
+            </li>
+            <li>|json|["related_applications"] が [=map/exist=] しない、または
+                |json|["related_applications"] が [=list=] でない場合、戻る。
+            </li>
+            <li>|json|["related_applications"] の <var>app</var> それぞれについて [=list/For each=]：
+                <ol>
+                    <li><var>app</var>["id"] も <var>app</var>["url"] も
+                        欠落していない場合：
+                        <ol>
+                            <li><var>app</var>["url"] を、
+                                <var>app</var>["url"] が与えられたときに
+                                <a>process the `url` member of an application</a> を実行した結果に
+                                設定する。
+                            </li>
+                            <li><var>app</var> を
+                                <var>relatedApplications</var> に [=list/append=] する。
+                            </li>
+                        </ol>
+                    </li>
+                </ol>
+            </li>
+            <li><var>relatedApplications</var> を設定する。
+            </li>
+        </ol>
+    </section>
+    <section>
+        <h3>
+            `prefer_related_applications` メンバー
+        </h3>
+        <p>
+            [=manifest's=] <code><dfn data-export="" data-dfn-for=
+        "manifest">`prefer_related_applications`</dfn></code> メンバーは、
+            <a>related applications</a> が Web アプリケーションより優先されるべきであると
+            ユーザーエージェントに伝えるヒントとして使用される [=boolean=] である。
+            `prefer_related_applications` メンバーが `true` に設定されており、
+            ユーザーエージェントが Web アプリケーションのインストールを提案したい場合、
+            代わりに <a>related applications</a> の 1 つのインストールを提案したいと
+            考えるかもしれない。
+        </p>
+    </section>
+    <section>
+        <h3>
+            `scope_extensions` メンバー
+        </h3>
+        <p>
+            [=manifest's=] <code><dfn data-export="" data-dfn-for=
+        "manifest">scope_extensions</dfn></code> メンバーは、アプリケーションが望む
+            [=scope extensions=] のリストを表す。
+        </p>
+        <p>
+            <dfn>scope extension</dfn> は、[=within extended scope=] として扱われるべき
+            追加の [=URLs=] を記述することで、[=manifest/navigation scope of
+            a manifest=] を拡張する。
+        </p>
+        <p>
+            ユーザーエージェントは、追加の [=URLs=] を [=within extended scope=] と
+            できるように [=apply extended scope=] する前に、
+            [=process the scope_extensions member=] および
+            [=validate scope extensions=] しなければならない。
+        </p>
+        <p>
+            [=URL=] |target:URL| は、|target| が manifest の [=manifest/within
+            scope=] である、または [=matches a validated scope extension=] である場合、
+            |manifest:processed manifest| の <dfn>extended scope 内</dfn>である。
+        </p>
+        <p>
+            [=URL=] |target:URL| は、[=URL=] |target:URL| と
+            [=list=] |validated_scope_extensions:list| が与えられたときに
+            次のアルゴリズムが `true` を返す場合、<dfn>検証済み scope extension に一致する</dfn>：
+        </p>
+        <ol class="algorithm">
+            <li>|validated_scope_extensions:list| の |entry:ordered map| それぞれについて [=list/For each=]：
+                <ol>
+                    <li>|entry| が [=ordered map=] でない、または |entry|["scope"] が
+                        [=map/exist=] しない、または [=URL=] でない場合、続行する。
+                    </li>
+                    <li>[=URL=] |resolved_scope:URL| を |entry:ordered
+                        map|["scope"] とする。
+                    </li>
+                    <li>|target| が |resolved_scope| の [=URL/within scope=] である場合、
+                        `true` を返す。
+                    </li>
+                </ol>
+            </li>
+            <li>`false` を返す。
+            </li>
+        </ol>
+        <aside class="note">
+            [=manifest's=] `scope` メンバーは、URL が単一の [=origin=] からのスコープとして
+            考慮されることだけを許可する。`scope_extensions` メンバーは、
+            複数の [=origins=] からの URL が考慮されることを可能にする。
+        </aside>
+        <section class="informative">
+            <h2>
+                使用例
+            </h2>
+            <p>
+                次の例は、`scope_extensions` メンバーを使用するアプリケーションの
+                [=manifest=] を示す。
+            </p>
+            <pre class="example json" title="https://example.com/manifest.webmanifest">
+          {
+            "id": "https://example.com/app",
+            "name": "My App",
+            "icons": [{
+              "src": "icon/hd_hi",
+              "sizes": "128x128"
+            }],
+            "start_url": "/app/index.html",
+            "scope": "/app",
+            "display": "standalone",
+            "scope_extensions": [
+              { "type": "origin", "origin": "https://example.co.uk" },
+              { "type": "origin", "origin": "https://help.example.com" }]
+          }
+        </pre>
+            <p>
+                次は、`scope_extensions` メンバーに列挙された [=origins=] の
+                `.well-known` パスからダウンロードできる 2 つの
+                [=web-app-origin-association=] ファイルを示す。
+            </p>
+            <pre class="example json" title="https://example.co.uk/.well-known/web-app-origin-association">
+          {
+            "https://example.com/app": {
+              "scope": "/app"   
+            }
+          }
+        </pre>
+            <pre class="example json" title="https://help.example.com/.well-known/web-app-origin-association">
+          {
+            "https://example.com/app": {
+              "scope": "/"   
+            }
+          }
+        </pre>
+            <p>
+                このアプリの navigation scope は、次の [=URLs=] のいずれかの
+                [=URL/within scope=] である URL から成る：
+                `https://example.com/app`, `https://example.co.uk/app`, および
+                `https://help.example.com`。
+            </p>
+        </section>
+        <section>
+            <h2>
+                `scope_extensions` メンバーの処理
+            </h2>
+            <p>
+                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、
+                および [=URL=] |manifest_id:URL| が与えられたとき、
+                <dfn>process the `scope_extensions` member</dfn> するには：
+            </p>
+            <ol class="algorithm">
+                <li>|processedScopeExtensions:list| を新しい [=list=] とする。
+                </li>
+                <li>|manifest|["scope_extensions"] を |processedScopeExtensions| に設定する。
+                </li>
+                <li>|json|["scope_extensions"] が [=map/exist=] しない、または
+                    [=list=] でない場合、戻る。
+                </li>
+                <li>|json|["scope_extensions"] の |entry:ordered map| それぞれについて
+                    [=list/For each=]：
+                    <ol>
+                        <li>|entry|["type"] または |entry|["origin"] が [=map/exist=] しない場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|entry|["type"] が "origin" でない場合、[=iteration/continue=]。
+                        </li>
+                        <li>|entry|["origin"] が [=string=] でない場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|entry|["origin"] を [=URL
+                            Parser|解析=] した結果を [=URL=] |origin_url:URL| とする。
+                        </li>
+                        <li>|origin_url| が [=URL/scheme=] "https" を持つ有効な |URL| である場合、
+                            |entry|["origin"] を |origin_url| の [=URL/origin=] に設定する。
+                        </li>
+                        <li>そうでなければ [=iteration/continue=]。
+                        </li>
+                        <li>[=ordered map=] |entry:ordered map| および
+                            [=URL=] |manifest_id:URL| が与えられたとして、
+                            [=validate scope extensions=] のアルゴリズムを用いて |entry| を検証する。
+                        </li>
+                        <li>直前の手順が error を返した場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>そうでない場合、|entry|["scope"] を返された [=URL=] に設定する。
+                        </li>
+                        <li>|entry| を |processedScopeExtensions| に [=list/Append=] する。
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+            <aside class="note">
+                `origin` は現在指定されている唯一の scope extension entry の型である。
+                将来、異なるユースケースをサポートするために他の型が追加される可能性がある。
+            </aside>
+        </section>
+        <section>
+            <h2>
+                scope extensions の検証
+            </h2>
+            <p>
+                [=ordered map=] |extension:ordered map| および [=URL=] |manifest_id:URL| が
+                与えられたとき、<dfn>validate scope extensions</dfn> するには：
+            </p>
+            <ol class="algorithm">
+                <li>|extension|["origin"] の [=URL/origin=] の [=URL=] を
+                    [=URL=] |origin_url:URL| とする。
+                </li>
+                <li>|origin_url| を基底 [=URL=] として
+                    "/.well-known/web-app-origin-association" を [=URL
+                    Parser|解析=] した結果を [=URL=] |download_url:URL| とする。
+                </li>
+                <li>|download_url| を与えて [=fetch=] した結果を
+                    [=ordered map=] |json:ordered map| とする。
+                </li>
+                <li>[=fetch=] が失敗した場合、error を返す。
+                </li>
+                <li>|json|[|manifest_id|] が [=map/exist=] しない、または
+                    [=ordered map=] でない場合、error を返す。
+                </li>
+                <li>|scope:string| を [=string=] "/" とする。
+                </li>
+                <li>|json|[|manifest_id|]["scope"] が [=map/exists=] し、
+                    [=string=] である場合、|scope| を |json|[|manifest_id|]["scope"] に設定する。
+                </li>
+                <li>|extension|["origin"] を基底
+                    [=URL=] として |scope| を [=URL
+                    Parser|解析=] した結果を [=URL=] |resolved_scope:URL| とする。
+                </li>
+                <li>|resolved_scope| を返す。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h2>
+                scope extensions の適用
+            </h2>
+            <p>
+                ユーザーエージェントは、シナリオによって <dfn>apply extended scope</dfn> を
+                適用し、別のシナリオでは [=manifest/scope=] を適用することを選択してもよい。
+            </p>
+            <p>
+                [=application context=] の [=navigable/active document=] の
+                [=URL=] が [=manifest/within scope=] ではないが [=within extended
+                scope=] である場合、ユーザーエージェントは、ユーザーがその [=URL=] または
+                少なくともその [=origin=] を判断できる UI を提供するべきであり、
+                それが安全な接続で提供されているかどうかも含めるべきである。
+                この UI は、[=URL=] が [=application context=] の
+                [=Document/processed manifest=] の [=manifest/within scope=] でない場合に
+                使用される UI とは異なるべきである。これは、ユーザーがアプリケーションの
+                意図された内容をナビゲートしていることを明確にしつつ、異なる
+                [=origin=] へナビゲートすることのプライバシーおよびセキュリティ上の
+                影響についてユーザーに情報を与え続けるためである。
+            </p>
+        </section>
+    </section>
+    <section class="informative">
+        <h2>
+            web-app-origin-association ファイル
+        </h2>
+        <p>
+            <dfn>web-app-origin-association</dfn> ファイルは、[=validate scope extensions=]
+            または [=validate origin
+            migration=] に使用できる JSON ファイルである。それは、自身が存在する
+            origin と 1 つ以上の Web アプリケーションとの関連付けを確認する。
+            これは manifest [=manifest/ids=] を参照することによってアプリを一意に識別する。
+        </p>
+        <p>
+            [=origin=] |origin:origin| が与えられた場合、
+            [=web-app-origin-association=] ファイルは
+            <code>[origin]/.well-known/web-app-origin-association</code>
+            からダウンロード可能であることが期待される。
+        </p>
+    </section>
+    <section>
+        <h2>
+            Web Application Origin Migration
+        </h2>
+        <p>
+            Web Application Origin Migration は、Web アプリケーションがユーザーエージェントに対して、
+            ある origin から別の origin（同じ site 内）へ移動したことを示せるようにする。
+            これにより、ユーザーエージェントは、ユーザーのインストールおよび場合によっては
+            その設定を保持しながら、インストール済み Web アプリケーションを移行できる。
+        </p>
+        <section class="informative">
+            <h3>
+                使用例
+            </h3>
+            <p>
+                次の例は、<code>https://old.example.com</code> でホストされていた
+                Web アプリケーションを <code>https://new.example.com</code> へ移行する方法を示す。
+                両方の origins は [=same site=] でなければならず、移行に明示的に
+                同意しなければならない。
+            </p>
+            <p>
+                まず、古いアプリケーションの manifest は、ユーザーエージェントに移動する
+                意図を知らせるために、任意で `migrate_to` メンバーを含めることができる
+                （あるいは古いアプリケーションが新しいアプリケーションへリダイレクトできる）：
+            </p>
+            <pre class="example json" title="https://old.example.com/manifest.json">
+          {
+            "name": "My App",
+            "id": "/",
+            "migrate_to": {
+              "id": "https://new.example.com/",
+              "install_url": "https://new.example.com/install"
+            }
+          }
+        </pre>
+            <p>
+                次に、新しいアプリケーションの manifest は、古いアプリケーションからの
+                移行を主張するために `migrate_from` メンバーを含める：
+            </p>
+            <pre class="example json" title="https://new.example.com/manifest.json">
+          {
+            "name": "My New App",
+            "id": "/",
+            "migrate_from": [
+              {
+                "id": "https://old.example.com/",
+                "install_url": "https://old.example.com/install",
+                "behavior": "force"
+              }
+            ]
+          }
+        </pre>
+            <p>
+                最後に、古い origin は、新しいアプリケーションによる引き継ぎを許可することを
+                確定的に検証するために、`web-app-origin-association` ファイルをホストしなければ
+                ならない。このファイルがないと、悪意ある新しいアプリケーションが許可なく
+                古いアプリケーションからの移行を主張できる。
+            </p>
+            <pre class="example json" title="https://old.example.com/.well-known/web-app-origin-association">
+          {
+            "https://new.example.com/": {
+              "allow_migration": true
+            }
+          }
+        </pre>
+        </section>
+        <section>
+            <h3>
+                <code><dfn data-export="" data-dfn-for=
+          "manifest">migrate_from</dfn></code> メンバー
+            </h3>
+            <p>
+                [=manifest/migrate_from=] メンバーは、移行元である古い Web
+                アプリケーションを識別する [=strings=] または [=ordered maps=] の
+                [=list=] である。
+            </p>
+            <p>
+                エントリが [=string=] である場合、それは古いアプリケーションの
+                [=manifest/id=] として扱われる。
+            </p>
+            <p>
+                エントリが [=ordered map=] である場合、次のメンバーを持つことができる：
+            </p>
+            <ul>
+                <li>
+                    <code><dfn data-dfn-for="migrate_from_item">id</dfn></code>：
+                    古いアプリケーションの [=manifest/id=] を表す [=string=]。
+                </li>
+                <li>
+                    <code><dfn data-dfn-for=
+            "migrate_from_item">install_url</dfn></code>：古いアプリケーションの
+                    manifest へリンクするページの URL を表す [=string=]。
+                    ユーザーエージェントは、古いアプリケーションの一部である他のすべての
+                    URL が新しいアプリケーションへリダイレクトする場合でも、更新を適用するために
+                    古いアプリケーションの manifest を取得する目的でこのフィールドを使用できる。
+                </li>
+                <li>
+                    <code><dfn data-dfn-for="migrate_from_item">behavior</dfn></code>：
+                    `"suggest"` または `"force"` のいずれかである [=string=]。
+                    これは、移行についてユーザーに通知するためにユーザーエージェントが提示する
+                    UI がどの程度強制的であるかに影響し得るヒントである。
+                </li>
+            </ul>
+            <div class="note">
+                ユーザーエージェントが [=manifest/migrate_from=] メンバーを処理するには、
+                manifest はその JSON 内に有効で明示的な
+                <a data-cite="appmanifest#dfn-id">id</a> メンバーも含む必要がある。
+            </div>
+        </section>
+        <section>
+            <h3>
+                <code><dfn data-export="" data-dfn-for=
+          "manifest">migrate_to</dfn></code> メンバー
+            </h3>
+            <p>
+                [=manifest/migrate_to=] メンバーは、新しいアプリケーションへの移行を
+                先回りして通知する任意の [=ordered map=] である。これは次のメンバーを持つ：
+            </p>
+            <ul>
+                <li>
+                    <code><dfn data-dfn-for="migrate_to_item">id</dfn></code>：
+                    新しいアプリケーションの [=manifest/id=] を表す [=string=]。
+                </li>
+                <li>
+                    <code><dfn data-dfn-for=
+            "migrate_to_item">install_url</dfn></code>：新しいアプリケーションの
+                    manifest へリンクするページの URL を表す [=string=]。
+                    このページ上の manifest は、移行が処理されるために、このアプリケーションへ
+                    戻る [=manifest/migrate_from=] フィールドを含む必要がある。
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h3>
+                origin migration の検証
+            </h3>
+            <p>
+                [=URL=] |old_manifest_id:URL| および [=URL=] |new_manifest_id:URL| が
+                与えられたとき、<dfn>validate origin migration</dfn> するには：
+            </p>
+            <ol class="algorithm">
+                <li>|old_manifest_id| の [=URL/origin=] と |new_manifest_id| の
+                    [=URL/origin=] が [=same site=] でない場合、error を返す。
+                </li>
+                <li>|old_manifest_id| の [=URL/origin=] が |new_manifest_id| の
+                    [=URL/origin=] と [=same origin=] である場合、success を返す。
+                </li>
+                <li>|old_manifest_id| の [=URL/origin=] の [=URL=] を
+                    [=URL=] |origin_url:URL| とする。
+                </li>
+                <li>|origin_url| を基底 [=URL=] として
+                    "/.well-known/web-app-origin-association" を [=URL
+                    Parser|解析=] した結果を [=URL=] |download_url:URL| とする。
+                </li>
+                <li>|download_url| を与えて [=fetch=] した結果を
+                    [=ordered map=] |json:ordered map| とする。
+                </li>
+                <li>[=fetch=] が失敗した場合、error を返す。
+                </li>
+                <li>|json|[|new_manifest_id|] が [=map/exist=] しない、または
+                    [=ordered map=] でない場合、error を返す。
+                </li>
+                <li>|json|[|new_manifest_id|]["allow_migration"] が `true` でない場合、
+                    error を返す。
+                </li>
+                <li>success を返す。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                `migrate_from` メンバーの処理
+            </h3>
+            <p>
+                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、
+                および [=URL=] |manifest URL:URL| が与えられたとき、
+                <dfn>process the `migrate_from` member</dfn> するには：
+            </p>
+            <ol class="algorithm">
+                <li>|json|["id"] が [=map/exist=] しない、または [=string=] でない場合、
+                    戻る。
+                </li>
+                <li>|json|["id"] が空文字列の場合、戻る。
+                </li>
+                <li>|base_origin:origin| を |manifest|["start_url"] の
+                    [=URL/origin=] とする。
+                </li>
+                <li>|id_url:URL| を、|base_origin| を基底 URL として
+                    |json|["id"] を [=URL Parser|解析=] した結果とする。
+                </li>
+                <li>|id_url| が failure の場合、戻る。
+                </li>
+                <li>|id_url| が |manifest|["start_url"] と [=same origin=] でない場合、
+                    戻る。
+                </li>
+                <li>|processed_migrate_from:list| を新しい [=list=] とする。
+                </li>
+                <li>|manifest|["migrate_from"] を |processed_migrate_from| に設定する。
+                </li>
+                <li>|json|["migrate_from"] が [=map/exist=] しない、または
+                    [=list=] でない場合、戻る。
+                </li>
+                <li>|json|["migrate_from"] の |entry| それぞれについて [=list/For each=]：
+                    <ol>
+                        <li>|processed_entry:ordered map| を新しい [=ordered map=] とする。
+                        </li>
+                        <li>|entry| が [=string=] の場合：
+                            <ol>
+                                <li>|manifest URL| を基底 URL として |entry| を
+                                    [=URL Parser|解析=] した結果を |id:URL| とする。
+                                </li>
+                                <li>|id| が failure の場合、[=iteration/continue=]。
+                                </li>
+                                <li>|processed_entry|["id"] を |id| に設定する。
+                                </li>
+                            </ol>
+                        </li>
+                        <li>そうでなく、|entry| が [=ordered map=] の場合：
+                            <ol>
+                                <li>|entry|["id"] が [=map/exist=] しない、または
+                                    [=string=] でない場合、[=iteration/continue=]。
+                                </li>
+                                <li>|manifest URL| を基底 URL として
+                                    |entry|["id"] を [=URL Parser|解析=] した結果を |id:URL| とする。
+                                </li>
+                                <li>|id| が failure の場合、[=iteration/continue=]。
+                                </li>
+                                <li>|processed_entry|["id"] を |id| に設定する。
+                                </li>
+                                <li>|entry|["install_url"] が [=map/exists=] し、
+                                    [=string=] である場合：
+                                    <ol>
+                                        <li>|manifest
+                                            URL| を基底 URL として |entry|["install_url"] を [=URL
+                                            Parser|解析=] した結果を |install_url:URL| とする。
+                                        </li>
+                                        <li>|install_url| が failure でない場合、
+                                            |processed_entry|["install_url"] を |install_url| に設定する。
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>|entry|["behavior"] が [=map/exists=] し、
+                                    [=string=] である場合：
+                                    <ol>
+                                        <li>|entry|["behavior"] が "suggest" または "force" である場合、
+                                            |processed_entry|["behavior"] を |entry|["behavior"] に設定する。
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                        <li>そうでなければ、[=iteration/continue=]。
+                        </li>
+                        <li>[=URL=] |processed_entry|["id"] および [=URL=] |id_url| が
+                            与えられたとして、[=validate origin migration=] のアルゴリズムを
+                            用いて |processed_entry|["id"] を検証する。
+                        </li>
+                        <li>直前の手順が error を返した場合、
+                            [=iteration/continue=]。
+                        </li>
+                        <li>|processed_entry| を
+                            |processed_migrate_from| に [=list/Append=] する。
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                `migrate_to` メンバーの処理
+            </h3>
+            <p>
+                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、
+                および [=URL=] |manifest URL:URL| が与えられたとき、
+                <dfn>process the `migrate_to` member</dfn> するには：
+            </p>
+            <ol class="algorithm">
+                <li>|json|["migrate_to"] が [=map/exist=] しない、または
+                    [=ordered map=] でない場合、戻る。
+                </li>
+                <li>|entry:ordered map| を |json|["migrate_to"] とする。
+                </li>
+                <li>|entry|["id"] が [=map/exist=] しない、または [=string=] でない場合、
+                    戻る。
+                </li>
+                <li>|manifest URL| を基底 URL として
+                    |entry|["id"] を [=URL Parser|解析=] した結果を |id:URL| とする。
+                </li>
+                <li>|id| が failure の場合、戻る。
+                </li>
+                <li>|processed_migrate_to:ordered map| を新しい [=ordered map=] とする。
+                </li>
+                <li>|processed_migrate_to|["id"] を |id| に設定する。
+                </li>
+                <li>|entry|["install_url"] が [=map/exists=] し、[=string=] である場合：
+                    <ol>
+                        <li>|manifest URL| を
+                            基底 URL として |entry|["install_url"] を [=URL
+                            Parser|解析=] した結果を |install_url:URL| とする。
+                        </li>
+                        <li>|install_url| が failure でない場合、
+                            |processed_migrate_to|["install_url"] を |install_url| に設定する。
+                        </li>
+                    </ol>
+                </li>
+                <li>|manifest|["migrate_to"] を |processed_migrate_to| に設定する。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                プライバシーおよびセキュリティの考慮事項
+            </h3>
+            <p>
+                悪意ある主体がアプリケーションを密かに乗っ取ること（例：単純な電卓が自身を更新して
+                銀行アプリを模倣すること）を防ぐため、[=validate origin migration=] アルゴリズムは
+                双方向のハンドシェイクを強制する。新旧両方のアプリケーション origin は、
+                [=web-app-origin-association=] ファイルを介して移行に明示的に同意しなければならない。
+            </p>
+            <p>
+                さらに、移行は [=same site=] であることに制限され、未検証の第三者へ所有権を移すのではなく、
+                組織の管理下での正当なリブランディングおよびアーキテクチャ変更に使用されることを保証する。
+            </p>
+            <p>
+                ユーザーエージェントは、特にセキュリティ上センシティブなフィールド
+                （アプリ名やアイコンなど）の更新が含まれる場合、移行フローの一部として
+                明示的なユーザー確認ダイアログを含めることを検討するべきである。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>
+            外部アプリケーションリソース
+        </h2>
+        <p>
+            各 <dfn data-local-lt="external application resource's">外部
+                アプリケーションリソース</dfn>は、Web アプリケーションに関連する
+            アプリケーションを表す。
+        </p>
+        <p>
+            [=external application resource=] は次のメンバーを持つことができ、
+            その一部は [=valid external application
+            resource=] であるために必須である：
+        </p>
+        <ul>
+            <li>[=external application resource/fingerprints=] メンバー
+            </li>
+            <li>[=external application resource/id=] メンバー
+            </li>
+            <li>[=external application resource/min_version=] メンバー
+            </li>
+            <li>[=external application resource/platform=] メンバー
+            </li>
+            <li>[=external application resource/url=] メンバー
+            </li>
+        </ul>
+        <p>
+            <dfn>valid external application resource</dfn> は、
+            [=external application resource/platform=] メンバー、および
+            [=external application resource/url=] または [=external application resource/id=]
+            メンバー（またはその両方）を持たなければならない。
+        </p>
+        <aside class="example">
+            <p>
+                次の例では、Web アプリケーションは 2 つの異なる related applications を
+                列挙している。一方は Google Play Store 上、もう一方は iTunes Store 上にある。
+                Google Play Store 上のものは、Android パッケージ名、最小バージョン指定子、
+                および Play-Store 固有の方法で検証に使用される暗号学的 fingerprint を持つ。
+            </p>
+            <pre class="json">
+          {
+            "related_applications": [
+              {
+                "platform": "play",
+                "url": "https://play.google.com/store/apps/details?id=com.example.app1",
+                "id": "com.example.app1",
+                "min_version": "2",
+                "fingerprints": [
+                  {
+                    "type": "sha256_cert",
+                    "value": "92:5A:39:05:C5:B9:EA:BC:71:48:5F:F2"
+                  }
+                ]
+              },
+              {
+                "platform": "itunes",
+                "url": "https://itunes.apple.com/app/example-app1/id123456789"
+              }
+            ]
+          }
+        </pre>
+        </aside>
+        <section>
+            <h3>
+                `platform` メンバー
+            </h3>
+            <p>
+                <code><dfn data-dfn-for=
+          "external application resource">platform</dfn></code> メンバーは、
+                この [=external application resource=] が関連付けられている
+                [=platform=] を表す。<dfn data-dfn-for="">platform</dfn> は、
+                ソフトウェア配布エコシステム、または場合によってはオペレーティングシステムを
+                表す。この仕様は <a>platform</a> メンバーの特定の値を定義しない。
+            </p>
+            <aside class="Platforms registry">
+                作業グループは、<a href="https://github.com/w3c/manifest/wiki/Platforms">既知の
+                    platform 値のレジストリ</a>を維持している。
+            </aside>
+        </section>
+        <section>
+            <h3>
+                `url` メンバー
+            </h3>
+            <p>
+                [=external application resource's=] <code><dfn data-dfn-for=
+          "external application resource">url</dfn></code> メンバーは、
+                アプリケーションを見つけることができる <a>URL</a> である。
+            </p>
+            <p>
+                <dfn>process the `url` member of an application</dfn> するには：
+            </p>
+            <ol class="algorithm">
+                <li><var>application URL</var> が欠落している場合、null を返す。
+                </li>
+                <li>そうでなければ、<var>application URL</var> を [=URL Parser|解析=] し、
+                    結果が failure でない場合、その結果を返す。そうでなければ null を返す。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                `id` メンバー
+            </h3>
+            <p>
+                [=external application resource's=] <code><dfn data-dfn-for=
+          "external application resource">id</dfn></code> メンバーは、
+                プラットフォーム上でアプリケーションを表すために使用される id を表す。
+            </p>
+        </section>
+        <section>
+            <h3>
+                `min_version` メンバー
+            </h3>
+            <p>
+                [=external application resource's=] <code><dfn data-dfn-for=
+          "external application resource">min_version</dfn></code> メンバーは、
+                この Web アプリに関連すると見なされるアプリケーションの最小バージョンを表す。
+                このバージョンは、プラットフォーム固有の構文および意味を持つ
+                <a>string</a> である。
+            </p>
+        </section>
+        <section>
+            <h3>
+                `fingerprints` メンバー
+            </h3>
+            <p>
+                [=external application resource's=] <code><dfn data-dfn-for=
+          "external application resource">fingerprints</dfn></code> メンバーは、
+                [=fingerprints=] の [=list=] を表す。
+            </p>
+            <p>
+                <dfn data-local-lt="fingerprints">fingerprint</dfn> は、
+                アプリケーションの検証に使用される暗号学的 fingerprint の集合を表す。
+                fingerprint は次の 2 つのメンバーを持つ：<dfn data-dfn-for="fingerprint">type</dfn> と
+                <dfn data-dfn-for="fingerprint">value</dfn>。これらはいずれも
+                <a>string</a> であるが、その構文と意味はプラットフォーム定義である。
+            </p>
+        </section>
+    </section>
+    <section data-cite="DOM">
+        <h2>
+            インストールプロンプト
+        </h2>
+        <p>
+            インストール処理は、複数の方法でトリガーされ得る：
+        </p>
+        <ul>
+            <li>エンドユーザーは、ユーザーエージェントの
+                <abbr title="User Interface">UI</abbr> を通じてインストール処理を
+                <dfn data-lt="manual installation">手動で</dfn>
+                トリガーし、<a>present an install prompt</a> する手順を直接呼び出すことができる。
+            </li>
+            <li>インストール処理は <dfn>automated
+                    install prompt</dfn> を通じて発生し得る：すなわち、たとえば Web
+                アプリケーションのインストールを正当化するのに十分な
+                <a>installability
+                    signals</a> がある場合に、ユーザーエージェントがユーザーに提示する UI である。
+            </li>
+            <li>インストール処理は <dfn>site-triggered
+                    install prompt</dfn> を通じて発生し得る：サイトはプログラム的に、
+                ユーザーエージェントがインストールプロンプトをユーザーに提示するよう要求できる。
+                ユーザーエージェントは、この機能の利用可能性を、たとえば Web アプリケーションの
+                [=installed web
+                application|インストール=] を正当化する十分なシグナルがある場合に制限してもよい。
+            </li>
+        </ul>
+        <p>
+            いずれの場合も、文書が installable でない場合、ユーザーエージェントは
+            <a>present an install prompt</a> してはならない。
+        </p>
+        <p>
+            ユーザーエージェントは、文書が installable である場合に限り、任意の時点で
+            <a>steps to notify that an install prompt is available</a> を
+            任意の時点で実行してもよく、サイトに、ユーザーがユーザーエージェント UI と
+            対話する必要なく <a>site-triggered
+                install prompt</a> を表示する機会を与える。
+        </p>
+        <p>
+            <dfn data-local-lt="presenting an install prompt|presentation of the install prompt">インストールプロンプトを
+                提示する</dfn>には：
+        </p>
+        <ol>
+            <li>ユーザーエージェント固有の UI を表示し、アプリのインストールを進めるかどうかを
+                ユーザーに尋ねる。この選択の <var>result</var> は、
+                {{AppBannerPromptOutcome/"accepted"}} または
+                {{AppBannerPromptOutcome/"dismissed"}} のいずれかである。
+            </li>
+            <li><var>result</var> を返し、<a>in parallel</a> で：
+                <ol>
+                    <li><var>result</var> が {{AppBannerPromptOutcome/"accepted"}} の場合、
+                        <a>steps to install the web application</a> を実行する。
+                    </li>
+                </ol>
+            </li>
+        </ol>
+        <p>
+            <dfn>steps to notify that an install prompt is available</dfn> は、
+            次のアルゴリズムで与えられる：
+        </p>
+        <ol>
+            <li><a>top-level browsing
+                    context</a> の {{Document}} が
+                <a data-cite="html#completely-loaded">完全に
+                    読み込まれる</a>まで待つ。
+            </li>
+            <li><a data-lt="present an install prompt">提示中の install prompt</a> がすでに
+                存在する場合、または <a>steps to install the web application</a> が現在
+                実行中である場合、この手順を中止する。
+            </li>
+            <li>
+                次を行うために、<a>application life-cycle task source</a> 上で
+                <a>Queue a task</a> する：
+                <ol>
+                    <li>{{Event/cancelable}} 属性を `true` に初期化する手順を伴い、
+                        {{BeforeInstallPromptEvent}} インターフェイスを使用して、
+                        [=top-level browsing context=] の [=relevant global object=] で
+                        `"beforeinstallprompt"` という名前の [=fire an event=] をした結果を
+                        |mayShowPrompt| とする。
+                    </li>
+                    <li>|mayShowPrompt| が true の場合、ユーザーエージェントは
+                        <a>in
+                            parallel</a> で、|event| とともに
+                        <a>request to present an install prompt</a> してもよい。
+                    </li>
+                </ol>
+            </li>
+        </ol>
+    </section>
+    <section data-cite="DOM">
+        <h2>
+            Installable web applications
+        </h2>
+        <section>
+            <h2>
+                <dfn>Installation</dfn> 処理
+            </h2>
+            <p>
+                <dfn>steps to install the web application</dfn> は次のアルゴリズムで与えられる：
+            </p>
+            <ol>
+                <li><var>manifest</var> を、installable document の manifest とする。
+                </li>
+                <li>ユーザーのオペレーティングシステムに Web アプリケーションを登録しようとするため、
+                    未指定の一連のアクションを実行する（例：Web アプリケーションを起動する
+                    ショートカットを作成する、システムのアンインストールメニューに
+                    アプリケーションを登録する、など）。インストールが失敗した場合
+                    （これは任意の理由で起こり得る。たとえば、OS がユーザーエージェントに
+                    デバイスのホーム画面へアイコンを追加する許可を拒否する場合など）、
+                    これらの手順を中止する。
+                </li>
+                <li>
+                    インストールが行われた [=top-level browsing context=] の
+                    [=relevant global object=] で `"appinstalled"` という名前の
+                    <a>fire an event</a> をするために、
+                    <a>application life-cycle task
+                        source</a> 上で <a>Queue a task</a> する。
+                </li>
+            </ol>
+        </section>
+        <section class="informative">
+            <h3 id="installability-signals">
+                インストール可能性シグナル
+            </h3>
+            <p>
+                設計上、この仕様は、Web アプリケーションを「インストール」するための
+                明示的な API を開発者に提供しない。代わりに、
+                <a>manifest</a> は、Web アプリケーションがインストール可能であることを
+                ユーザーエージェントに示す <dfn>installability signal</dfn> として機能できる。
+                これらのシグナルはユーザーエージェントごとに異なる。各ユーザーエージェントは、
+                Web サイトがインストールプロンプトに適格であるかどうかを判断するための
+                独自のヒューリスティックを持つためである。実装者は一般に、
+                特定の installabilty signals や、Web アプリケーションが installable と見なされるために
+                満たす必要があるその他の関連基準を説明する文書を提供する。
+            </p>
+            <p>
+                ユーザーエージェントが実装する可能性のある Web アプリケーションの
+                <a>installability signals</a> の例：
+            </p>
+            <ul>
+                <li>アプリケーション名と適切なアイコンを持つ [=application manifest=] を持つ。
+                </li>
+                <li>安全なネットワーク接続で提供され、かつネットワーク接続なしでも機能する。
+                </li>
+                <li>合理的な content security policy を持つ。
+                </li>
+                <li>モバイルとデスクトップの両方に対応して、さまざまな画面サイズに
+                    レスポンシブに適応できる。
+                </li>
+                <li>長期間にわたり高いエンドユーザーエンゲージメントを示す。
+                </li>
+                <li>ユーザーによって価値があり信頼できるものとして明示的にマークされている
+                    （例：ブックマークまたは「スター」付け）。
+                </li>
+            </ul>
+            <p>
+                このリストは網羅的ではなく、一部の <a>installability signals</a> は
+                すべてのユーザーエージェントに適用されない場合がある。ユーザーエージェントが
+                これらの <a>installability signals</a> をどのように使用して
+                Web アプリケーションがインストール可能かを判断するかは、実装者に委ねられる。
+            </p>
+        </section>
+    </section>
+    <section>
+        <h2>
+            インストールイベント
+        </h2>
+        <p>
+            この仕様の [=event|イベント=] は、<dfn>application
+                life-cycle task source</dfn> に依存する。
+        </p>
+        <section data-dfn-for="BeforeInstallPromptEvent">
+            <h3>
+                <dfn>BeforeInstallPromptEvent</dfn> インターフェイス
+            </h3>
+            <div class="note">
+                <a>beforeinstallprompt</a> イベントは、必ずしも
+                <a>manual installation</a> が続くことを示すわけではないため、
+                やや誤った名前である（ユーザーエージェントによっては、サイトに
+                インストールプロンプトをトリガーする能力を与えるだけの場合がある）。
+                歴史的な理由からこの名前になっている。
+            </div>
+            <pre class="idl" data-cite="DOM">
+          [Exposed=Window]
+          interface BeforeInstallPromptEvent : Event {
+            constructor(DOMString type, optional EventInit eventInitDict = {});
+            Promise&lt;PromptResponseObject&gt; prompt();
+          };
+
+          dictionary PromptResponseObject {
+            AppBannerPromptOutcome userChoice;
+          };
+
+          enum AppBannerPromptOutcome {
+            "accepted",
+            "dismissed"
+          };
+        </pre>
+            <p>
+                {{BeforeInstallPromptEvent}} は、サイトが
+                <a>site-triggered install prompt</a> を提示することを許可されたとき、
+                またはユーザーエージェントが <a>automated install prompt</a> を提示する前に
+                dispatch される。これは、サイトが <a>automated install prompt</a> を
+                cancel できるようにし、さらに <a>site-triggered install prompt</a> を
+                手動で提示できるようにする。
+            </p>
+            <div class="note">
+                {{BeforeInstallPromptEvent}} が cancel <em>されない</em>場合、
+                ユーザーエージェントはエンドユーザーに対して
+                <a>present an install prompt</a> することが許可される
+                （具体的には <a>automated install prompt</a>）。
+                既定動作を cancel すること（{{Event/preventDefault()}} による）は、
+                ユーザーエージェントが <a>presenting an install prompt</a> することを防ぐ。
+                ユーザーエージェントは、後で再び
+                <a>steps to notify that an install prompt
+                    is available</a> を自由に実行できる。
+            </div>
+            <p>
+                <dfn>PromptResponseObject</dfn> は
+                {{BeforeInstallPromptEvent/prompt()}} を呼び出した結果を含む。
+                それは 1 つのメンバー、
+                <dfn data-dfn-for="PromptResponseObject">userChoice</dfn> を含み、
+                ユーザーが選択した結果を表す。
+            </p>
+            <p>
+                {{BeforeInstallPromptEvent}} のインスタンスは、次の内部スロットを持つ：
+            </p>
+            <dl data-dfn-for="BeforeInstallPromptEvent">
+                <dt>
+                    <dfn>[[\didPrompt]]</dfn>
+                </dt>
+                <dd>
+                    初期値 `false` の boolean。このイベントがエンドユーザーに
+                    <a>present an install prompt</a> するために使用されたかどうかを表す。
+                </dd>
+                <dt>
+                    <dfn>[[\userResponsePromise]]</dfn>
+                </dt>
+                <dd>
+                    <a>presenting an install
+                        prompt</a> の結果を表す promise。
+                </dd>
+            </dl>
+            <section>
+                <h4>
+                    <code>prompt()</code> メソッド
+                </h4>
+                <p>
+                    <dfn>prompt</dfn> メソッドは、呼び出されたときに次の手順を実行する：
+                </p>
+                <ol>
+                    <li>{{BeforeInstallPromptEvent/[[userResponsePromise]]}} を
+                        |userResponsePromise| とする。
+                    </li>
+                    <li>|userResponsePromise| が pending の場合：
+                        <ol>
+                            <li>[=this=].{{BeforeInstallPromptEvent/[[didPrompt]]}} が
+                                `true` の場合、このアルゴリズムを終了する。
+                            </li>
+                            <li>このイベントの {{Event/isTrusted}} 属性が `false` の場合、
+                                |userResponsePromise| を {{"NotAllowedError"}} で reject し、
+                                このアルゴリズムを終了する。
+                            </li>
+                            <li>[=this=].{{BeforeInstallPromptEvent/[[didPrompt]]}} を
+                                `true` に設定する。
+                            </li>
+                            <li>
+                                <a>In parallel</a> で、[=this=] とともに
+                                <a>request to present an install
+                                    prompt</a> する。エンドユーザーが選択するまで、
+                                場合によっては無期限に待つ。
+                            </li>
+                        </ol>
+                    </li>
+                    <li>|userResponsePromise| を返す。
+                    </li>
+                </ol>
+                <p>
+                    {{BeforeInstallPromptEvent}} <var>event</var> とともに
+                    <dfn data-noexport="">request to present an install prompt</dfn> するには：
+                </p>
+                <ol>
+                    <li>
+                        <a>Present an install prompt</a> し、その結果を |outcome| とする。
+                    </li>
+                    <li>|response| を、新しく作成された {{PromptResponseObject}} とし、
+                        その {{PromptResponseObject/userChoice}} を |outcome| に初期化する。
+                    </li>
+                    <li>|event|.{{BeforeInstallPromptEvent/[[userResponsePromise]]}} を
+                        |response| で [=Resolve=] する。
+                    </li>
+                </ol>
+            </section>
+            <section class="informative">
+                <h4>
+                    使用例
+                </h4>
+                <p>
+                    この例は、ユーザーがボタンをクリックして
+                    <a>site-triggered install prompt</a> を表示するまで、
+                    automated install prompt が表示されないようにする方法を示す。
+                    このようにして、サイトは、任意の時点でプロンプトするのではなく、
+                    インストールをユーザーの裁量に任せつつ、そのための目立つ UI を提供できる。
+                </p>
+                <pre class="example" title="Using beforeinstallprompt to present an install button">
+              window.addEventListener("beforeinstallprompt", event =&gt; {
+                // Suppress automatic prompting.
+                event.preventDefault();
+
+                // Show the (disabled-by-default) install button. This button
+                // resolves the installButtonClicked promise when clicked.
+                installButton.disabled = false;
+
+                // Wait for the user to click the button.
+                installButton.addEventListener("click", async e =&gt; {
+                  // The prompt() method can only be used once.
+                  installButton.disabled = true;
+
+                  // Show the prompt.
+                  const userChoice = await event.prompt();
+                  console.info(`user choice was: ${userChoice}`);
+                });
+              });
+            </pre>
+            </section>
+            <section data-dfn-for="AppBannerPromptOutcome">
+                <h4>
+                    <code>AppBannerPromptOutcome</code> enum
+                </h4>
+                <p>
+                    <dfn>AppBannerPromptOutcome</dfn> enum の値は、
+                    <a>presenting an install prompt</a> からの結果を表す。
+                </p>
+                <dl>
+                    <dt>
+                        "<dfn>accepted</dfn>"：
+                    </dt>
+                    <dd>
+                        エンドユーザーは、ユーザーエージェントに Web アプリケーションを
+                        インストールしてほしいことを示した。
+                    </dd>
+                    <dt>
+                        "<dfn>dismissed</dfn>"：
+                    </dt>
+                    <dd>
+                        エンドユーザーは install prompt を退けた。
+                    </dd>
+                </dl>
+            </section>
+        </section>
+        <section>
+            <h3>
+                `Window` オブジェクトへの拡張
+            </h3>
+            <pre class="idl" data-cite="HTML">
+          partial interface Window {
+            attribute EventHandler onappinstalled;
+            attribute EventHandler onbeforeinstallprompt;
+          };
+        </pre>
+            <section data-dfn-for="Window">
+                <h4>
+                    <code>onappinstalled</code> 属性
+                </h4>
+                <p>
+                    <dfn>onappinstalled</dfn> <a>event handler IDL attribute</a> は
+                    "<dfn class="event">appinstalled</dfn>" イベントを処理する。
+                </p>
+            </section>
+            <section data-dfn-for="Window">
+                <h4>
+                    <code>onbeforeinstallprompt</code> 属性
+                </h4>
+                <p>
+                    <dfn>onbeforeinstallprompt</dfn> <a>event handler IDL
+                        attribute</a> は "<dfn class="event">beforeinstallprompt</dfn>" イベントを処理する。
+                </p>
+            </section>
+        </section>
+    </section>
+    <section id="conformance"></section>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
