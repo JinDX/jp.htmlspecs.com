@@ -150,6 +150,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Intersection Observer](https://jp.htmlspecs.com/intersection-observer/)（[Source](https://www.w3.org/TR/2023/WD-intersection-observer-20231018/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Resize Observer](https://jp.htmlspecs.com/resize-observer/)（[Source](https://www.w3.org/TR/2020/WD-resize-observer-1-20200211/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Navigation Timing Level 2](https://jp.htmlspecs.com/navigation-timing-2/)（[Source](https://www.w3.org/TR/2026/WD-navigation-timing-2-20260225/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Soft Navigations and Interaction Contentful Paint](https://jp.htmlspecs.com/soft-navigations/)（[Source](https://wicg.github.io/soft-navigations/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Resource Timing](https://jp.htmlspecs.com/resource-timing/)（[Source](https://www.w3.org/TR/2026/CRD-resource-timing-20260420/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [User Timing Level 2](https://jp.htmlspecs.com/user-timing-2/)（[Source](https://www.w3.org/TR/2019/REC-user-timing-2-20190226/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Observable](https://jp.htmlspecs.com/observable/)（[Source](https://wicg.github.io/observable/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
