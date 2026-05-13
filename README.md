@@ -371,6 +371,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS Cascading and Inheritance Level 6](https://jp.htmlspecs.com/css/css-cascade-6/)（[Source](https://www.w3.org/TR/2024/WD-css-cascade-6-20240906/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Basic User Interface Module Level 3](https://jp.htmlspecs.com/css/css-ui-3/)（[Source](https://www.w3.org/TR/2026/REC-css-ui-3-20260407/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [CSS Basic User Interface Module Level 4](https://jp.htmlspecs.com/css/css-ui-4/)（[Source](https://www.w3.org/TR/2026/WD-css-ui-4-20260120/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Form Control Styling Level 1](https://jp.htmlspecs.com/css/css-forms-1/)（[Source](https://www.w3.org/TR/2025/WD-css-forms-1-20250325/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Syntax Module Level 3](https://jp.htmlspecs.com/css/css-syntax-3/)（[Source](https://www.w3.org/TR/2021/CRD-css-syntax-3-20211224/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [CSS Values and Units Module Level 3](https://jp.htmlspecs.com/css/css-values-3/)（[Source](https://www.w3.org/TR/2024/CRD-css-values-3-20240322/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [CSS Values and Units Module Level 4](https://jp.htmlspecs.com/css/css-values-4/)（[Source](https://www.w3.org/TR/2024/WD-css-values-4-20240312/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
