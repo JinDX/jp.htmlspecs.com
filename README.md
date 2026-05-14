@@ -101,6 +101,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web Serial API](https://jp.htmlspecs.com/serial/)（[Source](https://wicg.github.io/serial/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebHID API](https://jp.htmlspecs.com/webhid/)（[Source](https://wicg.github.io/webhid/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebUSB API](https://jp.htmlspecs.com/webusb/)（[Source](https://wicg.github.io/webusb/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Web MIDI API](https://jp.htmlspecs.com/webmidi/)（[Source](https://www.w3.org/TR/2025/WD-webmidi-20250121/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web Bluetooth API](https://jp.htmlspecs.com/web-bluetooth/)（[Source](https://webbluetoothcg.github.io/web-bluetooth/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web NFC API](https://jp.htmlspecs.com/web-nfc/)（[Source](https://w3c-cg.github.io/web-nfc/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Handwriting Recognition API](https://jp.htmlspecs.com/handwriting-recognition/)（[Source](https://wicg.github.io/handwriting-recognition/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
