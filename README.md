@@ -143,7 +143,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Battery Status API](https://jp.htmlspecs.com/battery-status/)（[Source](https://www.w3.org/TR/2024/WD-battery-status-20241024/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Vibration API](https://jp.htmlspecs.com/vibration/)（[Source](https://www.w3.org/TR/2026/CRD-vibration-20260514/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Accelerometer](https://jp.htmlspecs.com/accelerometer/)（[Source](https://www.w3.org/TR/2026/CRD-accelerometer-20260514/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [Magnetometer](https://jp.htmlspecs.com/magnetometer/)（[Source](https://www.w3.org/TR/2025/WD-magnetometer-20250212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Magnetometer](https://jp.htmlspecs.com/magnetometer/)（[Source](https://www.w3.org/TR/2026/WD-magnetometer-20260514/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Gyroscope](https://jp.htmlspecs.com/gyroscope/)（[Source](https://www.w3.org/TR/2026/CRD-gyroscope-20260202/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Gamepad](https://jp.htmlspecs.com/gamepad/)（[Source](https://www.w3.org/TR/2025/WD-gamepad-20250710/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
