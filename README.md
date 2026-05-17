@@ -157,6 +157,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Soft Navigations and Interaction Contentful Paint](https://jp.htmlspecs.com/soft-navigations/)（[Source](https://wicg.github.io/soft-navigations/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Resource Timing](https://jp.htmlspecs.com/resource-timing/)（[Source](https://www.w3.org/TR/2026/CRD-resource-timing-20260420/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [User Timing Level 2](https://jp.htmlspecs.com/user-timing-2/)（[Source](https://www.w3.org/TR/2019/REC-user-timing-2-20190226/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [User Timing](https://jp.htmlspecs.com/user-timing/)（[Source](https://www.w3.org/TR/2026/CRD-user-timing-20260311/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Observable](https://jp.htmlspecs.com/observable/)（[Source](https://wicg.github.io/observable/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Long Tasks API](https://jp.htmlspecs.com/longtasks-1/)（[Source](https://www.w3.org/TR/2026/WD-longtasks-1-20260319/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Long Animation Frames API](https://jp.htmlspecs.com/long-animation-frames/)（[Source](https://www.w3.org/TR/2026/WD-long-animation-frames-20260428/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
