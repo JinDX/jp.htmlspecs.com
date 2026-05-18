@@ -1,0 +1,3491 @@
+<!DOCTYPE html>
+<html lang="ja-JP" dir="ltr" typeof="bibo:Document w3p:WD"
+    prefix="bibo: http://purl.org/ontology/bibo/ w3p: http://www.w3.org/2001/02pd/rec54#">
+
+<head>
+    <meta property="dc:language" content="en" lang="">
+    <meta charset="UTF-8">
+    <title>DOM の構文解析と直列化</title>
+    <style>
+        /* Make these stand-out more... */
+        .externalDFN {
+            font-style: italic;
+            background-color: #fff9d6;
+        }
+
+        /* Switch statement */
+        dl.switch dt::before {
+            content: "↪ ";
+            margin-left: 1em;
+        }
+
+        /* Better spacing around various lists (implied paragraph children) */
+        ol>li,
+        section:not(#toc) ul>li,
+        section dl>dt {
+            margin: 1em 0;
+        }
+
+        var {
+            color: maroon;
+        }
+
+        /* domintro styling */
+        dl.domintro {
+            background-color: rgb(221, 255, 221);
+            padding: 1em 0.5em 1em 2em;
+            clear: both;
+        }
+
+        dl.domintro dt {
+            color: black;
+        }
+
+        dl.domintro>dd {
+            color: green;
+        }
+
+        dl.domintro::before {
+            float: right;
+            background-color: white;
+            display: block;
+            border: 2px solid black;
+            color: green;
+            margin-top: -20px;
+            padding: 2px;
+            content: "This box is non-normative. Implementation requirements are given below this box.";
+        }
+
+        /* Fancy table stuff */
+        table {
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            border-bottom: 2px solid black;
+        }
+
+        tbody tr:not(:last-child) {
+            border-bottom: 1px solid black;
+        }
+
+        td {
+            border-left: 1px solid black;
+            padding: 4px;
+        }
+
+        /* Extra IDL :-) */
+        .extraidl {
+            line-height: 120%;
+            padding: 1em;
+            border-top: 1px solid #90b8de;
+            border-bottom: 1px solid #90b8de;
+        }
+
+        .extraidl:before {
+            width: 150px;
+            color: #fff;
+            padding: 3px;
+            font-weight: bold;
+            font-family: initial;
+            margin: -1em 0 1em -1em;
+            display: block;
+            content: "WebIDL";
+            background-color: rgb(144, 184, 222);
+        }
+    </style>
+
+
+    <style>
+        /*****************************************************************
+ * ReSpec 3 CSS
+ * Robin Berjon - http://berjon.com/
+ *****************************************************************/
+
+        /* --- INLINES --- */
+        em.rfc2119 {
+            text-transform: lowercase;
+            font-variant: small-caps;
+            font-style: normal;
+            color: #900;
+        }
+
+        h1 acronym,
+        h2 acronym,
+        h3 acronym,
+        h4 acronym,
+        h5 acronym,
+        h6 acronym,
+        a acronym,
+        h1 abbr,
+        h2 abbr,
+        h3 abbr,
+        h4 abbr,
+        h5 abbr,
+        h6 abbr,
+        a abbr {
+            border: none;
+        }
+
+        dfn {
+            font-weight: bold;
+        }
+
+        a.internalDFN {
+            color: inherit;
+            border-bottom: 1px solid #99c;
+            text-decoration: none;
+        }
+
+        a.externalDFN {
+            color: inherit;
+            border-bottom: 1px dotted #ccc;
+            text-decoration: none;
+        }
+
+        a.bibref {
+            text-decoration: none;
+        }
+
+        cite .bibref {
+            font-style: normal;
+        }
+
+        code {
+            color: #C83500;
+        }
+
+        /* --- TOC --- */
+        .toc a,
+        .tof a {
+            text-decoration: none;
+        }
+
+        a .secno,
+        a .figno {
+            color: #000;
+        }
+
+        ul.tof,
+        ol.tof {
+            list-style: none outside none;
+        }
+
+        .caption {
+            margin-top: 0.5em;
+            font-style: italic;
+        }
+
+        /* --- TABLE --- */
+        table.simple {
+            border-spacing: 0;
+            border-collapse: collapse;
+            border-bottom: 3px solid #005a9c;
+        }
+
+        .simple th {
+            background: #005a9c;
+            color: #fff;
+            padding: 3px 5px;
+            text-align: left;
+        }
+
+        .simple th[scope="row"] {
+            background: inherit;
+            color: inherit;
+            border-top: 1px solid #ddd;
+        }
+
+        .simple td {
+            padding: 3px 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .simple tr:nth-child(even) {
+            background: #f0f6ff;
+        }
+
+        /* --- DL --- */
+        .section dd>p:first-child {
+            margin-top: 0;
+        }
+
+        .section dd>p:last-child {
+            margin-bottom: 0;
+        }
+
+        .section dd {
+            margin-bottom: 1em;
+        }
+
+        .section dl.attrs dd,
+        .section dl.eldef dd {
+            margin-bottom: 0;
+        }
+
+        .respec-hidden {
+            display: none;
+        }
+
+        @media print {
+            .removeOnSave {
+                display: none;
+            }
+        }
+    </style>
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <style>
+        /* --- ISSUES/NOTES --- */
+        div.issue-title,
+        div.note-title,
+        div.ednote-title,
+        div.warning-title {
+            padding-right: 1em;
+            min-width: 7.5em;
+            color: #b9ab2d;
+        }
+
+        div.issue-title {
+            color: #e05252;
+        }
+
+        div.note-title,
+        div.ednote-title {
+            color: #2b2;
+        }
+
+        div.warning-title {
+            color: #f22;
+        }
+
+        div.issue-title span,
+        div.note-title span,
+        div.ednote-title span,
+        div.warning-title span {
+            text-transform: uppercase;
+        }
+
+        div.note,
+        div.issue,
+        div.ednote,
+        div.warning {
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+
+        .note>p:first-child,
+        .ednote>p:first-child,
+        .issue>p:first-child,
+        .warning>p:first-child {
+            margin-top: 0
+        }
+
+        .issue,
+        .note,
+        .ednote,
+        .warning {
+            padding: .5em;
+            border-left-width: .5em;
+            border-left-style: solid;
+        }
+
+        div.issue,
+        div.note,
+        div.ednote,
+        div.warning {
+            padding: 1em 1.2em 0.5em;
+            margin: 1em 0;
+            position: relative;
+            clear: both;
+        }
+
+        span.note,
+        span.ednote,
+        span.issue,
+        span.warning {
+            padding: .1em .5em .15em;
+        }
+
+        .issue {
+            border-color: #e05252;
+            background: #fbe9e9;
+        }
+
+        .note,
+        .ednote {
+            border-color: #52e052;
+            background: #e9fbe9;
+        }
+
+        .warning {
+            border-color: #f11;
+            border-width: .2em;
+            border-style: solid;
+            background: #fbe9e9;
+        }
+
+        .warning-title:before {
+            content: "⚠";
+            /*U+26A0 WARNING SIGN*/
+            font-size: 3em;
+            float: left;
+            height: 100%;
+            padding-right: .3em;
+            vertical-align: top;
+            margin-top: -0.5em;
+        }
+
+        li.task-list-item {
+            list-style: none;
+        }
+
+        input.task-list-item-checkbox {
+            margin: 0 0.35em 0.25em -1.6em;
+            vertical-align: middle;
+        }
+    </style>
+    <style>
+        /* --- WEB IDL --- */
+        pre.idl {
+            border-top: 1px solid #90b8de;
+            border-bottom: 1px solid #90b8de;
+            padding: 1em;
+            line-height: 120%;
+        }
+
+        @media print {
+            pre.idl {
+                white-space: pre-wrap;
+            }
+        }
+
+        pre.idl::before {
+            content: "WebIDL";
+            display: block;
+            width: 150px;
+            background: #90b8de;
+            color: #fff;
+            font-family: sans-serif;
+            padding: 3px;
+            font-weight: bold;
+            margin: -1em 0 1em -1em;
+        }
+
+        .idlType {
+            color: #ff4500;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        /*.idlModule*/
+        /*.idlModuleID*/
+        /*.idlInterface*/
+        .idlInterfaceID,
+        .idlDictionaryID,
+        .idlCallbackID,
+        .idlEnumID {
+            font-weight: bold;
+            color: #005a9c;
+        }
+
+        a.idlEnumItem {
+            color: #000;
+            border-bottom: 1px dotted #ccc;
+            text-decoration: none;
+        }
+
+        .idlSuperclass {
+            font-style: italic;
+            color: #005a9c;
+        }
+
+        /*.idlAttribute*/
+        .idlAttrType,
+        .idlFieldType,
+        .idlMemberType {
+            color: #005a9c;
+        }
+
+        .idlAttrName,
+        .idlFieldName,
+        .idlMemberName {
+            color: #ff4500;
+        }
+
+        .idlAttrName a,
+        .idlFieldName a,
+        .idlMemberName a {
+            color: #ff4500;
+            border-bottom: 1px dotted #ff4500;
+            text-decoration: none;
+        }
+
+        /*.idlMethod*/
+        .idlMethType,
+        .idlCallbackType {
+            color: #005a9c;
+        }
+
+        .idlMethName {
+            color: #ff4500;
+        }
+
+        .idlMethName a {
+            color: #ff4500;
+            border-bottom: 1px dotted #ff4500;
+            text-decoration: none;
+        }
+
+        /*.idlCtor*/
+        .idlCtorName {
+            color: #ff4500;
+        }
+
+        .idlCtorName a {
+            color: #ff4500;
+            border-bottom: 1px dotted #ff4500;
+            text-decoration: none;
+        }
+
+        /*.idlParam*/
+        .idlParamType {
+            color: #005a9c;
+        }
+
+        .idlParamName,
+        .idlDefaultValue {
+            font-style: italic;
+        }
+
+        .extAttr {
+            color: #666;
+        }
+
+        /*.idlSectionComment*/
+        .idlSectionComment {
+            color: gray;
+        }
+
+        /*.idlIterable*/
+        .idlIterableKeyType,
+        .idlIterableValueType {
+            color: #005a9c;
+        }
+
+        /*.idlMaplike*/
+        .idlMaplikeKeyType,
+        .idlMaplikeValueType {
+            color: #005a9c;
+        }
+
+        /*.idlConst*/
+        .idlConstType {
+            color: #005a9c;
+        }
+
+        .idlConstName {
+            color: #ff4500;
+        }
+
+        .idlConstName a {
+            color: #ff4500;
+            border-bottom: 1px dotted #ff4500;
+            text-decoration: none;
+        }
+
+        /*.idlException*/
+        .idlExceptionID {
+            font-weight: bold;
+            color: #c00;
+        }
+
+        .idlTypedefID,
+        .idlTypedefType {
+            color: #005a9c;
+        }
+
+        .idlRaises,
+        .idlRaises a.idlType,
+        .idlRaises a.idlType code,
+        .excName a,
+        .excName a code {
+            color: #c00;
+            font-weight: normal;
+        }
+
+        .excName a {
+            font-family: monospace;
+        }
+
+        .idlRaises a.idlType,
+        .excName a.idlType {
+            border-bottom: 1px dotted #c00;
+        }
+
+        .excGetSetTrue,
+        .excGetSetFalse,
+        .prmNullTrue,
+        .prmNullFalse,
+        .prmOptTrue,
+        .prmOptFalse {
+            width: 45px;
+            text-align: center;
+        }
+
+        .excGetSetTrue,
+        .prmNullTrue,
+        .prmOptTrue {
+            color: #0c0;
+        }
+
+        .excGetSetFalse,
+        .prmNullFalse,
+        .prmOptFalse {
+            color: #c00;
+        }
+
+        .idlImplements a {
+            font-weight: bold;
+        }
+
+        dl.attributes,
+        dl.methods,
+        dl.constants,
+        dl.constructors,
+        dl.fields,
+        dl.dictionary-members {
+            margin-left: 2em;
+        }
+
+        .attributes dt,
+        .methods dt,
+        .constants dt,
+        .constructors dt,
+        .fields dt,
+        .dictionary-members dt {
+            font-weight: normal;
+        }
+
+        .attributes dt code,
+        .methods dt code,
+        .constants dt code,
+        .constructors dt code,
+        .fields dt code,
+        .dictionary-members dt code {
+            font-weight: bold;
+            color: #000;
+            font-family: monospace;
+        }
+
+        .attributes dt code,
+        .fields dt code,
+        .dictionary-members dt code {
+            background: #ffffd2;
+        }
+
+        .attributes dt .idlAttrType code,
+        .fields dt .idlFieldType code,
+        .dictionary-members dt .idlMemberType code {
+            color: #005a9c;
+            background: transparent;
+            font-family: inherit;
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        .methods dt code {
+            background: #d9e6f8;
+        }
+
+        .constants dt code {
+            background: #ddffd2;
+        }
+
+        .constructors dt code {
+            background: #cfc;
+        }
+
+        .attributes dd,
+        .methods dd,
+        .constants dd,
+        .constructors dd,
+        .fields dd,
+        .dictionary-members dd {
+            margin-bottom: 1em;
+        }
+
+        table.parameters,
+        table.exceptions {
+            border-spacing: 0;
+            border-collapse: collapse;
+            margin: 0.5em 0;
+            width: 100%;
+        }
+
+        table.parameters {
+            border-bottom: 1px solid #90b8de;
+        }
+
+        table.exceptions {
+            border-bottom: 1px solid #deb890;
+        }
+
+        .parameters th,
+        .exceptions th {
+            color: #fff;
+            padding: 3px 5px;
+            text-align: left;
+            font-weight: normal;
+            text-shadow: #666 1px 1px 0;
+        }
+
+        .parameters th {
+            background: #90b8de;
+        }
+
+        .exceptions th {
+            background: #deb890;
+        }
+
+        .parameters td,
+        .exceptions td {
+            padding: 3px 10px;
+            border-top: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        .parameters tr:first-child td,
+        .exceptions tr:first-child td {
+            border-top: none;
+        }
+
+        .parameters td.prmName,
+        .exceptions td.excName,
+        .exceptions td.excCodeName {
+            width: 100px;
+        }
+
+        .parameters td.prmType {
+            width: 120px;
+        }
+
+        table.exceptions table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            width: 100%;
+        }
+    </style>
+    <link href="https://www.w3.org/StyleSheets/TR/2016/W3C-WD" rel="stylesheet">
+    <!--[if lt IE 9]><script src='https://www.w3.org/2008/site/js/html5shiv.js'></script><![endif]-->
+</head>
+
+<body id="respecDocument" role="document" class="h-entry">
+    <div id="respecHeader" role="contentinfo" class="head">
+        <p>
+            <a href="https://www.w3.org/"><img src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" alt="W3C"
+                    height="48" width="72"></a>
+        </p>
+        <h1 class="title p-name" id="title" property="dcterms:title">DOM の構文解析と直列化</h1>
+        <h2 property="bibo:subtitle" id="subtitle">DOMParser、XMLSerializer、innerHTML、および類似 API</h2>
+        <h2 id="w3c-working-draft-17-may-2016"><abbr title="World Wide Web Consortium">W3C</abbr> 作業草案 <time
+                property="dcterms:issued" class="dt-published" datetime="2016-05-17">2016年5月17日</time></h2>
+        <dl>
+            <dt>このバージョン:</dt>
+            <dd><a class="u-url"
+                    href="https://www.w3.org/TR/2016/WD-DOM-Parsing-20160517/">http://www.w3.org/TR/2016/WD-DOM-Parsing-20160517/</a>
+            </dd>
+            <dt>最新公開バージョン:</dt>
+            <dd><a href="https://www.w3.org/TR/DOM-Parsing/">http://www.w3.org/TR/DOM-Parsing/</a></dd>
+            <dt>最新エディターズドラフト:</dt>
+            <dd><a href="https://w3c.github.io/DOM-Parsing/">https://w3c.github.io/DOM-Parsing/</a></dd>
+            <dt>テストスイート:</dt>
+            <dd><a href="http://w3c-test.org/domparsing/">http://w3c-test.org/domparsing/</a></dd>
+            <dt>前バージョン:</dt>
+            <dd><a rel="dcterms:replaces"
+                    href="https://www.w3.org/TR/2014/CR-DOM-Parsing-20140617/">http://www.w3.org/TR/2014/CR-DOM-Parsing-20140617/</a>
+            </dd>
+            <dt>編集者:</dt>
+            <dd class="p-author h-card vcard" property="bibo:editor" resource="_:editor0" data-editor-id="40117"><span
+                    property="rdf:first" typeof="foaf:Person"><span property="foaf:name" class="p-name fn">Travis
+                        Leithead</span>, <a property="foaf:workplaceHomepage" class="p-org org h-org h-card"
+                        href="http://www.microsoft.com">Microsoft</a>, <span class="ed_mailto"><a class="u-email email"
+                            property="foaf:mbox"
+                            href="mailto:travis.leithead@microsoft.com">travis.leithead@microsoft.com</a></span></span>
+                <span property="rdf:rest" resource="rdf:nil"></span>
+            </dd>
+
+            <dt>参加:</dt>
+            <dd>
+                <a href="https://github.com/w3c/DOM-Parsing">
+                    GitHub にあります。
+                </a>
+            </dd>
+            <dd>
+                <a
+                    href="https://www.w3.org/Bugs/Public/buglist.cgi?component=DOM%20Parsing%20and%20Serialization&amp;list_id=44989&amp;product=WebAppsWG&amp;resolution=---">
+                    Bugzilla バグ一覧。
+                </a>
+            </dd>
+            <dd>
+                <a href="https://github.com/w3c/DOM-Parsing/issues">
+                    GitHub Issues。
+                </a>
+            </dd>
+            <dd>
+                <a href="https://github.com/w3c/DOM-Parsing/commits">
+                    コミット履歴。
+                </a>
+            </dd>
+            <dd>
+                <a href="http://lists.w3.org/Archives/Public/www-dom/">
+                    メーリングリスト。
+                </a>
+            </dd>
+        </dl>
+        <p class="copyright">
+            <a href="https://www.w3.org/Consortium/Legal/ipr-notice#Copyright">Copyright</a> ©
+            2016
+
+            <a href="https://www.w3.org/"><abbr title="World Wide Web Consortium">W3C</abbr></a><sup>®</sup>
+            (<a href="http://www.csail.mit.edu/"><abbr title="Massachusetts Institute of Technology">MIT</abbr></a>,
+            <a href="http://www.ercim.eu/"><abbr
+                    title="European Research Consortium for Informatics and Mathematics">ERCIM</abbr></a>,
+            <a href="http://www.keio.ac.jp/">Keio</a>, <a href="http://ev.buaa.edu.cn/">Beihang</a>).
+            <abbr title="World Wide Web Consortium">W3C</abbr> <a
+                href="https://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>,
+            <a href="https://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a> and
+            <a rel="license" href="https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document">permissive
+                document license</a>
+            rules apply.
+        </p>
+        <hr title="Separator for header">
+    </div>
+
+    <section property="dc:abstract" class="introductory" id="abstract">
+        <h2 resource="#h-abstract" id="h-abstract"><span property="xhv:role" resource="xhv:heading">概要</span></h2>
+        <p>この仕様は、Web アプリケーションが DOM ノードの構文解析と直列化で使用するための、
+            HTML および汎用 XML パーサーへのプログラム的アクセスのための
+            さまざまな API を定義する。</p>
+    </section>
+    <section id="sotd" class="introductory">
+        <h2 resource="#h-sotd" id="h-sotd"><span property="xhv:role" resource="xhv:heading">この文書の
+                ステータス</span></h2>
+        <p>
+            <em>この節は、公開時点におけるこの文書のステータスを説明する。他の文書が
+                この文書に取って代わる可能性がある。現在の <abbr title="World Wide Web Consortium">W3C</abbr>
+                公開物の一覧とこの技術報告の最新改訂は、http://www.w3.org/TR/ にある <a href="https://www.w3.org/TR/"><abbr
+                        title="World Wide Web Consortium">W3C</abbr> 技術報告
+                    インデックス</a>で見つけることができる。</em>
+        </p>
+
+        <p>この仕様は、<a href="https://domparsing.spec.whatwg.org/">
+                DOM の構文解析と直列化</a> Living Specification の元の作業に基づくが、
+            サポートされる機能、規範的要件、およびアルゴリズムの具体性の点で分岐している。
+            適切な場合には、Living Specification からの関連する修正がこの文書に取り込まれる。
+        </p>
+        <p>
+            この文書は、<a href="https://www.w3.org/WebPlatform/WG/">Web Platform Working
+                Group</a> により Working Draft として公開された。
+            この文書は <abbr title="World Wide Web Consortium">W3C</abbr> 勧告となることを意図している。
+            この文書に関するコメントを行いたい場合は、
+            <a href="mailto:www-dom@w3.org?subject=DOM-Parsing">www-dom@w3.org</a>
+            （<a href="mailto:www-dom-request@w3.org?subject=subscribe">購読</a>、
+            <a href="http://lists.w3.org/Archives/Public/www-dom/">アーカイブ</a>）
+            宛てに、メールの件名の先頭に <code>DOM-Parsing</code> を付けて送ってほしい。
+
+            すべてのコメントを歓迎する。
+        </p>
+        <p>
+            Working Draft としての公開は、<abbr title="World Wide Web Consortium">W3C</abbr>
+            会員による承認を意味しない。これは草案文書であり、いつでも他の文書により
+            更新、置換、または廃止される可能性がある。この文書を進行中の作業以外として
+            引用することは不適切である。
+        </p>
+        <p>
+            この文書は、
+            <a id="sotd_patent" property="w3p:patentRules"
+                href="https://www.w3.org/Consortium/Patent-Policy-20040205/">2004年2月5日付 <abbr
+                    title="World Wide Web Consortium">W3C</abbr> 特許
+                ポリシー</a>の下で運営される
+            グループにより作成された。
+            <abbr title="World Wide Web Consortium">W3C</abbr> は、そのグループの成果物に関連して行われた
+            <a href="https://www.w3.org/2004/01/pp-impl/83482/status" rel="disclosure">特許開示の公開一覧</a>
+            を維持している。そのページには、
+            特許を開示するための手順も含まれている。ある個人が、その個人の考えでは
+            <a href="https://www.w3.org/Consortium/Patent-Policy-20040205/#def-essential">必須
+                クレーム</a>を含む特許について実際の知識を有する場合、その個人は
+            <a href="https://www.w3.org/Consortium/Patent-Policy-20040205/#sec-Disclosure"><abbr
+                    title="World Wide Web Consortium">W3C</abbr> 特許ポリシーの
+                6 節</a>に従って情報を開示しなければならない。
+        </p>
+        <p>この文書は、<a id="w3c_process_revision" href="https://www.w3.org/2015/Process-20150901/">2015年9月1日付 <abbr
+                    title="World Wide Web Consortium">W3C</abbr> プロセス文書</a>により管理される。
+        </p>
+
+    </section>
+    <nav id="toc">
+        <h2 resource="#table-of-contents" id="table-of-contents" class="introductory"><span property="xhv:role"
+                resource="xhv:heading">目次</span></h2>
+        <ul role="directory" class="toc">
+            <li class="tocline"><a class="tocxref" href="#conformance"><span class="secno">1. </span>適合性</a>
+                <ul class="toc">
+                    <li class="tocline"><a class="tocxref" href="#dependencies"><span class="secno">1.1
+                            </span>依存関係</a></li>
+                    <li class="tocline"><a class="tocxref" href="#extensibility"><span class="secno">1.2
+                            </span>拡張性</a></li>
+                </ul>
+            </li>
+            <li class="tocline"><a class="tocxref" href="#terminology"><span class="secno">2. </span>用語</a>
+            </li>
+            <li class="tocline"><a class="tocxref" href="#namespaces"><span class="secno">3. </span>名前空間</a></li>
+            <li class="tocline"><a class="tocxref" href="#parsing-and-serializing-nodes"><span class="secno">4.
+                    </span><span title="node" class="formerLink">Node</span> の構文解析と直列化</a>
+                <ul class="toc">
+                    <li class="tocline"><a class="tocxref" href="#parsing"><span class="secno">4.1 </span>構文解析</a>
+                    </li>
+                    <li class="tocline"><a class="tocxref" href="#serializing"><span class="secno">4.2
+                            </span>直列化</a></li>
+                </ul>
+            </li>
+            <li class="tocline"><a class="tocxref" href="#the-domparser-interface"><span class="secno">5.
+                    </span><code>DOMParser</code>
+                    インターフェイス</a>
+                <ul class="toc">
+                    <li class="tocline"><a class="tocxref" href="#methods"><span class="secno">5.1 </span>メソッド</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="tocline"><a class="tocxref" href="#the-xmlserializer-interface"><span class="secno">6.
+                    </span><code>XMLSerializer</code>
+                    インターフェイス</a>
+                <ul class="toc">
+                    <li class="tocline"><a class="tocxref" href="#methods-1"><span class="secno">6.1 </span>メソッド</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="tocline"><a class="tocxref" href="#extensions-to-the-element-interface"><span class="secno">7.
+                    </span><code><span title="element" class="formerLink">Element</span></code>
+                    インターフェイスへの拡張</a>
+                <ul class="toc">
+                    <li class="tocline"><a class="tocxref" href="#attributes"><span class="secno">7.1
+                            </span>属性</a></li>
+                    <li class="tocline"><a class="tocxref" href="#methods-2"><span class="secno">7.2 </span>メソッド</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="tocline"><a class="tocxref" href="#extensions-to-the-range-interface"><span class="secno">8.
+                    </span><code><span title="range" class="formerLink">Range</span></code>
+                    インターフェイスへの拡張</a>
+                <ul class="toc">
+                    <li class="tocline"><a class="tocxref" href="#methods-3"><span class="secno">8.1 </span>メソッド</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="tocline"><a class="tocxref" href="#revision-history"><span class="secno">A. </span>改訂履歴</a></li>
+            <li class="tocline"><a class="tocxref" href="#acknowledgements"><span class="secno">B.
+                    </span>謝辞</a></li>
+            <li class="tocline"><a class="tocxref" href="#references"><span class="secno">C. </span>参考文献</a>
+                <ul class="toc">
+                    <li class="tocline"><a class="tocxref" href="#normative-references"><span class="secno">C.1
+                            </span>規範的参考文献</a></li>
+                    <li class="tocline"><a class="tocxref" href="#informative-references"><span class="secno">C.2
+                            </span>参考情報文献</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+
+
+    <section property="bibo:hasPart" resource="#crec" typeof="bibo:Chapter" id="crec" class="introductory">
+        <h2 resource="#h-crec" id="h-crec"><span property="xhv:role" resource="xhv:heading">候補勧告の
+                終了基準</span></h2>
+        <p>この仕様は、仕様の
+            <a href="http://w3c-test.org/domparsing/">テストスイート</a>が完了し、2 つ以上の
+            独立した実装が各テストに合格するまでは、勧告案へ進まない。ただし、単一の実装が
+            各テストに合格しなければならないわけではない。この基準を満たすのは、早くても
+            2014 年 10 月 24 日以降になると予想している。
+            このグループは
+            <a href="https://dvcs.w3.org/hg/innerhtml/raw-file/tip/implementationReport.html">実装報告</a>も作成する。
+        </p>
+    </section>
+
+    <!-- <section id="issues" class="introductory">
+        <h1>課題</h1>
+
+        <p class=issue>この文書の残りの部分に現れる未解決の課題は、
+        このように強調表示される。</p>
+    </section> -->
+
+    <section property="bibo:hasPart" resource="#conformance" typeof="bibo:Chapter" id="conformance"><!--OddPage-->
+        <h2 resource="#h-conformance" id="h-conformance"><span property="xhv:role" resource="xhv:heading"><span
+                    class="secno">1. </span>適合性</span></h2>
+        <p>
+            非規範的として印付けされた節に加え、この仕様におけるすべての作成指針、図、
+            例、および注記は非規範的である。この仕様におけるそれ以外のものはすべて
+            規範的である。
+        </p>
+
+
+        <p>アルゴリズムの一部として命令形で表現された要件
+            （たとえば「先頭の空白文字をすべて取り除く」または「false を返し、
+            これらの手順を終了する」など）は、そのアルゴリズムを導入する際に使用された
+            キーワード（「しなければならない」「すべきである」「してもよい」など）の
+            意味で解釈される。</p>
+
+        <p>アルゴリズムまたは特定の手順として表現された適合性要件は、
+            最終結果が同等である限り、どのような方法で実装してもよい。
+            （特に、この仕様で定義されるアルゴリズムは、従いやすいことを意図しており、
+            高性能であることを意図していない。）</p>
+
+        <p id="hardwareLimitations">ユーザーエージェントは、
+            そうでなければ制約のない入力に対して、実装固有の制限を課してもよい。
+            たとえば、サービス拒否攻撃を防止するため、メモリ不足を防ぐため、
+            またはプラットフォーム固有の制限を回避するためである。</p>
+
+        <p>あるメソッドまたは属性が別のメソッドまたは属性を呼び出すと言われる場合、
+            ユーザーエージェントは、その属性またはメソッドに対する内部 API を呼び出さなければならない。
+            これにより、たとえば作者が ECMAScript で属性またはメソッドをカスタムプロパティや関数で
+            上書きすることによって、その動作を変更できないようにする。</p>
+
+        <p>別途述べられていない限り、文字列比較は <a href="https://www.w3.org/TR/dom/#case-sensitive" class="externalDFN"
+                title="case-sensitive">
+                大文字小文字を区別する</a>方法で行われる。</p>
+
+        <p>あるアルゴリズムが別のアルゴリズムを呼び出す場合、後者によって投げられた
+            例外は（明示的に捕捉されない限り）、前者を終了させ、その例外を
+            <em>その</em>呼び出し元へ伝播させなければならない。
+        </p>
+
+        <section property="bibo:hasPart" resource="#dependencies" typeof="bibo:Chapter" id="dependencies">
+            <h3 resource="#h-dependencies" id="h-dependencies"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">1.1 </span>依存関係</span></h3>
+
+            <p>この仕様における IDL 断片は、Web IDL
+                仕様で説明される、適合する IDL 断片に要求されるものとして
+                解釈されなければならない。 [<cite><a href="#bib-WEBIDL" class="bibref">WEBIDL</a></cite>]</p>
+
+            <p>この仕様で使用される用語の一部は、
+                [<cite><a href="#bib-DOM4" class="bibref">DOM4</a></cite>]、[<cite><a href="#bib-HTML5"
+                        class="bibref">HTML5</a></cite>]、および [<cite><a href="#bib-XML10"
+                        class="bibref">XML10</a></cite>] で定義されている。
+            </p>
+        </section>
+
+        <section property="bibo:hasPart" resource="#extensibility" typeof="bibo:Chapter" id="extensibility">
+            <h3 resource="#h-extensibility" id="h-extensibility"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">1.2 </span>拡張性</span></h3>
+
+            <p>この仕様に対するベンダー固有の独自拡張は
+                強く推奨されない。作者はそのような拡張を使用してはならない。
+                それを行うと相互運用性が低下し、ユーザーベースが分断され、
+                特定のユーザーエージェントのユーザーだけが対象のコンテンツに
+                アクセスできるようになるためである。</p>
+
+            <p>ベンダー固有の拡張が必要な場合、そのメンバーには、
+                この仕様の将来のバージョンとの衝突を防ぐため、
+                ベンダー固有の文字列を接頭辞として付けるべきである。
+                拡張は、その拡張の使用が、この仕様で定義される機能と矛盾せず、
+                またはその機能を非適合にしないように定義されなければならない。</p>
+
+            <p>この仕様に対するベンダー中立の拡張が必要な場合、
+                この仕様をそれに応じて更新するか、
+                この仕様の要件を上書きする拡張仕様を書くことができる。
+                この仕様を自らの活動に適用する誰かが、そのような拡張仕様の要件を
+                認識することを決定した場合、それはこの仕様における適合性要件の目的において
+                <dfn id="dfn-other-applicable-specifications" data-dfn-type="dfn"
+                    data-lt="other applicable specifications">適用可能な
+                    仕様</dfn>となる。
+            </p>
+            <!-- http://www.w3.org/mid/17E341CD-E790-422C-9F9A-69347EE01CEB@iki.fi -->
+        </section>
+    </section>
+
+    <section property="bibo:hasPart" resource="#terminology" typeof="bibo:Chapter" id="terminology">
+        <!--OddPage-->
+        <h2 resource="#h-terminology" id="h-terminology"><span property="xhv:role" resource="xhv:heading"><span
+                    class="secno">2. </span>用語</span></h2>
+
+        <p><dfn id="dfn-context-object" data-dfn-type="dfn">コンテキストオブジェクト</dfn>という用語は、
+            論じられているメソッドまたは属性が呼び出された対象のオブジェクトを意味する。
+        </p>
+    </section>
+
+    <section property="bibo:hasPart" resource="#namespaces" typeof="bibo:Chapter" id="namespaces">
+        <!--OddPage-->
+        <h2 resource="#h-namespaces" id="h-namespaces"><span property="xhv:role" resource="xhv:heading"><span
+                    class="secno">3. </span>名前空間</span></h2>
+
+        <p><dfn id="dfn-html-ns" data-dfn-type="dfn" data-lt="html-ns">HTML 名前空間</dfn>は
+            <code>http://www.w3.org/1999/xhtml</code> である。
+        </p>
+        <p><dfn id="dfn-xml-ns" data-dfn-type="dfn" data-lt="xml-ns">XML 名前空間</dfn>は
+            <code>http://www.w3.org/XML/1998/namespace</code> である。
+        </p>
+        <p><dfn id="dfn-xmlns-ns" data-dfn-type="dfn" data-lt="xmlns-ns">XMLNS 名前空間</dfn>は
+            <code>http://www.w3.org/2000/xmlns/</code> である。
+        </p>
+    </section>
+
+    <section property="bibo:hasPart" resource="#parsing-and-serializing-nodes" typeof="bibo:Chapter"
+        id="parsing-and-serializing-nodes">
+        <!--OddPage-->
+        <h2 resource="#h-parsing-and-serializing-nodes" id="h-parsing-and-serializing-nodes"><span property="xhv:role"
+                resource="xhv:heading"><span class="secno">4. </span><a href="https://www.w3.org/TR/dom/#node"
+                    title="node" class="externalDFN">Node</a> の構文解析と直列化</span></h2>
+
+        <section property="bibo:hasPart" resource="#parsing" typeof="bibo:Chapter" id="parsing">
+            <h3 resource="#h-parsing" id="h-parsing"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">4.1 </span>構文解析</span></h3>
+
+            <p>次の手順は
+                <dfn id="dfn-concept-parse-fragment" data-dfn-type="dfn" data-lt="concept-parse-fragment">フラグメント
+                    構文解析アルゴリズム</dfn>を構成し、その
+                引数は <var>markup</var> 文字列および
+                <var>context element</var> である。
+
+            </p>
+            <ol>
+                <li>
+                    <p><var>context element</var> の
+                        <a href="https://www.w3.org/TR/dom/#concept-node-document" title="concept-node-document"
+                            class="externalDFN">ノード文書</a>
+                        が <a href="https://www.w3.org/TR/dom/#html-document" title="html-document"
+                            class="externalDFN">HTML 文書</a>である場合:
+                        <var>algorithm</var> を
+                        <a href="https://www.w3.org/TR/html5/single-page.html#html-fragment-parsing-algorithm"
+                            title="html-fragment-parsing-algorithm" class="externalDFN">HTML
+                            フラグメント構文解析アルゴリズム</a>とする。
+                    </p>
+
+                    <p><var>context element</var> の
+                        <a href="https://www.w3.org/TR/dom/#concept-node-document" title="concept-node-document"
+                            class="externalDFN">ノード文書</a>
+                        が <a href="https://www.w3.org/TR/dom/#xml-document" title="xml-document" class="externalDFN">XML
+                            文書</a>である場合:
+                        <var>algorithm</var> を
+                        <a href="https://www.w3.org/TR/html5/single-page.html#xml-fragment-parsing-algorithm"
+                            title="xml-fragment-parsing-algorithm" class="externalDFN">XML
+                            フラグメント構文解析アルゴリズム</a>とする。
+                    </p>
+                </li>
+
+                <li><var>new children</var> を、<var>markup</var> を
+                    <var>input</var> とし、<var>context element</var> を
+                    <var><a href="https://www.w3.org/TR/html5/single-page.html#concept-frag-parse-context"
+                            title="concept-frag-parse-context" class="externalDFN">context</a></var>
+                    要素として、<var>algorithm</var> を呼び出した結果とする。
+                </li>
+
+                <li><var>fragment</var> を、新しい
+                    <code><a href="https://www.w3.org/TR/dom/#documentfragment" title="documentfragment" class="externalDFN">DocumentFragment</a></code>
+                    とし、その
+                    <a href="https://www.w3.org/TR/dom/#concept-node-document" title="concept-node-document"
+                        class="externalDFN">ノード文書</a>
+                    は <var>context element</var> の
+                    <a href="https://www.w3.org/TR/dom/#concept-node-document" title="concept-node-document"
+                        class="externalDFN">ノード文書</a>である。
+
+                </li>
+                <li><var>new children</var> 内の各
+                    <a href="https://www.w3.org/TR/dom/#concept-node" title="concept-node" class="externalDFN">ノード</a>を
+                    <var>fragment</var> に
+                    （<a href="https://www.w3.org/TR/dom/#concept-tree-order" title="concept-tree-order"
+                        class="externalDFN">木順序</a>で）
+                    <a href="https://www.w3.org/TR/dom/#concept-node-append" title="concept-node-append"
+                        class="externalDFN">追加する</a>。
+
+                    <div class="note">
+                        <div id="h-note1" role="heading" aria-level="4" class="note-title marker"><span>注記</span>
+                        </div>
+                        <p class="">これにより、新しい
+                            <a href="https://www.w3.org/TR/dom/#concept-node" title="concept-node"
+                                class="externalDFN">ノード</a>の
+                            <a href="https://www.w3.org/TR/dom/#concept-node-document" title="concept-node-document"
+                                class="externalDFN">ノード文書</a>
+                            が正しいことが保証される。
+
+                        </p>
+                    </div>
+                </li>
+                <li><var>fragment</var> の値を返す。
+                </li>
+            </ol>
+        </section>
+
+        <section property="bibo:hasPart" resource="#serializing" typeof="bibo:Chapter" id="serializing">
+            <h3 resource="#h-serializing" id="h-serializing"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">4.2 </span>直列化</span></h3>
+            <p>次の手順は
+                <dfn id="dfn-concept-fragment-serializing-algorithm" data-dfn-type="dfn"
+                    data-lt="concept-fragment-serializing-algorithm">フラグメント直列化アルゴリズム</dfn>を構成し、
+                その引数は
+                <code><a href="https://www.w3.org/TR/dom/#node" title="node" class="externalDFN">Node</a></code>
+                <var>node</var> およびフラグ <dfn id="dfn-concept-well-formed" data-dfn-type="dfn"
+                    data-lt="concept-well-formed">整形式を要求する</dfn>である:
+
+            </p>
+            <ol>
+                <li><var>context document</var> を <var>node</var> の
+                    <a href="https://www.w3.org/TR/dom/#concept-node-document" title="concept-node-document"
+                        class="externalDFN">ノード文書</a>の値とする。
+                </li>
+                <li><var>context document</var> が
+                    <a href="https://www.w3.org/TR/dom/#html-document" title="html-document" class="externalDFN">HTML
+                        文書</a>である場合、
+                    <var>node</var> の <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-html"
+                        title="concept-serialize-html">HTML 直列化</a>を返す。
+                </li>
+                <li>そうでない場合、<var>context document</var> は
+                    <a href="https://www.w3.org/TR/dom/#xml-document" title="xml-document" class="externalDFN">XML
+                        文書</a>である;
+                    フラグ <var>require well-formed</var> を渡して、
+                    <var>node</var> の <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-xml"
+                        title="concept-serialize-xml">XML 直列化</a>を返す。
+                    <div class="note">
+                        <div id="h-note2" role="heading" aria-level="4" class="note-title marker"><span>注記</span>
+                        </div>
+                        <p class="">この文書で定義される <a data-link-type="dfn" class="internalDFN"
+                                href="#dfn-concept-serialize-xml" title="concept-serialize-xml">XML 直列化</a>は、[<cite><a
+                                    href="#bib-HTML5" class="bibref">HTML5</a></cite>] で定義される <a
+                                href="https://www.w3.org/TR/html5/single-page.html#xml-fragment-serialization-algorithm"
+                                title="xml-fragment-serialization-algorithm" class="externalDFN">XML フラグメント
+                                直列化アルゴリズム</a>の要件に適合する。</p>
+                    </div>
+                </li>
+            </ol>
+
+            <p>
+                <code><a href="https://www.w3.org/TR/dom/#node" title="node" class="externalDFN">Node</a></code>
+                <var>node</var> の <dfn id="dfn-concept-serialize-html" data-dfn-type="dfn"
+                    data-lt="concept-serialize-html">HTML 直列化</dfn>を生成するには、ユーザーエージェントは
+                <var>node</var> に対して
+                <a href="https://www.w3.org/TR/html5/single-page.html#html-fragment-serialization-algorithm"
+                    title="html-fragment-serialization-algorithm" class="externalDFN">HTML
+                    フラグメント直列化アルゴリズム</a> [<cite><a href="#bib-HTML5" class="bibref">HTML5</a></cite>] を実行し、
+                生成された文字列を返さなければならない。
+
+            </p>
+            <p>
+                <code><a href="https://www.w3.org/TR/dom/#node" title="node" class="externalDFN">Node</a></code>
+                <var>node</var> の <dfn id="dfn-concept-serialize-xml" data-dfn-type="dfn"
+                    data-lt="concept-serialize-xml">XML
+                    直列化</dfn>を、フラグ <var>require well-formed</var> が与えられたものとして生成するには、
+                次の手順を実行する:
+            </p>
+            <ol>
+                <li><dfn id="dfn-concept-context-namespace" data-dfn-type="dfn"
+                        data-lt="concept-context-namespace">コンテキスト名前空間</dfn>を <code>null</code> とする。
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-context-namespace"
+                        title="concept-context-namespace">コンテキスト名前空間</a>は、ある
+                    <var>node</var> がその親とは異なる既定の名前空間定義を直列化するときに変更される。
+                    このアルゴリズムは、開始時点では名前空間がないものと仮定する。
+                </li>
+                <li><dfn id="dfn-concept-namespace-prefix-map" data-dfn-type="dfn"
+                        data-lt="concept-namespace-prefix-map">名前空間接頭辞マップ</dfn>を、<code>namespaceURI</code>
+                    と名前空間 <code>prefix</code> の組を関連付けるための新しいマップとする。ここで
+                    <code>namespaceURI</code> 値はマップのキーであり、<code>prefix</code> 値は
+                    マップのキー値である。<a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                        title="concept-namespace-prefix-map">名前空間接頭辞
+                        マップ</a>には、サブツリーについて以前に見られた namespaceURI とその最新の接頭辞の関連付けが
+                    設定される。<span class="note"><strong>注記:</strong>
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                            title="concept-namespace-prefix-map">名前空間接頭辞マップ</a>は、与えられた namespaceURI に対して
+                        単一の接頭辞値だけを関連付ける。直列化の間に、同じ namespaceURI に対応する異なる名前空間接頭辞が
+                        見つかった場合、最後に遭遇したものが、新しい接頭辞値でマップ内の既存のキー値を置き換えることにより
+                        「勝つ」。</span>
+                </li>
+                <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                        title="concept-namespace-prefix-map">名前空間接頭辞マップ</a>を、
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-xml-ns" title="xml-ns">XML 名前空間</a>キー
+                    と、キー値としての文字列 "<code>xml</code>" で初期化する。
+                </li>
+                <li><dfn id="dfn-concept-generated-prefix" data-dfn-type="dfn"
+                        data-lt="concept-generated-prefix">生成された名前空間接頭辞インデックス</dfn>を、
+                    値 <code>1</code> の整数とする。<a data-link-type="dfn" class="internalDFN"
+                        href="#dfn-concept-generated-prefix" title="concept-generated-prefix">生成された名前空間
+                        接頭辞インデックス</a>は、<var>node</var> の namespaceURI（または <var>node</var> の
+                    いずれかの属性の namespaceURI）を直列化するために利用可能な適切な既存の名前空間接頭辞がない場合に、
+                    新しい一意の接頭辞値を生成するために使用される。<span class="note">
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generate-prefix"
+                            title="concept-generate-prefix">接頭辞を生成する</a>アルゴリズムを参照。</span>
+                </li>
+                <li><var>node</var> に対して <a data-link-type="dfn" class="internalDFN"
+                        href="#dfn-concept-xml-serialization-algorithm" title="concept-xml-serialization-algorithm">XML
+                        直列化
+                        アルゴリズム</a>を実行し、<a data-link-type="dfn" class="internalDFN" href="#dfn-concept-context-namespace"
+                        title="concept-context-namespace">コンテキスト
+                        名前空間</a>、<a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                        title="concept-namespace-prefix-map">名前空間接頭辞
+                        マップ</a>、
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                        title="concept-generated-prefix">生成された名前空間接頭辞インデックス</a>参照、および
+                    フラグ <var>require well-formed</var> を渡した結果を返す。アルゴリズムの実行中に
+                    <dfn id="dfn-concept-algorithm-exception" data-dfn-type="dfn"
+                        data-lt="concept-algorithm-exception">例外</dfn>が
+                    発生した場合、その例外を捕捉し、
+                    name が
+                    "<code><a href="https://www.w3.org/TR/dom/#invalidstateerror" title="invalidstateerror" class="externalDFN">InvalidStateError</a></code>"
+                    である
+                    <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                    を投げる。
+                </li>
+            </ol>
+
+            <p><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-xml"
+                    title="concept-serialize-xml">XML 直列化</a>は、
+                <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-html"
+                    title="concept-serialize-html">HTML 直列化</a>と次の点で異なる:
+            </p>
+            <ul>
+                <li><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">要素</a>および
+                    <a href="https://www.w3.org/TR/dom/#concept-attribute" title="concept-attribute"
+                        class="externalDFN">属性</a>
+                    は、その namespaceURI が常に保持されるように直列化される。場合によっては、
+                    既存の接頭辞、接頭辞宣言属性、または既定の名前空間宣言属性が削除、置換、または変更されることを
+                    意味する。
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-html"
+                        title="concept-serialize-html">HTML 直列化</a>は namespaceURI を保持しようとしない。
+                </li>
+                <li><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">要素</a>が
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns" title="html-ns">HTML 名前空間</a>
+                    内になく、かつ
+                    <a href="https://www.w3.org/TR/dom/#concept-tree-child" title="concept-tree-child"
+                        class="externalDFN">子</a>を含まない場合、
+                    自己終了タグ構文（すなわち [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>] の
+                    <code>EmptyElemTag</code>
+                    生成規則に従う構文）を使用して直列化される。
+                </li>
+            </ul>
+
+            <p>それ以外では、<a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-xml"
+                    title="concept-serialize-xml">XML 直列化</a>を
+                生成するアルゴリズムは、
+                <a href="https://www.w3.org/TR/html5/single-page.html#html-parser" title="html-parser"
+                    class="externalDFN">HTML パーサー</a>と互換性のある直列化を生成するように設計されている。
+                たとえば、子ノードを含まない
+                <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns" title="html-ns">HTML
+                    名前空間</a>内の要素は、自己終了タグ構文を使用するのではなく、明示的な開始タグと終了タグで
+                直列化される [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>]。
+
+            </p>
+            <div class="note">
+                <div id="h-note3" role="heading" aria-level="4" class="note-title marker"><span>注記</span></div>
+                <p class="">[<cite><a href="#bib-DOM4" class="bibref">DOM4</a></cite>] によれば、
+                    <code><a href="https://www.w3.org/TR/dom/#interface-attr" title="interface-attr" class="externalDFN">Attr</a></code>
+                    オブジェクトは
+                    <code><a href="https://www.w3.org/TR/dom/#node" title="node" class="externalDFN">Node</a></code>
+                    から継承しないため、
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-xml-serialization-algorithm"
+                        title="concept-xml-serialization-algorithm">XML
+                        直列化アルゴリズム</a>によって直列化することはできない。
+                    <code><a href="https://www.w3.org/TR/dom/#interface-attr" title="interface-attr" class="externalDFN">Attr</a></code>
+                    オブジェクトを直列化しようとすると、<code>TypeError</code> 例外が発生する
+                    [<cite><a href="#bib-WEBIDL" class="bibref">WEBIDL</a></cite>]。
+
+                </p>
+            </div>
+            <p><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-context-namespace"
+                    title="concept-context-namespace">コンテキスト名前空間</a>
+                <var>namespace</var>、<a data-link-type="dfn" class="internalDFN"
+                    href="#dfn-concept-namespace-prefix-map" title="concept-namespace-prefix-map">名前空間接頭辞
+                    マップ</a>
+                <var>prefix map</var>、<a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                    title="concept-generated-prefix">生成された名前空間接頭辞
+                    インデックス</a>
+                <var>prefix index</var>、およびフラグ <var>require well-formed</var> が与えられた
+                <var>node</var> に対して
+                <dfn id="dfn-concept-xml-serialization-algorithm" data-dfn-type="dfn"
+                    data-lt="concept-xml-serialization-algorithm">XML 直列化アルゴリズム</dfn>を実行するには、
+                ユーザーエージェントは <var>node</var> のインターフェイスに応じて適切な手順を実行しなければならない:
+            </p>
+
+            <dl class="switch">
+                <dt><code><a href="https://www.w3.org/TR/dom/#interface-element" title="interface-element" class="externalDFN">Element</a></code>
+                </dt>
+                <dd>
+                    <p>次のアルゴリズムを実行する:
+                    </p>
+                    <ol>
+                        <!-- "namespace" was passed via the caller, it's the default namespace scope -->
+                        <!-- "prefix map" was passed via the caller, it's the namespace->prefix map -->
+                        <!-- "prefix index" was passed via the caller, it's a number for generating prefixes if necessary -->
+                        <!-- "require well-formed" was passed via the caller, it's a flag (true/false) for whether certain validation steps should be taken during serialization. -->
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                                title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                            <code>true</code>）、かつこの <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                            属性が文字 "<code>:</code>"（U+003A COLON）を含むか、XML
+                            <code>Name</code> 生成規則 [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>]
+                            に一致しない場合、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                                title="concept-algorithm-exception">例外を
+                                投げる</a>; この <var>node</var> の直列化は整形式の要素にならない。
+                        </li>
+                        <li><var>markup</var> を文字列 "<code>&lt;</code>"（U+003C LESS-THAN SIGN）とする。
+                        </li>
+                        <li><var>qualified name</var> を空文字列とする。
+                        </li>
+                        <li><var>skip end tag</var> フラグに値 <code>false</code> を持たせる。
+                        </li>
+                        <li><var>ignore namespace definition attribute</var> フラグに値
+                            <code>false</code> を持たせる。
+                        </li>
+                        <li><var>map</var> を <var>prefix map</var> のコピーとする。
+                        </li>
+                        <li><var>element prefixes list</var> を空リストとする。<span class="note">このリストは
+                                各要素にローカルである。その目的は、新しい名前空間接頭辞属性を生成する必要がある場合に、
+                                競合する接頭辞が存在しないことを保証することである。</span>
+                        </li>
+                        <li><var>duplicate prefix definition</var> を <code>null</code> とする。
+                        </li>
+                        <li><var>local default namespace</var> を、<var>map</var>、
+                            <var>element prefixes list</var>、および
+                            <var>duplicate prefix definition</var> が与えられた <var>node</var> について
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-record-namespace-info"
+                                title="concept-record-namespace-info">名前空間情報を記録する</a>結果とする。
+                            <div class="note">
+                                <div id="h-note4" role="heading" aria-level="4" class="note-title marker">
+                                    <span>注記</span>
+                                </div>
+                                <p class="">上記の手順は、見つかった任意の名前空間接頭辞定義で <var>map</var> を更新し、
+                                    見つかった接頭辞定義を <var>element prefixes
+                                        list</var> に追加し、必要に応じて
+                                    <var>duplicate prefix definition</var> 値を設定し、既定の名前空間属性で定義された
+                                    ローカル既定名前空間値が存在する場合はそれを返す。そうでなければ
+                                    <code>null</code> を返す。
+                                </p>
+                            </div>
+                        </li>
+                        <li><var>inherited ns</var> を <var>namespace</var> のコピーとする。
+                        </li>
+                        <li><var>ns</var> を <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-namespaceuri" title="dom-element-namespaceuri" class="externalDFN">namespaceURI</a></code>
+                            属性の値とする。
+                        </li>
+                        <li><var>inherited ns</var> が <var>ns</var> と等しい場合:
+                            <ol>
+                                <li><var>local default namespace</var> が <code>null</code> でない場合、
+                                    <var>ignore
+                                        namespace definition attribute</var> を <code>true</code> に設定する。
+                                </li>
+                                <li><var>ns</var> が <a data-link-type="dfn" class="internalDFN" href="#dfn-xml-ns"
+                                        title="xml-ns">XML 名前空間</a>である場合、
+                                    <var>qualified
+                                        name</var> を、文字列 "<code>xml:</code>" と <var>node</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                                    の値の連結とする。
+                                </li>
+                                <li>そうでない場合、<var>qualified name</var> を <var>node</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                                    の値とする。
+                                    <span class="note"><var>node</var> の接頭辞は常に削除される。</span>
+                                </li>
+                                <li><var>qualified name</var> の値を <var>markup</var> に付加する。
+                                </li>
+                            </ol>
+                        </li>
+                        <li>そうでない場合、<var>inherited ns</var> は <var>ns</var> と等しくない
+                            （<var>node</var> 自身の名前空間は、その親のコンテキスト名前空間と異なる）。
+                            次の下位手順を実行する:
+                            <!-- The serialization algorithm must differentiate this node's namespace from it's parent's default
+                        namespace. There are two ways to do this: (1) [preferred due to assumed minimum length] use a
+                        namespace prefix if one is available or (2) use a default namespace declaration. Both cases can
+                        run into conflicts with existing attributes on the element and are handled accordingly. -->
+                            <ol>
+                                <li><var>prefix</var> を <var>node</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-element-prefix" title="dom-element-prefix" class="externalDFN">prefix</a></code>
+                                    属性の値とする。
+                                </li>
+                                <li><var>candidate prefix</var> を、<var>ns</var> の値に一致するキーが
+                                    <var>map</var> 内に存在する場合は <var>map</var> から得られる値とし、
+                                    そのようなキーが存在しない場合は
+                                    <var>candidate prefix</var> を <code>null</code> とする。
+                                    <!-- Found a suitable prefix to use, either locally, or inherited through a parent node that
+                            matches the node's namespaceURI. This prefix will be used in serialization even if the node
+                            doesn't have a real prefix. -->
+                                </li>
+                                <li><var>candidate prefix</var> が <code>null</code> でない場合（<var>ns</var> に
+                                    対応する適切な名前空間接頭辞が定義されている場合）:
+                                    <ol>
+                                        <li><var>qualified name</var> を、<var>candidate
+                                                prefix</var>、
+                                            "<code>:</code>"（U+003A COLON）、および <var>node</var> の <code>
+                                <a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                                            の連結とする。
+                                            <span class="note">この <var>node</var> または
+                                                <var>node</var> の祖先上に、
+                                                <var>node</var> の名前空間を定義する名前空間接頭辞定義が存在する。</span>
+                                        </li>
+                                        <li><var>local default namespace</var> が <code>null</code> でない場合
+                                            （ローカルに定義された既定の名前空間宣言属性が存在する場合）、
+                                            <var>inherited ns</var> に <var>ns</var> の値を取得させる。
+                                        </li>
+                                        <li><var>qualified name</var> の値を <var>markup</var> に付加する。
+                                        </li>
+                                    </ol>
+                                    <!-- Now there's no existing namespace->prefix mapping to override; try to use a prefix: -->
+                                </li>
+                                <li>そうでなく、<var>prefix</var> が <code>null</code> でなく、かつ
+                                    <var>local default
+                                        namespace</var> が
+                                    <code>null</code> である場合:
+                                    <ol>
+                                        <li><var>element prefixes list</var> が
+                                            <var>prefix</var> の値を含む場合、
+                                            <var>prefix</var> を、
+                                            <a data-link-type="dfn" class="internalDFN"
+                                                href="#dfn-concept-generate-prefix"
+                                                title="concept-generate-prefix">接頭辞を生成する</a>結果とする。
+                                            入力として、
+                                            <a data-link-type="dfn" class="internalDFN"
+                                                href="#dfn-concept-namespace-prefix-map"
+                                                title="concept-namespace-prefix-map">名前空間接頭辞マップ</a>
+                                            <var>map</var>、
+                                            <var>node</var> の <var>ns</var> 文字列、および <var>prefix index</var>
+                                            整数を与える。
+                                        </li>
+                                        <li>そうでない場合、<var>map</var> に新しいキー <var>ns</var> を追加し、
+                                            そのキー値を
+                                            <var>prefix</var> とする。
+                                            <!-- Prefix is now either real or generated, and added to the map. -->
+                                        </li>
+                                        <li><var>qualified name</var> を、
+                                            <var>prefix</var>、"<code>:</code>"（U+003A COLON）、および <var>node</var> の
+                                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                                            の連結とする。
+                                        </li>
+                                        <li><var>qualified name</var> の値を <var>markup</var> に付加する。
+                                        </li>
+                                        <li>次のものを、列挙された順に <var>markup</var> に付加する: <span class="note">次は、
+                                                いま <var>map</var> に追加された新しい名前空間/接頭辞の関連付けを
+                                                直列化する。</span>
+                                            <ol>
+                                                <li>"<code> </code>"（U+0020 SPACE）;
+                                                </li>
+                                                <li>文字列 "<code>xmlns:</code>";
+                                                </li>
+                                                <li><var>prefix</var> の値;
+                                                </li>
+                                                <li>"<code>="</code>"（U+003D EQUALS SIGN, U+0022 QUOTATION MARK）;
+                                                </li>
+                                                <li><var>ns</var> および <a data-link-type="dfn" class="internalDFN"
+                                                        href="#dfn-concept-well-formed"
+                                                        title="concept-well-formed">require well-formed</a> フラグを
+                                                    入力として与えた
+                                                    <a data-link-type="dfn" class="internalDFN"
+                                                        href="#dfn-concept-serialize-attr-value"
+                                                        title="concept-serialize-attr-value">属性値を直列化する</a>
+                                                    結果;
+                                                </li>
+                                                <li>"<code>"</code>"（U+0022 QUOTATION MARK）。
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                    <!-- Giving up on the prefix route, try to use a default namespace instead (stomping on an existing
+                             one if necessary) and dropping the node's prefix -->
+                                </li>
+                                <li>そうでなく、<var>local default namespace</var> が <code>null</code> であるか、
+                                    または <var>local
+                                        default
+                                        namespace</var> が <code>null</code> でなく、その値が
+                                    <var>ns</var> と等しくない場合:
+                                    <ol>
+                                        <li><var>ignore namespace definition attribute</var> フラグを
+                                            <code>true</code> に設定する。
+                                        </li>
+                                        <li><var>qualified name</var> を <var>node</var> の
+                                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                                            の値とする。
+                                        </li>
+                                        <li><var>inherited ns</var> の値を <var>ns</var> とする。<span
+                                                class="note">新しい既定の名前空間は、直列化においてこの
+                                                <var>node</var> の名前空間を定義し、その
+                                                <a href="https://www.w3.org/TR/dom/#concept-tree-child"
+                                                    title="concept-tree-child" class="externalDFN">子</a>の
+                                                コンテキスト名前空間として機能するために使用される。</span>
+                                        </li>
+                                        <li><var>qualified name</var> の値を <var>markup</var> に付加する。
+                                        </li>
+                                        <li>次のものを、列挙された順に <var>markup</var> に付加する: <span
+                                                class="note">次は、新しい（または置換の）既定の名前空間定義を直列化する。</span>
+                                            <ol>
+                                                <li>"<code> </code>"（U+0020 SPACE）;
+                                                </li>
+                                                <li>文字列 "<code>xmlns</code>";
+                                                </li>
+                                                <li>"<code>="</code>"（U+003D EQUALS SIGN, U+0022 QUOTATION MARK）;
+                                                </li>
+                                                <li><var>ns</var> および <a data-link-type="dfn" class="internalDFN"
+                                                        href="#dfn-concept-well-formed"
+                                                        title="concept-well-formed">require well-formed</a> フラグを
+                                                    入力として与えた
+                                                    <a data-link-type="dfn" class="internalDFN"
+                                                        href="#dfn-concept-serialize-attr-value"
+                                                        title="concept-serialize-attr-value">属性値を直列化する</a>
+                                                    結果;
+                                                </li>
+                                                <li>"<code>"</code>"（U+0022 QUOTATION MARK）。
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                    <!-- Finally, regardless of prefix, the node has a local default namespace that matches 'ns'.
+                            So, we'll just use that and drop the prefix -->
+                                </li>
+                                <li>そうでない場合、<var>node</var> は <var>ns</var> と一致する
+                                    <var>local default namespace</var> を持つ。<var>qualified name</var> を
+                                    <var>node</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                                    の値とし、
+                                    <var>inherited ns</var> の値を <var>ns</var> とし、
+                                    <var>qualified name</var> の値を <var>markup</var> に付加する。
+                                </li>
+                            </ol>
+                        </li>
+                        <li><var>map</var> という
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                                title="concept-namespace-prefix-map">名前空間接頭辞マップ</a>、
+                            <var>prefix index</var> という
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                                title="concept-generated-prefix">生成された接頭辞インデックス</a>、
+                            フラグ <var>ignore namespace definition attribute</var> および
+                            <var>duplicate
+                                prefix definition</var> の値が与えられた
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-xml-attributes"
+                                title="concept-serialize-xml-attributes"><var>node</var> の属性の
+                                XML 直列化</a>の結果を <var>markup</var> に付加する。
+                        </li>
+                        <li><var>ns</var> が <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns"
+                                title="html-ns">HTML 名前空間</a>であり、
+                            <var>node</var> の
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-child" title="concept-tree-child"
+                                class="externalDFN">子</a>
+                            のリストが空であり、かつ <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                            が次の
+                            <a href="https://www.w3.org/TR/html5/single-page.html#void-elements" title="void-elements"
+                                class="externalDFN">void 要素</a>のいずれかに一致する場合:
+                            "<code>area</code>",
+                            "<code>base</code>",
+                            "<code>basefont</code>",
+                            "<code>bgsound</code>",
+                            "<code>br</code>",
+                            "<code>col</code>",
+                            "<code>embed</code>",
+                            "<code>frame</code>",
+                            "<code>hr</code>",
+                            "<code>img</code>",
+                            "<code>input</code>",
+                            "<code>keygen</code>",
+                            "<code>link</code>",
+                            "<code>menuitem</code>",
+                            "<code>meta</code>",
+                            "<code>param</code>",
+                            "<code>source</code>",
+                            "<code>track</code>",
+                            "<code>wbr</code>";
+                            その場合、次のものを、列挙された順に <var>markup</var> に付加する:
+                            <ol>
+                                <li>"<code> </code>"（U+0020 SPACE）;
+                                </li>
+                                <li>"<code>/</code>"（U+002F SOLIDUS）。
+                                </li>
+                            </ol>
+                            そして <var>skip end tag</var> フラグを <code>true</code> に設定する。
+                        </li>
+                        <li><var>ns</var> が <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns"
+                                title="html-ns">HTML 名前空間</a>でなく、
+                            <var>node</var> の
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-child" title="concept-tree-child"
+                                class="externalDFN">子</a>
+                            のリストが空である場合、"<code>/</code>"（U+002F SOLIDUS）を
+                            <var>markup</var> に付加し、
+                            <var>skip end tag</var> フラグを <code>true</code> に設定する。
+                        </li>
+                        <li>"<code>&gt;</code>"（U+003E GREATER-THAN SIGN）を <var>markup</var> に付加する。
+                        </li>
+                        <li><var>skip end tag</var> の値が <code>true</code> である場合、
+                            <var>markup</var> の値を返し、残りの手順を飛ばす。
+                            <var>node</var> は葉ノードである。
+                        </li>
+                        <li><var>ns</var> が <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns"
+                                title="html-ns">HTML 名前空間</a>であり、かつ <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                            が文字列 "<code>template</code>" に一致する場合、これは
+                            <code><a href="https://www.w3.org/TR/html5/single-page.html#the-template-element" title="the-template-element" class="externalDFN">template</a></code>
+                            要素である。
+                            <a href="https://www.w3.org/TR/html5/single-page.html#the-template-element"
+                                title="the-template-element" class="externalDFN">template</a> 要素の
+                            <a href="https://www.w3.org/TR/html5/single-page.html#template-contents"
+                                title="template-contents" class="externalDFN">template contents</a>
+                            （
+                            <code><a href="https://www.w3.org/TR/dom/#interface-documentfragment" title="interface-documentfragment" class="externalDFN">DocumentFragment</a></code>）
+                            に対して
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-xml-serialization-algorithm"
+                                title="concept-xml-serialization-algorithm">XML 直列化アルゴリズム</a>を実行した結果を
+                            <var>markup</var> に付加する。このとき、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-context-namespace"
+                                title="concept-context-namespace">コンテキスト名前空間</a>には
+                            <var>inherited ns</var> の値を、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                                title="concept-namespace-prefix-map">名前空間
+                                接頭辞マップ</a>には <var>map</var> を、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                                title="concept-generated-prefix">生成された名前空間接頭辞インデックス</a>には
+                            <var>prefix index</var> を、そして <var>require well-formed</var> フラグの値を
+                            与える。<span class="note">これにより、[<cite><a href="#bib-HTML5" class="bibref">HTML5</a></cite>] の
+                                <a href="https://www.w3.org/TR/html5/single-page.html#parsing-xhtml-documents"
+                                    title="parsing-xhtml-documents" class="externalDFN">XHTML 文書の構文解析</a>の
+                                規則が与えられたとき、
+                                <a href="https://www.w3.org/TR/html5/single-page.html#template-contents"
+                                    title="template-contents" class="externalDFN">template content</a> を
+                                往復変換できる。</span>
+                        </li>
+                        <li>そうでない場合、<var>node</var> の各
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-child" title="concept-tree-child"
+                                class="externalDFN">子</a>に対して、
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-order" title="concept-tree-order"
+                                class="externalDFN">木順序</a>で
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-xml-serialization-algorithm"
+                                title="concept-xml-serialization-algorithm">XML 直列化アルゴリズム</a>を実行した結果を
+                            <var>markup</var> に付加する。このとき、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-context-namespace"
+                                title="concept-context-namespace">コンテキスト名前空間</a>には
+                            <var>inherited ns</var> の値を、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                                title="concept-namespace-prefix-map">名前空間
+                                接頭辞マップ</a>には <var>map</var> を、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                                title="concept-generated-prefix">生成された名前空間接頭辞インデックス</a>には
+                            <var>prefix index</var> を、そして <var>require well-formed</var> フラグの値を与える。
+                        </li>
+                        <li>次のものを、列挙された順に <var>markup</var> に付加する:
+                            <ol>
+                                <li>"<code>&lt;/</code>"（U+003C LESS-THAN SIGN, U+002F SOLIDUS）;
+                                </li>
+                                <li><var>qualified name</var> の値;
+                                </li>
+                                <li>"<code>&gt;</code>"（U+003E GREATER-THAN SIGN）。
+                                </li>
+                            </ol>
+                        </li>
+                        <li><var>markup</var> の値を返す。
+                        </li>
+                    </ol>
+
+                </dd>
+                <dt><code><a href="https://www.w3.org/TR/dom/#interface-document" title="interface-document" class="externalDFN">Document</a></code>
+                </dt>
+                <dd>
+                    <p><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                            title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                        <code>true</code>）、かつこの <var>node</var> が
+                        <code><a href="https://www.w3.org/TR/dom/#dom-document-documentelement" title="dom-document-documentelement" class="externalDFN">documentElement</a></code>
+                        を持たない
+                        （
+                        <code><a href="https://www.w3.org/TR/dom/#dom-document-documentelement" title="dom-document-documentelement" class="externalDFN">documentElement</a></code>
+                        属性の値が <code>null</code> である）場合、
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                            title="concept-algorithm-exception">例外を
+                            投げる</a>; この <var>node</var> の直列化は整形式の文書にならない。
+                    </p>
+                    <p>そうでない場合、次の手順を実行する:
+                    </p>
+                    <ol>
+                        <li><var>serialized document</var> を空文字列とする。
+                        </li>
+                        <li><var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-document-doctype" title="dom-document-doctype" class="externalDFN">doctype</a></code>
+                            属性が <code>null</code> でない場合、<var>require well-formed</var> フラグが与えられた
+                            <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-document-doctype" title="dom-document-doctype" class="externalDFN">doctype</a></code>
+                            属性の
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-doctype"
+                                title="concept-serialize-doctype">DocumentType 直列化を生成する</a>手順を実行して
+                            生成された文字列を <var>serialized document</var> に付加する。
+                        </li>
+                        <li><var>node</var> の各
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-child" title="concept-tree-child"
+                                class="externalDFN">子</a>
+                            <var>child</var> について、
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-order" title="concept-tree-order"
+                                class="externalDFN">木順序</a>で、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-xml-serialization-algorithm"
+                                title="concept-xml-serialization-algorithm">XML 直列化アルゴリズム</a>を
+                            <var>child</var> に対して実行する。このとき、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-context-namespace"
+                                title="concept-context-namespace">コンテキスト
+                                名前空間</a>
+                            <var>namespace</var>、<a data-link-type="dfn" class="internalDFN"
+                                href="#dfn-concept-namespace-prefix-map" title="concept-namespace-prefix-map">名前空間
+                                接頭辞マップ</a>
+                            <var>prefix map</var>、<a data-link-type="dfn" class="internalDFN"
+                                href="#dfn-concept-generated-prefix" title="concept-generated-prefix">生成された
+                                名前空間接頭辞インデックス</a> <var>prefix index</var> への参照、フラグ
+                            <var>require well-formed</var> を与え、
+                            その結果を <var>serialized document</var> に付加する。
+                        </li>
+                        <li><var>serialized document</var> の値を返す。
+                        </li>
+                    </ol>
+
+                </dd>
+                <dt><code><a href="https://www.w3.org/TR/dom/#interface-comment" title="interface-comment" class="externalDFN">Comment</a></code>
+                </dt>
+                <dd>
+                    <p><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                            title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                        <code>true</code>）、かつ <var>node</var> の
+                        <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                        が XML <code>Char</code> 生成規則 [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>]
+                        に一致しない文字を含む、
+                        または "<code>--</code>"（隣接する 2 つの U+002D HYPHEN-MINUS 文字）を含む、
+                        または "<code>-</code>"（U+002D HYPHEN-MINUS）文字で終わる場合、
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                            title="concept-algorithm-exception">例外を投げる</a>; この
+                        <var>node</var> の
+                        <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                        の直列化は整形式にならない。
+                    </p>
+                    <p>"<code>&lt;!--</code>"、<var>node</var> の
+                        <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>、
+                        および
+                        "<code>--&gt;</code>" の連結を返す。
+
+                        <!-- Removing CDATA Serialization steps as this interface type is removed from DOM4:
+            <dt><code><a title="cdata" data-spec="DOML2" class="externalDFN">CDATASection</a></code>
+            <dd><ol>
+                <li>Let <var>markup</var> be the concatenation of "<code>&lt;![CDATA[</code>",
+                    <var>node</var>'s <code><a title="dom-characterdata-data" data-spec="DOM4"
+                    class="externalDFN">data</a></code>, and "<code>]]></code>".
+                <li>Return the value of <var>markup</var>.
+              </ol>
+
+              <p class=note>CDATASection objects may be created by the historical
+            <code>document.createCDATASection</code> API, or as a result of parsing an
+            <a title="xml-document" data-spec="DOM4" class="externalDFN">XML document</a>.
+            -->
+
+                    </p>
+                </dd>
+                <dt><code><a href="https://www.w3.org/TR/dom/#interface-text" title="interface-text" class="externalDFN">Text</a></code>
+                </dt>
+                <dd>
+                    <ol>
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                                title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                            <code>true</code>）、かつ <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                            が XML <code>Char</code> 生成規則 [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>]
+                            に一致しない文字を含む場合、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                                title="concept-algorithm-exception">例外を投げる</a>; この
+                            <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                            の直列化は整形式にならない。
+                        </li>
+                        <li><var>markup</var> を <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                            の値とする。
+
+                        </li>
+                        <li><var>markup</var> 内の "<code>&amp;</code>" の出現をすべて
+                            "<code>&amp;amp;</code>" で置換する。
+
+                        </li>
+                        <li><var>markup</var> 内の "<code>&lt;</code>" の出現をすべて
+                            "<code>&amp;lt;</code>" で置換する。
+
+                        </li>
+                        <li><var>markup</var> 内の "<code>&gt;</code>" の出現をすべて
+                            "<code>&amp;gt;</code>" で置換する。
+
+                        </li>
+                        <li><var>markup</var> の値を返す。
+                        </li>
+                    </ol>
+                </dd>
+                <dt><code><a href="https://www.w3.org/TR/dom/#interface-documentfragment" title="interface-documentfragment" class="externalDFN">DocumentFragment</a></code>
+                </dt>
+                <dd>
+                    <ol>
+                        <li><var>markup</var> を空文字列とする。
+
+                        </li>
+                        <li><var>node</var> の各
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-child" title="concept-tree-child"
+                                class="externalDFN">子</a>
+                            <var>child</var> について、
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-order" title="concept-tree-order"
+                                class="externalDFN">木順序</a>で、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-xml-serialization-algorithm"
+                                title="concept-xml-serialization-algorithm">XML 直列化アルゴリズム</a>を
+                            <var>child</var> に対して実行する。このとき
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-context-namespace"
+                                title="concept-context-namespace">コンテキスト名前空間</a> <var>namespace</var>、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                                title="concept-namespace-prefix-map">名前空間接頭辞マップ</a> <var>prefix map</var>、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                                title="concept-generated-prefix">生成された
+                                名前空間接頭辞インデックス</a>
+                            <var>prefix index</var> への参照、およびフラグ <var>require well-formed</var> を与える。
+                            結果を <var>markup</var> に連結する。
+                        </li>
+                        <li><var>markup</var> の値を返す。
+                        </li>
+                    </ol>
+
+                </dd>
+                <dt><code><a href="https://www.w3.org/TR/dom/#interface-documenttype" title="interface-documenttype" class="externalDFN">DocumentType</a></code>
+                </dt>
+                <dd><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                        title="concept-well-formed">require well-formed</a>
+                    フラグが与えられた <var>node</var> の
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-doctype"
+                        title="concept-serialize-doctype">DocumentType
+                        直列化を生成する</a>手順を実行し、それによって生成された文字列を返す。
+
+                </dd>
+                <dt><code><a href="https://www.w3.org/TR/dom/#interface-processinginstruction" title="interface-processinginstruction" class="externalDFN">ProcessingInstruction</a></code>
+                </dt>
+                <dd>
+                    <ol>
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                                title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                            <code>true</code>）、かつ <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-processinginstruction-target" title="dom-processinginstruction-target" class="externalDFN">target</a></code>
+                            が "<code>:</code>"（U+003A COLON）文字を含む、または文字列
+                            "<code>xml</code>" に
+                            <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                                title="concept-algorithm-exception">例外を
+                                投げる</a>; この <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-processinginstruction-target" title="dom-processinginstruction-target" class="externalDFN">target</a></code>
+                            の直列化は整形式にならない。
+                        </li>
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                                title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                            <code>true</code>）、かつ <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                            が XML <code>Char</code> 生成規則 [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>]
+                            に一致しない文字を含む、または
+                            文字列 "<code>?&gt;</code>"（U+003F QUESTION MARK, U+003E GREATER-THAN SIGN）を
+                            含む場合、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                                title="concept-algorithm-exception">例外を投げる</a>; この
+                            <var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                            の直列化は整形式にならない。
+                        </li>
+                        <li><var>markup</var> を、次のものを列挙された順に連結したものとする:
+                            <ol>
+                                <li>"<code>&lt;?</code>"（U+003C LESS-THAN SIGN, U+003F QUESTION MARK）;
+                                </li>
+                                <li><var>node</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-processinginstruction-target" title="dom-processinginstruction-target" class="externalDFN">target</a></code>
+                                    の値;
+                                </li>
+                                <li>"<code> </code>"（U+0020 SPACE）;
+                                </li>
+                                <li><var>node</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-characterdata-data" title="dom-characterdata-data" class="externalDFN">data</a></code>
+                                    の値;
+                                </li>
+                                <li>"<code>?&gt;</code>"（U+003F QUESTION MARK, U+003E GREATER-THAN SIGN）。
+                                </li>
+                            </ol>
+                        </li>
+                        <li><var>markup</var> の値を返す。
+                        </li>
+                    </ol>
+
+                </dd>
+            </dl>
+
+            <p>
+                <code><a href="https://www.w3.org/TR/dom/#node" title="node" class="externalDFN">Node</a></code>
+                <var>node</var> の <dfn id="dfn-concept-serialize-doctype" data-dfn-type="dfn"
+                    data-lt="concept-serialize-doctype">DocumentType 直列化を生成する</dfn>には、
+                <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                    title="concept-well-formed">require well-formed</a> フラグが与えられたものとして、
+                ユーザーエージェントは次のアルゴリズムの結果を返さなければならない:
+            </p>
+
+            <ol>
+                <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                        title="concept-well-formed">require well-formed</a> フラグが <code>true</code> であり、
+                    かつ <var>node</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-publicid" title="dom-documenttype-publicid" class="externalDFN">publicId</a></code>
+                    属性が XML <code>PubidChar</code> 生成規則
+                    [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>] に一致しない文字を含む場合、
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                        title="concept-algorithm-exception">例外を投げる</a>; この <var>node</var> の直列化は
+                    整形式の文書型宣言にならない。
+                </li>
+                <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                        title="concept-well-formed">require well-formed</a> フラグが <code>true</code> であり、
+                    かつ <var>node</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-systemid" title="dom-documenttype-systemid" class="externalDFN">systemId</a></code>
+                    属性が XML <code>Char</code> 生成規則
+                    [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>] に一致しない文字を含む、
+                    または "<code>"</code>"（U+0022 QUOTATION MARK）と "<code>'</code>"
+                    （U+0027 APOSTROPHE）の両方を含む場合、<a data-link-type="dfn" class="internalDFN"
+                        href="#dfn-concept-algorithm-exception" title="concept-algorithm-exception">例外を
+                        投げる</a>; この
+                    <var>node</var> の直列化は整形式の文書型宣言にならない。
+                </li>
+                <li><var>markup</var> を空文字列とする。
+                </li>
+                <li>文字列 "<code>&lt;!DOCTYPE</code>" を <var>markup</var> に付加する。
+                </li>
+                <li>"<code> </code>"（U+0020 SPACE）を <var>markup</var> に付加する。
+                </li>
+                <li><var>node</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-name" title="dom-documenttype-name" class="externalDFN">name</a></code>
+                    属性の値を <var>markup</var> に付加する。
+                    <a href="https://www.w3.org/TR/dom/#html-document" title="html-document" class="externalDFN">HTML
+                        文書</a>
+                    に属する <var>node</var> については、その値はすべて小文字になる。
+                </li>
+                <li><var>node</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-publicid" title="dom-documenttype-publicid" class="externalDFN">publicId</a></code>
+                    が空文字列でない場合、次のものを、列挙された順に <var>markup</var> に付加する:
+                    <ol>
+                        <li>"<code> </code>"（U+0020 SPACE）;
+                        </li>
+                        <li>文字列 "<code>PUBLIC</code>";
+                        </li>
+                        <li>"<code> </code>"（U+0020 SPACE）;
+                        </li>
+                        <li>"<code>"</code>"（U+0022 QUOTATION MARK）;
+                        </li>
+                        <li><var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-publicid" title="dom-documenttype-publicid" class="externalDFN">publicId</a></code>
+                            属性の値;
+                        </li>
+                        <li>"<code>"</code>"（U+0022 QUOTATION MARK）。
+                        </li>
+                    </ol>
+                </li>
+                <li><var>node</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-systemid" title="dom-documenttype-systemid" class="externalDFN">systemId</a></code>
+                    が空文字列でなく、かつ <var>node</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-publicid" title="dom-documenttype-publicid" class="externalDFN">publicId</a></code>
+                    が空文字列に設定されている場合、次のものを、列挙された順に <var>markup</var> に付加する:
+                    <ol>
+                        <li>"<code> </code>"（U+0020 SPACE）;
+                        </li>
+                        <li>文字列 "<code>SYSTEM</code>"。
+                        </li>
+                    </ol>
+                </li>
+                <li><var>node</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-systemid" title="dom-documenttype-systemid" class="externalDFN">systemId</a></code>
+                    が空文字列でない場合、次のものを、列挙された順に <var>markup</var> に付加する:
+                    <ol>
+                        <li>"<code> </code>"（U+0020 SPACE）;
+                        </li>
+                        <li>"<code>"</code>"（U+0022 QUOTATION MARK）;
+                        </li>
+                        <li><var>node</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-documenttype-systemid" title="dom-documenttype-systemid" class="externalDFN">systemId</a></code>
+                            属性の値;
+                        </li>
+                        <li>"<code>"</code>"（U+0022 QUOTATION MARK）。
+                        </li>
+                    </ol>
+                </li>
+                <!-- Removing internalSubset serialization steps as this property is not supported by DOM4. Also,
+                optional requirements don't help improve interoperability:
+            <li>Optional: if the <var>node</var> has an (historical)
+                <code><a title="ID-Core-DocType-internalSubset" data-spec="DOM3" class="externalDFN">internalSubset</a></code>
+                and the
+                <code><a title="ID-Core-DocType-internalSubset" data-spec="DOM3" class="externalDFN">internalSubset</a></code>
+                attribute's value is a non-empty string, then append the following,
+                in the order listed, to <var>markup</var>:
+                <ol>
+                    <li>"<code> </code>" (U+0020 SPACE);
+                    <li>"<code>[</code>" (U+005B LEFT SQUARE BRACKET);
+                    <li>The value of the <var>node</var>'s
+                        <code><a title="ID-Core-DocType-internalSubset" data-spec="DOM3" class="externalDFN">internalSubset</a></code>
+                        attribute;
+                    <li>"<code>]</code>" (U+005D RIGHT SQUARE BRACKET);
+                </ol>
+                <p class=note>A <var>node</var> belonging to an
+                   <a title="html-document" data-spec="DOM4" class="externalDFN">HTML document</a>
+                   will never have an
+                   <code><a title="ID-Core-DocType-internalSubset" data-spec="DOM3" class="externalDFN">internalSubset</a></code>
+                   because any <code><a title="ID-Core-DocType-internalSubset" data-spec="DOM3" class="externalDFN">internalSubset</a></code>
+                   markup is ignored by the parser.</p>
+            </li>
+            -->
+                <li>"<code>&gt;</code>"（U+003E GREATER-THAN SIGN）を <var>markup</var> に付加する。
+                </li>
+                <li><var>markup</var> の値を返す。
+                </li>
+            </ol>
+
+            <p><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                    title="concept-namespace-prefix-map">名前空間接頭辞マップ</a> <var>map</var>、
+                <var>element prefixes list</var>（初期状態では空）、および
+                <var>duplicate prefix
+                    definition</var> 参照が与えられた
+                <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                <var>element</var> について
+                <dfn id="dfn-concept-record-namespace-info" data-dfn-type="dfn"
+                    data-lt="concept-record-namespace-info">名前空間情報を記録する</dfn>には、ユーザーエージェントは
+                次の手順を実行しなければならない:
+            </p>
+            <ol>
+                <li><var>default namespace attr value</var> を <code>null</code> とする。
+                </li>
+                <li><dfn id="dfn-record-namespace-loop" data-dfn-type="dfn" data-lt="record-namespace-loop">Main</dfn>:
+                    <var>element</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-element-attributes" title="dom-element-attributes" class="externalDFN">attributes</a></code>
+                    内の各
+                    <a href="https://www.w3.org/TR/dom/#concept-attribute" title="concept-attribute"
+                        class="externalDFN">属性</a>
+                    <var>attr</var> について、
+                    <var>element</var> の
+                    <a href="https://www.w3.org/TR/dom/#dom-element-attributes" title="dom-element-attributes"
+                        class="externalDFN">属性リスト</a>で指定された順序で:
+
+                    <div class="note">
+                        <div id="h-note5" role="heading" aria-level="4" class="note-title marker"><span>注記</span>
+                        </div>
+                        <p class="">次の条件付き手順は、名前空間接頭辞を
+                            <var>element prefixes list</var> に追加し、それらを <var>map</var> に追加または置換する。
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-xmlns-ns" title="xmlns-ns">XMLNS
+                                名前空間</a>内の属性のみが考慮される
+                            （たとえば、
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-setattribute" title="dom-element-setattribute" class="externalDFN">setAttribute</a>(<em>"xmlns:pretend-prefix"</em>,
+                    <em>"pretend-namespace"</em>)</code>
+                            により名前空間宣言のように見えるように作られた属性は含まれない）。
+                        </p>
+                    </div>
+                    <ol>
+                        <li><var>attribute namespace</var> を <var>attr</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-attr-namespaceuri" title="dom-attr-namespaceuri" class="externalDFN">namespaceURI</a></code>
+                            値の値とする。
+                        </li>
+                        <li><var>attribute prefix</var> を <var>attr</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-attr-prefix" title="dom-attr-prefix" class="externalDFN">prefix</a></code>
+                            の値とする。
+                        </li>
+                        <li><var>attribute namespace</var> が <a data-link-type="dfn" class="internalDFN"
+                                href="#dfn-xmlns-ns" title="xmlns-ns">XMLNS 名前空間</a>である場合:
+                            <ol>
+                                <li><var>attribute prefix</var> が <code>null</code> である場合、
+                                    <var>attr</var> は既定の名前空間宣言である。
+                                    <var>default namespace attr value</var> を <var>attr</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-attr-value" title="dom-attr-value" class="externalDFN">value</a></code>
+                                    に設定し、これらの手順の実行を停止して、
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-record-namespace-loop"
+                                        title="record-namespace-loop">Main</a> に戻り、次の属性を訪問する。
+                                </li>
+                                <li>そうでない場合、<var>attribute prefix</var> は <code>null</code> でなく、
+                                    <var>attr</var>
+                                    は名前空間接頭辞定義である。次の手順を実行する:
+                                    <ol>
+                                        <li><var>prefix definition</var> を <var>attr</var> の
+                                            <code><a href="https://www.w3.org/TR/dom/#dom-attr-localname" title="dom-attr-localname" class="externalDFN">localName</a></code>
+                                            の値とする。
+                                        </li>
+                                        <li><var>namespace definition</var> を <var>attr</var> の
+                                            <code><a href="https://www.w3.org/TR/dom/#dom-attr-value" title="dom-attr-value" class="externalDFN">value</a></code>
+                                            の値とする。
+                                        </li>
+                                        <li><var>namespace definition</var> の値に一致するキーがすでに
+                                            <var>map</var> 内に存在し、
+                                            そのキーの値が <var>prefix definition</var> と一致する場合、
+                                            これは重複する名前空間接頭辞定義である。
+                                            <var>duplicate
+                                                prefix definition</var> の値を <var>prefix definition</var> に設定する。
+                                        </li>
+                                        <li>そうでなく、<var>namespace definition</var> の値に一致するキーが
+                                            すでに <var>map</var> 内に存在するが、そのキーの値が
+                                            <var>prefix
+                                                definition</var> と一致しない場合、
+                                            そのキーの値を <var>prefix definition</var> となるように更新する。
+                                        </li>
+                                        <li>そうでない場合、<var>namespace definition</var> の値に一致するキーは
+                                            存在しない;
+                                            <var>map</var> に新しいキー <var>namespace definition</var> を追加し、
+                                            そのキー値を <var>prefix definition</var> とする。
+                                        </li>
+                                        <li><var>prefix definition</var> の値を <var>element prefixes
+                                                list</var> に付加する。
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+                <li><var>default namespace attr value</var> の値を返す。
+                </li>
+            </ol>
+
+            <p><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                    title="concept-namespace-prefix-map">名前空間接頭辞マップ</a> <var>map</var>、
+                文字列 <var>new namespace</var>、および
+                <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                    title="concept-generated-prefix">生成された名前空間接頭辞インデックス</a> <var>prefix
+                    index</var> への参照が与えられたときに
+                <dfn id="dfn-concept-generate-prefix" data-dfn-type="dfn" data-lt="concept-generate-prefix">接頭辞を
+                    生成する</dfn>には、ユーザーエージェントは次の手順を実行しなければならない:
+            </p>
+            <ol>
+                <li><var>generated prefix</var> を、文字列 "<code>ns</code>" と
+                    <var>prefix index</var> の現在の数値の連結とする。
+                </li>
+                <li><var>prefix index</var> の値を 1 増加させる。
+                </li>
+                <li><var>map</var> に新しいキー <var>new namespace</var> を追加し、
+                    そのキー値を <var>generated prefix</var> とする。
+                </li>
+                <li><var>generated prefix</var> の値を返す。
+                </li>
+            </ol>
+
+            <p>
+                <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-namespace-prefix-map"
+                    title="concept-namespace-prefix-map">名前空間接頭辞
+                    マップ</a> <var>map</var>、
+                <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-generated-prefix"
+                    title="concept-generated-prefix">生成された接頭辞インデックス</a>
+                <var>prefix index</var> 参照、フラグ <var>ignore namespace definition attribute</var>、
+                <var>duplicate prefix definition</var> 値、およびフラグ <var>require well-formed</var> とともに
+                与えられた
+                <code><a href="https://www.w3.org/TR/dom/#concept-element" title="concept-element" class="externalDFN">Element</a></code>
+                <var>element</var> の
+                <dfn id="dfn-concept-serialize-xml-attributes" data-dfn-type="dfn"
+                    data-lt="concept-serialize-xml-attributes">属性の XML 直列化</dfn>は、次のアルゴリズムの結果である:
+            </p>
+            <ol>
+                <li><var>result</var> を空文字列とする。
+                </li>
+                <li><var>localname set</var> を新しい空の
+                    <dfn id="dfn-concept-namespace-localname-set" data-dfn-type="dfn"
+                        data-lt="concept-namespace-localname-set">名前空間 localname 集合</dfn>とする。
+                    この <var>localname
+                        set</var> は、一意の属性
+                    <code><a href="https://www.w3.org/TR/dom/#dom-attr-namespaceuri" title="dom-attr-namespaceuri" class="externalDFN">namespaceURI</a></code>
+                    と
+                    <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                    の組のタプルを含み、各 <var>attr</var> が処理されるにつれて設定される。
+                    <span class="note">この集合は、要素が同じ
+                        <code><a href="https://www.w3.org/TR/dom/#dom-attr-namespaceuri" title="dom-attr-namespaceuri" class="externalDFN">namespaceURI</a></code>
+                        と
+                        <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                        を持つ 2 つの属性を持つことができないという整形式制約を
+                        ［任意で］強制するために使用される。
+                        これは、同じ要素上の他の点では同一の 2 つの属性が、
+                        その接頭辞値だけで異なる場合に起こり得る。</span>
+                </li>
+                <li><dfn id="dfn-serialize-attributes-loop" data-dfn-type="dfn"
+                        data-lt="serialize-attributes-loop">Main</dfn>: <var>element</var> の
+                    <code><a href="https://www.w3.org/TR/dom/#dom-element-attributes" title="dom-element-attributes" class="externalDFN">attributes</a></code>
+                    内の各
+                    <a href="https://www.w3.org/TR/dom/#concept-attribute" title="concept-attribute"
+                        class="externalDFN">属性</a>
+                    <var>attr</var> について、
+                    <var>element</var> の
+                    <a href="https://www.w3.org/TR/dom/#dom-element-attributes" title="dom-element-attributes"
+                        class="externalDFN">属性リスト</a>で指定された順序で:
+                    <ol>
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                                title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                            <code>true</code>）、かつ <var>localname set</var> が、
+                            <var>attr</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-attr-namespaceuri" title="dom-attr-namespaceuri" class="externalDFN">namespaceURI</a></code>
+                            属性と
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                            属性からなる新しいタプルの値と一致する値を持つタプルを含む場合、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                                title="concept-algorithm-exception">例外を
+                                投げる</a>; この
+                            <var>attr</var> の直列化は整形式の要素直列化を生成できない。
+                        </li>
+                        <li><var>attr</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-attr-namespaceuri" title="dom-attr-namespaceuri" class="externalDFN">namespaceURI</a></code>
+                            属性および
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                            属性からなる新しいタプルを作成し、それを <var>localname set</var> に追加する。
+                        </li>
+                        <li><var>attribute namespace</var> を <var>attr</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-attr-namespaceuri" title="dom-attr-namespaceuri" class="externalDFN">namespaceURI</a></code>
+                            値の値とする。
+                            <!-- Check for an unregistered attribute namespace, and if so, serialize a definition for it -->
+                        </li>
+                        <li><var>candidate prefix</var> を <code>null</code> とする。
+                        </li>
+                        <li><var>attribute namespace</var> が <code>null</code> でない場合、次の下位手順を実行する:
+                            <ol>
+                                <li><var>attribute namespace</var> の値が
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-xmlns-ns"
+                                        title="xmlns-ns">XMLNS 名前空間</a>であり、かつ
+                                    <var>attr</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-attr-prefix" title="dom-attr-prefix" class="externalDFN">prefix</a></code>
+                                    が <code>null</code> であって <var>ignore namespace definition
+                                        attribute</var> フラグが <code>true</code> であるか、または
+                                    <var>attr</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-attr-prefix" title="dom-attr-prefix" class="externalDFN">prefix</a></code>
+                                    が <code>null</code> でなく、かつ <var>attr</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-attr-localname" title="dom-attr-localname" class="externalDFN">localName</a></code>
+                                    が <var>duplicate prefix definition</var> の値に一致する場合、
+                                    これらの手順の実行を停止し、
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-serialize-attributes-loop"
+                                        title="serialize-attributes-loop">Main</a>
+                                    に移動して次の属性を訪問する。
+                                </li>
+                                <li>そうでなく、<var>attribute
+                                        namespace</var> の値に一致するキーが <var>map</var> 内に存在する場合、
+                                    <var>candidate prefix</var> を、そのキーの <var>map</var> からの値とする。
+                                </li>
+                                <li>そうでない場合、<var>attribute namespace</var> に一致するキーは
+                                    <var>map</var> 内に存在せず、かつ
+                                    <var>attribute namespace</var> は
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-xmlns-ns"
+                                        title="xmlns-ns">XMLNS 名前空間</a>
+                                    ではない。次の手順を実行する:
+                                    <ol>
+                                        <li><var>candidate prefix</var> を、
+                                            <var>map</var>、
+                                            <var>attribute namespace</var>、および <var>prefix index</var> を
+                                            入力として与えた
+                                            <a data-link-type="dfn" class="internalDFN"
+                                                href="#dfn-concept-generate-prefix"
+                                                title="concept-generate-prefix">接頭辞を生成する</a>結果とする。
+                                        </li>
+                                        <li>次のものを、列挙された順に <var>result</var> に付加する:
+                                            <ol>
+                                                <li>"<code> </code>"（U+0020 SPACE）;
+                                                </li>
+                                                <li>文字列 "<code>xmlns:</code>";
+                                                </li>
+                                                <li><var>candidate prefix</var> の値;
+                                                </li>
+                                                <li>"<code>="</code>"（U+003D EQUALS SIGN, U+0022 QUOTATION MARK）;
+                                                </li>
+                                                <li><var>attribute namespace</var> および
+                                                    <a data-link-type="dfn" class="internalDFN"
+                                                        href="#dfn-concept-well-formed"
+                                                        title="concept-well-formed">require well-formed</a> フラグを
+                                                    入力として与えた
+                                                    <a data-link-type="dfn" class="internalDFN"
+                                                        href="#dfn-concept-serialize-attr-value"
+                                                        title="concept-serialize-attr-value">属性値を直列化する</a>
+                                                    結果;
+                                                </li>
+                                                <li>"<code>"</code>"（U+0022 QUOTATION MARK）。
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                            <!-- A namespace prefix has been set by this point if it needed to be set -->
+                        </li>
+                        <li>"<code> </code>"（U+0020 SPACE）を <var>result</var> に付加する。
+                        </li>
+                        <li><var>candidate prefix</var> が <code>null</code> でない場合、
+                            <var>candidate prefix</var> と "<code>:</code>"（U+003A COLON）の連結を
+                            <var>result</var> に付加する。
+                            <!-- Check for well-formed localName -->
+                        </li>
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                                title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                            <code>true</code>）、かつこの <var>attr</var> の
+                            <code><a href="https://www.w3.org/TR/dom/#dom-element-localname" title="dom-element-localname" class="externalDFN">localName</a></code>
+                            属性が文字 "<code>:</code>"（U+003A COLON）を含む、または XML
+                            <code>Name</code> 生成規則 [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>] に
+                            一致しない、または "<code>xmlns</code>" と等しく、かつ
+                            <var>attribute
+                                namespace</var> が <code>null</code> である場合、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                                title="concept-algorithm-exception">例外を
+                                投げる</a>; この <var>attr</var> の直列化は整形式の属性にならない。
+                            <!-- Write out the standard attribute -->
+                        </li>
+                        <li>次の文字列を、列挙された順に <var>result</var> に付加する:
+                            <ol>
+                                <li><var>attr</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#dom-attr-localname" title="dom-attr-localname" class="externalDFN">localName</a></code>
+                                    の値;
+                                </li>
+                                <li>"<code>="</code>"（U+003D EQUALS SIGN, U+0022 QUOTATION MARK）;
+                                </li>
+                                <li><var>attr</var> の
+                                    <code><a href="https://www.w3.org/TR/dom/#concept-attribute-value" title="concept-attribute-value" class="externalDFN">value</a></code>
+                                    属性および
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                                        title="concept-well-formed">require
+                                        well-formed</a> フラグを入力として与えた
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-attr-value"
+                                        title="concept-serialize-attr-value">属性値を直列化する</a>結果;
+                                </li>
+                                <li>"<code>"</code>"（U+0022 QUOTATION MARK）。
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+                <li><var>result</var> の値を返す。
+                </li>
+            </ol>
+
+            <p><var>attribute value</var> および <a data-link-type="dfn" class="internalDFN"
+                    href="#dfn-concept-well-formed" title="concept-well-formed">require well-formed</a> フラグが
+                与えられたときに
+                <dfn id="dfn-concept-serialize-attr-value" data-dfn-type="dfn"
+                    data-lt="concept-serialize-attr-value">属性値を直列化する</dfn>には、
+                ユーザーエージェントは次の手順を実行しなければならない:
+            </p>
+            <ol>
+                <li><a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                        title="concept-well-formed">require well-formed</a> フラグが設定されており（その値が
+                    <code>true</code>）、かつ <var>attribute value</var> が XML
+                    <code>Char</code> 生成規則 [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>] に一致しない文字を含む場合、
+                    <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-algorithm-exception"
+                        title="concept-algorithm-exception">例外を投げる</a>; この
+                    <var>attribute value</var> の直列化は整形式の要素直列化を生成できない。
+                </li>
+                <li><var>attribute value</var> が <code>null</code> である場合、空文字列を返す。
+                </li>
+                <li>そうでない場合、<var>attribute value</var> は文字列である。次の出現をまず置換した上で、
+                    <var>attribute value</var> の値を返す:
+                    <ol>
+                        <li>"<code>"</code>" を "<code>&amp;quot;</code>" に
+                        </li>
+                        <li>"<code>&amp;</code>" を "<code>&amp;amp;</code>" に
+                        </li>
+                        <li>"<code>&lt;</code>" を "<code>&amp;lt;</code>" に
+                        </li>
+                        <li>"<code>&gt;</code>" を "<code>&amp;gt;</code>" に
+                        </li>
+                    </ol>
+                    <div class="note">
+                        <div id="h-note6" role="heading" aria-level="4" class="note-title marker"><span>注記</span>
+                        </div>
+                        <p class="">これはブラウザーに存在する挙動と一致し、XML 仕様の AttValue
+                            生成規則 [<cite><a href="#bib-XML10" class="bibref">XML10</a></cite>] における
+                            文法要件を超えて、"<code>&gt;</code>" 文字も置換する。</p>
+                    </div>
+                </li>
+            </ol>
+        </section>
+    </section>
+
+    <section property="bibo:hasPart" resource="#the-domparser-interface" typeof="bibo:Chapter"
+        id="the-domparser-interface">
+        <!--OddPage-->
+        <h2 resource="#h-the-domparser-interface" id="h-the-domparser-interface"><span property="xhv:role"
+                resource="xhv:heading"><span class="secno">5. </span><code>DOMParser</code> インターフェイス</span></h2>
+
+        <pre class="extraidl">enum <span class="idlInterfaceID">SupportedType</span> {
+    "text/html",
+    "text/xml",
+    "application/xml",
+    "application/xhtml+xml",
+    "image/svg+xml"
+};</pre>
+
+        <p><dfn id="dfn-dom-domparser" data-dfn-type="dfn" data-lt="dom-domparser"><code>DOMParser()</code></dfn>
+            コンストラクターは、
+            新しい <code>DOMParser</code> オブジェクトを返さなければならない。
+
+        </p>
+        <pre class="idl"><span class="idlInterface" id="idl-def-DOMParser">[<span class="extAttr">Constructor</span>]
+interface <span class="idlInterfaceID">DOMParser</span> {
+<span class="idlMethod">    [<span class="extAttr">NewObject</span>]
+    <span class="idlMethType">Document</span> <span class="idlMethName"><a href="#widl-DOMParser-parseFromString-Document-DOMString-str-SupportedType-type">parseFromString</a></span> (<span class="idlParam"><span class="idlParamType">DOMString</span> <span class="idlParamName">str</span></span>, <span class="idlParam"><span class="idlParamType">SupportedType</span> <span class="idlParamName">type</span></span>);</span>
+};</span></pre>
+        <section property="bibo:hasPart" resource="#methods" typeof="bibo:Chapter" id="methods">
+            <h3 resource="#h-methods" id="h-methods"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">5.1 </span>メソッド</span></h3>
+            <dl class="methods">
+                <dt id="widl-DOMParser-parseFromString-Document-DOMString-str-SupportedType-type">
+                    <code>parseFromString</code>
+                </dt>
+                <dd>
+                    <p>
+                        <dfn id="dfn-dom-domparser-parsefromstring" data-dfn-type="dfn"
+                            data-lt="dom-domparser-parsefromstring"><code>parseFromString(<var>str</var>, <var>type</var>)</code></dfn>
+                        メソッドは、<var>type</var> に応じて次の手順を実行しなければならない:
+
+                    </p>
+                    <dl class="switch">
+                        <dt>"<code>text/html</code>"
+                        </dt>
+                        <dd>
+                            <p><var>str</var> を
+                                <code><a href="https://www.w3.org/TR/html5/single-page.html#html-parser" title="html-parser" class="externalDFN">HTML パーサー</a></code>で構文解析し、
+                                新しく作成された
+                                <a href="https://www.w3.org/TR/dom/#concept-document" title="concept-document"
+                                    class="externalDFN">文書</a>を返す。
+
+                            </p>
+                            <p><a href="https://www.w3.org/TR/html5/single-page.html#scripting-flag"
+                                    title="scripting-flag" class="externalDFN">スクリプティングフラグ</a>は
+                                "disabled" に設定されなければならない。
+
+                            </p>
+                            <div class="note">
+                                <div id="h-note7" role="heading" aria-level="4" class="note-title marker">
+                                    <span>注記</span>
+                                </div>
+                                <p class="">
+                                    <code><a href="https://www.w3.org/TR/html5/single-page.html#meta" title="meta" class="externalDFN">meta</a></code>
+                                    要素は、使用されるエンコーディングについて考慮されない。
+                                    Unicode ストリームがパーサーに渡されるためである。
+
+                                </p>
+                            </div>
+                            <div class="note">
+                                <div id="h-note8" role="heading" aria-level="4" class="note-title marker">
+                                    <span>注記</span>
+                                </div>
+                                <p class="">
+                                    <code><a href="https://www.w3.org/TR/html5/single-page.html#script" title="script" class="externalDFN">script</a></code>
+                                    要素は実行不能として印付けされ、
+                                    <code><a href="https://www.w3.org/TR/html5/single-page.html#the-noscript-element" title="the-noscript-element" class="externalDFN">noscript</a></code>
+                                    の内容はマークアップとして構文解析される。
+
+                                </p>
+                            </div>
+                        </dd>
+                        <dt>"<code>text/xml</code>"
+                        </dt>
+                        <dt>"<code>application/xml</code>"
+                        </dt>
+                        <dt>"<code>application/xhtml+xml</code>"
+                        </dt>
+                        <dt>"<code>image/svg+xml</code>"
+                        </dt>
+                        <dd>
+                            <ol>
+                                <li><var>str</var> を、名前空間に対応した
+                                    <code><a href="https://www.w3.org/TR/html5/single-page.html#xml-parser" title="xml-parser" class="externalDFN">XML パーサー</a></code>で構文解析する。
+
+                                    <div class="note">
+                                        <div id="h-note9" role="heading" aria-level="4" class="note-title marker">
+                                            <span>注記</span>
+                                        </div>
+                                        <p class="">
+                                            <code><a href="https://www.w3.org/TR/html5/single-page.html#xml-parser" title="xml-parser" class="externalDFN">XML パーサー</a></code>を使用して
+                                            構文解析されたすべての XHTML
+                                            <code><a href="https://www.w3.org/TR/html5/single-page.html#script" title="script" class="externalDFN">script</a></code>
+                                            要素について、
+                                            <a href="https://www.w3.org/TR/html5/single-page.html#scripting-flag"
+                                                title="scripting-flag" class="externalDFN">スクリプティングフラグ</a>に相当するものは、
+                                            "disabled" に設定されなければならない。
+                                        </p>
+                                    </div>
+
+                                </li>
+                                <li>前の手順がエラーを返さなかった場合、新しく作成された
+                                    <a href="https://www.w3.org/TR/dom/#concept-document" title="concept-document"
+                                        class="externalDFN">文書</a>を返す。
+
+                                    <!-- This seemed like a good idea, but isn't web compatible, unfortunately.
+                    <li>Otherwise, throw a
+                    <code><a data-spec="DOM4" title="domexception" class="externalDFN">DOMException</a></code>
+                    with name <code>SyntaxError</code>. -->
+
+                                </li>
+                                <li><var>document</var> を、新しく作成された
+                                    <a href="https://www.w3.org/TR/dom/#xml-document" title="xml-document"
+                                        class="externalDFN">XML 文書</a>とする。
+                                    <span class="note"><var>document</var> は、
+                                        <code><a href="https://www.w3.org/TR/dom/#xmldocument" title="xmldocument" class="externalDFN">XMLDocument</a></code>
+                                        インターフェイスではなく、
+                                        <code><a href="https://www.w3.org/TR/dom/#document" title="document" class="externalDFN">Document</a></code>
+                                        インターフェイスを使用する。</span>
+
+                                </li>
+                                <li>
+                                    <p><var>root</var> を、新しい
+                                        <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>とし、
+                                        その
+                                        <a href="https://www.w3.org/TR/dom/#concept-element-local-name"
+                                            title="concept-element-local-name" class="externalDFN">ローカル名</a>
+                                        を "<code>parsererror</code>" に設定し、その
+                                        <a href="https://www.w3.org/TR/dom/#concept-element-namespace"
+                                            title="concept-element-namespace" class="externalDFN">名前空間</a>
+                                        を
+                                        "<code>http://www.mozilla.org/newlayout/xml/parsererror.xml</code>" に設定する。
+                                        <!-- see https://bugzilla.mozilla.org/show_bug.cgi?id=45566 -->
+                                    </p>
+                                    <p>この時点で、ユーザーエージェントは、
+                                        たとえばエラーの性質を説明するために、ノードを
+                                        <var>root</var> に
+                                        <a href="https://www.w3.org/TR/dom/#concept-node-append"
+                                            title="concept-node-append" class="externalDFN">追加</a>してもよい。
+
+                                    </p>
+                                </li>
+                                <li><var>root</var> を <var>document</var> に
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-append" title="concept-node-append"
+                                        class="externalDFN">追加する</a>。
+
+                                </li>
+                                <li><var>document</var> の値を返す。
+                                </li>
+                            </ol>
+                        </dd>
+                    </dl>
+
+                    <p>いずれの場合も、返される
+                        <a href="https://www.w3.org/TR/dom/#concept-document" title="concept-document"
+                            class="externalDFN">文書</a>の
+                        <a href="https://www.w3.org/TR/dom/#concept-document-content-type"
+                            title="concept-document-content-type" class="externalDFN">コンテンツタイプ</a>
+                        は <var>type</var> 引数でなければならない。さらに、
+                        <a href="https://www.w3.org/TR/dom/#concept-document" title="concept-document"
+                            class="externalDFN">文書</a>は、
+                        <a href="https://www.w3.org/TR/dom/#concept-document-url" title="concept-document-url"
+                            class="externalDFN">URL</a> 値として
+                        <a href="https://www.w3.org/TR/html5/single-page.html#active-document" title="active-document"
+                            class="externalDFN">アクティブ文書</a>の URL と等しい値を持ち、
+                        <a href="https://www.w3.org/TR/html5/single-page.html#location" title="location"
+                            class="externalDFN">location</a> 値として <code>null</code> を持たなければならない。
+
+                    </p>
+                    <div class="note">
+                        <div id="h-note10" role="heading" aria-level="4" class="note-title marker"><span>注記</span>
+                        </div>
+                        <p class="">返される
+                            <a href="https://www.w3.org/TR/dom/#concept-document" title="concept-document"
+                                class="externalDFN">文書</a>の
+                            <a href="https://www.w3.org/TR/dom/#concept-document-encoding"
+                                title="concept-document-encoding" class="externalDFN">エンコーディング</a>は、
+                            既定値の UTF-8 である。
+                        </p>
+                    </div>
+                    <table class="parameters">
+                        <tbody>
+                            <tr>
+                                <th>パラメーター</th>
+                                <th>型</th>
+                                <th>null 可能</th>
+                                <th>省略可能</th>
+                                <th>説明</th>
+                            </tr>
+                            <tr>
+                                <td class="prmName">str</td>
+                                <td class="prmType"><code>DOMString</code></td>
+                                <td class="prmNullFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmOptFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmDesc"></td>
+                            </tr>
+                            <tr>
+                                <td class="prmName">type</td>
+                                <td class="prmType"><code>SupportedType</code></td>
+                                <td class="prmNullFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmOptFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmDesc"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div><em>返り値の型: </em><code>Document</code></div>
+                </dd>
+            </dl>
+        </section>
+    </section>
+
+    <section property="bibo:hasPart" resource="#the-xmlserializer-interface" typeof="bibo:Chapter"
+        id="the-xmlserializer-interface">
+        <!--OddPage-->
+        <h2 resource="#h-the-xmlserializer-interface" id="h-the-xmlserializer-interface"><span property="xhv:role"
+                resource="xhv:heading"><span class="secno">6. </span><code>XMLSerializer</code> インターフェイス</span>
+        </h2>
+
+        <p><dfn id="dfn-dom-xmlserializer" data-dfn-type="dfn"
+                data-lt="dom-xmlserializer"><code>XMLSerializer()</code></dfn>
+            コンストラクターは、新しい <code>XMLSerializer</code> オブジェクトを返さなければならない。
+
+        </p>
+        <pre class="idl"><span class="idlInterface" id="idl-def-XMLSerializer">[<span class="extAttr">Constructor</span>]
+interface <span class="idlInterfaceID">XMLSerializer</span> {
+<span class="idlMethod">    <span class="idlMethType">DOMString</span> <span class="idlMethName"><a href="#widl-XMLSerializer-serializeToString-DOMString-Node-root">serializeToString</a></span> (<span class="idlParam"><span class="idlParamType">Node</span> <span class="idlParamName">root</span></span>);</span>
+};</span></pre>
+        <section property="bibo:hasPart" resource="#methods-1" typeof="bibo:Chapter" id="methods-1">
+            <h3 resource="#h-methods-1" id="h-methods-1"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">6.1 </span>メソッド</span></h3>
+            <dl class="methods">
+                <dt id="widl-XMLSerializer-serializeToString-DOMString-Node-root"><code>serializeToString</code></dt>
+                <dd>
+                    <dfn id="dfn-dom-xmlserializer-serializetostring" data-dfn-type="dfn"
+                        data-lt="dom-xmlserializer-serializetostring"><code>serializeToString(<var>root</var>)</code></dfn>
+                    メソッドは、<a data-link-type="dfn" class="internalDFN" href="#dfn-concept-serialize-xml"
+                        title="concept-serialize-xml"><var>root</var> の XML 直列化を生成</a>しなければならない。
+                    このとき <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                        title="concept-well-formed">require well-formed</a> パラメーターには
+                    <code>false</code> の値を渡し、その結果を返す。<table class="parameters">
+                        <tbody>
+                            <tr>
+                                <th>パラメーター</th>
+                                <th>型</th>
+                                <th>null 可能</th>
+                                <th>省略可能</th>
+                                <th>説明</th>
+                            </tr>
+                            <tr>
+                                <td class="prmName">root</td>
+                                <td class="prmType"><code>Node</code></td>
+                                <td class="prmNullFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmOptFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmDesc"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div><em>返り値の型: </em><code>DOMString</code></div>
+                </dd>
+            </dl>
+        </section>
+    </section>
+
+    <section property="bibo:hasPart" resource="#extensions-to-the-element-interface" typeof="bibo:Chapter"
+        id="extensions-to-the-element-interface">
+        <!--OddPage-->
+        <h2 resource="#h-extensions-to-the-element-interface" id="h-extensions-to-the-element-interface"><span
+                property="xhv:role" resource="xhv:heading"><span class="secno">7. </span>
+                <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                インターフェイスへの拡張</span></h2>
+
+        <pre class="idl"><span class="idlInterface" id="idl-def-Element">partial interface <span class="idlInterfaceID">Element</span> {
+<span class="idlAttribute">    [<span class="extAttr">CEReactions, TreatNullAs=EmptyString</span>]
+                    attribute <span class="idlAttrType">DOMString</span> <span class="idlAttrName"><a href="#widl-Element-innerHTML">innerHTML</a></span>;</span>
+<span class="idlAttribute">    [<span class="extAttr">CEReactions, TreatNullAs=EmptyString</span>]
+                    attribute <span class="idlAttrType">DOMString</span> <span class="idlAttrName"><a href="#widl-Element-outerHTML">outerHTML</a></span>;</span>
+<span class="idlMethod">    [<span class="extAttr">CEReactions</span>]
+    <span class="idlMethType">void</span> <span class="idlMethName"><a href="#widl-Element-insertAdjacentHTML-void-DOMString-position-DOMString-text">insertAdjacentHTML</a></span> (<span class="idlParam"><span class="idlParamType">DOMString</span> <span class="idlParamName">position</span></span>, <span class="idlParam"><span class="idlParamType">DOMString</span> <span class="idlParamName">text</span></span>);</span>
+};</span></pre>
+        <section property="bibo:hasPart" resource="#attributes" typeof="bibo:Chapter" id="attributes">
+            <h3 resource="#h-attributes" id="h-attributes"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">7.1 </span>属性</span></h3>
+            <dl class="attributes">
+                <dt id="widl-Element-innerHTML"><code>innerHTML</code>、型 <span class="idlAttrType">DOMString</span></dt>
+                <dd>
+                    <p><dfn id="dfn-dom-element-innerhtml" data-dfn-type="dfn"
+                            data-lt="dom-element-innerhtml"><code>innerHTML</code></dfn> IDL
+                        属性は、
+                        <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                        の
+                        内容のマークアップを表す。
+
+                    </p>
+                    <dl class="domintro">
+                        <!--doc.ih
+                <dt><var>document</var> . <code title="dom-document-innerhtml">innerHTML</code> [ = <var>value</var> ]
+                <dd>
+                <p>Returns a fragment of HTML or XML that represents the
+                <code><a title="document" data-spec="DOM4" class="externalDFN">Document</a></code>.
+
+                <p>Can be set, to replace the
+                <code><a title="document" data-spec="DOM4" class="externalDFN">Document</a></code>'s contents with the result of
+                parsing the given string.
+
+                <p>In the case of an <a title="xml-document" data-spec="DOM4" class="externalDFN">XML document</a>,
+                will throw an
+                <code><a data-spec="DOM4" title="domexception" class="externalDFN">DOMException</a></code> with name <code>InvalidStateError</code>
+                if the <code><a title="document" data-spec="DOM4" class="externalDFN">Document</a></code> cannot be serialized
+                to XML, and a
+                <code><a data-spec="DOM4" title="domexception" class="externalDFN">DOMException</a></code> with name <code>SyntaxError</code>
+                if the given string is not well-formed.
+                -->
+
+                        <dt><var>element</var> . <code title="dom-element-innerhtml">innerHTML</code> [ =
+                            <var>value</var> ]
+                        </dt>
+                        <dd>
+                            <p>要素の内容を表す HTML または XML のフラグメントを返す。
+
+                            </p>
+                            <p>設定することができ、要素の内容を、与えられた文字列から
+                                構文解析されたノードで置き換える。
+
+                            </p>
+                            <p><a href="https://www.w3.org/TR/dom/#xml-document" title="xml-document"
+                                    class="externalDFN">XML 文書</a>の場合、
+                                <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                                を XML に直列化できない場合は、name が
+                                "<code><a href="https://www.w3.org/TR/dom/#invalidstateerror" title="invalidstateerror" class="externalDFN">InvalidStateError</a></code>"
+                                である
+                                <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                を投げ、与えられた文字列が整形式でない場合は、name が
+                                "<code><a href="https://www.w3.org/TR/dom/#syntaxerror" title="syntaxerror" class="externalDFN">SyntaxError</a></code>"
+                                である
+                                <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                を投げる。
+                            </p>
+                        </dd>
+                    </dl>
+
+                    <p>取得時には、
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                            title="context object">コンテキストオブジェクト</a>に対して、
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                            title="concept-well-formed">require well-formed</a> フラグに <code>true</code> を与えて
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-fragment-serializing-algorithm"
+                            title="concept-fragment-serializing-algorithm">フラグメント直列化アルゴリズム</a>を
+                        呼び出した結果を返す（これは文字列を返す代わりに例外を投げる可能性がある）。
+
+                    </p>
+                    <p>設定時には、次の手順を実行しなければならない:
+                    </p>
+                    <ol>
+                        <li><var>fragment</var> を、
+                            新しい値を <var>markup</var> とし、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                title="context object">コンテキストオブジェクト</a>を
+                            <var>context element</var> として
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-parse-fragment"
+                                title="concept-parse-fragment">フラグメント構文解析アルゴリズム</a>を
+                            呼び出した結果とする。
+
+                        </li>
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                title="context object">コンテキストオブジェクト</a>内の
+                            すべてを <var>fragment</var> で
+                            <a href="https://www.w3.org/TR/dom/#concept-node-replace-all"
+                                title="concept-node-replace-all" class="externalDFN">置き換える</a>。
+                        </li>
+                    </ol>
+                </dd>
+                <dt id="widl-Element-outerHTML"><code>outerHTML</code>、型 <span class="idlAttrType">DOMString</span></dt>
+                <dd>
+                    <p><dfn id="dfn-dom-element-outerhtml" data-dfn-type="dfn"
+                            data-lt="dom-element-outerhtml"><code>outerHTML</code></dfn> IDL
+                        属性は、
+                        <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                        およびその内容のマークアップを表す。
+
+                    </p>
+                    <dl class="domintro">
+                        <dt><var>element</var> . <code title="dom-element-outerhtml">outerHTML</code> [ =
+                            <var>value</var> ]
+                        </dt>
+                        <dd>
+                            <p>要素およびその内容を表す HTML または XML のフラグメントを返す。
+
+                            </p>
+                            <p>設定することができ、要素を、与えられた文字列から構文解析された
+                                ノードで置き換える。
+
+                            </p>
+                            <p><a href="https://www.w3.org/TR/dom/#xml-document" title="xml-document"
+                                    class="externalDFN">XML 文書</a>の場合、
+                                要素を XML に直列化できない場合は、name が
+                                "<code><a href="https://www.w3.org/TR/dom/#invalidstateerror" title="invalidstateerror" class="externalDFN">InvalidStateError</a></code>"
+                                である
+                                <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                を投げ、与えられた文字列が整形式でない場合は、name が
+                                "<code><a href="https://www.w3.org/TR/dom/#syntaxerror" title="syntaxerror" class="externalDFN">SyntaxError</a></code>"
+                                である
+                                <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                を投げる。
+
+                            </p>
+                            <p>要素の親が
+                                <code><a href="https://www.w3.org/TR/dom/#document" title="document" class="externalDFN">Document</a></code>
+                                ノードである場合、name が
+                                "<code><a href="https://www.w3.org/TR/dom/#nomodificationallowederror" title="nomodificationallowederror" class="externalDFN">NoModificationAllowedError</a></code>"
+                                である
+                                <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                を投げる。
+                            </p>
+                        </dd>
+                    </dl>
+
+                    <p>取得時には、唯一の子が
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                            title="context object">コンテキストオブジェクト</a>である
+                        架空のノードに対して、
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-well-formed"
+                            title="concept-well-formed">require well-formed</a>
+                        フラグに <code>true</code> を与えて
+                        <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-fragment-serializing-algorithm"
+                            title="concept-fragment-serializing-algorithm">フラグメント直列化アルゴリズム</a>を
+                        呼び出した結果を返す（これは文字列を返す代わりに例外を投げる可能性がある）。
+
+                    </p>
+                    <p>設定時には、次の手順を実行しなければならない:
+
+                    </p>
+                    <ol>
+                        <li><var>parent</var> を、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                title="context object">コンテキストオブジェクト</a>の
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-parent" title="concept-tree-parent"
+                                class="externalDFN">親</a>とする。
+
+                        </li>
+                        <li><var>parent</var> が null である場合、これらの手順を終了する。残りの手順が
+                            実行されたとしても、作成されたノードへの参照を得る方法はない。
+
+                        </li>
+                        <li><var>parent</var> が
+                            <code><a href="https://www.w3.org/TR/dom/#document" title="document" class="externalDFN">Document</a></code>
+                            である場合、name が
+                            "<code><a href="https://www.w3.org/TR/dom/#nomodificationallowederror" title="nomodificationallowederror" class="externalDFN">NoModificationAllowedError</a></code>"
+                            である
+                            <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                            例外を投げる。
+
+                        </li>
+                        <li><var>parent</var> が
+                            <code><a href="https://www.w3.org/TR/dom/#documentfragment" title="documentfragment" class="externalDFN">DocumentFragment</a></code>
+                            である場合、
+                            <var>parent</var> を、次を持つ新しい
+                            <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                            とする:
+
+                            <ul>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-local-name"
+                                        title="concept-element-local-name" class="externalDFN">ローカル名</a>
+                                    として <code>body</code>、
+
+                                </li>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-namespace"
+                                        title="concept-element-namespace" class="externalDFN">名前空間</a>として
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns" title="html-ns">HTML
+                                        名前空間</a>、および
+                                </li>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>
+                                    として
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>の
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>。
+                                </li>
+                            </ul>
+
+                        </li>
+                        <li><var>fragment</var> を、
+                            新しい値を <var>markup</var> とし、<var>parent</var> を
+                            <var>context element</var> として
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-parse-fragment"
+                                title="concept-parse-fragment">フラグメント構文解析アルゴリズム</a>を
+                            呼び出した結果とする。
+
+                        </li>
+                        <li><a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                title="context object">コンテキストオブジェクト</a>を、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                title="context object">コンテキストオブジェクト</a>の
+                            <a href="https://www.w3.org/TR/dom/#concept-tree-parent" title="concept-tree-parent"
+                                class="externalDFN">親</a>内で <var>fragment</var> に
+                            <a href="https://www.w3.org/TR/dom/#concept-node-replace" title="concept-node-replace"
+                                class="externalDFN">置き換える</a>。
+                        </li>
+                    </ol>
+                </dd>
+            </dl>
+        </section>
+        <section property="bibo:hasPart" resource="#methods-2" typeof="bibo:Chapter" id="methods-2">
+            <h3 resource="#h-methods-2" id="h-methods-2"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">7.2 </span>メソッド</span></h3>
+            <dl class="methods">
+                <dt id="widl-Element-insertAdjacentHTML-void-DOMString-position-DOMString-text">
+                    <code>insertAdjacentHTML</code>
+                </dt>
+                <dd>
+                    <dl class="domintro">
+                        <dt><var>element</var> . <code
+                                title="dom-element-insertadjacenthtml">insertAdjacentHTML</code>(<var>position</var>,
+                            <var>text</var>)
+
+                        </dt>
+                        <dd>
+                            <p>与えられた文字列 <var>text</var> を HTML または XML として構文解析し、
+                                結果のノードを、<var>position</var> 引数で与えられた位置に従って
+                                木に挿入する:
+
+                            </p>
+                            <dl>
+                                <dt>"beforebegin"
+                                </dt>
+                                <dd>要素そのものの前。
+
+                                </dd>
+                                <dt>"afterbegin"
+                                </dt>
+                                <dd>要素のすぐ内側、その最初の子の前。
+
+                                </dd>
+                                <dt>"beforeend"
+                                </dt>
+                                <dd>要素のすぐ内側、その最後の子の後。
+
+                                </dd>
+                                <dt>"afterend"
+                                </dt>
+                                <dd>要素そのものの後。
+                                </dd>
+                            </dl>
+
+                            <p>引数が無効な値を持つ場合（たとえば
+                                <a href="https://www.w3.org/TR/dom/#xml-document" title="xml-document"
+                                    class="externalDFN">XML 文書</a>の場合に、与えられた文字列が
+                                整形式でない場合）、name が
+                                "<code><a href="https://www.w3.org/TR/dom/#syntaxerror" title="syntaxerror" class="externalDFN">SyntaxError</a></code>"
+                                である
+                                <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                を投げる。
+
+                            </p>
+                            <p>与えられた位置が不可能である場合（たとえば
+                                <code><a href="https://www.w3.org/TR/dom/#document" title="document" class="externalDFN">Document</a></code>
+                                のルート要素の後に要素を挿入する場合）、name が
+                                "<code><a href="https://www.w3.org/TR/dom/#nomodificationallowederror" title="nomodificationallowederror" class="externalDFN">NoModificationAllowedError</a></code>"
+                                である
+                                <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                を投げる。
+                            </p>
+                        </dd>
+                    </dl>
+
+                    <p>
+                        <dfn id="dfn-dom-element-insertadjacenthtml" data-dfn-type="dfn"
+                            data-lt="dom-element-insertadjacenthtml"><code>insertAdjacentHTML(<var>position</var>, <var>text</var>)</code></dfn>
+                        メソッドは次の手順を実行しなければならない:
+
+                    </p>
+                    <ol>
+                        <li>このリストから最初に一致する項目を使用する:
+
+                            <dl class="switch">
+                                <dt><var>position</var> が文字列 "beforebegin" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dt><var>position</var> が文字列 "afterend" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dd>
+                                    <p><var>context</var> を、
+                                        <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                            title="context object">コンテキストオブジェクト</a>の
+                                        <a href="https://www.w3.org/TR/dom/#concept-tree-parent"
+                                            title="concept-tree-parent" class="externalDFN">親</a>とする。
+
+                                    </p>
+                                    <p><var>context</var> が null または
+                                        <a href="https://www.w3.org/TR/dom/#concept-document" class="externalDFN"
+                                            title="concept-document">文書</a>である場合、
+                                        name が
+                                        "<code><a href="https://www.w3.org/TR/dom/#nomodificationallowederror" title="nomodificationallowederror" class="externalDFN">NoModificationAllowedError</a></code>"
+                                        である
+                                        <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                        を投げる。
+
+                                    </p>
+                                </dd>
+                                <dt><var>position</var> が文字列 "afterbegin" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dt><var>position</var> が文字列 "beforeend" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dd><var>context</var> を
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>とする。
+
+                                </dd>
+                                <dt>そうでない場合
+                                </dt>
+                                <dd>
+                                    <p>name が
+                                        "<code><a href="https://www.w3.org/TR/dom/#syntaxerror" title="syntaxerror" class="externalDFN">SyntaxError</a></code>"
+                                        である
+                                        <code><a href="https://www.w3.org/TR/dom/#dfn-DOMException" title="domexception" class="externalDFN">DOMException</a></code>
+                                        を投げる。
+                                    </p>
+                                </dd>
+                            </dl>
+
+                        </li>
+                        <li><var>context</var> が
+                            <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                            でない場合、または次のすべてが真である場合:
+
+                            <ul>
+                                <li><var>context</var> の
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>
+                                    が <a href="https://www.w3.org/TR/dom/#html-document" title="html-document"
+                                        class="externalDFN">HTML 文書</a>であり、
+
+                                </li>
+                                <li><var>context</var> の
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-local-name"
+                                        title="concept-element-local-name" class="externalDFN">ローカル名</a>
+                                    が "<code>html</code>" であり、かつ
+
+                                </li>
+                                <li><var>context</var> の
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-namespace"
+                                        title="concept-element-namespace" class="externalDFN">名前空間</a>
+                                    が <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns"
+                                        title="html-ns">HTML 名前空間</a>である;
+                                </li>
+                            </ul>
+
+                            <p><var>context</var> を、次を持つ新しい
+                                <code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                                とする:
+
+                            </p>
+                            <ul>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-local-name"
+                                        title="concept-element-local-name" class="externalDFN">ローカル名</a>
+                                    として <code>body</code>、
+
+                                </li>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-namespace"
+                                        title="concept-element-namespace" class="externalDFN">名前空間</a>として
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns" title="html-ns">HTML
+                                        名前空間</a>、および
+
+                                </li>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>
+                                    として
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>の
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>。
+                                </li>
+                            </ul>
+
+                        </li>
+                        <li><var>fragment</var> を、<var>text</var> を
+                            <var>markup</var> とし、<var>context</var> を <var>context element</var> として
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-parse-fragment"
+                                title="concept-parse-fragment">フラグメント構文解析アルゴリズム</a>を
+                            呼び出した結果とする。
+
+                        </li>
+                        <li>このリストから最初に一致する項目を使用する:
+
+                            <dl class="switch">
+                                <dt><var>position</var> が文字列 "beforebegin" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dd><var>fragment</var> を、
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>の
+                                    <a href="https://www.w3.org/TR/dom/#concept-tree-parent" title="concept-tree-parent"
+                                        class="externalDFN">親</a>内の、
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>の前に
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-insert" title="concept-node-insert"
+                                        class="externalDFN">挿入する</a>。
+
+                                </dd>
+                                <dt><var>position</var> が文字列 "afterbegin" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dd><var>fragment</var> を、
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>内の、
+                                    その
+                                    <a href="https://www.w3.org/TR/dom/#concept-tree-first-child"
+                                        title="concept-tree-first-child" class="externalDFN">最初の子</a>の前に
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-insert" title="concept-node-insert"
+                                        class="externalDFN">挿入する</a>。
+
+                                </dd>
+                                <dt><var>position</var> が文字列 "beforeend" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dd><var>fragment</var> を
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>に
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-append" title="concept-node-append"
+                                        class="externalDFN">追加する</a>。
+
+                                </dd>
+                                <dt><var>position</var> が文字列 "afterend" に
+                                    <a href="https://www.w3.org/TR/dom/#ascii-case-insensitive" class="externalDFN"
+                                        title="ascii-case-insensitive">ASCII 大文字小文字不区別</a>で一致する場合
+
+                                </dt>
+                                <dd><var>fragment</var> を、
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>の
+                                    <a href="https://www.w3.org/TR/dom/#concept-tree-parent" title="concept-tree-parent"
+                                        class="externalDFN">親</a>内の、
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>の
+                                    <a href="https://www.w3.org/TR/dom/#concept-tree-next-sibling"
+                                        title="concept-tree-next-sibling" class="externalDFN">次の兄弟</a>の前に
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-insert" title="concept-node-insert"
+                                        class="externalDFN">挿入する</a>。
+                                </dd>
+                            </dl>
+                        </li>
+                    </ol>
+                    <table class="parameters">
+                        <tbody>
+                            <tr>
+                                <th>パラメーター</th>
+                                <th>型</th>
+                                <th>null 可能</th>
+                                <th>省略可能</th>
+                                <th>説明</th>
+                            </tr>
+                            <tr>
+                                <td class="prmName">position</td>
+                                <td class="prmType"><code>DOMString</code></td>
+                                <td class="prmNullFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmOptFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmDesc"></td>
+                            </tr>
+                            <tr>
+                                <td class="prmName">text</td>
+                                <td class="prmType"><code>DOMString</code></td>
+                                <td class="prmNullFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmOptFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmDesc"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div><em>返り値の型: </em><code>void</code></div>
+                </dd>
+            </dl>
+        </section>
+    </section>
+
+    <!-- Dropping this extention as it is not implemented, nor does it appear that any browser
+     is currently interested in supporting it. Perhaps it can come back in a V2 of this spec
+     if browsers become interested.
+<section>
+    <h1>Extensions to the <code><a title="text" data-spec="DOM4" class="externalDFN">Text</a></code> interface</h1>
+
+    <dl class="idl" title="partial interface Text">
+        <dt>attribute boolean serializeAsCDATA</dt>
+        <dd>
+            <dl class=domintro>
+              <dt><var>text</var> .
+                  <code title="dom-text-serializeascdata">serializeAsCDATA</code> [ = <var>value</var> ]
+              <dd>Controls whether, in XML, this node is serialized as a CDATA section.
+            </dl>
+
+            <p><code><a title="text" data-spec="DOM4" class="externalDFN">Text</a></code> nodes have an additional
+            associated flag, the <dfn>serialize as CDATA flag</dfn>.
+
+            <p>The
+            <dfn title="dom-text-serializeascdata"><code>serializeAsCDATA</code></dfn>
+            attribute must return true if the <a title="context object">context object</a> has its
+            <a>serialize as CDATA flag</a> set, or false otherwise.
+
+            <p>Setting the <code title="dom-text-serializeascdata">serializeAsCDATA</code>
+            attribute must, if the new value is true, set the
+            <a title="context object">context object</a>'s <a>serialize as CDATA flag</a>, or unset
+            it otherwise.
+        </dd>
+    </dl>
+</section>
+-->
+
+    <section property="bibo:hasPart" resource="#extensions-to-the-range-interface" typeof="bibo:Chapter"
+        id="extensions-to-the-range-interface">
+        <!--OddPage-->
+        <h2 resource="#h-extensions-to-the-range-interface" id="h-extensions-to-the-range-interface"><span
+                property="xhv:role" resource="xhv:heading"><span class="secno">8. </span>
+                <code><a href="https://www.w3.org/TR/dom/#range" title="range" class="externalDFN">Range</a></code>
+                インターフェイスへの拡張</span></h2>
+
+        <pre class="idl"><span class="idlInterface" id="idl-def-Range">partial interface <span class="idlInterfaceID">Range</span> {
+<span class="idlMethod">    [<span class="extAttr">CEReactions, NewObject</span>]
+    <span class="idlMethType">DocumentFragment</span> <span class="idlMethName"><a href="#widl-Range-createContextualFragment-DocumentFragment-DOMString-fragment">createContextualFragment</a></span> (<span class="idlParam"><span class="idlParamType">DOMString</span> <span class="idlParamName">fragment</span></span>);</span>
+};</span></pre>
+        <section property="bibo:hasPart" resource="#methods-3" typeof="bibo:Chapter" id="methods-3">
+            <h3 resource="#h-methods-3" id="h-methods-3"><span property="xhv:role" resource="xhv:heading"><span
+                        class="secno">8.1 </span>メソッド</span></h3>
+            <dl class="methods">
+                <dt id="widl-Range-createContextualFragment-DocumentFragment-DOMString-fragment">
+                    <code>createContextualFragment</code>
+                </dt>
+                <dd>
+                    <dl class="domintro">
+                        <dt><var>docFragment</var> = <var>range</var> . <code
+                                title="dom-range-createcontextualfragment">createContextualFragment</code>(<var>markupString</var>)
+                        </dt>
+                        <dd>与えられたマークアップ文字列から作成された
+                            <code><a href="https://www.w3.org/TR/dom/#documentfragment" title="documentfragment" class="externalDFN">DocumentFragment</a></code>
+                            を返す。
+                        </dd>
+                    </dl>
+
+                    <p>
+                        <dfn id="dfn-dom-range-createcontextualfragment" data-dfn-type="dfn"
+                            data-lt="dom-range-createcontextualfragment"><code>createContextualFragment(<var>fragment</var>)</code></dfn>
+                        メソッドは次の手順を実行しなければならない:
+
+                    </p>
+                    <ol>
+                        <li><var>node</var> を、
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                title="context object">コンテキストオブジェクト</a>の
+                            <a href="https://www.w3.org/TR/dom/#concept-range-start-node"
+                                title="concept-range-start-node" class="externalDFN">始端ノード</a>とする。
+
+                            <p><var>node</var> のインターフェイスに応じて、<var>element</var> を次のようにする:
+
+                            </p>
+                            <dl class="switch">
+                                <dt><code><a href="https://www.w3.org/TR/dom/#document" title="document" class="externalDFN">Document</a></code>
+                                </dt>
+                                <dt><code><a href="https://www.w3.org/TR/dom/#documentfragment" title="documentfragment" class="externalDFN">DocumentFragment</a></code>
+                                </dt>
+                                <dd>null
+
+                                </dd>
+                                <dt><code><a href="https://www.w3.org/TR/dom/#element" title="element" class="externalDFN">Element</a></code>
+                                </dt>
+                                <dd><var>node</var>
+
+                                </dd>
+                                <dt><code><a href="https://www.w3.org/TR/dom/#text" title="text" class="externalDFN">Text</a></code>
+                                </dt>
+                                <dt><code><a href="https://www.w3.org/TR/dom/#comment" title="comment" class="externalDFN">Comment</a></code>
+                                </dt>
+                                <dd><var>node</var> の
+                                    <a href="https://www.w3.org/TR/dom/#parent-element" class="externalDFN"
+                                        title="parent-element">親要素</a>
+
+                                </dd>
+                                <dt><code><a href="https://www.w3.org/TR/dom/#documenttype" title="documenttype" class="externalDFN">DocumentType</a></code>
+                                </dt>
+                                <dt><code><a href="https://www.w3.org/TR/dom/#processinginstruction" title="processinginstruction" class="externalDFN">ProcessingInstruction</a></code>
+                                </dt>
+                                <dd>[<cite><a href="#bib-DOM4" class="bibref">DOM4</a></cite>] はこの場合を防ぐ。
+                                </dd>
+                            </dl>
+
+                        </li>
+                        <li><var>element</var> が null であるか、または次のすべてが真である場合:
+
+                            <ul>
+                                <li><var>element</var> の
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>
+                                    が <a href="https://www.w3.org/TR/dom/#html-document" title="html-document"
+                                        class="externalDFN">HTML 文書</a>であり、
+
+                                </li>
+                                <li><var>element</var> の
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-local-name"
+                                        title="concept-element-local-name" class="externalDFN">ローカル名</a>
+                                    が "<code>html</code>" であり、かつ
+
+                                </li>
+                                <li><var>element</var> の
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-namespace"
+                                        title="concept-element-namespace" class="externalDFN">名前空間</a>
+                                    が <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns"
+                                        title="html-ns">HTML 名前空間</a>である;
+                                </li>
+                            </ul>
+
+                            <p><var>element</var> を、次を持つ新しい
+                                <a href="https://www.w3.org/TR/dom/#concept-element" title="concept-element"
+                                    class="externalDFN">要素</a>とする:
+
+                            </p>
+                            <ul>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-local-name"
+                                        title="concept-element-local-name" class="externalDFN">ローカル名</a>
+                                    として "<code>body</code>"、
+
+                                </li>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-element-namespace"
+                                        title="concept-element-namespace" class="externalDFN">名前空間</a>として
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-html-ns" title="html-ns">HTML
+                                        名前空間</a>、および
+
+                                </li>
+                                <li>その
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>
+                                    として
+                                    <a data-link-type="dfn" class="internalDFN" href="#dfn-context-object"
+                                        title="context object">コンテキストオブジェクト</a>の
+                                    <a href="https://www.w3.org/TR/dom/#concept-node-document"
+                                        title="concept-node-document" class="externalDFN">ノード文書</a>。
+                                </li>
+                            </ul>
+
+                        </li>
+                        <li><var>fragment node</var> を、<var>fragment</var> を
+                            <var>markup</var> とし、<var>element</var> を <var>context element</var> として
+                            <a data-link-type="dfn" class="internalDFN" href="#dfn-concept-parse-fragment"
+                                title="concept-parse-fragment">フラグメント構文解析アルゴリズム</a>を
+                            呼び出した結果とする。
+
+                        </li>
+                        <li><var>fragment node</var> 内のすべてのスクリプトについて、"already started" の印を外す。
+
+                        </li>
+                        <li><var>fragment node</var> の値を返す。
+                        </li>
+                    </ol>
+                    <table class="parameters">
+                        <tbody>
+                            <tr>
+                                <th>パラメーター</th>
+                                <th>型</th>
+                                <th>null 可能</th>
+                                <th>省略可能</th>
+                                <th>説明</th>
+                            </tr>
+                            <tr>
+                                <td class="prmName">fragment</td>
+                                <td class="prmType"><code>DOMString</code></td>
+                                <td class="prmNullFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmOptFalse"><span role="img" aria-label="False">✘</span></td>
+                                <td class="prmDesc"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div><em>返り値の型: </em><code>DocumentFragment</code></div>
+                </dd>
+            </dl>
+        </section>
+    </section>
+
+    <section property="bibo:hasPart" resource="#revision-history" typeof="bibo:Chapter" id="revision-history"
+        class="appendix">
+        <!--OddPage-->
+        <h2 resource="#h-revision-history" id="h-revision-history"><span property="xhv:role"
+                resource="xhv:heading"><span class="secno">A. </span>改訂履歴</span></h2>
+        <p>以下は、この仕様の前回公開以降の変更についての参考情報としての要約である。
+            この仕様のエディターズドラフトの完全な改訂履歴は
+            <a href="https://dvcs.w3.org/hg/innerhtml/summary/">ここ</a>で見つけることができる。
+        </p>
+
+        <ul>
+            <li><a href="https://dvcs.w3.org/hg/innerhtml/raw-file/tip/LC2_comments.html">前回の Last Call 文書から
+                    非規範的な変更を取り込んだ。</a>
+            </li>
+        </ul>
+    </section>
+
+    <section property="bibo:hasPart" resource="#acknowledgements" typeof="bibo:Chapter" id="acknowledgements"
+        class="appendix">
+        <!--OddPage-->
+        <h2 resource="#h-acknowledgements" id="h-acknowledgements"><span property="xhv:role"
+                resource="xhv:heading"><span class="secno">B. </span>謝辞</span></h2>
+        <p>この仕様の初期草案を保守し、また
+            <a href="https://domparsing.spec.whatwg.org/">Living Specification</a> において
+            継続的に改善してくれた Ms2ger [<a href="http://www.mozilla.org">Mozilla</a>] に感謝する。
+
+        </p>
+        <p>
+            有用なコメントを寄せてくれた
+            Victor Costan、
+            Aryeh Gregor、
+            Anne van Kesteren、
+            Arkadiusz Michalski、
+            Simon Pieters、
+            Henri Sivonen、
+            Josh Soref
+            および Boris Zbarsky
+            に感謝する。
+
+        </p>
+        <p>
+            <code title="dom-element-innerhtml">innerHTML</code> および
+            <code title="dom-element-outerhtml">outerHTML</code> 属性、ならびに
+            <code title="dom-element-insertadjacenthtml">insertAdjacentHTML()</code> メソッドを
+            [<cite><a href="#bib-HTML5" class="bibref">HTML5</a></cite>] で定義し、有用なコメントを寄せてくれた
+            Ian Hickson に特別に感謝する。
+        </p>
+    </section>
+
+    <section property="bibo:hasPart" resource="#references" typeof="bibo:Chapter" id="references" class="appendix">
+        <!--OddPage-->
+        <h2 resource="#h-references" id="h-references"><span property="xhv:role" resource="xhv:heading"><span
+                    class="secno">C. </span>参考文献</span></h2>
+        <section property="bibo:hasPart" resource="#normative-references" typeof="bibo:Chapter"
+            id="normative-references">
+            <h3 resource="#h-normative-references" id="h-normative-references"><span property="xhv:role"
+                    resource="xhv:heading"><span class="secno">C.1 </span>規範的参考文献</span></h3>
+            <dl resource="" class="bibliography">
+                <dt id="bib-HTML5">[HTML5]</dt>
+                <dd>Ian Hickson; Robin Berjon; Steve Faulkner; Travis Leithead; Erika Doyle Navara; Edward O'Connor;
+                    Silvia Pfeiffer. W3C. <a property="dc:requires"
+                        href="https://www.w3.org/TR/html5/"><cite>HTML5</cite></a>. 2014年10月28日. W3C 勧告.
+                    URL: <a property="dc:requires" href="https://www.w3.org/TR/html5/">http://www.w3.org/TR/html5/</a>
+                </dd>
+                <dt id="bib-RFC2119">[RFC2119]</dt>
+                <dd>S. Bradner. IETF. <a property="dc:requires" href="https://tools.ietf.org/html/rfc2119"><cite>RFC
+                            において
+                            要求レベルを示すために用いるキーワード</cite></a>. 1997年3月. Best Current
+                    Practice. URL: <a property="dc:requires"
+                        href="https://tools.ietf.org/html/rfc2119">https://tools.ietf.org/html/rfc2119</a>
+                </dd>
+                <dt id="bib-WEBIDL">[WEBIDL]</dt>
+                <dd>Cameron McCormack; Boris Zbarsky. W3C. <a property="dc:requires"
+                        href="https://www.w3.org/TR/WebIDL-1/"><cite>WebIDL Level 1</cite></a>. 2016年3月8日. W3C
+                    候補勧告. URL: <a property="dc:requires"
+                        href="https://www.w3.org/TR/WebIDL-1/">http://www.w3.org/TR/WebIDL-1/</a>
+                </dd>
+            </dl>
+        </section>
+        <section property="bibo:hasPart" resource="#informative-references" typeof="bibo:Chapter"
+            id="informative-references">
+            <h3 resource="#h-informative-references" id="h-informative-references"><span property="xhv:role"
+                    resource="xhv:heading"><span class="secno">C.2 </span>参考情報文献</span></h3>
+            <dl resource="" class="bibliography">
+                <dt id="bib-DOM4">[DOM4]</dt>
+                <dd>Anne van Kesteren; Aryeh Gregor; Ms2ger; Alex Russell; Robin Berjon. W3C. <a
+                        property="dc:references" href="https://www.w3.org/TR/dom/"><cite>W3C DOM4</cite></a>.
+                    2015年11月19日.
+                    W3C 勧告. URL: <a property="dc:references"
+                        href="https://www.w3.org/TR/dom/">http://www.w3.org/TR/dom/</a>
+                </dd>
+                <dt id="bib-XML10">[XML10]</dt>
+                <dd>Tim Bray; Jean Paoli; Michael Sperberg-McQueen; Eve Maler; François Yergeau et al. W3C. <a
+                        property="dc:references" href="https://www.w3.org/TR/xml"><cite>Extensible Markup Language (XML)
+                            1.0 (Fifth Edition)</cite></a>. 2008年11月26日. W3C 勧告. URL: <a property="dc:references"
+                        href="https://www.w3.org/TR/xml">http://www.w3.org/TR/xml</a>
+                </dd>
+            </dl>
+        </section>
+    </section>
+    <p role="navigation" id="back-to-top"><a href="#toc"><abbr title="Back to Top">↑</abbr></a></p>
+    <script src="https://www.w3.org/scripts/TR/2016/fixup.js" defer="" async=""></script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
