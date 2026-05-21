@@ -228,7 +228,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [MediaStreamTrack Content Hints](https://jp.htmlspecs.com/mst-content-hint/)（[Source](https://www.w3.org/TR/2025/WD-mst-content-hint-20250919/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Autoplay Detection](https://jp.htmlspecs.com/autoplay-detection/)（[Source](https://www.w3.org/TR/2025/WD-autoplay-detection-20250904/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Stream Recording](https://jp.htmlspecs.com/media-stream-recording/)（[Source](https://www.w3.org/TR/2026/WD-mediastream-recording-20260316/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [WebVTT: The Web Video Text Tracks Format](https://jp.htmlspecs.com/webvtt1/)（[Source](https://www.w3.org/TR/2019/CR-webvtt1-20190404/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
+- [WebVTT: The Web Video Text Tracks Format](https://jp.htmlspecs.com/webvtt1/)（[Source](https://www.w3.org/TR/2026/CRD-webvtt1-20260520/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Media Source Extensions](https://jp.htmlspecs.com/media-source-2/)（[Source](https://www.w3.org/TR/2025/WD-media-source-2-20251104/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebCodecs](https://jp.htmlspecs.com/webcodecs/)（[Source](https://www.w3.org/TR/2026/WD-webcodecs-20260505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Session](https://jp.htmlspecs.com/mediasession/)（[Source](https://www.w3.org/TR/2026/WD-mediasession-20260316/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
