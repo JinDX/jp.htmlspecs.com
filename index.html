@@ -35,7 +35,7 @@
         src=https://resources.whatwg.org/logo.svg height=100></a>
     <hgroup>
       <h1 class=allcaps>HTML</h1>
-      <p id="living-standard">現行標準 — 最終更新 <span class=pubdate>2026年5月19日</span>
+      <p id="living-standard">現行標準 — 最終更新 <span class=pubdate>2026年5月26日</span>
     </hgroup>
 
     <nav>
@@ -65,7 +65,7 @@
         <a href=https://github.com/whatwg/html/commits class=changes><span><strong>コミット</strong>
             <code>GitHubで</code></span></a>
         <a id="commit-snapshot-link"
-          href="https://html.spec.whatwg.org/commit-snapshots/62622f789edefac077c16dc6433428661748787a/"
+          href="https://html.spec.whatwg.org/commit-snapshots/9b5f1b302b84434cdd40565e3f58228a6a91ea9b/"
           class=changes><span><strong>スナップショット</strong> <code>このコミット時点で</code></span></a>
         <a href=https://twitter.com/htmlstandard class=changes><span><strong>Twitterアップデート</strong>
             <code>@htmlstandard</code></span></a>
@@ -15058,30 +15058,43 @@
 
         <ol>
           <li>
-            <p><var>name</var>を？<a href=https://tc39.es/ecma262/#sec-get-o-p id=structuredserializeinternal:js-get
-                data-x-internal=js-get>Get</a>(<var>value</var>,
-              "name")に設定します。</p>
+            <p><var>name</var> を ? <a href="https://tc39.es/ecma262/#sec-get-o-p"
+                id="structuredserializeinternal:js-get" data-x-internal="js-get">Get</a>(<var>value</var>,
+              "name") とする。</p>
+          </li>
           <li>
-            <p>もし<var>name</var>が"Error", "EvalError", "RangeError", "ReferenceError",
-              "SyntaxError", "TypeError", または"URIError"のいずれでもない場合、<var>name</var>を"Error"に設定します。</p>
+            <p><var>name</var> が "Error", "EvalError", "RangeError", "ReferenceError",
+              "SyntaxError", "TypeError", "URIError" のいずれでもないなら、<var>name</var> を "Error" に設定する。</p>
+          </li>
           <li>
-            <p><var>valueMessageDesc</var>を？<var>value</var>.[[GetOwnProperty]]("<code>message</code>")に設定します。
+            <p><var>valueMessageDesc</var> を ? <var>value</var>.[[GetOwnProperty]]("<code>message</code>") とする。</p>
+          </li>
+          <li>
+            <p><var>message</var> を、
+              <a id="structuredserializeinternal:isdatadescriptor" href="https://tc39.es/ecma262/#sec-isdatadescriptor"
+                data-x-internal="isdatadescriptor">IsDataDescriptor</a>(<var>valueMessageDesc</var>) が false であるなら
+              undefined、
+              そうでないなら ? <a id="structuredserializeinternal:tostring" href="https://tc39.es/ecma262/#sec-tostring"
+                data-x-internal="tostring">ToString</a>(<var>valueMessageDesc</var>.[[Value]]) とする。
             </p>
+          </li>
           <li>
-            <p>もし<a id=structuredserializeinternal:isdatadescriptor href=https://tc39.es/ecma262/#sec-isdatadescriptor
-                data-x-internal=isdatadescriptor>IsDataDescriptor</a>(<var>valueMessageDesc</var>)
-              がfalseである場合、<var>message</var>をundefinedに設定し、そうでない場合は？<a id=structuredserializeinternal:tostring
-                href=https://tc39.es/ecma262/#sec-tostring
-                data-x-internal=tostring>ToString</a>(<var>valueMessageDesc</var>.[[Value]])に設定します。</p>
-          <li>
-            <p><var>serialized</var>を{ [[Type]]: "Error", [[Name]]: <var>name</var>,
-              [[Message]]: <var>message</var> }に設定します。</p>
-          <li>
-            <p>ユーザーエージェントは、<code>stack</code>プロパティなどのまだ指定されていない興味深い付随データのシリアル化された表現を<var>serialized</var>に添付するべきです。
+            <p><var>stack</var> を、<var>value</var>.[[Stack]] を表す<a
+                id="structuredserializeinternal:implementation-defined"
+                href="https://infra.spec.whatwg.org/#implementation-defined"
+                data-x-internal="implementation-defined">実装定義</a>の文字列とする。 <a
+                href="#refsJSERRORSTACKACCESSOR">[JSERRORSTACKACCESSOR]</a>
+              <a href="#refsJSERRORSTACKS">[JSERRORSTACKS]</a>
             </p>
-
-            <p class=note>このデータの指定に関する進行中の作業については、<cite>Error Stacks</cite>提案を参照してください。<a
-                href=#refsJSERRORSTACKS>[JSERRORSTACKS]</a></p>
+          </li>
+          <li>
+            <p><var>serialized</var> を { [[Type]]: "Error", [[Name]]: <var>name</var>,
+              [[Message]]: <var>message</var>, [[Stack]]: <var>stack</var> } に設定する。</p>
+          </li>
+          <li>
+            <p>ユーザーエージェントは、まだ仕様化されていない、付随する興味深いデータがあれば、
+              その直列化表現を <var>serialized</var> に付加するべきである。</p>
+          </li>
         </ol>
       <li>
         <p>それ以外の場合、<var>value</var>が配列の異常オブジェクトである場合：</p>
@@ -15598,11 +15611,10 @@
           <li>
             <p><var>message</var>を<var>serialized</var>.[[Message]]に設定します。
           <li>
-            <p><var>value</var>を<a id=structureddeserialize:ordinaryobjectcreate
-                href=https://tc39.es/ecma262/#sec-objectcreate
-                data-x-internal=ordinaryobjectcreate>OrdinaryObjectCreate</a>(<var>prototype</var>,
-              «
-              [[ErrorData]] »)に設定します。
+            <p><var>value</var>を<a id="structureddeserialize:ordinaryobjectcreate"
+                href="https://tc39.es/ecma262/#sec-objectcreate"
+                data-x-internal="ordinaryobjectcreate">OrdinaryObjectCreate</a>(<var>prototype</var>, «
+              [[ErrorData]], [[Stack]] »)に設定します。
           <li>
             <p><var>messageDesc</var>を<a id=structureddeserialize:propertydescriptor
                 href=https://tc39.es/ecma262/#sec-property-descriptor-specification-type
@@ -15615,6 +15627,7 @@
                 data-x-internal=ordinarydefineownproperty>OrdinaryDefineOwnProperty</a>(<var>value</var>,
               "<code>message</code>",
               <var>messageDesc</var>)を実行します。
+
           <li>
             <p><var>serialized</var>に添付されたすべての関連データはデシリアライズされ、<var>value</var>に添付されるべきです。
         </ol>
@@ -227638,10 +227651,12 @@ select::picker-icon {
     <dd><cite><a href="https://www.w3.org/Graphics/JPEG/jfif3.pdf">JPEG File Interchange
           Format</a></cite>、E.
       Hamilton。
-    <dt id="refsJSERRORSTACKS">[JSERRORSTACKS]
-    <dd>(非规范性) <cite><a href="https://tc39.es/proposal-error-stacks">Error Stacks</a></cite>。
-      Ecma
-      International。
+    <dt id="refsJSERRORSTACKACCESSOR">[JSERRORSTACKACCESSOR]</dt>
+    <dd><cite><a href="https://tc39.es/proposal-error-stack-accessor/">Error Stack Accessor</a></cite>. Ecma
+      International.</dd>
+    <dt id="refsJSERRORSTACKS">[JSERRORSTACKS]</dt>
+    <dd><cite><a href="https://tc39.es/proposal-error-stacks/">Error Stacks</a></cite>. Ecma International.</dd>
+
     <dt id="refsJSDYNAMICCODEBRANDCHECKS">[JSDYNAMICCODEBRANDCHECKS]
     <dd><cite><a href="https://tc39.es/proposal-dynamic-code-brand-checks">動的コードブランドチェック</a></cite>.
       Ecma International.
