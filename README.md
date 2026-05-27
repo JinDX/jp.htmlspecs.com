@@ -67,7 +67,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Micropub](https://jp.htmlspecs.com/micropub/)（[Source](https://www.w3.org/TR/2017/REC-micropub-20170523/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Web Annotation Data Model](https://jp.htmlspecs.com/annotation-model/)（[Source](https://www.w3.org/TR/2017/REC-annotation-model-20170223/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [WebTransport](https://jp.htmlspecs.com/webtransport/)（[Source](https://www.w3.org/TR/2026/WD-webtransport-20260325/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2026/CRD-service-workers-20260409/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2026/CRD-service-workers-20260526/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Web Background Synchronization](https://jp.htmlspecs.com/background-sync/)（[Source](https://wicg.github.io/background-sync/spec/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Push API](https://jp.htmlspecs.com/push-api/)（[Source](https://www.w3.org/TR/2025/WD-push-api-20251201/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebRTC](https://jp.htmlspecs.com/webrtc/)（[Source](https://www.w3.org/TR/2025/REC-webrtc-20250313/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
