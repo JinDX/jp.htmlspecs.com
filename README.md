@@ -9,7 +9,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Strings on the Web: Language and Direction Metadata](https://jp.htmlspecs.com/string-meta/)（[Source](https://www.w3.org/TR/2024/NOTE-string-meta-20241017/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Source map format specification](https://jp.htmlspecs.com/ecma426/)（[Source](https://tc39.es/ecma426/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-js-api-2-20260527/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-web-api-2-20260526/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-web-api-2-20260527/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [DOM](https://jp.htmlspecs.com/dom/)（[Source](https://dom.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [DOM Parsing and Serialization](https://jp.htmlspecs.com/dom-parsing/)（[Source](https://www.w3.org/TR/2016/WD-DOM-Parsing-20160517/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [EditContext API](https://jp.htmlspecs.com/edit-context/)（[Source](https://www.w3.org/TR/2026/WD-edit-context-20260430/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
