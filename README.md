@@ -222,6 +222,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [JWT Best Current Practices](https://jp.htmlspecs.com/jwt-bcp/)（[Source](https://www.rfc-editor.org/rfc/rfc8725) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
 ### AI と機械学習
+- [Web Neural Network API](https://jp.htmlspecs.com/webnn/)（[Source](https://www.w3.org/TR/2026/CRD-webnn-20260521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Model Loader API](https://jp.htmlspecs.com/model-loader/)（[Source](https://webmachinelearning.github.io/model-loader/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### メディアとグラフィックス
