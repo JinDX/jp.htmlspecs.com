@@ -124,6 +124,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Region Capture](https://jp.htmlspecs.com/mediacapture-region/)（[Source](https://www.w3.org/TR/2023/WD-mediacapture-region-20230712/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Capture Handle - Bootstrapping Collaboration when Screensharing](https://jp.htmlspecs.com/capture-handle-identity/)（[Source](https://www.w3.org/TR/2025/WD-capture-handle-identity-20250306/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [UI Events](https://jp.htmlspecs.com/uievents/)（[Source](https://www.w3.org/TR/2026/WD-uievents-20260221/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [UI Events KeyboardEvent key Values](https://jp.htmlspecs.com/uievents-key/)（[Source](https://www.w3.org/TR/2025/REC-uievents-key-20250422/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [UI Events KeyboardEvent code Values](https://jp.htmlspecs.com/uievents-code/)（[Source](https://www.w3.org/TR/2025/REC-uievents-code-20250422/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Keyboard Map](https://jp.htmlspecs.com/keyboard-map/)（[Source](https://wicg.github.io/keyboard-map/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Keyboard Lock](https://jp.htmlspecs.com/keyboard-lock/)（[Source](https://wicg.github.io/keyboard-lock/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
