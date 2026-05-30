@@ -30,6 +30,14 @@
                 ],
                 profile: "web-platform",
             },
+            localBiblio: {
+                "isolated-web-apps": {
+                    title: "Isolated Web Applications",
+                    href: "https://github.com/WICG/isolated-web-apps",
+                    authors: ["Robbie McElrath"],
+                    publisher: "WICG"
+                }
+            },
         };
     </script>
 </head>
@@ -56,70 +64,206 @@
         </h2>
         <p>
             高度な用途では、[=manifest/display_override=] メンバーを使用して、
-            開発者が Web アプリケーションに対して好ましい
-            <a data-cite="appmanifest#dfn-display">表示モード</a>を選択できるように、
-            <a data-cite="appmanifest#dfn-display-modes-list">表示モードリスト値</a>の
-            カスタムフォールバック順序を指定できる。その値は [=display mode=] である。
+            開発者がウェブアプリケーションに対して希望する<a data-cite="appmanifest#dfn-display">表示モード</a>を選択できるように、
+            <a data-cite="appmanifest#dfn-display-modes-list">表示モードリスト値</a>のカスタムフォールバック順序を
+            指定できる。
         </p>
         <p>
             [=application manifest=] の [=manifest/display_override=] メンバーは、
-            [=display mode/window-controls-overlay=] や [=display mode/unframed=] などの
-            拡張を含む
-            <a>sequence</a> の
-            <a data-cite="appmanifest#dfn-display-modes-list">表示モードリスト値</a>である。
-            このメンバーは、[=display mode=] に対する開発者の好ましい
-            フォールバックチェーンを表す。このフィールドは [=manifest/display=]
-            メンバーを上書きする。ユーザーエージェントがここで指定された
-            [=display mode=] のいずれもサポートしていない場合、
-            [=manifest/display=] メンバーを考慮することへフォールバックする。
-            アルゴリズム手順については、
-            <a data-cite="appmanifest#dfn-process-the-display-member">display
-                メンバーの処理</a>を参照。
+            [=display override entries=] の [=list=] である。
+            <dfn>display override entry</dfn> は、<a data-cite="appmanifest#dfn-display-modes-list">display
+                modes list value</a>
+            （[=display mode/window-controls-overlay=]、[=display mode/tabbed=]、および
+            [=display mode/unframed=] のような [=display mode extensions|extensions=] を含む）、
+            または [=DisplayOverrideEntryObject=] のいずれかである。
         </p>
         <p>
-            次の手順は、
-            <a data-cite="appmanifest#dfn-steps-for-determining-the-web-app-s-chosen-display-mode">
-                Web アプリの選択された表示モードを決定する</a>における
-            [=application manifest/processing extension-point=] に追加される。
+            このメンバーは、[=display modes=] に対する開発者の希望するフォールバックチェーンを表す。
+            このフィールドは [=manifest/display=] メンバーを上書きする。
+            ユーザーエージェントがここで指定された [=display modes=] のいずれもサポートしない場合、
+            [=manifest/display=] メンバーを考慮する処理へフォールバックする。
+            アルゴリズムの手順については、<a data-cite="appmanifest#dfn-process-the-display-member">display
+                メンバーの処理</a>を参照。 </p>
+        <p>
+            <dfn>DisplayOverrideEntryObject</dfn> は、次のメンバーを持つ [=ordered map=] である:
         </p>
-        <ol>
-            <li>|manifest:ordered map|.[=manifest/display_override=] メンバーの
-                |candidate_display_mode:DisplayModeType| それぞれについて [=list/For each=]：
-                <ol class="algorithm">
-                    <li><a data-cite="appmanifest/#dfn-display-modes-list">表示
-                            モードリスト</a>が |candidate_display_mode:DisplayModeType| を含む場合、
-                        その |candidate_display_mode:DisplayModeType| を返す
-                    </li>
-                    <li>|candidate_display_mode:DisplayModeType| が [=display
-                        mode/window-controls-overlay=] であり、ユーザーエージェントがこれを
-                        サポートする場合、その |candidate_display_mode:DisplayModeType| を返す。
-                    </li>
-                    <li>|candidate_display_mode:DisplayModeType| が [=display
-                        mode/tabbed=] であり、ユーザーエージェントがこれをサポートする場合、
-                        その |candidate_display_mode:DisplayModeType| を返す。
-                    </li>
-                </ol>
+        <ul>
+            <li>
+                <dfn data-dfn-for="DisplayOverrideEntryObject">display</dfn>:
+                [=display mode extensions|extensions=] を含む
+                <a data-cite="appmanifest#dfn-display-modes-list">display modes list
+                    value</a>。
             </li>
-        </ol>
-        <p class="note">
-            このメンバーは、開発者が自分の表示モードのフォールバック順序を
-            明示的に制御したい場合、または基本の
-            <a data-cite="appmanifest/#dfn-display-modes-list">表示モード
-                リスト</a>では利用できないモードのためなど、高度な場合にのみ
-            使用されることを意図している。そうでない場合、ほとんどのユースケースでは
-            [=manifest/display=] メンバーで十分である。
-        </p>
+            <li>
+                <dfn data-dfn-for="DisplayOverrideEntryObject">url_patterns</dfn>
+                （省略可能）: [=URL patterns=] の [=list=]。省略された場合は
+                [=list/is empty|空のリスト=] を既定値とする。
+            </li>
+        </ul>
+        <aside class="note">
+            このメンバーは、開発者が表示モードのフォールバック順序を明示的に制御したい場合、
+            または基本的な
+            <a data-cite="appmanifest/#dfn-display-modes-list">display modes
+                list</a> では利用できないモードのための、高度なケースでのみ使用されることを意図している。
+            それ以外の場合、ほとんどのユースケースでは [=manifest/display=] メンバーで十分である。
+        </aside>
+        <section>
+            <h3>
+                選択された表示モードの決定
+            </h3>
+            <p>
+                次の手順は、
+                <a data-cite="appmanifest#dfn-steps-for-determining-the-web-app-s-chosen-display-mode">
+                    ウェブアプリの選択された表示モードを決定する</a>における
+                [=application manifest/processing extension-point=] に追加される。
+                これは、任意の [=URL=] |document URL| も受け取るようになった:
+            </p>
+            <ol>
+                <li>|manifest:ordered map| の [=manifest/display_override=] メンバーの
+                    各 |entry:display override entry| について [=list/For each=]:
+                    <ol class="algorithm">
+                        <li>|candidate display mode| を null とする。
+                        </li>
+                        <li>|entry| が [=display mode=] である場合:
+                            <ol>
+                                <li>|candidate display mode| を |entry| に設定する。
+                                </li>
+                            </ol>
+                        </li>
+                        <li>そうでなく、|entry| が [=DisplayOverrideEntryObject=] である場合:
+                            <ol>
+                                <li>|entry| の [=DisplayOverrideEntryObject/url_patterns=] が [=list/is empty=] の場合:
+                                    <ol>
+                                        <li>|candidate display mode| を |entry| の
+                                            [=DisplayOverrideEntryObject/display=] に設定する。
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>そうでなく、|document URL| が null でない場合:
+                                    <ol>
+                                        <li>|entry| の [=DisplayOverrideEntryObject/url_patterns=] の
+                                            各 |pattern| について [=list/For each=]:
+                                            <ol>
+                                                <li>|pattern| が |document URL| に [=URL pattern/matches=] する場合、
+                                                    |candidate display mode| を |entry| の
+                                                    [=DisplayOverrideEntryObject/display=]
+                                                    に設定し、[=iteration/break=] する。
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                </li>
+                            </ol>
+                        </li>
+                        <li>|candidate display mode| が null である場合、[=iteration/continue=] する。
+                        </li>
+                        <li><a data-cite="appmanifest/#dfn-display-modes-list">display modes list</a> が
+                            |candidate display mode| を含む場合、その |candidate display mode| を返す。
+                        </li>
+                        <li>|candidate display mode| が [=display mode/window-controls-overlay=] であり、
+                            [=user agent=] がこれをサポートする場合、その |candidate display mode| を返す。
+                        </li>
+                        <li>|candidate display mode| が [=display mode/tabbed=] であり、[=user agent=] がこれをサポートする場合、
+                            その |candidate display mode| を返す。
+                        </li>
+                        <li>|candidate display mode| が [=display mode/unframed=] であり、[=user agent=] がこれをサポートし、
+                            かつアプリケーションが Isolated Web Application [[isolated-web-apps]] である場合、その
+                            |candidate display mode| を返す。
+                        </li>
+                    </ol>
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                `display_override` メンバーの処理
+            </h3>
+            <p>
+                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、および [=URL=]
+                |manifest URL:URL| が与えられたとき、<dfn>`display_override` メンバーを処理する</dfn>には、
+                次を実行する:
+            </p>
+            <ol class="algorithm">
+                <li>|manifest|["display_override"] を新しい [=list=] に設定する。
+                </li>
+                <li>|json|["display_override"] が [=map/exist=] しない場合、返す。
+                </li>
+                <li>|json|["display_override"] が [=list=] でない場合、返す。
+                </li>
+                <li>|processed display override:list| を新しい [=list=] とする。
+                </li>
+                <li>|json|["display_override"] の各 |entry| について [=list/For each=]:
+                    <ol>
+                        <li>|entry| が [=string=] である場合:
+                            <ol>
+                                <li><a data-cite="appmanifest#dfn-display-modes-list">display modes list</a>
+                                    （[=display mode extensions|extensions=] を含む）が |entry| を含む場合、
+                                    |entry| を |processed display override| に [=list/append=] する。
+                                </li>
+                            </ol>
+                        </li>
+                        <li>そうでなく、|entry| が [=ordered map=] である場合:
+                            <ol>
+                                <li>|entry|["display"] が [=map/exist=] しない、または [=string=] でない場合、
+                                    [=iteration/continue=] する。
+                                </li>
+                                <li><a data-cite="appmanifest#dfn-display-modes-list">display modes list</a>
+                                    （[=display mode extensions|extensions=] を含む）が
+                                    |entry|["display"] を含まない場合、[=iteration/continue=] する。
+                                </li>
+                                <li>[=user agent=] が |entry|["display"] の URL patterns をサポートしない場合、
+                                    [=iteration/continue=] する。
+                                </li>
+                                <li>|override object| を新しい [=DisplayOverrideEntryObject=] とし、その
+                                    [=DisplayOverrideEntryObject/display=] を |entry|["display"] に設定する。
+                                </li>
+                                <li>|entry|["url_patterns"] が [=map/exists=] する場合:
+                                    <ol>
+                                        <li>|entry|["url_patterns"] が [=list=] でない場合、[=iteration/continue=] する。
+                                        </li>
+                                        <li>|entry|["url_patterns"] の各 |pattern entry| について [=list/For each=]:
+                                            <ol>
+                                                <li>|pattern:URL pattern| を、|pattern entry| と |manifest URL| が与えられて
+                                                    [=build a URL pattern from an infra value=] した結果とする。
+                                                    この処理が例外を投げる、または null を返す場合、[=iteration/continue=] する。
+                                                </li>
+                                                <li>|pattern| を |override object| の
+                                                    [=DisplayOverrideEntryObject/url_patterns=] に [=list/append=] する。
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>|override object| を |processed display override| に [=list/append=] する。
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+                <li>|manifest|["display_override"] を |processed display override| に設定する。
+                </li>
+            </ol>
+            <aside class="note">
+                処理後、マニフェストの `display_override` に存在できる辞書エントリーは、
+                [=user agent=] が URL patterns をサポートする表示モードのものだけである。
+            </aside>
+        </section>
         <section>
             <h3>
                 概念
             </h3>
             <ul>
                 <li>
-                    <dfn data-lt="controls of the window">ウィンドウコントロール</dfn>：
-                    オペレーティングシステムがアプリケーション間で一貫して使用する
-                    インターフェイス要素であり、ユーザーがアプリケーションを制御する
-                    特定の操作を実行できるようにする。[=window controls=] における
-                    一般的な操作には、最小化、最大化／復元、閉じるボタンが含まれる。
+                    <dfn data-lt="controls of the window">Window controls</dfn>:
+                    オペレーティングシステムがアプリケーション全体で一貫して使用する、
+                    ユーザーがアプリケーションを制御する特定の操作を行えるようにする
+                    インターフェイス要素。[=window controls=] における一般的な操作には、
+                    最小化、最大化/復元、および閉じるボタンが含まれる。
+                </li>
+                <li>
+                    <dfn>Window frame</dfn>:
+                    アプリケーションウィンドウのウェブコンテンツを囲む、境界、タイトルバー、
+                    およびウィンドウコントロールを含むホストネイティブな装飾。
                 </li>
             </ul>
         </section>
@@ -128,30 +272,34 @@
                 表示モード拡張
             </h3>
             <p>
-                通常の <a data-cite="appmanifest#dfn-display-modes-list">表示モード</a>に加えて、
-                [=manifest/display_override=] はそれに対する特定の拡張もサポートする。
+                通常の <a data-cite="appmanifest#dfn-display-modes-list">display modes</a> に加えて、
+                [=manifest/display_override=] は特定の <dfn>display mode extensions</dfn> もサポートする。
             </p>
             <dl>
                 <dt>
-                    <dfn data-export="" data-dfn-for="display mode">unframed</dfn>
+                    [=display mode/unframed=]
                 </dt>
                 <dd>
-                    isolated web application には、ホストネイティブのタイトルバーや
-                    [=window controls=] が表示されず、Web コンテンツがタイトルバー領域
-                    全体へ拡張される。アプリは Web コンテンツ内に [=draggable region=] を
-                    指定して、カスタマイズされたタイトルバーを作成できる。
+                    アプリウィンドウは [=display mode/unframed=] であり、つまり [=Window frame=] を持たない。
+                    ホストネイティブのタイトルバーはなく、[=window controls=] は表示されない。
+                    ウェブコンテンツはウィンドウ領域全体に拡張される。[=display mode/Unframed=] は
+                    [[[isolated-web-apps]]] に制限される。
                 </dd>
                 <dt>
                     [=display mode/window-controls-overlay=]
                 </dt>
+                <dd>
+                    アプリウィンドウは通常の [=window controls=] の代わりに
+                    [=display mode/window-controls-overlay=] を持つ。
+                </dd>
                 <dt>
                     <dfn data-export="" data-dfn-for="display mode">tabbed</dfn>
                 </dt>
                 <dd>
-                    Web アプリケーションは、複数の [=application contexts=] を単一の
-                    オペレーティングシステムレベルのウィンドウに結合できる。たとえば、
-                    これはユーザーエージェントが、ユーザーが application contexts 間を
-                    切り替えられるようにタブストリップ UI を表示することを意味し得る。
+                    ウェブアプリケーションは、複数の [=application contexts=] を
+                    単一のオペレーティングシステムレベルのウィンドウにまとめることができる。
+                    たとえば、これはユーザーがアプリケーションコンテキスト間を切り替えられるように、
+                    ユーザーエージェントがタブストリップ UI を表示することを意味し得る。
                 </dd>
             </dl>
             <section class="informative">
@@ -159,13 +307,13 @@
                     [=manifest/display_override=] の使用例
                 </h4>
                 <p>
-                    次は、<code>standalone</code> よりも <code>minimal-ui</code>
-                    <a data-cite="appmanifest#dfn-display-mode">表示モード</a>を優先するが、
-                    <code>minimal-ui</code> がサポートされていない場合は
-                    <code>browser</code> ではなく <code>standalone</code> へフォールバックする
-                    [=manifest=] を示す。
+                    次は、<code>minimal-ui</code> がサポートされていない場合に
+                    <code>browser</code> ではなく <code>standalone</code> にフォールバックする一方で、
+                    <code>standalone</code> よりも
+                    <code>minimal-ui</code> <a data-cite="appmanifest#dfn-display-mode">display mode</a> を
+                    優先する [=manifest=] を示す。
                 </p>
-                <pre class="example json" title="display_override usage manifest">
+                <pre class="example json" title="display_override 使用マニフェスト">
             {
               "name": "Recipe Zone",
               "description": "All of the recipes!",
@@ -184,20 +332,97 @@
         </section>
         <section>
             <h3>
-                <dfn data-export="" data-lt="draggable region">ドラッグ可能な
-                    領域</dfn>の定義
+                <code><dfn data-export="" data-dfn-for="display mode">unframed</dfn></code> 表示モード
             </h3>
-            <p class="issue" title="At risk feature">
-                [=app-region=] CSS プロパティはどのユーザーエージェントにも実装されて
-                いないため、at risk である。なお、一部のユーザーエージェントは
-                同じ目的のために非標準 CSS プロパティ
-                <dfn data-export="" data-lt="-webkit-app-region">`-webkit-app-region`</dfn>
-                を使用する。
+            <p>
+                [=display mode/unframed=] 表示モードにより、[[[isolated-web-apps]]] は
+                タイトルバー領域を含むアプリウィンドウの外観を完全に制御できる。
             </p>
             <p>
+                [=display mode/unframed=] のウィンドウには、ホストネイティブのタイトルバーや
+                [=window controls=] は一切表示されず、ウェブコンテンツはウィンドウ領域全体に拡張される。
+                アプリはウェブコンテンツ内に [=draggable regions=] を指定して、
+                カスタマイズされたタイトルバーを作成できる。
+            </p>
+            <p>
+                [=User agents=] は、[=display mode/unframed=] の使用を
+                [[[isolated-web-apps]]] に制限しなければならない（MUST）。
+            </p>
+            <p>
+                [=display mode/unframed=] ウィンドウが作成されると、その表示モードは
+                ウィンドウの存続期間中固定される。[=user agent=] は、unframed ウィンドウ内で
+                スコープ外 URL へのナビゲーションが発生することを許可してはならない（MUST NOT）。
+            </p>
+            <section class="informative">
+                <h3>
+                    視覚的な例
+                </h3>
+                <p>
+                    次の図は、標準的なウェブアプリケーションウィンドウと
+                    [=display mode/unframed=] 表示モードを利用するウィンドウとの視覚的な違いを示す。
+                    通常のアプリウィンドウ（左）には、ホストネイティブのタイトルバーと標準の
+                    ウィンドウコントロールが含まれる。対照的に、unframed アプリウィンドウ（右）は、
+                    これらのホスト提供のフレーム装飾を取り除き、ウェブコンテンツがウィンドウ領域全体を
+                    占められるようにする。
+                </p>
+                <div style="display: flex; gap: 20px; margin-top: 15px;">
+                    <figure style="margin: 0;">
+                        <img src="images/example-non-unframed-window.png" alt="通常のアプリウィンドウの例"
+                            style="max-width: 100%; height: auto;">
+                        <figcaption style="text-align: center; font-size: 0.9em; color: #555;">standalone モードの
+                            通常のアプリウィンドウ</figcaption>
+                    </figure>
+                    <figure style="margin: 0;">
+                        <img src="images/example-unframed-window.png" alt="unframed アプリウィンドウの例"
+                            style="max-width: 100%; height: auto;">
+                        <figcaption style="text-align: center; font-size: 0.9em; color: #555;">unframed
+                            モードのアプリウィンドウ</figcaption>
+                    </figure>
+                </div>
+            </section>
+            <section>
+                <h3>
+                    CSS メディアクエリ
+                </h3>
+                <p>
+                    [=display mode/unframed=] 表示モードは、
+                    <a data-cite="MEDIAQUERIES-5#descdef-media-display-mode">`display-mode` メディア
+                        特性</a>を使用して問い合わせることができる。
+                </p>
+                <pre class="example css" title="unframed 表示モードの問い合わせ">
+            @media (display-mode: unframed) {
+              /* styles for unframed mode */
+            }
+          </pre>
+            </section>
+            <section>
+                <h3>
+                    セキュリティおよびプライバシーに関する考慮事項
+                </h3>
+                <p>
+                    開発者にタイトルバーの制御を与えると、以前は信頼されたユーザーエージェント制御領域であった場所の
+                    コンテンツを偽装できるようになる。この脅威を軽減するため、この機能は
+                    [[[isolated-web-apps]]] でのみ利用可能でなければならず、ウィンドウ管理権限によって
+                    ゲートされなければならない。
+                </p>
+                <p>
+                    [=display mode/unframed=] ウィンドウにはタイトルバーがないため、
+                    アプリのオリジンやプライバシーインジケーター（たとえばカメラおよびマイクへのアクセス用）など、
+                    [=user agent=] が通常タイトルバーに表示する重要なインジケーターは、
+                    別の場所に表示する必要がある。それらのインジケーターを表示する具体的な場所は
+                    プラットフォーム依存であり、ユーザーエージェントが決定する。
+                </p>
+            </section>
+        </section>
+        <section>
+            <h3>
+                <dfn data-export="" data-lt="draggable region">draggable
+                    regions</dfn> の定義
+            </h3>
+            <p>
                 <dfn data-export="" data-lt="app-region">`app-region`</dfn>
-                プロパティは、たとえばタイトルバー内のどの領域または要素が
-                ドラッグ可能であるかを CSS で定義するために使用できる。
+                プロパティは、たとえばタイトルバー内のどの領域または要素がドラッグ可能であるかを
+                CSS で定義するために使用できる。
             </p>
             <ul>
                 <li>要素のドラッグを有効にするには、`drag` に設定しなければならない。
@@ -205,45 +430,57 @@
                 <li>要素のドラッグを無効にするには、`no-drag` に設定しなければならない。
                 </li>
             </ul>
+            <p>
+                `app-region` プロパティは、ウィンドウに適用された [=display mode=] が
+                [=display mode/unframed=] または [=display mode/window-controls-overlay=] の場合にのみ
+                効果を持たなければならない（MUST）。
+            </p>
+            <aside class="note">
+                一部の [=user agents=] は、同じ目的のために非標準の CSS プロパティ
+                <dfn data-export="" data-lt="-webkit-app-region">`-webkit-app-region`</dfn> を使用する。
+            </aside>
         </section>
     </section>
     <section>
         <h2>
-            manifest の処理への拡張
+            マニフェスト処理への拡張
         </h2>
         <p>
-            この仕様によって追加される新しい拡張およびインキュベーション機能
-            すべてを容易にするため、ユーザーエージェントは [=processing a manifest=] における
+            この仕様によって追加されるすべての新しい拡張機能およびインキュベーション機能を容易にするため、
+            ユーザーエージェントは、[=processing a manifest=] における
             <a data-cite="appmanifest#dfn-processing-extension-point-of-web-manifest">拡張
-                ポイント</a>で、[=URL=]
-            |document URL:URL|、[=URL=] |manifest URL:URL|、[=ordered map=]
-            |json:ordered map|、および [=ordered map=] |manifest:ordered map| に
-            アクセスして、次を実行するべきである：
+                ポイント</a>の間に次を実行するべきである（SHOULD）
+            （[=URL=] |document URL:URL|、[=URL=] |manifest URL:URL|、
+            [=ordered map=] |json:ordered map|、および [=ordered map=]
+            |manifest:ordered map| にアクセスできるものとする）:
         </p>
         <ol>
-            <li>|json|、|manifest| および
-                |manifest URL| を渡して [=Process the `tab_strip` member=]。
+            <li>|json|、|manifest|、および |manifest URL| を渡して、
+                [=Process the `display_override` member=]。
             </li>
-            <li>|json|、|manifest|
-                および |manifest URL| を渡して [=Process the `note_taking` member=]。
+            <li>|json|、|manifest|、および |manifest URL| を渡して、
+                [=Process the `tab_strip` member=]。
             </li>
-            <li>|json| および
-                |manifest| を渡して [=Process the `protocol_handlers` member=]。
-            </li>
-            <li>|json|、|manifest|
-                および |manifest URL| を渡して [=Process the `file_handlers` member=]。
+            <li>|json|、|manifest|、
+                および |manifest URL| を渡して、[=Process the `note_taking` member=]。
             </li>
             <li>|json| および
-                |manifest| を渡して [=Process the `related_applications` member=]。
+                |manifest| を渡して、[=Process the `protocol_handlers` member=]。
+            </li>
+            <li>|json|、|manifest|、
+                および |manifest URL| を渡して、[=Process the `file_handlers` member=]。
             </li>
             <li>|json| および
-                |manifest| を渡して [=Process the `scope_extensions` member=]。
+                |manifest| を渡して、[=Process the `related_applications` member=]。
             </li>
-            <li>|json|、|manifest|
-                および |manifest URL| を渡して [=Process the `migrate_from` member=]。
+            <li>|json| および
+                |manifest| を渡して、[=Process the `scope_extensions` member=]。
             </li>
-            <li>|json|、|manifest|
-                および |manifest URL| を渡して [=Process the `migrate_to` member=]。
+            <li>|json|、|manifest|、
+                および |manifest URL| を渡して、[=Process the `migrate_from` member=]。
+            </li>
+            <li>|json|、|manifest|、
+                および |manifest URL| を渡して、[=Process the `migrate_to` member=]。
             </li>
         </ol>
     </section>
@@ -253,11 +490,10 @@
         </h2>
         <p>
             <a data-cite="appmanifest#web-application-manifest">Web Application
-                Manifest</a> の `tab_strip` メンバーは、アプリケーションが
-            [=display mode/tabbed=] 表示モードでどのように挙動することを意図しているか
-            についての情報を含む
-            <a data-cite="appmanifest#dfn-object">オブジェクト</a>である。
-            これは次のメンバーを持つ：
+                Manifest</a> の `tab_strip` メンバーは、
+            アプリケーションが [=display mode/tabbed=] 表示モードでどのように振る舞うことを意図しているかに関する
+            情報を含む
+            <a data-cite="appmanifest#dfn-object">オブジェクト</a>である。これは次のメンバーを持つ:
         </p>
         <ul>
             <li>[=tab_strip/home_tab=]
@@ -270,9 +506,9 @@
                 <code><dfn>home_tab</dfn></code> メンバー
             </h3>
             <p>
-                [=tab_strip=] オブジェクトの `home_tab` メンバーは、アプリケーションの
-                トップレベルメニューとして機能することを意図した特別な「ホームタブ」に
-                関する情報を含む ordered map である。これは次のメンバーを含む：
+                [=tab_strip=] オブジェクトの `home_tab` メンバーは、
+                アプリケーションのトップレベルメニューとして機能することを意図した特別な「home tab」に関する
+                情報を含む ordered map である。これは次のメンバーを含む:
             </p>
             <ul>
                 <li>[=home_tab/scope_patterns=]
@@ -280,182 +516,183 @@
             </ul>
             <p>
                 <code><dfn>scope_patterns</dfn></code> メンバーは、
-                [=manifest URL=] に相対的な [=within home tab scope|ホームタブのスコープ=]
-                を定義する {{URLPatternInput}} のリストである。
+                [=manifest URL=] を基準として [=within home tab scope|home tab のスコープ=] を定義する
+                {{URLPatternInput}} のリストである。
             </p>
             <aside class="note">
-                各スコープパターンは、URL のように見えるが
-                "<code>*</code>" をワイルドカード文字として持つ文字列、または
-                "<code>*</code>" ワイルドカードを持つ別々の URL コンポーネントを含む
-                辞書のいずれかである。詳細については [[urlpattern]] を参照。
+                各スコープパターンは、ワイルドカード文字として "<code>*</code>" を含む
+                URL のように見える文字列、または "<code>*</code>" ワイルドカードを含む
+                個別の URL コンポーネントを持つ辞書のいずれかである。
+                詳細については [[urlpattern]] を参照。
             </aside>
             <p>
-                アプリケーションの適用済み [=display mode=] が [=display mode/tabbed=] であり、
-                [=Document/processed manifest=] が [=tab_strip=] メンバーの非 null な
-                [=home_tab=] メンバーを含む場合、そのアプリケーションは
-                <dfn>ホームタブを持つ</dfn>。
+                アプリケーションは、アプリケーションの適用された [=display
+                mode=] が [=display mode/tabbed=] であり、かつ
+                [=Document/processed manifest=] が [=tab_strip=] メンバーの
+                非 null の [=home_tab=] メンバーを含む場合、<dfn>home tab を持つ</dfn>。
             </p>
             <p>
-                <dfn>ホームタブコンテキスト</dfn>は、他の application contexts と比べて
+                <dfn>home tab context</dfn> は、他のアプリケーションコンテキストと比較して
                 特別なプロパティを持つ任意の [=application context=] である。
-                アプリケーションが [=has a home tab=] 場合、すべてのアプリケーション
-                ウィンドウは [=home tab context=] を備えるべきである。そうでない場合、
-                アプリケーションウィンドウは [=home tab context=] を持つべきではない。
+                アプリケーションが [=has a home tab=] 場合、すべてのアプリケーションウィンドウは
+                [=home tab context=] を備えるべきである（SHOULD）。そうでない場合、
+                アプリケーションウィンドウは [=home tab context=] を持つべきではない（SHOULD NOT）。
             </p>
             <p>
-                [=home tab context=] がどのように提示されるかはユーザーエージェントの
-                裁量に委ねられるが、通常の application contexts とは異なる外観を
-                持つべきである。
+                [=home tab context=] がどのように提示されるかはユーザーエージェントの裁量によるが、
+                通常のアプリケーションコンテキストとは異なる外観を持つべきである（SHOULD）。
             </p>
             <p>
                 [=URL=] |url:URL| は、次の場合に限り
-                <dfn>ホームタブスコープ内</dfn>であると言われる：
+                <dfn>within home tab scope</dfn> であると言われる:
             </p>
             <ul>
                 <li>アプリケーションが [=has a home tab=]、かつ
                 </li>
-                <li>|url| が manifest の [=manifest/within scope=] であり、かつ
+                <li>|url| がマニフェストの [=manifest/within scope=] であり、かつ
                 </li>
-                <li>次の少なくとも 1 つ：
+                <li>次の少なくとも 1 つが成り立つ:
                     <ul>
                         <li>|url| が [=start URL=] と [=URL/equals=] であり、
                             [=URL/equals/exclude fragments=] が true に設定されている、または
                         </li>
                         <li>[=Document/processed manifest=] の [=tab_strip=] メンバーの
                             [=home_tab=] メンバーの [=scope_patterns=] メンバーの任意の要素と
-                            |url| を与えて [=URL pattern/match=] を適用した結果が
-                            {{URLPatternResult}} を返す。
+                            |url| が与えられて [=URL pattern/match=] を適用すると、
+                            {{URLPatternResult}} が返される。
                         </li>
                     </ul>
                 </li>
             </ul>
             <p>
-                URL は [=within home tab scope=] でない場合、<dfn>ホームタブスコープ外</dfn>である。
+                URL は、[=within home tab scope=] でない場合、
+                <dfn>outside of home tab scope</dfn> である。
             </p>
             <aside class="note">
                 <p>
-                    「ホームタブスコープ」（すなわち [=within home tab scope=] である
-                    [=URLs=] の集合）は、[=home tab context=] がナビゲートされ得る
-                    URL の集合である。アプリケーション内で [=within home tab scope=] の
-                    URL へのすべてのナビゲーションは [=home tab context=] で実行され、
-                    [=outside of home tab scope=] の URL へのすべてのナビゲーションは、
-                    必要に応じて作成される別の [=application context=]
-                    （すなわち別のタブ）で実行される。アプリケーションの [=start URL=] は、
-                    （アプリケーションが [=has a home tab=] 場合）常にホームタブスコープの
-                    一部である。
+                    「home tab scope」（すなわち、[=within
+                    home tab scope=] である [=URLs=] の集合）は、[=home tab
+                    context=] がナビゲート可能な URL の集合である。アプリケーション内で
+                    [=within home tab scope=] の URL へのすべてのナビゲーションは
+                    [=home tab context=] で実行され、[=outside of home tab
+                    scope=] の URL へのすべてのナビゲーションは、必要に応じて作成される別の
+                    [=application context=]（すなわち別のタブ）で実行される。
+                    アプリケーションの [=start URL=] は常に（アプリケーションが [=has a home tab=] 場合）
+                    home tab scope の一部である。
                 </p>
                 <p>
-                    [=start URL=] との照合のためには、[=URL/fragment=] は無視されるが、
+                    [=start URL=] との照合の目的では、[=URL/fragment=] は無視されるが、
                     [=URL/query=] は正確に一致しなければならない。
                 </p>
                 <p>
-                    アプリケーションが [=has a home tab|ホームタブを持たない=] 場合、
-                    ホームタブスコープは空集合であり、すべての URL は
+                    アプリケーションが [=has a home tab|home tab を持たない=] 場合、
+                    home tab scope は空集合であり、すべての URL は
                     [=outside of home tab scope=] である。
                 </p>
             </aside>
             <section>
                 <h3>
-                    すべてのウィンドウはホームタブを持つ
+                    すべてのウィンドウが home tab を持つ
                 </h3>
                 <p>
-                    アプリケーションが [=has a home tab=] 場合、新しいアプリケーション
-                    ウィンドウが作成されるたびに（たとえばアプリケーションの起動時、
-                    またはタブを新しいウィンドウへ移動するとき）、ユーザーエージェントは
-                    そのウィンドウ内に新しい [=home tab context=] を作成しなければならない。
-                    新しく作成された [=home tab context=] は、定義上
-                    [=within home tab scope=] である [=start URL=] へナビゲートされるべきである。
+                    アプリケーションが [=has a home tab=] 場合、新しいアプリケーションウィンドウが
+                    作成されるたびに（たとえば、アプリケーションの起動時、またはタブを新しいウィンドウに
+                    移動するとき）、ユーザーエージェントはそのウィンドウ内に新しい [=home tab
+                    context=] を作成しなければならない（MUST）。新しく作成された [=home tab
+                    context=] は [=start URL=] にナビゲートされるべきであり（SHOULD）、
+                    これは定義上 [=within home tab scope=] である。
                 </p>
             </section>
             <section>
                 <h3>
-                    ホームタブスコープに関するナビゲーション
+                    home tab scope に関するナビゲーション
                 </h3>
                 <p>
                     [=home tab context=] に関連付けられた [=top-level traversable=] を、
                     [=outside of home tab scope=] である [=URL=] |url:URL| へ
-                    [=navigate|ナビゲート=] するとき、次の手順が実行される：
+                    [=navigate|ナビゲート=] するとき、次の手順を実行する:
                 </p>
                 <ol>
-                    <li><code>"_blank"</code> のターゲットおよび noopener true で
+                    <li><code>"_blank"</code> を target とし、noopener を true として
                         navigable を選択した結果を、[=top-level traversable=]
                         |tab:toplevel traversable| とする。
                     </li>
                     <li>home-tab traversable を [=navigating=] する代わりに、
                         同じパラメーターで |tab| を [=navigate=] する。
                     </li>
-                    <li>現在の [=application manifest=] を |tab| の
-                        [=top-level browsing context=] に [=applied|適用=] する。
+                    <li>現在の [=application manifest=] を
+                        |tab| の [=top-level browsing context=] に適用する。
                     </li>
-                    <li>ユーザーエージェントは |tab| を home-tab navigable と同じ
-                        ウィンドウに配置するべきである。
+                    <li>ユーザーエージェントは |tab| を home-tab navigable と同じウィンドウに
+                        配置するべきである（SHOULD）。
                     </li>
-                    <li>|tab| をフォーカスする。
+                    <li>|tab| にフォーカスする。
                     </li>
                 </ol>
                 <p class="issue" data-number="98"></p>
                 <p>
-                    [=display mode/tabbed=] の [=display mode=] を持つ
-                    [=top-level traversable=] であって [=home tab context=] に関連付けられて
-                    いないもの（すなわち非ホームタブ）を、[=within home tab scope=] である
-                    [=URL=] |url:URL| へ [=navigate|ナビゲート=] するとき、次の手順が
-                    実行される：
+                    [=display mode/tabbed=] の [=display mode=] を持ち、
+                    [=home tab context=] に関連付けられていない [=top-level traversable=]
+                    （すなわち非 home tab）を、[=within home tab scope=] である [=URL=]
+                    |url:URL| へ [=navigate|ナビゲート=] するとき、次の手順を実行する:
                 </p>
                 <ol>
                     <li>|hometab:toplevel traversable| を、現在のウィンドウに関連付けられた
-                        [=home tab context=] の [=top-level traversable=] とする。
+                        [=home tab context=] の [=top-level
+                        traversable=] とする。
                     </li>
                     <li>top-level traversable を [=navigating=] する代わりに、
                         同じパラメーターで |hometab| を [=navigate=] する。
                     </li>
-                    <li>|hometab| をフォーカスする。
+                    <li>|hometab| にフォーカスする。
                     </li>
                 </ol>
                 <aside class="note">
-                    ホームタブから [=outside of home tab scope=] の URL へのナビゲーションは、
-                    新しい通常のタブを開き、既存の文書をホームタブに開いたままにする。
-                    同様に、通常のタブから [=within home tab scope=] の URL への
-                    ナビゲーションはホームタブで開かれ、そのナビゲーションを開始した
-                    タブには既存の文書が開いたまま残る。開発者は、これらのどちらの場合にも、
-                    残された文書が予期しない状態にならないようにするべきである。
+                    home tab から [=outside of home tab scope=] の URL へのナビゲーションは、
+                    既存の文書を home tab 内に開いたまま、新しい通常のタブを開く。
+                    同様に、通常のタブから [=within home tab scope=] の URL へのナビゲーションは、
+                    そのナビゲーションを開始したタブに既存の文書を開いたまま、
+                    home tab 内で開く。開発者は、これらのどちらの場合でも、取り残された文書が
+                    予期しない状態にならないようにするべきである。
                 </aside>
             </section>
             <section class="informative">
                 <h3>
-                    ホームタブ不変条件
+                    home tab の不変条件
                 </h3>
                 <p>
-                    上記の規則は、[=has a home tab|ホームタブを持つ=] アプリケーションについて、
-                    次の不変条件が常に真であることを保証することを意図している：
+                    上記の規則は、[=has a home
+                    tab|home tab を持つ=] アプリケーションについて、次の不変条件が常に真であることを
+                    保証することを意図している:
                 </p>
                 <ul>
-                    <li>すべてのアプリケーションウィンドウは正確に 1 つの
-                        [=home tab context=] を持ち、
+                    <li>各アプリケーションウィンドウは正確に 1 つの [=home tab context=] を持ち、
+                        かつ
                     </li>
-                    <li>すべての [=home tab context=] のアクティブ文書の
-                        [=Document/URL=] は [=within home tab scope=] であり
-                        （文書の URL が作成時以降に変更されていない限り）、
+                    <li>各 [=home tab context=] のアクティブな文書の [=Document/URL=] は
+                        （文書の URL が作成後に変更された場合を除き）[=within home tab scope=] であり、
+                        かつ
                     </li>
-                    <li>すべての非ホームタブ [=application context=] のアクティブ文書の
-                        [=Document/URL=] は [=outside of home tab scope=] である
-                        （文書の URL が作成時以降に変更されていない限り）。
+                    <li>各非 home-tab [=application context=] のアクティブな文書の
+                        [=Document/URL=] は（文書の URL が作成後に変更された場合を除き）
+                        [=outside of home tab scope=] である。
                     </li>
                 </ul>
                 <p>
-                    ユーザーエージェントは、文書が [=URL/fragment=] を変更したり、
-                    {{History}} API を使用して表示 URL をホームタブスコープ内外へ変更したり
-                    しても、ナビゲーションが発生していないため、文書をホームタブコンテキストと
-                    非ホームタブコンテキストの間で動的に移動しない。このため、上記の不変条件は、
-                    文書が作成された時点で持っていた [=Document/URLs=] のみを考慮する。
+                    文書が [=URL/fragment=] を変更したり、{{History}} API を使用して表示 URL を
+                    home tab scope の内外へ変更したりしても、ナビゲーションは発生していないため、
+                    ユーザーエージェントは文書を home-tab コンテキストと non-home-tab コンテキストの間で
+                    動的に移動しない。このため、上記の不変条件は、文書が作成された時点で持っていた
+                    [=Document/URLs=] のみを考慮する。
                 </p>
                 <p>
-                    URL を変更することで「ナビゲートしたふり」をする single-page applications では、
-                    これにより、上記の不変条件を破る望ましくない挙動が生じる可能性がある
-                    （例：ユーザーがホームタブ内のリンクをクリックして URL を非ホームページへ
-                    動的に変更しても、実際にはナビゲートしていないため、ホームタブ内に
-                    留まる）。この状況を避けるため、アプリケーションは tabbed application mode
-                    にあることを検出し、URL を変更する代わりに、ホームタブスコープの内外へ
-                    実際のナビゲーションを行うように挙動を変更できる。
+                    URL を変更することでナビゲーションを「装う」シングルページアプリケーションでは、
+                    これにより望ましくない振る舞いが発生し、上記の不変条件が破られる可能性がある
+                    （たとえば、ユーザーが home tab からリンクをクリックして URL を非 home ページへ
+                    動的に変更した場合、実際にはナビゲートしていないため home tab 内に留まる）。
+                    この状況を避けるため、アプリケーションは、tabbed アプリケーションモードにあることを検出し、
+                    URL を変更するのではなく、home tab scope の内外へ実際のナビゲーションを実行するように
+                    振る舞いを変更できる。
                 </p>
             </section>
         </section>
@@ -464,10 +701,10 @@
                 <code><dfn>new_tab_button</dfn></code> メンバー
             </h3>
             <p>
-                [=tab_strip/new_tab_button=] メンバーは、クリック／有効化されたときに
+                [=tab_strip/new_tab_button=] メンバーは、クリック/有効化されたときに
                 アプリケーションウィンドウ内で新しい [=application context=] を開く
-                UI アフォーダンス（ボタンなど）の挙動を記述する ordered map である。
-                これは次のメンバーを持つ：
+                UI アフォーダンス（ボタンなど）の振る舞いを記述する ordered map である。
+                これは次のメンバーを持つ:
             </p>
             <ul>
                 <li>[=new_tab_button/url=]
@@ -475,42 +712,38 @@
             </ul>
             <p>
                 <code><dfn data-dfn-for="new_tab_button">url</dfn></code> メンバーは、
-                [=manifest URL=] に相対的な URL を表す文字列であり、
+                [=manifest URL=] を基準とする URL を表す文字列であり、
                 [=Document/processed manifest=] の [=manifest/within scope=] である。
             </p>
             <p>
                 [=Document/processed manifest=] の [=new_tab_button=] の
                 [=new_tab_button/url=] メンバーが [=outside of home tab scope=] である場合、
-                アプリケーションは <dfn>新しいタブボタンを持つ</dfn>。アプリケーションが
-                [=has a new tab button|新しいタブボタンを持たない=] 場合、
-                ユーザーエージェントは「新しいタブ」アフォーダンスをエンドユーザーに
-                利用可能にするべきではない。
+                アプリケーションは <dfn>new tab button を持つ</dfn>。
+                アプリケーションが [=has a new tab button|new tab button を持たない=] 場合、
+                ユーザーエージェントはエンドユーザーに「new tab」アフォーダンスを利用可能にするべきではない（SHOULD NOT）。
             </p>
             <aside class="note">
                 <p>
-                    新しいタブボタンの URL が [=within home tab scope=] である場合、
-                    そのボタンは利用できなくなる。この規則は必要である。そうでなければ、
-                    a) 新しいタブボタンが [=within home tab scope=] の非ホームタブを開くことを
-                    意味し、上記の 3 番目のホームタブ不変条件に違反するか、
-                    b) 新しいタブボタンが単にホームタブをフォーカスするだけになり、
-                    冗長で混乱を招く UI になるためである。
+                    new tab button の URL が [=within home
+                    tab scope=] である場合、そのボタンは利用不可になる。この規則は必要である。
+                    そうでなければ、a) new tab button が [=within home tab scope=] の非 home tab を開き、
+                    上記の 3 番目の home tab 不変条件に違反する、または b) new tab button が単に
+                    home tab にフォーカスすることになり、冗長で分かりにくい UI になることを意味するためである。
                 </p>
                 <p>
                     [=new_tab_button/url=] の既定値は [=start URL=] である。
-                    これは、アプリケーションが [=has a home tab=] 場合、
-                    ボタンは既定で利用できなくなることを意味する。
+                    これは、アプリケーションが [=has a home tab=] 場合、既定でボタンが利用不可になることを意味する。
                 </p>
             </aside>
             <p>
-                エンドユーザーによって新しいタブボタンが有効化されたとき、次の手順が
-                実行される：
+                エンドユーザーによって new tab button が有効化されたとき、次の手順を実行する:
             </p>
             <ol>
                 <li>現在のウィンドウ内に [=Create a new application context=] し、
-                    それをフォーカスする。
+                    それにフォーカスする。
                 </li>
                 <li>[=new_tab_button=] の [=new_tab_button/url=] メンバーの値へ
-                    ナビゲートする。
+                    それをナビゲートする。
                 </li>
             </ol>
         </section>
@@ -519,33 +752,32 @@
                 `tab_strip` メンバーの処理
             </h2>
             <p>
-                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、
-                および [=URL=] |manifest URL:URL| が与えられたとき、
-                <dfn>process the `tab_strip` member</dfn> するには、
+                [=ordered map=] |json:ordered map|、[=ordered map=] |manifest:ordered map|、および
+                [=URL=] |manifest URL:URL| が与えられたとき、
+                <dfn>`tab_strip` メンバーを処理する</dfn>には、
                 [=processing a manifest=] における
                 <a data-cite="appmanifest#dfn-processing-extension-point-of-web-manifest">
-                    拡張ポイント</a>で次を実行する：
+                    拡張ポイント</a>の間に次を実行する:
             </p>
             <ol>
                 <li>|manifest|["tab_strip"] を新しい [=ordered map=] に設定する。
                 </li>
                 <li>|json|["tab_strip"] が存在しない、または |json|["tab_strip"] が
-                    [=ordered map=] でない場合：
+                    [=ordered map=] でない場合:
                     <ol>
                         <li>|manifest|["tab_strip"]["new_tab_button"]["url"] を
                             |manifest|["start_url"] に設定する。
                         </li>
-                        <li>戻る。
+                        <li>返す。
                         </li>
                     </ol>
                 </li>
-                <li>|json|["tab_strip"]、
-                    |manifest|["tab_strip"]、および |manifest URL| を渡して
+                <li>|json|["tab_strip"]、|manifest|["tab_strip"]、および |manifest URL| を渡して
                     [=Process the `home_tab` member=]。
                 </li>
-                <li>
-                    |json|["tab_strip"]、|manifest|["tab_strip"]、|manifest URL|、および
-                    |manifest|["start_url"] を渡して [=Process the `new_tab_button` member=]。
+                <li>|json|["tab_strip"]、|manifest|["tab_strip"]、|manifest URL|、および
+                    |manifest|["start_url"] を渡して
+                    [=Process the `new_tab_button` member=]。
                 </li>
             </ol>
             <section>
@@ -553,19 +785,18 @@
                     `home_tab` メンバーの処理
                 </h3>
                 <p>
-                    [=ordered map=] |json tab strip:ordered map|、[=ordered map=]
-                    |manifest tab strip:ordered map|、および [=URL=] |manifest URL:URL| が
-                    与えられたとき、<dfn>process the `home_tab` member</dfn> するには、
-                    次を実行する：
+                    [=ordered map=] |json tab strip:ordered map|、[=ordered map=] |manifest tab
+                    strip:ordered map|、および [=URL=] |manifest URL:URL| が与えられたとき、
+                    <dfn>`home_tab` メンバーを処理する</dfn>には、
+                    次を実行する:
                 </p>
                 <ol>
                     <li>|json tab strip|["home_tab"] が存在しない、または |json tab
-                        strip|["home_tab"] が [=ordered map=] でない場合、戻る。
+                        strip|["home_tab"] が [=ordered map=] でない場合、返す。
                     </li>
                     <li>|home tab:ordered map| を新しい [=ordered map=] とする。
                     </li>
-                    <li>|json tab
-                        strip|["home_tab"]["scope_patterns"]、|home tab| および |manifest
+                    <li>|json tab strip|["home_tab"]["scope_patterns"]、|home tab|、および |manifest
                         URL| を渡して [=Process the `scope_patterns` member=]。
                     </li>
                     <li>|manifest tab strip|["home_tab"] を |home tab| に設定する。
@@ -577,25 +808,26 @@
                     `new_tab_button` メンバーの処理
                 </h3>
                 <p>
-                    [=ordered map=] |json tab strip:ordered map|、[=ordered map=]
-                    |manifest tab strip:ordered map|、[=URL=] |manifest URL:URL|、および
-                    [=URL=] |start URL:URL| が与えられたとき、
-                    <dfn>process the `new_tab_button` member</dfn> するには、次を実行する：
+                    [=ordered
+                    map=] |json tab strip:ordered map|、[=ordered map=] |manifest tab
+                    strip:ordered map|、[=URL=] |manifest URL:URL|、および [=URL=] |start
+                    URL:URL| が与えられたとき、<dfn>`new_tab_button` メンバーを処理する</dfn>には、
+                    次を実行する:
                 </p>
                 <ol>
                     <li>|manifest tab strip|["new_tab_button"]["url"] を |start
                         URL| に設定する。
                     </li>
                     <li>|json tab strip|["new_tab_button"] が存在しない、または |json
-                        tab strip|["new_tab_button"] が [=ordered map=] でない場合、戻る。
+                        tab strip|["new_tab_button"] が [=ordered map=] でない場合、返す。
                     </li>
                     <li>|url:URL| を、|manifest URL| を基底
-                        URL として |json tab strip|["new_tab_button"]["url"] を
-                        [=URL Parser|解析=] した結果とする。
+                        URL として |json tab
+                        strip|["new_tab_button"]["url"] を [=URL Parser|構文解析=] した結果とする。
                     </li>
-                    <li>|url| が failure の場合、戻る。
+                    <li>|url| が failure である場合、返す。
                     </li>
-                    <li>|url| が |manifest URL| の [=URL/within scope=] でない場合、戻る。
+                    <li>|url| が |manifest URL| の [=URL/within scope=] でない場合、返す。
                     </li>
                     <li>|manifest tab strip|["new_tab_button"]["url"] を |url| に設定する。
                     </li>
@@ -606,10 +838,10 @@
                     `scope_patterns` メンバーの処理
                 </h3>
                 <p>
-                    [=ordered map=] |json home tab:ordered map|、[=ordered map=]
-                    |manifest home tab:ordered map| および [=URL=] |manifest URL:URL| が
-                    与えられたとき、<dfn>process the `scope_patterns` member</dfn> するには、
-                    次を実行する：
+                    [=ordered
+                    map=] |json home tab:ordered map|、[=ordered map=] |manifest home
+                    tab:ordered map|、および [=URL=] |manifest URL:URL| が与えられたとき、
+                    <dfn>`scope_patterns` メンバーを処理する</dfn>には、次を実行する:
                 </p>
                 <ol>
                     <li>|processed scope patterns:list| を新しい [=list=] とする。
@@ -618,15 +850,14 @@
                         patterns| に設定する。
                     </li>
                     <li>|json home tab|["scope_patterns"] が存在しない、または |json
-                        home tab|["scope_patterns"] が [=list=] でない場合、戻る。
+                        home tab|["scope_patterns"] が [=list=] でない場合、返す。
                     </li>
                     <li>|json home
-                        tab|["scope_patterns"] の |entry:URLPatternInit| それぞれについて：
+                        tab|["scope_patterns"] の各 |entry:URLPatternInit| について:
                         <ol>
-                            <li>|entry| と |manifest URL| を与えて
-                                [=build a URL pattern from an infra value|infra 値から URL パターンを構築=]
-                                した結果を |pattern:URL pattern| とする。この処理が例外を投げるか
-                                null を返す場合、続行する。
+                            <li>|pattern:URL pattern| を、|entry| と |manifest URL| が与えられて [=build a URL
+                                pattern from an infra value=] した結果とする。
+                                この処理が例外を投げる、または null を返す場合、継続する。
                             </li>
                             <li>|pattern| を |processed scope patterns| に追加する。
                             </li>
@@ -660,21 +891,20 @@
         }
         </pre>
             <p>
-                この例は、tabbed mode がサポートされていない場合に単一文書の
-                standalone window へフォールバックする tabbed web app である。
-                メイン index ページ（<code>/</code> または
+                この例は、tabbed モードがサポートされていない場合に単一文書の
+                standalone ウィンドウへフォールバックする tabbed ウェブアプリである。
+                メインインデックスページ（<code>/</code> または
                 <code>/index.html</code>）へのすべてのナビゲーションは
-                [=home tab context=] で開かれる。新しいタブボタンは
-                <code>/create</code> で新しいタブを開く。
+                [=home tab context=] で開かれる。
+                new tab button は <code>/create</code> で新しいタブを開く。
             </p>
             <p>
-                [=tab_strip/home_tab/scope_patterns=] と照合するとき、URL の
-                [=URL/query=] 部分は既定で無視されることに注意
-                （したがって <code>/index.html?utm_source=foo</code> への
-                ナビゲーションはホームタブで開かれる）。しかし、[=start URL=] と
-                照合するとき、[=URL/query=] は正確に一致しなければならないため、
-                クエリを無視したいサイトは、[=start URL=] の
-                [=URL/path=] をスコープパターンとして明示的に含めることが推奨される。
+                [=tab_strip/home_tab/scope_patterns=] に対する照合では、URL の [=URL/query=] 部分は
+                既定で無視される（したがって、
+                <code>/index.html?utm_source=foo</code> へのナビゲーションは
+                home tab で開かれる）ことに注意。ただし、[=start URL=] に対する照合では、
+                [=URL/query=] は正確に一致しなければならないため、query を無視したいサイトは
+                [=start URL=] の [=URL/path=] をスコープパターンとして明示的に含めることが推奨される。
             </p>
         </section>
     </section>
@@ -766,8 +996,7 @@
                 [=URL=] |manifest_URL:URL| が与えられたとき、
                 <dfn>process the `note_taking` member</dfn> するには、
                 [=processing a manifest=] における
-                <a
-                    data-cite="appmanifest#dfn-processing-extension-point-of-web-manifest">拡張
+                <a data-cite="appmanifest#dfn-processing-extension-point-of-web-manifest">拡張
                     ポイント</a>で次を実行する：
             </p>
             <ol class="algorithm">
@@ -848,9 +1077,9 @@
             `protocol_handlers` メンバー
         </h2>
         <p>
-            [=manifest's=] <code><dfn data-dfn-for=
-        "manifest">protocol_handlers</dfn></code> メンバーは、
-            Web アプリケーションが URL プロトコルを処理できるようにする
+            [=manifest=] の <code><dfn data-dfn-for=
+        "manifest">protocol_handlers</dfn></code> メンバーは、ウェブアプリケーションが
+            URL プロトコルを処理できるようにする
             <a>protocol handler description</a> の配列である。
         </p>
         <p>
@@ -982,7 +1211,7 @@
                 ユーザーが protocol handler URL を有効化したとき、ユーザーエージェントは
                 <a>handling a protocol launch</a> を実行するべきである。
             </p>
-            <p class="note">
+            <aside class="note">
                 [[HTML]] の {{NavigatorContentUtils/registerProtocolHandler()}} は、
                 Web サイトが特定のプロトコルの可能な handler として自分自身を登録することを
                 可能にする。<a>protocol handler description</a> に対する
@@ -990,7 +1219,7 @@
                 [=protocol handler description/url=] の値を構成するものは、その API で定義される。
                 なお、[[HTML]] API は、ここで [=protocol handler description/protocol=] を
                 使用する場所で <code>scheme</code> を使用するが、同じ制限が適用される。
-            </p>
+            </aside>
             <section>
                 <h3>
                     `protocol` メンバー
@@ -1080,10 +1309,10 @@
             `file_handlers` メンバー
         </h3>
         <p>
-            [=manifest's=] <code><dfn data-export="" data-dfn-for=
-        "manifest">file_handlers</dfn></code> メンバーは、
-            アプリ自体の外部から発生するファイルを開くアクションをアプリがどのように
-            処理するかについての指示を提供する [=list=] である。
+            [=manifest=] の <code><dfn data-export="" data-dfn-for=
+        "manifest">file_handlers</dfn></code> メンバーは、アプリ自体の外部から
+            発生するファイルを開くアクションをアプリがどのように処理するかについての指示を
+            提供する [=list=] である。
         </p>
         <p>
             登録済み file-handling applications の管理、提示、および選択は、
@@ -1553,13 +1782,12 @@
             アクセス可能であり、Web アプリケーションと関係を持つアプリケーションである。
         </p>
         <p>
-            [=manifest's=] <code><dfn data-export="" data-dfn-for=
-        "manifest">related_applications</dfn></code> メンバーは
-            <a>related
-                applications</a> を列挙し、Web アプリケーションと
-            <a>related applications</a> の間のそのような関係を示すものとして機能する。
-            この関係は一方向であり、列挙されたアプリケーションが同じ関係を主張しない限り、
-            <a>user agent</a> は双方向の endorsement を仮定してはならない。
+            [=manifest=] の <code><dfn data-export="" data-dfn-for=
+        "manifest">related_applications</dfn></code> メンバーは、<a>related
+                applications</a> を列挙し、ウェブアプリケーションと
+            <a>related applications</a> の間にそのような関係があることを示すものとして機能する。この
+            関係は単方向であり、列挙されたアプリケーションが同じ関係を主張しない限り、
+            <a>user agent</a> は双方向の承認を仮定してはならない（MUST NOT）。
         </p>
         <p>
             `related_applications` の使用例としては、その情報を使用して Web アプリケーションに
@@ -1606,14 +1834,15 @@
             `prefer_related_applications` メンバー
         </h3>
         <p>
-            [=manifest's=] <code><dfn data-export="" data-dfn-for=
+            [=manifest=] の <code><dfn data-export="" data-dfn-for=
         "manifest">`prefer_related_applications`</dfn></code> メンバーは、
-            <a>related applications</a> が Web アプリケーションより優先されるべきであると
-            ユーザーエージェントに伝えるヒントとして使用される [=boolean=] である。
+            [=boolean=] であり、ウェブアプリケーションよりも
+            <a>related applications</a> を優先するべきであることを
+            user agent に伝えるヒントとして使用される。
             `prefer_related_applications` メンバーが `true` に設定されており、
-            ユーザーエージェントが Web アプリケーションのインストールを提案したい場合、
-            代わりに <a>related applications</a> の 1 つのインストールを提案したいと
-            考えるかもしれない。
+            user agent がウェブアプリケーションのインストールを提案しようとする場合、
+            user agent は代わりに <a>related applications</a> のいずれかの
+            インストールを提案したい場合がある。
         </p>
     </section>
     <section>
@@ -1621,7 +1850,7 @@
             `scope_extensions` メンバー
         </h3>
         <p>
-            [=manifest's=] <code><dfn data-export="" data-dfn-for=
+            [=manifest=] の <code><dfn data-export="" data-dfn-for=
         "manifest">scope_extensions</dfn></code> メンバーは、アプリケーションが望む
             [=scope extensions=] のリストを表す。
         </p>
@@ -1664,9 +1893,9 @@
             </li>
         </ol>
         <aside class="note">
-            [=manifest's=] `scope` メンバーは、URL が単一の [=origin=] からのスコープとして
-            考慮されることだけを許可する。`scope_extensions` メンバーは、
-            複数の [=origins=] からの URL が考慮されることを可能にする。
+            [=manifest=] の `scope` メンバーは、単一の [=origin=] からの URL のみを
+            スコープの対象として考慮できるようにする。`scope_extensions` メンバーは、
+            複数の [=origins=] からの URL を考慮できるようにする。
         </aside>
         <section class="informative">
             <h2>
@@ -1954,11 +2183,11 @@
                     UI がどの程度強制的であるかに影響し得るヒントである。
                 </li>
             </ul>
-            <div class="note">
+            <aside class="note">
                 ユーザーエージェントが [=manifest/migrate_from=] メンバーを処理するには、
                 manifest はその JSON 内に有効で明示的な
                 <a data-cite="appmanifest#dfn-id">id</a> メンバーも含む必要がある。
-            </div>
+            </aside>
         </section>
         <section>
             <h3>
@@ -2031,85 +2260,86 @@
             </p>
             <ol class="algorithm">
                 <li>|json|["id"] が [=map/exist=] しない、または [=string=] でない場合、
-                    戻る。
+                    返す。
                 </li>
-                <li>|json|["id"] が空文字列の場合、戻る。
+                <li>|json|["id"] が空文字列である場合、返す。
                 </li>
                 <li>|base_origin:origin| を |manifest|["start_url"] の
                     [=URL/origin=] とする。
                 </li>
                 <li>|id_url:URL| を、|base_origin| を基底 URL として
-                    |json|["id"] を [=URL Parser|解析=] した結果とする。
+                    |json|["id"] を [=URL Parser|構文解析=] した結果とする。
                 </li>
-                <li>|id_url| が failure の場合、戻る。
+                <li>|id_url| が failure である場合、返す。
                 </li>
                 <li>|id_url| が |manifest|["start_url"] と [=same origin=] でない場合、
-                    戻る。
+                    返す。
                 </li>
                 <li>|processed_migrate_from:list| を新しい [=list=] とする。
                 </li>
                 <li>|manifest|["migrate_from"] を |processed_migrate_from| に設定する。
                 </li>
                 <li>|json|["migrate_from"] が [=map/exist=] しない、または
-                    [=list=] でない場合、戻る。
+                    [=list=] でない場合、返す。
                 </li>
-                <li>|json|["migrate_from"] の |entry| それぞれについて [=list/For each=]：
+                <li>|json|["migrate_from"] の各 |entry| について [=list/For each=]:
                     <ol>
                         <li>|processed_entry:ordered map| を新しい [=ordered map=] とする。
                         </li>
-                        <li>|entry| が [=string=] の場合：
+                        <li>|entry| が [=string=] である場合:
                             <ol>
-                                <li>|manifest URL| を基底 URL として |entry| を
-                                    [=URL Parser|解析=] した結果を |id:URL| とする。
+                                <li>|id:URL| を、|manifest URL| を基底 URL として
+                                    |entry| を [=URL Parser|構文解析=] した結果とする。
                                 </li>
-                                <li>|id| が failure の場合、[=iteration/continue=]。
+                                <li>|id| が failure である場合、[=iteration/continue=] する。
                                 </li>
-                                <li>|processed_entry|["id"] を |id| に設定する。
+                                <li>|processed_entry| の [=migrate_from_item/id=] を |id| に設定する。
                                 </li>
                             </ol>
                         </li>
-                        <li>そうでなく、|entry| が [=ordered map=] の場合：
+                        <li>そうでなく、|entry| が [=ordered map=] である場合:
                             <ol>
-                                <li>|entry|["id"] が [=map/exist=] しない、または
-                                    [=string=] でない場合、[=iteration/continue=]。
+                                <li>|entry| の [=migrate_from_item/id=] が [=map/exist=] しない、または
+                                    [=string=] でない場合、[=iteration/continue=] する。
                                 </li>
-                                <li>|manifest URL| を基底 URL として
-                                    |entry|["id"] を [=URL Parser|解析=] した結果を |id:URL| とする。
+                                <li>|id:URL| を、|manifest URL| を基底 URL として
+                                    |entry| の [=migrate_from_item/id=] を [=URL Parser|構文解析=] した結果とする。
                                 </li>
-                                <li>|id| が failure の場合、[=iteration/continue=]。
+                                <li>|id| が failure である場合、[=iteration/continue=] する。
                                 </li>
-                                <li>|processed_entry|["id"] を |id| に設定する。
+                                <li>|processed_entry| の [=migrate_from_item/id=] を |id| に設定する。
                                 </li>
-                                <li>|entry|["install_url"] が [=map/exists=] し、
-                                    [=string=] である場合：
+                                <li>|entry| の [=migrate_from_item/install_url=] が [=map/exists=] し、かつ
+                                    [=string=] である場合:
                                     <ol>
-                                        <li>|manifest
-                                            URL| を基底 URL として |entry|["install_url"] を [=URL
-                                            Parser|解析=] した結果を |install_url:URL| とする。
+                                        <li>|install_url:URL| を、|manifest
+                                            URL| を基底 URL として |entry| の [=migrate_from_item/install_url=] を [=URL
+                                            Parser|構文解析=] した結果とする。
                                         </li>
                                         <li>|install_url| が failure でない場合、
-                                            |processed_entry|["install_url"] を |install_url| に設定する。
+                                            |processed_entry| の [=migrate_from_item/install_url=] を |install_url| に設定する。
                                         </li>
                                     </ol>
                                 </li>
-                                <li>|entry|["behavior"] が [=map/exists=] し、
-                                    [=string=] である場合：
+                                <li>|entry| の [=migrate_from_item/behavior=] が [=map/exists=] し、かつ
+                                    [=string=] である場合:
                                     <ol>
-                                        <li>|entry|["behavior"] が "suggest" または "force" である場合、
-                                            |processed_entry|["behavior"] を |entry|["behavior"] に設定する。
+                                        <li>|entry| の [=migrate_from_item/behavior=] が "suggest" または "force" である場合、
+                                            |processed_entry| の [=migrate_from_item/behavior=] を |entry| の
+                                            [=migrate_from_item/behavior=] に設定する。
                                         </li>
                                     </ol>
                                 </li>
                             </ol>
                         </li>
-                        <li>そうでなければ、[=iteration/continue=]。
+                        <li>それ以外の場合、[=iteration/continue=] する。
                         </li>
-                        <li>[=URL=] |processed_entry|["id"] および [=URL=] |id_url| が
-                            与えられたとして、[=validate origin migration=] のアルゴリズムを
-                            用いて |processed_entry|["id"] を検証する。
+                        <li>[=validate origin migration=] のアルゴリズムを使用し、[=URL=]
+                            |processed_entry| の [=migrate_from_item/id=] と [=URL=] |id_url| が与えられて、
+                            |processed_entry| の [=migrate_from_item/id=] を検証する。
                         </li>
-                        <li>直前の手順が error を返した場合、
-                            [=iteration/continue=]。
+                        <li>前の手順がエラーを返した場合、
+                            [=iteration/continue=] する。
                         </li>
                         <li>|processed_entry| を
                             |processed_migrate_from| に [=list/Append=] する。
@@ -2129,30 +2359,30 @@
             </p>
             <ol class="algorithm">
                 <li>|json|["migrate_to"] が [=map/exist=] しない、または
-                    [=ordered map=] でない場合、戻る。
+                    [=ordered map=] でない場合、返す。
                 </li>
                 <li>|entry:ordered map| を |json|["migrate_to"] とする。
                 </li>
-                <li>|entry|["id"] が [=map/exist=] しない、または [=string=] でない場合、
-                    戻る。
+                <li>|entry| の [=migrate_to_item/id=] が [=map/exist=] しない、または [=string=] でない場合、
+                    返す。
                 </li>
-                <li>|manifest URL| を基底 URL として
-                    |entry|["id"] を [=URL Parser|解析=] した結果を |id:URL| とする。
+                <li>|id:URL| を、|manifest URL| を基底 URL として
+                    |entry| の [=migrate_to_item/id=] を [=URL Parser|構文解析=] した結果とする。
                 </li>
-                <li>|id| が failure の場合、戻る。
+                <li>|id| が failure である場合、返す。
                 </li>
                 <li>|processed_migrate_to:ordered map| を新しい [=ordered map=] とする。
                 </li>
-                <li>|processed_migrate_to|["id"] を |id| に設定する。
+                <li>|processed_migrate_to| の [=migrate_to_item/id=] を |id| に設定する。
                 </li>
-                <li>|entry|["install_url"] が [=map/exists=] し、[=string=] である場合：
+                <li>|entry| の [=migrate_to_item/install_url=] が [=map/exists=] し、かつ [=string=] である場合:
                     <ol>
-                        <li>|manifest URL| を
-                            基底 URL として |entry|["install_url"] を [=URL
-                            Parser|解析=] した結果を |install_url:URL| とする。
+                        <li>|install_url:URL| を、|manifest URL| を基底 URL として
+                            |entry| の [=migrate_to_item/install_url=] を [=URL
+                            Parser|構文解析=] した結果とする。
                         </li>
                         <li>|install_url| が failure でない場合、
-                            |processed_migrate_to|["install_url"] を |install_url| に設定する。
+                            |processed_migrate_to| の [=migrate_to_item/install_url=] を |install_url| に設定する。
                         </li>
                     </ol>
                 </li>
@@ -2307,16 +2537,16 @@
                 `fingerprints` メンバー
             </h3>
             <p>
-                [=external application resource's=] <code><dfn data-dfn-for=
+                [=external application resource=] の <code><dfn data-dfn-for=
           "external application resource">fingerprints</dfn></code> メンバーは、
                 [=fingerprints=] の [=list=] を表す。
             </p>
             <p>
-                <dfn data-local-lt="fingerprints">fingerprint</dfn> は、
-                アプリケーションの検証に使用される暗号学的 fingerprint の集合を表す。
-                fingerprint は次の 2 つのメンバーを持つ：<dfn data-dfn-for="fingerprint">type</dfn> と
-                <dfn data-dfn-for="fingerprint">value</dfn>。これらはいずれも
-                <a>string</a> であるが、その構文と意味はプラットフォーム定義である。
+                <dfn data-local-lt="fingerprints">fingerprint</dfn> は、アプリケーションの検証に使用される
+                暗号学的フィンガープリントの集合を表す。
+                fingerprint は、次の 2 つのメンバーを持つ: <dfn class="lint-ignore" data-dfn-for="fingerprint">type</dfn> および <dfn
+                    class="lint-ignore" data-dfn-for="fingerprint">value</dfn>。これらはいずれも <a>string</a> であるが、
+                その構文および意味論はプラットフォーム定義である。
             </p>
         </section>
     </section>
@@ -2495,13 +2725,13 @@
             <h3>
                 <dfn>BeforeInstallPromptEvent</dfn> インターフェイス
             </h3>
-            <div class="note">
+            <aside class="note">
                 <a>beforeinstallprompt</a> イベントは、必ずしも
                 <a>manual installation</a> が続くことを示すわけではないため、
                 やや誤った名前である（ユーザーエージェントによっては、サイトに
                 インストールプロンプトをトリガーする能力を与えるだけの場合がある）。
                 歴史的な理由からこの名前になっている。
-            </div>
+            </aside>
             <pre class="idl" data-cite="DOM">
           [Exposed=Window]
           interface BeforeInstallPromptEvent : Event {
@@ -2526,7 +2756,7 @@
                 cancel できるようにし、さらに <a>site-triggered install prompt</a> を
                 手動で提示できるようにする。
             </p>
-            <div class="note">
+            <aside class="note">
                 {{BeforeInstallPromptEvent}} が cancel <em>されない</em>場合、
                 ユーザーエージェントはエンドユーザーに対して
                 <a>present an install prompt</a> することが許可される
@@ -2536,7 +2766,7 @@
                 ユーザーエージェントは、後で再び
                 <a>steps to notify that an install prompt
                     is available</a> を自由に実行できる。
-            </div>
+            </aside>
             <p>
                 <dfn>PromptResponseObject</dfn> は
                 {{BeforeInstallPromptEvent/prompt()}} を呼び出した結果を含む。
