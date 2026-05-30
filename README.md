@@ -79,6 +79,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Digital Goods API](https://jp.htmlspecs.com/digital-goods/)（[Source](https://wicg.github.io/digital-goods/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Background Fetch](https://jp.htmlspecs.com/background-fetch/)（[Source](https://wicg.github.io/background-fetch/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Periodic Background Sync](https://jp.htmlspecs.com/periodic-background-sync/)（[Source](https://wicg.github.io/periodic-background-sync/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Content Index](https://jp.htmlspecs.com/content-index/)（[Source](https://wicg.github.io/content-index/spec/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [User-Agent Client Hints](https://jp.htmlspecs.com/ua-client-hints/)（[Source](https://wicg.github.io/ua-client-hints/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Trace Context Level 2](https://jp.htmlspecs.com/trace-context-2/)（[Source](https://www.w3.org/TR/2024/CRD-trace-context-2-20240328/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Baggage](https://jp.htmlspecs.com/baggage/)（[Source](https://www.w3.org/TR/2024/CR-baggage-20240530/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
