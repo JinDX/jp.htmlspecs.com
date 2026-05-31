@@ -273,6 +273,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [WebXR Augmented Reality Module - Level 1](https://jp.htmlspecs.com/webxr-ar-module-1/)（[Source](https://www.w3.org/TR/2025/CRD-webxr-ar-module-1-20250425/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [WebXR Hand Input Module - Level 1](https://jp.htmlspecs.com/webxr-hand-input-1/)（[Source](https://www.w3.org/TR/2024/WD-webxr-hand-input-1-20240605/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebXR Gamepads Module - Level 1](https://jp.htmlspecs.com/webxr-gamepads-module-1/)（[Source](https://www.w3.org/TR/2025/WD-webxr-gamepads-module-1-20250707/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [WebXR Hit Test Module](https://jp.htmlspecs.com/webxr-hit-test-1/)（[Source](https://www.w3.org/TR/2025/WD-webxr-hit-test-1-20251211/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Portable Network Graphics (PNG) 3](https://jp.htmlspecs.com/png-3/)（[Source](https://www.w3.org/TR/2025/REC-png-3-20250624/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Image Resource](https://jp.htmlspecs.com/image-resource/)（[Source](https://www.w3.org/TR/2021/WD-image-resource-20210604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
