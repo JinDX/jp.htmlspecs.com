@@ -243,6 +243,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Media Capture and Streams](https://jp.htmlspecs.com/mediacapture-streams/)（[Source](https://www.w3.org/TR/2025/CRD-mediacapture-streams-20251009/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Media Capture from DOM Elements](https://jp.htmlspecs.com/mediacapture-fromelement/)（[Source](https://www.w3.org/TR/2025/WD-mediacapture-fromelement-20250212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [MediaStreamTrack Content Hints](https://jp.htmlspecs.com/mst-content-hint/)（[Source](https://www.w3.org/TR/2025/WD-mst-content-hint-20250919/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MediaStreamTrack Insertable Media Processing using Streams](https://jp.htmlspecs.com/mediacapture-transform/)（[Source](https://www.w3.org/TR/2026/WD-mediacapture-transform-20260416/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Autoplay Detection](https://jp.htmlspecs.com/autoplay-detection/)（[Source](https://www.w3.org/TR/2025/WD-autoplay-detection-20250904/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Stream Recording](https://jp.htmlspecs.com/media-stream-recording/)（[Source](https://www.w3.org/TR/2026/WD-mediastream-recording-20260316/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebVTT: The Web Video Text Tracks Format](https://jp.htmlspecs.com/webvtt1/)（[Source](https://www.w3.org/TR/2026/CRD-webvtt1-20260520/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
