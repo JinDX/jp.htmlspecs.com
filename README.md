@@ -153,6 +153,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Input Events Level 1](https://jp.htmlspecs.com/input-events-1/)（[Source](https://www.w3.org/TR/2023/DISC-input-events-1-20230928/) ![Discontinued Draft](https://img.shields.io/badge/DISC-ffcc00)）
 - [Input Events Level 2](https://jp.htmlspecs.com/input-events-2/)（[Source](https://www.w3.org/TR/2026/WD-input-events-2-20260501/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Permissions](https://jp.htmlspecs.com/permissions/)（[Source](https://www.w3.org/TR/2025/WD-permissions-20251006/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Requesting Permissions](https://jp.htmlspecs.com/permissions-request/)（[Source](https://wicg.github.io/permissions-request/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebOTP API](https://jp.htmlspecs.com/web-otp/)（[Source](https://wicg.github.io/web-otp/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Device Posture API](https://jp.htmlspecs.com/device-posture/)（[Source](https://www.w3.org/TR/2026/CRD-device-posture-20260520/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Ambient Light Sensor](https://jp.htmlspecs.com/ambient-light/)（[Source](https://www.w3.org/TR/2026/WD-ambient-light-20260514/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
