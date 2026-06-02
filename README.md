@@ -2,7 +2,7 @@
 HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐📡
 
 ### コア仕様
-- [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/multipage/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
+- [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [ECMAScript® 2027 Language Specification](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），- [How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
 - [ECMAScript® 2027 Internationalization API Specification](https://jp.htmlspecs.com/ecma402/)（[Source](https://tc39.es/ecma402/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Language Tags and Locale Identifiers for the World Wide Web](https://jp.htmlspecs.com/ltli/)（[Source](https://www.w3.org/TR/2020/WD-ltli-20201007) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
@@ -196,7 +196,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web Cryptography Level 2](https://jp.htmlspecs.com/webcrypto-2/)（[Source](https://www.w3.org/TR/2025/WD-webcrypto-2-20250422/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web Authentication: An API for accessing Public Key Credentials Level 2](https://jp.htmlspecs.com/webauthn-2/)（[Source](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Web Authentication: An API for accessing Public Key Credentials Level 3](https://jp.htmlspecs.com/webauthn-3/)（[Source](https://www.w3.org/TR/2026/CR-webauthn-3-20260526/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
-- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260528/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260601/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api/)（[Source](https://wicg.github.io/sanitizer-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Subresource Integrity (SRI)](https://jp.htmlspecs.com/sri/)（[Source](https://www.w3.org/TR/2016/REC-SRI-20160623/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Subresource Integrity (SRI) 2](https://jp.htmlspecs.com/sri-2/)（[Source](https://www.w3.org/TR/2026/WD-sri-2-20260320/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
