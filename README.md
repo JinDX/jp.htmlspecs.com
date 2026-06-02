@@ -77,6 +77,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Scalable Video Coding (SVC) Extension for WebRTC](https://jp.htmlspecs.com/webrtc-svc/)（[Source](https://www.w3.org/TR/2024/WD-webrtc-svc-20240817/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Payment Request API](https://jp.htmlspecs.com/payment-request/)（[Source](https://www.w3.org/TR/2026/CRD-payment-request-20260327/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Web-based Payment Handler API](https://jp.htmlspecs.com/web-based-payment-handler/)（[Source](https://www.w3.org/TR/2026/WD-web-based-payment-handler-20260423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Payment Method Manifest](https://jp.htmlspecs.com/payment-method-manifest/)（[Source](https://www.w3.org/TR/2017/WD-payment-method-manifest-20171212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Digital Goods API](https://jp.htmlspecs.com/digital-goods/)（[Source](https://wicg.github.io/digital-goods/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Background Fetch](https://jp.htmlspecs.com/background-fetch/)（[Source](https://wicg.github.io/background-fetch/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Periodic Background Sync](https://jp.htmlspecs.com/periodic-background-sync/)（[Source](https://wicg.github.io/periodic-background-sync/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
