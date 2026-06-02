@@ -102,6 +102,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [GraphQL](https://jp.htmlspecs.com/graphql/)（[Source](https://spec.graphql.org/draft/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [OpenAPI Specification v3.2.0](https://jp.htmlspecs.com/openapi/)（[Source](https://spec.openapis.org/oas/latest.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Storage Access API](https://jp.htmlspecs.com/storage-access/)（[Source](https://privacycg.github.io/storage-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Shared Storage API](https://jp.htmlspecs.com/shared-storage/)（[Source](https://wicg.github.io/shared-storage/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Subresource Loading with Web Bundles](https://jp.htmlspecs.com/webpackage-subresource-loading/)（[Source](https://wicg.github.io/webpackage/subresource-loading.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### デバイスとハードウェアアクセス
