@@ -202,7 +202,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web Authentication: An API for accessing Public Key Credentials Level 3](https://jp.htmlspecs.com/webauthn-3/)（[Source](https://www.w3.org/TR/2026/CR-webauthn-3-20260526/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [A Well-Known URL for Relying Party Passkey Endpoints](https://jp.htmlspecs.com/passkey-endpoints/)（[Source](https://www.w3.org/TR/2026/WD-passkey-endpoints-1-20260114/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [A Well-Known URL for Changing Passwords](https://jp.htmlspecs.com/change-password-url/)（[Source](https://www.w3.org/TR/2024/WD-change-password-url-20240603/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260601/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260604/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api/)（[Source](https://wicg.github.io/sanitizer-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Subresource Integrity (SRI)](https://jp.htmlspecs.com/sri/)（[Source](https://www.w3.org/TR/2016/REC-SRI-20160623/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Subresource Integrity (SRI) 2](https://jp.htmlspecs.com/sri-2/)（[Source](https://www.w3.org/TR/2026/WD-sri-2-20260320/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
