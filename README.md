@@ -92,7 +92,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Indexed Database API 3.0](https://jp.htmlspecs.com/IndexedDB/)（[Source](https://www.w3.org/TR/2025/WD-IndexedDB-3-20250813/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Storage](https://jp.htmlspecs.com/storage/)（[Source](https://storage.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Storage Buckets](https://jp.htmlspecs.com/storage-buckets/)（[Source](https://wicg.github.io/storage-buckets/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [File API](https://jp.htmlspecs.com/FileAPI/)（[Source](https://www.w3.org/TR/2025/WD-FileAPI-20251203/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [File API](https://jp.htmlspecs.com/FileAPI/)（[Source](https://www.w3.org/TR/2026/WD-FileAPI-20260604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [File System](https://jp.htmlspecs.com/fs/)（[Source](https://fs.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [File System Access API](https://jp.htmlspecs.com/file-system-access/)（[Source](https://wicg.github.io/file-system-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)（[Source](https://cookiestore.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
