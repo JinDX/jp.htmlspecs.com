@@ -43,7 +43,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Making Content Usable for People with Cognitive and Learning Disabilities](https://jp.htmlspecs.com/coga-usable/)（[Source](https://www.w3.org/TR/2021/NOTE-coga-usable-20210429/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.2](https://jp.htmlspecs.com/wai-aria-1.2/)（[Source](https://www.w3.org/TR/2023/REC-wai-aria-1.2-20230606/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.3](https://jp.htmlspecs.com/wai-aria-1.3/)（[Source](https://www.w3.org/TR/2026/WD-wai-aria-1.3-20260604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Core Accessibility API Mappings 1.2](https://jp.htmlspecs.com/core-aam-1.2/)（[Source](https://www.w3.org/TR/2026/CRD-core-aam-1.2-20260529/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Core Accessibility API Mappings 1.2](https://jp.htmlspecs.com/core-aam-1.2/)（[Source](https://www.w3.org/TR/2026/CRD-core-aam-1.2-20260604/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [HTML Accessibility API Mappings 1.0](https://jp.htmlspecs.com/html-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-html-aam-1.0-20260529/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SVG Accessibility API Mappings](https://jp.htmlspecs.com/svg-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-svg-aam-1.0-20260529/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WAI-ARIA Graphics Module](https://jp.htmlspecs.com/graphics-aria-1.0/)（[Source](https://www.w3.org/TR/2018/REC-graphics-aria-1.0-20181002/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
