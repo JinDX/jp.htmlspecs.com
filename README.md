@@ -239,6 +239,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Translator and Language Detector APIs](https://jp.htmlspecs.com/translation-api/)（[Source](https://webmachinelearning.github.io/translation-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Prompt API](https://jp.htmlspecs.com/prompt-api/)（[Source](https://webmachinelearning.github.io/prompt-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Writing Assistance APIs](https://jp.htmlspecs.com/writing-assistance-apis/)（[Source](https://webmachinelearning.github.io/writing-assistance-apis/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Proofreader API](https://jp.htmlspecs.com/proofreader-api/)（[Source](https://webmachinelearning.github.io/proofreader-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### メディアとグラフィックス
 - [WebGPU](https://jp.htmlspecs.com/webgpu/)（[Source](https://www.w3.org/TR/2026/CRD-webgpu-20260521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
