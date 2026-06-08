@@ -333,7 +333,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS Font Loading Module Level 3](https://jp.htmlspecs.com/css/css-font-loading/)（[Source](https://www.w3.org/TR/2023/WD-css-font-loading-3-20230406/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### テキストとタイポグラフィ
-- [CSS Text Module Level 3](https://jp.htmlspecs.com/css/css-text-3/)（[Source](https://www.w3.org/TR/2024/CRD-css-text-3-20240930/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [CSS Text Module Level 3](https://jp.htmlspecs.com/css/css-text-3/)（[Source](https://www.w3.org/TR/2026/CRD-css-text-3-20260608/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [CSS Text Module Level 4](https://jp.htmlspecs.com/css/css-text-4/)（[Source](https://www.w3.org/TR/2024/WD-css-text-4-20240529/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Counter Styles Level 3](https://jp.htmlspecs.com/css/css-counter-styles-3/)（[Source](https://www.w3.org/TR/2021/CR-css-counter-styles-3-20210727/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [CSS Lists and Counters Module Level 3](https://jp.htmlspecs.com/css/css-lists-3/)（[Source](https://www.w3.org/TR/2020/WD-css-lists-3-20201117/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
