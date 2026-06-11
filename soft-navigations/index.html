@@ -1464,7 +1464,7 @@ For darkmode:
     <div class="head">
         <h1 class="no-ref p-name" id="title">ソフトナビゲーションとインタラクション・コンテンツフル・ペイント</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">コミュニティグループ報告書草案</a>,
-            <time class="dt-updated" datetime="2026-06-09">2026年6月9日</time>
+            <time class="dt-updated" datetime="2026-06-10">2026年6月10日</time>
         </p>
         <div data-fill-with="spec-metadata">
             <dl>
@@ -1673,7 +1673,9 @@ For darkmode:
 
             <p>性能指標（イベントタイミング、レイアウトシフト、リソース読み込み、または
                 長いアニメーションフレームなど）を、それらの起点となるナビゲーションに帰属させるため、
-                performance timeline は、<code class="highlight">navigationId</code> 属性を <code
+                performance timeline は、<code
+                    class="idl"><a data-link-type="idl" href="#dom-performanceentry-navigationid" id="ref-for-dom-performanceentry-navigationid">navigationId</a></code>
+                属性を <code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#performanceentry" id="ref-for-performanceentry">PerformanceEntry</a></code>
                 上で用いて
                 セグメントに分割される。
@@ -1735,7 +1737,7 @@ For darkmode:
                 navigation id value</a> と <a data-link-type="dfn" href="#window-navigation-id-increment"
                 id="ref-for-window-navigation-id-increment">navigation id increment</a> は、
             <code
-                class="idl"><a data-link-type="idl" href="#dom-performanceentry-navigationid" id="ref-for-dom-performanceentry-navigationid">navigationId</a></code>
+                class="idl"><a data-link-type="idl" href="#dom-performanceentry-navigationid" id="ref-for-dom-performanceentry-navigationid①">navigationId</a></code>
             値を計算するために用いられる（
             <a data-link-type="dfn" href="#increment-the-current-navigation-id"
                 id="ref-for-increment-the-current-navigation-id">increment the current navigation id</a> を参照）。
@@ -1796,7 +1798,7 @@ For darkmode:
 
 
             <p><code
-                    class="idl"><a data-link-type="idl" href="#dom-performanceentry-navigationid" id="ref-for-dom-performanceentry-navigationid①">navigationId</a></code>
+                    class="idl"><a data-link-type="idl" href="#dom-performanceentry-navigationid" id="ref-for-dom-performanceentry-navigationid②">navigationId</a></code>
                 属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
                     id="ref-for-this">this</a> の <a data-link-type="dfn" href="#performanceentry-navigation-id"
                     id="ref-for-performanceentry-navigation-id">navigation id</a> を返さなければならない。</p>
@@ -1850,12 +1852,11 @@ For darkmode:
                     class="highlight"><c- k>await</c-></code>）に自動的に
                 付加され、ブラウザーが
                 後続の効果を元のインタラクションに帰属させることを可能にする。</p>
-            <p>スクリプトの伝播に加えて、この仕様は、DOM を変更するユーザーインタラクションがどのように
-                <strong>container roots</strong>（<a data-link-type="biblio" href="#biblio-container-timing"
-                    title="Container Timing API">[CONTAINER-TIMING]</a> 経由）を確立するかを定義する。
-                これらの roots により、
-                contentful paints のような後続のレンダリング効果を、現在アクティブな非同期スクリプトが
-                存在しない場合でも、起点となった interaction context まで追跡できる。
+            <p>スクリプト伝播に加えて、この仕様は、DOM を変更するユーザー操作が、操作に関連付けられた変更済みノードの集合を
+                <a data-link-type="dfn" href="#record-a-node-as-modified-for-interaction-paint-timing"
+                    id="ref-for-record-a-node-as-modified-for-interaction-paint-timing">確立する</a>方法を定義し、
+                非同期スクリプトが現在実行されていない場合でも、コンテンツのあるペイントなどの後続のレンダリング効果を、
+                それを開始した操作コンテキストまでたどれるようにします。
             </p>
         </div>
         <h3 class="heading settled" data-level="3.2" id="sec-interaction"><span class="secno">3.2. </span><span
@@ -1864,93 +1865,72 @@ For darkmode:
         <div>
 
             <dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                id="interactioncontext-interactioncontext">InteractionContext</dfn> は、単一のインタラクションからソフト
-            ナビゲーションを検出するために必要なデータを保持するために用いられる <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct"
-                id="ref-for-struct">struct</a> である。これは以下の
-            <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item">items</a>
-            を持つ。
+                id="interactioncontext-interactioncontext">InteractionContext</dfn> は、単一の操作からソフト
+            ナビゲーションを検出するために必要なデータを保持するために使用される <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct"
+                id="ref-for-struct">構造体</a> である。これは次の <a data-link-type="dfn"
+                href="https://infra.spec.whatwg.org/#struct-item" id="ref-for-struct-item">項目</a> を持つ:
 
 
             <ul>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-id">id</dfn>、初期状態では未設定 - このコンテキストに関連付けられた
-                        <a data-link-type="dfn" href="https://w3c.github.io/event-timing/#interaction-id"
-                            id="ref-for-interaction-id">インタラクション ID</a>。
-                    </p>
+                            id="interactioncontext-id">id</dfn>、このコンテキストに関連付けられた <code
+                            class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" id="ref-for-dom-performanceeventtiming-interactionid">interactionId</a></code>
+                        を表す <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#64-bit-unsigned-integer"
+                            id="ref-for-64-bit-unsigned-integer⑤">64 ビット符号なし整数</a>。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
                             id="interactioncontext-context-document">コンテキスト文書</dfn>、<a data-link-type="dfn"
                             href="https://dom.spec.whatwg.org/#concept-document"
-                            id="ref-for-concept-document">Document</a> - このコンテキストに関連付けられた
-                        <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                            id="ref-for-concept-document①">Document</a>。
-                    </p>
+                            id="ref-for-concept-document">Document</a>。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-start-time">開始時刻</dfn>、初期状態では未設定 - インタラクションの
-                        開始時刻を表します。</p>
+                            id="interactioncontext-start-time">開始時刻</dfn>、数値。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-navigation-type">ナビゲーション種別</dfn>、初期状態では未設定 -
-                        ナビゲーションの種別（例："push"、
-                        "replace"）を表します。</p>
+                            id="interactioncontext-navigation-type">ナビゲーション型</dfn>、<code
+                            class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigationtype" id="ref-for-navigationtype">NavigationType</a></code>
+                        または null。初期値は null。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-first-url-value">最初の URL 値</dfn>、初期状態では未設定 -
-                        最初の変更時点における URL の値を
-                        表します。</p>
+                            id="interactioncontext-first-url-value">最初の URL 値</dfn>、文字列または null。初期値は
+                        null。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
                             id="interactioncontext-first-url-update-timestamp">最初の URL 更新タイムスタンプ</dfn>、
-                        初期状態では未設定 - このインタラクション中の最初の URL
-                        変更時刻を表します。</p>
+                        数値。初期値は 0。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-first-scroll-timestamp">最初のスクロールタイムスタンプ</dfn>、
-                        初期状態では未設定
-                        - このインタラクション中の最初のスクロール
-                        イベントの時刻を表します。</p>
+                            id="interactioncontext-first-scroll-timestamp">最初のスクロールタイムスタンプ</dfn>、数値。
+                        初期値は 0。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-first-input-timestamp">最初の入力タイムスタンプ</dfn>、初期状態では未設定 -
-                        このインタラクション中の最初の入力イベントの
-                        時刻を表します。</p>
+                            id="interactioncontext-first-input-timestamp">最初の入力タイムスタンプ</dfn>、数値。
+                        初期値は 0。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-first-contentful-paint">最初のコンテンツフル・ペイント</dfn>、
-                        初期状態では null
-                        - このインタラクションの最初の <code
+                            id="interactioncontext-first-contentful-paint">最初のコンテンツフルペイント</dfn>、<code
                             class="idl"><a data-link-type="idl" href="#interactioncontentfulpaint" id="ref-for-interactioncontentfulpaint">InteractionContentfulPaint</a></code>
-                        エントリ。</p>
+                        または null。初期値は null。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-largest-contentful-paint">最大のコンテンツフル・ペイント</dfn>、
-                        初期状態では
-                        null - このインタラクションにおける現時点までの最大の <code
+                            id="interactioncontext-largest-contentful-paint">最大コンテンツフルペイント</dfn>、<code
                             class="idl"><a data-link-type="idl" href="#interactioncontentfulpaint" id="ref-for-interactioncontentfulpaint①">InteractionContentfulPaint</a></code>
-                        エントリ。</p>
+                        または null。初期値は null。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
                             id="interactioncontext-current-largest-contentful-paint-candidate">現在の最大
-                            コンテンツフル・ペイント候補</dfn>、初期状態では null -
-                        <a data-link-type="dfn"
+                            コンテンツフルペイント候補</dfn>、<a data-link-type="dfn"
                             href="https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#largest-contentful-paint-candidate"
-                            id="ref-for-largest-contentful-paint-candidate">最大コンテンツフル・ペイント候補</a>であり、
-                        <a data-link-type="dfn" href="#interactioncontext-largest-contentful-paint"
-                            id="ref-for-interactioncontext-largest-contentful-paint">最大のコンテンツフル・ペイント</a>に
-                        関連付けられたもの。
-                    </p>
+                            id="ref-for-largest-contentful-paint-candidate">最大コンテンツフルペイント候補</a>
+                        または null。初期値は null。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-last-url-value">最後の URL 値</dfn>、初期状態では未設定 -
-                        このインタラクション中の直近の URL
-                        変更時点における値を表します。</p>
+                            id="interactioncontext-last-url-value">最後の URL 値</dfn>、文字列または null。初期値は
+                        null。</p>
                 <li data-md>
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionContext" data-dfn-type="dfn" data-noexport
-                            id="interactioncontext-emitted">送出済み</dfn> フラグ、初期状態では false -
-                        ソフトナビゲーションエントリがこのインタラクションによって
-                        送出されたことを示します。</p>
+                            id="interactioncontext-emitted">発行済み</dfn>、真偽値。初期値は false。</p>
             </ul>
         </div>
         <p class="note" role="note"><span class="marker">注:</span> この仕様の将来のバージョンでは、
@@ -1967,50 +1947,59 @@ For darkmode:
                 class="content">基盤アルゴリズム</span><a class="self-link" href="#sec-infra-algos"></a></h3>
         <div class="algorithm" data-algorithm="get the current interaction context">
 
-            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document②">Document</a>
-            <var>document</var> が与えられたとき、
-            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="get-the-current-interaction-context">get
-                the current interaction context</dfn> するには、次を実行する。
+            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="get-the-current-interaction-context">現在の
+                操作コンテキストを取得する</dfn>には、<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
+                id="ref-for-concept-document①">Document</a>
+            <var>document</var> が与えられたとき、次を実行する:
 
 
             <ol>
                 <li data-md>
-                    <p><var>context</var> を、内部の <code class="highlight">AsyncContext<c- p>.</c->Variable</code>
+                    <p><var>context</var> を、内部 <code class="highlight">AsyncContext<c- p>.</c->Variable</code>
                         <code class="highlight"><c- p>[[</c->ActiveInteractionContext<c- p>]]</c-></code> の値とする。
                     </p>
                 <li data-md>
                     <p><var>context</var> が null でなく、かつ <var>context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-context-document"
-                            id="ref-for-interactioncontext-context-document">context document</a> が
+                            id="ref-for-interactioncontext-context-document">コンテキスト文書</a> が
                         <var>document</var> と等しくない場合、null を返す。
                     </p>
                 <li data-md>
                     <p><var>context</var> を返す。</p>
             </ol>
         </div>
-        <div class="algorithm" data-algorithm="get the context for an interaction">
+        <div class="algorithm" data-algorithm="get or create the context for an interaction">
 
+            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
+                id="get-or-create-the-context-for-an-interaction">操作のコンテキストを取得または作成する</dfn>には、
             <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document③">Document</a>
-            <var>document</var>、<var>interaction id</var>、および <a data-link-type="dfn"
-                href="https://dom.spec.whatwg.org/#concept-event" id="ref-for-concept-event">Event</a> <var>event</var>
-            が与えられたとき、
-            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="get-the-context-for-an-interaction">get
-                the context for an interaction</dfn> するには、次を実行する。
+                id="ref-for-concept-document②">Document</a> <var>document</var> と
+            <code
+                class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#performanceeventtiming" id="ref-for-performanceeventtiming">PerformanceEventTiming</a></code>
+            <var>timing entry</var> が与えられたとき、次を実行する:
 
 
             <ol>
                 <li data-md>
+                    <p><var>interaction id</var> を、<var>timing entry</var> の <code
+                            class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" id="ref-for-dom-performanceeventtiming-interactionid①">interactionId</a></code>
+                        とする。
+                    </p>
+                <li data-md>
+                    <p><var>interaction id</var> が 0 より大きいことを <a data-link-type="dfn"
+                            href="https://infra.spec.whatwg.org/#assert" id="ref-for-assert">表明する</a>。</p>
+                <li data-md>
                     <p><var>document</var> の <a data-link-type="dfn"
                             href="#document-interaction-id-to-interaction-context"
-                            id="ref-for-document-interaction-id-to-interaction-context">interaction id to interaction
-                            context</a>[<var>interaction id</var>] が <a data-link-type="dfn"
-                            href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists">exists</a> する場合、
+                            id="ref-for-document-interaction-id-to-interaction-context">操作 ID
+                            から操作コンテキストへの写像</a>[<var>interaction id</var>] が
+                        <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists"
+                            id="ref-for-map-exists">存在する</a>場合、
                         <var>document</var> の <a data-link-type="dfn"
                             href="#document-interaction-id-to-interaction-context"
-                            id="ref-for-document-interaction-id-to-interaction-context①">interaction id to interaction
-                            context</a>[<var>interaction id</var>] を返す。
+                            id="ref-for-document-interaction-id-to-interaction-context①">操作 ID
+                            から操作コンテキストへの写像</a>[<var>interaction id</var>]
+                        を返す。
                     </p>
                 <li data-md>
                     <p><var>interaction context</var> を新しい <a data-link-type="dfn"
@@ -2022,20 +2011,25 @@ For darkmode:
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-context-document"
-                            id="ref-for-interactioncontext-context-document①">context document</a> を
+                            id="ref-for-interactioncontext-context-document①">コンテキスト文書</a> を
                         <var>document</var> に設定する。
                     </p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn" href="#interactioncontext-start-time"
-                            id="ref-for-interactioncontext-start-time">start
-                            time</a> を <var>event</var> の <code class="highlight">startTime</code> に設定する。</p>
+                            id="ref-for-interactioncontext-start-time">開始
+                            時刻</a> を <var>timing entry</var> の
+                        <code
+                            class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-starttime" id="ref-for-dom-performanceentry-starttime">startTime</a></code>
+                        に設定する。
+                    </p>
                 <li data-md>
                     <p><var>document</var> の <a data-link-type="dfn"
                             href="#document-interaction-id-to-interaction-context"
-                            id="ref-for-document-interaction-id-to-interaction-context②">interaction id to interaction
-                            context</a>[<var>interaction id</var>] を
-                        <var>interaction context</var> に <a data-link-type="dfn"
-                            href="https://infra.spec.whatwg.org/#map-set" id="ref-for-map-set">Set</a> する。
+                            id="ref-for-document-interaction-id-to-interaction-context②">操作 ID
+                            から操作コンテキストへの写像</a>[<var>interaction id</var>] を
+                        <var>interaction context</var> に
+                        <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-set"
+                            id="ref-for-map-set">設定する</a>。
                     </p>
                 <li data-md>
                     <p><var>interaction context</var> を返す。</p>
@@ -2043,114 +2037,112 @@ For darkmode:
         </div>
         <div class="algorithm" data-algorithm="update the interaction contexts for an event">
 
-            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document④">Document</a> <var>document</var> と
-            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event"
-                id="ref-for-concept-event①">Event</a> <var>event</var> が与えられたとき、
             <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
-                id="update-the-interaction-contexts-for-an-event">update the interaction contexts for an event</dfn>
-            するには、次を実行する。
+                id="update-the-interaction-contexts-for-an-event">イベントの操作コンテキストを更新する</dfn>には、
+            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
+                id="ref-for-concept-document③">Document</a> <var>document</var> と
+            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event"
+                id="ref-for-concept-event">Event</a> <var>event</var> が与えられたとき、次を実行する:
 
 
             <ol>
                 <li data-md>
                     <p><var>timestamp</var> を、<var>document</var> の <a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"
-                            id="ref-for-concept-relevant-global">relevant global object</a> が与えられたときの
+                            id="ref-for-concept-relevant-global">関連するグローバルオブジェクト</a> を指定して得られる
                         <a data-link-type="dfn" href="https://w3c.github.io/hr-time/#dfn-current-high-resolution-time"
-                            id="ref-for-dfn-current-high-resolution-time">current high resolution time</a> とする。
+                            id="ref-for-dfn-current-high-resolution-time">現在の高分解能時刻</a> とする。
                     </p>
                 <li data-md>
-                    <p><var>is scroll</var> を、<var>event</var> の type が "scroll" であれば true、そうでなければ false とする。</p>
+                    <p><var>is scroll</var> を、<var>event</var> の型が "scroll" であれば true、そうでなければ false とする。</p>
                 <li data-md>
-                    <p><var>is input</var> を、<var>event</var> の type が
-                        <a data-link-type="dfn" href="https://w3c.github.io/event-timing/#has-dispatched-input-event"
-                            id="ref-for-has-dispatched-input-event">has dispatched input event</a> を引き起こす
-                        event type（<a data-link-type="biblio" href="#biblio-event-timing"
-                            title="Event Timing API">[EVENT-TIMING]</a> で定義されるもの）であれば true、そうでなければ false とする。
+                    <p><var>is input</var> を、<var>event</var> の型が
+                        <a data-link-type="dfn"
+                            href="https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#has-dispatched-input-event"
+                            id="ref-for-has-dispatched-input-event">入力イベントを配送済みである</a> を引き起こすイベント型
+                        （<a data-link-type="biblio" href="#biblio-event-timing"
+                            title="Event Timing API">[EVENT-TIMING]</a> で定義される）であれば true、そうでなければ false とする。
                     </p>
                 <li data-md>
-                    <p><var>is scroll</var> が false であり、かつ <var>is input</var> が false である場合、戻る。</p>
+                    <p><var>is scroll</var> が false で、かつ <var>is input</var> が false である場合、返る。</p>
                 <li data-md>
                     <p><var>document</var> の <a data-link-type="dfn"
                             href="#document-interaction-id-to-interaction-context"
-                            id="ref-for-document-interaction-id-to-interaction-context③">interaction id to interaction
-                            context</a> の
-                        values の各 <var>interaction context</var> について、次を実行する。</p>
+                            id="ref-for-document-interaction-id-to-interaction-context③">操作 ID から操作
+                            コンテキストへの写像</a> の
+                        値の各 <var>interaction context</var> について:</p>
                     <ol>
                         <li data-md>
-                            <p><var>is scroll</var> が true であり、かつ <var>interaction context</var> の <a
-                                    data-link-type="dfn" href="#interactioncontext-first-scroll-timestamp"
-                                    id="ref-for-interactioncontext-first-scroll-timestamp">first scroll timestamp</a>
-                                が未設定である場合:</p>
+                            <p><var>is scroll</var> が true で、かつ <var>interaction context</var> の <a data-link-type="dfn"
+                                    href="#interactioncontext-first-scroll-timestamp"
+                                    id="ref-for-interactioncontext-first-scroll-timestamp">最初のスクロールタイムスタンプ</a>
+                                が 0 である場合:</p>
                             <ol>
                                 <li data-md>
                                     <p><var>interaction context</var> の <a data-link-type="dfn"
                                             href="#interactioncontext-first-scroll-timestamp"
-                                            id="ref-for-interactioncontext-first-scroll-timestamp①">first scroll
-                                            timestamp</a> を <var>timestamp</var> に設定する。</p>
+                                            id="ref-for-interactioncontext-first-scroll-timestamp①">最初のスクロール
+                                            タイムスタンプ</a> を <var>timestamp</var> に設定する。</p>
                             </ol>
                         <li data-md>
-                            <p><var>is input</var> が true であり、かつ <var>interaction context</var> の <a
-                                    data-link-type="dfn" href="#interactioncontext-first-input-timestamp"
-                                    id="ref-for-interactioncontext-first-input-timestamp">first input timestamp</a>
-                                が未設定である場合:</p>
+                            <p><var>is input</var> が true で、かつ <var>interaction context</var> の <a data-link-type="dfn"
+                                    href="#interactioncontext-first-input-timestamp"
+                                    id="ref-for-interactioncontext-first-input-timestamp">最初の入力タイムスタンプ</a>
+                                が 0 である場合:</p>
                             <ol>
                                 <li data-md>
                                     <p><var>interaction context</var> の <a data-link-type="dfn"
                                             href="#interactioncontext-first-input-timestamp"
-                                            id="ref-for-interactioncontext-first-input-timestamp①">first input
-                                            timestamp</a> を <var>timestamp</var> に設定する。</p>
+                                            id="ref-for-interactioncontext-first-input-timestamp①">最初の入力
+                                            タイムスタンプ</a> を <var>timestamp</var> に設定する。</p>
                             </ol>
                     </ol>
             </ol>
         </div>
         <div class="algorithm" data-algorithm="set the current interaction context for event dispatch">
 
-            null または
-            <code
-                class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#performanceeventtiming" id="ref-for-performanceeventtiming">PerformanceEventTiming</a></code>
-            オブジェクト <var>timingEntry</var> が与えられたとき、
             <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
-                id="set-the-current-interaction-context-for-event-dispatch">set the current interaction context for
-                event dispatch</dfn> するには、次を実行する。
+                id="set-the-current-interaction-context-for-event-dispatch">イベント配送のために現在の操作コンテキストを
+                設定する</dfn>には、null または
+            <code
+                class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#performanceeventtiming" id="ref-for-performanceeventtiming①">PerformanceEventTiming</a></code>
+            オブジェクト <var>timing entry</var> が与えられたとき、次を実行する:
 
 
             <ol>
                 <li data-md>
-                    <p><var>timingEntry</var> が null である場合、null を返す。</p>
+                    <p><var>timing entry</var> が null である場合、null を返す。</p>
                 <li data-md>
-                    <p><var>event</var> を、<var>timingEntry</var> の <a data-link-type="dfn"
-                            href="https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#performanceeventtiming-associated-event"
-                            id="ref-for-performanceeventtiming-associated-event">associated event</a> とする。</p>
-                <li data-md>
-                    <p><var>interaction id</var> を、<var>timingEntry</var> の <code
-                            class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" id="ref-for-dom-performanceeventtiming-interactionid">interactionId</a></code>
+                    <p><var>interaction id</var> を、<var>timing entry</var> の <code
+                            class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" id="ref-for-dom-performanceeventtiming-interactionid②">interactionId</a></code>
                         とする。
                     </p>
                 <li data-md>
-                    <p><var>interaction id</var> が null または 0 である場合、null を返す。</p>
+                    <p><var>interaction id</var> が 0 である場合、null を返す。</p>
+                <li data-md>
+                    <p><var>event</var> を、<var>timing entry</var> の <a data-link-type="dfn"
+                            href="https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#performanceeventtiming-associated-event"
+                            id="ref-for-performanceeventtiming-associated-event">関連付けられたイベント</a> とする。</p>
                 <li data-md>
                     <p><var>document</var> を、<var>event</var> の <a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"
-                            id="ref-for-concept-relevant-global①">relevant global object</a> の <a data-link-type="dfn"
+                            id="ref-for-concept-relevant-global①">関連するグローバルオブジェクト</a> の <a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window"
-                            id="ref-for-concept-document-window">associated Document</a> とする。</p>
+                            id="ref-for-concept-document-window">関連付けられた Document</a> とする。</p>
                 <li data-md>
-                    <p><var>document</var> と <var>event</var> が与えられたものとして、
-                        <a data-link-type="dfn" href="#update-the-interaction-contexts-for-an-event"
-                            id="ref-for-update-the-interaction-contexts-for-an-event">Update the interaction contexts
-                            for an event</a> を行う。
+                    <p><var>document</var> と <var>event</var> が与えられたものとして、<a data-link-type="dfn"
+                            href="#update-the-interaction-contexts-for-an-event"
+                            id="ref-for-update-the-interaction-contexts-for-an-event">イベントの操作コンテキストを
+                            更新する</a>。</p>
+                <li data-md>
+                    <p><var>interaction context</var> を、<var>document</var> と
+                        <var>timing entry</var> が与えられたものとして <a data-link-type="dfn"
+                            href="#get-or-create-the-context-for-an-interaction"
+                            id="ref-for-get-or-create-the-context-for-an-interaction">操作のコンテキストを取得または作成する</a>
+                        結果とする。
                     </p>
                 <li data-md>
-                    <p><var>interaction context</var> を、
-                        <var>document</var>、<var>interaction id</var>、および <var>event</var> が与えられたものとして
-                        <a data-link-type="dfn" href="#get-the-context-for-an-interaction"
-                            id="ref-for-get-the-context-for-an-interaction">geting the context for an interaction</a>
-                        を行った結果とする。
-                    </p>
-                <li data-md>
-                    <p>内部の <code class="highlight">AsyncContext<c- p>.</c->Variable</code>
+                    <p>内部 <code class="highlight">AsyncContext<c- p>.</c->Variable</code>
                         <code class="highlight"><c- p>[[</c->ActiveInteractionContext<c- p>]]</c-></code> の値を
                         <var>interaction context</var> に設定する。
                     </p>
@@ -2161,13 +2153,13 @@ For darkmode:
         <div class="algorithm" data-algorithm="unset the current interaction context after event dispatch">
 
             <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
-                id="unset-the-current-interaction-context-after-event-dispatch">unset the current interaction context
-                after event dispatch</dfn> するには、次を実行する。
+                id="unset-the-current-interaction-context-after-event-dispatch">イベント配送後に現在の操作コンテキストを
+                設定解除する</dfn>には、次を実行する:
 
 
             <ol>
                 <li data-md>
-                    <p>内部の <code class="highlight">AsyncContext<c- p>.</c->Variable</code>
+                    <p>内部 <code class="highlight">AsyncContext<c- p>.</c->Variable</code>
                         <code class="highlight"><c- p>[[</c->ActiveInteractionContext<c- p>]]</c-></code> の値を null
                         に設定する。
                     </p>
@@ -2215,59 +2207,59 @@ For darkmode:
             </ul>
             <p><code
                     class="idl"><a data-link-type="idl" href="#dom-interactioncontentfulpaint-largestcontentfulpaint" id="ref-for-dom-interactioncontentfulpaint-largestcontentfulpaint">largestContentfulPaint</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                    id="ref-for-this①">this</a> の
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this①">this</a>
+                の
                 <a data-link-type="dfn" href="#interactioncontentfulpaint-largest-contentful-paint"
-                    id="ref-for-interactioncontentfulpaint-largest-contentful-paint">largest contentful paint</a>
-                を返さなければならない。
+                    id="ref-for-interactioncontentfulpaint-largest-contentful-paint">最大コンテンツフルペイント</a>を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="#dom-interactioncontentfulpaint-interactionid" id="ref-for-dom-interactioncontentfulpaint-interactionid">interactionId</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                    id="ref-for-this②">this</a> の
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this②">this</a>
+                の
                 <a data-link-type="dfn" href="#interactioncontentfulpaint-context"
-                    id="ref-for-interactioncontentfulpaint-context">context</a> の <a data-link-type="dfn"
+                    id="ref-for-interactioncontentfulpaint-context">コンテキスト</a>の <a data-link-type="dfn"
                     href="#interactioncontext-id" id="ref-for-interactioncontext-id①">id</a> を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-name" id="ref-for-dom-performanceentry-name">name</a></code>
-                属性の getter は空文字列を返さなければならない。</p>
+                属性のゲッターは空文字列を返さなければならない。</p>
             <p><code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-entrytype" id="ref-for-dom-performanceentry-entrytype">entryType</a></code>
-                属性の getter は "interaction-contentful-paint" を返さなければならない。</p>
+                属性のゲッターは <code class="highlight"><c- u>"interaction-contentful-paint"</c-></code> を返さなければならない。
+            </p>
             <p><code
-                    class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-starttime" id="ref-for-dom-performanceentry-starttime">startTime</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                    id="ref-for-this③">this</a> の
+                    class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-starttime" id="ref-for-dom-performanceentry-starttime①">startTime</a></code>
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this③">this</a>
+                の
                 <a data-link-type="dfn" href="#interactioncontentfulpaint-context"
-                    id="ref-for-interactioncontentfulpaint-context①">context</a> の <a data-link-type="dfn"
-                    href="#interactioncontext-start-time" id="ref-for-interactioncontext-start-time①">start time</a>
-                を返さなければならない。
+                    id="ref-for-interactioncontentfulpaint-context①">コンテキスト</a>の <a data-link-type="dfn"
+                    href="#interactioncontext-start-time"
+                    id="ref-for-interactioncontext-start-time①">開始時刻</a>を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-duration" id="ref-for-dom-performanceentry-duration">duration</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                    id="ref-for-this④">this</a> の <a data-link-type="dfn"
-                    href="https://w3c.github.io/paint-timing/#paint-timing-info" id="ref-for-paint-timing-info①">paint
-                    timing info</a> に対する
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this④">this</a>
+                の <a data-link-type="dfn" href="https://w3c.github.io/paint-timing/#paint-timing-info"
+                    id="ref-for-paint-timing-info①">ペイント
+                    タイミング情報</a>に対する
                 <a data-link-type="dfn" href="https://w3c.github.io/paint-timing/#default-paint-timestamp"
-                    id="ref-for-default-paint-timestamp">default paint timestamp</a> と、<a data-link-type="dfn"
+                    id="ref-for-default-paint-timestamp">既定のペイントタイムスタンプ</a>と、<a data-link-type="dfn"
                     href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑤">this</a> の
                 <a data-link-type="dfn" href="#interactioncontentfulpaint-context"
-                    id="ref-for-interactioncontentfulpaint-context②">context</a> の <a data-link-type="dfn"
-                    href="#interactioncontext-start-time" id="ref-for-interactioncontext-start-time②">start time</a>
-                との差を返さなければならない。
+                    id="ref-for-interactioncontentfulpaint-context②">コンテキスト</a>の <a data-link-type="dfn"
+                    href="#interactioncontext-start-time"
+                    id="ref-for-interactioncontext-start-time②">開始時刻</a>との差を返さなければならない。
             </p>
-            <p class="note" role="note"><span class="marker">注:</span> entry は、関連付けられた <a data-link-type="dfn"
+            <p class="note" role="note"><span class="marker">注:</span> このエントリは、静的な
+                操作プロパティ（<code class="highlight">interactionId</code> や
+                <code class="highlight">startTime</code> など）を、関連付けられた <a data-link-type="dfn"
                     href="#interactioncontext-interactioncontext"
-                    id="ref-for-interactioncontext-interactioncontext②">InteractionContext</a> から
-                静的なインタラクションプロパティ（<code class="highlight">interactionId</code> や
-                <code class="highlight">startTime</code> など）を動的に照会する一方で、
-                その視覚的更新の正確な状態をこれらの指標が反映するように、
-                作成時に paint の <a data-link-type="dfn" href="https://w3c.github.io/paint-timing/#paint-timing-info"
-                    id="ref-for-paint-timing-info②">paint timing info</a> と候補の <code
+                    id="ref-for-interactioncontext-interactioncontext②">InteractionContext</a> から動的に照会する一方で、
+                その視覚的更新の正確な状態をこれらのメトリクスが反映するように、
+                作成時にペイントの <a data-link-type="dfn" href="https://w3c.github.io/paint-timing/#paint-timing-info"
+                    id="ref-for-paint-timing-info②">ペイントタイミング情報</a>と候補 <code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/largest-contentful-paint/#largestcontentfulpaint" id="ref-for-largestcontentfulpaint②">LargestContentfulPaint</a></code>
-                entry の静的なスナップショットを取得する。
+                エントリの静的なスナップショットを取得する。
             </p>
         </div>
         <h3 class="heading settled" data-level="4.2" id="sec-interaction-contentful-paint-algos"><span
@@ -2318,48 +2310,47 @@ For darkmode:
         </div>
         <div class="algorithm" data-algorithm="process a new attributed contentful paint candidate">
 
-            To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
-                id="process-a-new-attributed-contentful-paint-candidate">新しい帰属済みコンテンツフル・ペイント
+            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
+                id="process-a-new-attributed-contentful-paint-candidate">新しい属性付けされたコンテンツフルペイント
                 候補を処理する</dfn>には、
             <a data-link-type="dfn"
                 href="https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#largest-contentful-paint-candidate"
-                id="ref-for-largest-contentful-paint-candidate①">最大コンテンツフル・ペイント候補</a>
+                id="ref-for-largest-contentful-paint-candidate①">最大コンテンツフルペイント候補</a>
             <var>lcpCandidate</var>、<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document⑤">Document</a> <var>document</var>、
+                id="ref-for-concept-document④">Document</a> <var>document</var>、
             <a data-link-type="dfn" href="#interactioncontext-interactioncontext"
                 id="ref-for-interactioncontext-interactioncontext④">InteractionContext</a> <var>interaction
                 context</var>、および <a data-link-type="dfn" href="https://w3c.github.io/paint-timing/#paint-timing-info"
                 id="ref-for-paint-timing-info⑤">ペイント
-                タイミング情報</a> <var>paintTimingInfo</var> が与えられたとき：
+                タイミング情報</a> <var>paintTimingInfo</var> が与えられたとき、次を実行する:
 
 
             <ol>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-first-scroll-timestamp"
-                            id="ref-for-interactioncontext-first-scroll-timestamp②">最初のスクロールタイムスタンプ</a>が設定されて
-                        おり、
+                            id="ref-for-interactioncontext-first-scroll-timestamp②">最初のスクロールタイムスタンプ</a> が
+                        0 より大きく、かつ
                         <var>lcpEntry</var> の <code
                             class="idl"><a data-link-type="idl" href="https://w3c.github.io/largest-contentful-paint/#dom-largestcontentfulpaint-rendertime" id="ref-for-dom-largestcontentfulpaint-rendertime">renderTime</a></code>
                         が <var>interaction context</var> の
                         <a data-link-type="dfn" href="#interactioncontext-first-scroll-timestamp"
-                            id="ref-for-interactioncontext-first-scroll-timestamp③">最初のスクロールタイムスタンプ</a>より大きい場合、return
-                        する。
+                            id="ref-for-interactioncontext-first-scroll-timestamp③">最初のスクロールタイムスタンプ</a> より大きい場合、返る。
                     </p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-first-input-timestamp"
-                            id="ref-for-interactioncontext-first-input-timestamp②">最初の入力タイムスタンプ</a>が設定されており、
-                        <var>lcpEntry</var> の
-                        <code
+                            id="ref-for-interactioncontext-first-input-timestamp②">最初の入力タイムスタンプ</a> が 0 より大きく、
+                        かつ
+                        <var>lcpEntry</var> の <code
                             class="idl"><a data-link-type="idl" href="https://w3c.github.io/largest-contentful-paint/#dom-largestcontentfulpaint-rendertime" id="ref-for-dom-largestcontentfulpaint-rendertime①">renderTime</a></code>
                         が <var>interaction context</var> の
                         <a data-link-type="dfn" href="#interactioncontext-first-input-timestamp"
-                            id="ref-for-interactioncontext-first-input-timestamp③">最初の入力タイムスタンプ</a>より大きい場合、return する。
+                            id="ref-for-interactioncontext-first-input-timestamp③">最初の入力タイムスタンプ</a> より大きい場合、返る。
                     </p>
                 <li data-md>
                     <p><var>lcpEntry</var> を、<var>lcpCandidate</var>、<var>paintTimingInfo</var>、および <var>document</var>
-                        を用いて
+                        で
                         <a data-link-type="dfn"
                             href="https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#create-a-largestcontentfulpaint-entry"
                             id="ref-for-create-a-largestcontentfulpaint-entry">LargestContentfulPaint
@@ -2368,17 +2359,17 @@ For darkmode:
                 <li data-md>
                     <p><var>global</var> を <var>document</var> の <a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"
-                            id="ref-for-concept-relevant-global②">関連するグローバルオブジェクト</a>とする。</p>
+                            id="ref-for-concept-relevant-global②">関連するグローバルオブジェクト</a> とする。</p>
                 <li data-md>
-                    <p><var>paint timing info</var> を <var>lcpEntry</var> に関連付けられた <a data-link-type="dfn"
+                    <p><var>paint timing info</var> を、<var>lcpEntry</var> に関連付けられた <a data-link-type="dfn"
                             href="https://w3c.github.io/paint-timing/#paint-timing-info"
-                            id="ref-for-paint-timing-info⑥">ペイントタイミング情報</a>とする。</p>
+                            id="ref-for-paint-timing-info⑥">ペイントタイミング情報</a> とする。</p>
                 <li data-md>
-                    <p><var>icpEntry</var> を、<var>global</var>、<var>interaction context</var>、<var>lcpEntry</var>、
-                        および <var>paint timing
-                            info</var> が与えられたときの
-                        <a data-link-type="dfn" href="#create-an-interaction-contentful-paint-entry"
-                            id="ref-for-create-an-interaction-contentful-paint-entry">インタラクション・コンテンツフル・
+                    <p><var>icpEntry</var> を、<var>global</var>、<var>interaction context</var>、<var>lcpEntry</var>、および
+                        <var>paint timing
+                            info</var> が与えられたものとして、<a data-link-type="dfn"
+                            href="#create-an-interaction-contentful-paint-entry"
+                            id="ref-for-create-an-interaction-contentful-paint-entry">操作コンテンツフル
                             ペイントエントリを作成する</a>結果とする。
                     </p>
                 <li data-md>
@@ -2388,30 +2379,30 @@ For darkmode:
                 <li data-md>
                     <p><var>icpEntry</var> を <var>global</var> の <a data-link-type="dfn"
                             href="https://w3c.github.io/performance-timeline/#performance-entry-buffer"
-                            id="ref-for-performance-entry-buffer">パフォーマンスエントリバッファ</a>に追加する。</p>
+                            id="ref-for-performance-entry-buffer">パフォーマンスエントリバッファ</a> に追加する。</p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-first-contentful-paint"
-                            id="ref-for-interactioncontext-first-contentful-paint">最初のコンテンツフル・ペイント</a>が null の場合：
+                            id="ref-for-interactioncontext-first-contentful-paint">最初のコンテンツフルペイント</a> が null である場合:
                     </p>
                     <ol>
                         <li data-md>
                             <p><var>interaction context</var> の <a data-link-type="dfn"
                                     href="#interactioncontext-first-contentful-paint"
-                                    id="ref-for-interactioncontext-first-contentful-paint①">最初のコンテンツフル・ペイント</a>
+                                    id="ref-for-interactioncontext-first-contentful-paint①">最初のコンテンツフルペイント</a>
                                 を <var>icpEntry</var> に設定する。</p>
                     </ol>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-largest-contentful-paint"
-                            id="ref-for-interactioncontext-largest-contentful-paint①">最大のコンテンツフル・ペイント</a>を
+                            id="ref-for-interactioncontext-largest-contentful-paint">最大コンテンツフルペイント</a> を
                         <var>icpEntry</var> に設定する。
                     </p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-current-largest-contentful-paint-candidate"
                             id="ref-for-interactioncontext-current-largest-contentful-paint-candidate">現在の最大
-                            コンテンツフル・ペイント候補</a>
+                            コンテンツフルペイント候補</a>
                         を <var>lcpCandidate</var> に設定する。</p>
             </ol>
         </div>
@@ -2567,7 +2558,7 @@ For darkmode:
                     <p><dfn class="dfn-paneled" data-dfn-for="InteractionPaintTimingNodeState" data-dfn-type="dfn"
                             data-noexport id="interactionpainttimingnodestate-modification-id">modification id</dfn>、
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#64-bit-unsigned-integer"
-                            id="ref-for-64-bit-unsigned-integer⑤">64 ビット符号なし整数</a>、初期値は 0。
+                            id="ref-for-64-bit-unsigned-integer⑥">64 ビット符号なし整数</a>、初期値は 0。
                     </p>
             </ul>
         </div>
@@ -2718,7 +2709,7 @@ For darkmode:
         <div class="algorithm" data-algorithm="update the interaction context for a document and its descendants">
 
             <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document⑥">Document</a> <var>document</var> が与えられたとき、
+                id="ref-for-concept-document⑤">Document</a> <var>document</var> が与えられたとき、
             <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
                 id="update-the-interaction-context-for-a-document-and-its-descendants">文書とその子孫の
                 インタラクションコンテキストを更新する</dfn>には：
@@ -2866,7 +2857,7 @@ For darkmode:
             （すなわち、グローバルな "containertiming" 属性とインタラクションごとのタイミング）を
             サポートし、Container Timing に基づいてインタラクション・ペイントタイミングを実装できるようにする予定です。
             <a data-link-type="dfn" href="#record-a-node-as-modified-for-interaction-paint-timing"
-                id="ref-for-record-a-node-as-modified-for-interaction-paint-timing">記録された</a>各ノードは、
+                id="ref-for-record-a-node-as-modified-for-interaction-paint-timing①">記録された</a>各ノードは、
             それを変更したインタラクションに対するコンテナーとみなされ、
             各インタラクションがコンテナーの集合と関連付けられるようになります。その後、
             この仕様は、各インタラクションについて、マーク済みコンテナー内で発生する最大コンテンツフル・ペイントを
@@ -2880,7 +2871,7 @@ For darkmode:
                 class="self-link" href="#sec-interface"></a></h3>
         <pre class="def highlight idl">[<a class="idl-code" data-link-type="extended-attribute" href="https://webidl.spec.whatwg.org/#Exposed" id="ref-for-Exposed②"><c- g>Exposed</c-></a>=<c- n>Window</c->]
 <c- b>interface</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="interface" data-export id="performancesoftnavigation"><code class="highlight"><c- g>PerformanceSoftNavigation</c-></code></dfn> : <a data-link-type="idl-name" href="https://w3c.github.io/performance-timeline/#performanceentry" id="ref-for-performanceentry④"><c- n>PerformanceEntry</c-></a> {
-    <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-DOMString" id="ref-for-idl-DOMString"><c- b>DOMString</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="PerformanceSoftNavigation" data-dfn-type="attribute" data-export data-readonly data-type="DOMString" id="dom-performancesoftnavigation-navigationtype"><code class="highlight"><c- g>navigationType</c-></code></dfn>;
+    <c- b>readonly</c-> <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigationtype" id="ref-for-navigationtype①"><c- n>NavigationType</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="PerformanceSoftNavigation" data-dfn-type="attribute" data-export data-readonly data-type="NavigationType" id="dom-performancesoftnavigation-navigationtype"><code class="highlight"><c- g>navigationType</c-></code></dfn>;
     <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-unsigned-long-long" id="ref-for-idl-unsigned-long-long②"><c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="PerformanceSoftNavigation" data-dfn-type="attribute" data-export data-readonly data-type="unsigned long long" id="dom-performancesoftnavigation-interactionid"><code class="highlight"><c- g>interactionId</c-></code></dfn>;
     <a data-link-type="idl-name" href="#interactioncontentfulpaint" id="ref-for-interactioncontentfulpaint⑤"><c- n>InteractionContentfulPaint</c-></a>? <dfn class="dfn-paneled idl-code" data-dfn-for="PerformanceSoftNavigation" data-dfn-type="method" data-export data-lt="getLargestInteractionContentfulPaint()" id="dom-performancesoftnavigation-getlargestinteractioncontentfulpaint"><code class="highlight"><c- g>getLargestInteractionContentfulPaint</c-></code></dfn>();
 };
@@ -2890,11 +2881,11 @@ For darkmode:
         <div>
             <p>各 <code
                     class="idl"><a data-link-type="idl" href="#performancesoftnavigation" id="ref-for-performancesoftnavigation②">PerformanceSoftNavigation</a></code>
-                は、以下を持つ：</p>
+                は次を持つ:</p>
             <ul>
                 <li data-md>
                     <p>関連付けられた <dfn class="dfn-paneled" data-dfn-for="PerformanceSoftNavigation" data-dfn-type="dfn"
-                            data-noexport id="performancesoftnavigation-context">context</dfn>、すなわち
+                            data-noexport id="performancesoftnavigation-context">コンテキスト</dfn>、すなわち
                         <a data-link-type="dfn" href="#interactioncontext-interactioncontext"
                             id="ref-for-interactioncontext-interactioncontext⑥">InteractionContext</a>。
                     </p>
@@ -2904,61 +2895,61 @@ For darkmode:
             </ul>
             <p><code
                     class="idl"><a data-link-type="idl" href="#dom-performancesoftnavigation-navigationtype" id="ref-for-dom-performancesoftnavigation-navigationtype">navigationType</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                    id="ref-for-this⑥">this</a> の
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑥">this</a>
+                の
                 <a data-link-type="dfn" href="#performancesoftnavigation-context"
-                    id="ref-for-performancesoftnavigation-context">context</a> の <a data-link-type="dfn"
+                    id="ref-for-performancesoftnavigation-context">コンテキスト</a>の <a data-link-type="dfn"
                     href="#interactioncontext-navigation-type"
-                    id="ref-for-interactioncontext-navigation-type">navigation type</a> を返さなければならない。
+                    id="ref-for-interactioncontext-navigation-type">ナビゲーション型</a>を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="#dom-performancesoftnavigation-interactionid" id="ref-for-dom-performancesoftnavigation-interactionid">interactionId</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                    id="ref-for-this⑦">this</a> の
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑦">this</a>
+                の
                 <a data-link-type="dfn" href="#performancesoftnavigation-context"
-                    id="ref-for-performancesoftnavigation-context①">context</a> の <a data-link-type="dfn"
+                    id="ref-for-performancesoftnavigation-context①">コンテキスト</a>の <a data-link-type="dfn"
                     href="#interactioncontext-id" id="ref-for-interactioncontext-id②">id</a> を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="#dom-performancesoftnavigation-getlargestinteractioncontentfulpaint" id="ref-for-dom-performancesoftnavigation-getlargestinteractioncontentfulpaint">getLargestInteractionContentfulPaint()</a></code>
                 メソッドは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑧">this</a> の
                 <a data-link-type="dfn" href="#performancesoftnavigation-context"
-                    id="ref-for-performancesoftnavigation-context②">context</a> の <a data-link-type="dfn"
+                    id="ref-for-performancesoftnavigation-context②">コンテキスト</a>の <a data-link-type="dfn"
                     href="#interactioncontext-largest-contentful-paint"
-                    id="ref-for-interactioncontext-largest-contentful-paint②">largest contentful paint</a> を返さなければならない。
+                    id="ref-for-interactioncontext-largest-contentful-paint①">最大コンテンツフルペイント</a>を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-name" id="ref-for-dom-performanceentry-name①">name</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                    id="ref-for-this⑨">this</a> の
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this⑨">this</a>
+                の
                 <a data-link-type="dfn" href="#performancesoftnavigation-context"
-                    id="ref-for-performancesoftnavigation-context③">context</a> の <a data-link-type="dfn"
-                    href="#interactioncontext-first-url-value" id="ref-for-interactioncontext-first-url-value">first URL
-                    value</a> を返さなければならない。
+                    id="ref-for-performancesoftnavigation-context③">コンテキスト</a>の <a data-link-type="dfn"
+                    href="#interactioncontext-first-url-value" id="ref-for-interactioncontext-first-url-value">最初の URL
+                    値</a>を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-entrytype" id="ref-for-dom-performanceentry-entrytype①">entryType</a></code>
-                属性の getter は "soft-navigation" を返さなければならない。</p>
+                属性のゲッターは <code class="highlight"><c- u>"soft-navigation"</c-></code> を返さなければならない。</p>
             <p><code
-                    class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-starttime" id="ref-for-dom-performanceentry-starttime①">startTime</a></code>
-                属性の getter は、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
+                    class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-starttime" id="ref-for-dom-performanceentry-starttime②">startTime</a></code>
+                属性のゲッターは、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
                     id="ref-for-this①⓪">this</a> の
                 <a data-link-type="dfn" href="#performancesoftnavigation-context"
-                    id="ref-for-performancesoftnavigation-context④">context</a> の <a data-link-type="dfn"
-                    href="#interactioncontext-start-time" id="ref-for-interactioncontext-start-time③">start time</a>
-                を返さなければならない。
+                    id="ref-for-performancesoftnavigation-context④">コンテキスト</a>の <a data-link-type="dfn"
+                    href="#interactioncontext-start-time"
+                    id="ref-for-interactioncontext-start-time③">開始時刻</a>を返さなければならない。
             </p>
             <p><code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#dom-performanceentry-duration" id="ref-for-dom-performanceentry-duration①">duration</a></code>
-                属性の getter は、送出時点における <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
+                属性のゲッターは、発行時点での <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
                     id="ref-for-this①①">this</a> の
                 <code
                     class="idl"><a data-link-type="idl" href="https://w3c.github.io/paint-timing/#dom-painttimingmixin-presentationtime" id="ref-for-dom-painttimingmixin-presentationtime">presentationTime</a></code>
                 と <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this" id="ref-for-this①②">this</a> の
                 <a data-link-type="dfn" href="#performancesoftnavigation-context"
-                    id="ref-for-performancesoftnavigation-context⑤">context</a> の
+                    id="ref-for-performancesoftnavigation-context⑤">コンテキスト</a>の
                 <a data-link-type="dfn" href="#interactioncontext-start-time"
-                    id="ref-for-interactioncontext-start-time④">start time</a> との差を返さなければならない。
+                    id="ref-for-interactioncontext-start-time④">開始時刻</a>との差を返さなければならない。
             </p>
         </div>
         <p class="note" role="note"><span class="marker">注：</span> 実際には、<code
@@ -2996,65 +2987,62 @@ For darkmode:
         </ul>
         <div class="algorithm" data-algorithm="evaluate soft navigation emission">
 
-            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document⑦">Document</a> <var>document</var> および
+            To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
+                id="evaluate-soft-navigation-emission">ソフトナビゲーション発行を評価する</dfn> given a <a data-link-type="dfn"
+                href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document⑥">Document</a>
+            <var>document</var> and an
             <a data-link-type="dfn" href="#interactioncontext-interactioncontext"
                 id="ref-for-interactioncontext-interactioncontext⑨">InteractionContext</a> <var>interaction
-                context</var> が与えられたとき、
-            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
-                id="evaluate-soft-navigation-emission">ソフトナビゲーション送出を評価する</dfn>には：
+                context</var>:
 
 
             <ol>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn" href="#interactioncontext-emitted"
-                            id="ref-for-interactioncontext-emitted">emitted</a> が true である場合、return する。</p>
+                            id="ref-for-interactioncontext-emitted">発行済み</a> が true である場合、返る。</p>
                 <li data-md>
                     <p><var>document</var> の <a data-link-type="dfn" href="#document-active-soft-navigation-candidate"
-                            id="ref-for-document-active-soft-navigation-candidate">active soft navigation candidate</a>
-                        が <var>interaction context</var> でない場合、return する。</p>
+                            id="ref-for-document-active-soft-navigation-candidate">アクティブなソフトナビゲーション候補</a>
+                        が <var>interaction context</var> でない場合、返る。</p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-first-url-value"
-                            id="ref-for-interactioncontext-first-url-value①">first URL value</a> が未設定である場合、return する。
-                    </p>
+                            id="ref-for-interactioncontext-first-url-value①">最初の URL 値</a> が null である場合、返る。</p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-first-contentful-paint"
-                            id="ref-for-interactioncontext-first-contentful-paint②">first contentful paint</a> が null
-                        である場合、
-                        return する。</p>
+                            id="ref-for-interactioncontext-first-contentful-paint②">最初のコンテンツフルペイント</a> が null
+                        である場合、返る。</p>
                 <li data-md>
                     <p><var>window</var> を <var>document</var> の <a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"
-                            id="ref-for-concept-relevant-global③">関連するグローバルオブジェクト</a>とする。</p>
+                            id="ref-for-concept-relevant-global③">関連するグローバルオブジェクト</a> とする。</p>
                 <li data-md>
-                    <p><var>entry</var> を、<var>window</var> および
-                        <var>interaction context</var> が与えられたときの
-                        <a data-link-type="dfn" href="#create-a-soft-navigation-entry"
-                            id="ref-for-create-a-soft-navigation-entry">ソフト
-                            ナビゲーションエントリを作成する</a>結果とする。
+                    <p><var>entry</var> を、<var>window</var> と
+                        <var>interaction context</var> が与えられたものとして <a data-link-type="dfn"
+                            href="#create-a-soft-navigation-entry"
+                            id="ref-for-create-a-soft-navigation-entry">ソフトナビゲーション
+                            エントリを作成する</a>結果とする。
                     </p>
                 <li data-md>
-                    <p><var>window</var> および <var>entry</var> が与えられたとき、
-                        <a data-link-type="dfn" href="#emit-a-soft-navigation-entry"
-                            id="ref-for-emit-a-soft-navigation-entry">ソフトナビゲーションエントリを送出する</a>。
+                    <p><var>window</var> と <var>entry</var> が与えられたものとして、<a data-link-type="dfn"
+                            href="#emit-a-soft-navigation-entry"
+                            id="ref-for-emit-a-soft-navigation-entry">ソフトナビゲーションエントリを発行する</a>。
                     </p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn" href="#interactioncontext-emitted"
-                            id="ref-for-interactioncontext-emitted①">emitted</a> を true に設定する。</p>
+                            id="ref-for-interactioncontext-emitted①">発行済み</a> を true に設定する。</p>
             </ol>
         </div>
         <div class="algorithm" data-algorithm="create a soft navigation entry">
 
-            <code
+            To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-soft-navigation-entry">ソフト
+                ナビゲーションエントリを作成する</dfn> given a <code
                 class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#window" id="ref-for-window⑥">Window</a></code>
-            <var>window</var>、および
+            <var>window</var>, and an
             <a data-link-type="dfn" href="#interactioncontext-interactioncontext"
                 id="ref-for-interactioncontext-interactioncontext①⓪">InteractionContext</a> <var>interaction
-                context</var> が与えられたとき、
-            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="create-a-soft-navigation-entry">ソフト
-                ナビゲーションエントリを作成する</dfn>には：
+                context</var>:
 
 
             <ol>
@@ -3068,45 +3056,41 @@ For darkmode:
                     </p>
                 <li data-md>
                     <p><var>entry</var> の <a data-link-type="dfn" href="#performancesoftnavigation-context"
-                            id="ref-for-performancesoftnavigation-context⑥">context</a> を <var>interaction
+                            id="ref-for-performancesoftnavigation-context⑥">コンテキスト</a> を <var>interaction
                             context</var> に設定する。</p>
                 <li data-md>
                     <p><var>first paint</var> を <var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-first-contentful-paint"
-                            id="ref-for-interactioncontext-first-contentful-paint③">first contentful paint</a> とする。</p>
+                            id="ref-for-interactioncontext-first-contentful-paint③">最初のコンテンツフルペイント</a> とする。</p>
                 <li data-md>
-                    <p><var>first paint</var> が null でない場合：</p>
-                    <ol>
-                        <li data-md>
-                            <p><var>entry</var> に関連付けられた <a data-link-type="dfn"
-                                    href="https://w3c.github.io/paint-timing/#paint-timing-info"
-                                    id="ref-for-paint-timing-info⑨">ペイントタイミング情報</a>を、<var>first paint</var> に
-                                関連付けられた <a data-link-type="dfn"
-                                    href="https://w3c.github.io/paint-timing/#paint-timing-info"
-                                    id="ref-for-paint-timing-info①⓪">ペイントタイミング情報</a>に設定する。</p>
-                    </ol>
+                    <p><var>first paint</var> が null でないことを <a data-link-type="dfn"
+                            href="https://infra.spec.whatwg.org/#assert" id="ref-for-assert①">表明する</a>。</p>
+                <li data-md>
+                    <p><var>entry</var> に関連付けられた <a data-link-type="dfn"
+                            href="https://w3c.github.io/paint-timing/#paint-timing-info"
+                            id="ref-for-paint-timing-info⑨">ペイントタイミング情報</a> を、<var>first paint</var> に関連付けられた
+                        <a data-link-type="dfn" href="https://w3c.github.io/paint-timing/#paint-timing-info"
+                            id="ref-for-paint-timing-info①⓪">ペイントタイミング情報</a> に設定する。
+                    </p>
                 <li data-md>
                     <p><var>entry</var> を返す。</p>
             </ol>
         </div>
         <div class="algorithm" data-algorithm="emit a soft navigation entry">
 
-            <code
+            To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="emit-a-soft-navigation-entry">ソフト
+                ナビゲーションエントリを発行する</dfn> given a <code
                 class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#window" id="ref-for-window⑦">Window</a></code>
-            <var>window</var> および
+            <var>window</var> and a
             <code
                 class="idl"><a data-link-type="idl" href="#performancesoftnavigation" id="ref-for-performancesoftnavigation④">PerformanceSoftNavigation</a></code>
-            <var>entry</var> が与えられたとき、
-            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="emit-a-soft-navigation-entry">ソフト
-                ナビゲーションエントリを送出する</dfn>には：
+            <var>entry</var>:
 
 
             <ol>
                 <li data-md>
-                    <p><var>window</var> が与えられたとき、
-                        <a data-link-type="dfn" href="#increment-the-current-navigation-id"
-                            id="ref-for-increment-the-current-navigation-id①">現在のナビゲーション ID を増やす</a>。
-                    </p>
+                    <p><var>window</var> が与えられたものとして、<a data-link-type="dfn" href="#increment-the-current-navigation-id"
+                            id="ref-for-increment-the-current-navigation-id①">現在のナビゲーション ID を増加させる</a>。</p>
                 <li data-md>
                     <p><var>entry</var> を<a data-link-type="dfn"
                             href="https://w3c.github.io/performance-timeline/#dfn-queue-a-performanceentry"
@@ -3114,86 +3098,85 @@ For darkmode:
                 <li data-md>
                     <p><var>entry</var> を <var>window</var> の <a data-link-type="dfn"
                             href="https://w3c.github.io/performance-timeline/#performance-entry-buffer"
-                            id="ref-for-performance-entry-buffer①">パフォーマンスエントリバッファ</a>に追加する。</p>
+                            id="ref-for-performance-entry-buffer①">パフォーマンスエントリバッファ</a> に追加する。</p>
             </ol>
         </div>
-        <p class="note" role="note"><span class="marker">注：</span> この <code class="highlight">navigationId</code>
-            <code
+        <p class="note" role="note"><span class="marker">注:</span> この <code class="highlight">navigationId</code>
+            for this <code
                 class="idl"><a data-link-type="idl" href="#performancesoftnavigation" id="ref-for-performancesoftnavigation⑤">PerformanceSoftNavigation</a></code>
-            エントリについては、パフォーマンスタイムラインへキューに入れる処理の一部として自動的に設定され、
-            他の
+            エントリは、他の
             <code
                 class="idl"><a data-link-type="idl" href="https://w3c.github.io/performance-timeline/#performanceentry" id="ref-for-performanceentry⑤">PerformanceEntry</a></code>
-            型の挙動と一致する。
+            型の挙動と一致するように、パフォーマンスタイムラインへキューに入れられる一部として自動的に設定される。
         </p>
         <div class="algorithm" data-algorithm="process a same document commit">
 
-            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document⑧">Document</a>
-            <var>document</var>、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string"
-                id="ref-for-string">string</a> <var>url</var>、
-            および <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">string</a>
-            <var>navigation type</var> が与えられたとき、
-            <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="process-a-same-document-commit">同一文書
-                コミットを処理する</dfn>には：
+            To <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="process-a-same-document-commit">同一
+                文書コミットを処理する</dfn> given a <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
+                id="ref-for-concept-document⑦">Document</a>
+            <var>document</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string"
+                id="ref-for-string">文字列</a> <var>url</var>,
+            and <code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigationtype" id="ref-for-navigationtype②">NavigationType</a></code>
+            <var>navigation type</var>:
 
 
             <ol>
                 <li data-md>
                     <p><var>url</var> が <var>document</var> の <a data-link-type="dfn"
                             href="https://dom.spec.whatwg.org/#concept-document-url"
-                            id="ref-for-concept-document-url">url</a> と等しい場合、return する。</p>
+                            id="ref-for-concept-document-url">url</a> と等しい場合、返る。</p>
                 <li data-md>
-                    <p><var>interaction context</var> を、<var>document</var> が与えられたときの
-                        <a data-link-type="dfn" href="#get-the-current-interaction-context"
-                            id="ref-for-get-the-current-interaction-context①">現在のインタラクション
+                    <p><var>interaction context</var> を、<var>document</var> が与えられたものとして <a data-link-type="dfn"
+                            href="#get-the-current-interaction-context"
+                            id="ref-for-get-the-current-interaction-context①">現在の操作
                             コンテキストを取得する</a>結果とする。
                     </p>
                 <li data-md>
-                    <p><var>interaction context</var> が null の場合、return する。</p>
+                    <p><var>interaction context</var> が null である場合、返る。</p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
-                            href="#interactioncontext-last-url-value"
-                            id="ref-for-interactioncontext-last-url-value">last URL value</a> を <var>url</var> に設定する。
-                    </p>
+                            href="#interactioncontext-last-url-value" id="ref-for-interactioncontext-last-url-value">最後の
+                            URL 値</a> を <var>url</var> に設定する。</p>
                 <li data-md>
                     <p><var>interaction context</var> の <a data-link-type="dfn"
                             href="#interactioncontext-first-url-update-timestamp"
-                            id="ref-for-interactioncontext-first-url-update-timestamp">first URL update timestamp</a> が
-                        未設定である場合：</p>
+                            id="ref-for-interactioncontext-first-url-update-timestamp">最初の URL 更新タイムスタンプ</a> が
+                        null である場合:</p>
                     <ol>
                         <li data-md>
                             <p><var>interaction context</var> の <a data-link-type="dfn"
                                     href="#interactioncontext-first-url-update-timestamp"
-                                    id="ref-for-interactioncontext-first-url-update-timestamp①">first URL update
-                                    timestamp</a> を、<var>document</var> の <a data-link-type="dfn"
+                                    id="ref-for-interactioncontext-first-url-update-timestamp①">最初の URL 更新
+                                    タイムスタンプ</a> を、<var>document</var> の <a data-link-type="dfn"
                                     href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"
-                                    id="ref-for-concept-relevant-global④">関連するグローバルオブジェクト</a> が与えられたときの
+                                    id="ref-for-concept-relevant-global④">関連するグローバルオブジェクト</a> が与えられたものとして得られる
                                 <a data-link-type="dfn"
                                     href="https://w3c.github.io/hr-time/#dfn-current-high-resolution-time"
-                                    id="ref-for-dfn-current-high-resolution-time①">現在の高分解能時刻</a>に設定する。
+                                    id="ref-for-dfn-current-high-resolution-time①">現在の高分解能時刻</a>
+                                に設定する。
                             </p>
                         <li data-md>
                             <p><var>interaction context</var> の <a data-link-type="dfn"
                                     href="#interactioncontext-first-url-value"
-                                    id="ref-for-interactioncontext-first-url-value②">first URL value</a> を
+                                    id="ref-for-interactioncontext-first-url-value②">最初の URL 値</a> を
                                 <var>url</var> に設定する。
                             </p>
                         <li data-md>
                             <p><var>interaction context</var> の <a data-link-type="dfn"
                                     href="#interactioncontext-navigation-type"
-                                    id="ref-for-interactioncontext-navigation-type①">navigation type</a> を
+                                    id="ref-for-interactioncontext-navigation-type①">ナビゲーション型</a> を
                                 <var>navigation type</var> に設定する。
                             </p>
                     </ol>
                 <li data-md>
                     <p><var>document</var> の <a data-link-type="dfn" href="#document-active-soft-navigation-candidate"
-                            id="ref-for-document-active-soft-navigation-candidate①">active soft navigation candidate</a>
+                            id="ref-for-document-active-soft-navigation-candidate①">アクティブなソフトナビゲーション候補</a>
                         を <var>interaction context</var> に設定する。</p>
                 <li data-md>
-                    <p><var>document</var> および <var>interaction context</var> が与えられたとき、
-                        <a data-link-type="dfn" href="#evaluate-soft-navigation-emission"
-                            id="ref-for-evaluate-soft-navigation-emission①">ソフトナビゲーション送出を評価する</a>。
+                    <p><var>document</var> と <var>interaction context</var> が与えられたものとして、<a data-link-type="dfn"
+                            href="#evaluate-soft-navigation-emission"
+                            id="ref-for-evaluate-soft-navigation-emission①">ソフトナビゲーション発行を評価する</a>。
                     </p>
             </ol>
         </div>
@@ -3204,13 +3187,13 @@ For darkmode:
         <h4 class="heading settled" data-level="6.1.1" id="sec-html-document"><span class="secno">6.1.1. </span><span
                 class="content">Document</span><a class="self-link" href="#sec-html-document"></a></h4>
         <p>各 <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document⑨">document</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
-                data-dfn-type="dfn" data-noexport id="document-interaction-id-to-interaction-context">interaction id から
-                interaction context への対応</dfn>、すなわち <a data-link-type="dfn"
-                href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map①">map</a> を持ち、
+                id="ref-for-concept-document⑧">文書</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
+                data-dfn-type="dfn" data-noexport id="document-interaction-id-to-interaction-context">操作 ID から
+                操作コンテキストへの写像</dfn>、すなわち <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map"
+                id="ref-for-ordered-map①">マップ</a>を持ち、
             初期状態では空である。</p>
         <p>各 <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①⓪">document</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
+                id="ref-for-concept-document⑨">文書</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
                 data-dfn-type="dfn" data-noexport id="document-active-soft-navigation-candidate">アクティブなソフトナビゲーション
                 候補</dfn>、すなわち
             <a data-link-type="dfn" href="#interactioncontext-interactioncontext"
@@ -3218,55 +3201,55 @@ For darkmode:
             である。
         </p>
         <p>各 <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①①">document</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
+                id="ref-for-concept-document①⓪">文書</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
                 data-dfn-type="dfn" data-noexport id="document-current-modification-generation-id">現在の変更
-                世代 ID</dfn>、すなわち
+                生成 ID</dfn>、すなわち
             <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#64-bit-unsigned-integer"
-                id="ref-for-64-bit-unsigned-integer⑥">64 ビット符号なし整数</a> を持ち、0 に初期化される。
+                id="ref-for-64-bit-unsigned-integer⑦">64 ビット符号なし整数</a>を持ち、0 に初期化される。
         </p>
-        <p class="note" role="note"><span class="marker">注：</span> <a data-link-type="dfn"
+        <p class="note" role="note"><span class="marker">注:</span> <a data-link-type="dfn"
                 href="#document-current-modification-generation-id"
-                id="ref-for-document-current-modification-generation-id③">現在の変更世代 ID</a> は、前回の
+                id="ref-for-document-current-modification-generation-id③">現在の変更生成 ID</a> は、関連する DOM 変更が、前回の
             変更とは異なる <a data-link-type="dfn" href="#interactioncontext-interactioncontext"
-                id="ref-for-interactioncontext-interactioncontext①②">InteractionContext</a> によって、関連する DOM 変更が
-            発生したときに変化する。これにより、
-            関連する変更をまとめてグループ化でき、<a data-link-type="dfn"
+                id="ref-for-interactioncontext-interactioncontext①②">InteractionContext</a> で発生したときに
+            変化する。これにより、関連する変更をまとめて
+            グループ化できるようになり、<a data-link-type="dfn"
                 href="#interactionpainttimingnodestate-interactionpainttimingnodestate"
                 id="ref-for-interactionpainttimingnodestate-interactionpainttimingnodestate④">InteractionPaintTimingNodeState</a>
             オブジェクトを
-            新しさの観点で比較し、追跡する必要があるノードを最適化できる。</p>
+            新しさの観点から比較し、追跡が必要なノードを最適化できるようになる。</p>
         <p>各 <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①②">document</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
+                id="ref-for-concept-document①①">文書</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
                 data-dfn-type="dfn" data-noexport id="document-last-modification-context">最後の変更
                 コンテキスト</dfn>、すなわち <a data-link-type="dfn" href="#interactioncontext-interactioncontext"
                 id="ref-for-interactioncontext-interactioncontext①③">InteractionContext</a>
             または null を持ち、初期状態では null である。</p>
         <p>各 <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①③">document</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
-                data-dfn-type="dfn" data-noexport id="document-marked-node-state">マーク済みノード状態</dfn>、すなわち <a
-                data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map②">map</a>
+                id="ref-for-concept-document①②">文書</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
+                data-dfn-type="dfn" data-noexport id="document-marked-node-state">マークされたノード状態</dfn>、すなわち <a
+                data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map②">マップ</a>
             であり、<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node"
                 id="ref-for-concept-node④">Node</a> から
             <a data-link-type="dfn" href="#interactionpainttimingnodestate-interactionpainttimingnodestate"
                 id="ref-for-interactionpainttimingnodestate-interactionpainttimingnodestate⑤">InteractionPaintTimingNodeState</a>
-            への
-            対応を持ち、初期状態では空である。
+            への対応を持ち、
+            初期状態では空である。
         </p>
         <p>各 <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①④">document</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
-                data-dfn-type="dfn" data-noexport id="document-propagated-node-state">伝播済みノード状態</dfn>、すなわち <a
-                data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map③">map</a>
+                id="ref-for-concept-document①③">文書</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
+                data-dfn-type="dfn" data-noexport id="document-propagated-node-state">伝播されたノード状態</dfn>、すなわち <a
+                data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map③">マップ</a>
             であり、<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node"
                 id="ref-for-concept-node⑤">Node</a> から
             <a data-link-type="dfn" href="#interactionpainttimingnodestate-interactionpainttimingnodestate"
                 id="ref-for-interactionpainttimingnodestate-interactionpainttimingnodestate⑥">InteractionPaintTimingNodeState</a>
-            への
-            対応を持ち、初期状態では空である。
+            への対応を持ち、
+            初期状態では空である。
         </p>
         <p>各 <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①⑤">document</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
-                data-dfn-type="dfn" data-noexport id="document-is-interaction-paint-timing-dirty">インタラクション・ペイント
-                タイミングが dirty である</dfn>、すなわち boolean を持ち、
+                id="ref-for-concept-document①④">文書</a> は、<dfn class="dfn-paneled" data-dfn-for="document"
+                data-dfn-type="dfn" data-noexport id="document-is-interaction-paint-timing-dirty">操作ペイント
+                タイミングがダーティであるか</dfn>、すなわち真偽値を持ち、
             初期状態では false である。</p>
         <h4 class="heading settled" data-level="6.1.2" id="sec-html-node"><span class="secno">6.1.2. </span><span
                 class="content">Node</span><a class="self-link" href="#sec-html-node"></a></h4>
@@ -3292,15 +3275,10 @@ For darkmode:
                 <li data-md>
                     <p><var>node</var> が与えられたとき、<a data-link-type="dfn"
                             href="#record-a-node-as-modified-for-interaction-paint-timing"
-                            id="ref-for-record-a-node-as-modified-for-interaction-paint-timing①">インタラクション・ペイントタイミング用に
+                            id="ref-for-record-a-node-as-modified-for-interaction-paint-timing②">インタラクション・ペイントタイミング用に
                             変更済みのノードとして記録する</a>。</p>
             </ol>
         </div>
-        <p class="note" role="note"><span class="marker">注：</span> "node insert" への参照は、
-            文書構造に新しい要素を追加するすべての操作（例：<code class="highlight">appendChild</code>、<code class="highlight">innerHTML</code>
-            更新など）を含む高水準の
-            説明である。これらを、文書構造の変更を追跡する内部実装フックに対応付けることは、
-            ユーザーエージェントに委ねられる。</p>
         <h3 class="heading settled" data-level="6.2" id="sec-html"><span class="secno">6.2. </span><span
                 class="content">HTML 統合</span><a class="self-link" href="#sec-html"></a></h3>
         <h4 class="heading settled" data-level="6.2.1" id="sec-html-history"><span class="secno">6.2.1. </span><span
@@ -3310,22 +3288,31 @@ For darkmode:
                 href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#update-document-for-history-step-application"
                 id="ref-for-update-document-for-history-step-application">履歴ステップ適用のために文書を更新する</a>において、
             5.5.1（<code class="highlight">documentsEntryChanged</code> が
-            true で、かつ <code class="highlight">documentIsNew</code> が false の場合）の前に、<a data-link-type="dfn"
-                href="#process-a-same-document-commit" id="ref-for-process-a-same-document-commit">同一文書
-                コミットを処理する</a>。その際、<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①⑥">Document</a>、
+            true であり、かつ <code class="highlight">documentIsNew</code> が false である場合）の前に、<a data-link-type="dfn"
+                href="#process-a-same-document-commit" id="ref-for-process-a-same-document-commit">同一
+                文書コミットを処理する</a>を、<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
+                id="ref-for-concept-document①⑤">Document</a>、
             対象エントリの <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#she-url"
-                id="ref-for-she-url">url</a>、および "traverse" を与える。
+                id="ref-for-she-url">url</a>、および "<code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-traverse" id="ref-for-dom-navigationtype-traverse">traverse</a></code>"
+            が与えられたものとして実行する。
         </div>
+
+        <br>
+
         <div class="algorithm" data-algorithm="additions to shared history push/replace steps">
             <a href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#shared-history-push/replace-steps">共有
-                履歴 push/replace 手順</a>
+                履歴 push/replace ステップ</a>
             （<a data-link-type="biblio" href="#biblio-html" title="HTML Standard">[HTML]</a> で定義される）において、
             URL が更新された後、<a data-link-type="dfn" href="#process-a-same-document-commit"
-                id="ref-for-process-a-same-document-commit①">同一文書コミットを処理する</a>。その際、
+                id="ref-for-process-a-same-document-commit①">同一文書コミットを処理する</a>を、
             <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
-                id="ref-for-concept-document①⑦">Document</a>、新しい URL、および操作種別（"push" または
-            "replace" のいずれか）を与える。
+                id="ref-for-concept-document①⑥">Document</a>、新しい URL、および操作型（"<code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-push" id="ref-for-dom-navigationtype-push">push</a></code>"
+            または
+            "<code
+                class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-replace" id="ref-for-dom-navigationtype-replace">replace</a></code>"
+            のいずれか）が与えられたものとして実行する。
         </div>
         <h4 class="heading settled" data-level="6.2.2" id="sec-html-hard-nav"><span class="secno">6.2.2. </span><span
                 class="content">ハードナビゲーション</span><a class="self-link" href="#sec-html-hard-nav"></a></h4>
@@ -3350,13 +3337,13 @@ For darkmode:
             </span><span class="content">Event Timing 統合</span><a class="self-link"
                 href="#sec-event-timing-integration"></a></h3>
         <p>この仕様は、<a data-link-type="biblio" href="#biblio-event-timing" title="Event Timing API">[EVENT-TIMING]</a>
-            におけるインタラクションの定義を拡張し、
-            現代のウェブアプリケーションおよび Single Page Application に関連する追加の
-            イベント種別を含める。</p>
-        <p>次のイベント種別は、<a data-link-type="dfn" href="https://w3c.github.io/event-timing/#dfn-interaction"
-                id="ref-for-dfn-interaction">interaction</a>
-            （<a data-link-type="biblio" href="#biblio-event-timing" title="Event Timing API">[EVENT-TIMING]</a>
-            で定義される）の一部とみなされる：</p>
+            における操作の定義を拡張し、現代の Web アプリケーションおよび
+            シングルページアプリケーションに関連する追加の
+            イベント型を含める。</p>
+        <p>次のイベント型は、<a data-link-type="dfn"
+                href="https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#dfn-interaction"
+                id="ref-for-dfn-interaction">操作</a>（<a data-link-type="biblio" href="#biblio-event-timing"
+                title="Event Timing API">[EVENT-TIMING]</a> で定義される）の一部とみなされる:</p>
         <ul>
             <li data-md>
                 <p><code class="highlight">navigate</code></p>
@@ -3365,19 +3352,17 @@ For darkmode:
             <li data-md>
                 <p><code class="highlight">hashchange</code></p>
         </ul>
-        <p>これらのイベントがユーザーインタラクションの結果として配送されるとき、ユーザーエージェントは、
+        <p>これらのイベントがユーザー操作の結果として配送される場合、ユーザーエージェントは、それらに
             文書の <a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"
-                id="ref-for-concept-relevant-global⑤">関連するグローバルオブジェクト</a>について
-            <a data-link-type="dfn" href="#get-the-next-interactionid" id="ref-for-get-the-next-interactionid">次の
-                interactionId を取得する</a>ことにより得られる一意な <a data-link-type="dfn"
-                href="https://w3c.github.io/event-timing/#interaction-id" id="ref-for-interaction-id①">interaction
-                id</a> をそれらに割り当てなければならない。
-            イベントが、すでに
-            割り当て済みの <a data-link-type="dfn" href="https://w3c.github.io/event-timing/#interaction-id"
-                id="ref-for-interaction-id②">interaction id</a> を持つ以前のインタラクションによって発火された場合、ユーザーエージェントは
-            同じ識別子を再利用すべきである。
-        </p>
+                id="ref-for-concept-relevant-global⑤">関連するグローバルオブジェクト</a> について <a data-link-type="dfn"
+                href="#get-the-next-interactionid" id="ref-for-get-the-next-interactionid">次の interactionId を取得する</a>
+            ことによって得られる一意の <code
+                class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" id="ref-for-dom-performanceeventtiming-interactionid③">interactionId</a></code>
+            を割り当てなければならない。イベントが、すでに <code
+                class="idl"><a data-link-type="idl" href="https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" id="ref-for-dom-performanceeventtiming-interactionid④">interactionId</a></code>
+            が割り当てられている以前の操作によってトリガーされた場合、ユーザーエージェントは
+            その同じ識別子を再利用するべきである。</p>
         <p class="note" role="note"><span class="marker">注：</span>これらのイベントは、ユーザー操作から始まる
             開始イベントである場合にのみ、一次的なインタラクションとして報告される
             （例：ブラウザー UI の戻るボタンをクリックする場合）。その他のほとんどのシナリオ、たとえば
@@ -3620,7 +3605,7 @@ For darkmode:
                 <li data-md>
                     <p><strong>アクティブ候補のシングルトン</strong>：多くのインタラクションがアクティブになり得る一方で、<a data-link-type="dfn"
                             href="https://dom.spec.whatwg.org/#concept-document"
-                            id="ref-for-concept-document①⑧">Document</a>
+                            id="ref-for-concept-document①⑦">Document</a>
                         は任意の時点で 1 つの <a data-link-type="dfn" href="#document-active-soft-navigation-candidate"
                             id="ref-for-document-active-soft-navigation-candidate②">アクティブなソフトナビゲーション候補</a>
                         だけを認識します。</p>
@@ -3687,8 +3672,8 @@ For darkmode:
         <li><a
                 href="#dom-performancesoftnavigation-getlargestinteractioncontentfulpaint">getLargestInteractionContentfulPaint()</a><span>、
                 § 5.1 内</span>
+        <li><a href="#get-or-create-the-context-for-an-interaction">操作のコンテキストを取得または作成する</a><span>、§ 3.3 内</span>
         <li><a href="#get-the-attribution-element">帰属要素を取得する</a><span>、§ 6.4 内</span>
-        <li><a href="#get-the-context-for-an-interaction">インタラクションのコンテキストを取得する</a><span>、§ 3.3 内</span>
         <li><a href="#get-the-current-interaction-context">現在のインタラクションコンテキストを取得する</a><span>、
                 § 3.3 内</span>
         <li><a href="#get-the-next-interactionid">次の interactionId を取得する</a><span>、§ 6.3 内</span>
@@ -3774,9 +3759,6 @@ For darkmode:
             <ul>
                 <li><span class="dfn-paneled" id="5390e522">PaintTimingMixin</span>
                 <li><span class="dfn-paneled" id="cf22a135">デフォルトのペイントタイムスタンプ</span>
-                <li><span class="dfn-paneled" id="bc2342f0">入力イベントを配送済みである</span>
-                <li><span class="dfn-paneled" id="9ca77ab8">インタラクション</span>
-                <li><span class="dfn-paneled" id="2e38edd1">インタラクション ID</span>
                 <li><span class="dfn-paneled" id="0d1464b6">ペイントタイミング情報</span>
                 <li><span class="dfn-paneled" id="a2de40e9">保留中の画像レコード</span>
                 <li><span class="dfn-paneled" id="24f32f51">保留中の画像レコード要素</span>
@@ -3808,11 +3790,13 @@ For darkmode:
             <ul>
                 <li><span class="dfn-paneled" id="6d8bccc7">PerformanceEventTiming</span>
                 <li><span class="dfn-paneled" id="925b5984">関連付けられたイベント</span>
+                <li><span class="dfn-paneled" id="d51946bf">入力イベントを配送済みである</span>
                 <li><span class="dfn-paneled" id="ce6f454c">初期 interactionId 値</span>
                 <li><span class="dfn-paneled" id="8a1f6229">イベントタイミング処理開始を初期化して記録する</span>
-                <li><span class="dfn-paneled" id="02c65a0e">interaction count</span>
+                <li><span class="dfn-paneled" id="62287cfd">操作</span>
+                <li><span class="dfn-paneled" id="02c65a0e">操作回数</span>
                 <li><span class="dfn-paneled" id="35922c9d">interactionId</span>
-                <li><span class="dfn-paneled" id="ba6dc3e0">interactionId increment</span>
+                <li><span class="dfn-paneled" id="ba6dc3e0">interactionId 増分</span>
                 <li><span class="dfn-paneled" id="e952c64d">イベントタイミング処理終了を記録する</span>
             </ul>
         <li>
@@ -3823,12 +3807,16 @@ For darkmode:
         <li>
             <a data-link-type="biblio">[HTML]</a> は次の用語を定義する:
             <ul>
+                <li><span class="dfn-paneled" id="a4c36929">NavigationType</span>
                 <li><span class="dfn-paneled" id="5d7209e9">Window</span>
                 <li><span class="dfn-paneled" id="3349d69f">関連付けられた Document</span>
                 <li><span class="dfn-paneled" id="4b6086d7">グローバルオブジェクト</span>
+                <li><span class="dfn-paneled" id="c9ff317b">push</span>
                 <li><span class="dfn-paneled" id="b75a7d23">realm</span>
                 <li><span class="dfn-paneled" id="e99bd18e">関連するグローバルオブジェクト</span>
+                <li><span class="dfn-paneled" id="6d273060">replace</span>
                 <li><span class="dfn-paneled" id="f710aefb">セッション履歴エントリ URL</span>
+                <li><span class="dfn-paneled" id="fa3348cc">traverse</span>
                 <li><span class="dfn-paneled" id="5c1d019b">履歴ステップ適用のために文書を更新する</span>
             </ul>
         <li>
@@ -3836,6 +3824,7 @@ For darkmode:
             <ul>
                 <li><span class="dfn-paneled" id="42db82d0">64 ビット符号なし整数</span>
                 <li><span class="dfn-paneled" id="a3b18719">追加する</span>
+                <li><span class="dfn-paneled" id="77b4c09a">assert</span>
                 <li><span class="dfn-paneled" id="a326add7">含む</span>
                 <li><span class="dfn-paneled" id="1243a891">存在する</span>
                 <li><span class="dfn-paneled" id="16d07e10">for each <small>（list 用）</small></span>
@@ -3885,7 +3874,6 @@ For darkmode:
         <li>
             <a data-link-type="biblio">[WEBIDL]</a> は次の用語を定義する:
             <ul>
-                <li><span class="dfn-paneled" id="8855a9aa">DOMString</span>
                 <li><span class="dfn-paneled" id="889e932f">Exposed</span>
                 <li><span class="dfn-paneled" id="efd1ec5d">object</span>
                 <li><span class="dfn-paneled" id="4013a022">this</span>
@@ -3970,7 +3958,7 @@ For darkmode:
 
 [<a class="idl-code" data-link-type="extended-attribute" href="https://webidl.spec.whatwg.org/#Exposed"><c- g>Exposed</c-></a>=<c- n>Window</c->]
 <c- b>interface</c-> <a href="#performancesoftnavigation"><code class="highlight"><c- g>PerformanceSoftNavigation</c-></code></a> : <a data-link-type="idl-name" href="https://w3c.github.io/performance-timeline/#performanceentry"><c- n>PerformanceEntry</c-></a> {
-    <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-DOMString"><c- b>DOMString</c-></a> <a data-readonly data-type="DOMString" href="#dom-performancesoftnavigation-navigationtype"><code class="highlight"><c- g>navigationType</c-></code></a>;
+    <c- b>readonly</c-> <c- b>attribute</c-> <a data-link-type="idl-name" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigationtype"><c- n>NavigationType</c-></a> <a data-readonly data-type="NavigationType" href="#dom-performancesoftnavigation-navigationtype"><code class="highlight"><c- g>navigationType</c-></code></a>;
     <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://webidl.spec.whatwg.org/#idl-unsigned-long-long"><c- b>unsigned</c-> <c- b>long</c-> <c- b>long</c-></a> <a data-readonly data-type="unsigned long long" href="#dom-performancesoftnavigation-interactionid"><code class="highlight"><c- g>interactionId</c-></code></a>;
     <a data-link-type="idl-name" href="#interactioncontentfulpaint"><c- n>InteractionContentfulPaint</c-></a>? <a href="#dom-performancesoftnavigation-getlargestinteractioncontentfulpaint"><code class="highlight"><c- g>getLargestInteractionContentfulPaint</c-></code></a>();
 };
@@ -4200,7 +4188,7 @@ For darkmode:
             let dfnPanelData = {
                 "02c65a0e": { "dfnID": "02c65a0e", "dfnText": "interaction count", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-window-interaction-count" }, { "id": "ref-for-window-interaction-count\u2460" }, { "id": "ref-for-window-interaction-count\u2461" }], "title": "6.3. Event Timing integration" }], "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#window-interaction-count" },
                 "03f41c8b": { "dfnID": "03f41c8b", "dfnText": "timing-eligible", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-timing-eligible" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "https://w3c.github.io/paint-timing/#timing-eligible" },
-                "0698d556": { "dfnID": "0698d556", "dfnText": "string", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-string" }, { "id": "ref-for-string\u2460" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://infra.spec.whatwg.org/#string" },
+                "0698d556": { "dfnID": "0698d556", "dfnText": "string", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-string" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://infra.spec.whatwg.org/#string" },
                 "08a90f22": { "dfnID": "08a90f22", "dfnText": "entryType", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceentry-entrytype" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-dom-performanceentry-entrytype\u2460" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://w3c.github.io/performance-timeline/#dom-performanceentry-entrytype" },
                 "09c54b53": { "dfnID": "09c54b53", "dfnText": "name", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceentry-name" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-dom-performanceentry-name\u2460" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://w3c.github.io/performance-timeline/#dom-performanceentry-name" },
                 "0d1464b6": { "dfnID": "0d1464b6", "dfnText": "paint timing info", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-paint-timing-info" }, { "id": "ref-for-paint-timing-info\u2460" }, { "id": "ref-for-paint-timing-info\u2461" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-paint-timing-info\u2462" }, { "id": "ref-for-paint-timing-info\u2463" }, { "id": "ref-for-paint-timing-info\u2464" }, { "id": "ref-for-paint-timing-info\u2465" }, { "id": "ref-for-paint-timing-info\u2466" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-paint-timing-info\u2467" }], "title": "5.1. The PerformanceSoftNavigation interface" }, { "refs": [{ "id": "ref-for-paint-timing-info\u2468" }, { "id": "ref-for-paint-timing-info\u2460\u24ea" }], "title": "5.2. Soft Navigation Algorithms" }, { "refs": [{ "id": "ref-for-paint-timing-info\u2460\u2460" }], "title": "6.4. Paint Timing integration" }], "url": "https://w3c.github.io/paint-timing/#paint-timing-info" },
@@ -4208,18 +4196,17 @@ For darkmode:
                 "1243a891": { "dfnID": "1243a891", "dfnText": "exist", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-map-exists" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-map-exists\u2460" }, { "id": "ref-for-map-exists\u2461" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://infra.spec.whatwg.org/#map-exists" },
                 "16d07e10": { "dfnID": "16d07e10", "dfnText": "for each (for list)", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-list-iterate" }, { "id": "ref-for-list-iterate\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-list-iterate\u2461" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "https://infra.spec.whatwg.org/#list-iterate" },
                 "24f32f51": { "dfnID": "24f32f51", "dfnText": "pending image record element", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-pending-image-record-element" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://w3c.github.io/paint-timing/#pending-image-record-element" },
-                "26b82890": { "dfnID": "26b82890", "dfnText": "event", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-event" }, { "id": "ref-for-concept-event\u2460" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://dom.spec.whatwg.org/#concept-event" },
+                "26b82890": { "dfnID": "26b82890", "dfnText": "event", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-event" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://dom.spec.whatwg.org/#concept-event" },
                 "27d9b7ea": { "dfnID": "27d9b7ea", "dfnText": "element", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-element" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-concept-element\u2460" }], "title": "6.4. Paint Timing integration" }], "url": "https://dom.spec.whatwg.org/#concept-element" },
                 "296f3551": { "dfnID": "296f3551", "dfnText": "Element", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-element" }], "title": "6.4. Paint Timing integration" }], "url": "https://dom.spec.whatwg.org/#element" },
-                "2e38edd1": { "dfnID": "2e38edd1", "dfnText": "interaction id", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-interaction-id" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-interaction-id\u2460" }, { "id": "ref-for-interaction-id\u2461" }], "title": "6.3. Event Timing integration" }], "url": "https://w3c.github.io/event-timing/#interaction-id" },
                 "3349d69f": { "dfnID": "3349d69f", "dfnText": "associated Document", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-document-window" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" },
                 "347e8fe9": { "dfnID": "347e8fe9", "dfnText": "URL", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-document-url" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://dom.spec.whatwg.org/#concept-document-url" },
                 "352e4f4f": { "dfnID": "352e4f4f", "dfnText": "node", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-node" }, { "id": "ref-for-concept-node\u2460" }, { "id": "ref-for-concept-node\u2461" }, { "id": "ref-for-concept-node\u2462" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-concept-node\u2463" }, { "id": "ref-for-concept-node\u2464" }], "title": "6.1.1. Document" }, { "refs": [{ "id": "ref-for-concept-node\u2465" }], "title": "6.1.2. Node" }, { "refs": [{ "id": "ref-for-concept-node\u2466" }, { "id": "ref-for-concept-node\u2467" }, { "id": "ref-for-concept-node\u2468" }, { "id": "ref-for-concept-node\u2460\u24ea" }], "title": "6.4. Paint Timing integration" }], "url": "https://dom.spec.whatwg.org/#concept-node" },
-                "35922c9d": { "dfnID": "35922c9d", "dfnText": "interactionId", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceeventtiming-interactionid" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" },
+                "35922c9d": { "dfnID": "35922c9d", "dfnText": "interactionId", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceeventtiming-interactionid" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-dom-performanceeventtiming-interactionid\u2460" }, { "id": "ref-for-dom-performanceeventtiming-interactionid\u2461" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-dom-performanceeventtiming-interactionid\u2462" }, { "id": "ref-for-dom-performanceeventtiming-interactionid\u2463" }], "title": "6.3. Event Timing integration" }], "url": "https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" },
                 "3b786c72": { "dfnID": "3b786c72", "dfnText": "exposed for paint timing", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-exposed-for-paint-timing" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "https://w3c.github.io/paint-timing/#exposed-for-paint-timing" },
                 "3fca5a9e": { "dfnID": "3fca5a9e", "dfnText": "map", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-ordered-map" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-ordered-map\u2460" }, { "id": "ref-for-ordered-map\u2461" }, { "id": "ref-for-ordered-map\u2462" }], "title": "6.1.1. Document" }], "url": "https://infra.spec.whatwg.org/#ordered-map" },
                 "4013a022": { "dfnID": "4013a022", "dfnText": "this", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-this" }], "title": "2.2. The PerformanceEntry extension" }, { "refs": [{ "id": "ref-for-this\u2460" }, { "id": "ref-for-this\u2461" }, { "id": "ref-for-this\u2462" }, { "id": "ref-for-this\u2463" }, { "id": "ref-for-this\u2464" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-this\u2465" }, { "id": "ref-for-this\u2466" }, { "id": "ref-for-this\u2467" }, { "id": "ref-for-this\u2468" }, { "id": "ref-for-this\u2460\u24ea" }, { "id": "ref-for-this\u2460\u2460" }, { "id": "ref-for-this\u2460\u2461" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://webidl.spec.whatwg.org/#this" },
-                "42db82d0": { "dfnID": "42db82d0", "dfnText": "64-bit unsigned integer", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-64-bit-unsigned-integer" }, { "id": "ref-for-64-bit-unsigned-integer\u2460" }, { "id": "ref-for-64-bit-unsigned-integer\u2461" }, { "id": "ref-for-64-bit-unsigned-integer\u2462" }], "title": "2.1. Navigation ID" }, { "refs": [{ "id": "ref-for-64-bit-unsigned-integer\u2463" }], "title": "2.2. The PerformanceEntry extension" }, { "refs": [{ "id": "ref-for-64-bit-unsigned-integer\u2464" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-64-bit-unsigned-integer\u2465" }], "title": "6.1.1. Document" }], "url": "https://infra.spec.whatwg.org/#64-bit-unsigned-integer" },
+                "42db82d0": { "dfnID": "42db82d0", "dfnText": "64-bit unsigned integer", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-64-bit-unsigned-integer" }, { "id": "ref-for-64-bit-unsigned-integer\u2460" }, { "id": "ref-for-64-bit-unsigned-integer\u2461" }, { "id": "ref-for-64-bit-unsigned-integer\u2462" }], "title": "2.1. Navigation ID" }, { "refs": [{ "id": "ref-for-64-bit-unsigned-integer\u2463" }], "title": "2.2. The PerformanceEntry extension" }, { "refs": [{ "id": "ref-for-64-bit-unsigned-integer\u2464" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-64-bit-unsigned-integer\u2465" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-64-bit-unsigned-integer\u2466" }], "title": "6.1.1. Document" }], "url": "https://infra.spec.whatwg.org/#64-bit-unsigned-integer" },
                 "45209803": { "dfnID": "45209803", "dfnText": "for each (for map)", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-map-iterate" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://infra.spec.whatwg.org/#map-iterate" },
                 "4523ab1a": { "dfnID": "4523ab1a", "dfnText": "event dispatch", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-event-dispatch" }], "title": "6.3. Event Timing integration" }], "url": "https://dom.spec.whatwg.org/#concept-event-dispatch" },
                 "4b6086d7": { "dfnID": "4b6086d7", "dfnText": "global object", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-global-object" }], "title": "2.1. Navigation ID" }], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#global-object" },
@@ -4231,38 +4218,41 @@ For darkmode:
                 "5c2fe3bf": { "dfnID": "5c2fe3bf", "dfnText": "presentationTime", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-painttimingmixin-presentationtime" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://w3c.github.io/paint-timing/#dom-painttimingmixin-presentationtime" },
                 "5d7209e9": { "dfnID": "5d7209e9", "dfnText": "Window", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-window" }, { "id": "ref-for-window\u2460" }, { "id": "ref-for-window\u2461" }, { "id": "ref-for-window\u2462" }], "title": "2.1. Navigation ID" }, { "refs": [{ "id": "ref-for-window\u2463" }], "title": "2.3. Performance Timeline Integration" }, { "refs": [{ "id": "ref-for-window\u2464" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-window\u2465" }, { "id": "ref-for-window\u2466" }], "title": "5.2. Soft Navigation Algorithms" }, { "refs": [{ "id": "ref-for-window\u2467" }, { "id": "ref-for-window\u2468" }], "title": "6.2.2. Hard Navigation" }, { "refs": [{ "id": "ref-for-window\u2460\u24ea" }], "title": "6.3. Event Timing integration" }], "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#window" },
                 "61f06c86": { "dfnID": "61f06c86", "dfnText": "PerformanceEntry", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-performanceentry" }], "title": "2. Performance Timeline Slicing" }, { "refs": [{ "id": "ref-for-performanceentry\u2460" }, { "id": "ref-for-performanceentry\u2461" }], "title": "2.2. The PerformanceEntry extension" }, { "refs": [{ "id": "ref-for-performanceentry\u2462" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-performanceentry\u2463" }], "title": "5.1. The PerformanceSoftNavigation interface" }, { "refs": [{ "id": "ref-for-performanceentry\u2464" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://w3c.github.io/performance-timeline/#performanceentry" },
+                "62287cfd": { "dfnID": "62287cfd", "dfnText": "interaction", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-interaction" }], "title": "6.3. Event Timing integration" }], "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#dfn-interaction" },
                 "692595fe": { "dfnID": "692595fe", "dfnText": "ordered set", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-ordered-set" }, { "id": "ref-for-ordered-set\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-ordered-set\u2461" }, { "id": "ref-for-ordered-set\u2462" }], "title": "6.4. Paint Timing integration" }], "url": "https://infra.spec.whatwg.org/#ordered-set" },
-                "6d8bccc7": { "dfnID": "6d8bccc7", "dfnText": "PerformanceEventTiming", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-performanceeventtiming" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://w3c.github.io/event-timing/#performanceeventtiming" },
+                "6d273060": { "dfnID": "6d273060", "dfnText": "replace", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-navigationtype-replace" }], "title": "6.2.1. History" }], "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-replace" },
+                "6d8bccc7": { "dfnID": "6d8bccc7", "dfnText": "PerformanceEventTiming", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-performanceeventtiming" }, { "id": "ref-for-performanceeventtiming\u2460" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://w3c.github.io/event-timing/#performanceeventtiming" },
                 "6f0c9044": { "dfnID": "6f0c9044", "dfnText": "performance entry buffer", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-performance-entry-buffer" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-performance-entry-buffer\u2460" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://w3c.github.io/performance-timeline/#performance-entry-buffer" },
                 "77a05ba3": { "dfnID": "77a05ba3", "dfnText": "mark paint timing", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-mark-paint-timing" }, { "id": "ref-for-mark-paint-timing\u2460" }, { "id": "ref-for-mark-paint-timing\u2461" }], "title": "6.4. Paint Timing integration" }], "url": "https://w3c.github.io/paint-timing/#mark-paint-timing" },
+                "77b4c09a": { "dfnID": "77b4c09a", "dfnText": "assert", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-assert" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-assert\u2460" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://infra.spec.whatwg.org/#assert" },
                 "7d4424b2": { "dfnID": "7d4424b2", "dfnText": "remove", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-map-remove" }, { "id": "ref-for-map-remove\u2460" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "https://infra.spec.whatwg.org/#map-remove" },
                 "7e7cc1d8": { "dfnID": "7e7cc1d8", "dfnText": "current high resolution time", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-current-high-resolution-time" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-dfn-current-high-resolution-time\u2460" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://w3c.github.io/hr-time/#dfn-current-high-resolution-time" },
                 "84f47c16": { "dfnID": "84f47c16", "dfnText": "child", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-tree-child" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "https://dom.spec.whatwg.org/#concept-tree-child" },
                 "85394472": { "dfnID": "85394472", "dfnText": "Document", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-document" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-document\u2460" }, { "id": "ref-for-document\u2461" }], "title": "6.4. Paint Timing integration" }], "url": "https://dom.spec.whatwg.org/#document" },
-                "8855a9aa": { "dfnID": "8855a9aa", "dfnText": "DOMString", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-idl-DOMString" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://webidl.spec.whatwg.org/#idl-DOMString" },
                 "889e932f": { "dfnID": "889e932f", "dfnText": "Exposed", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-Exposed" }], "title": "2.2. The PerformanceEntry extension" }, { "refs": [{ "id": "ref-for-Exposed\u2460" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-Exposed\u2461" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://webidl.spec.whatwg.org/#Exposed" },
                 "8a1f6229": { "dfnID": "8a1f6229", "dfnText": "initialize and record event timing processing start", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-initialize-and-record-event-timing-processing-start" }], "title": "6.3. Event Timing integration" }], "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#initialize-and-record-event-timing-processing-start" },
                 "925b5984": { "dfnID": "925b5984", "dfnText": "associated event", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-performanceeventtiming-associated-event" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#performanceeventtiming-associated-event" },
                 "984221ca": { "dfnID": "984221ca", "dfnText": "struct", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-struct" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-struct\u2460" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "https://infra.spec.whatwg.org/#struct" },
                 "9b804b5d": { "dfnID": "9b804b5d", "dfnText": "largest contentful paint candidate", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-largest-contentful-paint-candidate" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-largest-contentful-paint-candidate\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#largest-contentful-paint-candidate" },
-                "9ca77ab8": { "dfnID": "9ca77ab8", "dfnText": "interaction", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-interaction" }], "title": "6.3. Event Timing integration" }], "url": "https://w3c.github.io/event-timing/#dfn-interaction" },
                 "a2de40e9": { "dfnID": "a2de40e9", "dfnText": "pending image record", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-pending-image-record" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-pending-image-record\u2460" }], "title": "6.4. Paint Timing integration" }], "url": "https://w3c.github.io/paint-timing/#pending-image-record" },
                 "a326add7": { "dfnID": "a326add7", "dfnText": "contain", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-map-exists" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-map-exists\u2460" }, { "id": "ref-for-map-exists\u2461" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://infra.spec.whatwg.org/#map-exists" },
                 "a3b18719": { "dfnID": "a3b18719", "dfnText": "append", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-set-append" }, { "id": "ref-for-set-append\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://infra.spec.whatwg.org/#set-append" },
+                "a4c36929": { "dfnID": "a4c36929", "dfnText": "NavigationType", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-navigationtype" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-navigationtype\u2460" }], "title": "5.1. The PerformanceSoftNavigation interface" }, { "refs": [{ "id": "ref-for-navigationtype\u2461" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigationtype" },
                 "a67e9838": { "dfnID": "a67e9838", "dfnText": "report largest contentful paint", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-report-largest-contentful-paint" }], "title": "6.4. Paint Timing integration" }], "url": "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#report-largest-contentful-paint" },
-                "a973e0fe": { "dfnID": "a973e0fe", "dfnText": "document", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-document" }, { "id": "ref-for-concept-document\u2460" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-concept-document\u2461" }, { "id": "ref-for-concept-document\u2462" }, { "id": "ref-for-concept-document\u2463" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-concept-document\u2464" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-concept-document\u2465" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-concept-document\u2466" }, { "id": "ref-for-concept-document\u2467" }], "title": "5.2. Soft Navigation Algorithms" }, { "refs": [{ "id": "ref-for-concept-document\u2468" }, { "id": "ref-for-concept-document\u2460\u24ea" }, { "id": "ref-for-concept-document\u2460\u2460" }, { "id": "ref-for-concept-document\u2460\u2461" }, { "id": "ref-for-concept-document\u2460\u2462" }, { "id": "ref-for-concept-document\u2460\u2463" }, { "id": "ref-for-concept-document\u2460\u2464" }], "title": "6.1.1. Document" }, { "refs": [{ "id": "ref-for-concept-document\u2460\u2465" }, { "id": "ref-for-concept-document\u2460\u2466" }], "title": "6.2.1. History" }, { "refs": [{ "id": "ref-for-concept-document\u2460\u2467" }], "title": "8. Appendix: Overlapping Interactions and Race Conditions" }], "url": "https://dom.spec.whatwg.org/#concept-document" },
+                "a973e0fe": { "dfnID": "a973e0fe", "dfnText": "document", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-document" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-concept-document\u2460" }, { "id": "ref-for-concept-document\u2461" }, { "id": "ref-for-concept-document\u2462" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-concept-document\u2463" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-concept-document\u2464" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-concept-document\u2465" }, { "id": "ref-for-concept-document\u2466" }], "title": "5.2. Soft Navigation Algorithms" }, { "refs": [{ "id": "ref-for-concept-document\u2467" }, { "id": "ref-for-concept-document\u2468" }, { "id": "ref-for-concept-document\u2460\u24ea" }, { "id": "ref-for-concept-document\u2460\u2460" }, { "id": "ref-for-concept-document\u2460\u2461" }, { "id": "ref-for-concept-document\u2460\u2462" }, { "id": "ref-for-concept-document\u2460\u2463" }], "title": "6.1.1. Document" }, { "refs": [{ "id": "ref-for-concept-document\u2460\u2464" }, { "id": "ref-for-concept-document\u2460\u2465" }], "title": "6.2.1. History" }, { "refs": [{ "id": "ref-for-concept-document\u2460\u2466" }], "title": "8. Appendix: Overlapping Interactions and Race Conditions" }], "url": "https://dom.spec.whatwg.org/#concept-document" },
                 "a9ea380f": { "dfnID": "a9ea380f", "dfnText": "queue a PerformanceEntry", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dfn-queue-a-performanceentry" }], "title": "2.3. Performance Timeline Integration" }, { "refs": [{ "id": "ref-for-dfn-queue-a-performanceentry\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-dfn-queue-a-performanceentry\u2461" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://w3c.github.io/performance-timeline/#dfn-queue-a-performanceentry" },
                 "b2bb4403": { "dfnID": "b2bb4403", "dfnText": "renderTime", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-largestcontentfulpaint-rendertime" }, { "id": "ref-for-dom-largestcontentfulpaint-rendertime\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://w3c.github.io/largest-contentful-paint/#dom-largestcontentfulpaint-rendertime" },
                 "b75a7d23": { "dfnID": "b75a7d23", "dfnText": "realm", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-concept-global-object-realm" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-concept-global-object-realm\u2460" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#concept-global-object-realm" },
                 "ba6dc3e0": { "dfnID": "ba6dc3e0", "dfnText": "interactionId increment", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-window-interactionid-increment" }], "title": "6.3. Event Timing integration" }], "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#window-interactionid-increment" },
-                "bc2342f0": { "dfnID": "bc2342f0", "dfnText": "has dispatched input event", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-has-dispatched-input-event" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://w3c.github.io/event-timing/#has-dispatched-input-event" },
                 "c88f3887": { "dfnID": "c88f3887", "dfnText": "item", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-struct-item" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-struct-item\u2460" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "https://infra.spec.whatwg.org/#struct-item" },
+                "c9ff317b": { "dfnID": "c9ff317b", "dfnText": "push", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-navigationtype-push" }], "title": "6.2.1. History" }], "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-push" },
                 "cc02d9f1": { "dfnID": "cc02d9f1", "dfnText": "compute a new largest contentful paint candidate", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-compute-a-new-largest-contentful-paint-candidate" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#compute-a-new-largest-contentful-paint-candidate" },
-                "cc7c9b78": { "dfnID": "cc7c9b78", "dfnText": "startTime", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceentry-starttime" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-dom-performanceentry-starttime\u2460" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://w3c.github.io/performance-timeline/#dom-performanceentry-starttime" },
+                "cc7c9b78": { "dfnID": "cc7c9b78", "dfnText": "startTime", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceentry-starttime" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-dom-performanceentry-starttime\u2460" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-dom-performanceentry-starttime\u2461" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://w3c.github.io/performance-timeline/#dom-performanceentry-starttime" },
                 "ce6f454c": { "dfnID": "ce6f454c", "dfnText": "initial interactionId value", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-window-initial-interactionid-value" }], "title": "6.3. Event Timing integration" }], "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#window-initial-interactionid-value" },
                 "cf22a135": { "dfnID": "cf22a135", "dfnText": "default paint timestamp", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-default-paint-timestamp" }], "title": "4.1. The InteractionContentfulPaint interface" }], "url": "https://w3c.github.io/paint-timing/#default-paint-timestamp" },
                 "create-a-soft-navigation-entry": { "dfnID": "create-a-soft-navigation-entry", "dfnText": "create a soft navigation entry", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-create-a-soft-navigation-entry" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "#create-a-soft-navigation-entry" },
                 "create-an-interaction-contentful-paint-entry": { "dfnID": "create-an-interaction-contentful-paint-entry", "dfnText": "create an interaction contentful paint entry", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-create-an-interaction-contentful-paint-entry" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "#create-an-interaction-contentful-paint-entry" },
+                "d51946bf": { "dfnID": "d51946bf", "dfnText": "has dispatched input event", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-has-dispatched-input-event" }], "title": "3.3. Infrastructure Algorithms" }], "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#has-dispatched-input-event" },
                 "document-active-soft-navigation-candidate": { "dfnID": "document-active-soft-navigation-candidate", "dfnText": "active soft navigation candidate", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-document-active-soft-navigation-candidate" }, { "id": "ref-for-document-active-soft-navigation-candidate\u2460" }], "title": "5.2. Soft Navigation Algorithms" }, { "refs": [{ "id": "ref-for-document-active-soft-navigation-candidate\u2461" }, { "id": "ref-for-document-active-soft-navigation-candidate\u2462" }, { "id": "ref-for-document-active-soft-navigation-candidate\u2463" }], "title": "8. Appendix: Overlapping Interactions and Race Conditions" }], "url": "#document-active-soft-navigation-candidate" },
                 "document-current-modification-generation-id": { "dfnID": "document-current-modification-generation-id", "dfnText": "current modification generation id", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-document-current-modification-generation-id" }, { "id": "ref-for-document-current-modification-generation-id\u2460" }, { "id": "ref-for-document-current-modification-generation-id\u2461" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-document-current-modification-generation-id\u2462" }], "title": "6.1.1. Document" }], "url": "#document-current-modification-generation-id" },
                 "document-interaction-id-to-interaction-context": { "dfnID": "document-interaction-id-to-interaction-context", "dfnText": "interaction id to interaction context", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-document-interaction-id-to-interaction-context" }, { "id": "ref-for-document-interaction-id-to-interaction-context\u2460" }, { "id": "ref-for-document-interaction-id-to-interaction-context\u2461" }, { "id": "ref-for-document-interaction-id-to-interaction-context\u2462" }], "title": "3.3. Infrastructure Algorithms" }], "url": "#document-interaction-id-to-interaction-context" },
@@ -4273,7 +4263,7 @@ For darkmode:
                 "dom-interactioncontentfulpaint-interactionid": { "dfnID": "dom-interactioncontentfulpaint-interactionid", "dfnText": "interactionId", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-dom-interactioncontentfulpaint-interactionid" }], "title": "4.1. The InteractionContentfulPaint interface" }], "url": "#dom-interactioncontentfulpaint-interactionid" },
                 "dom-interactioncontentfulpaint-largestcontentfulpaint": { "dfnID": "dom-interactioncontentfulpaint-largestcontentfulpaint", "dfnText": "largestContentfulPaint", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-dom-interactioncontentfulpaint-largestcontentfulpaint" }], "title": "4.1. The InteractionContentfulPaint interface" }], "url": "#dom-interactioncontentfulpaint-largestcontentfulpaint" },
                 "dom-interactioncontentfulpaint-tojson": { "dfnID": "dom-interactioncontentfulpaint-tojson", "dfnText": "toJSON", "external": false, "refSections": [], "url": "#dom-interactioncontentfulpaint-tojson" },
-                "dom-performanceentry-navigationid": { "dfnID": "dom-performanceentry-navigationid", "dfnText": "navigationId", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceentry-navigationid" }], "title": "2.1. Navigation ID" }, { "refs": [{ "id": "ref-for-dom-performanceentry-navigationid\u2460" }], "title": "2.2. The PerformanceEntry extension" }], "url": "#dom-performanceentry-navigationid" },
+                "dom-performanceentry-navigationid": { "dfnID": "dom-performanceentry-navigationid", "dfnText": "navigationId", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceentry-navigationid" }], "title": "2. Performance Timeline Slicing" }, { "refs": [{ "id": "ref-for-dom-performanceentry-navigationid\u2460" }], "title": "2.1. Navigation ID" }, { "refs": [{ "id": "ref-for-dom-performanceentry-navigationid\u2461" }], "title": "2.2. The PerformanceEntry extension" }], "url": "#dom-performanceentry-navigationid" },
                 "dom-performancesoftnavigation-getlargestinteractioncontentfulpaint": { "dfnID": "dom-performancesoftnavigation-getlargestinteractioncontentfulpaint", "dfnText": "getLargestInteractionContentfulPaint", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-dom-performancesoftnavigation-getlargestinteractioncontentfulpaint" }, { "id": "ref-for-dom-performancesoftnavigation-getlargestinteractioncontentfulpaint\u2460" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "#dom-performancesoftnavigation-getlargestinteractioncontentfulpaint" },
                 "dom-performancesoftnavigation-interactionid": { "dfnID": "dom-performancesoftnavigation-interactionid", "dfnText": "interactionId", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-dom-performancesoftnavigation-interactionid" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "#dom-performancesoftnavigation-interactionid" },
                 "dom-performancesoftnavigation-navigationtype": { "dfnID": "dom-performancesoftnavigation-navigationtype", "dfnText": "navigationType", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-dom-performancesoftnavigation-navigationtype" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "#dom-performancesoftnavigation-navigationtype" },
@@ -4289,9 +4279,10 @@ For darkmode:
                 "f05d368d": { "dfnID": "f05d368d", "dfnText": "PerformanceNavigationTiming", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-performancenavigationtiming" }], "title": "6.2.2. Hard Navigation" }], "url": "https://w3c.github.io/navigation-timing/#performancenavigationtiming" },
                 "f14b47b8": { "dfnID": "f14b47b8", "dfnText": "unsigned long long", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-idl-unsigned-long-long" }], "title": "2.2. The PerformanceEntry extension" }, { "refs": [{ "id": "ref-for-idl-unsigned-long-long\u2460" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-idl-unsigned-long-long\u2461" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://webidl.spec.whatwg.org/#idl-unsigned-long-long" },
                 "f710aefb": { "dfnID": "f710aefb", "dfnText": "session history entry url", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-she-url" }], "title": "6.2.1. History" }], "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#she-url" },
+                "fa3348cc": { "dfnID": "fa3348cc", "dfnText": "traverse", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-navigationtype-traverse" }], "title": "6.2.1. History" }], "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-traverse" },
                 "fabd3046": { "dfnID": "fabd3046", "dfnText": "duration", "external": true, "refSections": [{ "refs": [{ "id": "ref-for-dom-performanceentry-duration" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-dom-performanceentry-duration\u2460" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "https://w3c.github.io/performance-timeline/#dom-performanceentry-duration" },
+                "get-or-create-the-context-for-an-interaction": { "dfnID": "get-or-create-the-context-for-an-interaction", "dfnText": "get or create the context for an interaction", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-get-or-create-the-context-for-an-interaction" }], "title": "3.3. Infrastructure Algorithms" }], "url": "#get-or-create-the-context-for-an-interaction" },
                 "get-the-attribution-element": { "dfnID": "get-the-attribution-element", "dfnText": "get the attribution element", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-get-the-attribution-element" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "#get-the-attribution-element" },
-                "get-the-context-for-an-interaction": { "dfnID": "get-the-context-for-an-interaction", "dfnText": "get the context for an interaction", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-get-the-context-for-an-interaction" }], "title": "3.3. Infrastructure Algorithms" }], "url": "#get-the-context-for-an-interaction" },
                 "get-the-current-interaction-context": { "dfnID": "get-the-current-interaction-context", "dfnText": "get the current interaction context", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-get-the-current-interaction-context" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-get-the-current-interaction-context\u2460" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "#get-the-current-interaction-context" },
                 "get-the-next-interactionid": { "dfnID": "get-the-next-interactionid", "dfnText": "get the next interactionId", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-get-the-next-interactionid" }], "title": "6.3. Event Timing integration" }], "url": "#get-the-next-interactionid" },
                 "get-the-paint-attribution-interaction-context": { "dfnID": "get-the-paint-attribution-interaction-context", "dfnText": "get the paint attribution interaction context", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-get-the-paint-attribution-interaction-context" }, { "id": "ref-for-get-the-paint-attribution-interaction-context\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "#get-the-paint-attribution-interaction-context" },
@@ -4309,7 +4300,7 @@ For darkmode:
                 "interactioncontext-first-url-value": { "dfnID": "interactioncontext-first-url-value", "dfnText": "first URL value", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-first-url-value" }], "title": "5.1. The PerformanceSoftNavigation interface" }, { "refs": [{ "id": "ref-for-interactioncontext-first-url-value\u2460" }, { "id": "ref-for-interactioncontext-first-url-value\u2461" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "#interactioncontext-first-url-value" },
                 "interactioncontext-id": { "dfnID": "interactioncontext-id", "dfnText": "id", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-id" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-interactioncontext-id\u2460" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-interactioncontext-id\u2461" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "#interactioncontext-id" },
                 "interactioncontext-interactioncontext": { "dfnID": "interactioncontext-interactioncontext", "dfnText": "InteractionContext", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-interactioncontext" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-interactioncontext-interactioncontext\u2460" }, { "id": "ref-for-interactioncontext-interactioncontext\u2461" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-interactioncontext-interactioncontext\u2462" }, { "id": "ref-for-interactioncontext-interactioncontext\u2463" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-interactioncontext-interactioncontext\u2464" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-interactioncontext-interactioncontext\u2465" }], "title": "5.1. The PerformanceSoftNavigation interface" }, { "refs": [{ "id": "ref-for-interactioncontext-interactioncontext\u2466" }, { "id": "ref-for-interactioncontext-interactioncontext\u2467" }, { "id": "ref-for-interactioncontext-interactioncontext\u2468" }, { "id": "ref-for-interactioncontext-interactioncontext\u2460\u24ea" }], "title": "5.2. Soft Navigation Algorithms" }, { "refs": [{ "id": "ref-for-interactioncontext-interactioncontext\u2460\u2460" }, { "id": "ref-for-interactioncontext-interactioncontext\u2460\u2461" }, { "id": "ref-for-interactioncontext-interactioncontext\u2460\u2462" }], "title": "6.1.1. Document" }, { "refs": [{ "id": "ref-for-interactioncontext-interactioncontext\u2460\u2463" }], "title": "8. Appendix: Overlapping Interactions and Race Conditions" }], "url": "#interactioncontext-interactioncontext" },
-                "interactioncontext-largest-contentful-paint": { "dfnID": "interactioncontext-largest-contentful-paint", "dfnText": "largest contentful paint", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-largest-contentful-paint" }], "title": "3.2. The InteractionContext struct" }, { "refs": [{ "id": "ref-for-interactioncontext-largest-contentful-paint\u2460" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-interactioncontext-largest-contentful-paint\u2461" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "#interactioncontext-largest-contentful-paint" },
+                "interactioncontext-largest-contentful-paint": { "dfnID": "interactioncontext-largest-contentful-paint", "dfnText": "largest contentful paint", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-largest-contentful-paint" }], "title": "4.2. Interaction Contentful Paint Algorithms" }, { "refs": [{ "id": "ref-for-interactioncontext-largest-contentful-paint\u2460" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "#interactioncontext-largest-contentful-paint" },
                 "interactioncontext-last-url-value": { "dfnID": "interactioncontext-last-url-value", "dfnText": "last URL value", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-last-url-value" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "#interactioncontext-last-url-value" },
                 "interactioncontext-navigation-type": { "dfnID": "interactioncontext-navigation-type", "dfnText": "navigation type", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-navigation-type" }], "title": "5.1. The PerformanceSoftNavigation interface" }, { "refs": [{ "id": "ref-for-interactioncontext-navigation-type\u2460" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "#interactioncontext-navigation-type" },
                 "interactioncontext-start-time": { "dfnID": "interactioncontext-start-time", "dfnText": "start time", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-interactioncontext-start-time" }], "title": "3.3. Infrastructure Algorithms" }, { "refs": [{ "id": "ref-for-interactioncontext-start-time\u2460" }, { "id": "ref-for-interactioncontext-start-time\u2461" }], "title": "4.1. The InteractionContentfulPaint interface" }, { "refs": [{ "id": "ref-for-interactioncontext-start-time\u2462" }, { "id": "ref-for-interactioncontext-start-time\u2463" }], "title": "5.1. The PerformanceSoftNavigation interface" }], "url": "#interactioncontext-start-time" },
@@ -4323,7 +4314,7 @@ For darkmode:
                 "performancesoftnavigation-context": { "dfnID": "performancesoftnavigation-context", "dfnText": "context", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-performancesoftnavigation-context" }, { "id": "ref-for-performancesoftnavigation-context\u2460" }, { "id": "ref-for-performancesoftnavigation-context\u2461" }, { "id": "ref-for-performancesoftnavigation-context\u2462" }, { "id": "ref-for-performancesoftnavigation-context\u2463" }, { "id": "ref-for-performancesoftnavigation-context\u2464" }], "title": "5.1. The PerformanceSoftNavigation interface" }, { "refs": [{ "id": "ref-for-performancesoftnavigation-context\u2465" }], "title": "5.2. Soft Navigation Algorithms" }], "url": "#performancesoftnavigation-context" },
                 "process-a-new-attributed-contentful-paint-candidate": { "dfnID": "process-a-new-attributed-contentful-paint-candidate", "dfnText": "process a new attributed contentful paint candidate", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-process-a-new-attributed-contentful-paint-candidate" }], "title": "4.2. Interaction Contentful Paint Algorithms" }], "url": "#process-a-new-attributed-contentful-paint-candidate" },
                 "process-a-same-document-commit": { "dfnID": "process-a-same-document-commit", "dfnText": "process a same document commit", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-process-a-same-document-commit" }, { "id": "ref-for-process-a-same-document-commit\u2460" }], "title": "6.2.1. History" }], "url": "#process-a-same-document-commit" },
-                "record-a-node-as-modified-for-interaction-paint-timing": { "dfnID": "record-a-node-as-modified-for-interaction-paint-timing", "dfnText": "record a node as modified for interaction paint timing", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-record-a-node-as-modified-for-interaction-paint-timing" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-record-a-node-as-modified-for-interaction-paint-timing\u2460" }], "title": "6.1.2. Node" }], "url": "#record-a-node-as-modified-for-interaction-paint-timing" },
+                "record-a-node-as-modified-for-interaction-paint-timing": { "dfnID": "record-a-node-as-modified-for-interaction-paint-timing", "dfnText": "record a node as modified for interaction paint timing", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-record-a-node-as-modified-for-interaction-paint-timing" }], "title": "3.1. Interaction Context Intro" }, { "refs": [{ "id": "ref-for-record-a-node-as-modified-for-interaction-paint-timing\u2460" }], "title": "4.3. Interaction Contentful Paint Attribution" }, { "refs": [{ "id": "ref-for-record-a-node-as-modified-for-interaction-paint-timing\u2461" }], "title": "6.1.2. Node" }], "url": "#record-a-node-as-modified-for-interaction-paint-timing" },
                 "report-interaction-contentful-paints-and-soft-navigations": { "dfnID": "report-interaction-contentful-paints-and-soft-navigations", "dfnText": "report interaction contentful paints and soft navigations", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-report-interaction-contentful-paints-and-soft-navigations" }], "title": "6.4. Paint Timing integration" }], "url": "#report-interaction-contentful-paints-and-soft-navigations" },
                 "reset-paint-tracking": { "dfnID": "reset-paint-tracking", "dfnText": "reset paint tracking", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-reset-paint-tracking" }], "title": "4.3. Interaction Contentful Paint Attribution" }], "url": "#reset-paint-tracking" },
                 "set-the-current-interaction-context-for-event-dispatch": { "dfnID": "set-the-current-interaction-context-for-event-dispatch", "dfnText": "set the current interaction context for event dispatch", "external": false, "refSections": [{ "refs": [{ "id": "ref-for-set-the-current-interaction-context-for-event-dispatch" }], "title": "6.3. Event Timing integration" }], "url": "#set-the-current-interaction-context-for-event-dispatch" },
@@ -4741,8 +4732,8 @@ For darkmode:
                 "#dom-performancesoftnavigation-navigationtype": { "displayText": "navigationType", "export": true, "for_": ["PerformanceSoftNavigation"], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "navigationType", "type": "attribute", "url": "#dom-performancesoftnavigation-navigationtype" },
                 "#emit-a-soft-navigation-entry": { "displayText": "emit a soft navigation entry", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "emit a soft navigation entry", "type": "dfn", "url": "#emit-a-soft-navigation-entry" },
                 "#evaluate-soft-navigation-emission": { "displayText": "evaluate soft navigation emission", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "evaluate soft navigation emission", "type": "dfn", "url": "#evaluate-soft-navigation-emission" },
+                "#get-or-create-the-context-for-an-interaction": { "displayText": "get or create the context for an interaction", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "get or create the context for an interaction", "type": "dfn", "url": "#get-or-create-the-context-for-an-interaction" },
                 "#get-the-attribution-element": { "displayText": "get the attribution element", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "get the attribution element", "type": "dfn", "url": "#get-the-attribution-element" },
-                "#get-the-context-for-an-interaction": { "displayText": "get the context for an interaction", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "get the context for an interaction", "type": "dfn", "url": "#get-the-context-for-an-interaction" },
                 "#get-the-current-interaction-context": { "displayText": "get the current interaction context", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "get the current interaction context", "type": "dfn", "url": "#get-the-current-interaction-context" },
                 "#get-the-next-interactionid": { "displayText": "get the next interactionid", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "get the next interactionid", "type": "dfn", "url": "#get-the-next-interactionid" },
                 "#get-the-paint-attribution-interaction-context": { "displayText": "get the paint attribution interaction context", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "soft-navigations", "status": "local", "text": "get the paint attribution interaction context", "type": "dfn", "url": "#get-the-paint-attribution-interaction-context" },
@@ -4802,11 +4793,16 @@ For darkmode:
                 "https://html.spec.whatwg.org/multipage/browsing-the-web.html#she-url": { "displayText": "session history entry url", "export": true, "for_": [], "level": "", "normative": true, "shortname": "html", "spec": "html", "status": "anchor-block", "text": "session history entry url", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#she-url" },
                 "https://html.spec.whatwg.org/multipage/browsing-the-web.html#update-document-for-history-step-application": { "displayText": "update document for history step application", "export": true, "for_": [], "level": "", "normative": true, "shortname": "html", "spec": "html", "status": "anchor-block", "text": "update document for history step application", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#update-document-for-history-step-application" },
                 "https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window": { "displayText": "associated Document", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "associated document", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" },
+                "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-push": { "displayText": "push", "export": true, "for_": ["NavigationType"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "push", "type": "enum-value", "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-push" },
+                "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-replace": { "displayText": "replace", "export": true, "for_": ["NavigationType"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "replace", "type": "enum-value", "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-replace" },
+                "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-traverse": { "displayText": "traverse", "export": true, "for_": ["NavigationType"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "traverse", "type": "enum-value", "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#dom-navigationtype-traverse" },
+                "https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigationtype": { "displayText": "NavigationType", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "NavigationType", "type": "enum", "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#navigationtype" },
                 "https://html.spec.whatwg.org/multipage/nav-history-apis.html#window": { "displayText": "Window", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "Window", "type": "interface", "url": "https://html.spec.whatwg.org/multipage/nav-history-apis.html#window" },
                 "https://html.spec.whatwg.org/multipage/webappapis.html#concept-global-object-realm": { "displayText": "realm", "export": true, "for_": ["global object"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "realm", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/webappapis.html#concept-global-object-realm" },
                 "https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global": { "displayText": "relevant global object", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "relevant global object", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global" },
                 "https://html.spec.whatwg.org/multipage/webappapis.html#global-object": { "displayText": "global object", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "global object", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/webappapis.html#global-object" },
                 "https://infra.spec.whatwg.org/#64-bit-unsigned-integer": { "displayText": "64-bit unsigned integer", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "64-bit unsigned integer", "type": "dfn", "url": "https://infra.spec.whatwg.org/#64-bit-unsigned-integer" },
+                "https://infra.spec.whatwg.org/#assert": { "displayText": "assert", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "assert", "type": "dfn", "url": "https://infra.spec.whatwg.org/#assert" },
                 "https://infra.spec.whatwg.org/#list-iterate": { "displayText": "for each", "export": true, "for_": ["list", "set"], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "for each", "type": "dfn", "url": "https://infra.spec.whatwg.org/#list-iterate" },
                 "https://infra.spec.whatwg.org/#map-exists": { "displayText": "exist", "export": true, "for_": ["map"], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "exist", "type": "dfn", "url": "https://infra.spec.whatwg.org/#map-exists" },
                 "https://infra.spec.whatwg.org/#map-iterate": { "displayText": "for each", "export": true, "for_": ["map"], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "for each", "type": "dfn", "url": "https://infra.spec.whatwg.org/#map-iterate" },
@@ -4819,6 +4815,8 @@ For darkmode:
                 "https://infra.spec.whatwg.org/#string": { "displayText": "string", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "string", "type": "dfn", "url": "https://infra.spec.whatwg.org/#string" },
                 "https://infra.spec.whatwg.org/#struct": { "displayText": "struct", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "struct", "type": "dfn", "url": "https://infra.spec.whatwg.org/#struct" },
                 "https://infra.spec.whatwg.org/#struct-item": { "displayText": "item", "export": true, "for_": ["struct", "tuple"], "level": "1", "normative": true, "shortname": "infra", "spec": "infra", "status": "current", "text": "item", "type": "dfn", "url": "https://infra.spec.whatwg.org/#struct-item" },
+                "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#dfn-interaction": { "displayText": "interaction", "export": true, "for_": [], "level": "", "normative": true, "shortname": "event-timing", "spec": "event-timing", "status": "anchor-block", "text": "interaction", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#dfn-interaction" },
+                "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#has-dispatched-input-event": { "displayText": "has dispatched input event", "export": true, "for_": [], "level": "", "normative": true, "shortname": "event-timing", "spec": "event-timing", "status": "anchor-block", "text": "has dispatched input event", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#has-dispatched-input-event" },
                 "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#initialize-and-record-event-timing-processing-start": { "displayText": "initialize and record event timing processing start", "export": true, "for_": [], "level": "", "normative": true, "shortname": "event-timing", "spec": "event-timing", "status": "anchor-block", "text": "initialize and record event timing processing start", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#initialize-and-record-event-timing-processing-start" },
                 "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#performanceeventtiming-associated-event": { "displayText": "associated event", "export": true, "for_": [], "level": "", "normative": true, "shortname": "event-timing", "spec": "event-timing", "status": "anchor-block", "text": "associated event", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#performanceeventtiming-associated-event" },
                 "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#record-event-timing-processing-end": { "displayText": "record event timing processing end", "export": true, "for_": [], "level": "", "normative": true, "shortname": "event-timing", "spec": "event-timing", "status": "anchor-block", "text": "record event timing processing end", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/mmocny/event-timing/pull/165.html#record-event-timing-processing-end" },
@@ -4829,10 +4827,7 @@ For darkmode:
                 "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#create-a-largestcontentfulpaint-entry": { "displayText": "create a LargestContentfulPaint entry", "export": true, "for_": [], "level": "", "normative": true, "shortname": "largest-contentful-paint", "spec": "largest-contentful-paint", "status": "anchor-block", "text": "create a largestcontentfulpaint entry", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#create-a-largestcontentfulpaint-entry" },
                 "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#largest-contentful-paint-candidate": { "displayText": "largest contentful paint candidate", "export": true, "for_": [], "level": "", "normative": true, "shortname": "largest-contentful-paint", "spec": "largest-contentful-paint", "status": "anchor-block", "text": "largest contentful paint candidate", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#largest-contentful-paint-candidate" },
                 "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#report-largest-contentful-paint": { "displayText": "report largest contentful paint", "export": true, "for_": [], "level": "", "normative": true, "shortname": "largest-contentful-paint", "spec": "largest-contentful-paint", "status": "anchor-block", "text": "report largest contentful paint", "type": "dfn", "url": "https://pr-preview.s3.amazonaws.com/shaseley/largest-contentful-paint/pull/171.html#report-largest-contentful-paint" },
-                "https://w3c.github.io/event-timing/#dfn-interaction": { "displayText": "interaction", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "", "status": "anchor-block", "text": "interaction", "type": "dfn", "url": "https://w3c.github.io/event-timing/#dfn-interaction" },
                 "https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid": { "displayText": "interactionId", "export": true, "for_": ["PerformanceEventTiming"], "level": "1", "normative": false, "shortname": "event-timing", "spec": "event-timing", "status": "current", "text": "interactionId", "type": "attribute", "url": "https://w3c.github.io/event-timing/#dom-performanceeventtiming-interactionid" },
-                "https://w3c.github.io/event-timing/#has-dispatched-input-event": { "displayText": "has dispatched input event", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "", "status": "anchor-block", "text": "has dispatched input event", "type": "dfn", "url": "https://w3c.github.io/event-timing/#has-dispatched-input-event" },
-                "https://w3c.github.io/event-timing/#interaction-id": { "displayText": "interaction id", "export": true, "for_": [], "level": "", "normative": true, "shortname": "soft-navigations", "spec": "", "status": "anchor-block", "text": "interaction id", "type": "dfn", "url": "https://w3c.github.io/event-timing/#interaction-id" },
                 "https://w3c.github.io/event-timing/#performanceeventtiming": { "displayText": "PerformanceEventTiming", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "event-timing", "spec": "event-timing", "status": "current", "text": "PerformanceEventTiming", "type": "interface", "url": "https://w3c.github.io/event-timing/#performanceeventtiming" },
                 "https://w3c.github.io/hr-time/#dfn-current-high-resolution-time": { "displayText": "current high resolution time", "export": true, "for_": [], "level": "3", "normative": true, "shortname": "hr-time", "spec": "hr-time-3", "status": "current", "text": "current high resolution time", "type": "dfn", "url": "https://w3c.github.io/hr-time/#dfn-current-high-resolution-time" },
                 "https://w3c.github.io/largest-contentful-paint/#dom-largestcontentfulpaint-rendertime": { "displayText": "renderTime", "export": true, "for_": ["LargestContentfulPaint"], "level": "1", "normative": true, "shortname": "largest-contentful-paint", "spec": "largest-contentful-paint", "status": "current", "text": "renderTime", "type": "attribute", "url": "https://w3c.github.io/largest-contentful-paint/#dom-largestcontentfulpaint-rendertime" },
@@ -4855,7 +4850,6 @@ For darkmode:
                 "https://w3c.github.io/performance-timeline/#performance-entry-buffer": { "displayText": "performance entry buffer", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "performance-timeline", "spec": "performance-timeline", "status": "current", "text": "performance entry buffer", "type": "dfn", "url": "https://w3c.github.io/performance-timeline/#performance-entry-buffer" },
                 "https://w3c.github.io/performance-timeline/#performanceentry": { "displayText": "PerformanceEntry", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "performance-timeline", "spec": "performance-timeline", "status": "current", "text": "PerformanceEntry", "type": "interface", "url": "https://w3c.github.io/performance-timeline/#performanceentry" },
                 "https://webidl.spec.whatwg.org/#Exposed": { "displayText": "Exposed", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "Exposed", "type": "extended-attribute", "url": "https://webidl.spec.whatwg.org/#Exposed" },
-                "https://webidl.spec.whatwg.org/#idl-DOMString": { "displayText": "DOMString", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "DOMString", "type": "interface", "url": "https://webidl.spec.whatwg.org/#idl-DOMString" },
                 "https://webidl.spec.whatwg.org/#idl-object": { "displayText": "object", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "object", "type": "interface", "url": "https://webidl.spec.whatwg.org/#idl-object" },
                 "https://webidl.spec.whatwg.org/#idl-unsigned-long-long": { "displayText": "unsigned long long", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "unsigned long long", "type": "interface", "url": "https://webidl.spec.whatwg.org/#idl-unsigned-long-long" },
                 "https://webidl.spec.whatwg.org/#this": { "displayText": "this", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "this", "type": "dfn", "url": "https://webidl.spec.whatwg.org/#this" },
