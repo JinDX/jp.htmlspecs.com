@@ -332,7 +332,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [WebDriver](https://jp.htmlspecs.com/webdriver2/)（[Source](https://www.w3.org/TR/2026/WD-webdriver2-20260528/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebDriver BiDi](https://jp.htmlspecs.com/webdriver-bidi/)（[Source](https://www.w3.org/TR/2026/WD-webdriver-bidi-20260601/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
-### 索引・スナップショット・概要
+## CSS
 - [CSS current work](https://jp.htmlspecs.com/css/)（[Source](https://www.w3.org/Style/CSS/current-work)）
 - [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)），- [How to Read](https://jp.htmlspecs.com/css/read/)（[Source](https://www.w3.org/Style/CSS/read)）
 - [CSS Snapshot 2024](https://jp.htmlspecs.com/css/css-2024/)（[Source](https://www.w3.org/TR/2025/NOTE-css-2024-20250225/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
@@ -488,7 +488,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Design Tokens Color Module 2025.10](https://jp.htmlspecs.com/css/design-tokens-color/)（[Source](https://www.designtokens.org/tr/2025.10/color/) ![Community Group Final Report](https://img.shields.io/badge/CG--FINAL-ffcc00)）
 - [Design Tokens Resolver Module 2025.10](https://jp.htmlspecs.com/css/design-tokens-resolver/)（[Source](https://www.designtokens.org/tr/2025.10/resolver/) ![Community Group Final Report](https://img.shields.io/badge/CG--FINAL-ffcc00)）
 
-### 索引と概要
+## HTTP
 - [index](https://jp.htmlspecs.com/http/)（[Source](https://httpwg.org/specs/)）
 
 ### HTTP 中核・バージョン・圧縮
