@@ -1,0 +1,493 @@
+Internet Engineering Task Force (IETF) P. Hoffman
+Request for Comments: 7396 VPN Consortium
+Obsoletes: <a href="./rfc7386">7386</a> J. Snell
+Category: Standards Track October 2014
+ISSN: 2070-1721
+
+
+<span class="h1">JSON Merge Patch</span>
+
+概要
+
+本仕様は、JSON マージパッチ形式とその処理規則を定義する。
+マージパッチ形式は、主として HTTP PATCH メソッドと併用し、
+対象リソースの内容に対する一連の変更を記述する手段として
+意図されている。
+
+このメモの位置づけ
+
+本文書は、インターネット標準化過程の文書である。
+
+本文書は、Internet Engineering Task Force (IETF) の成果物である。
+IETF コミュニティの合意を表している。本文書は公開レビューを受け、
+Internet Engineering Steering Group (IESG) によって公開が承認されている。
+インターネット標準に関する詳細情報は、
+<a href="./rfc5741#section-2">RFC 5741 の Section&nbsp;2</a> に記載されている。
+
+本文書の現在の状態、正誤表、およびフィードバックの送付方法に関する情報は、
+<a href="http://www.rfc-editor.org/info/rfc7396">http://www.rfc-editor.org/info/rfc7396</a> で入手できる。
+
+著作権表示
+
+Copyright (c) 2014 IETF Trust and the persons identified as the
+document authors. All rights reserved.
+
+本文書は、公開日に有効な <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> および IETF Trust の
+Legal Provisions Relating to IETF Documents
+(<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) の対象となる。
+これらの文書には、本文書に関する権利および制限が記載されているため、
+注意深く確認すること。本文書から抽出された Code Components には、
+Trust Legal Provisions の Section 4.e に記載されている Simplified BSD License
+の本文を含めなければならず、Simplified BSD License に記載されているとおり、
+無保証で提供される。
+
+
+
+
+
+
+
+<span class="grey">Hoffman &amp; Snell Standards Track [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  導入 . . . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-2">2</a>
+   <a href="#section-2">2</a>.  マージパッチ文書の処理 . . . . . . . . . . . . . . . . . .   <a href="#page-3">3</a>
+   <a href="#section-3">3</a>.  例 . . . . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+   <a href="#section-4">4</a>.  IANA に関する考慮事項 . . . . . . . . . . . . . . . . . .   <a href="#page-5">5</a>
+   <a href="#section-5">5</a>.  セキュリティに関する考慮事項 . . . . . . . . . . . . . .   <a href="#page-6">6</a>
+   <a href="#section-6">6</a>.  参考文献  . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-7">7</a>
+     <a href="#section-6.1">6.1</a>.  規範的参考文献  . . . . . . . . . . . . . . . . . . .   <a href="#page-7">7</a>
+     <a href="#section-6.2">6.2</a>.  参考情報としての参考文献  . . . . . . . . . . . . . .   <a href="#page-7">7</a>
+   <a href="#appendix-A">Appendix A</a>.  テストケースの例 . . . . . . . . . . . . . . . .   <a href="#page-8">8</a>
+   謝辞 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
+   著者の連絡先  . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  導入</span>
+
+   本仕様は、JSON マージパッチ文書形式、処理規則、および関連する
+   MIME メディアタイプ識別子を定義する。マージパッチ形式は、
+   主として HTTP PATCH メソッド [<a href="./rfc5789" title="&quot;PATCH Method for HTTP&quot;">RFC5789</a>] と併用し、
+   対象リソースの内容に対する一連の変更を記述する手段として
+   意図されている。
+
+   JSON マージパッチ文書は、変更対象となる文書に非常によく似た構文を用いて、
+   対象 JSON 文書に加える変更を記述する。マージパッチ文書の受信者は、
+   提供されたパッチの内容を対象文書の現在の内容と比較することで、
+   要求されている正確な変更の集合を決定する。提供されたマージパッチに、
+   対象内に存在しないメンバーが含まれている場合、それらのメンバーは追加される。
+   対象にそのメンバーが含まれている場合、その値は置換される。マージパッチ内の
+   Null 値には、対象内の既存の値を削除することを示す特別な意味が与えられる。
+
+   たとえば、次の元の JSON 文書があるとする。
+
+   {
+     "a": "b",
+     "c": {
+       "d": "e",
+       "f": "g"
+     }
+   }
+
+
+
+
+
+
+
+
+
+<span class="grey">Hoffman &amp; Snell              Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+   "a" の値を変更し、"f" を削除するには、次を送信すればよい。
+
+   PATCH /target HTTP/1.1
+   Host: example.org
+   Content-Type: application/merge-patch+json
+
+   {
+     "a":"z",
+     "c": {
+       "f": null
+     }
+   }
+
+   対象リソースに適用すると、"a" メンバーの値は "z" に置換され、
+   "f" は削除される。残りの内容は変更されない。
+
+   この設計は、マージパッチ文書が、主としてオブジェクトを構造として用い、
+   明示的な null 値を使用しない JSON 文書への変更を記述するのに適していることを
+   意味する。マージパッチ形式は、すべての JSON 構文に適しているわけではない。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  マージパッチ文書の処理</span>
+
+   JSON マージパッチ文書は、対象リソースに加えられる一連の変更を、
+   例によって記述する。マージパッチ文書の受信者は、マージパッチを
+   対象リソースの現在の内容と比較し、対象に適用すべき具体的な変更操作の集合を
+   決定する責任を負う。
+
+   マージパッチ文書を対象リソースに適用するため、システムは次の関数の効果を
+   実現する。この関数は擬似コードで記述されている。この説明では、この関数を
+   MergePatch と呼び、対象リソース文書とマージパッチ文書の 2 つの引数を取る。
+   Target 引数は任意の JSON 値または undefined でよい。Patch 引数は任意の
+   JSON 値でよい。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hoffman &amp; Snell              Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+   define MergePatch(Target, Patch):
+     if Patch is an Object:
+       if Target is not an Object:
+         Target = {} # 内容を無視し、空の Object に設定する
+       for each Name/Value pair in Patch:
+         if Value is null:
+           if Name exists in Target:
+             remove the Name/Value pair from Target
+         else:
+           Target[Name] = MergePatch(Target[Name], Value)
+       return Target
+     else:
+       return Patch
+
+   この関数について、いくつか注意すべき点がある。パッチがオブジェクト以外の
+   何かである場合、結果は常に対象全体をパッチ全体で置換することになる。
+   また、配列内の値の一部だけを置換する場合など、オブジェクトではない対象の
+   一部だけをパッチすることはできない。
+
+   MergePatch 操作は、テキスト表現のレベルではなく、データ項目のレベルで
+   動作するよう定義されている。MergePatch 操作が、空白、メンバーの順序、
+   対象の実装で利用可能な精度を超える数値精度など、テキスト表現レベルの特徴を
+   保持することは期待されない。さらに、対象の実装が同じ名前を持つ複数の
+   name/value ペアを許容している場合であっても、そのようなオブジェクトに対する
+   MergePatch 操作の結果は定義されていない。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  例</span>
+
+   次の例の JSON 文書があるとする。
+
+   {
+     "title": "Goodbye!",
+     "author" : {
+       "givenName" : "John",
+       "familyName" : "Doe"
+     },
+     "tags":[ "example", "sample" ],
+     "content": "This will be unchanged"
+   }
+
+
+
+
+
+
+
+
+<span class="grey">Hoffman &amp; Snell              Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+   ユーザーエージェントが、"title" メンバーの値を "Goodbye!" から "Hello!" に
+   変更し、新しい "phoneNumber" メンバーを追加し、"author" オブジェクトから
+   "familyName" メンバーを削除し、"sample" という語を含まないように "tags" 配列を
+   置換したい場合、次の要求を送信する。
+
+   PATCH /my/resource HTTP/1.1
+   Host: example.org
+   Content-Type: application/merge-patch+json
+
+   {
+     "title": "Hello!",
+     "phoneNumber": "+01-123-456-7890",
+     "author": {
+       "familyName": null
+     },
+     "tags": [ "example" ]
+   }
+
+   結果として得られる JSON 文書は次のようになる。
+
+   {
+     "title": "Hello!",
+     "author" : {
+       "givenName" : "John"
+     },
+     "tags": [ "example" ],
+     "content": "This will be unchanged",
+     "phoneNumber": "+01-123-456-7890"
+   }
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  IANA に関する考慮事項</span>
+
+   本仕様は、次の追加 MIME メディアタイプを登録する。
+
+      Type name: application
+
+      Subtype name: merge-patch+json
+
+      Required parameters: None
+
+      Optional parameters: None
+
+      Encoding considerations: "application/merge-patch+json" メディアタイプを
+      使用するリソースは、"application/json" メディアタイプに適合することが
+      求められるため、<a href="./rfc7159#section-8">[RFC7159] の Section&nbsp;8</a> で規定されているものと同じ
+      エンコーディングに関する考慮事項の対象となる。
+
+
+
+<span class="grey">Hoffman &amp; Snell              Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+      Security considerations: 本仕様で定義されているとおり。
+
+      Published specification: 本仕様。
+
+      Applications that use this media type: 現在知られていない。
+
+      Additional information:
+
+         Magic number(s): N/A
+
+         File extension(s): N/A
+
+         Macintosh file type code(s): TEXT
+
+      Person &amp; email address to contact for further information: IESG
+
+      Intended usage: COMMON
+
+      Restrictions on usage: None
+
+      Author: James M. Snell &lt;jasnell@gmail.com&gt;
+
+      Change controller: IESG
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  セキュリティに関する考慮事項</span>
+
+   "application/merge-patch+json" メディアタイプにより、ユーザーエージェントは、
+   対象リソースに適用されるべき具体的な変更操作の集合をサーバーが決定することを
+   意図していると示すことができる。そのため、任意の変更が適切かどうか、
+   およびユーザーエージェントがそのような変更を要求する権限を持つかどうかを
+   判断する責任はサーバーにある。そのような判断をどのように行うかは、
+   本仕様の範囲外とみなされる。
+
+   "application/merge-patch+json" メディアタイプで HTTP PATCH メソッドを使用する
+   すべての場合に、<a href="./rfc5789#section-5">[RFC5789] の Section&nbsp;5</a> で説明されている
+   すべてのセキュリティに関する考慮事項が適用される。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hoffman &amp; Snell              Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-RFC7159">RFC7159</a>]  Bray, T., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", <a href="./rfc7159">RFC 7159</a>, March 2014,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7159">http://www.rfc-editor.org/info/rfc7159</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  参考情報としての参考文献</span>
+
+   [<a id="ref-RFC5789">RFC5789</a>]  Dusseault, L. and J. Snell, "PATCH Method for HTTP", <a href="./rfc5789">RFC</a>
+              <a href="./rfc5789">5789</a>, March 2010,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5789">http://www.rfc-editor.org/info/rfc5789</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hoffman &amp; Snell              Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  テストケースの例</span>
+
+   ORIGINAL        PATCH            RESULT
+   ------------------------------------------
+   {"a":"b"}       {"a":"c"}       {"a":"c"}
+
+   {"a":"b"}       {"b":"c"}       {"a":"b",
+                                    "b":"c"}
+
+   {"a":"b"}       {"a":null}      {}
+
+   {"a":"b",       {"a":null}      {"b":"c"}
+    "b":"c"}
+
+   {"a":["b"]}     {"a":"c"}       {"a":"c"}
+
+   {"a":"c"}       {"a":["b"]}     {"a":["b"]}
+
+   {"a": {         {"a": {         {"a": {
+     "b": "c"}       "b": "d",       "b": "d"
+   }                 "c": null}      }
+                   }               }
+
+   {"a": [         {"a": [1]}      {"a": [1]}
+     {"b":"c"}
+    ]
+   }
+
+   ["a","b"]       ["c","d"]       ["c","d"]
+
+   {"a":"b"}       ["c"]           ["c"]
+
+   {"a":"foo"}     null            null
+
+   {"a":"foo"}     "bar"           "bar"
+
+   {"e":null}      {"a":1}         {"e":null,
+                                    "a":1}
+
+   [1,2]           {"a":"b",       {"a":"b"}
+                    "c":null}
+
+   {}              {"a":            {"a":
+                    {"bb":           {"bb":
+                     {"ccc":          {}}}
+                      null}}}
+
+
+
+
+
+<span class="grey">Hoffman &amp; Snell              Standards Track                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc7396">RFC 7396</a>                    JSON Merge Patch                October 2014</span>
+
+
+謝辞
+
+   多くの人々が本文書に重要な着想を提供した。これらの人々には、
+   James Manger、Matt Miller、Carsten Bormann、Bjoern Hoehrmann、
+   Pete Resnick、および Richard Barnes が含まれるが、これらに限定されない。
+
+著者の連絡先
+
+   Paul Hoffman
+   VPN Consortium
+
+   EMail: paul.hoffman@vpnc.org
+
+
+   James M. Snell
+
+   EMail: jasnell@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hoffman &amp; Snell              Standards Track                    [Page 9]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
