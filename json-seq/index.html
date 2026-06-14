@@ -1,0 +1,434 @@
+<pre>Internet Engineering Task Force (IETF)                       N. Williams
+Request for Comments: 7464                                  Cryptonector
+Category: Standards Track                                  February 2015
+ISSN: 2070-1721
+
+
+            <span class="h1">JavaScript Object Notation (JSON) テキストシーケンス</span>
+
+概要
+
+   本文書は、JavaScript Object Notation (JSON) テキストシーケンス形式と、
+   関連するメディアタイプ "application/json-seq" について記述する。
+   JSON テキストシーケンスは、任意個数の JSON テキストから構成され、
+   すべて UTF-8 で符号化され、各テキストの前には ASCII Record Separator
+   (0x1E) が置かれ、各テキストは ASCII Line Feed 文字 (0x0A) で終わる。
+
+このメモの位置づけ
+
+   本文書は、インターネット標準化過程の文書である。
+
+   本文書は、Internet Engineering Task Force (IETF) の成果物である。
+   IETF コミュニティの合意を表している。本文書は公開レビューを受け、
+   Internet Engineering Steering Group (IESG) によって公開が承認されている。
+   インターネット標準に関する詳細情報は、
+   <a href="./rfc5741#section-2">RFC 5741 の Section&nbsp;2</a> に記載されている。
+
+   本文書の現在の状態、正誤表、およびフィードバックの送付方法に関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc7464">http://www.rfc-editor.org/info/rfc7464</a> で入手できる。
+
+著作権表示
+
+   Copyright (c) 2015 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   本文書は、公開日に有効な <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> および IETF Trust の
+   Legal Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) の対象となる。
+   これらの文書には、本文書に関する権利および制限が記載されているため、
+   注意深く確認すること。本文書から抽出された Code Components には、
+   Trust Legal Provisions の Section 4.e に記載されている Simplified BSD License
+   の本文を含めなければならず、Simplified BSD License に記載されているとおり、
+   無保証で提供される。
+
+
+
+
+
+
+
+<span class="grey">Williams                     Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc7464">RFC 7464</a>                   JSON Text Sequences             February 2015</span>
+
+
+目次
+
+   <a href="#section-1">1</a>. 導入と動機 ...................................................<a href="#page-2">2</a>
+      <a href="#section-1.1">1.1</a>. 本文書で使用される規約 ..................................<a href="#page-2">2</a>
+   <a href="#section-2">2</a>. JSON テキストシーケンス形式 ..................................<a href="#page-3">3</a>
+      <a href="#section-2.1">2.1</a>. JSON テキストシーケンスの解析 ...........................<a href="#page-3">3</a>
+      <a href="#section-2.2">2.2</a>. JSON テキストシーケンスの符号化 ..........................<a href="#page-4">4</a>
+      <a href="#section-2.3">2.3</a>. 不完全/無効な JSON テキストは致命的でなくてよい .........<a href="#page-4">4</a>
+      <a href="#section-2.4">2.4</a>. トップレベル値: 数値、true、false、および null ...........<a href="#page-5">5</a>
+   <a href="#section-3">3</a>. セキュリティに関する考慮事項 .................................<a href="#page-6">6</a>
+   <a href="#section-4">4</a>. IANA に関する考慮事項 ........................................<a href="#page-6">6</a>
+   <a href="#section-5">5</a>. 規範的参考文献 ...............................................<a href="#page-7">7</a>
+   謝辞 .............................................................<a href="#page-8">8</a>
+   著者の連絡先 .....................................................<a href="#page-8">8</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  導入と動機</span>
+
+   JavaScript Object Notation (JSON) [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] は、非常に便利な
+   シリアル化形式である。しかし、大量の値のシーケンスを配列としてシリアル化する場合、
+   または長さが未確定である可能性がある、あるいは終わりのない値のシーケンスを
+   シリアル化する場合、JSON は扱いにくくなる。
+
+   100 万個の値のシーケンスを考える。各値は符号化時に 1 キロバイトになり得るため、
+   おおよそ 1 ギガバイトになる。このようなデータセットは、結果の生成を開始する前に
+   全体を読み込むことなく、インクリメンタルな方法で処理することが望ましいことが多い。
+   従来、JSON でこれを行う方法は「ストリーミング」パーサーを使用することであるが、
+   これらは広く利用可能でも、広く使用されているわけでも、使いやすいわけでもない。
+
+   本文書は、「JSON テキストシーケンス」の概念と形式について記述する。
+   JSON テキストシーケンスは、それ自体は JSON テキストではないが、
+   （あり得る）JSON テキストから構成される。JSON テキストシーケンスは、
+   ストリーミングパーサー（またはストリーミングエンコーダー）を必要とせずに、
+   インクリメンタルに解析（および生成）できる。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  本文書で使用される規約</span>
+
+   本文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+   "MAY", および "OPTIONAL" は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] に記述されているとおりに
+   解釈されるものとする。
+
+
+
+
+
+
+
+
+
+<span class="grey">Williams                     Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc7464">RFC 7464</a>                   JSON Text Sequences             February 2015</span>
+
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  JSON テキストシーケンス形式</span>
+
+   JSON テキストシーケンスの定義には、2 つの異なる ABNF 規則群が提供される。
+   1 つはパーサー用であり、もう 1 つはエンコーダー用である。2 つの異なる規則群を
+   持つことで、何らかの理由により一部の要素が切り詰められているシーケンスから、
+   パーサーが回復できる。パーサー用の構文は、オクテット文字列として規定され、
+   その後、可能であれば JSON テキストとして解釈される。一方、エンコーダー用の構文は、
+   シーケンス要素が切り詰められていないことを前提とする。
+
+   JSON テキストシーケンスは UTF-8 符号化を使用しなければならない（MUST）。
+   JSON の他の符号化（すなわち UTF-16 および UTF-32）は使用してはならない（MUST NOT）。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  JSON テキストシーケンスの解析</span>
+
+   JSON テキストシーケンスパーサーの ABNF [<a href="./rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>] は、Figure 1 に
+   示すとおりである。
+
+      input-JSON-sequence = *(1*RS possible-JSON)
+      RS = %x1E; "record separator" (RS), <a href="./rfc20">RFC 20</a> を参照
+               ; 別名: Unicode Character INFORMATION SEPARATOR
+               ;       TWO (U+001E)
+      possible-JSON = 1*(not-RS); UTF-8 で符号化された JSON テキストとして
+                                ; 解析を試みる（<a href="./rfc7159">RFC 7159</a> を参照）
+      not-RS = %x00-1d / %x1f-ff; RS 以外の任意のオクテット
+
+                     Figure 1: JSON テキストシーケンス ABNF
+
+   散文で述べると、record separator (RS) (0x1E) [<a href="./rfc20" title="&quot;ASCII format for network interchange&quot;">RFC20</a>] 以外の
+   任意のオクテットを含む、一連のオクテット文字列である。すべてのオクテット文字列の
+   前には RS バイトが置かれる。シーケンス内の各オクテット文字列は、UTF-8 符号化
+   [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] の JSON テキストとして解析される。
+
+   そのようなオクテット文字列を UTF-8 で符号化された JSON テキストとして解析することに
+   失敗した場合でも、パーサーはシーケンスの残りの解析を続けるべきである（SHOULD）。
+   パーサーはそのような失敗をアプリケーションに報告でき、アプリケーションは
+   その後、シーケンスの解析を終了することを選択してもよい。複数の連続する RS
+   オクテットは、それらの間に空のシーケンス要素があることを示さず、無視できる。
+
+   本文書は、位置によってテキストシーケンスを確実に識別する仕組みを定義しない
+   （たとえば、配列の個々の要素を一意のテキストシーケンスとして送信する場合）。
+   切り詰めが発生し得るアプリケーションでは、意図されたシーケンス要素が切り詰められ、
+   さらには完全に欠落する可能性があることを意味する。したがって、n 番目の要素への
+   参照は信頼できない。
+
+
+
+
+<span class="grey">Williams                     Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc7464">RFC 7464</a>                   JSON Text Sequences             February 2015</span>
+
+
+   シーケンスの終端を示す指示子は存在しない。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  JSON テキストシーケンスの符号化</span>
+
+   JSON テキストシーケンスエンコーダーの ABNF は、Figure 2 に示すとおりである。
+
+      JSON-sequence = *(RS JSON-text LF)
+      RS = %x1E; <a href="./rfc20">RFC 20</a> を参照
+               ; 別名: Unicode Character INFORMATION SEPARATOR
+               ;       TWO (U+001E)
+      LF = %x0A; "line feed" (LF), <a href="./rfc20">RFC 20</a> を参照
+      JSON-text = &lt;<a href="./rfc7159">RFC 7159</a> により与えられ、UTF-8 符号化を使用する&gt;
+
+                     Figure 2: JSON テキストシーケンス ABNF
+
+   散文で述べると、任意個数の JSON テキストであり、各テキストは UTF-8 [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] で
+   符号化され、それぞれの前には 1 つの ASCII RS 文字が置かれ、それぞれの後には
+   line feed (LF) が置かれる。RS は ASCII 制御文字であるため、JSON 文字列内では
+   エスケープされた形式でのみ出現できる（[<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] を参照）。また、RS は
+   JSON テキスト内で他の形式では出現し得ないため、RS はシーケンス内の任意の要素の
+   開始を曖昧さなく区切る。RS は、数値以外のすべてのトップレベル JSON 値型を
+   曖昧さなく区切るのに十分である。シーケンス内の各 JSON テキストの後に LF を
+   置くことで、トップレベルの数値からなる切り詰められた JSON テキストを検出できる。
+   <a href="#section-2.4">Section 2.4</a> を参照。
+
+   JSON テキストシーケンスエンコーダーは、シーケンス要素が適切に形成されていることを
+   確保することが期待される。JSON テキストシーケンスエンコーダーが JSON テキストの
+   符号化を行う場合、シーケンス要素は当然適切に形成される。JSON テキストシーケンス
+   エンコーダーが、すでに符号化済みの JSON テキストを受け付ける場合、シーケンスへ
+   追加する前にそれらを解析するべきである。
+
+   一部のシステムでは、"ctrl-^" を入力することで RS を入力できることに注意。
+   一部のシステムまたはアプリケーションでは、正しいシーケンスは
+   "ctrl-v ctrl-^" である場合がある。これは、テキストエディターでシーケンスを
+   手作業で構築する際に役立つ。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  不完全/無効な JSON テキストは致命的でなくてよい</span>
+
+   <a href="#section-2.1">Section 2.1</a> に従い、オクテット文字列に不正な形式の JSON テキストが含まれる場合でも、
+   JSON テキストシーケンスパーサーは中止すべきではない。代わりに、JSON テキスト
+   シーケンスパーサーは次の RS までスキップすべきである。このような状況は、たとえば
+   ログファイルに追記されたデータがファイルシステムによって切り詰められる文脈
+   （例: クラッシュまたは管理プロセスの終了によるもの）で発生することがある。
+
+
+
+
+
+<span class="grey">Williams                     Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc7464">RFC 7464</a>                   JSON Text Sequences             February 2015</span>
+
+
+   インクリメンタル JSON テキストパーサーを使用してもよいが、もちろん、
+   与えられたテキストの解析失敗は、最初にいくつかのインクリメンタルな解析結果を
+   生成した後に生じる場合がある。
+
+   シーケンスパーサーは、切り詰められた JSON テキストについて警告するオプションを
+   持つべきである。
+
+<span class="h3"><a class="selflink" id="section-2.4" href="#section-2.4">2.4</a>.  トップレベル値: 数値、true、false、および null</span>
+
+   JSON テキスト内では、オブジェクト、配列、および文字列は自己区切りであるが、
+   数値ならびに値 'true'、'false'、および 'null' はそうではない。後者 4 種類の値を
+   区切れるのは空白だけである。
+
+   JSON テキストシーケンスは、切り詰めを検出するための「カナリア」オクテットとして
+   0x0A を使用する。
+
+   パーサーは、トップレベルの数値である JSON テキスト、または 'true'、'false'、
+   'null' である可能性のある JSON テキストについて、その値の後に JSON 空白
+   （[<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] の "ws" ABNF 規則に一致する少なくとも 1 バイト）を含むことを
+   検査しなければならない（MUST）。そうでない場合、その JSON-text は切り詰められて
+   いる可能性がある。各 JSON テキストに続く LF は、"ws" ABNF 規則に一致することに注意。
+
+   パーサーは、切り詰められている可能性のある（空白で区切られていない）自己区切りでない
+   トップレベル値からなる JSON-text シーケンス要素を破棄しなければならない（MUST）。
+   パーサーは、そのようなテキストを警告として報告できる（任意で、解析済みテキスト
+   および/または元のオクテット文字列を含めてもよい）。
+
+   たとえば、'&lt;RS&gt;123&lt;RS&gt;' はトップレベル数値 1234 を運ぶ意図だったものが
+   切り詰められた可能性がある。同様に、'&lt;RS&gt;true&lt;RS&gt;' は無効なテキスト 'trueish' を
+   運ぶ意図だった可能性がある。'&lt;RS&gt;truefalse&lt;RS&gt;' は 2 つのトップレベル値
+   'true' と 'false' ではない。これは単に有効な JSON テキストではない。
+
+   実装は、'&lt;RS&gt;"foo"&lt;RS&gt;' を解析するときに値を生成する場合がある。
+   これは、その JSON テキストパーサーがバイトをインクリメンタルに消費できるからである。
+   この場合の JSON テキストは自己区切りのトップレベル値であるため、パーサーは
+   追加のバイトを消費せずに結果を生成できる。そのような実装は、次の RS バイトまで
+   スキップし、場合によっては介在する非空白バイトを報告するべきである。
+
+   自己区切りでないシーケンス要素（数値、true、false、および null）の切り詰め検出は、
+   シーケンスエンコーダーが完全な JSON テキストを生成または受信する場合にのみ可能である。
+   シーケンスエンコーダーが個々の JSON テキストの符号化も担当しているわけではない実装では、
+   それらの JSON テキストが完全であることを確保すべきである。
+
+
+
+
+<span class="grey">Williams                     Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc7464">RFC 7464</a>                   JSON Text Sequences             February 2015</span>
+
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  セキュリティに関する考慮事項</span>
+
+   JSON [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] のすべてのセキュリティに関する考慮事項が適用される。
+   この形式は、いかなる種類の暗号学的完全性保護も提供しない。
+
+   通常どおり、パーサーは信頼されないものと想定される入力に対して動作しなければならない。
+   これは、悪意のある入力に直面した場合に、パーサーが穏当に失敗しなければならないことを
+   意味する。
+
+   インクリメンタル JSON テキストパーサーは部分的な結果を生成し、その後でテキストの
+   残りの解析に失敗したことを示す場合があることに注意。インクリメンタル JSON テキスト
+   パーサーを使用するシーケンスパーサーは、'&lt;RS&gt;"foo"&lt;LF&gt;456&lt;LF&gt;&lt;RS&gt;' のような
+   シーケンスを 1 つの要素（"foo"）のシーケンスとして扱う可能性がある一方で、
+   非インクリメンタル JSON テキストパーサーを使用するシーケンスパーサーは、同じ
+   シーケンスを空として扱う可能性がある。この効果、および解析に失敗して無視される
+   テキストは、JSON テキストの失敗について警告しないシーケンスパーサーをすり抜けて
+   データを密輸するために使用され得る。
+
+   JSON テキストシーケンスの反復的な解析と再符号化により、個々のシーケンス要素の
+   JSON テキストに末尾の LF バイトが追加される（または取り除かれる）可能性がある。
+   これは署名検証を破壊し得る。JSON には JSON テキストの正準形式がないため、
+   JSON テキストシーケンス形式にも正準形式はない。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  IANA に関する考慮事項</span>
+
+   JSON テキストシーケンスの MIME メディアタイプは application/json-seq である。
+
+   Type name: application
+
+   Subtype name: json-seq
+
+   Required parameters: N/A
+
+   Optional parameters: N/A
+
+   Encoding considerations: binary
+
+   Security considerations: <a href="./rfc7464#section-3">RFC 7464, Section&nbsp;3</a> を参照。
+
+   Interoperability considerations: 本文書に記述されている。
+
+   Published specification: <a href="./rfc7464">RFC 7464</a>.
+
+
+
+
+
+
+
+<span class="grey">Williams                     Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc7464">RFC 7464</a>                   JSON Text Sequences             February 2015</span>
+
+
+   Applications that use this media type:
+
+      &lt;<a href="https://stedolan.github.io/jq">https://stedolan.github.io/jq</a>&gt;
+      &lt;<a href="https://github.com/mapbox/cligj">https://github.com/mapbox/cligj</a>&gt;
+      &lt;<a href="https://github.com/hildjj/json-text-sequence">https://github.com/hildjj/json-text-sequence</a>&gt;
+
+   Fragment identifier considerations: N/A
+
+   Additional information:
+
+   o  Deprecated alias names for this type: N/A
+
+   o  Magic number(s): N/A
+
+   o  File extension(s): N/A
+
+   o  Macintosh file type code(s): N/A
+
+   Person &amp; email address to contact for further information:
+
+      json@ietf.org
+
+   Intended usage: COMMON
+
+   Author: Nicolas Williams (nico@cryptonector.com)
+
+   Change controller: IETF
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  規範的参考文献</span>
+
+   [<a id="ref-RFC20">RFC20</a>]    Cerf, V., "ASCII format for network interchange", STD 80,
+              <a href="./rfc20">RFC 20</a>, October 1969,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc20">http://www.rfc-editor.org/info/rfc20</a>&gt;.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, March 1997,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+   [<a id="ref-RFC3629">RFC3629</a>]  Yergeau, F., "UTF-8, a transformation format of ISO
+              10646", STD 63, <a href="./rfc3629">RFC 3629</a>, November 2003,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc3629">http://www.rfc-editor.org/info/rfc3629</a>&gt;.
+
+   [<a id="ref-RFC5234">RFC5234</a>]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, <a href="./rfc5234">RFC 5234</a>, January 2008,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5234">http://www.rfc-editor.org/info/rfc5234</a>&gt;.
+
+
+
+
+
+
+<span class="grey">Williams                     Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc7464">RFC 7464</a>                   JSON Text Sequences             February 2015</span>
+
+
+   [<a id="ref-RFC7159">RFC7159</a>]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", <a href="./rfc7159">RFC 7159</a>, March 2014,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7159">http://www.rfc-editor.org/info/rfc7159</a>&gt;.
+
+謝辞
+
+   Phillip Hallam-Baker は、ログファイルに JSON テキストシーケンスを使用することを
+   提案し、再同期の必要性を指摘した。Stephen Dolan は
+   &lt;<a href="https://github.com/stedolan/jq">https://github.com/stedolan/jq</a>&gt; を作成した。これは JSON テキストシーケンスのようなものを
+   使用している（出力ではテキスト間の区切りとして LF を使用し、入力では曖昧さを
+   解消するために必要な空白だけを要求する）。Carsten Bormann は ASCII RS の使用を
+   提案し、Joe Hildebrand はトップレベル数値を曖昧さなく扱うために RS に加えて
+   LF を使用することを提案した。Paul Hoffman は本文書のシェパードを務めた。
+   多くの他の人々も JSON Working Group メーリングリストでレビューとコメントを
+   寄せた。
+
+著者の連絡先
+
+   Nicolas Williams
+   Cryptonector, LLC
+
+   EMail: nico@cryptonector.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Williams                     Standards Track                    [Page 8]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
