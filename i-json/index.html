@@ -1,0 +1,318 @@
+<pre>Internet Engineering Task Force (IETF)                      T. Bray, Ed.
+Request for Comments: 7493                           Textuality Services
+Category: Standards Track                                     March 2015
+ISSN: 2070-1721
+
+
+                       <span class="h1">I-JSON メッセージ形式</span>
+
+概要
+
+   I-JSON（"Internet JSON" の略）は、相互運用性を最大化し、
+   ソフトウェアが予測可能な結果で正常に処理できるという信頼性を高めるために
+   設計された、JSON の制限付きプロファイルである。
+
+このメモの位置づけ
+
+   本文書は、インターネット標準化過程の文書である。
+
+   本文書は、Internet Engineering Task Force (IETF) の成果物である。
+   IETF コミュニティの合意を表している。本文書は公開レビューを受け、
+   Internet Engineering Steering Group (IESG) によって公開が承認されている。
+   インターネット標準に関する詳細情報は、
+   <a href="./rfc5741#section-2">RFC 5741 の Section&nbsp;2</a> に記載されている。
+
+   本文書の現在の状態、正誤表、およびフィードバックの送付方法に関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc7493">http://www.rfc-editor.org/info/rfc7493</a> で入手できる。
+
+著作権表示
+
+   Copyright (c) 2015 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   本文書は、公開日に有効な <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> および IETF Trust の
+   Legal Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) の対象となる。
+   これらの文書には、本文書に関する権利および制限が記載されているため、
+   注意深く確認すること。本文書から抽出された Code Components には、
+   Trust Legal Provisions の Section 4.e に記載されている Simplified BSD License
+   の本文を含めなければならず、Simplified BSD License に記載されているとおり、
+   無保証で提供される。
+
+
+
+
+
+
+
+
+
+<span class="grey">Bray                         Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc7493">RFC 7493</a>                The I-JSON Message Format             March 2015</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  導入  . . . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-2">2</a>
+     <a href="#section-1.1">1.1</a>.  用語 . . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-2">2</a>
+     <a href="#section-1.2">1.2</a>.  要件言語 . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-2">2</a>
+   <a href="#section-2">2</a>.  I-JSON メッセージ . . . . . . . . . . . . . . . . . . . .   <a href="#page-3">3</a>
+     <a href="#section-2.1">2.1</a>.  符号化と文字 . . . . . . . . . . . . . . . . . . . . .   <a href="#page-3">3</a>
+     <a href="#section-2.2">2.2</a>.  数値 . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-3">3</a>
+     <a href="#section-2.3">2.3</a>.  オブジェクトの制約  . . . . . . . . . . . . . . . . .   <a href="#page-3">3</a>
+   <a href="#section-3">3</a>.  ソフトウェアの動作 . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+   <a href="#section-4">4</a>.  プロトコル設計への推奨事項 . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+     <a href="#section-4.1">4.1</a>.  トップレベル構造  . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+     <a href="#section-4.2">4.2</a>.  Must-Ignore ポリシー  . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+     <a href="#section-4.3">4.3</a>.  時刻と日付の扱い  . . . . . . . . . . . . . . . . . .   <a href="#page-5">5</a>
+     <a href="#section-4.4">4.4</a>.  バイナリデータ . . . . . . . . . . . . . . . . . . .   <a href="#page-5">5</a>
+   <a href="#section-5">5</a>.  セキュリティに関する考慮事項 . . . . . . . . . . . . . .   <a href="#page-5">5</a>
+   <a href="#section-6">6</a>.  規範的参考文献  . . . . . . . . . . . . . . . . . . . .   <a href="#page-5">5</a>
+   謝辞  . . . . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-6">6</a>
+   著者の連絡先  . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-6">6</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  導入</span>
+
+   <a href="./rfc7159">RFC 7159</a> は、インターネットプロトコルで広く使用されている
+   JSON データ交換形式を記述している。歴史的な理由により、その仕様では、
+   相互運用性の問題やソフトウェアの破損につながる可能性が高い言語イディオムや
+   テキスト符号化パターンの使用が許されている。特に、JSON データを受信する
+   プログラムが、それをネイティブのプログラミング言語構造やデータベースレコードに
+   自動的に対応付けるソフトウェアを使用する場合に問題となる。<a href="./rfc7159">RFC 7159</a> は、
+   これらの相互運用性の問題を回避するために使用できる実践を記述している。
+
+   本文書は、"Internet JSON" の略である I-JSON を規定する。定義の単位は
+   "I-JSON message" である。I-JSON メッセージは、<a href="./rfc7159">RFC 7159</a> で定義される
+   "JSON texts" でもあるが、同仕様で記述されている良好な相互運用性の実践を
+   強制する特定の追加制約を伴う。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  用語</span>
+
+   本文書における "object", "member", "array", "number", "name", および "string"
+   という用語は、<a href="./rfc7159">RFC 7159</a> [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] に記述されているとおりに
+   解釈されるものとする。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  要件言語</span>
+
+   本文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", および "OPTIONAL" は、
+   <a href="./rfc2119">RFC 2119</a> [<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] に記述されているとおりに解釈されるものとする。
+
+
+
+<span class="grey">Bray                         Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc7493">RFC 7493</a>                The I-JSON Message Format             March 2015</span>
+
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  I-JSON メッセージ</span>
+
+   I-JSON メッセージは、<a href="./rfc7159">RFC 7159</a> によって定義される JSON テキストである。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  符号化と文字</span>
+
+   I-JSON メッセージは UTF-8 [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] を使用して符号化されなければならない（MUST）。
+
+   オブジェクトメンバー名、ならびに配列およびオブジェクトメンバー内の文字列値は、
+   [<a href="#ref-UNICODE" title="&quot;The Unicode Standard&quot;">UNICODE</a>] で定義される Surrogates または Noncharacters を識別する
+   コードポイントを含んではならない（MUST NOT）。
+
+   これは、UTF-8 で直接符号化された文字とエスケープされた文字の両方に適用される。
+   したがって、"\uDEAD" は対になっていないサロゲートであるため無効である一方、
+   "\uD800\uDEAD" は合法である。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  数値</span>
+
+   IEEE 754-2008 binary64（二倍精度）数値 [<a href="#ref-IEEE754" title="&quot;IEEE Standard for Floating-Point Arithmetic&quot;">IEEE754</a>] を実装する
+   ソフトウェアは一般に利用可能であり、広く使用されている。I-JSON メッセージを
+   生成する実装は、受信側実装がこれらの数値で提供されるよりも大きな桁数や精度を持つ
+   数値を処理できると仮定することはできない。I-JSON メッセージは、たとえば
+   1E400 や 3.141592653589793238462643383279 のように、IEEE 754 二倍精度数が
+   提供するよりも大きな桁数または精度を表す数値を含むべきではない（SHOULD NOT）。
+
+   I-JSON の送信者は、絶対値が 9007199254740991 より大きい整数
+   （すなわち [-(2**53)+1, (2**53)-1] の範囲外の整数）を、受信者が正確な値として
+   扱うことを期待することはできない。
+
+   より大きな桁数または精度を持つ数値の正確な交換を必要とするアプリケーションでは、
+   それらを JSON 文字列値として符号化することが推奨される（RECOMMENDED）。
+   これには、受信プログラムがその値の意図された意味を理解している必要がある。
+   例として、現代のハードウェアでは扱えるとしても、JavaScript 数値の範囲が限られるため、
+   64 ビット整数が挙げられる。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  オブジェクトの制約</span>
+
+   I-JSON メッセージ内のオブジェクトは、重複する名前を持つメンバーを持ってはならない
+   （MUST NOT）。この文脈で "duplicate" とは、エスケープされた文字を処理した後の名前が、
+   Unicode 文字の同一の列であることを意味する。
+
+
+
+
+
+
+
+<span class="grey">Bray                         Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc7493">RFC 7493</a>                The I-JSON Message Format             March 2015</span>
+
+
+   I-JSON メッセージ内のオブジェクトメンバーの順序は、I-JSON メッセージの意味を
+   変更しない。受信側実装は、2 つの I-JSON メッセージがオブジェクトメンバーの
+   順序だけで異なる場合、それらを同等として扱ってもよい（MAY）。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  ソフトウェアの動作</span>
+
+   I-JSON を使用する主な利点は、受信者が受信する JSON メッセージ内の曖昧な意味を
+   回避できることである。これにより、受信者は、I-JSON メッセージについて本文書の
+   要件に適合しないメッセージを拒否する、または別の方法で無視することができる。
+   I-JSON メッセージを使用するプロトコルは、I-JSON の制約を満たさないメッセージを
+   受信側実装が拒否すること（または、セキュリティプロトコルの場合のように、
+   信頼しないこと）を要求するように書くことができる。
+
+   I-JSON メッセージを使用するプロトコルの設計者は、この場合に、誤ったデータの
+   受信者がその問題を送信者へ通知する方法を提供すべきである（SHOULD）。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  プロトコル設計への推奨事項</span>
+
+   I-JSON は、インターネットプロトコルで使用するために設計されている。
+   次の推奨事項は、そのようなプロトコルにおける I-JSON の使用に適用される。
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  トップレベル構造</span>
+
+   I-JSON メッセージは任意の JSON 値でよい。しかし、古い仕様 [<a href="./rfc4627" title="&quot;The application/json Media Type for JavaScript Object Notation (JSON)&quot;">RFC4627</a>] に
+   基づいて作成されたソフトウェア実装には、JSON テキストのトップレベルで
+   JSON オブジェクトまたは JSON 配列だけを受け入れるものがある。そのような実装との
+   最大限の相互運用性のため、プロトコル設計者は、オブジェクトでも配列でもない
+   トップレベル JSON テキストを使用すべきではない（SHOULD NOT）。
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  Must-Ignore ポリシー</span>
+
+   プロトコルを本番環境に投入した後に、プロトコルの変更が必要になることは頻繁にある。
+   既存ソフトウェアの動作を妨げない方法で新しいプロトコル要素の導入を許す
+   プロトコルは、実際に有利であることが証明されている。
+
+   これは "Must-Ignore" ポリシーと呼ぶことができる。これは、実装が認識しない
+   プロトコル要素に遭遇した場合、その新しい要素が単に存在しなかったかのように
+   プロトコルトランザクションの残りを扱うべきであり、特に、実装はこれを
+   エラー条件として扱ってはならない（MUST NOT）という意味である。反対の
+   "Must-Understand" ポリシーは、新しいプロトコル要素の導入を許容しない。
+
+
+
+<span class="grey">Bray                         Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc7493">RFC 7493</a>                The I-JSON Message Format             March 2015</span>
+
+
+   これは特定のプロトコル設計では必要であることが証明されているものの、
+   一般には過度に制限的で壊れやすいことが分かっている。
+
+   I-JSON プロトコル設計で Must-Ignore の使用を支援する良い方法は、
+   トップレベルのプロトコル要素が JSON オブジェクトでなければならないと要求し、
+   名前が認識されないメンバーは無視されなければならない（MUST）と規定することである。
+
+<span class="h3"><a class="selflink" id="section-4.3" href="#section-4.3">4.3</a>.  時刻と日付の扱い</span>
+
+   プロトコルには、タイムスタンプまたは時間の長さを含むように設計された
+   データ項目がしばしば含まれる。そのようなデータ項目はすべて、[<a href="./rfc3339" title="&quot;Date and Time on the Internet: Timestamps&quot;">RFC3339</a>] で
+   規定される ISO 8601 形式の文字列値として表現することが推奨される
+   （RECOMMENDED）。ただし、小文字ではなく大文字を使用すること、タイムゾーンを
+   省略せずに含めること、およびオプションの末尾の秒を、その値が "00" の場合でも
+   含めることという追加制限を伴う。時間の長さを含むすべてのデータ項目も、
+   <a href="./rfc3339#appendix-A">RFC 3339 の Appendix&nbsp;A</a> にある "duration" 生成規則に、同じ追加制限付きで
+   適合することが推奨される（RECOMMENDED）。
+
+<span class="h3"><a class="selflink" id="section-4.4" href="#section-4.4">4.4</a>.  バイナリデータ</span>
+
+   I-JSON プロトコル要素が任意のバイナリデータを含む必要がある場合、
+   このデータは base64url の文字列値として符号化することが推奨される（RECOMMENDED）。
+   <a href="./rfc4648#section-5">[RFC4648] の Section&nbsp;5</a> を参照。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  セキュリティに関する考慮事項</span>
+
+   JSON に適用されるすべてのセキュリティに関する考慮事項（<a href="./rfc7159">RFC 7159</a> を参照）は、
+   I-JSON にも適用される。I-JSON に固有の追加のセキュリティに関する考慮事項はない。
+
+   I-JSON は、受信側ソフトウェアで予測不能な動作につながり得る特定の JSON
+   イディオムの使用を禁じるため、インターネットプロトコルのより安全な基盤になる
+   可能性があり、特別なセキュリティ上の必要性を持つプロトコル設計者にとって
+   良い選択肢となり得る。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  規範的参考文献</span>
+
+   [<a id="ref-IEEE754">IEEE754</a>]  IEEE, "IEEE Standard for Floating-Point Arithmetic", IEEE
+              754-2008, 2008, &lt;<a href="http://grouper.ieee.org/groups/754/">http://grouper.ieee.org/groups/754/</a>&gt;.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, March 1997,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+
+
+
+
+<span class="grey">Bray                         Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc7493">RFC 7493</a>                The I-JSON Message Format             March 2015</span>
+
+
+   [<a id="ref-RFC3339">RFC3339</a>]  Klyne, G. and C. Newman, "Date and Time on the Internet:
+              Timestamps", <a href="./rfc3339">RFC 3339</a>, July 2002,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc3339">http://www.rfc-editor.org/info/rfc3339</a>&gt;.
+
+   [<a id="ref-RFC3629">RFC3629</a>]  Yergeau, F., "UTF-8, a transformation format of ISO
+              10646", STD 63, <a href="./rfc3629">RFC 3629</a>, November 2003,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc3629">http://www.rfc-editor.org/info/rfc3629</a>&gt;.
+
+   [<a id="ref-RFC4627">RFC4627</a>]  Crockford, D., "The application/json Media Type for
+              JavaScript Object Notation (JSON)", <a href="./rfc4627">RFC 4627</a>, July 2006,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc4627">http://www.rfc-editor.org/info/rfc4627</a>&gt;.
+
+   [<a id="ref-RFC4648">RFC4648</a>]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", <a href="./rfc4648">RFC 4648</a>, October 2006,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc4648">http://www.rfc-editor.org/info/rfc4648</a>&gt;.
+
+   [<a id="ref-RFC7159">RFC7159</a>]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", <a href="./rfc7159">RFC 7159</a>, March 2014,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7159">http://www.rfc-editor.org/info/rfc7159</a>&gt;.
+
+   [<a id="ref-UNICODE">UNICODE</a>]  The Unicode Consortium, "The Unicode Standard",
+              &lt;<a href="http://www.unicode.org/versions/latest/">http://www.unicode.org/versions/latest/</a>&gt;.
+
+謝辞
+
+   I-JSON は、主に Douglas Crockford による JSON の設計に完全に依存している。
+   具体的な内容は、IETF JSON Working Group における <a href="./rfc7159">RFC 7159</a> の設計への
+   貢献者たちから強い影響を受けた。
+
+著者の連絡先
+
+   Tim Bray (editor)
+   Textuality Services
+
+   EMail: tbray@textuality.com
+   URI:   <a href="https://www.tbray.org/">https://www.tbray.org/</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bray                         Standards Track                    [Page 6]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
