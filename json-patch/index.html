@@ -1,0 +1,995 @@
+<pre>Internet Engineering Task Force (IETF)                     P. Bryan, Ed.
+Request for Comments: 6902                                Salesforce.com
+分類: Standards Track                                  M. Nottingham, Ed.
+ISSN: 2070-1721                                                   Akamai
+                                                              2013年4月
+
+
+                <span class="h1">JavaScript Object Notation (JSON) Patch</span>
+
+概要
+
+   JSON Patch は、JavaScript Object Notation (JSON) 文書へ適用する
+   一連の操作を表現するための JSON 文書構造を定義する。これは HTTP
+   PATCH メソッドで使用するのに適している。
+   "application/json-patch+json" メディアタイプは、そのような patch
+   文書を識別するために使用される。
+
+このメモの位置付け
+
+   これは Internet Standards Track 文書である。
+
+   この文書は Internet Engineering Task Force (IETF) の成果物である。
+   これは IETF コミュニティの合意を表している。公開レビューを受け、
+   Internet Engineering Steering Group (IESG) によって公開が承認されている。
+   Internet Standards に関する詳細情報は
+   <a href="./rfc5741#section-2">RFC 5741 の Section&nbsp;2</a> で参照できる。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、以下から入手できる。
+   <a href="http://www.rfc-editor.org/info/rfc6902">http://www.rfc-editor.org/info/rfc6902</a>.
+
+著作権表示
+
+   Copyright (c) 2013 IETF Trust および文書著者として識別される者。
+   All rights reserved.
+
+   この文書は <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> および、この文書の公開日に有効な
+   IETF Trust's Legal Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) の対象である。
+   この文書に関する権利および制限について説明しているため、これらの
+   文書を注意深く確認すること。本文書から抽出される Code Components
+   には、Trust Legal Provisions の Section 4.e に記載される
+   Simplified BSD License テキストを含めなければならず、Simplified BSD
+   License に記載されるとおり、保証なしで提供される。
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 1]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+   <a href="#section-2">2</a>.  規約  . . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+   <a href="#section-3">3</a>.  文書構造 . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+   <a href="#section-4">4</a>.  操作 . . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+     <a href="#section-4.1">4.1</a>.  add  . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+     <a href="#section-4.2">4.2</a>.  remove . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+     <a href="#section-4.3">4.3</a>.  replace  . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+     <a href="#section-4.4">4.4</a>.  move . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+     <a href="#section-4.5">4.5</a>.  copy . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-7">7</a>
+     <a href="#section-4.6">4.6</a>.  test . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-7">7</a>
+   <a href="#section-5">5</a>.  エラー処理 . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-8">8</a>
+   <a href="#section-6">6</a>.  IANA に関する考慮事項  . . . . . . . . . . . . . . . . . .  <a href="#page-9">9</a>
+   <a href="#section-7">7</a>.  セキュリティに関する考慮事項  . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+   <a href="#section-8">8</a>.  謝辞 . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+   <a href="#section-9">9</a>.  参考文献 . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+     <a href="#section-9.1">9.1</a>.  規範参考文献 . . . . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+     <a href="#section-9.2">9.2</a>.  参考参考文献 . . . . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+   <a href="#appendix-A">Appendix A</a>.  例  . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+     <a href="#appendix-A.1">A.1</a>.  オブジェクトメンバーの追加  . . . . . . . . . . . . . . <a href="#page-12">12</a>
+     <a href="#appendix-A.2">A.2</a>.  配列要素の追加  . . . . . . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+     <a href="#appendix-A.3">A.3</a>.  オブジェクトメンバーの削除  . . . . . . . . . . . . . . <a href="#page-12">12</a>
+     <a href="#appendix-A.4">A.4</a>.  配列要素の削除  . . . . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+     <a href="#appendix-A.5">A.5</a>.  値の置換  . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+     <a href="#appendix-A.6">A.6</a>.  値の移動 . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-14">14</a>
+     <a href="#appendix-A.7">A.7</a>.  配列要素の移動  . . . . . . . . . . . . . . . . . . . . <a href="#page-14">14</a>
+     <a href="#appendix-A.8">A.8</a>.  値のテスト: 成功 . . . . . . . . . . . . . . . . . . . <a href="#page-15">15</a>
+     <a href="#appendix-A.9">A.9</a>.  値のテスト: エラー . . . . . . . . . . . . . . . . . . <a href="#page-15">15</a>
+     <a href="#appendix-A.10">A.10</a>. ネストされたメンバーオブジェクトの追加  . . . . . . . <a href="#page-15">15</a>
+     <a href="#appendix-A.11">A.11</a>. 認識されない要素の無視 . . . . . . . . . . . . . . . . <a href="#page-16">16</a>
+     <a href="#appendix-A.12">A.12</a>. 存在しない対象への追加 . . . . . . . . . . . . . . . . <a href="#page-16">16</a>
+     <a href="#appendix-A.13">A.13</a>. 無効な JSON Patch 文書  . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+     <a href="#appendix-A.14">A.14</a>. ~ エスケープ順序  . . . . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+     <a href="#appendix-A.15">A.15</a>. 文字列と数値の比較  . . . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+     <a href="#appendix-A.16">A.16</a>. 配列値の追加  . . . . . . . . . . . . . . . . . . . . . <a href="#page-18">18</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 2]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   JavaScript Object Notation (JSON) [<a href="./rfc4627" title="&quot;The application/json Media Type for JavaScript Object Notation (JSON)&quot;">RFC4627</a>] は、構造化データの
+   交換および保存のための一般的な形式である。HTTP PATCH [<a href="./rfc5789" title="&quot;PATCH Method for HTTP&quot;">RFC5789</a>] は、
+   Hypertext Transfer Protocol (HTTP) [<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] を、リソースに対する
+   部分的な変更を実行するメソッドで拡張する。
+
+   JSON Patch は、対象 JSON 文書へ適用する一連の操作を表現する形式
+   (メディアタイプ "application/json-patch+json" によって識別される)
+   であり、HTTP PATCH メソッドで使用するのに適している。
+
+   この形式は、JSON 文書または類似の制約を持つデータ構造
+   (すなわち、JSON 文法を用いてオブジェクトまたは配列として
+   シリアライズできるもの) に対して部分的な更新を行う必要がある
+   他の場合にも、潜在的に有用である。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  規約</span>
+
+   本文書中のキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", および "OPTIONAL" は、
+   <a href="./rfc2119">RFC 2119</a> [<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] に記載されているとおりに解釈されるものとする。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  文書構造</span>
+
+   JSON Patch 文書は JSON [<a href="./rfc4627" title="&quot;The application/json Media Type for JavaScript Object Notation (JSON)&quot;">RFC4627</a>] 文書であり、オブジェクトの配列を表す。
+   各オブジェクトは、対象 JSON 文書へ適用される単一の操作を表す。
+
+   以下は、HTTP PATCH リクエストで転送される JSON Patch 文書の例である。
+
+   PATCH /my/data HTTP/1.1
+   Host: example.org
+   Content-Length: 326
+   Content-Type: application/json-patch+json
+   If-Match: "abc123"
+
+   [
+     { "op": "test", "path": "/a/b/c", "value": "foo" },
+     { "op": "remove", "path": "/a/b/c" },
+     { "op": "add", "path": "/a/b/c", "value": [ "foo", "bar" ] },
+     { "op": "replace", "path": "/a/b/c", "value": 42 },
+     { "op": "move", "from": "/a/b/c", "path": "/a/b/d" },
+     { "op": "copy", "from": "/a/b/d", "path": "/a/b/e" }
+   ]
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 3]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   JSON Patch 文書の評価は、対象 JSON 文書に対して開始される。
+   操作は、配列中に現れる順序で逐次適用される。シーケンス中の各操作は
+   対象文書に適用され、その結果として得られた文書が次の操作の対象と
+   なる。評価は、すべての操作が正常に適用されるか、エラー条件に遭遇
+   するまで継続する。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  操作</span>
+
+   操作オブジェクトは、実行する操作を示す値を持つ "op" メンバーを
+   正確に 1 つ持たなければならない (MUST)。その値は "add",
+   "remove", "replace", "move", "copy", または "test" のいずれかで
+   なければならず (MUST)、その他の値はエラーである。各オブジェクトの
+   意味論は以下で定義される。
+
+   さらに、操作オブジェクトは "path" メンバーを正確に 1 つ持たなければ
+   ならない (MUST)。そのメンバーの値は、操作が実行される対象文書内の
+   位置 ("target location") を参照する JSON-Pointer 値
+   [<a href="./rfc6901" title="&quot;JavaScript Object Notation (JSON) Pointer&quot;">RFC6901</a>] を含む文字列である。
+
+   その他の操作オブジェクトメンバーの意味は、操作ごとに定義される
+   (以下のサブセクションを参照)。該当する操作について明示的に定義
+   されていないメンバーは無視されなければならない (MUST)
+   (すなわち、その操作は未定義のメンバーがオブジェクト内に現れなかった
+   かのように完了する)。
+
+   JSON オブジェクトにおけるメンバーの順序は重要ではないことに注意。
+   したがって、以下の操作オブジェクトは等価である。
+
+   { "op": "add", "path": "/a/b/c", "value": "foo" }
+   { "path": "/a/b/c", "op": "add", "value": "foo" }
+   { "value": "foo", "path": "/a/b/c", "op": "add" }
+
+   操作は、JSON 文書によって表されるデータ構造、すなわち任意の
+   アンエスケープ (see <a href="./rfc4627#section-2.5">[RFC4627], Section&nbsp;2.5</a>) が行われた後の
+   データ構造に適用される。
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  add</span>
+
+   "add" 操作は、対象位置が何を参照するかに応じて、以下の機能の
+   いずれかを実行する。
+
+   o  対象位置が配列インデックスを指定する場合、新しい値は指定された
+      インデックスの位置に配列へ挿入される。
+
+   o  対象位置が、まだ存在しないオブジェクトメンバーを指定する場合、
+      新しいメンバーがそのオブジェクトへ追加される。
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 4]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   o  対象位置が、既に存在するオブジェクトメンバーを指定する場合、
+      そのメンバーの値は置換される。
+
+   操作オブジェクトは、追加される値を指定する内容を持つ "value"
+   メンバーを含まなければならない (MUST)。
+
+   例:
+
+   { "op": "add", "path": "/a/b/c", "value": [ "foo", "bar" ] }
+
+   操作が適用されるとき、対象位置は以下のいずれかを参照しなければ
+   ならない (MUST)。
+
+   o  対象文書のルート - その場合、指定された値が対象文書全体の内容と
+      なる。
+
+   o  既存のオブジェクトへ追加するメンバー - その場合、指定された位置で
+      提供された値がそのオブジェクトへ追加される。そのメンバーが既に
+      存在する場合、それは指定された値で置換される。
+
+   o  既存の配列へ追加する要素 - その場合、提供された値が指定された
+      位置で配列へ追加される。指定されたインデックス以上の任意の要素は
+      1 つ右へシフトされる。指定されたインデックスは配列内の要素数を
+      超えてはならない (MUST NOT)。配列の末尾を示すために "-" 文字が
+      使用される場合 (see [<a href="./rfc6901" title="&quot;JavaScript Object Notation (JSON) Pointer&quot;">RFC6901</a>])、これは値を配列へ
+      追加する効果を持つ。
+
+   この操作は既存のオブジェクトおよび配列へ追加するように設計されて
+   いるため、その対象位置はしばしば存在しない。そのためポインターの
+   エラー処理アルゴリズムが呼び出されることになるが、この仕様は
+   "add" ポインターのエラー処理動作として、そのエラーを無視し、
+   指定されたとおりに値を追加することを定義する。
+
+   ただし、オブジェクト自体またはそれを含む配列は存在している必要が
+   あり、それが存在しない場合はエラーのままである。例えば、
+   以下の文書から開始して、対象位置 "/a/b" を持つ "add" は、
+
+   { "a": { "foo": 1 } }
+
+   エラーではない。なぜなら "a" が存在し、"b" はその値へ追加される
+   からである。以下の文書ではエラーである。
+
+   { "q": { "bar": 2 } }
+
+   なぜなら "a" が存在しないからである。
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 5]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  remove</span>
+
+   "remove" 操作は、対象位置にある値を削除する。
+
+   操作が成功するためには、対象位置は存在しなければならない (MUST)。
+
+   例:
+
+   { "op": "remove", "path": "/a/b/c" }
+
+   配列から要素を削除する場合、指定されたインデックスより上にある任意の
+   要素は 1 つ左へシフトされる。
+
+<span class="h3"><a class="selflink" id="section-4.3" href="#section-4.3">4.3</a>.  replace</span>
+
+   "replace" 操作は、対象位置にある値を新しい値で置換する。操作
+   オブジェクトは、置換値を指定する内容を持つ "value" メンバーを
+   含まなければならない (MUST)。
+
+   操作が成功するためには、対象位置は存在しなければならない (MUST)。
+
+   例:
+
+   { "op": "replace", "path": "/a/b/c", "value": 42 }
+
+   この操作は、値に対する "remove" 操作の直後に、同じ位置へ置換値を
+   用いた "add" 操作を行うことと機能的に同一である。
+
+<span class="h3"><a class="selflink" id="section-4.4" href="#section-4.4">4.4</a>.  move</span>
+
+   "move" 操作は、指定された位置にある値を削除し、それを対象位置へ
+   追加する。
+
+   操作オブジェクトは "from" メンバーを含まなければならない (MUST)。
+   これは、値を移動元とする対象文書内の位置を参照する JSON Pointer
+   値を含む文字列である。
+
+   操作が成功するためには、"from" 位置は存在しなければならない (MUST)。
+
+   例:
+
+   { "op": "move", "from": "/a/b/c", "path": "/a/b/d" }
+
+   この操作は、"from" 位置に対する "remove" 操作の直後に、ちょうど
+   削除された値を用いて対象位置へ "add" 操作を行うことと機能的に同一
+   である。
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 6]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   "from" 位置は "path" 位置の proper prefix であってはならない
+   (MUST NOT)。すなわち、ある位置をその子の 1 つへ移動することは
+   できない。
+
+<span class="h3"><a class="selflink" id="section-4.5" href="#section-4.5">4.5</a>.  copy</span>
+
+   "copy" 操作は、指定された位置にある値を対象位置へコピーする。
+
+   操作オブジェクトは "from" メンバーを含まなければならない (MUST)。
+   これは、コピー元となる対象文書内の位置を参照する JSON Pointer
+   値を含む文字列である。
+
+   操作が成功するためには、"from" 位置は存在しなければならない (MUST)。
+
+   例:
+
+   { "op": "copy", "from": "/a/b/c", "path": "/a/b/e" }
+
+   この操作は、"from" メンバーで指定された値を用いて対象位置へ
+   "add" 操作を行うことと機能的に同一である。
+
+<span class="h3"><a class="selflink" id="section-4.6" href="#section-4.6">4.6</a>.  test</span>
+
+   "test" 操作は、対象位置にある値が指定された値と等しいことを
+   テストする。
+
+   操作オブジェクトは、対象位置の値と比較される値を伝える "value"
+   メンバーを含まなければならない (MUST)。
+
+   操作が成功したと見なされるためには、対象位置は "value" 値と等しく
+   なければならない (MUST)。
+
+   ここで "equal" とは、対象位置にある値と "value" によって伝えられる
+   値が同じ JSON 型であり、その型について以下の規則により等しいと
+   見なされることを意味する。
+
+   o  strings: 同じ数の Unicode 文字を含み、その code point が
+      byte-by-byte で等しい場合、等しいと見なされる。
+
+   o  numbers: その値が数値的に等しい場合、等しいと見なされる。
+
+   o  arrays: 同じ数の値を含み、各値が他方の配列の対応する位置にある
+      値と、この型別規則の一覧を用いて等しいと見なせる場合、等しいと
+      見なされる。
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 7]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   o  objects: 同じ数のメンバーを含み、各メンバーが、キー
+      (文字列として) と値 (この型別規則の一覧を用いる) を比較することに
+      よって、他方のオブジェクト内のメンバーと等しいと見なせる場合、
+      等しいと見なされる。
+
+   o  literals (false, true, and null): 同一である場合、等しいと
+      見なされる。
+
+   行われる比較は論理的な比較であることに注意。例えば、配列の
+   メンバー値の間の空白は重要ではない。
+
+   また、オブジェクトメンバーのシリアライズ順序は重要ではないことに
+   注意。
+
+   例:
+
+   { "op": "test", "path": "/a/b/c", "value": "foo" }
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  エラー処理</span>
+
+   JSON Patch 文書によって規範的要件が違反された場合、または操作が
+   成功しない場合、JSON Patch 文書の評価は終了すべきであり (SHOULD)、
+   patch 文書全体の適用は成功したと見なしてはならない (SHALL NOT)。
+
+   JSON Patch が HTTP PATCH メソッドとともに使用される場合のエラー処理
+   に関する考慮事項については、さまざまな条件を示すために使用する
+   推奨ステータスコードを含め、
+   <a href="./rfc5789#section-2.2">[RFC5789], Section&nbsp;2.2</a> を参照。
+
+   HTTP PATCH メソッドは [<a href="./rfc5789" title="&quot;PATCH Method for HTTP&quot;">RFC5789</a>] に従って atomic であることに注意。
+   したがって、以下の patch は文書に対してまったく変更を行わない結果と
+   なる ("test" 操作がエラーになるため)。
+
+   [
+     { "op": "replace", "path": "/a/b/c", "value": 42 },
+     { "op": "test", "path": "/a/b/c", "value": "C" }
+   ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 8]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  IANA に関する考慮事項</span>
+
+   JSON Patch 文書の Internet media type は application/
+   json-patch+json である。
+
+   Type name:  application
+
+   Subtype name:  json-patch+json
+
+   Required parameters:  none
+
+   Optional parameters:   none
+
+   Encoding considerations:  binary
+
+   Security considerations:
+      <a href="#section-7">Section 7</a> の Security Considerations を参照。
+
+   Interoperability considerations:  N/A
+
+   Published specification:
+      <a href="./rfc6902">RFC 6902</a>
+
+   Applications that use this media type:
+      JSON 文書を操作するアプリケーション。
+
+   Additional information:
+
+      Magic number(s):  N/A
+
+      File extension(s):  .json-patch
+
+      Macintosh file type code(s):  TEXT
+
+   Person &amp; email address to contact for further information:
+      Paul C. Bryan &lt;pbryan@anode.ca&gt;
+
+   Intended usage:  COMMON
+
+   Restrictions on usage:  none
+
+   Author:  Paul C. Bryan &lt;pbryan@anode.ca&gt;
+
+   Change controller:  IETF
+
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                    [Page 9]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  セキュリティに関する考慮事項</span>
+
+   この仕様は、JSON [<a href="./rfc4627" title="&quot;The application/json Media Type for JavaScript Object Notation (JSON)&quot;">RFC4627</a>] および JSON-Pointer
+   [<a href="./rfc6901" title="&quot;JavaScript Object Notation (JSON) Pointer&quot;">RFC6901</a>] と同じセキュリティ上の考慮事項を持つ。
+
+   一部の古い Web ブラウザーは、ルートが配列である任意の JSON 文書を
+   読み込むように強制され得る。その結果、認証されたアクセスであっても、
+   機密情報を含む JSON Patch 文書が攻撃者に公開される状況につながる
+   可能性がある。これは Cross-Site Request Forgery (CSRF) 攻撃として
+   知られている [<a href="#ref-CSRF" title="&quot;Robust Defenses for Cross-Site Request Forgery&quot;">CSRF</a>]。
+
+   ただし、そのようなブラウザーは広く使用されていない (執筆時点では、
+   市場の 1% 未満で使用されていると推定される)。それでもこの攻撃を
+   懸念する公開者には、そのような文書を HTTP GET で利用可能にしない
+   ことが推奨される。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  謝辞</span>
+
+   以下の個人は、この仕様にアイデア、フィードバック、および文言を
+   寄稿した。
+
+      Mike Acar, Mike Amundsen, Cyrus Daboo, Paul Davis, Stefan Koegl,
+      Murray S. Kucherawy, Dean Landolt, Randall Leeds, James Manger,
+      Julian Reschke, James Snell, Eli Stevens, and Henry S. Thompson.
+
+   JSON Patch 文書の構造は、XML Patch 文書仕様 [<a href="./rfc5261" title="&quot;An Extensible Markup Language (XML) Patch Operations Framework Utilizing XML Path Language (XPath) Selectors&quot;">RFC5261</a>] の影響を
+   受けている。
+
+<span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-9.1" href="#section-9.1">9.1</a>.  規範参考文献</span>
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, 1997年3月。
+
+   [<a id="ref-RFC4627">RFC4627</a>]  Crockford, D., "The application/json Media Type for
+              JavaScript Object Notation (JSON)", <a href="./rfc4627">RFC 4627</a>, 2006年7月。
+
+   [<a id="ref-RFC6901">RFC6901</a>]  Bryan, P., Ed., Zyp, K., and M. Nottingham, Ed.,
+              "JavaScript Object Notation (JSON) Pointer", <a href="./rfc6901">RFC 6901</a>,
+              2013年4月。
+
+<span class="h3"><a class="selflink" id="section-9.2" href="#section-9.2">9.2</a>.  参考参考文献</span>
+
+   [<a id="ref-CSRF">CSRF</a>]     Barth, A., Jackson, C., and J. Mitchell, "Robust Defenses
+              for Cross-Site Request Forgery", ACM Conference
+              on Computer and Communications Security, 2008年10月,
+              &lt;<a href="http://seclab.stanford.edu/websec/csrf/csrf.pdf">http://seclab.stanford.edu/websec/csrf/csrf.pdf</a>&gt;.
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 10]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   [<a id="ref-RFC2616">RFC2616</a>]  Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
+              Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
+              Transfer Protocol -- HTTP/1.1", <a href="./rfc2616">RFC 2616</a>, 1999年6月。
+
+   [<a id="ref-RFC5261">RFC5261</a>]  Urpalainen, J., "An Extensible Markup Language (XML) Patch
+              Operations Framework Utilizing XML Path Language (XPath)
+              Selectors", <a href="./rfc5261">RFC 5261</a>, 2008年9月。
+
+   [<a id="ref-RFC5789">RFC5789</a>]  Dusseault, L. and J. Snell, "PATCH Method for HTTP",
+              <a href="./rfc5789">RFC 5789</a>, 2010年3月。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 11]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  例</span>
+
+<span class="h3"><a class="selflink" id="appendix-A.1" href="#appendix-A.1">A.1</a>.  オブジェクトメンバーの追加</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": "bar"}
+
+   JSON Patch 文書:
+
+   [
+     { "op": "add", "path": "/baz", "value": "qux" }
+   ]
+
+   結果として得られる JSON 文書:
+
+   {
+     "baz": "qux",
+     "foo": "bar"
+   }
+
+<span class="h3"><a class="selflink" id="appendix-A.2" href="#appendix-A.2">A.2</a>.  配列要素の追加</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": [ "bar", "baz" ] }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "add", "path": "/foo/1", "value": "qux" }
+   ]
+
+   結果として得られる JSON 文書:
+
+   { "foo": [ "bar", "qux", "baz" ] }
+
+<span class="h3"><a class="selflink" id="appendix-A.3" href="#appendix-A.3">A.3</a>.  オブジェクトメンバーの削除</span>
+
+   対象 JSON 文書の例:
+
+   {
+     "baz": "qux",
+     "foo": "bar"
+   }
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 12]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   JSON Patch 文書:
+
+   [
+     { "op": "remove", "path": "/baz" }
+   ]
+
+   結果として得られる JSON 文書:
+
+   { "foo": "bar" }
+
+<span class="h3"><a class="selflink" id="appendix-A.4" href="#appendix-A.4">A.4</a>.  配列要素の削除</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": [ "bar", "qux", "baz" ] }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "remove", "path": "/foo/1" }
+   ]
+
+   結果として得られる JSON 文書:
+
+   { "foo": [ "bar", "baz" ] }
+
+<span class="h3"><a class="selflink" id="appendix-A.5" href="#appendix-A.5">A.5</a>.  値の置換</span>
+
+   対象 JSON 文書の例:
+
+   {
+     "baz": "qux",
+     "foo": "bar"
+   }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "replace", "path": "/baz", "value": "boo" }
+   ]
+
+   結果として得られる JSON 文書:
+
+   {
+     "baz": "boo",
+     "foo": "bar"
+   }
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 13]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h3"><a class="selflink" id="appendix-A.6" href="#appendix-A.6">A.6</a>.  値の移動</span>
+
+   対象 JSON 文書の例:
+
+   {
+     "foo": {
+       "bar": "baz",
+       "waldo": "fred"
+     },
+     "qux": {
+       "corge": "grault"
+     }
+   }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "move", "from": "/foo/waldo", "path": "/qux/thud" }
+   ]
+
+   結果として得られる JSON 文書:
+
+   {
+     "foo": {
+       "bar": "baz"
+     },
+     "qux": {
+       "corge": "grault",
+       "thud": "fred"
+     }
+   }
+
+<span class="h3"><a class="selflink" id="appendix-A.7" href="#appendix-A.7">A.7</a>.  配列要素の移動</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": [ "all", "grass", "cows", "eat" ] }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "move", "from": "/foo/1", "path": "/foo/3" }
+   ]
+
+   結果として得られる JSON 文書:
+
+   { "foo": [ "all", "cows", "eat", "grass" ] }
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 14]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h3"><a class="selflink" id="appendix-A.8" href="#appendix-A.8">A.8</a>.  値のテスト: 成功</span>
+
+   対象 JSON 文書の例:
+
+   {
+     "baz": "qux",
+     "foo": [ "a", 2, "c" ]
+   }
+
+   評価が成功する結果となる JSON Patch 文書:
+
+   [
+     { "op": "test", "path": "/baz", "value": "qux" },
+     { "op": "test", "path": "/foo/1", "value": 2 }
+   ]
+
+<span class="h3"><a class="selflink" id="appendix-A.9" href="#appendix-A.9">A.9</a>.  値のテスト: エラー</span>
+
+   対象 JSON 文書の例:
+
+   { "baz": "qux" }
+
+   エラー条件となる JSON Patch 文書:
+
+   [
+     { "op": "test", "path": "/baz", "value": "bar" }
+   ]
+
+<span class="h3"><a class="selflink" id="appendix-A.10" href="#appendix-A.10">A.10</a>.  ネストされたメンバーオブジェクトの追加</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": "bar" }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "add", "path": "/child", "value": { "grandchild": { } } }
+   ]
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 15]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   結果として得られる JSON 文書:
+
+   {
+     "foo": "bar",
+     "child": {
+       "grandchild": {
+       }
+     }
+   }
+
+<span class="h3"><a class="selflink" id="appendix-A.11" href="#appendix-A.11">A.11</a>.  認識されない要素の無視</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": "bar" }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "add", "path": "/baz", "value": "qux", "xyz": 123 }
+   ]
+
+   結果として得られる JSON 文書:
+
+   {
+     "foo": "bar",
+     "baz": "qux"
+   }
+
+<span class="h3"><a class="selflink" id="appendix-A.12" href="#appendix-A.12">A.12</a>.  存在しない対象への追加</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": "bar" }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "add", "path": "/baz/bat", "value": "qux" }
+   ]
+
+   上記の対象 JSON 文書に適用されるこの JSON Patch 文書はエラーとなる
+   (したがって適用されない)。これは、"add" 操作の対象位置が文書の
+   ルートも、既存オブジェクトのメンバーも、既存配列のメンバーも
+   参照していないためである。
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 16]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+<span class="h3"><a class="selflink" id="appendix-A.13" href="#appendix-A.13">A.13</a>.  無効な JSON Patch 文書</span>
+
+   JSON Patch 文書:
+
+   [
+     { "op": "add", "path": "/baz", "value": "qux", "op": "remove" }
+   ]
+
+   この JSON Patch 文書は "add" 操作として扱うことができない。なぜなら、
+   後続の "op":"remove" 要素を含んでいるからである。JSON は、
+   オブジェクトメンバー名が一意であることを "SHOULD" 要件として要求
+   しており、重複に対する標準的なエラー処理は存在しない。
+
+<span class="h3"><a class="selflink" id="appendix-A.14" href="#appendix-A.14">A.14</a>.  ~ エスケープ順序</span>
+
+   対象 JSON 文書の例:
+
+   {
+     "/": 9,
+     "~1": 10
+   }
+
+   JSON Patch 文書:
+
+   [
+     {"op": "test", "path": "/~01", "value": 10}
+   ]
+
+   結果として得られる JSON 文書:
+
+   {
+     "/": 9,
+     "~1": 10
+   }
+
+<span class="h3"><a class="selflink" id="appendix-A.15" href="#appendix-A.15">A.15</a>.  文字列と数値の比較</span>
+
+   対象 JSON 文書の例:
+
+   {
+     "/": 9,
+     "~1": 10
+   }
+
+
+
+
+
+
+
+
+<span class="grey">Bryan &amp; Nottingham           Standards Track                   [Page 17]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc6902">RFC 6902</a>                       JSON Patch                     2013年4月</span>
+
+
+   JSON Patch 文書:
+
+   [
+     {"op": "test", "path": "/~01", "value": "10"}
+   ]
+
+   これはエラーとなる。なぜなら test が失敗するからである。文書の値は
+   数値であるのに対し、テスト対象の値は文字列である。
+
+<span class="h3"><a class="selflink" id="appendix-A.16" href="#appendix-A.16">A.16</a>.  配列値の追加</span>
+
+   対象 JSON 文書の例:
+
+   { "foo": ["bar"] }
+
+   JSON Patch 文書:
+
+   [
+     { "op": "add", "path": "/foo/-", "value": ["abc", "def"] }
+   ]
+
+   結果として得られる JSON 文書:
+
+   { "foo": ["bar", ["abc", "def"]] }
+
+著者の連絡先
+
+   Paul C. Bryan (editor)
+   Salesforce.com
+
+   Phone: +1 604 783 1481
+   EMail: pbryan@anode.ca
+
+
+   Mark Nottingham (editor)
+   Akamai
+
+   EMail: mnot@mnot.net
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bryan &amp; Nottingham           Standards Track                   [Page 18]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
