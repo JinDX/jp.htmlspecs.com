@@ -1,0 +1,436 @@
+<pre>Internet Engineering Task Force (IETF)                     P. Bryan, Ed.
+Request for Comments: 6901                                Salesforce.com
+Category: Standards Track                                         K. Zyp
+ISSN: 2070-1721                                            SitePen (USA)
+                                                      M. Nottingham, Ed.
+                                                                  Akamai
+                                                              April 2013
+
+
+               <span class="h1">JavaScript Object Notation (JSON) ポインター</span>
+
+概要
+
+   JSON Pointer は、JavaScript Object Notation (JSON) 文書内の
+   特定の値を識別するための文字列構文を定義する。
+
+このメモの位置付け
+
+   これは Internet Standards Track 文書である。
+
+   この文書は Internet Engineering Task Force (IETF) の成果物である。
+   IETF コミュニティの合意を表している。公開レビューを受け、
+   Internet Engineering Steering Group (IESG) によって公開が承認された。
+   Internet Standards に関する詳しい情報は
+   <a href="./rfc5741#section-2">RFC 5741 の Section&nbsp;2</a> で入手できる。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc6901">http://www.rfc-editor.org/info/rfc6901</a> で入手できる。
+
+Copyright Notice
+
+   Copyright (c) 2013 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+
+
+<span class="grey">Bryan, et al.                Standards Track                    [Page 1]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc6901">RFC 6901</a>                      JSON Pointer                    April 2013</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに  . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-2">2</a>
+   <a href="#section-2">2</a>.  表記規約 . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-2">2</a>
+   <a href="#section-3">3</a>.  構文  . . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-2">2</a>
+   <a href="#section-4">4</a>.  評価  . . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-3">3</a>
+   <a href="#section-5">5</a>.  JSON 文字列表現  . . . . . . . . . . . . . . . . . . . . . . <a href="#page-4">4</a>
+   <a href="#section-6">6</a>.  URI フラグメント識別子表現  . . . . . . . . . . . . . . . . <a href="#page-5">5</a>
+   <a href="#section-7">7</a>.  エラー処理  . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-6">6</a>
+   <a href="#section-8">8</a>.  セキュリティに関する考慮事項 . . . . . . . . . . . . . . . <a href="#page-6">6</a>
+   <a href="#section-9">9</a>.  謝辞  . . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-7">7</a>
+   <a href="#section-10">10</a>.  参考文献  . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-7">7</a>
+     <a href="#section-10.1">10.1</a>.  規範的参考文献 . . . . . . . . . . . . . . . . . . . . <a href="#page-7">7</a>
+     <a href="#section-10.2">10.2</a>.  参考情報の参考文献 . . . . . . . . . . . . . . . . . . <a href="#page-7">7</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   この仕様は、JavaScript Object Notation (JSON) 文書 [<a href="./rfc4627" title="&quot;The application/json Media Type for JavaScript Object Notation (JSON)&quot;">RFC4627</a>] 内の
+   特定の値を識別するための文字列構文である JSON Pointer を定義する。
+   JSON Pointer は、JSON 文字列値としても Uniform Resource
+   Identifier (URI) [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] のフラグメント識別子としても
+   容易に表現できることを意図している。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  表記規約</span>
+
+   この文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY",
+   "OPTIONAL" は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] で説明されるとおりに解釈される。
+
+   この仕様は、Augmented Backus-Naur Form (ABNF) [<a href="./rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>]
+   表記法を使用して規範的な構文規則を表す。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  構文</span>
+
+   JSON Pointer は Unicode 文字列 (<a href="./rfc4627#section-3">[RFC4627], Section&nbsp;3</a> を参照) であり、
+   0 個以上の reference token の列を含む。各 token には
+   '/' (%x2F) 文字が前置される。
+
+   文字 '~' (%x7E) および '/' (%x2F) は JSON Pointer で特別な
+   意味を持つため、これらの文字が reference token に現れる場合、
+   '~' は '~0' として、'/' は '~1' としてエンコードする必要がある。
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan, et al.                Standards Track                    [Page 2]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc6901">RFC 6901</a>                      JSON Pointer                    April 2013</span>
+
+
+   JSON Pointer の ABNF 構文は次のとおりである。
+
+      json-pointer    = *( "/" reference-token )
+      reference-token = *( unescaped / escaped )
+      unescaped       = %x00-2E / %x30-7D / %x7F-10FFFF
+         ; %x2F ('/') および %x7E ('~') は 'unescaped' から除外される
+      escaped         = "~" ( "0" / "1" )
+        ; それぞれ '~' および '/' を表す
+
+   JSON Pointer 値がこの構文に適合しない場合はエラー条件である
+   (<a href="#section-7">Section 7</a> を参照)。
+
+   JSON Pointer はバイトとしてではなく、文字として指定される点に注意。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  評価</span>
+
+   JSON Pointer の評価は、JSON 文書のルート値への参照から始まり、
+   文書内の何らかの値への参照で完了する。JSON Pointer 内の
+   各 reference token は順番に評価される。
+
+   各 reference token の評価は、エスケープされた文字列の
+   デコードから始まる。これはまず、列 '~1' の出現を '/' に変換し、
+   次に列 '~0' の出現を '~' に変換することで行われる。この順序で
+   置換を行うことにより、実装は '~01' を最初に '~1' に、
+   その後 '/' に変換してしまう誤りを避けられる。それは正しくない
+   (文字列 '~01' は変換後に正しく '~1' となる)。
+
+   その後、reference token は次の方式に従って、参照される値を変更する。
+
+   o  現在参照されている値が JSON object である場合、新しく
+      参照される値は、reference token によって識別される名前を持つ
+      object member である。member name は、token と同じ数の
+      Unicode 文字を持ち、それらの code point が byte-by-byte で
+      等しい場合に token と等しい。Unicode 文字の正規化は行われない。
+      参照される member name が object 内で一意でない場合、
+      参照される member は未定義であり、評価は失敗する (下記参照)。
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan, et al.                Standards Track                    [Page 3]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc6901">RFC 6901</a>                      JSON Pointer                    April 2013</span>
+
+
+   o  現在参照されている値が JSON array である場合、reference
+      token は次のいずれかを含まなければならない。
+
+      *  数字で構成される文字 (下記の ABNF を参照。先頭のゼロは
+         許されないことに注意)。これは符号なしの基数 10 の整数値を
+         表し、token によって識別される zero-based index を持つ
+         array element を新しく参照される値にする、または
+
+      *  正確に単一文字 "-"。これは最後の array element の後にある
+         (存在しない) member を新しく参照される値にする。
+
+   array index の ABNF 構文は次のとおりである。
+
+   array-index = %x30 / ( %x31-39 *(%x30-39) )
+                 ; "0"、または先頭に "0" のない数字
+
+   実装は各 reference token を文書の内容に対して評価し、JSON
+   pointer の reference token のいずれかについて具体的な値に
+   解決できない場合はエラー条件を発生させる。たとえば、array が
+   非数値の token で参照された場合、エラー条件が発生する。
+   詳細は <a href="#section-7">Section 7</a> を参照。
+
+   array に index するための "-" 文字の使用は、定義上、存在しない
+   array element を参照するため、常にそのようなエラー条件になる点に
+   注意。そのため、JSON Pointer の適用側は、この文字を有用にするなら、
+   どのように扱うかを指定する必要がある。
+
+   JSON Pointer の適用側によって特定の動作が定義されていない
+   すべてのエラー条件は、評価の終了をもたらす。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  JSON 文字列表現</span>
+
+   JSON Pointer は JSON 文字列値で表現できる。
+   <a href="./rfc4627#section-2.5">[RFC4627], Section&nbsp;2.5</a> に従い、引用符 '"' (%x22)、
+   reverse solidus '\' (%x5C)、および control (%x00-1F) 文字の
+   すべての出現はエスケープしなければならない。
+
+   JSON 文字列を JSON Pointer として処理する前に、
+   backslash escape sequence をアンエスケープしなければならない点に注意。
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan, et al.                Standards Track                    [Page 4]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc6901">RFC 6901</a>                      JSON Pointer                    April 2013</span>
+
+
+   たとえば、次の JSON 文書が与えられたとする。
+
+   {
+      "foo": ["bar", "baz"],
+      "": 0,
+      "a/b": 1,
+      "c%d": 2,
+      "e^f": 3,
+      "g|h": 4,
+      "i\\j": 5,
+      "k\"l": 6,
+      " ": 7,
+      "m~n": 8
+   }
+
+   次の JSON 文字列は、対応する値に評価される。
+
+    ""           // 文書全体
+    "/foo"       ["bar", "baz"]
+    "/foo/0"     "bar"
+    "/"          0
+    "/a~1b"      1
+    "/c%d"       2
+    "/e^f"       3
+    "/g|h"       4
+    "/i\\j"      5
+    "/k\"l"      6
+    "/ "         7
+    "/m~0n"      8
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  URI フラグメント識別子表現</span>
+
+   JSON Pointer は、UTF-8 [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] を使用して octet にエンコードし、
+   [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の fragment 規則で許可されない文字を
+   percent-encoding することで、URI fragment identifier として表現できる。
+
+   特定の media type は、fragment identifier syntax として
+   JSON Pointer を明示的に指定する必要がある点に注意 (通常はその登録
+   [<a href="./rfc6838" title="&quot;Media Type Specifications and Registration Procedures&quot;">RFC6838</a>] において)。つまり、文書が JSON であるからといって、
+   JSON Pointer をその fragment identifier syntax として使用できる
+   ことを意味しない。特に、application/json の fragment identifier
+   syntax は JSON Pointer ではない。
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan, et al.                Standards Track                    [Page 5]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc6901">RFC 6901</a>                      JSON Pointer                    April 2013</span>
+
+
+   上と同じ例の文書が与えられた場合、次の URI fragment identifier は、
+   対応する値に評価される。
+
+    #            // 文書全体
+    #/foo        ["bar", "baz"]
+    #/foo/0      "bar"
+    #/           0
+    #/a~1b       1
+    #/c%25d      2
+    #/e%5Ef      3
+    #/g%7Ch      4
+    #/i%5Cj      5
+    #/k%22l      6
+    #/%20        7
+    #/m~0n       8
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  エラー処理</span>
+
+   エラー条件が発生した場合、JSON Pointer の評価は完了に失敗する。
+
+   エラー条件には、次のものが含まれるが、これらに限定されない。
+
+   o  無効な pointer 構文
+
+   o  存在しない値を参照する pointer
+
+   この仕様は、エラーがどのように処理されるかを定義しない。
+   JSON Pointer の適用側は、各種類のエラーの影響と処理を
+   指定すべきである。
+
+   たとえば、ある適用側はエラー時に pointer 処理を停止する一方で、
+   別の適用側は欠落した値に default 値を挿入することで
+   回復を試みる場合がある。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  セキュリティに関する考慮事項</span>
+
+   特定の JSON Pointer が実際の JSON 値を参照することは保証されない。
+   したがって、JSON Pointer を使用する適用側は、この状況を想定し、
+   解決されない pointer をどのように扱うべきかを定義しておくべきである。
+
+   JSON pointer には NUL (Unicode U+0000) 文字を含められる点に注意。
+   NUL を文字列の終端を示すために使用する programming language では、
+   この文字を誤って解釈しないよう注意が必要である。
+
+
+
+
+
+
+<span class="grey">Bryan, et al.                Standards Track                    [Page 6]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc6901">RFC 6901</a>                      JSON Pointer                    April 2013</span>
+
+
+<span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  謝辞</span>
+
+   以下の個人は、この仕様に対してアイデア、フィードバック、文言を
+   提供した。
+
+      Mike Acar, Carsten Bormann, Tim Bray, Jacob Davies, Martin J.
+      Duerst, Bjoern Hoehrmann, James H. Manger, Drew Perttula, and
+      Julian Reschke.
+
+<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-10.1" href="#section-10.1">10.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, March 1997.
+
+   [<a id="ref-RFC3629">RFC3629</a>]  Yergeau, F., "UTF-8, a transformation format of ISO
+              10646", STD 63, <a href="./rfc3629">RFC 3629</a>, November 2003.
+
+   [<a id="ref-RFC3986">RFC3986</a>]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              <a href="./rfc3986">RFC 3986</a>, January 2005.
+
+   [<a id="ref-RFC4627">RFC4627</a>]  Crockford, D., "The application/json Media Type for
+              JavaScript Object Notation (JSON)", <a href="./rfc4627">RFC 4627</a>, July 2006.
+
+   [<a id="ref-RFC5234">RFC5234</a>]  Crocker, D. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, <a href="./rfc5234">RFC 5234</a>, January 2008.
+
+<span class="h3"><a class="selflink" id="section-10.2" href="#section-10.2">10.2</a>.  参考情報の参考文献</span>
+
+   [<a id="ref-RFC6838">RFC6838</a>]  Freed, N., Klensin, J., and T. Hansen, "Media Type
+              Specifications and Registration Procedures", <a href="https://www.rfc-editor.org/bcp/bcp13">BCP 13</a>,
+              <a href="./rfc6838">RFC 6838</a>, January 2013.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Bryan, et al.                Standards Track                    [Page 7]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc6901">RFC 6901</a>                      JSON Pointer                    April 2013</span>
+
+
+著者の連絡先
+
+   Paul C. Bryan (editor)
+   Salesforce.com
+
+   Phone: +1 604 783 1481
+   EMail: pbryan@anode.ca
+
+
+   Kris Zyp
+   SitePen (USA)
+
+   Phone: +1 650 968 8787
+   EMail: kris@sitepen.com
+
+
+   Mark Nottingham (editor)
+   Akamai
+
+   EMail: mnot@mnot.net
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Bryan, et al.                Standards Track                    [Page 8]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
