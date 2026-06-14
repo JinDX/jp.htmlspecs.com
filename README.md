@@ -26,6 +26,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [ECMAScript® 2027 Internationalization API Specification](https://jp.htmlspecs.com/ecma402/)（[Source](https://tc39.es/ecma402/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Language Tags and Locale Identifiers for the World Wide Web](https://jp.htmlspecs.com/ltli/)（[Source](https://www.w3.org/TR/2020/WD-ltli-20201007) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Strings on the Web: Language and Direction Metadata](https://jp.htmlspecs.com/string-meta/)（[Source](https://www.w3.org/TR/2024/NOTE-string-meta-20241017/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
+- [Internationalization Best Practices for Spec Developers](https://jp.htmlspecs.com/international-specs/)（[Source](https://www.w3.org/TR/2025/NOTE-international-specs-20250808/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 
 ### データ形式・セマンティック Web・API 記述
 - [The JavaScript Object Notation (JSON) Data Interchange Format](https://jp.htmlspecs.com/json/)（[Source](https://www.rfc-editor.org/rfc/rfc8259.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
