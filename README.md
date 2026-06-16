@@ -176,7 +176,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Viewport Capture](https://jp.htmlspecs.com/mediacapture-viewport/)（[Source](https://www.w3.org/TR/2024/WD-mediacapture-viewport-20241009/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Region Capture](https://jp.htmlspecs.com/mediacapture-region/)（[Source](https://www.w3.org/TR/2023/WD-mediacapture-region-20230712/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Capture Handle - Bootstrapping Collaboration when Screensharing](https://jp.htmlspecs.com/capture-handle-identity/)（[Source](https://www.w3.org/TR/2025/WD-capture-handle-identity-20250306/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture/)（[Source](https://www.w3.org/TR/2026/WD-picture-in-picture-20260521/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Picture-in-Picture](https://jp.htmlspecs.com/picture-in-picture/)（[Source](https://www.w3.org/TR/2026/WD-picture-in-picture-20260616/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Document Picture-in-Picture](https://jp.htmlspecs.com/document-picture-in-picture/)（[Source](https://wicg.github.io/document-picture-in-picture/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Presentation API](https://jp.htmlspecs.com/presentation-api/)（[Source](https://www.w3.org/TR/2025/CRD-presentation-api-20250212/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [HTML Media Capture](https://jp.htmlspecs.com/html-media-capture/)（[Source](https://www.w3.org/TR/2018/REC-html-media-capture-20180201/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
