@@ -106,7 +106,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Subresource Loading with Web Bundles](https://jp.htmlspecs.com/webpackage-subresource-loading/)（[Source](https://wicg.github.io/webpackage/subresource-loading.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### 入力・編集・クリップボード
-- [EditContext API](https://jp.htmlspecs.com/edit-context/)（[Source](https://www.w3.org/TR/2026/WD-edit-context-20260610/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [EditContext API](https://jp.htmlspecs.com/edit-context/)（[Source](https://www.w3.org/TR/2026/WD-edit-context-20260616/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Scroll To Text Fragment](https://jp.htmlspecs.com/scroll-to-text-fragment/)（[Source](https://wicg.github.io/scroll-to-text-fragment/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Pointer Events Level 2](https://jp.htmlspecs.com/pointerevents2/)（[Source](https://www.w3.org/TR/2019/REC-pointerevents2-20190404/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Pointer Events Level 3](https://jp.htmlspecs.com/pointerevents3/)（[Source](https://www.w3.org/TR/2026/CRD-pointerevents3-20260522/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
