@@ -1,0 +1,1096 @@
+<pre>Internet Engineering Task Force (IETF)                          A. Barth
+Request for Comments: 6454                                  Google, Inc.
+分類: 標準化過程                                      2011年12月
+ISSN: 2070-1721
+
+
+                         <span class="h1">Web オリジン概念</span>
+
+概要
+
+   この文書は、ユーザーエージェントによって権限または特権の範囲として
+   よく使用される「オリジン」の概念を定義する。通常、ユーザーエージェントは、
+   悪意のあるウェブサイト運営者が良性のウェブサイトの動作に干渉することを
+   防ぐため、異なるオリジンから取得されたコンテンツを分離する。
+   オリジンの概念を支える原則を概説することに加えて、この文書は、
+   URI のオリジンを決定する方法、およびオリジンを文字列へ直列化する方法を
+   詳述する。また、HTTP リクエストに関連付けられたオリジンを示す
+   "Origin" という名前の HTTP ヘッダーフィールドも定義する。
+
+このメモの位置付け
+
+   これはインターネット標準化過程の文書である。
+
+   この文書は、Internet Engineering Task Force
+   (IETF) の成果物である。これは IETF コミュニティの合意を表している。
+   公開レビューを受けており、Internet Engineering Steering Group
+   (IESG) によって発行が承認されている。インターネット標準に関する
+   さらなる情報は、<a href="./rfc5741#section-2">RFC 5741 のセクション&nbsp;2</a>で入手できる。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc6454">http://www.rfc-editor.org/info/rfc6454</a> から入手できる。
+
+Copyright Notice
+
+   Copyright (c) 2011 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+   <a href="#section-2">2</a>.  慣例  . . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+     <a href="#section-2.1">2.1</a>.  適合基準 . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+     <a href="#section-2.2">2.2</a>.  構文表記  . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+     <a href="#section-2.3">2.3</a>.  用語  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+   <a href="#section-3">3</a>.  同一オリジンポリシーの原則 . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+     <a href="#section-3.1">3.1</a>.  信頼  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-5">5</a>
+       <a href="#section-3.1.1">3.1.1</a>.  落とし穴 . . . . . . . . . . . . . . . . . . . . .  <a href="#page-5">5</a>
+     <a href="#section-3.2">3.2</a>.  オリジン . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+       <a href="#section-3.2.1">3.2.1</a>.  例 . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-7">7</a>
+     <a href="#section-3.3">3.3</a>.  権限  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-7">7</a>
+       <a href="#section-3.3.1">3.3.1</a>.  落とし穴 . . . . . . . . . . . . . . . . . . . . .  <a href="#page-8">8</a>
+     <a href="#section-3.4">3.4</a>.  ポリシー . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-8">8</a>
+       <a href="#section-3.4.1">3.4.1</a>.  オブジェクトアクセス  . . . . . . . . . . . . . . .  <a href="#page-8">8</a>
+       <a href="#section-3.4.2">3.4.2</a>.  ネットワークアクセス . . . . . . . . . . . . . . .  <a href="#page-9">9</a>
+       <a href="#section-3.4.3">3.4.3</a>.  落とし穴 . . . . . . . . . . . . . . . . . . . . .  <a href="#page-9">9</a>
+     <a href="#section-3.5">3.5</a>.  結論 . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+   <a href="#section-4">4</a>.  URI のオリジン  . . . . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+   <a href="#section-5">5</a>.  オリジンの比較  . . . . . . . . . . . . . . . . . . . . . <a href="#page-11">11</a>
+   <a href="#section-6">6</a>.  オリジンの直列化  . . . . . . . . . . . . . . . . . . . . <a href="#page-11">11</a>
+     <a href="#section-6.1">6.1</a>.  オリジンの Unicode 直列化 . . . . . . . . . . . . . . <a href="#page-12">12</a>
+     <a href="#section-6.2">6.2</a>.  オリジンの ASCII 直列化 . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+   <a href="#section-7">7</a>.  HTTP Origin ヘッダーフィールド . . . . . . . . . . . . . <a href="#page-13">13</a>
+     <a href="#section-7.1">7.1</a>.  構文 . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+     <a href="#section-7.2">7.2</a>.  意味論  . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+     <a href="#section-7.3">7.3</a>.  ユーザーエージェント要件  . . . . . . . . . . . . . . <a href="#page-14">14</a>
+   <a href="#section-8">8</a>.  セキュリティ上の考慮事項  . . . . . . . . . . . . . . . <a href="#page-14">14</a>
+     <a href="#section-8.1">8.1</a>.  DNS への依存  . . . . . . . . . . . . . . . . . . . . <a href="#page-15">15</a>
+     <a href="#section-8.2">8.2</a>.  分離単位の相違 . . . . . . . . . . . . . . . . . . . <a href="#page-15">15</a>
+     <a href="#section-8.3">8.3</a>.  周囲権限  . . . . . . . . . . . . . . . . . . . . . . <a href="#page-16">16</a>
+     <a href="#section-8.4">8.4</a>.  IDNA 依存関係と移行  . . . . . . . . . . . . . . . . <a href="#page-16">16</a>
+   <a href="#section-9">9</a>.  IANA に関する考慮事項  . . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+   <a href="#section-10">10</a>. 参考文献 . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+     <a href="#section-10.1">10.1</a>. 規範的参考文献 . . . . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+     <a href="#section-10.2">10.2</a>. 参考情報としての参考文献 . . . . . . . . . . . . . . <a href="#page-18">18</a>
+   <a href="#appendix-A">付録 A</a>.  謝辞  . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-20">20</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   ユーザーエージェントは、多数の作者によって作成されたコンテンツと
+   相互作用する。それらの作者の多くは善意であるが、一部の作者は
+   悪意を持っている可能性がある。ユーザーエージェントが処理する
+   コンテンツに基づいて何らかの動作を行う限り、ユーザーエージェント
+   実装者は、悪意のある作者が他のコンテンツまたはサーバーの
+   機密性や完全性を妨害する能力を制限したいと望むかもしれない。
+
+   例として、さまざまなサーバーから取得した HTML コンテンツを描画する
+   HTTP ユーザーエージェントを考える。そのユーザーエージェントが
+   それらの文書に含まれるスクリプトを実行する場合、ユーザーエージェント
+   実装者は、悪意のあるサーバーから取得されたスクリプトが、
+   たとえばファイアウォールの背後にあるかもしれない正直なサーバーに
+   保存された文書を読み取ることを防ぎたいと望むかもしれない。
+
+   従来、ユーザーエージェントはコンテンツをその「オリジン」に従って
+   分割してきた。より具体的には、ユーザーエージェントは、ある
+   オリジンから取得されたコンテンツが同じオリジンから取得された他の
+   コンテンツと自由に相互作用することを許可するが、そのコンテンツが
+   別のオリジンのコンテンツとどのように相互作用できるかを制限する。
+
+   この文書は、いわゆる同一オリジンポリシーの背後にある原則、および
+   オリジンを比較し直列化するための「詳細な仕組み」を説明する。
+   この文書は、同一オリジンポリシーのすべての側面を説明するものでは
+   ない。その詳細は、多くの場合アプリケーション固有であるため、
+   HTML [<a href="#ref-HTML" title="&quot;HTML5&quot;">HTML</a>] や WebSockets [<a href="./rfc6455" title="&quot;The WebSocket Protocol&quot;">RFC6455</a>] などの
+   他の仕様に委ねられる。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  慣例</span>
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  適合基準</span>
+
+   この文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY",
+   および "OPTIONAL" は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] に記述されているとおりに
+   解釈されるものとする。
+
+   アルゴリズムの一部として命令形で表現された要件（たとえば
+   "strip any leading space characters" や "return false and abort these
+   steps" など）は、そのアルゴリズムを導入する際に使用される
+   キーワード（"MUST", "SHOULD", "MAY" など）の意味で解釈されるものとする。
+
+   アルゴリズムまたは具体的な手順として表現された適合要件は、最終結果が
+   同等である限り、どのような方法で実装されてもよい。特に、この仕様で
+   定義されるアルゴリズムは理解しやすいことを意図しており、性能が高い
+   ことを意図しているわけではない。
+
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  構文表記</span>
+
+   この仕様は、[<a href="./rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>] の Augmented Backus-Naur Form（ABNF）
+   表記を使用する。
+
+   次のコアルールは、<a href="./rfc5234#appendix-B.1">[RFC5234], Appendix&nbsp;B.1</a> で定義されているとおり、
+   参照により組み込まれる: ALPHA（文字）、CR（キャリッジリターン）、
+   CRLF（CR LF）、CTL（制御文字）、DIGIT（10進数 0-9）、DQUOTE（二重引用符）、
+   HEXDIG（16進数 0-9/A-F/a-f）、LF（ラインフィード）、OCTET（任意の
+   8 ビットデータ列）、SP（空白）、HTAB（水平タブ）、CHAR（任意の
+   US-ASCII 文字）、VCHAR（任意の可視 US-ASCII 文字）、および WSP
+   （空白）。
+
+   OWS ルールは、0 個以上の線形空白オクテットが現れる可能性のある場所で
+   使用される。OWS は、生成されないか、単一の SP として生成されるべきで
+   ある。field-content 内に現れる複数の OWS オクテットは、フィールド値を
+   解釈する前、またはメッセージを下流へ転送する前に、単一の SP に置換
+   されるか、すべて SP オクテットへ変換されるべきである（SP 以外の各
+   オクテットは SP に置換される）。
+
+   OWS            = *( SP / HTAB / obs-fold )
+                  ; 「任意の」空白
+   obs-fold       = CRLF ( SP / HTAB )
+                  ; 廃止された行折り返し
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  用語</span>
+
+   "user agent", "client", "server", "proxy", および "origin
+   server" という用語は、HTTP/1.1 仕様
+   （<a href="./rfc2616#section-1.3">[RFC2616], Section&nbsp;1.3</a>）における意味と同じである。
+
+   グローバルに一意な識別子とは、以前に存在した他のすべての値とは
+   異なる値である。たとえば、十分に長いランダムな文字列は、グローバルに
+   一意な識別子である可能性が高い。オリジン値がユーザーエージェントの
+   外へ出ない場合、ユーザーエージェントにローカルな単調増加カウンターも、
+   グローバルに一意な識別子として機能できる。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  同一オリジンポリシーの原則</span>
+
+   多くのユーザーエージェントは、リモートの当事者に代わって動作を行う。
+   たとえば、HTTP ユーザーエージェントはリモートサーバーからの指示である
+   リダイレクトに従い、HTML ユーザーエージェントはリモートサーバーから
+   取得されたスクリプトに対して豊富な Document Object Model（DOM）
+   インターフェイスを公開する。
+
+   いかなるセキュリティモデルも存在しない場合、ユーザーエージェントは
+   ユーザーや他の当事者に有害な動作を行う可能性がある。時間の経過とともに、
+   多くのウェブ関連技術は、俗に「同一オリジンポリシー」として知られる
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+   共通のセキュリティモデルへ収束してきた。このセキュリティモデルは
+   主に有機的に進化したものではあるが、同一オリジンポリシーは少数の
+   重要な概念によって理解できる。このセクションでは、それらの概念を
+   示し、それらの概念を安全に使用する方法について助言を提供する。
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  信頼</span>
+
+   同一オリジンポリシーは、URI によって信頼を指定する。たとえば、
+   HTML 文書は、どのスクリプトを実行するかを URI で指定する。
+
+   &lt;script src="https://example.com/library.js"&gt;&lt;/script&gt;
+
+   ユーザーエージェントがこの要素を処理すると、ユーザーエージェントは
+   指定された URI にあるスクリプトを取得し、その文書の特権でスクリプトを
+   実行する。このようにして、文書は自身が持つすべての特権を、その URI に
+   よって指定されたリソースに付与する。本質的に、その文書は、その URI から
+   取得される情報の完全性を信頼していることを宣言している。
+
+   URI からライブラリをインポートすることに加えて、ユーザーエージェントは
+   URI によって指定されたリモートの当事者へ情報も送信する。たとえば、
+   HTML form 要素を考える。
+
+   &lt;form method="POST" action="https://example.com/login"&gt;
+    ... &lt;input type="password"&gt; ...
+   &lt;/form&gt;
+
+   ユーザーがパスワードを入力してフォームを送信すると、ユーザーエージェントは
+   そのパスワードを URI によって指定されたネットワークエンドポイントへ送信する。
+   このようにして、文書は自身の秘密データをその URI へエクスポートし、
+   本質的に、その URI へ送信される情報の機密性を信頼していることを宣言する。
+
+<span class="h4"><a class="selflink" id="section-3.1.1" href="#section-3.1.1">3.1.1</a>.  落とし穴</span>
+
+   同一オリジンポリシーを使用する新しいプロトコルを設計するときは、
+   重要な信頼の区別が URI に可視化されるようにすること。たとえば、
+   Transport Layer Security（TLS）と非 TLS 保護リソースの両方が
+   （[<a href="./rfc2817" title="&quot;Upgrading to TLS Within HTTP/1.1&quot;">RFC2817</a>] のように）"http" URI スキームを使用する場合、文書は
+   TLS 経由でのみスクリプトを取得したいことを指定できなくなる。
+   "https" URI スキームを使用することで、文書はアクティブなネットワーク
+   攻撃者から保護されたリソースと相互作用したいことを示すことができる。
+
+
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  オリジン</span>
+
+   原則として、ユーザーエージェントはすべての URI を別個の保護ドメインとして
+   扱い、ある URI から取得されたコンテンツが別の URI と相互作用するには
+   明示的な同意を要求することもできる。しかし残念ながら、ウェブアプリケーションは
+   連携して動作する多数のリソースで構成されることが多いため、この設計は
+   開発者にとって扱いにくい。
+
+   その代わりに、ユーザーエージェントは URI をまとめて「オリジン」と呼ばれる
+   保護ドメインにグループ化する。大まかに言えば、2 つの URI は、同じ
+   スキーム、ホスト、およびポートを持つ場合、同じオリジンの一部である
+   （すなわち、同じ主体を表す）。（完全な詳細については
+   <a href="#section-4">セクション 4</a> を参照。）
+
+   Q: なぜ単にホストだけを使用しないのか？
+
+   A: オリジンの組にスキームを含めることは、セキュリティにとって不可欠で
+   ある。ユーザーエージェントがスキームを含めなかった場合、
+   http://example.com と https://example.com の間に分離は存在しない。
+   なぜなら、両者は同じホストを持つからである。しかし、この分離がなければ、
+   アクティブなネットワーク攻撃者は http://example.com から取得された
+   コンテンツを破損させ、そのコンテンツに https://example.com から取得された
+   コンテンツの機密性と完全性を侵害するようユーザーエージェントに指示させ、
+   TLS [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] によって提供される保護を回避できる。
+
+   Q: なぜ単なる「トップレベル」ドメインではなく、完全修飾ホスト名を
+   使用するのか？
+
+   A: DNS には階層的委任があるが、ホスト名間の信頼関係はデプロイメントに
+   よって異なる。たとえば、多くの教育機関では、学生は
+   <a href="https://example.edu/~student/">https://example.edu/~student/</a> でコンテンツをホストできるが、それは学生が
+   作成した文書が、<a href="https://grades.example.edu/">https://grades.example.edu/</a> でホストされている成績管理用の
+   ウェブアプリケーションと同じオリジンの一部（すなわち、同じ保護ドメインに
+   属する）であるべきことを意味しない。
+
+   example.edu のデプロイメントは、リソースをオリジンによってグループ化する
+   ことが、すべてのデプロイメントシナリオに常に完全に一致するわけではない
+   ことを示している。このデプロイメントでは、すべての学生のウェブサイトが
+   同じオリジンに属することになり、それは望ましくないかもしれない。ある意味で、
+   オリジンの粒度は、セキュリティモデルが進化してきた経緯の歴史的産物である。
+
+
+
+
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h4"><a class="selflink" id="section-3.2.1" href="#section-3.2.1">3.2.1</a>.  例</span>
+
+   次のすべてのリソースは同じオリジンを持つ。
+
+   http://example.com/
+   <a href="http://example.com:80/">http://example.com:80/</a>
+   http://example.com/path/file
+
+   それぞれの URI は、同じスキーム、ホスト、およびポート構成要素を持つ。
+
+   次の各リソースは、リスト中の他のものとは異なるオリジンを持つ。
+
+   http://example.com/
+   <a href="http://example.com:8080/">http://example.com:8080/</a>
+   http://www.example.com/
+   <a href="https://example.com:80/">https://example.com:80/</a>
+   https://example.com/
+   http://example.org/
+   <a href="http://ietf.org/">http://ietf.org/</a>
+
+   それぞれの場合において、スキーム、ホスト、およびポート構成要素の少なくとも
+   1 つが、リスト内の他のものとは異なる。
+
+<span class="h3"><a class="selflink" id="section-3.3" href="#section-3.3">3.3</a>.  権限</span>
+
+   ユーザーエージェントは URI をオリジンへグループ化するが、オリジン内の
+   すべてのリソースが同じ権限（[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の意味での「authority」ではなく、
+   セキュリティ上の意味での「権限」）を持つわけではない。たとえば、画像は
+   受動的なコンテンツであり、したがって権限を持たない。これは、その画像が
+   そのオリジンで利用可能なオブジェクトやリソースにアクセスできないことを
+   意味する。対照的に、HTML 文書はそのオリジンの完全な権限を持ち、文書内の
+   （または文書にインポートされた）スクリプトは、そのオリジン内のすべての
+   リソースにアクセスできる。
+
+   ユーザーエージェントは、リソースにどれだけの権限を付与するかを、その
+   メディア型を調べることによって決定する。たとえば、メディア型が
+   image/png のリソースは画像として扱われ、メディア型が text/html の
+   リソースは HTML 文書として扱われる。
+
+   信頼できないコンテンツ（ユーザー生成コンテンツなど）をホストする場合、
+   ウェブアプリケーションは、そのメディア型を制限することによって、その
+   コンテンツの権限を制限できる。たとえば、ユーザー生成コンテンツを
+   image/png として提供することは、text/html として提供するよりリスクが
+   低い。もちろん、多くのウェブアプリケーションは信頼できないコンテンツを
+   自身の HTML 文書に組み込む。慎重に行われない場合、これらのアプリケーションは
+   自身のオリジンの権限を信頼できないコンテンツへ漏えいさせる危険があり、
+   これは一般にクロスサイトスクリプティングとして知られる脆弱性である。
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h4"><a class="selflink" id="section-3.3.1" href="#section-3.3.1">3.3.1</a>.  落とし穴</span>
+
+   ウェブプラットフォームの新しい部分を設計するときは、メディア型に関係なく
+   リソースへ権限を付与しないよう注意すること。多くのウェブアプリケーションは、
+   信頼できないコンテンツを制限されたメディア型で提供している。これらの
+   コンテンツに権限を付与する新しいウェブプラットフォーム機能は、既存の
+   アプリケーションに脆弱性を導入する危険がある。その代わりに、すでに
+   オリジンの完全な権限を持つメディア型、または新しい権限を持つように
+   特別に設計された新しいメディア型に権限を付与することを優先する。
+
+   不正確なメディア型を提供するサーバーとの互換性を維持するため、一部の
+   ユーザーエージェントは「コンテンツスニッフィング」を用い、コンテンツを
+   サーバーによって提供されたメディア型とは異なるメディア型を持つかのように
+   扱う。慎重に行われない場合、コンテンツスニッフィングはセキュリティ脆弱性に
+   つながる可能性がある。なぜなら、ユーザーエージェントが画像のような低権限の
+   メディア型に、HTML 文書のような高権限のメディア型の特権を付与してしまう
+   可能性があるからである [<a href="#ref-SNIFF" title="&quot;Media Type Sniffing&quot;">SNIFF</a>]。
+
+<span class="h3"><a class="selflink" id="section-3.4" href="#section-3.4">3.4</a>.  ポリシー</span>
+
+   一般に、ユーザーエージェントは異なるオリジンを分離し、オリジン間の
+   制御された通信を許可する。ユーザーエージェントがどのように分離と通信を
+   提供するかの詳細は、いくつかの要因によって異なる。
+
+<span class="h4"><a class="selflink" id="section-3.4.1" href="#section-3.4.1">3.4.1</a>.  オブジェクトアクセス</span>
+
+   ユーザーエージェントによって公開されるほとんどのオブジェクト
+   （アプリケーションプログラミングインターフェイス、すなわち API とも
+   呼ばれる）は、同じオリジンに対してのみ利用可能である。具体的には、ある
+   URI から取得されたコンテンツは、別の URI から取得されたコンテンツに関連付け
+   られたオブジェクトに、2 つの URI が同じオリジンに属する場合、かつその場合に
+   限ってアクセスできる。たとえば、同じスキーム、ホスト、およびポートを持つ場合である。
+
+   この一般規則にはいくつかの例外がある。たとえば、HTML の Location
+   インターフェイスの一部は、オリジンをまたいで利用可能である
+   （たとえば、他の閲覧コンテキストをナビゲートできるようにするため）。
+   別の例として、HTML の postMessage インターフェイスは、クロスオリジン通信を
+   明示的に容易にするため、オリジンをまたいで可視である。外部オリジンに
+   オブジェクトを公開することは危険であり、そうするとこれらのオブジェクトを
+   潜在的な攻撃者にさらすことになるため、細心の注意を払ってのみ行うべきである。
+
+
+
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h4"><a class="selflink" id="section-3.4.2" href="#section-3.4.2">3.4.2</a>.  ネットワークアクセス</span>
+
+   ネットワークリソースへのアクセスは、そのリソースが、アクセスを試みている
+   コンテンツと同じオリジンにあるかどうかによって異なる。
+
+   一般に、別のオリジンから情報を読み取ることは禁止されている。しかし、
+   あるオリジンは、他のオリジンから取得された一部の種類のリソースを使用する
+   ことを許可される。たとえば、あるオリジンは、任意のオリジンからスクリプトを
+   実行し、画像を描画し、スタイルシートを適用することを許可される。同様に、
+   あるオリジンは、HTML フレーム内の HTML 文書など、別のオリジンからの
+   コンテンツを表示できる。ネットワークリソースは、たとえば
+   Cross-Origin Resource Sharing [<a href="#ref-CORS" title="&quot;Cross-Origin Resource Sharing&quot;">CORS</a>] を使用して、他のオリジンに自身の情報を
+   読み取らせることへ明示的に参加することもできる。これらの場合、アクセスは
+   通常、オリジンごとに付与される。
+
+   別のオリジンへ情報を送信することは許可されている。しかし、任意の形式で
+   ネットワーク越しに情報を送信することは危険である。このため、ユーザーエージェントは、
+   カスタムヘッダーを持たない HTTP リクエストなど、特定のプロトコルを使用して
+   情報を送信するよう文書を制限する。たとえば WebSockets のサポートを追加する
+   ことによって許可されるプロトコルの集合を拡張する場合、脆弱性を導入しないよう
+   慎重に行わなければならない [<a href="./rfc6455" title="&quot;The WebSocket Protocol&quot;">RFC6455</a>]。
+
+<span class="h4"><a class="selflink" id="section-3.4.3" href="#section-3.4.3">3.4.3</a>.  落とし穴</span>
+
+   ユーザーエージェントが、あるオリジンに別のオリジンのリソースとの相互作用を
+   許可するたびに、セキュリティ上の問題を招く。たとえば、別のオリジンからの
+   画像を表示できることは、その高さと幅を漏えいさせる。同様に、別のオリジンへ
+   ネットワークリクエストを送信できることは、クロスサイトリクエストフォージェリ
+   脆弱性を生じさせる [<a href="#ref-CSRF" title="&quot;Robust Defenses for Cross-Site Request Forgery&quot;">CSRF</a>]。しかし、ユーザーエージェント実装者は多くの場合、
+   これらのリスクとクロスオリジン相互作用を許可する利点とを比較衡量する。
+   たとえば、クロスオリジンネットワークリクエストをブロックする HTML
+   ユーザーエージェントは、ウェブの中核的機能であるハイパーリンクをたどることを
+   ユーザーに対して妨げてしまう。
+
+   ウェブプラットフォームに新しい機能を追加するとき、同じオリジン内のある
+   リソースには特権を付与し、別のリソースにはその特権を与えないようにしたく
+   なることがある。しかし、このように特権を差し控えることは効果がない。
+   なぜなら、その特権を持たないリソースは、通常、いずれにせよその特権を取得
+   できるからであり、ユーザーエージェントはオリジン内のリソースを分離しない
+   からである。その代わりに、特権はオリジン全体に対して付与または差し控え
+   られるべきである（オリジン内の個々のリソースを区別するのではない）
+   [<a href="#ref-BOFGO" title="&quot;Beware of Finer-Grained Origins&quot;">BOFGO</a>]。
+
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                    [ページ 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.5" href="#section-3.5">3.5</a>.  結論</span>
+
+   同一オリジンポリシーは、信頼関係を指定するために URI を使用する。
+   URI はオリジンへまとめられ、それらは保護ドメインを表す。オリジン内の
+   一部のリソース（たとえばアクティブコンテンツ）には、そのオリジンの完全な
+   権限が付与される一方、オリジン内の他のリソース（たとえば受動的コンテンツ）
+   には、そのオリジンの権限は付与されない。自身のオリジンの権限を持つ
+   コンテンツには、自身のオリジン内のオブジェクトおよびネットワークリソース
+   へのアクセスが付与される。このコンテンツには、他のオリジンのオブジェクト
+   およびネットワークリソースへの限定的なアクセスも付与されるが、これらの
+   クロスオリジン特権は、セキュリティ脆弱性を避けるため慎重に設計されなければ
+   ならない。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  URI のオリジン</span>
+
+   URI のオリジンは、次のアルゴリズムによって計算される値である。
+
+   1.  URI が、命名権限として階層的要素を使用していない場合
+       （<a href="./rfc3986#section-3.2">[RFC3986], Section&nbsp;3.2</a> を参照）、または URI が絶対 URI でない
+       場合は、新しいグローバルに一意な識別子を生成し、その値を返す。
+
+          注: 同じ URI に対してこのアルゴリズムを複数回実行すると、
+          毎回異なる値が生成される可能性がある。通常、ユーザーエージェントは、
+          たとえば HTML 文書のオリジンを一度計算し、各セキュリティチェックごとに
+          オリジンを再計算するのではなく、そのオリジンを後続のセキュリティチェックに
+          使用する。
+
+   2.  uri-scheme を、URI のスキーム構成要素を小文字に変換したものとする。
+
+   3.  実装が uri-scheme によって与えられるプロトコルをサポートしていない場合、
+       新しいグローバルに一意な識別子を生成し、その値を返す。
+
+   4.  uri-scheme が "file" である場合、実装は実装定義の値を返してもよい。
+
+          注: 歴史的に、ユーザーエージェントは file スキームからのコンテンツに
+          非常に大きな特権を付与してきた。しかし、すべてのローカルファイルに
+          そのような広い特権を付与すると、権限昇格攻撃につながる可能性がある。
+          一部のユーザーエージェントは、ローカルファイルにディレクトリベースの
+          特権を付与することで成功しているが、この方法は広く採用されていない。
+          他のユーザーエージェントは、各 file URI にグローバルに一意な識別子を
+          使用しており、これが最も安全な選択肢である。
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+   5.  uri-host を、URI のホスト構成要素を小文字に変換したもの
+       （[<a href="./rfc4790" title="&quot;Internet Application Protocol Collation Registry&quot;">RFC4790</a>] で定義される i;ascii-casemap 照合を使用）とする。
+
+          注: この文書は、ユーザーエージェントが URI を構築する際に
+          Internationalizing Domain Names in Applications（IDNA）の処理と検証を
+          行うことを前提としている。特に、この文書は、ユーザーエージェントが
+          非 ASCII ラベルを対応する A ラベルへすでに変換しているため、
+          uri-host は LDH ラベルのみを含むと前提している（[<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>] を参照）。
+          このため、オリジンベースのセキュリティポリシーは、ユーザーエージェントが
+          採用する IDNA アルゴリズムに敏感である。さらなる議論については
+          <a href="#section-8.4">セクション 8.4</a> を参照。
+
+   6.  URI にポート構成要素がない場合:
+
+       1.  uri-port を、uri-scheme によって与えられるプロトコルの
+           既定ポートとする。
+
+       そうでない場合:
+
+       2.  uri-port を、URI のポート構成要素とする。
+
+   7.  三つ組（uri-scheme, uri-host, uri-port）を返す。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  オリジンの比較</span>
+
+   2 つのオリジンは、同一である場合、かつその場合に限り、「同じ」である。
+   特に:
+
+   o  2 つのオリジンが scheme/host/port の三つ組である場合、
+      2 つのオリジンは、スキーム、ホスト、およびポートが同一である場合、
+      かつその場合に限り同じである。
+
+   o  グローバルに一意な識別子であるオリジンは、scheme/host/port の三つ組である
+      オリジンと同じになることはできない。
+
+   2 つの URI は、それらのオリジンが同じである場合、同一オリジンである。
+
+      注: URI は必ずしも自身と同一オリジンであるとは限らない。たとえば、
+      data URI [<a href="./rfc2397" title="&quot;The &quot;">RFC2397</a>] は自身と同一オリジンではない。なぜなら、
+      data URI はサーバーベースの命名権限を使用せず、そのためグローバルに
+      一意な識別子をオリジンとして持つからである。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  オリジンの直列化</span>
+
+   このセクションでは、オリジンを unicode [<a href="#ref-Unicode6" title="&quot;The Unicode Standard, Version 6.0.0&quot;">Unicode6</a>] 文字列および
+   ASCII [<a href="./rfc20" title="&quot;ASCII format for network interchange&quot;">RFC20</a>] 文字列へ直列化する方法を定義する。
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  オリジンの Unicode 直列化</span>
+
+   オリジンの unicode-serialization は、次のアルゴリズムによって返される値である。
+
+   1.  オリジンが scheme/host/port の三つ組でない場合、文字列
+
+          null
+
+       （すなわち、コードポイント列 U+006E, U+0075, U+006C, U+006C）を
+       返し、これらの手順を中止する。
+
+   2.  そうでない場合、result をオリジン三つ組のスキーム部分とする。
+
+   3.  文字列 "://" を result に追加する。
+
+   4.  オリジン三つ組のホスト部分の各構成要素（次のように変換される）を、
+       U+002E FULL STOP コードポイント（"."）で区切って result に追加する。
+
+       1.  構成要素が A ラベルである場合、代わりに対応する U ラベルを使用する
+           （[<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>] および [<a href="./rfc5891" title="&quot;Internationalized Domain Names in Applications (IDNA): Protocol&quot;">RFC5891</a>] を参照）。
+
+       2.  そうでない場合、その構成要素をそのまま使用する。
+
+   5.  オリジン三つ組のポート部分が、オリジン三つ組のスキーム部分によって
+       与えられるプロトコルの既定ポートと異なる場合:
+
+       1.  U+003A COLON コードポイント（":"）および与えられたポートを
+           10 進数で result に追加する。
+
+   6.  result を返す。
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  オリジンの ASCII 直列化</span>
+
+   オリジンの ascii-serialization は、次のアルゴリズムによって返される値である。
+
+   1.  オリジンが scheme/host/port の三つ組でない場合、文字列
+
+          null
+
+       （すなわち、コードポイント列 U+006E, U+0075, U+006C, U+006C）を
+       返し、これらの手順を中止する。
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+   2.  そうでない場合、result をオリジン三つ組のスキーム部分とする。
+
+   3.  文字列 "://" を result に追加する。
+
+   4.  オリジン三つ組のホスト部分を result に追加する。
+
+   5.  オリジン三つ組のポート部分が、オリジン三つ組のスキーム部分によって
+       与えられるプロトコルの既定ポートと異なる場合:
+
+       1.  U+003A COLON コードポイント（":"）および与えられたポートを
+           10 進数で result に追加する。
+
+   6.  result を返す。
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  HTTP Origin ヘッダーフィールド</span>
+
+   このセクションでは、HTTP Origin ヘッダーフィールドを定義する。
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  構文</span>
+
+   Origin ヘッダーフィールドは次の構文を持つ。
+
+   origin              = "Origin:" OWS origin-list-or-null OWS
+   origin-list-or-null = %x6E %x75 %x6C %x6C / origin-list
+   origin-list         = serialized-origin *( SP serialized-origin )
+   serialized-origin   = scheme "://" host [ ":" port ]
+                       ; <a href="./rfc3986">RFC 3986</a> 由来の &lt;scheme&gt;, &lt;host&gt;, &lt;port&gt;
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  意味論</span>
+
+   HTTP リクエストに含まれる場合、Origin ヘッダーフィールドは、
+   そのリクエストを発行するようユーザーエージェントをトリガーした API によって
+   定義される、そのリクエストをユーザーエージェントに発行させたオリジンを示す。
+
+   たとえば、オリジンに代わってスクリプトを実行するユーザーエージェントを
+   考える。それらのスクリプトの 1 つがユーザーエージェントに HTTP リクエストを
+   発行させた場合、ユーザーエージェントは Origin ヘッダーフィールドを使用して、
+   そのスクリプトがユーザーエージェントにリクエストを発行させた時点で実行されていた
+   セキュリティコンテキストをサーバーに通知してもよい。
+
+   場合によっては、多数のオリジンが、ユーザーエージェントに HTTP リクエストを
+   発行させることに関与する。そのような場合、ユーザーエージェントは
+   Origin ヘッダーフィールドにすべてのオリジンを列挙してもよい。たとえば、
+   HTTP リクエストが最初はあるオリジンによって発行されたが、その後
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+   別のオリジンによってリダイレクトされた場合、ユーザーエージェントは、
+   ユーザーエージェントにリクエストを発行させることに 2 つのオリジンが
+   関与したことをサーバーに通知してもよい。
+
+<span class="h3"><a class="selflink" id="section-7.3" href="#section-7.3">7.3</a>.  ユーザーエージェント要件</span>
+
+   ユーザーエージェントは、任意の HTTP リクエストに Origin ヘッダーフィールドを
+   含めてもよい。
+
+   ユーザーエージェントは、任意の HTTP リクエストに複数の Origin ヘッダーフィールドを
+   含めてはならない。
+
+   ユーザーエージェントが「プライバシーに敏感な」コンテキストから HTTP リクエストを
+   発行する場合は常に、ユーザーエージェントは Origin ヘッダーフィールドで
+   値 "null" を送信しなければならない。
+
+      注: この文書は、プライバシーに敏感なコンテキストの概念を定義しない。
+      HTTP リクエストを生成するアプリケーションは、ユーザーエージェントが
+      Origin ヘッダーフィールドを生成する方法に制限を課すために、コンテキストを
+      プライバシーに敏感であると指定できる。
+
+   Origin ヘッダーフィールドを生成する際、ユーザーエージェントは次の要件を
+   満たさなければならない。
+
+   o  文法内の各 serialized-origin 生成規則は、オリジンの ascii-serialization で
+      なければならない。
+
+   o  文法内の連続する 2 つの serialized-origin 生成規則が同一であってはならない。
+      特に、ユーザーエージェントが 2 つの連続する serialized-origin を生成することに
+      なる場合、ユーザーエージェントは 2 つ目を生成してはならない。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  セキュリティ上の考慮事項</span>
+
+   同一オリジンポリシーは、ウェブブラウザーを含む多くのユーザーエージェントに
+   とって、セキュリティの基礎の 1 つである。歴史的に、一部のユーザーエージェントは、
+   汚染追跡や流出防止など、他のセキュリティモデルを試みたが、それらのモデルは
+   当時実装が困難であることが判明した（ただし、近年これらの考え方の一部を
+   復活させることへの関心がある）。
+
+   同一オリジンポリシーのセキュリティを評価することは難しい。なぜなら、
+   オリジンの概念それ自体が、セキュリティの全体像において非常に中心的な役割を
+   果たすからである。概念上のオリジンそれ自体は、単なる分離の単位であり、
+   多くの一律適用の概念と同様に不完全である。とはいえ、以下で議論するように、
+   いくつかの体系的な弱点がある。
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-8.1" href="#section-8.1">8.1</a>.  DNS への依存</span>
+
+   実際には、同一オリジンポリシーはセキュリティを Domain Name System（DNS）に
+   依存している。なぜなら、http など、多くの一般に使用される URI スキームは
+   DNS ベースの命名権限を使用するからである。DNS が部分的または全面的に侵害された
+   場合、同一オリジンポリシーは、アプリケーションが要求するセキュリティ特性を
+   提供できない可能性がある。
+
+   https などの一部の URI スキームは、ユーザーエージェントが証明書などの
+   他のメカニズムを用いて、これらの URI から取得されたコンテンツの出所を
+   検証するため、DNS の侵害に対してより耐性がある。chrome-extension URI スキーム
+   などの他の URI スキーム（[<a href="#ref-CRX" title="&quot;Protecting Browsers from Extension Vulnerabilities&quot;">CRX</a>] のセクション 4.3 を参照）は、公開鍵ベースの
+   命名権限を使用し、DNS の侵害に対して完全に安全である。
+
+   Web オリジン概念は、異なる URI スキームから取得されたコンテンツを分離する。
+   これは、DNS 侵害の影響を封じ込めるために不可欠である。
+
+<span class="h3"><a class="selflink" id="section-8.2" href="#section-8.2">8.2</a>.  分離単位の相違</span>
+
+   時間の経過とともに、多くの技術が、便利な分離単位として Web オリジン概念へ
+   収束してきた。しかし、cookies [<a href="./rfc6265" title="&quot;HTTP State Management Mechanism&quot;">RFC6265</a>] など、今日使用されている多くの
+   技術は、現代的な Web オリジン概念よりも前から存在している。これらの技術は
+   しばしば異なる分離単位を持ち、脆弱性につながる。
+
+   1 つの代替案は、分離単位として完全修飾ドメイン名ではなく、
+   「レジストリ制御」ドメインのみを使用することである
+   （たとえば、"www.example.com" ではなく "example.com"）。この慣行は
+   いくつもの理由から問題があり、推奨されない。
+
+   1.  「レジストリ制御」ドメインという概念は、DNS そのものの性質ではなく、
+       DNS を取り巻く人間の慣行の関数である。たとえば、日本の多くの自治体は、
+       DNS 階層のかなり深い位置で公開レジストリを運用している。広く使用されている
+       「public suffix lists」は存在するが、これらのリストを最新に保つことは難しく、
+       実装ごとに異なる。
+
+   2.  この慣行は、DNS ベースの命名権限を使用しない URI スキームと互換性がない。
+       たとえば、ある URI スキームが公開鍵を命名権限として使用する場合、
+       「レジストリ制御」公開鍵という概念はいくぶん首尾一貫しない。さらに悪いことに、
+       nntp など一部の URI スキームは、DNS とは逆方向のドット付き委任を使用し
+       （たとえば alt.usenet.kooks）、他のものは DNS を使用するものの、通常とは逆の
+       順序でラベルを表示する（たとえば com.example.www）。
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+   よくても、「レジストリ制御」ドメインの使用は URI スキームおよび実装に固有で
+   ある。悪ければ、URI スキーム間および実装間の差異が脆弱性につながる可能性がある。
+
+<span class="h3"><a class="selflink" id="section-8.3" href="#section-8.3">8.3</a>.  周囲権限</span>
+
+   同一オリジンポリシーを使用する場合、ユーザーエージェントは、コンテンツが
+   指定できるオブジェクトではなく、その URI に基づいてコンテンツへ権限を付与する。
+   この指定と権限の切り離しは、周囲権限の一例であり、脆弱性につながる可能性がある。
+
+   たとえば、HTML 文書におけるクロスサイトスクリプティングを考える。攻撃者が
+   HTML 文書へスクリプトコンテンツを注入できる場合、それらのスクリプトはその文書の
+   オリジンの権限で実行され、おそらくユーザーの医療記録などの機密情報へアクセスする
+   ことをスクリプトに許してしまう。もし、スクリプトの権限が、そのスクリプトが
+   指定できるオブジェクトに限定されていれば、攻撃者は第三者によってホストされる
+   HTML 文書へスクリプトを注入しても、何の利点も得られないだろう。
+
+<span class="h3"><a class="selflink" id="section-8.4" href="#section-8.4">8.4</a>.  IDNA 依存関係と移行</span>
+
+   同一オリジンポリシーのセキュリティ特性は、ユーザーエージェントが採用する
+   IDNA アルゴリズムの詳細に決定的に依存することがある。特に、ユーザーエージェントは、
+   IDNA2003 [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] を使用するか IDNA2008 [<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>] を使用するかに応じて、
+   一部の国際化ドメイン名（たとえば U+00DF 文字を含むもの）を異なる ASCII 表現へ
+   マッピングする可能性がある。
+
+   ある IDNA アルゴリズムから別の IDNA アルゴリズムへ移行すると、多数の
+   セキュリティ境界が引き直され、新しいセキュリティ境界が構築される可能性があり、
+   さらに悪い場合には、相互に信頼していない 2 つの実体間のセキュリティ境界が
+   取り払われる可能性がある。セキュリティ境界を変更することは危険である。
+   なぜなら、相互に信頼していない 2 つの実体を同じオリジンへ結合すると、
+   一方が他方を攻撃できるようになる可能性があるからである。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  IANA に関する考慮事項</span>
+
+   永続的メッセージヘッダーフィールドレジストリ（[<a href="./rfc3864" title="&quot;Registration Procedures for Message Header Fields&quot;">RFC3864</a>] を参照）は、
+   次の登録で更新された。
+
+   ヘッダーフィールド名: Origin
+
+   適用可能なプロトコル: http
+
+   状態: 標準
+
+   作者／変更管理者: IETF
+
+   仕様文書: この仕様（<a href="#section-7">セクション 7</a>）
+
+<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-10.1" href="#section-10.1">10.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-RFC20">RFC20</a>]     Cerf, V., "ASCII format for network interchange", <a href="./rfc20">RFC 20</a>,
+               1969年10月.
+
+   [<a id="ref-RFC2119">RFC2119</a>]   Bradner, S., "Key words for use in RFCs to Indicate
+               Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, 1997年3月.
+
+   [<a id="ref-RFC2616">RFC2616</a>]   Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
+               Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
+               Transfer Protocol -- HTTP/1.1", <a href="./rfc2616">RFC 2616</a>, 1999年6月.
+
+   [<a id="ref-RFC3864">RFC3864</a>]   Klyne, G., Nottingham, M., and J. Mogul, "Registration
+               Procedures for Message Header Fields", <a href="https://www.rfc-editor.org/bcp/bcp90">BCP 90</a>, <a href="./rfc3864">RFC 3864</a>,
+               2004年9月.
+
+   [<a id="ref-RFC3986">RFC3986</a>]   Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+               Resource Identifier (URI): Generic Syntax", STD 66,
+               <a href="./rfc3986">RFC 3986</a>, 2005年1月.
+
+   [<a id="ref-RFC4790">RFC4790</a>]   Newman, C., Duerst, M., and A. Gulbrandsen, "Internet
+               Application Protocol Collation Registry", <a href="./rfc4790">RFC 4790</a>,
+               2007年3月.
+
+   [<a id="ref-RFC5234">RFC5234</a>]   Crocker, D., Ed. and P. Overell, "Augmented BNF for
+               Syntax Specifications: ABNF", STD 68, <a href="./rfc5234">RFC 5234</a>,
+               2008年1月.
+
+   [<a id="ref-RFC5890">RFC5890</a>]   Klensin, J., "Internationalized Domain Names for
+               Applications (IDNA): Definitions and Document Framework",
+               <a href="./rfc5890">RFC 5890</a>, 2010年8月.
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+   [<a id="ref-RFC5891">RFC5891</a>]   Klensin, J., "Internationalized Domain Names in
+               Applications (IDNA): Protocol", <a href="./rfc5891">RFC 5891</a>, 2010年8月.
+
+   [<a id="ref-Unicode6">Unicode6</a>]  The Unicode Consortium, "The Unicode Standard, Version
+               6.0.0", 2011,
+               &lt;<a href="http://www.unicode.org/versions/Unicode6.0.0/">http://www.unicode.org/versions/Unicode6.0.0/</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-10.2" href="#section-10.2">10.2</a>.  参考情報としての参考文献</span>
+
+   [<a id="ref-BOFGO">BOFGO</a>]     Jackson, C. and A. Barth, "Beware of Finer-Grained
+               Origins", 2008,
+               &lt;<a href="http://w2spconf.com/2008/papers/s2p1.pdf">http://w2spconf.com/2008/papers/s2p1.pdf</a>&gt;.
+
+   [<a id="ref-CORS">CORS</a>]      van Kesteren, A., "Cross-Origin Resource Sharing", W3C
+               Working Draft WD-cors-20100727, 2010年7月,
+               &lt;<a href="http://www.w3.org/TR/2010/WD-cors-20100727/">http://www.w3.org/TR/2010/WD-cors-20100727/</a>&gt;.
+
+               最新版は &lt;<a href="http://www.w3.org/TR/cors/">http://www.w3.org/TR/cors/</a>&gt; で入手できる。
+
+   [<a id="ref-CRX">CRX</a>]       Barth, A., Felt, A., Saxena, P., and A. Boodman,
+               "Protecting Browsers from Extension Vulnerabilities",
+               2010, &lt;<a href="http://www.isoc.org/isoc/conferences/ndss/10/pdf/04.pdf">http://www.isoc.org/isoc/conferences/ndss/10/pdf/</a>
+               <a href="http://www.isoc.org/isoc/conferences/ndss/10/pdf/04.pdf">04.pdf</a>&gt;.
+
+   [<a id="ref-CSRF">CSRF</a>]      Barth, A., Jackson, C., and J. Mitchell, "Robust Defenses
+               for Cross-Site Request Forgery", 2008,
+               &lt;<a href="http://portal.acm.org/citation.cfm?id=1455770.1455782">http://portal.acm.org/citation.cfm?id=1455770.1455782</a>&gt;.
+
+   [<a id="ref-HTML">HTML</a>]      Hickson, I., "HTML5", W3C Working Draft WD-html5-
+               20110525, 2011年5月,
+               &lt;<a href="http://www.w3.org/TR/2011/WD-html5-20110525/">http://www.w3.org/TR/2011/WD-html5-20110525/</a>&gt;.
+
+               最新版は
+               &lt;<a href="http://www.w3.org/TR/html5/">http://www.w3.org/TR/html5/</a>&gt; で入手できる。
+
+   [<a id="ref-RFC2397">RFC2397</a>]   Masinter, L., "The "data" URL scheme", <a href="./rfc2397">RFC 2397</a>,
+               1998年8月.
+
+   [<a id="ref-RFC2817">RFC2817</a>]   Khare, R. and S. Lawrence, "Upgrading to TLS Within
+               HTTP/1.1", <a href="./rfc2817">RFC 2817</a>, 2000年5月.
+
+   [<a id="ref-RFC3490">RFC3490</a>]   Faltstrom, P., Hoffman, P., and A. Costello,
+               "Internationalizing Domain Names in Applications (IDNA)",
+               <a href="./rfc3490">RFC 3490</a>, 2003年3月.
+
+   [<a id="ref-RFC5246">RFC5246</a>]   Dierks, T. and E. Rescorla, "The Transport Layer Security
+               (TLS) Protocol Version 1.2", <a href="./rfc5246">RFC 5246</a>, 2008年8月.
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+   [<a id="ref-RFC6265">RFC6265</a>]   Barth, A., "HTTP State Management Mechanism", <a href="./rfc6265">RFC 6265</a>,
+               2011年4月.
+
+   [<a id="ref-RFC6455">RFC6455</a>]   Fette, I. and A. Melnikov, "The WebSocket Protocol",
+               <a href="./rfc6455">RFC 6455</a>, 2011年12月.
+
+   [<a id="ref-SNIFF">SNIFF</a>]     Barth, A. and I. Hickson, <a style="text-decoration: none" href='https://www.google.com/search?sitesearch=datatracker.ietf.org%2Fdoc%2Fhtml%2F&amp;q=inurl:draft-+%22Media+Type+Sniffing%22'>"Media Type Sniffing"</a>, 作業中,
+               2011年5月.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Barth                        標準化過程                   [ページ 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc6454">RFC 6454</a>                 Web オリジン概念            2011年12月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">付録 A</a>.  謝辞</span>
+
+   Lucas Adamski、Stephen Farrell、Miguel A. Garcia、Tobias Gondrom、
+   Ian Hickson、Anne van Kesteren、Jeff Hodges、Collin Jackson、
+   Larry Masinter、Alexey Melnikov、Mark Nottingham、Julian Reschke、
+   Peter Saint-Andre、Jonas Sicking、Sid Stamm、Daniel Veditz、
+   および Chris Weber には、この文書に対する貴重なフィードバックを
+   いただいたことに感謝する。
+
+作者の住所
+
+   Adam Barth
+   Google, Inc.
+
+   EMail: ietf@adambarth.com
+   URI:   <a href="http://www.adambarth.com/">http://www.adambarth.com/</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Barth                        標準化過程                   [ページ 20]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
