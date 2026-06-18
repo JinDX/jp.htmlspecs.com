@@ -196,6 +196,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [WebVTT: The Web Video Text Tracks Format](https://jp.htmlspecs.com/webvtt1/)（[Source](https://www.w3.org/TR/2026/CRD-webvtt1-20260520/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Timed Text Markup Language 2 (TTML2)](https://jp.htmlspecs.com/ttml2/)（[Source](https://www.w3.org/TR/2018/REC-ttml2-20181108/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [IMSC Text Profile 1.3](https://jp.htmlspecs.com/ttml-imsc1.3/)（[Source](https://www.w3.org/TR/2026/REC-ttml-imsc1.3-20260521/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [Dubbing and Audio description Profiles of TTML2](https://jp.htmlspecs.com/dapt/)（[Source](https://www.w3.org/TR/2026/CRD-dapt-20260210/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Media Source Extensions](https://jp.htmlspecs.com/media-source-2/)（[Source](https://www.w3.org/TR/2025/WD-media-source-2-20251104/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebCodecs](https://jp.htmlspecs.com/webcodecs/)（[Source](https://www.w3.org/TR/2026/WD-webcodecs-20260608/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [WebCodecs Codec Registry](https://jp.htmlspecs.com/webcodecs-codec-registry/)（[Source](https://www.w3.org/TR/2026/DRY-webcodecs-codec-registry-20260212/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
@@ -281,7 +282,9 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Subresource Integrity (SRI)](https://jp.htmlspecs.com/sri/)（[Source](https://www.w3.org/TR/2016/REC-SRI-20160623/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Subresource Integrity (SRI) 2](https://jp.htmlspecs.com/sri-2/)（[Source](https://www.w3.org/TR/2026/WD-sri-2-20260320/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20260505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Content Security Policy: Embedded Enforcement](https://jp.htmlspecs.com/csp-embedded-enforcement/)（[Source](https://www.w3.org/TR/2026/WD-csp-embedded-enforcement-20260507/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Secure Contexts](https://jp.htmlspecs.com/secure-contexts/)（[Source](https://www.w3.org/TR/2023/CRD-secure-contexts-20231110/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [The Web Origin Concept](https://jp.htmlspecs.com/web-origin/)（[Source](https://www.rfc-editor.org/rfc/rfc6454.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Referrer Policy](https://jp.htmlspecs.com/referrer-policy/)（[Source](https://www.w3.org/TR/2017/CR-referrer-policy-20170126/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Fetch Metadata Request Headers](https://jp.htmlspecs.com/fetch-metadata/)（[Source](https://www.w3.org/TR/2025/WD-fetch-metadata-20250401/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Mixed Content](https://jp.htmlspecs.com/mixed-content/)（[Source](https://www.w3.org/TR/2023/CRD-mixed-content-20230223/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
