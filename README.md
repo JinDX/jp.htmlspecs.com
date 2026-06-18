@@ -545,7 +545,6 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### 表現メタデータ・リンク・内容エンコーディング
 - [HTTP State Management Mechanism](https://jp.htmlspecs.com/http/rfc6265.html)（[Source](https://httpwg.org/specs/rfc6265.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
-- [Cookies: HTTP State Management Mechanism](https://jp.htmlspecs.com/http/draft-ietf-httpbis-rfc6265bis.html)（[Source](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Use of the Content-Disposition Header Field in the Hypertext Transfer Protocol (HTTP)](https://jp.htmlspecs.com/http/rfc6266.html)（[Source](https://httpwg.org/specs/rfc6266.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Hypertext Transfer Protocol (HTTP) Client-Initiated Content-Encoding](https://jp.htmlspecs.com/http/rfc7694.html)（[Source](https://httpwg.org/specs/rfc7694.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Web Linking](https://jp.htmlspecs.com/http/rfc8288.html)（[Source](https://httpwg.org/specs/rfc8288.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
