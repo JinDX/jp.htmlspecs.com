@@ -541,6 +541,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [The Cache-Status HTTP Response Header Field](https://jp.htmlspecs.com/http/rfc9211.html)（[Source](https://httpwg.org/specs/rfc9211.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Targeted HTTP Cache Control](https://jp.htmlspecs.com/http/rfc9213.html)（[Source](https://httpwg.org/specs/rfc9213.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [HTTP Cache Groups](https://jp.htmlspecs.com/http/rfc9875.html)（[Source](https://httpwg.org/specs/rfc9875.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [The No-Vary-Search HTTP Caching Extension](https://jp.htmlspecs.com/http/no-vary-search.html)（[Source](https://httpwg.org/http-extensions/draft-ietf-httpbis-no-vary-search.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### 表現メタデータ・リンク・内容エンコーディング
 - [HTTP State Management Mechanism](https://jp.htmlspecs.com/http/rfc6265.html)（[Source](https://httpwg.org/specs/rfc6265.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
