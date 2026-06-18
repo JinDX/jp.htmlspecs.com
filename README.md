@@ -322,6 +322,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Isolated Contexts](https://jp.htmlspecs.com/isolated-contexts/)（[Source](https://wicg.github.io/isolated-web-apps/isolated-contexts.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Controlled Frame API](https://jp.htmlspecs.com/controlled-frame/)（[Source](https://wicg.github.io/controlled-frame/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Fenced Frame](https://jp.htmlspecs.com/fenced-frame/)（[Source](https://wicg.github.io/fenced-frame/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Iframe credentialless](https://jp.htmlspecs.com/anonymous-iframe/)（[Source](https://wicg.github.io/anonymous-iframe/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Private State Token API](https://jp.htmlspecs.com/trust-token-api/)（[Source](https://wicg.github.io/trust-token-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Attribution Level 1](https://jp.htmlspecs.com/attribution/)（[Source](https://www.w3.org/TR/2026/WD-attribution-20260602/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
