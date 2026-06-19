@@ -263,7 +263,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Paint Timing](https://jp.htmlspecs.com/paint-timing/)（[Source](https://www.w3.org/TR/2026/WD-paint-timing-20260324/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Largest Contentful Paint](https://jp.htmlspecs.com/largest-contentful-paint/)（[Source](https://www.w3.org/TR/2026/WD-largest-contentful-paint-20260408/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Event Timing API](https://jp.htmlspecs.com/event-timing/)（[Source](https://www.w3.org/TR/2026/WD-event-timing-20260319/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Performance measure memory](https://wicg.github.io/performance-measure-memory/)（[Source](https://wicg.github.io/performance-measure-memory/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Performance measure memory](https://jp.htmlspecs.com/performance-measure-memory/)（[Source](https://wicg.github.io/performance-measure-memory/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2026/WD-device-memory-1-20260330/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Layout Instability API](https://jp.htmlspecs.com/layout-instability/)（[Source](https://wicg.github.io/layout-instability/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
@@ -557,7 +557,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [HTTP Client Hints](https://jp.htmlspecs.com/http/rfc8942.html)（[Source](https://httpwg.org/specs/rfc8942.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Extensible Prioritization Scheme for HTTP](https://jp.htmlspecs.com/http/rfc9218.html)（[Source](https://httpwg.org/specs/rfc9218.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
-### 接続・中介・プロキシ・トンネル
+### 接続・仲介・プロキシ・トンネル
 - [The ALPN HTTP Header Field](https://jp.htmlspecs.com/http/rfc7639.html)（[Source](https://httpwg.org/specs/rfc7639.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [HTTP Alternative Services](https://jp.htmlspecs.com/http/rfc7838.html)（[Source](https://httpwg.org/specs/rfc7838.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [The ORIGIN HTTP/2 Frame](https://jp.htmlspecs.com/http/rfc8336.html)（[Source](https://httpwg.org/specs/rfc8336.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
