@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title>要素キャプチャ</title>
+    <script class="remove" src="https://screen-share.github.io/element-capture/element-capture.js"
+        type="text/javascript"></script>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"></script>
+</head>
+
+<body>
+    <section id="abstract">
+        <h2>要約</h2>
+        <p>
+            {{MediaDevices/getDisplayMedia()}} などの既存のメカニズムは、Webアプリケーションが
+            画面キャプチャを開始することを可能にします。ユーザーがタブをキャプチャすることを選択した場合、
+            [[mediacapture-region|Region Capture]] などのメカニズムは、結果として得られるビデオトラックを
+            変化させ、それ以降に生成されるすべてのフレームに対して操作を実行します。([[mediacapture-region|Region
+            Capture]] の例では、その操作は、対象要素のバウンディングボックスとフレームの交差部分に
+            フレームを切り抜くことから成ります。)
+        </p>
+        <p>
+            Element Capture は、私たちが「制限 (restriction)」と名付ける新しい変化メカニズムを導入します。
+            アプリケーションがビデオトラックを特定の対象要素に「制限」すると、制限されたビデオトラックで
+            生成されるフレームは、その対象要素とその子孫からの情報のみで構成されます。言い換えれば、
+            トラックは対象要素をルートとするDOMサブツリーのキャプチャになります。
+        </p>
+    </section>
+    <section id="sotd"></section>
+    <section id="conformance"></section>
+    <section id="use-cases">
+        <h2>ユースケース</h2>
+        <section id="generic-use-case">
+            <h3>一般的なユースケース</h3>
+            <p>
+                [[mediacapture-region|Region Capture]] は、アプリケーションがキャプチャを切り抜くことを
+                可能にします。ある要素 <code>TARGET</code> が制限対象であると仮定します。
+                <code>TARGET</code> のDOM子孫ではない他の要素が、<code>TARGET</code> の前面に描画される場合は
+                どうなるでしょうか。[[mediacapture-region|Region Capture]] を使用すると、これらの他の要素も
+                キャプチャされてしまいますが、これは必ずしも望ましいことではありません。
+                <code>TARGET</code> のバウンディングボックスに切り抜きつつ、DOM子孫ではないコンテンツを
+                キャプチャから除外できるメカニズムが求められています。
+            </p>
+        </section>
+        <section id="practical-use-case-1">
+            <h3>実践的なユースケース #1: アプリの一部を記録する</h3>
+            <p>
+                「エディタ」Webアプリケーション (テキストエディタ、画像エディタ、スライドエディタ、または
+                ビデオエディタ) を考えてみましょう。このようなアプリケーションは多くの場合、メインコンテンツ領域を
+                含み、その周囲にはローカルユーザーがメインコンテンツ領域のコンテンツを編集できるようにする
+                さまざまなツールバー、ドロップダウンメニュー、ウィジェットが配置されています。
+            </p>
+            <p>
+                Webアプリケーションがメインコンテンツ領域のみを記録し、それをリモート参加者に「ライブ」で
+                送信したり、ディスクに記録したりしたい場合があります。このようなアプリケーションは、
+                メインコンテンツ領域以外のものに、ストレージ、帯域幅、またはリモート参加者の画面領域を
+                必ずしも費やしたくはないでしょう。
+            </p>
+            <p>
+                [[mediacapture-region|Region Capture]] などのメカニズムは、対象要素のバウンディングボックスへの
+                切り抜きに役立ちますが、ドロップダウンリストが一時的にその上に描画される場合はどうなるでしょうか。
+            </p>
+        </section>
+        <section id="practical-use-case-2">
+            <h3>実践的なユースケース #2: ビデオ会議中の共同作業ツール</h3>
+            <p>
+                ビデオ会議アプリケーションは、しばしば「タイル」を使用して自身を配置します。各リモート
+                参加者のビデオはタイルに表示されます。テキストエディタや画像編集アプリケーションのような
+                共同作業Webアプリケーションが別のiframeに読み込まれ、このiframeもタイルとして表示されると
+                仮定します。
+            </p>
+            <p>
+                一部のリモート参加者も同様に、専用のタイルに同じツールを読み込むでしょう。しかし、一部の
+                ユーザーがそのツールを読み込むために必要な権限を持っていない場合はどうなるでしょうか。
+                あるいは、そのツールをサポートしていないプラットフォームから参加している場合はどうでしょうか。
+            </p>
+            <p>
+                その場合、ビデオ会議ソリューションは、ツールを正常に読み込んだ参加者の一人に、ツールを
+                読み込めないユーザーに対してそのツールのタイルを画面共有させることを選択し、彼らが少なくとも
+                それを閲覧できるようにするかもしれません (操作はできませんが)。これは、
+                {{MediaDevices/getDisplayMedia()}} と [[mediacapture-region|Region Capture]] による
+                自己キャプチャを使用して行うことができます。
+            </p>
+            <p>
+                しかし、このようなソリューションにはいくつかの問題があります。他の要素が、一時的にせよ
+                恒久的にせよ、ツールタイルの上に描画される場合はどうなるでしょうか。例としては次のものが
+                挙げられます:
+            </p>
+            <ul>
+                <li>ビデオ会議アプリケーション内で送信されるプライベートメッセージ。</li>
+                <li>新しいユーザーからの参加リクエスト。</li>
+                <li>タイルレイアウト変更中の他のタイル。</li>
+                <li>ビデオ会議アプリケーションの他の要素からのドロップダウンリスト。</li>
+            </ul>
+        </section>
+    </section>
+    <section id="solution-overview">
+        <h2>ソリューションの概要</h2>
+        <p>Element Capture メカニズムは2つの部分で構成されます:</p>
+        <ol>
+            <li>
+                [=RestrictionTarget production=]: {{Element}} を [=restriction mechanism=] の潜在的な対象として
+                <dfn>タグ付け (tagging)</dfn> するためのメカニズム。
+            </li>
+            <li>
+                [=Restriction mechanism=]: 以前に [=tagging|タグ付け=] された {{Element}} の
+                バウンディングボックスへのビデオトラックの制限を開始するよう、またはそのような制限を停止して
+                トラックを [=unrestricted=] 状態に戻すよう、ユーザーエージェントに指示するためのメカニズム。
+            </li>
+        </ol>
+        <p>
+            私たちは2つの <dfn>制限状態 (restriction-states)</dfn> を定義します。<dfn>restricted</dfn> と
+            <dfn>unrestricted</dfn> です。ビデオトラックは常にどちらか一方の状態にあります。トラックは
+            [=unrestricted=] の状態で開始し、{{BrowserCaptureMediaStreamTrack/restrictTo()}} が正常に
+            呼び出されると [=restricted=] に変わる場合があります。
+        </p>
+    </section>
+    <section id="produce-restriction-target">
+        <h2><dfn>RestrictionTarget Production</dfn></h2>
+        <section id="restriction-target-motivation">
+            <h3>RestrictionTarget を定義する動機</h3>
+            <p>
+                本文書で提示される [=restriction mechanism=]
+                ({{BrowserCaptureMediaStreamTrack/restrictTo}}) は、直接のノード参照ではなく
+                {{RestrictionTarget}} トークンに依存しています。これにより、ある文書による、別の文書で
+                指定された対象要素への制限が可能になります。
+            </p>
+            <p>
+                {{BrowserCaptureMediaStreamTrack/cropTo()}} と
+                {{BrowserCaptureMediaStreamTrack/restrictTo()}} はそれぞれ異なるトークン型 - {{CropTarget}}
+                と {{RestrictionTarget}} - を使用するため、文書は自身をキャプチャする文書に付与する
+                能力を制限することが可能です。
+            </p>
+        </section>
+        <section id="restriction-target">
+            <h3><dfn>RestrictionTarget</dfn> の定義</h3>
+            <p>
+                RestrictionTarget は、意図的に空の不透明な識別子です。その目的は、
+                {{BrowserCaptureMediaStreamTrack/restrictTo}} に入力として渡されることです。
+            </p>
+            <pre class="idl">
+          [Exposed=(Window,Worker), Serializable]
+          interface RestrictionTarget {
+            [Exposed=Window, SecureContext] static Promise&lt;RestrictionTarget&gt; fromElement(Element element);
+          };
+        </pre>
+            <dl data-link-for="RestrictionTarget" data-dfn-for="RestrictionTarget">
+                <dt>
+                    <dfn>fromElement()</dfn>
+                </dt>
+                <dd>
+                    <p>
+                        サポートされている型の {{Element}} を指定して {{RestrictionTarget/fromElement}} を
+                        呼び出すと、その {{Element}} が {{RestrictionTarget}} に関連付けられます。この
+                        {{RestrictionTarget}} は {{BrowserCaptureMediaStreamTrack/restrictTo}} への入力として
+                        使用できます。私たちは、まだ <a data-cite="!HTML#active-document">アクティブ</a> な
+                        <a data-cite="!HTML#document">文書</a> 内での {{RestrictionTarget.fromElement()}} の
+                        呼び出しによって返されたものを、有効な RestrictionTarget として定義します。
+                    </p>
+                    <p>
+                        指定された |element| を伴って {{RestrictionTarget/fromElement}} が呼び出されると、
+                        ユーザーエージェントは |element| を入力として
+                        [=create a RestrictionTarget|RestrictionTarget を作成=] します。ユーザーエージェントは
+                        {{Promise}} |p| を返さなければなりません (MUST)。ユーザーエージェントは、新しい
+                        {{RestrictionTarget}} に関連付けられた状態の必要な内部伝播をすべて完了した後にのみ
+                        |p| を解決しなければならず (MUST)、その時点でユーザーエージェントは新しい
+                        {{RestrictionTarget}} を {{BrowserCaptureMediaStreamTrack/restrictTo}} への有効な
+                        パラメータとして受け取る準備ができていなければなりません (MUST)。
+                    </p>
+                    <p>
+                        以前に {{RestrictionTarget/fromElement}} が呼び出された {{Element}} を複製する場合、
+                        その複製はいかなる {{RestrictionTarget}} にも関連付けられません。後で複製に対して
+                        {{RestrictionTarget/fromElement}} が呼び出された場合、新しい {{RestrictionTarget}} が
+                        それに割り当てられます。
+                    </p>
+                </dd>
+            </dl>
+            <p>
+                |element| を入力として <dfn data-export>create a RestrictionTarget</dfn> するには、
+                以下の手順を実行します:
+            </p>
+            <ol>
+                <li>
+                    <p>|restrictionTarget| を型 {{RestrictionTarget}} の新しいオブジェクトとします。</p>
+                </li>
+                <li>
+                    <p>
+                        |restrictionTarget|.<dfn data-dfn-for="RestrictionTarget">[[\Element]]</dfn>
+                        を |element| に設定します。
+                    </p>
+                </li>
+            </ol>
+            <p>
+                {{RestrictionTarget}} オブジェクトはシリアライズ可能です。|value|、|serialized|、および
+                ブール値 |forStorage| が与えられた場合の [=serialization steps=] は次のとおりです:
+            </p>
+            <ol>
+                <li>
+                    <p>
+                        |forStorage| が <code>true</code> の場合、{{DOMException/name}} 属性が
+                        {{"DataCloneError"}} の値を持つ新しい {{DOMException}} オブジェクトをスローします。
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        |serialized|.[[\RestrictionTargetElement]] を
+                        |value|.{{RestrictionTarget/[[Element]]}} に設定します。
+                    </p>
+                </li>
+            </ol>
+            <p>|serialized| および |value| が与えられた場合の [=deserialization steps=] は次のとおりです:</p>
+            <ol>
+                <li>
+                    <p>
+                        |value|.{{RestrictionTarget/[[Element]]}} を
+                        |serialized|.[[\RestrictionTargetElement]] に設定します。
+                    </p>
+                </li>
+            </ol>
+        </section>
+    </section>
+    <section id="restricting-a-track">
+        <h2><dfn>Restriction Mechanism</dfn></h2>
+        <section>
+            <h3>定義</h3>
+            <section>
+                <h4>制限可能なトラック</h4>
+                <p>
+                    私たちは、{{MediaStreamTrack}} |T| が以下のすべての条件を満たす場合に限り、それを
+                    <dfn>制限可能な MediaStreamTrack (restrictable MediaStreamTrack)</dfn> と呼びます:
+                </p>
+                <ul>
+                    <li>|T|.{{MediaStreamTrack/[[Restrictable]]}} が <code>true</code> である。</li>
+                    <li>
+                        |T| が <a data-cite="screen-capture/#dfn-browser">ブラウザ</a>
+                        <a data-cite="screen-capture/#dfn-display-surface">ディスプレイサーフェス</a> に
+                        関連付けられている。(つまり、|T|.{{MediaStreamTrack/getSettings()}} が呼び出された場合、
+                        キー {{MediaTrackSettings/displaySurface}} が値
+                        {{DisplayCaptureSurfaceType/"browser"}} にマッピングされた
+                        {{MediaTrackSettings}} ディクショナリを返したであろうということ。)
+                    </li>
+                    <li>
+                        |T|.<a data-cite="mediacapture-streams/#dfn-kind">[[\Kind]]</a> が
+                        <a data-cite="mediacapture-streams/#dfn-video">"video"</a> である。
+                    </li>
+                    <li>
+                        |T|.<a data-cite="mediacapture-streams/#dfn-readystate">[[\ReadyState]]</a> が
+                        <a data-cite="mediacapture-streams/#idl-def-MediaStreamTrackState.live">"live"</a> である。
+                    </li>
+                </ul>
+            </section>
+            <section>
+                <h4>制限の対象となる資格を持つ要素</h4>
+                <p>
+                    私たちは、{{Element}} |E| が以下のすべての条件を満たす場合に限り、それが
+                    <dfn>制限の対象となる資格を持つ (eligible for restriction)</dfn> と言います:
+                </p>
+                <ul>
+                    <li>
+                        <p>|E| が <a data-cite="css2ed#stacking-context">スタッキングコンテキスト</a> を形成する。</p>
+                    </li>
+                    <li>
+                        <p>
+                            |E| が
+                            <a data-cite="css-transforms-2#grouping-property-values">3Dで平坦化されている</a>。
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            |E| が
+                            <a data-cite="filter-effects-2/#backdrop-root">バックドロップルート</a> を形成する。
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            |E| がちょうど1つの
+                            <a data-cite="css-break-4/#box-fragment">ボックスフラグメント</a> を持つ。
+                        </p>
+                    </li>
+                    <li>
+                        <p>|E| が <a data-cite="css-images-4/#element-not-rendered">レンダリングされている</a>。</p>
+                    </li>
+                </ul>
+                <div class="note">
+                    <p>
+                        これらの条件が成り立つことを保証するために、開発者は次のスニペットのようなCSSを
+                        使用できます:
+                    </p>
+                    <pre class="css">
+              #target {
+                isolation: isolate;     /* Forms a stacking context. */
+                transform-style: flat;  /* Flattened. */
+              }
+            </pre>
+                </div>
+            </section>
+            <h4>有効な制限対象</h4>
+            <p>
+                私たちは、{{Element}} |E| が、以下のすべての条件が成り立つ場合に限り、{{MediaStreamTrack}}
+                |T| に対する <dfn>有効な制限対象 (valid restriction target)</dfn> であると言います:
+            </p>
+            <ul>
+                <li>|T| が [=restrictable MediaStreamTrack=] である。</li>
+                <li>|E| が [=eligible for restriction=] である。</li>
+                <li>
+                    |T| のソースである
+                    <a data-cite="screen-capture/#dfn-display-surface">ディスプレイサーフェス</a> の
+                    [=top-level browsing context=] が、|E| の [=shadow-including root=] である。
+                </li>
+            </ul>
+            <div class="note">
+                <p>
+                    非公式には、これは |T| がタブキャプチャに関連付けられたアクティブなビデオトラックであり、
+                    |E| がキャプチャされたタブ内のDOMに [=connected=] された要素であることを意味します。
+                </p>
+                <p>
+                    {{Element}} |E| が {{MediaStreamTrack}} |T| に対する [=valid restriction target=] であるか
+                    どうかは、キャプチャの開始前または開始後、ならびに制限の開始前または開始後のいずれにおいても
+                    変化する可能性があることに注意してください。例としては次のものが挙げられます:
+                </p>
+                <ul>
+                    <li>|T| がプログラム的に停止される。</li>
+                    <li>|T| がユーザーによって停止される。</li>
+                    <li>
+                        ユーザーエージェントおよび/またはオペレーティングシステムとのユーザーの操作により、
+                        |T|.<a data-cite="mediacapture-streams/#dfn-source-0">[[\Source]]</a> が変化する。
+                    </li>
+                    <li>
+                        |E| のCSS属性のセットが変化し、|E| がもはや [=eligible for restriction=] でなくなる。
+                    </li>
+                </ul>
+                <p>無効性は、有効性が回復するまで追加のフレームを抑制します。</p>
+            </div>
+        </section>
+        <section id="browser-capture-media-stream-track-extension">
+            <h3>BrowserCaptureMediaStreamTrack 拡張</h3>
+            <p>
+                [[mediacapture-region|Region Capture]] は {{BrowserCaptureMediaStreamTrack}} インターフェースを
+                導入しました。私たちはそれを新しいメソッド {{BrowserCaptureMediaStreamTrack/restrictTo}} で
+                拡張します。
+            </p>
+            <pre class="idl">
+          [Exposed = Window]
+          partial interface BrowserCaptureMediaStreamTrack {
+            Promise&lt;undefined&gt; restrictTo(RestrictionTarget? RestrictionTarget);
+          };
+        </pre>
+            <p>
+                以下でキューに入れられるすべてのタスクは、{{BrowserCaptureMediaStreamTrack}} と同じ
+                <a data-cite="!HTML#global-object">グローバルオブジェクト</a> に関連付けられた
+                <a data-cite="!HTML#rendering-task-source">レンダリングタスクソース</a> を使用します。
+            </p>
+            <dl data-link-for="BrowserCaptureMediaStreamTrack" data-dfn-for="BrowserCaptureMediaStreamTrack">
+                <dt>
+                    <dfn>restrictTo()</dfn>
+                </dt>
+                <dd>
+                    <p>
+                        このメソッドの呼び出しは、ビデオトラックの制限を開始/停止するようユーザーエージェントに
+                        指示します。
+                    </p>
+                    <p>
+                        |restrictionTarget| を最初のパラメータとして呼び出された場合、ユーザーエージェントは
+                        以下のアルゴリズムを実行しなければなりません (MUST):
+                    </p>
+                    <ol>
+                        <li>
+                            <p>
+                                [=this=] が [=restrictable MediaStreamTrack=] でない場合、新しい
+                                {{NotSupportedError}} で [=rejected=] された {{Promise}} を返します。
+                            </p>
+                        </li>
+                        <li>|p| を新しい {{Promise}} とします。</li>
+                        <li>
+                            <p>以下の手順を並行して実行します:</p>
+                            <ol>
+                                <li>
+                                    <p>|E| を |restrictionTarget|.{{RestrictionTarget/[[Element]]}} とします。</p>
+                                </li>
+                                <li>
+                                    <p>
+                                        [=this=] ビデオトラックの
+                                        <a data-cite="!mediacapture-region/#dfn-crop-states">crop-state</a>
+                                        を <a data-cite="!mediacapture-region/#dfn-uncropped">uncropped</a> に
+                                        更新します。
+                                    </p>
+                                </li>
+                                <li>
+                                    <p>
+                                        |restrictionTarget| に応じて [=this=] ビデオトラックの
+                                        [=restriction-state=] を更新します:
+                                    </p>
+                                    <ol>
+                                        <li>
+                                            |restrictionTarget| が {{undefined}} でない場合、ユーザーエージェントは
+                                            [=this=] ビデオトラックの [=restriction-state=] を [=restricted=] に設定し、
+                                            |restrictionTarget| を対象として [=this=] ビデオトラックに配信される
+                                            すべてのフレームに対して [=applying the restriction transformation=] を
+                                            開始しなければなりません (MUST)。
+                                        </li>
+                                        <li>
+                                            |restrictionTarget| が {{undefined}} に設定されている場合、ユーザーエージェントは
+                                            [=this=] ビデオトラックの [=restriction-state=] を [=unrestricted=] に設定し、
+                                            [=this=] ビデオトラックに配信されるフレームに対して
+                                            [=applying the restriction transformation=] を停止しなければなりません (MUST)。
+                                        </li>
+                                    </ol>
+                                </li>
+                                <li>
+                                    <p>
+                                        このメソッド呼び出し前のトラックの状態を |preState| と呼び、このメソッド
+                                        呼び出し後の状態を |postState| と呼びます。ユーザーエージェントは、
+                                        |preState| に従って [=restricted=] (または [=unrestricted=]) された
+                                        これ以上のフレームがアプリケーションに配信されないことが保証され、かつ
+                                        アプリケーションに配信される追加のフレームがすべて、|postState| または
+                                        それ以降の状態に従って [=restricted=] (または [=unrestricted=]) される
+                                        ことになる場合に、|p| を解決するために
+                                        <a data-cite="!HTML#queue-a-global-task">グローバルタスクをキューに入れ</a>
+                                        なければなりません (MUST)。
+                                    </p>
+                                </li>
+                            </ol>
+                        </li>
+                        <li>|p| を返します。</li>
+                    </ol>
+                </dd>
+            </dl>
+        </section>
+    </section>
+    <section id="applying-the-restriction-transformation">
+        <h2><dfn>Applying the restriction transformation</dfn></h2>
+        <p>
+            ユーザーエージェントが、指定された対象 |restrictionTarget| に [=restricted=] されたビデオトラック
+            |T| のために新しい |frame| を生成しようとするときは常に、ユーザーエージェントは以下のアルゴリズムを
+            実行しなければなりません (MUST):
+        </p>
+        <ol>
+            <li>|E| を |restrictionTarget|.{{RestrictionTarget/[[Element]]}} とします。</li>
+            <li>
+                |E| が |T| に対する [=valid restriction target=] でない場合、新しいフレームを生成せずに中止します。
+            </li>
+            <li>
+                |intersection| を、|E| のバウンディングボックスと、キャプチャされたサーフェスの
+                [=top-level browsing context=] のビューポートとの交差部分とします。
+            </li>
+            <li>|intersection| が空の場合、新しいフレームを生成せずに中止します。</li>
+            <li>
+                これまでの手順の帰結として、|E| はスタッキングコンテキストを形成します。そのスタッキング
+                コンテキストの独立したレンダリングを |intersection| にクリップしたものから成るフレームを
+                生成して配信します。
+            </li>
+        </ol>
+        <p>
+            最終ステップで生成されるフレームは、|E| とその子孫を無限の透明なキャンバスの上にレンダリングし、
+            <a data-cite="!css-images-4#decorated-bounding-box">装飾されたバウンディングボックス</a> の
+            端がフレームの端とぴったり一致するように配置することで構築されます。
+        </p>
+        <p class="note">
+            一部の実装では、フレームデータの基礎となるピクセルフォーマットがアルファチャンネル情報を
+            保持できない場合があります。この場合、実装はレンダリングされたフレームを黒
+            (`rgb(0,0,0)`) の無限のキャンバスとブレンドできます。
+        </p>
+        <p class="note">
+            実装は、|E| のために生成された既存のビットマップデータを再利用するか、フレームのサイズで品質を
+            最大化するために要素の表示を再生成するかのいずれかを行うことができます (例えば、参照される要素が
+            SVGフラグメントであることを実装が検出した場合)。ただし、フレームは、ラスタライズ品質の違いを
+            別として、上記でレンダリングされた |E| と同一に見えなければなりません。
+        </p>
+    </section>
+    <section id="sample-code">
+        <h2>サンプルコード</h2>
+        <div class="example">
+            <p>キャプチャ対象側のコード:</p>
+            <pre class="javascript">
+          const mainContentArea = navigator.getElementById('mainContentArea');
+          const restrictionTarget = await RestrictionTarget.fromElement(mainContentArea);
+          sendRestrictionTarget(restrictionTarget);
+
+          function sendRestrictionTarget(restrictionTarget) {
+            // Either send the restriction-target using postMessage(),
+            // or pass it on locally within the same document.
+          }
+        </pre>
+        </div>
+        <div class="example">
+            <p>キャプチャを行う文書側のコード:</p>
+            <pre class="javascript">
+          async function startRestrictedCapture(RestrictionTarget) {
+            const stream = await navigator.mediaDevices.getDisplayMedia();
+            const [track] = stream.getVideoTracks();
+            if (!!track.restrictTo) {
+              handleError(stream);
+              return;
+            }
+            await track.restrictTo(RestrictionTarget);
+            transmitVideoRemotely(track);
+          }
+        </pre>
+        </div>
+    </section>
+    <section id="privacy-and-security-considerations">
+        <h1>プライバシーとセキュリティに関する考慮事項</h1>
+        <section>
+            <h2>このAPIの利点</h2>
+            <p>
+                悪意のないアプリケーションにとって、本仕様によって導入されるAPIは純粋にプラスとなるはずです。
+                なぜなら、責任あるアプリケーションが記録される情報を削減することを可能にするからです。
+                これには好ましい特性があります。
+            </p>
+            <p>例えば、既存のメカニズムを使用すると、ビデオ会議アプリケーションは次のことができます:</p>
+            <ol>
+                <li>
+                    <p>コンテンツをiframeに埋め込む。</p>
+                </li>
+                <li>
+                    <p>
+                        現在のタブをキャプチャするようユーザーに促す。({{MediaDevices/getDisplayMedia()}} を
+                        使用して。)
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        結果として得られるキャプチャを、キャプチャを意図したiframeだけに切り抜く。
+                        ({{BrowserCaptureMediaStreamTrack/cropTo()}} を使用して。)
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        結果として得られるピクセルをリモート参加者に送信する。
+                        (<a data-cite="webrtc#dom-rtcpeerconnection">RTCPeerConnection</a> を使用して。)
+                    </p>
+                </li>
+            </ol>
+            <p>
+                しかし、これはリスクを伴います。なぜなら、キャプチャを意図したコンテンツの前面に偶然描画される
+                あらゆるコンテンツも、リモートに送信されてしまうからです。これがほんの一瞬であっても、
+                リモートユーザーが気づくかもしれません。そして、そのようなコンテンツは非常にプライベートな
+                ものである可能性があります - 例えば、チャット通知、リマインダー、スピーカーノートなど。
+            </p>
+            <p>
+                本仕様で導入されるメカニズムは、責任あるアプリケーションが、そのような問題が起こり得ないことを
+                完全に保証する方法で自身を構成することを可能にします。そのようなアプリケーションは、ユーザーに
+                対するプライバシーの保証をより簡単に行い、維持することができます。
+            </p>
+        </section>
+        <section>
+            <h2>このAPIに関する懸念</h2>
+            <section>
+                <h3>クロスオリジンのピクセルの読み取り</h3>
+                <p>
+                    本仕様で導入されるメカニズムはすべて、自己キャプチャが他の何らかの手段 - 通常は
+                    {{MediaDevices/getDisplayMedia()}} - によって提供されることに依存しています。これらに関する
+                    主な懸念は、アプリケーションにクロスオリジンコンテンツへの読み取りアクセスを許可することです。
+                </p>
+                <p>
+                    悪意のあるアプリケーションがユーザーを騙して自己キャプチャを承認させると、その後、目に見えない
+                    iframeにクロスオリジンコンテンツを読み込み、そのコンテンツを前面に持ってくることができ、
+                    ユーザーが反応する前に攻撃者がコンテンツを読み取ることを可能にします。このような攻撃は、
+                    本仕様で導入されるメカニズムがなくても、すでに可能です。
+                </p>
+            </section>
+            <section>
+                <h3>古い攻撃ベクトルの悪化</h3>
+                <p>
+                    主な懸念は、本仕様で導入するメカニズムが、上記で説明した古い攻撃ベクトルを
+                    <b>悪化させる</b> べきではないということです。私たちが導入するメカニズムが、古い攻撃を
+                    <b>ひそかに</b> 実行することを可能にするのではないかと、当然ながら懸念されます。
+                    私たちは、ここで導入されるメカニズムが攻撃者の攻撃を隠す能力を増大させるものではないと
+                    主張します。そのような攻撃の隠蔽は、以下のいずれかの手法を使用して常に可能でした:
+                </p>
+                <ul>
+                    <li>
+                        <p>
+                            <b>コンテンツを短時間表示する。</b> 攻撃者は常に、単一フレームの時間幅だけ
+                            コンテンツを画面に一瞬表示することができました。これは記録するには十分な長さですが、
+                            ユーザーが理解するには十分な長さではありません。
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            <b>コンテンツを断片的に表示する。</b> 攻撃者は常に、コンテンツを複数の小さな断片、
+                            さらには各1ピクセルにまで分割し、それらを異なる場所と時間に表示することができました。
+                            ユーザーはこの操作を観察できませんが、ソフトウェアがこれらのピクセルを収集して
+                            そこから画像を再構築するのは簡単なことです。
+                        </p>
+                    </li>
+                    <li>
+                        <p>
+                            <b>コンテンツを低い不透明度で表示する。</b> 攻撃者は常に、ユーザーには知覚できないが
+                            機械はまだ読み取れる不透明度でコンテンツを表示することができました。
+                        </p>
+                    </li>
+                </ul>
+                <p>
+                    これらの手法のいずれもそれ単体で十分ですが、それらを組み合わせることで、悪意のある
+                    アプリケーションは常に攻撃を効果的に隠蔽し、なおかつコンテンツを効率的に読み取ることが
+                    できました。
+                </p>
+            </section>
+            <section id="reading-occluded-content">
+                <h3>遮蔽されたコンテンツの読み取り</h3>
+                <p>
+                    悪意のあるアプリが、そのコンテンツからのオプトインなしに、クロスオリジンiframe内の遮蔽物を
+                    除去できるのではないかと懸念されるかもしれません。APIの形状はそのような攻撃を防ぎます -
+                    クロスオリジンiframeは {{RestrictionTarget}} を生成し、それを攻撃者となり得る者に
+                    渡さなければなりません。{{RestrictionTargets}} は本仕様で導入されるAPIの一部としての
+                    目的以外には役立たないため、{{RestrictionTarget}} の発行と受け渡しは、その遮蔽物の除去に
+                    対するクロスオリジンiframeの許可を証明します。
+                </p>
+            </section>
+            <section>
+                <h3>Region Capture との相互作用</h3>
+                <p>
+                    本仕様で導入されるAPIの設計において、{{CropTarget}} を再利用せず、代わりに専用のトークン
+                    ({{CropTarget}}) を定義するという意識的な決定がなされました。これにより、以前に
+                    {{BrowserCaptureMediaStreamTrack/cropTo()}} を念頭に置いて設計および実装されたが、
+                    {{BrowserCaptureMediaStreamTrack/restrictTo()}} は念頭に置いていなかった既存のWeb
+                    アプリケーションが、<a href="#reading-occluded-content">前のセクション</a> で説明したように、
+                    遮蔽物の除去を許可することへ実質的にオプトインしてしまうことがないようにしています。
+                </p>
+            </section>
+        </section>
+    </section>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
