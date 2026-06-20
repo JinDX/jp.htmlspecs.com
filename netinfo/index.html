@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<title>Network Information API</title>
+<script class='remove' src='https://www.w3.org/Tools/respec/respec-w3c-common'></script>
+<script>
+    async function loadTableData() {
+        const res = await fetch("downlink.json");
+        const json = await res.json();
+        try {
+            populateTable(json)
+        } catch (err) {
+            console.error("Error trying to get downlink.json", err);
+            populateTable({});
+        }
+    }
+
+    function populateTable(data) {
+        const tbody = document.querySelector("#max-downlink-table > tbody");
+        const head = document.querySelector("#max-downlink-table > thead");
+        const headsize = head.rows[0].children.length;
+        let trs = "";
+        //for each entry in the JSON
+        for (var connection in data) {
+            var connectionTypes = data[connection];
+            trs += "<tr>";
+            trs += connectionTypes.length > 1
+                ? "<td rowspan=" + connectionTypes.length + ">"
+                : "<td>";
+            trs += "<a>" + connection + "</a>";
+            trs += "</td>";
+
+            //Tell reader we don't have any data for connection
+            if (connectionTypes.length === 0) {
+                trs += "<td colspan=" + headsize + ">";
+                trs += "No data available for this";
+                trs += " <a>connection type</a>.</td>";
+            } else {
+                //loop through and populate the table
+                for (var j = 0; j < connectionTypes.length; j++) {
+                    var conObj = connectionTypes[j];
+                    if (j) {
+                        trs += "<tr>";
+                    }
+                    trs += "<td>" + conObj.name + "</td>";
+                    trs += "<td>" + conObj.version + "</td>";
+                    trs += "<td>" + conObj.max.downlink + "</td>";
+                    trs += "</tr>";
+                }
+            }
+        }
+        //finally, add the data
+        tbody.innerHTML = trs;
+    }
+
+    var respecConfig = {
+        specStatus: "CG-DRAFT",
+        shortName: "netinfo",
+        format: "markdown",
+        github: "https://github.com/WICG/netinfo/",
+        editors: [
+            {
+                name: "Ilya Grigorik",
+                company: "Google",
+                companyURL: "http://google.com",
+            },
+        ],
+        formerEditors: [
+            {
+                name: "Marcos Cáceres",
+                company: "Mozilla Corporation",
+                companyURL: "http://mozilla.com",
+            },
+            {
+                name: "Fernando Jiménez Moreno",
+                company: "Telefonica",
+                companyURL: "http://www.telefonica.com/en/home/jsp/home.jsp",
+            },
+        ],
+        wg: "Web Incubator Community Group",
+        wgURI: "https://wicg.io",
+        caniuse: {
+            feature: "netinfo",
+            browsers: ["chrome", "firefox", "and_ff", "safari"],
+        },
+        preProcess: [loadTableData],
+        localBiblio: {
+            "CLIENT-HINTS": {
+                title: "HTTP Client Hints",
+                href: "https://tools.ietf.org/html/draft-grigorik-http-client-hints",
+                status: "Internet-Draft",
+                publisher: "IETF",
+            },
+            "STRUCTURED-HEADERS": {
+                title: "Structured Headers for HTTP",
+                href: "https://tools.ietf.org/html/draft-ietf-httpbis-header-structure",
+                status: "Internet-Draft",
+                publisher: "IETF",
+            },
+        },
+        mdn: true,
+    };
+</script>
+
+<section id='abstract'>
+    <cite>Network Information API</cite> は、デバイスが使用中のネットワーク接続に関する情報に Web アプリケーションが
+    アクセスできるようにする。
+</section>
+
+<section id='sotd'></section>
+
+## 要件とユースケース
+
+この文書は、2 つの具体的な要件に対応する API について記述する。
+
+### ネットワークとの通信に現在使用されている [接続タイプ](https://wicg.github.io/netinfo/#dfn-connection-types) を
+判定するためのインターフェースを提供する。
+
+これはクライアントページからアドホックに照会できるべきであり、また [Service Worker](https://w3c.github.io/ServiceWorker/v1/) に
+公開されるなど、他のコンテキストでも利用できるべきである。
+
+**ユースケースの例:**
+
+* メディアのストリーミングを主目的とする Web アプリケーションは、再生前に `navigator.connection.type` を確認できる。
+これが `'cellular'` に設定されている場合、モバイルネットワーク事業者が帯域幅に対して課金している可能性があることをユーザーに
+知らせ、以前にキャッシュされたコンテンツのみを自動再生し始める、といったことができる。
+* [インストール](https://w3c.github.io/ServiceWorker/v1/#installation-algorithm) 中にリソースを
+[キャッシュ](https://w3c.github.io/ServiceWorker/v1/#cache-objects)
+するために Service Worker を利用する Web アプリケーションは、キャッシュし得る複数の異なるアセットのバンドルを持つ場合がある。
+すなわち、無条件にキャッシュされる重要なアセットの一覧と、`navigator.connection.type` が `'ethernet'` または `'wifi'` の
+ときにのみ事前にキャッシュされる、より大きなオプションのアセットのバンドルである。
+* [バックグラウンド
+同期](https://github.com/WICG/BackgroundSync/blob/master/explainer.md) ハンドラーを伴う Service Worker を使用する Web アプリケーションは、現在の
+`navigator.connection.type` 値を確認し、それが `'ethernet'` または `'wifi'` の場合にのみ `sync` イベントハンドラー内で
+データを転送する、といったことができる。
+* Web アプリケーションは、ネットワーク状況に基づいてオフラインモードを有効にする判断を下す場合がある（例えば EDGE では
+不十分なとき）。
+
+### 接続タイプが変化した場合にスクリプトへ通知する手段を提供する。
+
+これにより開発者は、ネットワーク接続タイプが変化し、それが何らかの形で影響を及ぼす可能性があることをユーザーに知らせるため、
+ユーザーインターフェースを動的に変更できる。また、大量のデータ転送を延期していたアプリケーションが、高帯域幅のネットワークが
+検出され次第、自動的に転送を開始できるようにもなる。
+
+**ユースケースの例:**
+
+* メディアのストリーミングを主目的とする Web アプリケーションは、接続タイプの更新に応じて、ユーザーインターフェースを
+動的に変更できる。これは、ユーザーが再生を試み、1 回限りの照会を行うまで待つよりも、優れたユーザー体験をもたらす
+可能性がある。これにより、アプリケーションはユーザーの操作に先立って、接続に関するコンテキストを提供することが
+できる。
+* アップロードまたはダウンロードを可能にする Web アプリケーションは、`navigator.connection.type` が `'cellular'` に
+設定されているときにリクエストの開始を延期し、接続の変化に対するリスナーを追加する場合がある。高帯域幅のネットワーク
+タイプへの変化が検出されたとき、リクエストを自動的に開始できる。
+
+<section class="informative">
+    ## 利用例
+    この API で構築できるアプリケーションの種類の例については、<cite>[Review of Apps that Use
+        Network Information](https://github.com/w3c-webmob/netinfo)</cite> を参照のこと。
+
+    <pre class="example js">
+  // 接続タイプを取得する。
+  var type = navigator.connection.type;
+
+  // 最初のネットワークホップのダウンリンク速度の上限を取得する
+  var max = navigator.connection.downlinkMax;
+
+  function changeHandler(e) {
+    // ここで接続の変化を処理する。
+  }
+
+  // イベントの変化を登録する。
+  navigator.connection.onchange = changeHandler;
+
+  // あるいは。
+  navigator.connection.addEventListener('change', changeHandler);
+  </pre>
+</section>
+
+
+## 定義
+
+明確にするために、<dfn>メガビット</dfn> は 1,000,000 ビットであり、<dfn data-lt="Mbit/s">メガビット毎秒</dfn> は次の転送に
+相当する。
+
+* 毎秒 1,000,000 ビット
+* 毎秒 1,000 キロビット
+* 毎秒 125,000 バイト
+* 毎秒 125 キロバイト
+* など……
+
+
+## 接続タイプ
+
+### 基盤となる接続技術
+
+この節では、<a>ユーザーエージェント</a> が使用している（もしあれば）<dfn data-lt="接続タイプ">接続タイプ</dfn> と <a>基盤となる接続
+    技術</a> を定義する。
+
+<dl data-dfn-for="ConnectionType">
+    <dt><dfn>bluetooth</dfn></dt>
+    <dd>Bluetooth 接続。</dd>
+    <dt><dfn>cellular</dfn></dt>
+    <dd>セルラー接続（例: EDGE、HSPA、LTE など）。</dd>
+    <dt><dfn>ethernet</dfn></dt>
+    <dd>イーサネット接続。</dd>
+    <dt><dfn>none</dfn></dt>
+    <dd>ネットワーク接続なし。ユーザーがリンクをたどったとき、またはスクリプトがリモートページを要求したとき（あるいは
+        そのような試みが失敗するとわかっているとき）、ユーザーエージェントはネットワークに接続しない。すなわち、HTML における
+        <code>navigator.onLine === false</code> に相当する。
+    </dd>
+    <dt><dfn>mixed</dfn></dt>
+    <dd>ユーザーエージェントは複数の接続タイプを使用している。</dd>
+    <dt><dfn>other</dfn></dt>
+    <dd>既知の接続タイプであるが、列挙された接続タイプのいずれでもないもの。</dd>
+    <dt><dfn>unknown</dfn></dt>
+    <dd>ユーザーエージェントはネットワーク接続を確立したが、<a>基盤となる
+            接続技術</a>を判定できない、または判定しようとしないもの。</dd>
+    <dt><dfn>wifi</dfn></dt>
+    <dd>Wi-Fi 接続。</dd>
+    <dt><dfn>wimax</dfn></dt>
+    <dd>WiMAX 接続。</dd>
+</dl>
+
+この API では、<a>接続タイプ</a> は <a>ConnectionType</a> 列挙型で表される。
+
+### <dfn>ConnectionType</dfn> 列挙型
+
+<pre class="idl">
+  enum ConnectionType {
+    "bluetooth",
+    "cellular",
+    "ethernet",
+    "mixed",
+    "none",
+    "other",
+    "unknown",
+    "wifi",
+    "wimax"
+  };
+</pre>
+
+### 実効接続タイプ
+
+この節では、<dfn data-lt="実効接続タイプ">実効接続タイプ</dfn>（ECT）を定義する。
+
+<table id="effective-connection-type-table" data-dfn-for="EffectiveConnectionType">
+    <caption><dfn>実効接続タイプの表</dfn></caption>
+    <thead>
+        <tr>
+            <th>ECT</th>
+            <th>最小 RTT (ms)</th>
+            <th>最大ダウンリンク (Kbps)</th>
+            <th>説明</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><dfn>slow-2g</dfn></td>
+            <td>2000</td>
+            <td>50</td>
+            <td>このネットワークは、テキストのみのページなど、小さな転送のみに適している。</td>
+        </tr>
+        <tr>
+            <td><dfn>2g</dfn></td>
+            <td>1400</td>
+            <td>70</td>
+            <td>このネットワークは、小さな画像の転送に適している。</td>
+        </tr>
+        <tr>
+            <td><dfn>3g</dfn></td>
+            <td>270</td>
+            <td>700</td>
+            <td>このネットワークは、高解像度画像、音声、SD 動画など、大きなアセットの転送に適している。
+            </td>
+        </tr>
+        <tr>
+            <td><dfn>4g</dfn></td>
+            <td>0</td>
+            <td>∞</td>
+            <td>このネットワークは、HD 動画やリアルタイム動画などに適している。</td>
+        </tr>
+    </tbody>
+</table>
+
+上記のラウンドトリップおよび帯域幅の値は、実際のユーザー測定の観測結果に基づいている。
+
+* `slow-2g` は 2G 観測値の 66.6 パーセンタイルである
+* `2g` は 2G 観測値の 50 パーセンタイルである
+* `3g` は 3G 観測値の 50 パーセンタイルである
+
+上記で提供される絶対値は、2017 年 4 月時点で取得された、Android 上の Chrome における実際のユーザー測定に基づいている。
+ユーザーエージェントは、測定データの変化を反映するために、将来これらの値を更新してもよい。
+
+この API では、<a>実効接続タイプ</a> は <a>EffectiveConnectionType</a> 列挙型で表される。
+
+### <dfn>EffectiveConnectionType</dfn> 列挙型
+
+<pre class="idl">
+  enum EffectiveConnectionType {
+    "2g",
+    "3g",
+    "4g",
+    "slow-2g"
+  };
+</pre>
+
+
+## <dfn>NavigatorNetworkInformation</dfn> インターフェース
+
+<code><dfn data-cite="!HTML#navigator">Navigator</dfn></code> および
+<code><dfn data-cite="!HTML#workernavigator">WorkerNavigator</dfn></code> インターフェースは、<a>NavigatorNetworkInformation</a> を
+ミックスインすることによって、<a>NetworkInformation</a> インターフェースへのアクセスを公開する。
+
+<pre class="idl">
+  interface mixin NavigatorNetworkInformation {
+    [SameObject] readonly attribute NetworkInformation connection;
+  };
+
+  Navigator includes NavigatorNetworkInformation;
+  WorkerNavigator includes NavigatorNetworkInformation;
+</pre>
+
+<section data-dfn-for="NavigatorNetworkInformation" data-link-for="NavigatorNetworkInformation">
+    ### <code><dfn>connection</dfn></code> 属性
+
+    <a>connection</a> 属性は、取得時に、<a>NetworkInformation</a> インターフェースを実装するオブジェクトを
+    返す。
+</section>
+
+<section data-dfn-for="NetworkInformation" data-link-for="NetworkInformation">
+    ## <dfn>NetworkInformation</dfn> インターフェース
+
+    <a>NetworkInformation</a> インターフェースは、ユーザーエージェントが現在使用しているネットワーク接続に関する情報に
+    アクセスする手段を提供する。<code><dfn data-cite="DOM#interface-eventtarget">EventTarget</dfn></code> は
+    [[!DOM]] で定義されている。
+
+    <pre class="idl">
+  [Exposed=(Window,Worker)]
+  interface NetworkInformation : EventTarget {
+    readonly attribute ConnectionType type;
+    readonly attribute EffectiveConnectionType effectiveType;
+    readonly attribute Megabit downlinkMax;
+    readonly attribute Megabit downlink;
+    readonly attribute Millisecond rtt;
+    attribute EventHandler onchange;
+  };
+
+  typedef unrestricted double Megabit;
+  typedef unsigned long long Millisecond;
+  </pre>
+
+    この節ではまた、ユーザーのネットワーク状況に関する詳細を公開する、いくつかの HTTP リクエストヘッダーフィールドを
+    定義する。これらはサーバーが受信をオプトインできるものである。サーバーは、[[CLIENT-HINTS]] で定義され、
+    [[CLIENT-HINTS-INFRASTRUCTURE]] で定義された処理モデルに拘束される Client Hints インフラストラクチャを介してそれを行える。
+
+    ### <dfn>type</dfn> 属性
+
+    <a>type</a> 属性は、取得時に、ユーザーエージェントが使用している <a>接続タイプ</a> を返す。
+
+    ### <dfn>effectiveType</dfn> 属性
+
+    <a>effectiveType</a> 属性は、取得時に、最近観測された <a>rtt</a> と <a>downlink</a> の値の組み合わせを使用して
+    決定される <a>実効接続タイプ</a> を返す。
+
+    #### <code><dfn>ECT</dfn></code> リクエストヘッダーフィールド
+
+    <a>ECT</a> リクエストヘッダーフィールドは、ユーザーエージェントがリクエストを行う時点での <a>effectiveType</a> を示す
+    トークンであり、これは <a>EffectiveConnectionType</a> の値のいずれかである。
+    これは値が Token でなければならない構造化ヘッダー（Structured Header）である。[[STRUCTURED-HEADERS]]
+
+    ### <dfn>downlinkMax</dfn> 属性
+
+    <a>downlinkMax</a> 属性は、<dfn>最初のネットワークホップのダウンリンク速度の
+        上限</dfn>を表す。報告される値は <a>メガビット毎秒</a> 単位であり、<a>基盤となる接続技術</a> の
+    プロパティによって決定される。
+
+    <div class="note">
+        ユーザーエージェントは、特定のリクエストを満たすために必要なさまざまなネットワークホップの総数や性能特性を
+        把握していない。異なるリクエストは異なる経路をたどり、異なる性能特性を持つ場合がある。報告される
+        <a>最初のネットワークホップのダウンリンク速度の上限</a>
+        の値は、最初のネットワークホップの <a>基盤となる接続技術</a> のプロパティによって決定される。
+        いかなるリクエストのエンドツーエンド性能もこの値を超えることはできないが、これは性能を
+        保証するものではなく、大幅に悪化する場合もある。
+    </div>
+
+    ### <dfn>onchange</dfn> 属性
+
+    <a>onchange</a> イベントハンドラー属性は、<a>接続値を更新する
+        手順</a>中に発火される "change" イベントを処理する。
+
+    ### <dfn>downlink</dfn> 属性
+
+    <a>downlink</a> 属性は、<a>メガビット毎秒</a> 単位の実効帯域幅推定値を表す。これは最も近い 25 キロビット毎秒の倍数に
+    丸められ、最近アクティブだった接続にわたって最近観測されたアプリケーション層のスループットに基づくが、
+    プライベートアドレス空間 [[!RFC1918]] への接続は除外される。最近の帯域幅測定データがない場合、属性値は <a>基盤となる接続
+        技術</a> のプロパティによって決定される。
+
+    #### `Downlink` リクエストヘッダーフィールド
+
+    <a>Downlink</a> リクエストヘッダーフィールドは、ユーザーエージェントがリクエストを行う時点での <a>downlink</a> の値を
+    示す数値である。
+    これは値が Decimal でなければならない構造化ヘッダー（Structured Header）である。[[STRUCTURED-HEADERS]]
+
+    ### <dfn>rtt</dfn> 属性
+
+    <a>rtt</a> 属性は、<dfn data-lt="Millisecond">ミリ秒</dfn> 単位の実効ラウンドトリップ時間推定値を表し、最も近い 25 ミリ秒の倍数に丸められ、
+    最近アクティブだった接続にわたって最近観測されたアプリケーション層の RTT 測定値に基づくが、
+    プライベートアドレス空間 [[!RFC1918]] への接続は除外される。最近の RTT 測定データがない場合、属性値は
+    <a>基盤となる接続技術</a> のプロパティによって決定される。
+
+    #### `RTT` リクエストヘッダーフィールド
+
+    <a>RTT</a> リクエストヘッダーフィールドは、ユーザーエージェントがリクエストを行う時点での <a>rtt</a> の値を示す
+    数値である。
+    これは値が Integer でなければならない構造化ヘッダー（Structured Header）である。[[STRUCTURED-HEADERS]]
+
+    ## 基盤となる接続技術
+
+    <dfn>基盤となる接続技術</dfn> とその <a>最初のネットワークホップのダウンリンク速度の
+        上限</a> との関係は、新しいネットワークリクエストを満たすために使用され得る利用可能なネットワーク
+    インターフェースによって決定される。
+
+    <dfn>利用可能なインターフェースに対する downlinkMax</dfn> は、<a>最大ダウンリンク速度の表</a> に記載された、標準化された、
+    または一般的に受け入れられている最大ダウンロードデータレートによって決定される。可能な場合、この値は、信号
+    強度、変調アルゴリズム、その他の「ネットワークの天候」変数など、インターフェースの現在のプロパティに基づいて、
+    より正確な上限を報告するように精緻化される場合がある。
+
+    <a>最初のネットワークホップのダウンリンク速度の上限</a> は、
+    href="#handling-changes-to-the-underlying-connection">基盤となる接続の変化の処理</a> に記載された規則によって決定される。
+
+    <div class="note">
+        利用可能なネットワークインターフェースとその世代およびバージョンの列挙は、スクリプトに直接公開されない。
+        その代わり、`downlinkMax` は、すべての利用可能なインターフェースとその現在のネットワーク状況を反映した
+        <a>メガビット毎秒</a> 単位の単一の値を公開する。
+    </div>
+
+    <table id="max-downlink-table" class="simple" data-link-for="ConnectionType">
+        <caption><dfn>最大ダウンリンク速度の表</dfn></caption>
+        <thead>
+            <tr>
+                <th>接続タイプ</th>
+                <th>基盤となる接続技術</th>
+                <th>世代またはバージョン</th>
+                <th>最大ダウンリンク速度 (<a>Mbit/s</a>)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <!-- JS が無効、または xhr が失敗した場合のフォールバック -->
+                <td colspan="4"><a href="downlink.json">JSON として利用可能なデータ</a>。</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <section data-link-for="NetworkInformation">
+        ### 基盤となる接続の変化の処理
+
+        異なる <a>接続タイプ</a> もしくは <a>実効接続タイプ</a> への切り替え、<a>最初のネットワークホップのダウンリンク速度の
+            上限</a>の変化、または実効的な <a>downlink</a> もしくは <a>rtt</a> の推定値の変化によって <a>基盤となる接続技術</a> の
+        プロパティが変化したとき、ユーザーエージェントは <dfn>接続値を更新する手順</dfn> を実行
+        しなければならない:
+
+        1. <var>new-type</var> を、<a>基盤となる接続
+            技術</a> を表す <a>接続タイプ</a> とする。
+        1. <var>new-effective-type</var> を、現在の <a>downlink</a> および <a>rtt</a> の値によって決定される
+        <a>実効接続タイプ</a> とする。
+        1. <var>new-downlink</var> を次の結果とする。
+        1. <a>downlink</a> の値を最も近い 25 キロビット毎秒の倍数に丸める。
+        1. 結果の値が `connection.downlink` の値より 10% 大きいか小さい場合、<var>new-dowlink</var> をその結果の値に
+        設定する。そうでない場合、<var>new-downlink</var> を
+        `connection.downlink` の値に設定する。
+        1. <var>new-rtt</var> を次の結果とする。
+        1. <a>rtt</a> の値を最も近い 25 ミリ秒の倍数に丸める。
+        1. 結果の値が `connection.rtt` の値より 10% 大きいか小さい場合、<var>new-rtt</var> をその結果の値に
+        設定する。そうでない場合、<var>new-rtt</var> を `connection.rtt` の値に設定する。
+        1. <var>new-type</var> が "none" の場合、<var>max-value</var> を `0` に設定する。
+        1. <var>new-type</var> が "unknown" の場合、<var>max-value</var> を `+Infinity` に設定する。
+        1. <var>new-type</var> が "mixed" の場合、<var>max-value</var> を、新しいネットワークリクエストを処理するために
+        使用されるインターフェース構成に適用可能な値に設定する。例えば、複数のインターフェースが使用される場合、それらの
+        <a>利用可能なインターフェースに対する downlinkMax</a> の値を合計する。
+        1. そうでない場合、<var>max-value</var> を <a>利用可能なインターフェースに対する downlinkMax</a> に設定する。
+        1. <var>max-value</var> が `connection.downlinkMax` の値と等しくない場合、または <var>new-type</var> が
+        `connection.type` の値と等しくない場合、または <var>new-downlink</var> が
+        `connection.downlink` の値と等しくない場合、または <var>new-rtt</var> が `connection.rtt` の値と等しくない場合:
+        1. <a data-cite="!HTML#networking-task-source">ネットワーキングタスクソース</a> を使用して、次を実行する
+        data-cite="!HTML#queue-a-task">タスクをキューに入れる</a>:
+        1. `connection.downlinkMax` を <var>max-value</var> に設定する。
+        1. `connection.type` を <var>new-type</var> に設定する。
+        1. `connection.effectiveType` を <var>new-effective-type</var> に設定する。
+        1. `connection.downlink` を <var>new-downlink</var> に設定する。
+        1. `connection.rtt` を <var>new-rtt</var> に設定する。
+        1. `NetworkInformation` オブジェクトで `change` という名前の <a data-cite="!DOM#concept-event-fire">イベントを発火する</a>。
+    </section>
+
+    <section>
+        ## プライバシーに関する考慮事項
+
+        Network Information API は、観測されたエンドツーエンドのネットワーク帯域幅および遅延、ならびにユーザーエージェントと
+        サーバーの間の最初のネットワークホップに関する情報、具体的には接続のタイプとダウンリンク速度の上限、さらに
+        この情報が変化するたびのシグナルを公開する。そのような情報は、次の目的に使用される
+        可能性がある:
+
+        * ある時点での特定のネットワークの特性（例: タイプおよびダウンリンク推定値）に基づき、またそのような特性の
+        一定期間にわたる変化を観測することによって、ユーザーをフィンガープリントする。
+        * 1 つ以上のネットワーク間の遷移（例: タイプ、ダウンリンク推定値、時刻による遷移の順序に基づく）に基づいて、
+        ユーザーをフィンガープリントする。
+        * 上記の基準に基づいて、ユーザーの位置（例: 自宅、職場、移動中のいずれか）を推測する。
+
+        ただし、上記の考慮事項は新しいものではなく、十分な動機を持つ攻撃者は、他の技術を使用してそのような情報を
+        すでに取得できる可能性がある:
+
+        * 攻撃者は JavaScript を使用して、クライアント上の任意のネットワークフェッチ（同一オリジンまたはクロスオリジン）の
+        継続時間（例: フェッチ開始から `onload` イベントまでの時間）を観測でき、Resource Timing API を介して同じ
+        フェッチに関するより詳細なタイミングデータを取得できる場合がある。
+        * 攻撃者は WebRTC を使用して、STUN または類似のメカニズムを介して、クライアントのパブリックおよびプライベート
+        IP アドレスを特定できる。
+        * 攻撃者は、サーバー上でフェッチのクライアント IP、フェッチ継続時間、RTT、転送速度、その他の低レベルの
+        ソケットメトリクスを観測できる。
+
+        さらに、上記の戦略の 1 つを繰り返すことによって（例: リソースの定期的なフェッチや再取得の呼び出し、定期的な
+        SSE や WebSocket メッセージ、定期的な STUN リクエストなど）、攻撃者はクライアントの接続および IP アドレスの
+        性能特性の経時的な変化を観測できる。そのようなデータはその後、ユーザーフィンガープリントを精緻化し、ユーザーの
+        位置（例: 自宅、職場、移動中のいずれか）を推測し、さまざまな行動パターンを抽出するために
+        使用できる。
+
+        上記のリストは完全な概要ではない。ただし、上記の例が示すように、攻撃は送信側と受信側の
+        両方から可能である:
+
+        * 攻撃者がクライアントから任意の種類のネットワークフェッチを開始または観測できる場合、その性能特性と
+        それらが経時的にどのように変化するかを観測できる。
+        * 攻撃者がクライアントに自分のサーバーからリソースをフェッチさせることができる場合、同様にフェッチの
+        性能特性とそれらが経時的にどのように変化するかを観測できる。
+
+        クライアントから開始されるそのような攻撃を緩和するには、攻撃者がネットワークリクエストを観測および開始することを
+        防ぐ必要がある。例えば、悪意のある者による単純なコンテンツインジェクションを防ぐために HTTPS を使用する、任意の
+        種類のスクリプト化されたリソースフェッチを防ぐために JavaScript を無効にする、などである。送信側からの攻撃の緩和は、
+        VPN または HTTP プロキシの使用によって可能である。例えば、クライアントの真の IP アドレスを隠す、追加の遅延を導入する、などである。
+
+        このように、Network Information API は、ネットワークリクエストを観測または実行する必要を回避することによって、
+        エンドツーエンドのネットワークスループット、遅延、および最初のネットワークホップに関する情報の取得を容易にするが、
+        十分な動機を持つ攻撃者がすでに利用できない情報を公開することはない。
+
+        クライアントがこの種の攻撃を緩和したい場合、JavaScript を無効にし、すべての送信リクエストが信頼できるオリジンに
+        対して行われていることを監視し、匿名化 VPN/プロキシサービスを入念に利用すべきである。
+    </section>
+
+    <section id="iana-considerations">
+        ## IANA に関する考慮事項
+
+        次の 3 つの HTTP リクエストヘッダーフィールドは、HTTP/1.1 [[!RFC7231]] が示すガイドラインを考慮した上で、メッセージ
+        ヘッダーフィールドの恒久的なレジストリ（[[!RFC3864]] を参照）に追加されるべきである。
+
+        <section id="registration-ect">
+            ### `ECT` リクエストヘッダーフィールドの登録
+
+            * ヘッダーフィールド名: ECT
+            * 適用プロトコル: Hypertext Transfer Protocol (HTTP)
+            * ステータス: Standard
+            * 著者/変更管理者: W3C
+            * 仕様文書: W3C TR https://www.w3.org/TR/netinfo/
+
+        </section>
+
+        <section id="registration-downlink">
+            ### `Downlink` リクエストヘッダーフィールドの登録
+
+            * ヘッダーフィールド名: Downlink
+            * 適用プロトコル: Hypertext Transfer Protocol (HTTP)
+            * ステータス: Standard
+            * 著者/変更管理者: W3C
+            * 仕様文書: W3C TR https://www.w3.org/TR/netinfo/
+
+        </section>
+
+        <section id="registration-rtt">
+            ### `RTT` リクエストヘッダーフィールドの登録
+
+            * ヘッダーフィールド名: RTT
+            * 適用プロトコル: Hypertext Transfer Protocol (HTTP)
+            * ステータス: Standard
+            * 著者/変更管理者: W3C
+            * 仕様文書: W3C TR https://www.w3.org/TR/netinfo/
+
+        </section>
+
+    </section>
+
+    <section id="conformance">
+        この仕様への適合を主張できる製品のクラスは 1 つだけである。
+        すなわち <dfn>ユーザーエージェント</dfn> である。
+    </section>
+
+    <section class="appendix">
+        ## 謝辞
+        この文書は、[[!HTML]] 仕様のライセンスで許可されている範囲で、
+        その仕様のテキストを再利用している。
+    </section>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
