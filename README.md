@@ -359,6 +359,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### デジタル出版・電子書籍
 - [EPUB 3.3](https://jp.htmlspecs.com/epub-33/)（[Source](https://www.w3.org/TR/2026/REC-epub-33-20260113/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [EPUB Reading Systems 3.3](https://jp.htmlspecs.com/epub-rs-33/)（[Source](https://www.w3.org/TR/2024/REC-epub-rs-33-20241017/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 
 ### 開発者ツール・テスト・自動化
 - [Test Utils](https://jp.htmlspecs.com/testutils/)（[Source](https://testutils.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
