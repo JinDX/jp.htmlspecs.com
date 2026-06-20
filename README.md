@@ -81,6 +81,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Baggage](https://jp.htmlspecs.com/baggage/)（[Source](https://www.w3.org/TR/2024/CR-baggage-20240530/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Beacon](https://jp.htmlspecs.com/beacon/)（[Source](https://www.w3.org/TR/2022/CRD-beacon-20220803/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Network Error Logging](https://jp.htmlspecs.com/network-error-logging/)（[Source](https://www.w3.org/TR/2025/WD-network-error-logging-20250505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Network Information API](https://jp.htmlspecs.com/netinfo/)（[Source](https://wicg.github.io/netinfo/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### オフライン・バックグラウンド・通知
 - [Web Background Synchronization](https://jp.htmlspecs.com/background-sync/)（[Source](https://wicg.github.io/background-sync/spec/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
@@ -326,6 +327,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Iframe credentialless](https://jp.htmlspecs.com/anonymous-iframe/)（[Source](https://wicg.github.io/anonymous-iframe/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Private State Token API](https://jp.htmlspecs.com/trust-token-api/)（[Source](https://wicg.github.io/trust-token-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Attribution Level 1](https://jp.htmlspecs.com/attribution/)（[Source](https://www.w3.org/TR/2026/WD-attribution-20260602/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Related Website Sets](https://jp.htmlspecs.com/first-party-sets/)（[Source](https://wicg.github.io/first-party-sets/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Private Aggregation API](https://jp.htmlspecs.com/private-aggregation-api/)（[Source](https://patcg-individual-drafts.github.io/private-aggregation-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### 決済・デジタル商品
 - [Payment Request API](https://jp.htmlspecs.com/payment-request/)（[Source](https://www.w3.org/TR/2026/CRD-payment-request-20260327/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
@@ -546,6 +549,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### 表現メタデータ・リンク・内容エンコーディング
 - [HTTP State Management Mechanism](https://jp.htmlspecs.com/http/rfc6265.html)（[Source](https://httpwg.org/specs/rfc6265.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [Cookies: HTTP State Management Mechanism](https://jp.htmlspecs.com/http/draft-ietf-httpbis-rfc6265bis.html)（[Source](https://httpwg.org/http-extensions/draft-ietf-httpbis-rfc6265bis.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Use of the Content-Disposition Header Field in the Hypertext Transfer Protocol (HTTP)](https://jp.htmlspecs.com/http/rfc6266.html)（[Source](https://httpwg.org/specs/rfc6266.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Hypertext Transfer Protocol (HTTP) Client-Initiated Content-Encoding](https://jp.htmlspecs.com/http/rfc7694.html)（[Source](https://httpwg.org/specs/rfc7694.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Web Linking](https://jp.htmlspecs.com/http/rfc8288.html)（[Source](https://httpwg.org/specs/rfc8288.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
