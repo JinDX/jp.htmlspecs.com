@@ -1,0 +1,1850 @@
+<pre>Internet Engineering Task Force (IETF)                       J. Gregorio
+Request for Comments: 6570                                        Google
+分類: Standards Track                                        R. Fielding
+ISSN: 2070-1721                                                    Adobe
+                                                               M. Hadley
+                                                                   MITRE
+                                                           M. Nottingham
+                                                               Rackspace
+                                                              D. Orchard
+                                                          Salesforce.com
+                                                              2012年3月
+
+
+                              <span class="h1">URIテンプレート</span>
+
+概要
+
+   URIテンプレートは、変数展開によって一連のUniform Resource
+   Identifierを記述するためのコンパクトな文字列である。本仕様は、
+   URIテンプレートの構文、およびURIテンプレートをURI参照へ展開する
+   処理を、インターネットにおけるURIテンプレートの使用に関する
+   指針とともに定義する。
+
+本文書の位置付け
+
+   本文書は、インターネット標準化過程の文書である。
+
+   本文書は、Internet Engineering Task Force（IETF）の成果物である。
+   本文書はIETFコミュニティの合意を表している。本文書は公開レビューを
+   受けており、Internet Engineering Steering Group（IESG）によって
+   公開が承認されている。インターネット標準に関する詳細情報は
+   <a href="./rfc5741#section-2">RFC 5741 の第&nbsp;2節</a>で入手可能である。
+
+   本文書の現在の状態、正誤表、および本文書へのフィードバック方法に
+   関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc6570">http://www.rfc-editor.org/info/rfc6570</a>で入手できる。
+
+Copyright Notice
+
+   Copyright (c) 2012 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   Trust Legal Provisions の Section 4.e に記述されている
+   Simplified BSD License の本文を含み、Simplified BSD License に
+   記述されているとおり無保証で提供される。
+
+目次
+
+   <a href="#section-1">1</a>. 序論 ..........................................................<a href="#page-3">3</a>
+      <a href="#section-1.1">1.1</a>. 概要 .....................................................<a href="#page-3">3</a>
+      <a href="#section-1.2">1.2</a>. レベルと式の型 ..........................................<a href="#page-5">5</a>
+      <a href="#section-1.3">1.3</a>. 設計上の考慮事項 ........................................<a href="#page-9">9</a>
+      <a href="#section-1.4">1.4</a>. 制限 ....................................................<a href="#page-10">10</a>
+      <a href="#section-1.5">1.5</a>. 表記上の規約 ............................................<a href="#page-11">11</a>
+      <a href="#section-1.6">1.6</a>. 文字エンコーディングとUnicode正規化 ....................<a href="#page-12">12</a>
+   <a href="#section-2">2</a>. 構文 ..........................................................<a href="#page-13">13</a>
+      <a href="#section-2.1">2.1</a>. リテラル ................................................<a href="#page-13">13</a>
+      <a href="#section-2.2">2.2</a>. 式 ......................................................<a href="#page-13">13</a>
+      <a href="#section-2.3">2.3</a>. 変数 ....................................................<a href="#page-14">14</a>
+      <a href="#section-2.4">2.4</a>. 値修飾子 ................................................<a href="#page-15">15</a>
+           <a href="#section-2.4.1">2.4.1</a>. 接頭値 ..........................................<a href="#page-15">15</a>
+           <a href="#section-2.4.2">2.4.2</a>. 複合値 ..........................................<a href="#page-16">16</a>
+   <a href="#section-3">3</a>. 展開 ..........................................................<a href="#page-18">18</a>
+      <a href="#section-3.1">3.1</a>. リテラル展開 ............................................<a href="#page-18">18</a>
+      <a href="#section-3.2">3.2</a>. 式展開 ..................................................<a href="#page-18">18</a>
+           <a href="#section-3.2.1">3.2.1</a>. 変数展開 ........................................<a href="#page-19">19</a>
+           <a href="#section-3.2.2">3.2.2</a>. 単純文字列展開: {var} .........................<a href="#page-21">21</a>
+           <a href="#section-3.2.3">3.2.3</a>. 予約展開: {+var} ..............................<a href="#page-22">22</a>
+           <a href="#section-3.2.4">3.2.4</a>. フラグメント展開: {#var} ......................<a href="#page-23">23</a>
+           <a href="#section-3.2.5">3.2.5</a>. ドット接頭辞によるラベル展開: {.var} ..........<a href="#page-24">24</a>
+           <a href="#section-3.2.6">3.2.6</a>. パスセグメント展開: {/var} ....................<a href="#page-24">24</a>
+           <a href="#section-3.2.7">3.2.7</a>. パス形式パラメータ展開: {;var} ................<a href="#page-25">25</a>
+           <a href="#section-3.2.8">3.2.8</a>. フォーム形式クエリ展開: {?var} ................<a href="#page-26">26</a>
+           <a href="#section-3.2.9">3.2.9</a>. フォーム形式クエリ継続: {&amp;var} ...............<a href="#page-27">27</a>
+   <a href="#section-4">4</a>. セキュリティ上の考慮事項 ....................................<a href="#page-27">27</a>
+   <a href="#section-5">5</a>. 謝辞 ..........................................................<a href="#page-28">28</a>
+   <a href="#section-6">6</a>. 参考文献 ......................................................<a href="#page-28">28</a>
+      <a href="#section-6.1">6.1</a>. 規範的参考文献 ..........................................<a href="#page-28">28</a>
+      <a href="#section-6.2">6.2</a>. 参考情報 ................................................<a href="#page-29">29</a>
+   <a href="#appendix-A">Appendix A</a>. 実装上のヒント ......................................<a href="#page-30">30</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  序論</span>
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  概要</span>
+
+   Uniform Resource Identifier（URI）[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] は、多くの場合、
+   類似するリソースの共通空間（非公式には「URI空間」）内で
+   特定のリソースを識別するために使用される。たとえば、個人の
+   Web空間は、次のような共通パターンを用いて委任されることが多い。
+
+     http://example.com/~fred/
+     http://example.com/~mark/
+
+   また、辞書項目の集合は、次のように用語の最初の文字によって
+   階層にまとめられることがある。
+
+     http://example.com/dictionary/c/cat
+     http://example.com/dictionary/d/dog
+
+   また、サービスインターフェイスは、次のようにさまざまなユーザー
+   入力を共通パターンで指定して呼び出されることがある。
+
+     http://example.com/search?q=cat&amp;lang=en
+     http://example.com/search?q=chien&amp;lang=fr
+
+   URI Template は、変数展開によって一連の Uniform Resource
+   Identifier を記述するためのコンパクトな文字列である。
+
+   URI Template は、リソース識別子の空間を抽象化する仕組みを提供し、
+   変数部分を容易に識別し記述できるようにする。URI Template には、
+   利用可能なサービスの発見、リソースマッピングの構成、計算された
+   リンクの定義、インターフェイスの指定、およびリソースとのその他の
+   プログラム的なやり取りを含む多くの用途がある。たとえば、上記の
+   リソースは次の URI Template によって記述できる。
+
+     http://example.com/~{username}/
+     http://example.com/dictionary/{term:1}/{term}
+     http://example.com/search{?q,lang}
+
+   本仕様では、次の用語を定義する。
+
+   expression:  <a href="#section-2">Section 2</a> で定義される、囲み中括弧を含む
+      '{' と '}' の間のテキスト。
+
+   expansion:  <a href="#section-3">Section 3</a> で定義される、式の型、変数名のリスト、
+      および値修飾子に従ってテンプレート式を処理した後に得られる
+      文字列結果。
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   template processor:  URI Template と値を持つ変数の集合が与えられた
+      とき、式を解析し、それぞれを対応する展開に置換することで、
+      テンプレート文字列をURI参照に変換するプログラムまたはライブラリ。
+
+   URI Template は、URI空間の構造的な記述と、変数値が提供された
+   ときに、それらの値に対応するURIを構築する方法を示す機械可読な
+   指示の両方を提供する。URI Template は、区切られた各式を、式の型
+   と、その式内で名前付けされた変数の値によって定義される値に
+   置換することでURI参照へ変換される。式の型は、単純な文字列展開から
+   複数の name=value リストまでに及ぶ。展開はURI一般構文に基づくため、
+   実装は、結果として得られる可能性があるあらゆるURIについて
+   スキーム固有の要件を知らなくても、任意のURI Templateを処理できる。
+
+   たとえば、次の URI Template は、変数名の前に現れる "?" 演算子に
+   よって示されるフォーム形式のパラメータ式を含んでいる。
+
+     http://www.example.com/foo{?query,number}
+
+   疑問符（"?"）演算子で始まる式の展開処理は、World Wide Web上の
+   フォーム形式インターフェイスと同じパターンに従う。
+
+     http://www.example.com/foo{?query,number}
+                               \_____________/
+                                  |
+                                  |
+             [ 'query', 'number' ] の各定義済み変数について、
+             それが最初の置換であれば "?" を、以後であれば "&amp;" を
+             置換し、その後に変数名、'='、および変数の値を続ける。
+
+   変数が次の値を持つ場合、
+
+     query  := "mycelium"
+     number := 100
+
+   上記の URI Template の展開は次のようになる。
+
+     http://www.example.com/foo?query=mycelium&amp;number=100
+
+   あるいは、'query' が未定義であれば、展開は次のようになる。
+
+     http://www.example.com/foo?number=100
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   また、両方の変数が未定義であれば、次のようになる。
+
+     http://www.example.com/foo
+
+   URI Template は、上記の例のように絶対形式で提供されることも、
+   相対形式で提供されることもある。テンプレートは、結果の参照が
+   相対形式から絶対形式へ解決される前に展開される。
+
+   結果にはURI構文が使用されるが、テンプレート文字列には
+   Internationalized Resource Identifier（IRI）参照 [<a href="./rfc3987" title="&quot;Internationalized Resource Identifiers (IRIs)&quot;">RFC3987</a>] に
+   見られる、より広範な文字集合を含めることが許される。
+   したがって、URI Template はIRIテンプレートでもあり、
+   テンプレート処理の結果は、<a href="./rfc3987#section-3.2">[RFC3987] の Section&nbsp;3.2</a> に定義された
+   処理に従うことでIRIへ変換できる。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  レベルと式の型</span>
+
+   URI Template は、固定されたマクロ定義の集合を持つマクロ言語に
+   似ている。式の型が展開処理を決定する。デフォルトの式の型は
+   単純文字列展開であり、単一の名前付き変数が、予約されていない
+   URI文字の集合（<a href="#section-1.5">Section 1.5</a>）に含まれない任意の文字を pct-encoding
+   した後、その値の文字列で置換される。
+
+   本仕様以前に実装されたほとんどのテンプレートプロセッサは
+   デフォルトの式の型のみを実装しているため、これらを Level 1
+   テンプレートと呼ぶ。
+
+   .-----------------------------------------------------------------.
+   | Level 1 の例、変数が次の値を持つ場合                            |
+   |                                                                 |
+   |             var   := "value"                                    |
+   |             hello := "Hello World!"                             |
+   |                                                                 |
+   |-----------------------------------------------------------------|
+   | Op       式                    展開                              |
+   |-----------------------------------------------------------------|
+   |     | 単純文字列展開                                (Sec 3.2.2) |
+   |     |                                                           |
+   |     |    {var}                 value                            |
+   |     |    {hello}               Hello%20World%21                 |
+   `-----------------------------------------------------------------'
+
+   Level 2 テンプレートは、予約URI文字（<a href="#section-1.5">Section 1.5</a>）を
+   含めることが許される値の展開のためにプラス（"+"）演算子を追加し、
+   フラグメント識別子の展開のためにクロスハッチ（"#"）演算子を追加する。
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   .-----------------------------------------------------------------.
+   | Level 2 の例、変数が次の値を持つ場合                            |
+   |                                                                 |
+   |             var   := "value"                                    |
+   |             hello := "Hello World!"                             |
+   |             path  := "/foo/bar"                                 |
+   |                                                                 |
+   |-----------------------------------------------------------------|
+   | Op       式                    展開                              |
+   |-----------------------------------------------------------------|
+   |  +  | 予約文字列展開                                (Sec 3.2.3) |
+   |     |                                                           |
+   |     |    {+var}                value                            |
+   |     |    {+hello}              Hello%20World!                   |
+   |     |    {+path}/here          /foo/bar/here                    |
+   |     |    here?ref={+path}      here?ref=/foo/bar                |
+   |-----+-----------------------------------------------------------|
+   |  #  | フラグメント展開、クロスハッチ接頭辞付き      (Sec 3.2.4) |
+   |     |                                                           |
+   |     |    X{#var}               X#value                          |
+   |     |    X{#hello}             X#Hello%20World!                 |
+   `-----------------------------------------------------------------'
+
+   Level 3 テンプレートは、式ごとに複数の変数を許し、それぞれを
+   カンマで区切る。また、ドット接頭辞付きラベル、スラッシュ接頭辞付き
+   パスセグメント、セミコロン接頭辞付きパスパラメータ、および
+   アンパサンド文字で区切られた name=value ペアからなるクエリ構文を
+   フォーム形式で構築するための、より複雑な演算子を追加する。
+
+   .-----------------------------------------------------------------.
+   | Level 3 の例、変数が次の値を持つ場合                            |
+   |                                                                 |
+   |             var   := "value"                                    |
+   |             hello := "Hello World!"                             |
+   |             empty := ""                                         |
+   |             path  := "/foo/bar"                                 |
+   |             x     := "1024"                                     |
+   |             y     := "768"                                      |
+   |                                                                 |
+   |-----------------------------------------------------------------|
+   | Op       式                    展開                              |
+   |-----------------------------------------------------------------|
+   |     | 複数変数による文字列展開                      (Sec 3.2.2) |
+   |     |                                                           |
+   |     |    map?{x,y}             map?1024,768                     |
+   |     |    {x,hello,y}           1024,Hello%20World%21,768        |
+   |     |                                                           |
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   |-----+-----------------------------------------------------------|
+   |  +  | 複数変数による予約展開                        (Sec 3.2.3) |
+   |     |                                                           |
+   |     |    {+x,hello,y}          1024,Hello%20World!,768          |
+   |     |    {+path,x}/here        /foo/bar,1024/here               |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  #  | 複数変数によるフラグメント展開                (Sec 3.2.4) |
+   |     |                                                           |
+   |     |    {#x,hello,y}          #1024,Hello%20World!,768         |
+   |     |    {#path,x}/here        #/foo/bar,1024/here              |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  .  | ラベル展開、ドット接頭辞付き                  (Sec 3.2.5) |
+   |     |                                                           |
+   |     |    X{.var}               X.value                          |
+   |     |    X{.x,y}               X.1024.768                       |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  /  | パスセグメント、スラッシュ接頭辞付き          (Sec 3.2.6) |
+   |     |                                                           |
+   |     |    {/var}                /value                           |
+   |     |    {/var,x}/here         /value/1024/here                 |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  ;  | パス形式パラメータ、セミコロン接頭辞付き      (Sec 3.2.7) |
+   |     |                                                           |
+   |     |    {;x,y}                ;x=1024;y=768                    |
+   |     |    {;x,y,empty}          ;x=1024;y=768;empty              |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  ?  | フォーム形式クエリ、アンパサンド区切り        (Sec 3.2.8) |
+   |     |                                                           |
+   |     |    {?x,y}                ?x=1024&amp;y=768                    |
+   |     |    {?x,y,empty}          ?x=1024&amp;y=768&amp;empty=             |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  &amp;  | フォーム形式クエリ継続                        (Sec 3.2.9) |
+   |     |                                                           |
+   |     |    ?fixed=yes{&amp;x}        ?fixed=yes&amp;x=1024                |
+   |     |    {&amp;x,y,empty}          &amp;x=1024&amp;y=768&amp;empty=             |
+   |     |                                                           |
+   `-----------------------------------------------------------------'
+
+   最後に、Level 4 テンプレートは、各変数名への任意の接尾辞として
+   値修飾子を追加する。接頭修飾子（":"）は、値の先頭から限られた
+   数の文字だけが展開で使用されることを示す（<a href="#section-2.4.1">Section 2.4.1</a>）。
+   explode（"*"）修飾子は、
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   その変数が、名前のリストまたは（name, value）ペアの連想配列の
+   いずれかからなる複合値として扱われ、それぞれのメンバーが別個の
+   変数であるかのように展開されることを示す（<a href="#section-2.4.2">Section 2.4.2</a>）。
+
+   .-----------------------------------------------------------------.
+   | Level 4 の例、変数が次の値を持つ場合                            |
+   |                                                                 |
+   |             var   := "value"                                    |
+   |             hello := "Hello World!"                             |
+   |             path  := "/foo/bar"                                 |
+   |             list  := ("red", "green", "blue")                   |
+   |             keys  := [("semi",";"),("dot","."),("comma",",")]   |
+   |                                                                 |
+   | Op       式                    展開                              |
+   |-----------------------------------------------------------------|
+   |     | 値修飾子による文字列展開                      (Sec 3.2.2) |
+   |     |                                                           |
+   |     |    {var:3}               val                              |
+   |     |    {var:30}              value                            |
+   |     |    {list}                red,green,blue                   |
+   |     |    {list*}               red,green,blue                   |
+   |     |    {keys}                semi,%3B,dot,.,comma,%2C         |
+   |     |    {keys*}               semi=%3B,dot=.,comma=%2C         |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  +  | 値修飾子による予約展開                        (Sec 3.2.3) |
+   |     |                                                           |
+   |     |    {+path:6}/here        /foo/b/here                      |
+   |     |    {+list}               red,green,blue                   |
+   |     |    {+list*}              red,green,blue                   |
+   |     |    {+keys}               semi,;,dot,.,comma,,             |
+   |     |    {+keys*}              semi=;,dot=.,comma=,             |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  #  | 値修飾子によるフラグメント展開                (Sec 3.2.4) |
+   |     |                                                           |
+   |     |    {#path:6}/here        #/foo/b/here                     |
+   |     |    {#list}               #red,green,blue                  |
+   |     |    {#list*}              #red,green,blue                  |
+   |     |    {#keys}               #semi,;,dot,.,comma,,            |
+   |     |    {#keys*}              #semi=;,dot=.,comma=,            |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  .  | ラベル展開、ドット接頭辞付き                  (Sec 3.2.5) |
+   |     |                                                           |
+   |     |    X{.var:3}             X.val                            |
+   |     |    X{.list}              X.red,green,blue                 |
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   |     |    X{.list*}             X.red.green.blue                 |
+   |     |    X{.keys}              X.semi,%3B,dot,.,comma,%2C       |
+   |     |    X{.keys*}             X.semi=%3B.dot=..comma=%2C       |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  /  | パスセグメント、スラッシュ接頭辞付き          (Sec 3.2.6) |
+   |     |                                                           |
+   |     |    {/var:1,var}          /v/value                         |
+   |     |    {/list}               /red,green,blue                  |
+   |     |    {/list*}              /red/green/blue                  |
+   |     |    {/list*,path:4}       /red/green/blue/%2Ffoo           |
+   |     |    {/keys}               /semi,%3B,dot,.,comma,%2C        |
+   |     |    {/keys*}              /semi=%3B/dot=./comma=%2C        |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  ;  | パス形式パラメータ、セミコロン接頭辞付き      (Sec 3.2.7) |
+   |     |                                                           |
+   |     |    {;hello:5}            ;hello=Hello                     |
+   |     |    {;list}               ;list=red,green,blue             |
+   |     |    {;list*}              ;list=red;list=green;list=blue   |
+   |     |    {;keys}               ;keys=semi,%3B,dot,.,comma,%2C   |
+   |     |    {;keys*}              ;semi=%3B;dot=.;comma=%2C        |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  ?  | フォーム形式クエリ、アンパサンド区切り        (Sec 3.2.8) |
+   |     |                                                           |
+   |     |    {?var:3}              ?var=val                         |
+   |     |    {?list}               ?list=red,green,blue             |
+   |     |    {?list*}              ?list=red&amp;list=green&amp;list=blue   |
+   |     |    {?keys}               ?keys=semi,%3B,dot,.,comma,%2C   |
+   |     |    {?keys*}              ?semi=%3B&amp;dot=.&amp;comma=%2C        |
+   |     |                                                           |
+   |-----+-----------------------------------------------------------|
+   |  &amp;  | フォーム形式クエリ継続                        (Sec 3.2.9) |
+   |     |                                                           |
+   |     |    {&amp;var:3}              &amp;var=val                         |
+   |     |    {&amp;list}               &amp;list=red,green,blue             |
+   |     |    {&amp;list*}              &amp;list=red&amp;list=green&amp;list=blue   |
+   |     |    {&amp;keys}               &amp;keys=semi,%3B,dot,.,comma,%2C   |
+   |     |    {&amp;keys*}              &amp;semi=%3B&amp;dot=.&amp;comma=%2C        |
+   |     |                                                           |
+   `-----------------------------------------------------------------'
+
+<span class="h3"><a class="selflink" id="section-1.3" href="#section-1.3">1.3</a>.  設計上の考慮事項</span>
+
+   URI Template に類似する仕組みは、WSDL [<a href="#ref-WSDL" title="&quot;Web Services Description Language (WSDL) Version 2.0 Part 1: Core Language&quot;">WSDL</a>]、WADL
+   [<a href="#ref-WADL" title="&quot;Web Application Description Language&quot;">WADL</a>]、および OpenSearch [<a href="#ref-OpenSearch" title="&quot;OpenSearch 1.1&quot;">OpenSearch</a>] など、複数の仕様内で
+   定義されてきた。本仕様は、その構文を拡張して正式に定義することで、
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                    [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   URI Template を複数のインターネットアプリケーション間および
+   インターネットメッセージフィールド内で一貫して使用できるように
+   すると同時に、これらの以前の定義との互換性を保持する。
+
+   URI Template 構文は、強力な展開機構の必要性と実装の容易さの
+   必要性との間で慎重に均衡を取るよう設計されている。この構文は、
+   解析が自明である一方で、多くの一般的なテンプレートシナリオを
+   表現するのに十分な柔軟性を提供するよう設計されている。実装は
+   テンプレートを解析し、展開を単一パスで実行できる。
+
+   テンプレートは、単一文字の演算子がURI一般構文の区切り文字に
+   対応しているため、一般的な例で使用すると単純で読みやすい。
+   演算子に関連付けられた区切り文字（"."、";"、"/"、"?"、"&amp;"、
+   および "#"）は、列挙された変数がどれも定義されていない場合には
+   省略される。同様に、";"（パス形式パラメータ）の展開処理は、
+   変数値が空の場合に "=" を省略するが、"?"（フォーム形式パラメータ）
+   の処理は、値が空の場合でも "=" を省略しない。演算子に対して
+   事前定義された結合機構が存在しない場合、複数の変数およびリスト値は
+   "," で結合される。"+" および "#" 演算子は、変数値内に見つかった
+   未エンコードの予約文字をそのまま置換する。他の演算子は、展開前に
+   変数値内に見つかった予約文字を pct-encode する。
+
+   URI空間における最も一般的な場合は、Level 1 のテンプレート式で
+   記述できる。URI生成だけを考慮するのであれば、より複雑な形式は
+   変数値を変更することで生成できるため、テンプレート構文は単純な
+   変数展開だけに制限できる。しかし、URI Template には、既存の
+   データ値の観点から識別子の配置を記述するという追加の目標がある。
+   したがって、テンプレート構文には、リソース識別子が一般的に
+   割り当てられる方法を反映する演算子が含まれている。同様に、接頭
+   部分文字列は大規模なリソース空間を分割するためによく使用されるため、
+   変数値の修飾子は、単一の変数名で部分文字列と完全な値文字列の
+   両方を指定する方法を提供する。
+
+<span class="h3"><a class="selflink" id="section-1.4" href="#section-1.4">1.4</a>.  制限</span>
+
+   URI Template は識別子の上位集合を記述するため、区切られた
+   変数式ごとに可能なすべての展開が、既存リソースのURIに対応する
+   ことを意味するものではない。本仕様では、テンプレートに従ってURIを
+   構築するアプリケーションに対して、置換される変数に適切な値集合、
+   または少なくともそれらの値についてユーザーデータ入力を検証する
+   手段が提供されることを想定している。
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   URI Template はURIではない。すなわち、抽象リソースまたは物理
+   リソースを識別せず、URIとして解析されず、テンプレート式が使用前に
+   テンプレートプロセッサによって展開される場合を除き、URIが期待される
+   場所で使用するべきではない。URI Template を運ぶプロトコル要素と、
+   URI参照を期待するプロトコル要素とを区別するために、異なる
+   フィールド名、要素名、または属性名を使用するべきである。
+
+   一部の URI Template は、変数マッチングの目的で逆向きに使用できる。
+   つまり、完全に形成されたURIとテンプレートを比較して、そのURIから
+   変数部分を抽出し、それらを名前付き変数に割り当てることである。
+   変数マッチングが適切に機能するのは、テンプレート式がURIの先頭
+   または末尾、あるいは単純文字列式を囲む予約文字のように、展開の
+   一部になり得ない文字によって区切られている場合に限られる。
+   一般に、正規表現言語の方が変数マッチングに適している。
+
+<span class="h3"><a class="selflink" id="section-1.5" href="#section-1.5">1.5</a>.  表記上の規約</span>
+
+   本文書におけるキーワード "MUST"、"MUST NOT"、"REQUIRED"、"SHALL"、
+   "SHALL NOT"、"SHOULD"、"SHOULD NOT"、"RECOMMENDED"、"MAY"、
+   および "OPTIONAL" は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] に記述されているとおりに
+   解釈されるものとする。
+
+   本仕様は、[<a href="./rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>] の Augmented Backus-Naur Form（ABNF）記法を
+   使用する。次のABNF規則は、規範的参考文献 [<a href="./rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>]、
+   [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>]、および [<a href="./rfc3987" title="&quot;Internationalized Resource Identifiers (IRIs)&quot;">RFC3987</a>] から取り込まれている。
+
+     ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z
+     DIGIT          =  %x30-39             ; 0-9
+     HEXDIG         =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
+                       ; 大文字小文字を区別しない
+
+     pct-encoded    =  "%" HEXDIG HEXDIG
+     unreserved     =  ALPHA / DIGIT / "-" / "." / "_" / "~"
+     reserved       =  gen-delims / sub-delims
+     gen-delims     =  ":" / "/" / "?" / "#" / "[" / "]" / "@"
+     sub-delims     =  "!" / "$" / "&amp;" / "'" / "(" / ")"
+                    /  "*" / "+" / "," / ";" / "="
+
+     ucschar        =  %xA0-D7FF / %xF900-FDCF / %xFDF0-FFEF
+                    /  %x10000-1FFFD / %x20000-2FFFD / %x30000-3FFFD
+                    /  %x40000-4FFFD / %x50000-5FFFD / %x60000-6FFFD
+                    /  %x70000-7FFFD / %x80000-8FFFD / %x90000-9FFFD
+                    /  %xA0000-AFFFD / %xB0000-BFFFD / %xC0000-CFFFD
+                    /  %xD0000-DFFFD / %xE1000-EFFFD
+
+     iprivate       =  %xE000-F8FF / %xF0000-FFFFD / %x100000-10FFFD
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+<span class="h3"><a class="selflink" id="section-1.6" href="#section-1.6">1.6</a>.  文字エンコーディングとUnicode正規化</span>
+
+   本仕様は、「character」、「character encoding scheme」、
+   「code point」、「coded character set」、「glyph」、「non-ASCII」、
+   「normalization」、「protocol element」、および「regular expression」
+   という用語を、[<a href="./rfc6365" title="&quot;Terminology Used in Internationalization in the IETF&quot;">RFC6365</a>] で定義されているとおりに使用する。
+
+   ABNF記法は、その終端値を、US-ASCII符号化文字集合 [<a href="#ref-ASCII" title="&quot;Coded Character Set - 7-bit American Standard Code for Information Interchange&quot;">ASCII</a>] の
+   上位集合である非負整数（コードポイント）として定義する。本仕様は、
+   終端値をUnicode符号化文字集合 [<a href="#ref-UNIV6" title="&quot;The Unicode Standard, Version 6.0.0&quot;">UNIV6</a>] 内のコードポイントとして
+   定義する。
+
+   構文およびテンプレート展開処理はUnicodeコードポイントの観点から
+   定義されているが、テンプレートは実際には、それが現れる文脈に適した
+   任意の形式またはエンコーディングにおける文字の列として存在することを
+   理解しておくべきである。それは、ネットワークプロトコル要素に埋め
+   込まれたオクテットである場合も、バスの側面に描かれたグリフである
+   場合もある。本仕様は、URI Template の文字と、それらの文字を保存または
+   送信するために使用されるオクテットとの間の対応付けについて、特定の
+   文字エンコーディング方式を義務付けない。URI Template がプロトコル
+   要素に現れる場合、その文字エンコーディング方式はそのプロトコルに
+   よって定義される。そのような定義がない場合、URI Template は周囲の
+   テキストと同じ文字エンコーディング方式であると仮定される。
+   URI Template 内の文字列がUnicodeコードポイントの列として処理される
+   ことが REQUIRED となるのは、テンプレート展開処理の間だけである。
+
+   Unicode Standard [<a href="#ref-UNIV6" title="&quot;The Unicode Standard, Version 6.0.0&quot;">UNIV6</a>] は、さまざまな目的のために文字列間の
+   各種等価性を定義している。Unicode Standard Annex #15 [<a href="#ref-UTR15" title="&quot;Unicode Normalization Forms&quot;">UTR15</a>] は、
+   これらの等価性に対する各種 Normalization Form を定義している。
+   正規化形式は、等価な文字列を一貫してエンコードする方法を決定する。
+   理論上は、テンプレートプロセッサを含むすべてのURI処理実装が、
+   URI参照の生成に同じ正規化形式を使用するべきである。実際には、
+   そうではない。値がリソースと同じサーバーによって提供されている
+   場合、その文字列はそのサーバーが期待する形式になっていると仮定できる。
+   値が、データ入力ダイアログなどを介してユーザーによって提供される
+   場合、その文字列は、テンプレートプロセッサによる展開で使用される前に
+   Normalization Form C（NFC: Canonical Decomposition の後に Canonical
+   Composition）として正規化される SHOULD である。
+
+   同様に、読み取り可能な文字列を表す非ASCIIデータがURI参照で使用する
+   ために pct-encoded される場合、テンプレートプロセッサは、まずその
+   文字列をUTF-8 [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] としてエンコードし、その後URI参照内で
+   許されない任意のオクテットを pct-encode する MUST である。
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  構文</span>
+
+   URI Template は、印字可能なUnicode文字の文字列であり、0個以上の
+   埋め込み変数式を含む。各式は、対応する中括弧の対（'{'、'}'）で
+   区切られる。
+
+     URI-Template  = *( literals / expression )
+
+   上記では、テンプレート（およびテンプレートプロセッサの実装）を
+   4つの段階的なレベルの観点から説明したが、本仕様では URI-Template
+   構文を Level 4 のABNFの観点から定義する。下位レベルのテンプレートに
+   限定されたテンプレートプロセッサは、上位レベルにのみ適用される
+   ABNF規則を除外してもよい（MAY）。しかし、サポートされていない
+   レベルをそのようなものとしてエンドユーザーに適切に識別できるよう、
+   すべてのパーサーが完全な構文を実装することが推奨される（RECOMMENDED）。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  リテラル</span>
+
+   URI Template 文字列において式の外側にある文字は、その文字がURIで
+   許される（reserved / unreserved / pct-encoded）場合はURI参照へ
+   そのままコピーされることを意図している。許されない場合は、その文字の
+   UTF-8 [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] エンコーディングに対応する pct-encoded トリプレットの
+   列としてURI参照へコピーされる。
+
+     literals      =  %x21 / %x23-24 / %x26 / %x28-3B / %x3D / %x3F-5B
+                   /  %x5D / %x5F / %x61-7A / %x7E / ucschar / iprivate
+                   /  pct-encoded
+                        ; 次を除く任意のUnicode文字: CTL, SP,
+                        ;  DQUOTE, "'", "%"（pct-encoded を除く）,
+                        ;  "&lt;", "&gt;", "\", "^", "`", "{", "|", "}"
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  式</span>
+
+   テンプレート式は、URI Template のパラメータ化された部分である。
+   各式は、任意の演算子を含む。この演算子は式の型とそれに対応する
+   展開処理を定義し、その後にカンマ区切りの変数指定子（変数名および
+   任意の値修飾子）のリストが続く。演算子が提供されない場合、式は
+   unreserved 値の単純変数展開をデフォルトとする。
+
+     expression    =  "{" [ operator ] variable-list "}"
+     operator      =  op-level2 / op-level3 / op-reserve
+     op-level2     =  "+" / "#"
+     op-level3     =  "." / "/" / ";" / "?" / "&amp;"
+     op-reserve    =  "=" / "," / "!" / "@" / "|"
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   演算子文字は、URI一般構文における予約文字としてのそれぞれの役割を
+   反映するよう選ばれている。本仕様の <a href="#section-3">Section 3</a> で定義される演算子には、
+   次が含まれる。
+
+      +   予約文字列;
+
+      #   "#" を接頭辞とするフラグメント識別子;
+
+      .   "." を接頭辞とする名前ラベルまたは拡張子;
+
+      /   "/" を接頭辞とするパスセグメント;
+
+      ;   ";" を接頭辞とするパスパラメータ名または name=value ペア;
+
+      ?   "?" で始まり、"&amp;" で区切られた name=value ペアからなる
+          クエリコンポーネント; および
+
+      &amp;   リテラルクエリコンポーネント内におけるクエリ形式の
+          &amp;name=value ペアの継続。
+
+   等号（"="）、カンマ（","）、感嘆符（"!"）、アット記号（"@"）、
+   およびパイプ（"|"）の演算子文字は、将来の拡張のために予約される。
+
+   式構文では、ドル（"$"）および括弧 ["(" and ")"] 文字の使用を
+   明示的に除外しており、それらが本仕様の範囲外で使用できるようにしている。
+   たとえば、マクロ言語は、URI Template として処理される前の文字列に
+   マクロ置換を適用するために、これらの文字を使用するかもしれない。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  変数</span>
+
+   演算子（存在する場合）の後、各式には1つ以上のカンマ区切りの
+   変数指定子（varspec）のリストが含まれる。変数名は複数の目的を
+   果たす。期待される値の種類に関する文書化、テンプレートプロセッサ内で
+   値を関連付けるための識別子、および name=value 展開において名前として
+   使用するリテラル文字列（連想配列を explode する場合を除く）である。
+   変数名は、大文字小文字を区別するURIコンポーネント内で展開される
+   可能性があるため、大文字小文字を区別する。
+
+     variable-list =  varspec *( "," varspec )
+     varspec       =  varname [ modifier-level4 ]
+     varname       =  varchar *( ["."] varchar )
+     varchar       =  ALPHA / DIGIT / "_" / pct-encoded
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   varname は、1つ以上の pct-encoded トリプレットを含んでもよい。
+   これらのトリプレットは変数名の本質的な一部と見なされ、処理中に
+   デコードされない。pct-encoded 文字を含む varname は、それらと同じ
+   文字をデコードした varname と同じ変数ではない。URI Template を
+   提供するアプリケーションは、変数名内での pct-encoding の使用において
+   一貫していることが期待される。
+
+   式は、テンプレートプロセッサにとって未知の変数、または undef や
+   null などの特別な "undefined" 値に設定された変数を参照してもよい
+   （MAY）。そのような未定義変数は、展開処理で特別な扱いを受ける
+   （<a href="#section-3.2.1">Section 3.2.1</a>）。
+
+   長さ0の文字列である変数値は、未定義とは見なされない。それは
+   空文字列という定義済みの値を持つ。
+
+   Level 4 テンプレートでは、変数は値のリスト、または (name, value)
+   ペアの連想配列という形式の複合値を持つことができる。このような
+   値の型はテンプレート構文では直接示されないが、展開処理には影響を
+   与える（<a href="#section-3.2.1">Section 3.2.1</a>）。
+
+   リスト値として定義された変数は、そのリストが0個のメンバーを含む場合、
+   未定義と見なされる。(name, value) ペアの連想配列として定義された
+   変数は、その配列が0個のメンバーを含む場合、または配列内のすべての
+   メンバー名が未定義値に関連付けられている場合、未定義と見なされる。
+
+<span class="h3"><a class="selflink" id="section-2.4" href="#section-2.4">2.4</a>.  値修飾子</span>
+
+   Level 4 テンプレート式内の各変数は、その展開が変数の値文字列の
+   接頭部分に制限されること、またはその展開が値リストもしくは
+   (name, value) ペアの連想配列という形式の複合値として explode
+   されることを示す修飾子を持つことができる。
+
+     modifier-level4 =  prefix / explode
+
+<span class="h4"><a class="selflink" id="section-2.4.1" href="#section-2.4.1">2.4.1</a>.  接頭値</span>
+
+   接頭修飾子は、変数展開が変数の値文字列の接頭部分に制限されることを
+   示す。接頭修飾子は、参照インデックスやハッシュベースのストレージで
+   一般的なように、識別子空間を階層的に分割するためによく使用される。
+   また、展開される値を最大文字数に制限する役割も果たす。接頭修飾子は、
+   複合値を持つ変数には適用されない。
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+     prefix        =  ":" max-length
+     max-length    =  %x31-39 0*3DIGIT   ; 正の整数 &lt; 10000
+
+   max-length は、変数の値の先頭からの最大文字数を指す正の整数であり、
+   その値はUnicode文字列として扱われる。この番号付けはオクテットではなく
+   文字単位であることに注意すること。これは、複数オクテットで
+   エンコードされた文字のオクテット間、または pct-encoded トリプレット
+   の途中で分割されることを避けるためである。max-length が変数の値の
+   長さより大きい場合、値文字列全体が使用される。
+
+   たとえば、
+
+     次の変数割り当てが与えられた場合
+
+       var   := "value"
+       semi  := ";"
+
+     例のテンプレート   展開
+
+       {var}              value
+       {var:20}           value
+       {var:3}            val
+       {semi}             %3B
+       {semi:2}           %3B
+
+<span class="h4"><a class="selflink" id="section-2.4.2" href="#section-2.4.2">2.4.2</a>.  複合値</span>
+
+   explode（"*"）修飾子は、変数が値のリスト、または (name, value)
+   ペアの連想配列のいずれかからなる複合値として扱われることを示す。
+   したがって、展開処理は、複合値の各メンバーが別個の変数として
+   列挙されているかのように、それぞれに適用される。この種の変数指定は、
+   非 explode 変数よりも自己文書化の度合いが大幅に低い。これは、
+   変数名と、展開後にURI参照がどのように現れるかとの対応が少ないためである。
+
+     explode       =  "*"
+
+   URI Template には型またはスキーマを示すものが含まれないため、
+   explode される変数の型は文脈によって決定されると仮定される。
+   たとえば、プロセッサには、値を文字列、リスト、または連想配列として
+   区別する形式で値が供給されるかもしれない。同様に、テンプレートが
+   使用される文脈（スクリプト、マークアップ言語、Interface Definition
+   Language など）が、変数名を型、構造、またはスキーマに関連付ける
+   規則を定義するかもしれない。
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   explode 修飾子は、URI Template 構文の簡潔さを向上させる。たとえば、
+   指定された住所に対して地理地図を提供するリソースは、部分的な住所
+   （たとえば、市区町村または郵便番号だけ）を含む、住所入力フィールドの
+   100通りもの組み合わせを受け入れるかもしれない。そのようなリソースは、
+   各住所コンポーネントをすべて順番に列挙したテンプレートとして記述する
+   ことも、次のように explode 修飾子を利用した、はるかに単純な
+   テンプレートとして記述することもできる。
+
+      /mapper{?address*}
+
+   これに加えて、"address" という名前の変数が何を含むことができるかを
+   定義する何らかの文脈、たとえば住所に関する別の標準
+   （例: [<a href="#ref-UPU-S42" title="&quot;International Postal Address Components and Templates&quot;">UPU-S42</a>]）への参照を伴う。スキーマを認識する受信者は、
+   次のような適切な展開を提供できる。
+
+      /mapper?city=Newport%20Beach&amp;state=CA
+
+   explode された変数の展開処理は、使用される演算子と、複合値を
+   値のリストとして扱うか、それとも (name, value) ペアの連想配列として
+   扱うかの両方に依存する。構造体は、構造体定義内のフィールドに対応する
+   名前を持ち、サブ構造内の名前階層を示すために "." 区切りを使用する
+   連想配列であるかのように処理される。
+
+   変数が複合構造を持ち、その構造内の一部のフィールドだけが定義済みの
+   値を持つ場合、定義済みのペアだけが展開に現れる。これは、多数の
+   潜在的なクエリ語からなるテンプレートに有用である。
+
+   リスト変数に適用された explode 修飾子は、展開がリストのメンバー値を
+   反復するようにする。パスおよびクエリパラメータ展開では、各メンバー値は
+   変数名と (varname, value) ペアとして組み合わされる。これにより、
+   次のように、複数の値に対してパスおよびクエリパラメータを繰り返す
+   ことができる。
+
+     次の変数割り当てが与えられた場合
+
+       year  := ("1965", "2000", "2012")
+       dom   := ("example", "com")
+
+     例のテンプレート   展開
+
+       find{?year*}       find?year=1965&amp;year=2000&amp;year=2012
+       www{.dom*}         www.example.com
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  展開</span>
+
+   URI Template 展開の処理は、テンプレート文字列を先頭から末尾まで
+   走査し、リテラル文字をコピーし、各式を、その式内で名前付けされた
+   各変数の値に式の演算子を適用した結果で置換することである。各変数の
+   値は、テンプレート展開の前に形成されていなければならない（MUST）。
+
+   URI Template 文法の各側面に対する展開の要件は、このセクションで
+   定義される。展開処理全体に対する非規範的なアルゴリズムは
+   <a href="#appendix-A">Appendix A</a> に示されている。
+
+   テンプレートプロセッサが、式の外側で &lt;URI-Template&gt; 文法に一致しない
+   文字列を検出した場合、テンプレートの処理は停止するべきであり（SHOULD）、
+   URI参照結果はテンプレートの展開済み部分の後に未展開の残りを含む
+   べきであり（SHOULD）、エラーの位置と種類を呼び出し元アプリケーションに
+   示すべきである（SHOULD）。
+
+   式内でエラーが検出された場合、たとえばテンプレートプロセッサが
+   認識しない、またはまだサポートしていない演算子または値修飾子がある場合、
+   あるいは &lt;expression&gt; 文法で許されない文字が見つかった場合、式の
+   未処理部分は未展開のまま結果へコピーされるべきであり（SHOULD）、
+   テンプレートの残りの処理は継続するべきであり（SHOULD）、エラーの
+   位置と種類を呼び出し元アプリケーションに示すべきである（SHOULD）。
+
+   エラーが発生した場合、返される結果は有効なURI参照ではない可能性がある。
+   それは診断用途だけを意図した、不完全に展開されたテンプレート文字列である。
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  リテラル展開</span>
+
+   リテラル文字がURI構文内の任意の場所で許される
+   （unreserved / reserved / pct-encoded）場合、それは結果文字列へ
+   直接コピーされる。そうでない場合、リテラル文字の pct-encoded 等価物が、
+   まずその文字をUTF-8におけるオクテット列としてエンコードし、その後
+   その各オクテットを pct-encoded トリプレットとしてエンコードすることで、
+   結果文字列へコピーされる。
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  式展開</span>
+
+   各式は、開始中括弧（"{"）文字によって示され、次の終了中括弧（"}"）
+   まで続く。式はネストできない。
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   式は、その式の型を判定し、その後、式内のカンマ区切りの各 varspec に
+   ついて、その型の展開処理に従うことによって展開される。Level 1
+   テンプレートは、デフォルト演算子（単純文字列値展開）と、式ごとに
+   単一の変数に制限される。Level 2 テンプレートは、式ごとに単一の
+   varspec に制限される。
+
+   式の型は、開始中括弧の後の最初の文字を見ることで決定される。
+   その文字が演算子であれば、その演算子に関連付けられた式の型を
+   後の展開判断のために記憶し、variable-list の次の文字へ進む。
+   最初の文字が演算子でない場合、式の型は単純文字列展開であり、
+   最初の文字は variable-list の開始である。
+
+   以下のサブセクションの例では、変数値について次の定義を使用する。
+
+         count := ("one", "two", "three")
+         dom   := ("example", "com")
+         dub   := "me/too"
+         hello := "Hello World!"
+         half  := "50%"
+         var   := "value"
+         who   := "fred"
+         base  := "http://example.com/home/"
+         path  := "/foo/bar"
+         list  := ("red", "green", "blue")
+         keys  := [("semi",";"),("dot","."),("comma",",")]
+         v     := "6"
+         x     := "1024"
+         y     := "768"
+         empty := ""
+         empty_keys  := []
+         undef := null
+
+<span class="h4"><a class="selflink" id="section-3.2.1" href="#section-3.2.1">3.2.1</a>.  変数展開</span>
+
+   未定義の変数（<a href="#section-2.3">Section 2.3</a>）は値を持たず、展開処理では
+   無視される。式内のすべての変数が未定義である場合、その式の展開は
+   空文字列である。
+
+   定義済みかつ空でない値の変数展開は、許可されたURI文字の部分文字列を
+   生成する。<a href="#section-1.6">Section 1.6</a> で説明したように、展開処理はUnicodeコードポイントの
+   観点から定義される。これは、非ASCII文字が結果のURI参照内で一貫して
+   pct-encoded されるようにするためである。テンプレート
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   プロセッサが一貫した展開を得る1つの方法は、値文字列を
+   UTF-8（まだUTF-8でない場合）へトランスコードし、その後、許可された
+   集合に含まれない各オクテットを、対応する pct-encoded トリプレットへ
+   変換することである。もう1つの方法は、値のネイティブな文字エンコーディング
+   から許可されたURI文字の集合へ直接対応付け、残った許可されない文字を、
+   その文字がUTF-8 [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] としてエンコードされたときのオクテットに対応する
+   pct-encoded トリプレットの列へ対応付けることである。
+
+   与えられた展開に対する許可集合は式の型に依存する。予約（"+"）および
+   フラグメント（"#"）展開は、( unreserved / reserved / pct-encoded ) の
+   和集合に含まれる文字集合が pct-encoding なしで通過することを許す。
+   一方、他のすべての式の型は、unreserved 文字だけが pct-encoding なしで
+   通過することを許す。パーセント文字（"%"）は、pct-encoded トリプレットの
+   一部としてのみ、かつ予約/フラグメント展開の場合にのみ許されることに
+   注意すること。他のすべての場合、値文字 "%" は、変数展開によって
+   "%25" として pct-encoded されなければならない（MUST）。
+
+   変数が式内で複数回、または URI Template の複数の式内に現れる場合、
+   その変数の値は展開処理全体を通じて静的でなければならない（MUST）
+   （すなわち、各展開の計算のために、その変数は同じ値を持たなければ
+   ならない）。ただし、予約文字または pct-encoded トリプレットが値内に
+   出現する場合、それらは一部の式の型では pct-encoded され、他の型では
+   そうされない。
+
+   単純文字列値である変数については、展開はエンコード済みの値を
+   結果文字列へ追加することからなる。explode 修飾子は効果を持たない。
+   接頭修飾子は、展開をデコード済み値の最初の max-length 文字に制限する。
+   値が複数オクテット文字または pct-encoded 文字を含む場合、値を文字の
+   途中で分割しないよう注意しなければならない。各Unicodeコードポイントを
+   1文字として数えること。
+
+   連想配列である変数については、展開は式の型と explode 修飾子の有無の
+   両方に依存する。explode 修飾子がない場合、展開は、定義済み値を持つ
+   各 (name, value) ペアのカンマ区切り連結を追加することからなる。
+   explode 修飾子がある場合、展開は、定義済み値を持つ各ペアを
+   "name=value" として追加するか、値が空文字列であり、式の型が
+   フォーム形式パラメータを示さない場合（すなわち "?" または "&amp;" 型で
+   ない場合）は、単に "name" として追加することからなる。name と value
+   文字列の両方は、単純文字列値と同じ方法でエンコードされる。
+   区切り文字列は、次の表で定義されるように、式の型に従って定義済み
+   ペアの間に追加される。
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 20]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-21" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+      型      区切り
+                 ","     （デフォルト）
+        +        ","
+        #        ","
+        .        "."
+        /        "/"
+        ;        ";"
+        ?        "&amp;"
+        &amp;        "&amp;"
+
+   値のリストである変数については、展開は式の型と explode 修飾子の有無の
+   両方に依存する。explode 修飾子がない場合、展開は定義済みの
+   メンバー文字列値のカンマ区切り連結からなる。explode 修飾子があり、
+   式の型が名前付きパラメータ（";"、"?"、または "&amp;"）を展開する場合、
+   リストは、各メンバー値がリストの varname と組み合わされた連想配列で
+   あるかのように展開される。それ以外の場合、その値は、個別の変数値の
+   リストであるかのように展開され、各値は上の表で定義された式の型に
+   関連付けられた区切りによって区切られる。
+
+     例のテンプレート   展開
+
+       {count}            one,two,three
+       {count*}           one,two,three
+       {/count}           /one,two,three
+       {/count*}          /one/two/three
+       {;count}           ;count=one,two,three
+       {;count*}          ;count=one;count=two;count=three
+       {?count}           ?count=one,two,three
+       {?count*}          ?count=one&amp;count=two&amp;count=three
+       {&amp;count*}          &amp;count=one&amp;count=two&amp;count=three
+
+<span class="h4"><a class="selflink" id="section-3.2.2" href="#section-3.2.2">3.2.2</a>.  単純文字列展開: {var}</span>
+
+   単純文字列展開は、演算子が与えられていない場合のデフォルトの
+   式の型である。
+
+   variable-list 内の各定義済み変数について、<a href="#section-3.2.1">Section 3.2.1</a> で定義された
+   変数展開を、許可文字を unreserved 集合内の文字として実行する。
+   複数の変数が定義済み値を持つ場合、変数展開間の区切りとして
+   カンマ（","）を結果文字列へ追加する。
+
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 21]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-22" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+     例のテンプレート   展開
+
+       {var}              value
+       {hello}            Hello%20World%21
+       {half}             50%25
+       O{empty}X          OX
+       O{undef}X          OX
+       {x,y}              1024,768
+       {x,hello,y}        1024,Hello%20World%21,768
+       ?{x,empty}         ?1024,
+       ?{x,undef}         ?1024
+       ?{undef,y}         ?768
+       {var:3}            val
+       {var:30}           value
+       {list}             red,green,blue
+       {list*}            red,green,blue
+       {keys}             semi,%3B,dot,.,comma,%2C
+       {keys*}            semi=%3B,dot=.,comma=%2C
+
+<span class="h4"><a class="selflink" id="section-3.2.3" href="#section-3.2.3">3.2.3</a>.  予約展開: {+var}</span>
+
+   Level 2 以上のテンプレートに対するプラス（"+"）演算子によって示される
+   予約展開は、置換される値が pct-encoded トリプレットおよび reserved
+   集合内の文字も含んでよいことを除き、単純文字列展開と同一である。
+
+   variable-list 内の各定義済み変数について、<a href="#section-3.2.1">Section 3.2.1</a> で定義された
+   変数展開を、許可文字を (unreserved / reserved / pct-encoded) 集合内の
+   文字として実行する。複数の変数が定義済み値を持つ場合、変数展開間の
+   区切りとしてカンマ（","）を結果文字列へ追加する。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 22]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-23" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+     例のテンプレート      展開
+
+       {+var}                value
+       {+hello}              Hello%20World!
+       {+half}               50%25
+
+       {base}index           http%3A%2F%2Fexample.com%2Fhome%2Findex
+       {+base}index          http://example.com/home/index
+       O{+empty}X            OX
+       O{+undef}X            OX
+
+       {+path}/here          /foo/bar/here
+       here?ref={+path}      here?ref=/foo/bar
+       up{+path}{var}/here   up/foo/barvalue/here
+       {+x,hello,y}          1024,Hello%20World!,768
+       {+path,x}/here        /foo/bar,1024/here
+
+       {+path:6}/here        /foo/b/here
+       {+list}               red,green,blue
+       {+list*}              red,green,blue
+       {+keys}               semi,;,dot,.,comma,,
+       {+keys*}              semi=;,dot=.,comma=,
+
+<span class="h4"><a class="selflink" id="section-3.2.4" href="#section-3.2.4">3.2.4</a>.  フラグメント展開: {#var}</span>
+
+   Level 2 以上のテンプレートに対するクロスハッチ（"#"）演算子によって
+   示されるフラグメント展開は、いずれかの変数が定義されている場合に
+   クロスハッチ文字（フラグメント区切り）がまず結果文字列へ追加される
+   ことを除き、予約展開と同一である。
+
+     例のテンプレート   展開
+
+       {#var}             #value
+       {#hello}           #Hello%20World!
+       {#half}            #50%25
+       foo{#empty}        foo#
+       foo{#undef}        foo
+       {#x,hello,y}       #1024,Hello%20World!,768
+       {#path,x}/here     #/foo/bar,1024/here
+       {#path:6}/here     #/foo/b/here
+       {#list}            #red,green,blue
+       {#list*}           #red,green,blue
+       {#keys}            #semi,;,dot,.,comma,,
+       {#keys*}           #semi=;,dot=.,comma=,
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 23]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-24" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+<span class="h4"><a class="selflink" id="section-3.2.5" href="#section-3.2.5">3.2.5</a>.  ドット接頭辞によるラベル展開: {.var}</span>
+
+   Level 3 以上のテンプレートに対するドット（"."）演算子によって示される
+   ラベル展開は、変化するドメイン名またはパスセレクタ（例: ファイル名
+   拡張子）を持つURI空間を記述するのに有用である。
+
+   variable-list 内の各定義済み変数について、"." を結果文字列へ追加し、
+   その後、<a href="#section-3.2.1">Section 3.2.1</a> で定義された変数展開を、許可文字を
+   unreserved 集合内の文字として実行する。
+
+   "." は unreserved 集合内にあるため、"." を含む値は複数のラベルを
+   追加する効果を持つ。
+
+     例のテンプレート   展開
+
+       {.who}             .fred
+       {.who,who}         .fred.fred
+       {.half,who}        .50%25.fred
+       www{.dom*}         www.example.com
+       X{.var}            X.value
+       X{.empty}          X.
+       X{.undef}          X
+       X{.var:3}          X.val
+       X{.list}           X.red,green,blue
+       X{.list*}          X.red.green.blue
+       X{.keys}           X.semi,%3B,dot,.,comma,%2C
+       X{.keys*}          X.semi=%3B.dot=..comma=%2C
+       X{.empty_keys}     X
+       X{.empty_keys*}    X
+
+<span class="h4"><a class="selflink" id="section-3.2.6" href="#section-3.2.6">3.2.6</a>.  パスセグメント展開: {/var}</span>
+
+   Level 3 以上のテンプレートにおけるスラッシュ（"/"）演算子によって
+   示されるパスセグメント展開は、URIパス階層を記述するのに有用である。
+
+   variable-list 内の各定義済み変数について、"/" を結果文字列へ追加し、
+   その後、<a href="#section-3.2.1">Section 3.2.1</a> で定義された変数展開を、許可文字を
+   unreserved 集合内の文字として実行する。
+
+   パスセグメント展開の展開処理は、"." の代わりに "/" を置換することを
+   除き、ラベル展開と同一であることに注意すること。ただし、"." とは異なり、
+   "/" は予約文字であり、値内で見つかった場合は pct-encoded される。
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 24]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-25" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+     例のテンプレート   展開
+
+       {/who}             /fred
+       {/who,who}         /fred/fred
+       {/half,who}        /50%25/fred
+       {/who,dub}         /fred/me%2Ftoo
+       {/var}             /value
+       {/var,empty}       /value/
+       {/var,undef}       /value
+       {/var,x}/here      /value/1024/here
+       {/var:1,var}       /v/value
+       {/list}            /red,green,blue
+       {/list*}           /red/green/blue
+       {/list*,path:4}    /red/green/blue/%2Ffoo
+       {/keys}            /semi,%3B,dot,.,comma,%2C
+       {/keys*}           /semi=%3B/dot=./comma=%2C
+
+<span class="h4"><a class="selflink" id="section-3.2.7" href="#section-3.2.7">3.2.7</a>.  パス形式パラメータ展開: {;var}</span>
+
+   Level 3 以上のテンプレートにおけるセミコロン（";"）演算子によって
+   示されるパス形式パラメータ展開は、"path;property" または
+   "path;name=value" などのURIパスパラメータを記述するのに有用である。
+
+   variable-list 内の各定義済み変数について:
+
+   o  結果文字列へ ";" を追加する;
+
+   o  変数が単純文字列値を持つ場合、または explode 修飾子が
+      与えられていない場合、次を行う:
+
+      *  変数名を（リテラル文字列であるかのようにエンコードして）
+         結果文字列へ追加する;
+
+      *  変数の値が空でない場合、結果文字列へ "=" を追加する;
+
+   o  <a href="#section-3.2.1">Section 3.2.1</a> で定義された変数展開を、許可文字を
+      unreserved 集合内の文字として実行する。
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 25]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-26" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+     例のテンプレート   展開
+
+       {;who}             ;who=fred
+       {;half}            ;half=50%25
+       {;empty}           ;empty
+       {;v,empty,who}     ;v=6;empty;who=fred
+       {;v,bar,who}       ;v=6;who=fred
+       {;x,y}             ;x=1024;y=768
+       {;x,y,empty}       ;x=1024;y=768;empty
+       {;x,y,undef}       ;x=1024;y=768
+       {;hello:5}         ;hello=Hello
+       {;list}            ;list=red,green,blue
+       {;list*}           ;list=red;list=green;list=blue
+       {;keys}            ;keys=semi,%3B,dot,.,comma,%2C
+       {;keys*}           ;semi=%3B;dot=.;comma=%2C
+
+<span class="h4"><a class="selflink" id="section-3.2.8" href="#section-3.2.8">3.2.8</a>.  フォーム形式クエリ展開: {?var}</span>
+
+   Level 3 以上のテンプレートにおける疑問符（"?"）演算子によって示される
+   フォーム形式クエリ展開は、任意のクエリコンポーネント全体を記述するのに
+   有用である。
+
+   variable-list 内の各定義済み変数について:
+
+   o  これが最初の定義済み値である場合は結果文字列へ "?" を追加し、
+      それ以後は "&amp;" を追加する;
+
+   o  変数が単純文字列値を持つ場合、または explode 修飾子が
+      与えられていない場合、変数名（リテラル文字列であるかのように
+      エンコードされたもの）と等号文字（"="）を結果文字列へ追加する; および
+
+   o  <a href="#section-3.2.1">Section 3.2.1</a> で定義された変数展開を、許可文字を
+      unreserved 集合内の文字として実行する。
+
+
+     例のテンプレート   展開
+
+       {?who}             ?who=fred
+       {?half}            ?half=50%25
+       {?x,y}             ?x=1024&amp;y=768
+       {?x,y,empty}       ?x=1024&amp;y=768&amp;empty=
+       {?x,y,undef}       ?x=1024&amp;y=768
+       {?var:3}           ?var=val
+       {?list}            ?list=red,green,blue
+       {?list*}           ?list=red&amp;list=green&amp;list=blue
+       {?keys}            ?keys=semi,%3B,dot,.,comma,%2C
+       {?keys*}           ?semi=%3B&amp;dot=.&amp;comma=%2C
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 26]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-27" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+<span class="h4"><a class="selflink" id="section-3.2.9" href="#section-3.2.9">3.2.9</a>.  フォーム形式クエリ継続: {&amp;var}</span>
+
+   Level 3 以上のテンプレートにおけるアンパサンド（"&amp;"）演算子によって
+   示されるフォーム形式クエリ継続は、固定パラメータを持つリテラルな
+   クエリコンポーネントをすでに含むテンプレート内で、任意の
+   &amp;name=value ペアを記述するのに有用である。
+
+   variable-list 内の各定義済み変数について:
+
+   o  結果文字列へ "&amp;" を追加する;
+
+   o  変数が単純文字列値を持つ場合、または explode 修飾子が
+      与えられていない場合、変数名（リテラル文字列であるかのように
+      エンコードされたもの）と等号文字（"="）を結果文字列へ追加する; および
+
+   o  <a href="#section-3.2.1">Section 3.2.1</a> で定義された変数展開を、許可文字を
+      unreserved 集合内の文字として実行する。
+
+
+     例のテンプレート   展開
+
+       {&amp;who}             &amp;who=fred
+       {&amp;half}            &amp;half=50%25
+       ?fixed=yes{&amp;x}     ?fixed=yes&amp;x=1024
+       {&amp;x,y,empty}       &amp;x=1024&amp;y=768&amp;empty=
+       {&amp;x,y,undef}       &amp;x=1024&amp;y=768
+
+       {&amp;var:3}           &amp;var=val
+       {&amp;list}            &amp;list=red,green,blue
+       {&amp;list*}           &amp;list=red&amp;list=green&amp;list=blue
+       {&amp;keys}            &amp;keys=semi,%3B,dot,.,comma,%2C
+       {&amp;keys*}           &amp;semi=%3B&amp;dot=.&amp;comma=%2C
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  セキュリティ上の考慮事項</span>
+
+   URI Template は、能動的または実行可能な内容を含まない。しかし、
+   攻撃者がテンプレートを制御できる場合、または展開で予約文字を許す
+   式内の変数値を制御できる場合、予期しないURIを作成することが
+   可能かもしれない。いずれの場合も、セキュリティ上の考慮事項は主に、
+   誰がテンプレートを提供するか、誰がテンプレート内の変数に使用する値を
+   提供するか、どの実行文脈（クライアントまたはサーバー）で展開が
+   発生するか、および結果として得られるURIがどこで使用されるかによって
+   決まる。
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 27]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-28" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   本仕様は、URI Template が使用され得る場所を制限しない。
+   現在の実装は、サーバー側開発フレームワーク内、および計算されたリンク
+   またはフォームのためのクライアント側 JavaScript 内に存在する。
+
+   フレームワーク内では、テンプレートは通常、クライアント要求における
+   後続の（要求時の）URI内でデータが現れ得る場所の指針として機能する。
+   したがって、セキュリティ上の懸念はテンプレート自体ではなく、むしろ
+   通常のWeb要求内で、サーバーがユーザー提供データをどのように抽出し
+   処理するかにある。
+
+   クライアント側実装内では、URI Template はHTMLフォームと同じ性質を
+   多く持つ。ただし、URI文字に制限され、単にメッセージ本文の内容だけで
+   なくHTTPヘッダーフィールド値内に含まれる可能性がある点が異なる。
+   "javascript:" で始まるものなど、潜在的に危険なURI参照文字列が、
+   テンプレートと値の両方が信頼できるソースによって提供される場合を除き、
+   展開内に現れないように注意するべきである。
+
+   その他のセキュリティ上の考慮事項は、<a href="./rfc3986#section-7">[RFC3986] の Section&nbsp;7</a> に
+   記述されているURIに対するものと同じである。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  謝辞</span>
+
+   次の人々が本仕様に貢献した: Mike Burrows、Michaeljohn Clement、
+   DeWitt Clinton、John Cowan、Stephen Farrell、Robbie Gates、
+   Vijay K. Gurbani、Peter Johanson、Murray S. Kucherawy、
+   James H. Manger、Tom Petch、Marc Portier、Pete Resnick、
+   James Snell、および Jiankang Yao。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-ASCII">ASCII</a>]       American National Standards Institute, "Coded Character
+                 Set - 7-bit American Standard Code for Information
+                 Interchange", ANSI X3.4, 1986.
+
+   [<a id="ref-RFC2119">RFC2119</a>]     Bradner, S., "Key words for use in RFCs to Indicate
+                 Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, March 1997.
+
+   [<a id="ref-RFC3629">RFC3629</a>]     Yergeau, F., "UTF-8, a transformation format of ISO
+                 10646", STD 63, <a href="./rfc3629">RFC 3629</a>, November 2003.
+
+   [<a id="ref-RFC3986">RFC3986</a>]     Berners-Lee, T., Fielding, R., and L. Masinter,
+                 "Uniform Resource Identifier (URI): Generic Syntax",
+                 STD 66, <a href="./rfc3986">RFC 3986</a>, January 2005.
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 28]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-29" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   [<a id="ref-RFC3987">RFC3987</a>]     Duerst, M. and M. Suignard, "Internationalized Resource
+                 Identifiers (IRIs)", <a href="./rfc3987">RFC 3987</a>, January 2005.
+
+   [<a id="ref-RFC5234">RFC5234</a>]     Crocker, D. and P. Overell, "Augmented BNF for Syntax
+                 Specifications: ABNF", STD 68, <a href="./rfc5234">RFC 5234</a>, January 2008.
+
+   [<a id="ref-RFC6365">RFC6365</a>]     Hoffman, P. and J. Klensin, "Terminology Used in
+                 Internationalization in the IETF", <a href="https://www.rfc-editor.org/bcp/bcp166">BCP 166</a>, <a href="./rfc6365">RFC 6365</a>,
+                 September 2011.
+
+   [<a id="ref-UNIV6">UNIV6</a>]       The Unicode Consortium, "The Unicode Standard, Version
+                 6.0.0", (Mountain View, CA: The Unicode Consortium,
+                 2011.  ISBN 978-1-936213-01-6),
+                 &lt;<a href="http://www.unicode.org/versions/Unicode6.0.0/">http://www.unicode.org/versions/Unicode6.0.0/</a>&gt;.
+
+   [<a id="ref-UTR15">UTR15</a>]       Davis, M. and M. Duerst, "Unicode Normalization Forms",
+                 Unicode Standard Annex # 15, April 2003,
+                 &lt;<a href="http://www.unicode.org/unicode/reports/tr15/tr15-23.html">http://www.unicode.org/unicode/reports/tr15/</a>
+                 <a href="http://www.unicode.org/unicode/reports/tr15/tr15-23.html">tr15-23.html</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  参考情報</span>
+
+   [<a id="ref-OpenSearch">OpenSearch</a>]  Clinton, D., "OpenSearch 1.1", Draft 5, December 2011,
+                 &lt;<a href="http://www.opensearch.org/Specifications/OpenSearch">http://www.opensearch.org/Specifications/OpenSearch</a>&gt;.
+
+   [<a id="ref-UPU-S42">UPU-S42</a>]     Universal Postal Union, "International Postal Address
+                 Components and Templates", UPU S42-1, November 2002,
+                 &lt;<a href="http://www.upu.int/en/activities/addressing/standards.html">http://www.upu.int/en/activities/addressing/</a>
+                 <a href="http://www.upu.int/en/activities/addressing/standards.html">standards.html</a>&gt;.
+
+   [<a id="ref-WADL">WADL</a>]        Hadley, M., "Web Application Description Language",
+                 World Wide Web Consortium Member Submission
+                 SUBM-wadl-20090831, August 2009,
+                 &lt;<a href="http://www.w3.org/Submission/2009/SUBM-wadl-20090831/">http://www.w3.org/Submission/2009/</a>
+                 <a href="http://www.w3.org/Submission/2009/SUBM-wadl-20090831/">SUBM-wadl-20090831/</a>&gt;.
+
+   [<a id="ref-WSDL">WSDL</a>]        Weerawarana, S., Moreau, J., Ryman, A., and R.
+                 Chinnici, "Web Services Description Language (WSDL)
+                 Version 2.0 Part 1: Core Language", World Wide Web
+                 Consortium Recommendation REC-wsdl20-20070626,
+                 June 2007, &lt;<a href="http://www.w3.org/TR/2007/REC-wsdl20-20070626">http://www.w3.org/TR/2007/</a>
+                 <a href="http://www.w3.org/TR/2007/REC-wsdl20-20070626">REC-wsdl20-20070626</a>&gt;.
+
+
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 29]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-30" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  実装上のヒント</span>
+
+   展開に関する規範的セクションでは、記述の明確さのため、各演算子を
+   個別の展開処理として説明している。実際の実装では、式は演算子ごとに
+   処理上のわずかな違いだけを持つ共通アルゴリズムを使用して、左から右へ
+   処理されることを想定している。この非規範的な付録は、そのような
+   アルゴリズムの1つを説明する。
+
+   空の結果文字列と、その非エラー状態を初期化する。
+
+   テンプレートを走査し、"{" によって式が示されるか、"{" 以外の
+   非 literals 文字の存在によってエラーが示されるか、またはテンプレートが
+   終了するまで、リテラルを結果文字列へコピーする（<a href="#section-3.1">Section 3.1</a> と同様）。
+   終了した場合、結果文字列とその現在のエラーまたは非エラー状態を返す。
+
+   o  式が見つかった場合、テンプレートを次の "}" まで走査し、
+      中括弧の間の文字を抽出する。
+
+   o  "}" の前にテンプレートが終了した場合、"{" と抽出された文字を
+      結果文字列へ追加し、その式が不正な形式であることを示す
+      エラー状態で返す。
+
+   抽出された式の最初の文字を調べ、演算子かどうかを判定する。
+
+   o  式が終了していた場合（すなわち "{}" である場合）、未知または
+      未実装の演算子が見つかった場合、または文字が varchar 集合
+      （<a href="#section-2.3">Section 2.3</a>）に含まれない場合、"{"、抽出された式、
+      および "}" を結果文字列へ追加し、結果がエラー状態であることを記憶し、
+      その後テンプレートの残りの走査へ戻る。
+
+   o  既知で実装済みの演算子が見つかった場合、その演算子を保存し、
+      次の文字へ進んで varspec-list を開始する。
+
+   o  それ以外の場合、演算子を NUL（単純文字列展開）として保存する。
+
+   次の値表を使用して、式の型の演算子ごとの処理動作を決定する。
+   "first" の項目は、式の変数のいずれかが定義されている場合に、
+   結果へ最初に追加する文字列である。"sep" の項目は、2番目以降の
+   定義済み変数展開の前に結果へ追加する区切りである。"named" の項目は、
+   explode 修飾子が与えられていない場合に、展開に変数名またはキー名を
+   含めるかどうかを示すブール値である。"ifemp" の項目は、対応する値が
+   空である場合に名前へ追加する文字列である。"allow" の項目は、値の
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 30]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-31" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   展開内で未エンコードのまま許す文字を示す。(U) は、unreserved 集合に
+   含まれない任意の文字がエンコードされることを意味する。(U+R) は、
+   (unreserved / reserved / pct-encoding) の和集合に含まれない任意の文字が
+   エンコードされることを意味する。また、どちらの場合も、許可されない
+   各文字はまずUTF-8におけるオクテット列としてエンコードされ、その後
+   その各オクテットが pct-encoded トリプレットとしてエンコードされる。
+
+   .------------------------------------------------------------------.
+   |          NUL     +      .       /       ;      ?      &amp;      #   |
+   |------------------------------------------------------------------|
+   | first |  ""     ""     "."     "/"     ";"    "?"    "&amp;"    "#"  |
+   | sep   |  ","    ","    "."     "/"     ";"    "&amp;"    "&amp;"    ","  |
+   | named | false  false  false   false   true   true   true   false |
+   | ifemp |  ""     ""     ""      ""      ""     "="    "="    ""   |
+   | allow |   U     U+R     U       U       U      U      U     U+R  |
+   `------------------------------------------------------------------'
+
+   上記の表を念頭に置き、variable-list を次のように処理する。
+
+   各 varspec について、varname 集合に含まれない文字が見つかるか、
+   式の終端に到達するまで variable-list を走査することで、変数名と
+   任意の修飾子を式から抽出する。
+
+   o  式の終端であり、かつ varname が空である場合、テンプレートの
+      残りの走査へ戻る。
+
+   o  式の終端ではなく、最後に見つかった文字が修飾子（"*" または ":"）
+      を示す場合、その修飾子を記憶する。それが explode（"*"）である場合、
+      次の文字を走査する。接頭（":"）である場合、10進整数として表される
+      max-length のために次の1文字から4文字を走査し続け、その後、
+      まだ式の終端でなければ次の文字を走査する。
+
+   o  式の終端ではなく、最後に見つかった文字がカンマ（","）でない場合、
+      "{"、保存された演算子（存在する場合）、走査された varname と修飾子、
+      残りの式、および "}" を結果文字列へ追加し、結果がエラー状態である
+      ことを記憶し、その後テンプレートの残りの走査へ戻る。
+
+   走査された変数名の値を検索し、その後、次を行う。
+
+   o  varname が未知であるか、未定義値を持つ変数に対応する場合
+      （<a href="#section-2.3">Section 2.3</a>）、次の varspec へ進む。
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 31]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-32" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   o  これがこの式に対する最初の定義済み変数である場合、この式の型に
+      対する first 文字列を結果文字列へ追加し、それが行われたことを
+      記憶する。それ以外の場合、sep 文字列を結果文字列へ追加する。
+
+   o  この変数の値が文字列である場合、次を行う。
+
+      *  named が true である場合、リテラルと同じエンコード処理を使用して
+         varname を結果文字列へ追加し、
+
+         +  値が空である場合、ifemp 文字列を結果文字列へ追加し、
+            次の varspec へ進む;
+
+         +  それ以外の場合、"=" を結果文字列へ追加する。
+
+      *  接頭修飾子が存在し、接頭長がUnicode文字数で測った値文字列の
+         長さより短い場合、値文字列の先頭からその数の文字を結果文字列へ
+         追加する。その際、allow 集合に含まれない任意の文字を pct-encoding
+         しつつ、単一のUnicodeコードポイントを表す複数オクテット文字または
+         pct-encoded トリプレット文字を分割しないよう注意する;
+
+      *  それ以外の場合、allow 集合に含まれない任意の文字を pct-encoding
+         した後、値を結果文字列へ追加する。
+
+   o  そうでなく、explode 修飾子が与えられていない場合、次を行う。
+
+      *  named が true である場合、リテラルと同じエンコード処理を使用して
+         varname を結果文字列へ追加し、
+
+         +  値が空である場合、ifemp 文字列を結果文字列へ追加し、
+            次の varspec へ進む;
+
+         +  それ以外の場合、"=" を結果文字列へ追加する; および
+
+      *  この変数の値がリストである場合、定義済みの各リストメンバーを、
+         allow 集合に含まれない任意の文字を pct-encoding した後に
+         結果文字列へ追加し、定義済みの各リストメンバーの間には
+         カンマ（","）を結果へ追加する;
+
+      *  この変数の値が連想配列、またはその他の (name, value) ペア構造の
+         形式である場合、定義済み値を持つ各ペアを "name,value" として、
+         allow 集合に含まれない任意の文字を pct-encoding した後に
+         結果文字列へ追加し、定義済みの各ペアの間にはカンマ（","）を
+         結果へ追加する。
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 32]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-33" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+   o  そうでなく、explode 修飾子が与えられている場合、次を行う。
+
+      *  named が true である場合、定義済み値を持つ定義済みリストメンバー
+         または配列の (name, value) ペアごとに、次を行う。
+
+         +  これが最初の定義済みメンバー/値でない場合、sep 文字列を
+            結果文字列へ追加する;
+
+         +  これがリストである場合、リテラルと同じエンコード処理を使用して
+            varname を結果文字列へ追加する;
+
+         +  これがペアである場合、リテラルと同じエンコード処理を使用して
+            name を結果文字列へ追加する;
+
+         +  メンバー/値が空である場合、ifemp 文字列を結果文字列へ追加する。
+            それ以外の場合、"=" と、allow 集合に含まれない任意の
+            メンバー/値文字を pct-encoding した後のメンバー/値を
+            結果文字列へ追加する。
+
+      *  そうでなく、named が false である場合、次を行う。
+
+         +  これがリストである場合、定義済みの各リストメンバーを、
+            allow 集合に含まれない任意の文字を pct-encoding した後に
+            結果文字列へ追加し、定義済みの各リストメンバーの間には
+            sep 文字列を結果へ追加する。
+
+         +  これが (name, value) ペアの配列である場合、定義済み値を持つ
+            各ペアを "name=value" として、allow 集合に含まれない任意の文字を
+            pct-encoding した後に結果文字列へ追加し、定義済みの各ペアの間には
+            sep 文字列を結果へ追加する。
+
+   この式の variable-list を使い果たしたら、テンプレートの残りの
+   走査へ戻る。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Gregorio, et al.             Standards Track                   [Page 33]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-34" ></span>
+<span class="grey"><a href="./rfc6570">RFC 6570</a>                      URI Template                    March 2012</span>
+
+
+著者の連絡先
+
+   Joe Gregorio
+   Google
+
+   メール: joe@bitworking.org
+   URI:    <a href="http://bitworking.org/">http://bitworking.org/</a>
+
+
+   Roy T. Fielding
+   Adobe Systems Incorporated
+
+   メール: fielding@gbiv.com
+   URI:    <a href="http://roy.gbiv.com/">http://roy.gbiv.com/</a>
+
+
+   Marc Hadley
+   The MITRE Corporation
+
+   メール: mhadley@mitre.org
+   URI:    <a href="http://mitre.org/">http://mitre.org/</a>
+
+
+   Mark Nottingham
+   Rackspace
+
+   メール: mnot@mnot.net
+   URI:    <a href="http://www.mnot.net/">http://www.mnot.net/</a>
+
+
+   David Orchard
+   Salesforce.com
+
+   メール: orchard@pacificspirit.com
+   URI:    <a href="http://www.pacificspirit.com/">http://www.pacificspirit.com/</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Gregorio, et al.             Standards Track                   [Page 34]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
