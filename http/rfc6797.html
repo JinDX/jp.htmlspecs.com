@@ -1,0 +1,2505 @@
+<pre>Internet Engineering Task Force (IETF)                         J. Hodges
+Request for Comments: 6797                                        PayPal
+Category: Standards Track                                     C. Jackson
+ISSN: 2070-1721                               Carnegie Mellon University
+                                                                A. Barth
+                                                            Google, Inc.
+                                                           2012年11月
+
+
+                 <span class="h1">HTTP Strict Transport Security (HSTS)</span>
+
+概要
+
+   本仕様は、Webサイトが自身を安全な接続を介してのみアクセス可能で
+   あると宣言できるようにし、かつ/または、利用者が自らのユーザー
+   エージェントに対して、指定されたサイトとは安全な接続を介してのみ
+   やり取りするよう指示できるようにする仕組みを定義します。この全体的な
+   ポリシーは HTTP Strict Transport Security (HSTS) と呼ばれます。
+   このポリシーは、Webサイトによって Strict-Transport-Security HTTP
+   応答ヘッダーフィールドを介して宣言され、かつ/または、たとえば
+   ユーザーエージェントの設定など、その他の手段によって宣言されます。
+
+このメモの位置付け
+
+   これはインターネット標準化過程の文書です。
+
+   本文書は Internet Engineering Task Force (IETF) の成果物です。
+   これは IETF コミュニティの合意を表すものです。本文書は公開レビューを
+   受けており、Internet Engineering Steering Group (IESG) により公開を
+   承認されています。インターネット標準に関する詳細情報は
+   <a href="./rfc5741#section-2">RFC 5741 のセクション&nbsp;2</a>で参照できます。
+
+   本文書の現在の状態、正誤表、およびフィードバックの提供方法に関する
+   情報は、以下で入手できます。
+   <a href="http://www.rfc-editor.org/info/rfc6797">http://www.rfc-editor.org/info/rfc6797</a>.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+Copyright Notice
+
+   Copyright (c) 2012 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   <a href="#section-1">1</a>. 序論 ........................................................<a href="#page-4">4</a>
+      <a href="#section-1.1">1.1</a>. 本仕様の構成 .........................................<a href="#page-6">6</a>
+      <a href="#section-1.2">1.2</a>. 文書の表記規則 .......................................<a href="#page-6">6</a>
+   <a href="#section-2">2</a>. 概要 ........................................................<a href="#page-6">6</a>
+      <a href="#section-2.1">2.1</a>. ユースケース ..........................................<a href="#page-6">6</a>
+      <a href="#section-2.2">2.2</a>. HTTP Strict Transport Security ポリシーの効果 ..........<a href="#page-6">6</a>
+      <a href="#section-2.3">2.3</a>. 脅威モデル ............................................<a href="#page-6">6</a>
+           <a href="#section-2.3.1">2.3.1</a>. 対処対象となる脅威 ............................<a href="#page-7">7</a>
+                  <a href="#section-2.3.1.1">2.3.1.1</a>. 受動的ネットワーク攻撃者 ............<a href="#page-7">7</a>
+                  <a href="#section-2.3.1.2">2.3.1.2</a>. 能動的ネットワーク攻撃者 ............<a href="#page-7">7</a>
+                  <a href="#section-2.3.1.3">2.3.1.3</a>. Webサイトの開発および配備上のバグ ...<a href="#page-8">8</a>
+           <a href="#section-2.3.2">2.3.2</a>. 対処対象外の脅威 ..............................<a href="#page-8">8</a>
+                  <a href="#section-2.3.2.1">2.3.2.1</a>. フィッシング ........................<a href="#page-8">8</a>
+                  <a href="#section-2.3.2.2">2.3.2.2</a>. マルウェアとブラウザー脆弱性 ........<a href="#page-8">8</a>
+      <a href="#section-2.4">2.4</a>. 要件 ..................................................<a href="#page-9">9</a>
+           <a href="#section-2.4.1">2.4.1</a>. 全体要件 ......................................<a href="#page-9">9</a>
+                  <a href="#section-2.4.1.1">2.4.1.1</a>. 詳細な中核要件 ......................<a href="#page-9">9</a>
+                  <a href="#section-2.4.1.2">2.4.1.2</a>. 詳細な付随要件 .....................<a href="#page-10">10</a>
+   <a href="#section-3">3</a>. 適合性基準 ...................................................<a href="#page-10">10</a>
+   <a href="#section-4">4</a>. 用語 ........................................................<a href="#page-11">11</a>
+   <a href="#section-5">5</a>. HSTS メカニズムの概要 ........................................<a href="#page-13">13</a>
+      <a href="#section-5.1">5.1</a>. HSTS ホスト宣言 .......................................<a href="#page-13">13</a>
+      <a href="#section-5.2">5.2</a>. HSTS ポリシー .........................................<a href="#page-13">13</a>
+      <a href="#section-5.3">5.3</a>. ユーザーエージェントによる HSTS ポリシーの保存と保守 ...<a href="#page-14">14</a>
+      <a href="#section-5.4">5.4</a>. ユーザーエージェントによる HSTS ポリシーの適用 .........<a href="#page-14">14</a>
+   <a href="#section-6">6</a>. 構文 ........................................................<a href="#page-14">14</a>
+      <a href="#section-6.1">6.1</a>. Strict-Transport-Security HTTP 応答ヘッダーフィールド ...<a href="#page-15">15</a>
+           <a href="#section-6.1.1">6.1.1</a>. max-age ディレクティブ ........................<a href="#page-16">16</a>
+           <a href="#section-6.1.2">6.1.2</a>. includeSubDomains ディレクティブ ...............<a href="#page-16">16</a>
+      <a href="#section-6.2">6.2</a>. 例 ....................................................<a href="#page-16">16</a>
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   <a href="#section-7">7</a>. サーバー処理モデル ...........................................<a href="#page-17">17</a>
+      <a href="#section-7.1">7.1</a>. セキュアトランスポート上の HTTP 要求タイプ .............<a href="#page-17">17</a>
+      <a href="#section-7.2">7.2</a>. HTTP 要求タイプ ........................................<a href="#page-18">18</a>
+   <a href="#section-8">8</a>. ユーザーエージェント処理モデル ...............................<a href="#page-18">18</a>
+      8.1. Strict-Transport-Security 応答ヘッダーフィールド
+           処理 ....................................................<a href="#page-19">19</a>
+           <a href="#section-8.1.1">8.1.1</a>. HSTS ホストの記録 - 保存モデル .................<a href="#page-20">20</a>
+      <a href="#section-8.2">8.2</a>. 既知の HSTS ホストのドメイン名照合 .....................<a href="#page-20">20</a>
+      <a href="#section-8.3">8.3</a>. URI 読み込みとポート対応付け ..........................<a href="#page-21">21</a>
+      <a href="#section-8.4">8.4</a>. セキュアトランスポート確立時のエラー ...................<a href="#page-22">22</a>
+      <a href="#section-8.5">8.5</a>. HTTP-Equiv &lt;Meta&gt; 要素属性 ............................<a href="#page-22">22</a>
+      <a href="#section-8.6">8.6</a>. Strict-Transport-Security 応答ヘッダーフィールドの欠落 ...<a href="#page-23">23</a>
+   <a href="#section-9">9</a>. 有効要求 URI の構築 ..........................................<a href="#page-23">23</a>
+      <a href="#section-9.1">9.1</a>. ERU の基本定義 .........................................<a href="#page-23">23</a>
+      <a href="#section-9.2">9.2</a>. 有効要求 URI の決定 ....................................<a href="#page-24">24</a>
+           <a href="#section-9.2.1">9.2.1</a>. 有効要求 URI の例 ..............................<a href="#page-24">24</a>
+   <a href="#section-10">10</a>. ドメイン名の IDNA 正規化 ....................................<a href="#page-25">25</a>
+   <a href="#section-11">11</a>. サーバー実装および配備に関する助言 .........................<a href="#page-26">26</a>
+      <a href="#section-11.1">11.1</a>. 非適合ユーザーエージェントに関する考慮事項 ...........<a href="#page-26">26</a>
+      <a href="#section-11.2">11.2</a>. HSTS ポリシー有効期限に関する考慮事項 ................<a href="#page-26">26</a>
+      11.3. 自己署名公開鍵証明書と併せた HSTS の使用
+            証明書 .................................................<a href="#page-27">27</a>
+      <a href="#section-11.4">11.4</a>. includeSubDomains の含意 ..............................<a href="#page-28">28</a>
+            11.4.1. HSTS ホストの代替ポートまたはサブドメインで
+                    保護されない HTTP サービスを提供する場合の
+                    考慮事項 .......................................<a href="#page-28">28</a>
+            11.4.2. HSTS ホストのサブドメインで Web アプリケーションを
+                    提供する場合の考慮事項 .........................<a href="#page-29">29</a>
+   <a href="#section-12">12</a>. ユーザーエージェント実装に関する助言 .......................<a href="#page-30">30</a>
+      <a href="#section-12.1">12.1</a>. 利用者に回避手段を与えない ...........................<a href="#page-30">30</a>
+      <a href="#section-12.2">12.2</a>. 利用者宣言 HSTS ポリシー .............................<a href="#page-30">30</a>
+      <a href="#section-12.3">12.3</a>. HSTS 事前読み込みリスト ..............................<a href="#page-31">31</a>
+      <a href="#section-12.4">12.4</a>. 混在セキュリティコンテキストの読み込み禁止 ...........<a href="#page-31">31</a>
+      <a href="#section-12.5">12.5</a>. HSTS ポリシー削除 ....................................<a href="#page-31">31</a>
+   13. Internationalized Domain Names for Applications (IDNA):
+       依存関係と移行 ..............................................<a href="#page-32">32</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   <a href="#section-14">14</a>. セキュリティ上の考慮事項 ...................................<a href="#page-32">32</a>
+      <a href="#section-14.1">14.1</a>. 基盤となるセキュアトランスポートに関する考慮事項 .....<a href="#page-32">32</a>
+      <a href="#section-14.2">14.2</a>. 非適合ユーザーエージェントの含意 .....................<a href="#page-33">33</a>
+      14.3. エラーのないセキュアトランスポート上でのみ
+            HSTS ポリシーを確立することの影響 ......................<a href="#page-33">33</a>
+      <a href="#section-14.4">14.4</a>. includeSubDomains の必要性 ............................<a href="#page-34">34</a>
+      <a href="#section-14.5">14.5</a>. サービス拒否 ..........................................<a href="#page-35">35</a>
+      <a href="#section-14.6">14.6</a>. ブートストラップ MITM 脆弱性 ........................<a href="#page-36">36</a>
+      <a href="#section-14.7">14.7</a>. ネットワーク時刻攻撃 ..................................<a href="#page-37">37</a>
+      14.8. 偽のルート CA 証明書フィッシングと DNS キャッシュ
+            ポイズニング攻撃 .......................................<a href="#page-37">37</a>
+      <a href="#section-14.9">14.9</a>. HSTS ポリシーストアの創造的操作 ......................<a href="#page-37">37</a>
+      <a href="#section-14.10">14.10</a>. 国際化ドメイン名 ....................................<a href="#page-38">38</a>
+   <a href="#section-15">15</a>. IANA に関する考慮事項 .......................................<a href="#page-39">39</a>
+   <a href="#section-16">16</a>. 参考文献 ....................................................<a href="#page-39">39</a>
+      <a href="#section-16.1">16.1</a>. 規範的参考文献 .......................................<a href="#page-39">39</a>
+      <a href="#section-16.2">16.2</a>. 参考情報 .............................................<a href="#page-40">40</a>
+   <a href="#appendix-A">付録 A</a>. 設計判断に関する注記 .....................................<a href="#page-44">44</a>
+   <a href="#appendix-B">付録 B</a>. HSTS ポリシーと同一生成元
+               ポリシーの違い ......................................<a href="#page-45">45</a>
+   <a href="#appendix-C">付録 C</a>. 謝辞 ...................................................<a href="#page-46">46</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  序論</span>
+
+   HTTP [<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] はさまざまなトランスポート上で使用でき、典型的には
+   Transmission Control Protocol (TCP) が用いられます。しかし、TCP は
+   チャネルの完全性保護、機密性、または安全なホスト識別を提供しません。
+   そのため、Secure Sockets Layer (SSL) プロトコル [<a href="./rfc6101" title="&quot;The Secure Sockets Layer (SSL) Protocol Version 3.0&quot;">RFC6101</a>] とその後継である
+   Transport Layer Security (TLS) [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] は、チャネル指向のセキュリティを
+   提供するために開発され、通常はアプリケーションプロトコルと TCP の間に
+   階層化されます。[<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>] は HTTP を TLS 上にどのように階層化するかを
+   規定し、"https" の Uniform Resource Identifier (URI) スキームを定義します
+   （ただし実際には、HTTP ユーザーエージェント (UA) は通常、サーバーとの
+   ネゴシエーションと利用者設定の組合せに応じて、TLS または SSL3 の
+   いずれかを使用します）。
+
+   UA は、Web リソースとのやり取りの特性に関して、HTTP を使用しているか
+   HTTP-over-Secure-Transport を使用してその Web リソースのホストと通信して
+   いるかに（部分的に）依存する、さまざまなローカルセキュリティポリシーを
+   採用します。たとえば、Cookie ([<a href="./rfc6265" title="&quot;HTTP State Management Mechanism&quot;">RFC6265</a>]) には Secure フラグを付ける
+   ことができます。UA は、そのような Secure Cookie を、対象ホストに対して
+   セキュアトランスポート上でのみ送信することになっています。これは、
+   トランスポートにかかわらず（ただし他の規則には従って）ホストに返される
+   非 Secure Cookie とは対照的です。
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   UA は通常、TLS サーバー証明書の信頼チェーンを検証できない場合、TLS
+   サーバー証明書の有効期限が切れている場合、または TLS ホストのドメイン名が
+   TLS サーバー証明書内で誤っているように見える場合など、セキュア接続の
+   確立に関する問題を利用者に通知します（<a href="./rfc2818#section-3.1">[RFC2818] のセクション&nbsp;3.1</a>を参照）。
+   多くの場合、UA はそのような問題があっても、利用者が Web リソースの
+   ホストとのやり取りを継続することを選択できるようにします。この挙動は
+   ときに、セキュリティを「クリックして通過する」こと [<a href="#ref-GoodDhamijaEtAl05">GoodDhamijaEtAl05</a>]
+   [<a href="#ref-SunshineEgelmanEtAl09">SunshineEgelmanEtAl09</a>] と呼ばれます。したがって、これは「クリック通過
+   型の非安全性」と表現できます。
+
+   クリック通過型の非安全性によって可能になる主要な脆弱性は、Web リソースが
+   利用者のセッション管理に使用している可能性のある Cookie の漏えいです。
+   ここでの脅威は、攻撃者が Cookie を取得し、その後、利用者になりすまして
+   正規の Web リソースとやり取りできることです。
+
+   Jackson と Barth は [<a href="#ref-ForceHTTPS">ForceHTTPS</a>] において、UA による Web リソースとの
+   あらゆるやり取りを安全に行わなければならず、セキュアトランスポート
+   セッション確立に関するあらゆる問題を致命的かつ利用者が直接回避できない
+   ものとして扱うことを、Web リソースが宣言できるようにする手法を提案しました。
+   その目的は、クリック通過型の非安全性を防ぎ、その他の潜在的脅威に
+   対処することです。
+
+   本仕様は、[<a href="#ref-ForceHTTPS">ForceHTTPS</a>] で提案された手法を具体化し、洗練したものです。
+   たとえば、Web リソースのホストから UA へポリシーを伝達するために Cookie を
+   使用するのではなく、この目的のための HTTP 応答ヘッダーフィールドを定義します。
+   さらに、Web リソースのホストは、そのホスト名を根とするドメイン名サブツリー
+   全体にポリシーを適用すると宣言できます。これにより、HTTP Strict
+   Transport Security (HSTS) は、特定の Web リソースのホスト名のすべての
+   サブドメインに適用される、いわゆる「ドメイン Cookie」を保護できます。
+
+   本仕様はまた、ポリシーが「ホスト全体」単位で適用されるという点で、
+   [<a href="#ref-JacksonBarth2008">JacksonBarth2008</a>] の考え方も取り入れています。すなわち、発行元ホストの
+   任意の TCP ポート上の HTTP（のみ）に適用されます。
+
+   本仕様で定義されるポリシーは、"The Web Origin Concept" [<a href="./rfc6454" title="&quot;The Web Origin Concept&quot;">RFC6454</a>] で
+   定義される「同一生成元ポリシー」とは明確に異なることに注意してください。
+   これらの違いは<a href="#appendix-B">付録 B</a>にまとめられています。
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  本仕様の構成</span>
+
+   本仕様は、HSTS のユースケース、ポリシー効果、脅威モデル、および要件の
+   概要から始まります（<a href="#section-2">セクション 2</a>）。次に、<a href="#section-3">セクション 3</a>で適合性要件を
+   定義します。<a href="#section-4">セクション 4</a>では、本文書に関連する用語を定義します。
+   HSTS メカニズム自体は、セクション <a href="#section-5">5</a> から <a href="#section-15">15</a> で正式に規定されます。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  文書の表記規則</span>
+
+   注記:  これは読者への注記です。明示的に念頭に置くべき点、または
+          考慮すべき点を示します。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  概要</span>
+
+   このセクションではユースケースについて説明し、HSTS ポリシーを要約し、
+   さらに脅威モデル、対処されない脅威、およびそこから導かれる要件について
+   論じます。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  ユースケース</span>
+
+   高レベルのユースケースは、次の組合せです。
+
+   o  Web ブラウザー利用者が、さまざまな Web サイト（任意のものもあれば、
+      既知のものもある）と安全な方法でやり取りしたい。
+
+   o  Web サイトの配備者が、自分自身のため、また利用者のために、自身のサイトを
+      明示的に安全な方法で提供したい。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  HTTP Strict Transport Security ポリシーの効果</span>
+
+   HSTS ポリシーを保持する Web リソースホスト（HSTS ホストとして知られる）
+   とのやり取りにおいて、適合 UA によって適用される HSTS ポリシーの効果は、
+   次のように要約されます。
+
+   1.  UA は、HSTS ホストへの安全でない URI 参照を、参照解除する前に安全な
+       URI 参照へ変換します。
+
+   2.  UA は、あらゆるセキュアトランスポートエラーまたは警告が発生した場合、
+       セキュアトランスポート接続の試行を終了します。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  脅威モデル</span>
+
+   HSTS は、受動的ネットワーク攻撃者、能動的ネットワーク攻撃者、および
+   不完全な Web 開発者という 3 つの脅威クラスを対象とします。ただし、
+   他の 2 つの脅威クラス、すなわちフィッシングとマルウェアに対する
+   救済策ではないことを明示します。対処される脅威、および対処されない脅威を
+   以下で簡単に論じます。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   読者は、詳細および関連する引用について、[<a href="#ref-ForceHTTPS">ForceHTTPS</a>] のセクション 2 を
+   参照するとよいでしょう。
+
+<span class="h4"><a class="selflink" id="section-2.3.1" href="#section-2.3.1">2.3.1</a>.  対処対象となる脅威</span>
+
+<span class="h5"><a class="selflink" id="section-2.3.1.1" href="#section-2.3.1.1">2.3.1.1</a>.  受動的ネットワーク攻撃者</span>
+
+   利用者がローカル無線ネットワーク（たとえば 802.11 ベースの無線 LAN）上で
+   Web を閲覧する場合、近くにいる攻撃者は、ローカル無線ネットワーク自体が
+   保護されているかどうかにかかわらず、HTTP などの利用者の暗号化されていない
+   Internet Protocol ベースの接続を盗聴できる可能性があります [<a href="#ref-BeckTews09">BeckTews09</a>]。
+   自由に入手可能な無線スニッフィングツールキット（たとえば [<a href="#ref-Aircrack-ng">Aircrack-ng</a>]）は、
+   ローカル無線ネットワークが安全な方法で運用されている場合でも、そのような
+   受動的盗聴攻撃を可能にします。そのようなツールを使用する受動的
+   ネットワーク攻撃者は、認証資格情報を含む Cookie を取得することで、
+   セッション識別子/Cookie を盗み、利用者の Web セッションを乗っ取ることが
+   できます [<a href="#ref-ForceHTTPS">ForceHTTPS</a>]。たとえば、Firesheep（Web ブラウザー拡張機能）
+   [<a href="#ref-Firesheep">Firesheep</a>] のように、さまざまな Web アプリケーションについて、他の
+   ローカル利用者のセッション Cookie を取得できる広く入手可能なツールが
+   存在します。
+
+   そのような脅威を緩和するため、一部の Web サイトはエンドツーエンドの
+   セキュアトランスポートを用いたアクセスをサポートしますが、通常は強制しません
+   -- たとえば "https" スキーム [<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>] で構築された URI を通じて
+   示されます。これにより、利用者はそのようなサービスへセキュアトランスポートで
+   アクセスすれば、受動的ネットワーク攻撃者から保護されると信じる可能性があります。
+   残念ながら、実世界の配備では多くの場合そうではありません。なぜなら、
+   セッション識別子は、安全でないトランスポート上で提供されるサービスのバージョンと
+   相互運用できるようにするため、非 Secure Cookie に保存されることが多いからです
+   （"Secure Cookie" とは、"Secure" 属性 [<a href="./rfc6265" title="&quot;HTTP State Management Mechanism&quot;">RFC6265</a>] を含む Cookie です）。
+   たとえば、ある Web サイト（たとえば電子メールサービス）のセッション識別子が
+   非 Secure Cookie に保存されている場合、利用者の UA がそのサイトへ安全でない
+   HTTP 要求を 1 回行うだけで、攻撃者は利用者のセッションを乗っ取ることができます。
+
+<span class="h5"><a class="selflink" id="section-2.3.1.2" href="#section-2.3.1.2">2.3.1.2</a>.  能動的ネットワーク攻撃者</span>
+
+   断固とした攻撃者は、利用者の DNS サーバーになりすますこと、または無線
+   ネットワーク内でネットワークフレームを詐称すること、あるいは似た名前の
+   悪意ある双子アクセスポイントを提供することにより、能動的攻撃を仕掛けることが
+   できます。利用者が無線ホームルーターの背後にいる場合、攻撃者はデフォルト
+   パスワードやその他の脆弱性を使用してルーターの再設定を試みることができます。
+   銀行などの一部のサイトは、そのような能動的攻撃者から自分自身と利用者を
+   保護するため、エンドツーエンドのセキュアトランスポートに依存しています。
+   残念ながら、ブラウザーは利用者がこれらの保護を容易に解除できるようにしており、
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   これは、たとえば自ら証明書を生成して自己署名する（かつ、その認証局 (CA)
+   証明書を利用者のブラウザーに配布しない）など、セキュアトランスポートを
+   誤って配備しているサイトでも利用できるようにするためです。
+
+<span class="h5"><a class="selflink" id="section-2.3.1.3" href="#section-2.3.1.3">2.3.1.3</a>.  Webサイトの開発および配備上のバグ</span>
+
+   それ以外は一貫して安全なサイト（すなわち、そのすべての内容が "https" URI
+   によって実体化されるサイト）のセキュリティは、能動的攻撃者が単純なミスを
+   悪用することで完全に損なわれる可能性があります。たとえば、カスケーディング
+   スタイルシートや SWF (Shockwave Flash) ムービーを安全でない接続上で読み込む
+   ことです（カスケーディングスタイルシートと SWF ムービーはいずれも、埋め込み元
+   ページをスクリプト化できます。これは多くの Web 開発者にとって意外なことです。
+   さらに一部のブラウザーは、SWF ファイルが安全でない接続経由で埋め込まれた場合に、
+   いわゆる「混在コンテンツ警告」を発しません）。サイトの開発者がログインページに
+   「混在コンテンツ」がないか注意深く調べていたとしても、サイト全体のどこかで
+   1 つでも安全でない埋め込みがあると、ログインページのセキュリティは損なわれます。
+   なぜなら、攻撃者は安全でなく読み込まれた別のサイトページにコード
+   （たとえばスクリプト）を注入することで、ログインページをスクリプト化
+   （すなわち制御）できるからです。
+
+   注記:  上で使用される「混在コンテンツ」（[<a href="#ref-W3C.REC-wsc-ui-20100812">W3C.REC-wsc-ui-20100812</a>] の
+          セクション 5.3 も参照）は、本仕様で「混在セキュリティコンテキスト」と
+          呼ばれる概念を指し、XML や HTML などのマークアップ言語の文脈で使われる
+          同じ「混在コンテンツ」という用語と混同しないでください。
+
+<span class="h4"><a class="selflink" id="section-2.3.2" href="#section-2.3.2">2.3.2</a>.  対処対象外の脅威</span>
+
+<span class="h5"><a class="selflink" id="section-2.3.2.1" href="#section-2.3.2.1">2.3.2.1</a>.  フィッシング</span>
+
+   フィッシング攻撃は、攻撃者が本物のサイトとは異なるドメインに置かれた偽サイトを
+   ホストし、おそらく電子メールメッセージ内のリンクを送ることで偽サイトへ誘導し、
+   利用者から認証資格情報を求める場合に発生します。利用者は本物のサイトと
+   偽サイトを見分けるのが難しいため、フィッシング攻撃は非常に効果的になり得ます。
+   HSTS はフィッシングそのものに対する防御ではありません。むしろ、ブラウザーに
+   セッションの完全性と長期存続する認証トークンを保護するよう指示することで、
+   多くの既存のフィッシング対策を補完します [<a href="#ref-ForceHTTPS">ForceHTTPS</a>]。
+
+<span class="h5"><a class="selflink" id="section-2.3.2.2" href="#section-2.3.2.2">2.3.2.2</a>.  マルウェアとブラウザー脆弱性</span>
+
+   HSTS はブラウザーセキュリティメカニズムとして実装されるため、セッションを
+   保護するには利用者のシステムの信頼性に依存します。利用者のシステム上で
+   実行される悪意あるコードは、HSTS が使用されているかどうかにかかわらず、
+   ブラウザーセッションを侵害できます。
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-2.4" href="#section-2.4">2.4</a>.  要件</span>
+
+   このセクションでは、上記のユースケースと脅威から導かれるさまざまな要件を
+   識別して列挙し、HTTP Strict Transport Security が対処する詳細な中核要件、
+   および直接には対処しない付随要件を列挙します。
+
+<span class="h4"><a class="selflink" id="section-2.4.1" href="#section-2.4.1">2.4.1</a>.  全体要件</span>
+
+   o  Web ブラウザー利用者および Web サイト配備者にとって、受動的および能動的な
+      ネットワーク攻撃者、Web サイトの開発および配備上のバグ、ならびに
+      安全でない利用者操作から生じるリスクを最小化すること。
+
+<span class="h5"><a class="selflink" id="section-2.4.1.1" href="#section-2.4.1.1">2.4.1.1</a>.  詳細な中核要件</span>
+
+   これらの中核要件は全体要件から導かれ、本仕様によって対処されます。
+
+   1.  Web サイトは、UA に対して、厳格なセキュリティポリシーを使用して
+       アクセスされるべきであると宣言できる必要があります。
+
+   2.  Web サイトは、安全でない方法で接触してくる UA に対し、安全な方法で
+       接触するよう指示できる必要があります。
+
+   3.  UA は、厳格なセキュリティポリシー有効化を通知する Web サイトについて、
+       Web サイトが宣言した期間にわたり永続的なデータを保持する必要があります。
+       さらに、Web サイトが情報を更新できるようにするため、UA は「最新の」
+       厳格なセキュリティポリシー情報をキャッシュする必要があります。
+
+   4.  UA は、セキュアポリシーが有効化されている Web サイトについて、安全でない
+       UA のすべての "http" URI 読み込みを、"https" セキュアスキームを使用するよう
+       書き換える必要があります。
+
+   5.  Web サイト管理者は、厳格なセキュリティポリシーが有効化されている
+       上位レベルドメインのサブドメインに対して、厳格なセキュリティポリシーの
+       適用を通知できる必要があり、UA はそのようなポリシーを適用する必要があります。
+
+       たとえば、example.com と foo.example.com はどちらも bar.foo.example.com に
+       ポリシーを設定できます。
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                    [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   6.  UA は、厳格なセキュリティポリシーが有効化されているドメインによる、
+       同位ドメインおよび/または上位レベルドメインへのセキュリティポリシーの
+       適用を禁止する必要があります。
+
+       たとえば、bar.foo.example.com も foo.example.com も example.com に
+       ポリシーを設定することはできず、bar.foo.example.com は foo.example.com に
+       ポリシーを設定することもできません。また、foo.example.com は
+       sibling.example.com にポリシーを設定できません。
+
+   7.  UA は、利用者がセキュリティ警告を「クリックして通過する」ことを防ぐ
+       必要があります。セキュアトランスポート例外が発生した場合に接続試行を
+       停止することは許容されます。<a href="#section-12.1">セクション 12.1</a>（「利用者に回避手段を
+       与えない」）も参照してください。
+
+   注記:  上記の第一の中核要件を一様に安全に満たす手段は、本仕様では具体的には
+          対処されません（<a href="#section-14.6">セクション 14.6</a>（「ブートストラップ MITM
+          脆弱性」）を参照）。これは本仕様の将来の改訂または他の仕様によって
+          対処される可能性があります。また、UA 実装が第一の中核要件をより完全に
+          満たせる手段があることにも注意してください。<a href="#section-12">セクション 12</a>
+          （「ユーザーエージェント実装に関する助言」）を参照してください。
+
+<span class="h5"><a class="selflink" id="section-2.4.1.2" href="#section-2.4.1.2">2.4.1.2</a>.  詳細な付随要件</span>
+
+   これらの付随要件も全体要件から導かれます。本仕様では規範的には
+   対処されませんが、これらの要件を満たすことは複雑である可能性があるものの、
+   UA 実装が実装者の裁量で満たすことができます。
+
+   1.  「混在セキュリティコンテキスト」の読み込みを禁止する
+       （<a href="#section-2.3.1.3">セクション 2.3.1.3</a>を参照）。
+
+   2.  サイトが HSTS ポリシーを通知するかどうかにかかわらず、厳格な
+       セキュリティポリシーが有効化される Web サイトを、利用者が宣言できるようにする。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  適合性基準</span>
+
+   本仕様はホストおよびユーザーエージェント向けに書かれています。
+
+   適合ホストとは、本仕様に列挙されたホストに適用可能なすべての要件を
+   実装するホストです。
+
+   適合ユーザーエージェントとは、本仕様に列挙されたユーザーエージェントに
+   適用可能なすべての要件を実装するものです。
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   本文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", および
+   "OPTIONAL" は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] で述べられているとおりに解釈されるものとします。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  用語</span>
+
+   用語はこのセクションで定義されます。
+
+   ASCII 大文字小文字を区別しない比較:
+
+      とは、2 つの文字列をコードポイントごとに正確に比較することを意味しますが、
+      U+0041 ..  U+005A の範囲の文字（すなわち LATIN CAPITAL LETTER A から
+      LATIN CAPITAL LETTER Z）と、U+0061 ..  U+007A の範囲の対応する文字
+      （すなわち LATIN SMALL LETTER A から LATIN SMALL LETTER Z）は、
+      互いに一致するものと見なされます。詳細は [<a href="#ref-Unicode" title="&quot;The Unicode Standard&quot;">Unicode</a>] を参照してください。
+
+   codepoint:
+
+      は Code Point の口語的短縮形であり、Unicode コード空間内の任意の値、
+      すなわち 0 から 10FFFF(hex) までの整数の範囲です [<a href="#ref-Unicode" title="&quot;The Unicode Standard&quot;">Unicode</a>]。
+
+   domain name:
+
+      は "DNS name" とも呼ばれ、[<a href="./rfc1035" title="&quot;Domain names - implementation and specification&quot;">RFC1035</a>] では、DNS プロトコル自体
+      （およびその実装）の外部で、ドットで区切られた一連のラベルとして
+      表されるものと定義されています。たとえば "example.com" や
+      "yet.another.example.org" です。本仕様の文脈では、ドメイン名は
+      [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の "Appendix A.  Collected ABNF for URI" にある reg-name
+      生成規則を満たす URI の一部、および <a href="./rfc2616#section-14.23">[RFC2616] のセクション&nbsp;14.23</a>にある
+      Host HTTP ヘッダーフィールド生成規則の host 構成要素に現れます。
+
+      注記:  実際の URI インスタンス内に現れ、前述の生成規則構成要素と一致する
+             ドメイン名は、完全修飾ドメイン名である場合も、そうでない場合も
+             あります。
+
+   domain name label:
+
+      はドメイン名の「ドットの間」に現れる部分です。すなわち、"foo.example.com" を
+      考えると、"foo"、"example"、および "com" はすべてドメイン名ラベルです。
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   Effective Request URI:
+
+      は、受信した任意の HTTP 要求について HTTP ホストが推論できる、対象リソースを
+      識別する URI です。そのような推論が必要になるのは、HTTP 要求が対象リソースを
+      識別する完全な「絶対」URI を含まないことが多いためです。
+      <a href="#section-9">セクション 9</a>（「有効要求 URI の構築」）を参照してください。
+
+   HTTP Strict Transport Security:
+
+      は、本仕様で定義される UA 側およびサーバー側のセキュリティポリシーを
+      合わせた全体の名称です。
+
+   HTTP Strict Transport Security Host:
+
+      は、HSTS ポリシーの HTTP サーバー側の側面を実装する適合ホストです。
+      これは、HSTS ホストがセキュアトランスポート上で送信される HTTP 応答
+      メッセージ内に "Strict-Transport-Security" HTTP 応答ヘッダーフィールドを
+      返すことを意味します。
+
+   HTTP Strict Transport Security Policy:
+
+      は、本仕様で定義される挙動の UA 側およびサーバー側の側面を合わせた
+      全体の名称です。
+
+   HSTS:
+
+      HTTP Strict Transport Security を参照してください。
+
+   HSTS Host:
+
+      HTTP Strict Transport Security Host を参照してください。
+
+   HSTS Policy:
+
+      HTTP Strict Transport Security Policy を参照してください。
+
+   Known HSTS Host:
+
+      は、UA に HSTS ポリシーが有効になっている HSTS ホストです。すなわち、
+      UA がこのホストを Known HSTS Host として記録しているものです。詳細は
+      <a href="#section-8.1.1">セクション 8.1.1</a>（「HSTS ホストの記録 - 保存モデル」）を参照してください。
+
+   Local policy:
+
+      は、配備者が指定するポリシー規則からなり、多くの場合、設定項目として
+      表現されます。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   MITM:
+
+      は "man in the middle" の頭字語です。[<a href="./rfc4949" title="&quot;Internet Security Glossary, Version 2&quot;">RFC4949</a>] の
+      "man-in-the-middle attack" を参照してください。
+
+   Request URI:
+
+      は、UA に HTTP 要求メッセージを発行させるために使用される URI です。
+      "Effective Request URI" も参照してください。
+
+   UA:
+
+      は "user agent" の頭字語です。本仕様の目的上、UA は、通常は利用者が
+      能動的に操作する HTTP クライアントアプリケーションです [<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>]。
+
+   unknown HSTS Host:
+
+      は、ユーザーエージェントが記録していない HSTS ホストです。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  HSTS メカニズムの概要</span>
+
+   このセクションでは、HSTS ホストがその HSTS ポリシーを UA に伝達する仕組み、
+   および UA が HSTS ホストから受け取った HSTS ポリシーをどのように処理するかの
+   概要を示します。メカニズムの詳細は、セクション <a href="#section-6">6</a> から <a href="#section-15">15</a> で
+   規定されます。
+
+<span class="h3"><a class="selflink" id="section-5.1" href="#section-5.1">5.1</a>.  HSTS ホスト宣言</span>
+
+   HTTP ホストは、セキュアトランスポート（たとえば TLS）上で
+   Strict-Transport-Security HTTP 応答ヘッダーフィールドによって表され、
+   それを介して伝達される HSTS ポリシーを UA に発行することで、自身を
+   HSTS ホストであると宣言します。適合 UA がこのヘッダーをエラーなく受信し
+   処理すると、その UA はそのホストを Known HSTS Host と見なします。
+
+<span class="h3"><a class="selflink" id="section-5.2" href="#section-5.2">5.2</a>.  HSTS ポリシー</span>
+
+   HSTS ポリシーは、UA に対し、Known HSTS Host とはセキュアトランスポート上で
+   のみ通信するよう指示し、ポリシー保持期間を指定します。
+
+   HSTS ポリシーは、URI 参照、利用者入力（たとえば "location bar" 経由）、
+   またはその他の情報の UA 処理を明示的に上書きします。HSTS ポリシーが
+   なければ、そのような情報は UA に Known HSTS Host と安全でない方法で
+   通信させる可能性があります。
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   HSTS ポリシーは、任意のディレクティブ -- includeSubDomains -- を含むことが
+   でき、この HSTS ポリシーが Known HSTS Host のドメイン名のサブドメインである
+   任意のホストにも適用されることを指定します。
+
+<span class="h3"><a class="selflink" id="section-5.3" href="#section-5.3">5.3</a>.  ユーザーエージェントによる HSTS ポリシーの保存と保守</span>
+
+   UA は、発行元 HSTS ホストのドメイン名のみに厳密に基づいて HSTS ポリシーを
+   保存し、索引付けします。
+
+   これは、UA が、任意の HSTS ホストの HSTS ポリシーを、その HSTS ホストの
+   ドメイン名の上位ドメインまたはサブドメインであるドメイン名を持つ他の
+   HSTS ホストによって発行された HSTS ポリシーとは別個に保守することを意味します。
+   発行された HSTS ポリシーを更新できる、または削除させることができるのは、
+   当該 HSTS ホストだけです。これは、ポリシー期間およびサブドメインへの適用可能性の
+   新しい値を持つ Strict-Transport-Security HTTP 応答ヘッダーフィールドを UA に
+   送信することで行われます。したがって、UA は HSTS ホストのために「最新の」
+   HSTS ポリシー情報をキャッシュします。期間として 0 を指定すると、UA に対し、
+   その HSTS ホストについて HSTS ポリシー（主張された includeSubDomains
+   ディレクティブを含む）を削除するよう通知します。詳細は
+   <a href="#section-8.1">セクション 8.1</a>（「Strict-Transport-Security 応答ヘッダーフィールド
+   処理」）を参照してください。さらに、<a href="#section-6.2">セクション 6.2</a> では
+   Strict-Transport-Security HTTP 応答ヘッダーフィールドの例を示します。
+
+<span class="h3"><a class="selflink" id="section-5.4" href="#section-5.4">5.4</a>.  ユーザーエージェントによる HSTS ポリシーの適用</span>
+
+   あるホストへの HTTP 接続を確立する際、そのきっかけが何であれ、UA は
+   Known HSTS Hosts のキャッシュを調べ、そのホストのドメイン名の上位ドメインである
+   ドメイン名を持つものがあるかどうかを確認します。見つかったもののうち、
+   includeSubDomains ディレクティブを主張しているものがあれば、HSTS ポリシーは
+   そのホストに適用されます。そうでなければ、当該ホスト自体が UA に HSTS ホストとして
+   既知である場合に限り、HSTS ポリシーはそのホストに適用されます。詳細は
+   <a href="#section-8.3">セクション 8.3</a>（「URI 読み込みとポート対応付け」）を参照してください。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  構文</span>
+
+   このセクションでは、Strict-Transport-Security HTTP 応答ヘッダーフィールドと
+   そのディレクティブの構文を定義し、いくつかの例を示します。
+
+   <a href="#section-7">セクション 7</a>（「サーバー処理モデル」）では、ホストがこのヘッダーフィールドを
+   使用して HSTS ポリシーを宣言する方法を詳述し、<a href="#section-8">セクション 8</a>
+   （「ユーザーエージェント処理モデル」）では、ユーザーエージェントが
+   このヘッダーフィールドを処理して HSTS ポリシーを適用する方法を詳述します。
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  Strict-Transport-Security HTTP 応答ヘッダーフィールド</span>
+
+   Strict-Transport-Security HTTP 応答ヘッダーフィールド（STS ヘッダー
+   フィールド）は、このヘッダーフィールドを含む応答メッセージを発行した
+   ホストに関して、UA が HSTS ポリシーを適用しなければならない（MUST）
+   ことを示します。
+
+   STS ヘッダーフィールドの ABNF (Augmented Backus-Naur Form) 構文を
+   以下に示します。これは <a href="./rfc2616#section-2">[RFC2616] のセクション&nbsp;2</a> で定義される
+   Generic Grammar に基づいています（これには「暗黙の線形空白」、すなわち
+   "implied *LWS" の概念が含まれます）。
+
+     Strict-Transport-Security = "Strict-Transport-Security" ":"
+                                 [ directive ]  *( ";" [ directive ] )
+
+     directive                 = directive-name [ "=" directive-value ]
+     directive-name            = token
+     directive-value           = token | quoted-string
+
+   ここで:
+
+     token          = &lt;token, defined in <a href="./rfc2616#section-2.2">[RFC2616], Section&nbsp;2.2</a>&gt;
+     quoted-string  = &lt;quoted-string, defined in <a href="./rfc2616#section-2.2">[RFC2616], Section&nbsp;2.2</a>&gt;
+
+   本仕様で定義される 2 つのディレクティブを以下で説明します。
+   ディレクティブに関する全体的な要件は次のとおりです。
+
+   1.  ディレクティブの出現順序に意味はありません。
+
+   2.  すべてのディレクティブは、STS ヘッダーフィールド内に一度だけ
+       出現しなければなりません（MUST）。ディレクティブは、その定義で
+       規定されるとおり、省略可能または必須です。
+
+   3.  ディレクティブ名は大文字小文字を区別しません。
+
+   4.  UA は、本仕様で定義される構文に適合しないディレクティブ、または
+       その他のヘッダーフィールド値データを含む STS ヘッダーフィールドを
+       無視しなければなりません（MUST）。
+
+   5.  STS ヘッダーフィールドが UA に認識されないディレクティブを含む場合、
+       UA は認識されないディレクティブを無視しなければならず（MUST）、
+       かつ STS ヘッダーフィールドがそれ以外の点で上記の要件
+       （1 から 4）を満たす場合、UA は認識したディレクティブを処理
+       しなければなりません（MUST）。
+
+   STS ヘッダーフィールドの意味的機能を拡張する追加ディレクティブは、
+   他の仕様で定義できます。その際には、それらのためにレジストリ
+   （IETF Review [<a href="./rfc5226" title="">RFC5226</a>] の IANA ポリシー定義を持つもの）が
+   定義されます。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   注記:  そのような将来のディレクティブは、本仕様のみを実装する UA、および
+          一般に非適合な UA によって無視されます。詳細な議論については
+          <a href="#section-14.2">セクション 14.2</a>（「非適合ユーザーエージェントの含意」）を
+          参照してください。
+
+<span class="h4"><a class="selflink" id="section-6.1.1" href="#section-6.1.1">6.1.1</a>.  max-age ディレクティブ</span>
+
+   必須（REQUIRED）の "max-age" ディレクティブは、STS ヘッダーフィールドの
+   受信後、UA がそのホスト（そのメッセージを受信した相手）を Known HSTS Host と
+   見なす秒数を指定します。<a href="#section-8.1.1">セクション 8.1.1</a>（「HSTS ホストの記録 -
+   保存モデル」）も参照してください。delta-seconds 生成規則は [<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] で
+   規定されています。
+
+   max-age ディレクティブの必須（REQUIRED）値の構文（必要に応じて
+   quoted-string のエスケープ解除後）は、次のように定義されます。
+
+    max-age-value = delta-seconds
+
+    delta-seconds = &lt;1*DIGIT, defined in <a href="./rfc2616#section-3.3.2">[RFC2616], Section&nbsp;3.3.2</a>&gt;
+
+   注記:  max-age 値が 0（すなわち "max-age=0"）である場合、UA に対して、
+          そのホストを Known HSTS Host と見なすことを停止するよう通知します。
+          これには、その HSTS ホストに対して主張されている場合の
+          includeSubDomains ディレクティブも含まれます。<a href="#section-8.1">セクション 8.1</a>
+          （「Strict-Transport-Security 応答ヘッダーフィールド処理」）も
+          参照してください。
+
+<span class="h4"><a class="selflink" id="section-6.1.2" href="#section-6.1.2">6.1.2</a>.  includeSubDomains ディレクティブ</span>
+
+   任意（OPTIONAL）の "includeSubDomains" ディレクティブは値を持たない
+   ディレクティブであり、存在する場合（すなわち「主張」されている場合）、
+   HSTS ポリシーがこの HSTS ホストに加えて、そのホストのドメイン名の
+   すべてのサブドメインにも適用されることを UA に通知します。
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  例</span>
+
+   以下の HSTS ヘッダーフィールドは、HSTS ポリシーが 1 年間有効であり続ける
+   こと（1 年はおよそ 31536000 秒です）、およびそのポリシーが、それを発行する
+   HSTS ホストのドメインにのみ適用されることを規定します。
+
+     Strict-Transport-Security: max-age=31536000
+
+   以下の HSTS ヘッダーフィールドは、HSTS ポリシーがおよそ 6 か月間有効で
+   あり続けること、およびそのポリシーが、発行元 HSTS ホストのドメインと
+   そのすべてのサブドメインに適用されることを規定します。
+
+     Strict-Transport-Security: max-age=15768000 ; includeSubDomains
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   max-age ディレクティブ値は任意で引用符付きにできます。
+
+     Strict-Transport-Security: max-age="31536000"
+
+   以下の HSTS ヘッダーフィールドは、そのヘッダーフィールドを送信した
+   HSTS ホストに関連付けられた HSTS ポリシー全体を UA が削除しなければ
+   ならないことを示します。
+
+     Strict-Transport-Security: max-age=0
+
+   以下の HSTS ヘッダーフィールドは、直前のものとまったく同じ効果を持ちます。
+   なぜなら、max-age が 0 の場合、HSTS ヘッダーフィールド内に
+   includeSubDomains ディレクティブが存在しても無視されるからです。
+
+     Strict-Transport-Security: max-age=0; includeSubDomains
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  サーバー処理モデル</span>
+
+   このセクションでは、HSTS ホストが実装する処理モデルについて説明します。
+   このモデルは 2 つの側面から成ります。第一は、セキュアトランスポート
+   （TLS [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] または SSL [<a href="./rfc6101" title="&quot;The Secure Sockets Layer (SSL) Protocol Version 3.0&quot;">RFC6101</a>]。<a href="#section-14.1">セクション 14.1</a>
+   （「基盤となるセキュアトランスポートに関する考慮事項」）も参照）上で
+   受信した HTTP 要求メッセージの処理規則であり、第二は TCP などの
+   非セキュアトランスポート上で受信した HTTP 要求メッセージの処理規則です。
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  セキュアトランスポート上の HTTP 要求タイプ</span>
+
+   セキュアトランスポート上で伝達された HTTP 要求に応答する際、HSTS ホストは、
+   上記の <a href="#section-6.1">セクション 6.1</a>（「Strict-Transport-Security HTTP 応答ヘッダー
+   フィールド」）で規定された文法を満たさなければならない（MUST）STS
+   ヘッダーフィールドを、その応答メッセージに含めるべきです（SHOULD）。
+   STS ヘッダーフィールドを含める場合、HSTS ホストはそのような
+   ヘッダーフィールドを 1 つだけ含めなければなりません（MUST）。
+
+   ある UA の文脈で、特定のホストを Known HSTS Host として確立することは、
+   セキュアトランスポート上で動作している HTTP を介して、本仕様に従って
+   正しく少なくとも 1 つの有効な STS ヘッダーフィールドを UA に返すことで
+   達成してもよい（MAY）です。クライアント側の事前読み込み済み
+   Known HSTS Host リストなど、他の仕組みを使用してもよい（MAY）です。
+   たとえば <a href="#section-12">セクション 12</a>（「ユーザーエージェント実装に関する助言」）を
+   参照してください。
+
+   注記:  STS ヘッダーフィールドを含めることが "SHOULD" として規定されているのは、
+          特定の HSTS ホストに代わって STS ヘッダーフィールドを一様に発行することが
+          困難な場合がある、さまざまなサーバー側およびネットワーク側の
+          キャッシュや負荷分散構成を考慮するためです。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  HTTP 要求タイプ</span>
+
+   HSTS ホストが非セキュアトランスポート上で HTTP 要求メッセージを受信した
+   場合、永続的なリダイレクトを示すステータスコード、たとえばステータスコード
+   301（<a href="./rfc2616#section-10.3.2">[RFC2616] のセクション&nbsp;10.3.2</a>）を含み、かつ Location ヘッダー
+   フィールド値として、HTTP 要求の元の Effective Request URI
+   （<a href="#section-9">セクション 9</a>（「有効要求 URI の構築」）を参照）を必要に応じて URI
+   スキームが "https" になるよう変更したもの、またはローカルポリシーに従って
+   "https" の URI スキームを持つよう生成した URI を含む HTTP 応答メッセージを
+   送信するべきです（SHOULD）。
+
+   注記:  上記の挙動が "MUST" ではなく "SHOULD" である理由は次のとおりです。
+
+      *  サーバー側での非セキュアからセキュアへのリダイレクトにおけるリスク
+         [<a href="#ref-OWASP-TLSGuide">OWASP-TLSGuide</a>]。
+
+      *  サイト配備の特性。たとえば、サードパーティコンポーネントを組み込む
+         サイトは、非セキュアトランスポートでアクセスされた場合に、サーバー側で
+         非セキュアからセキュアへのリダイレクトを行うと正しく動作しないことが
+         ありますが、セキュアトランスポート上で一様にアクセスされた場合には
+         正しく動作することがあります。後者は、すでにそのサイトを Known HSTS Host と
+         して記録している HSTS 対応 UA（手段は問わず、たとえば以前のやり取りや
+         UA 設定によるもの）において該当します。
+
+   HSTS ホストは、非セキュアトランスポート上で伝達される HTTP 応答に STS
+   ヘッダーフィールドを含めてはなりません（MUST NOT）。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  ユーザーエージェント処理モデル</span>
+
+   このセクションでは、UA の HTTP Strict Transport Security 処理モデルについて
+   説明します。このモデルにはいくつかの側面があり、以下のサブセクションで
+   列挙されます。
+
+   この処理モデルは、UA が IDNA2008 [<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>]、または場合によっては
+   IDNA2003 [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] を実装していることを前提とします。これは
+   <a href="#section-13">セクション 13</a>（「Internationalized Domain Names for Applications (IDNA):
+   Dependency and Migration」）で述べるとおりです。また、本仕様の文脈で
+   操作されるすべてのドメイン名は、このセクションで規定される処理に先立ち、
+   <a href="#section-10">セクション 10</a>（「ドメイン名の IDNA 正規化」）で概説されるとおり、
+   すでに IDNA 正規化されているものとします。
+
+      注記:  [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] は、予見可能な将来にわたり実際の配備において
+             引き続き関連性を持つため参照されています。
+
+   上記の前提は、この処理モデルが、ドメイン名について適切な IDNA および
+   Unicode の検証ならびに文字リスト検査が、それらの IDNA 正規化と併せて、
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   このセクションで規定される処理に先立って行われていることも、具体的に
+   前提としていることを意味します。根拠および詳細については、
+   <a href="#section-14.10">セクション 14.10</a>（「国際化ドメイン名」）にある IDNA 固有の
+   セキュリティ上の考慮事項を参照してください。
+
+<span class="h3"><a class="selflink" id="section-8.1" href="#section-8.1">8.1</a>.  Strict-Transport-Security 応答ヘッダーフィールド処理</span>
+
+   セキュアトランスポート上で受信した HTTP 応答が、<a href="#section-6.1">セクション 6.1</a>
+   （「Strict-Transport-Security HTTP 応答ヘッダーフィールド」）で規定される
+   文法に適合する STS ヘッダーフィールドを含み、かつ基盤となる
+   セキュアトランスポートのエラーまたは警告がない場合（<a href="#section-8.4">セクション 8.4</a>を
+   参照）、UA は次のいずれかを行わなければなりません（MUST）。
+
+   o  そのホストがまだ記録されていない場合、Known HSTS Host として記録する
+      （<a href="#section-8.1.1">セクション 8.1.1</a>（「HSTS ホストの記録 - 保存モデル」）を参照）、
+
+   または
+
+   o  max-age および includeSubDomains ヘッダーフィールド値トークンの
+      いずれかまたは両方が、UA がすでに保持している情報と異なる情報を
+      伝達している場合、その Known HSTS Host に関する UA のキャッシュ済み情報を
+      更新する。
+
+      max-age 値は本質的に、STS ヘッダーフィールドの受信時刻に対する
+      「有効期間」値です。
+
+      max-age ヘッダーフィールド値トークンの値が 0 である場合、HSTS ホストが
+      既知であれば、UA はそのキャッシュ済み HSTS ポリシー情報
+      （主張されている場合の includeSubDomains ディレクティブを含む）を
+      削除しなければなりません（MUST）。また、まだ既知でない場合、UA は
+      この HSTS ホストを記録してはなりません（MUST NOT）。
+
+      UA がセキュアトランスポート上の HTTP 応答メッセージで複数の STS
+      ヘッダーフィールドを受信した場合、UA は最初のそのような
+      ヘッダーフィールドだけを処理しなければなりません（MUST）。
+
+   それ以外の場合:
+
+   o  HTTP 応答が非セキュアトランスポート上で受信された場合、UA は存在する
+      STS ヘッダーフィールドをすべて無視しなければなりません（MUST）。
+
+   o  UA は、<a href="#section-6.1">セクション 6.1</a>（「Strict-Transport-Security HTTP
+      応答ヘッダーフィールド」）で規定された文法に適合しない STS
+      ヘッダーフィールドをすべて無視しなければなりません（MUST）。
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h4"><a class="selflink" id="section-8.1.1" href="#section-8.1.1">8.1.1</a>.  HSTS ホストの記録 - 保存モデル</span>
+
+   Request-URI（そのホストが応答したメッセージのもの）内の host 生成規則に
+   一致する部分文字列が、<a href="./rfc3986#section-3.2.2">[RFC3986] のセクション&nbsp;3.2.2</a> にある IP-literal
+   または IPv4address 生成規則に構文的に一致する場合、UA はこのホストを
+   Known HSTS Host として記録してはなりません（MUST NOT）。
+
+   それ以外の場合、その部分文字列が <a href="#section-8.2">セクション 8.2</a>
+   （「既知の HSTS ホストのドメイン名照合」）で規定される照合手順に従って
+   Known HSTS Host のドメイン名と合同に一致しないなら、UA はこのホストを
+   Known HSTS Host として記録し、HSTS ホストのドメイン名をキャッシュし、
+   与えられた max-age 値によって実質的に規定されるこの情報の有効期限、
+   および includeSubDomains ディレクティブが主張されているかどうかを
+   併せて記録しなければなりません（MUST）。<a href="#section-11.2">セクション 11.2</a>
+   （「HSTS ポリシー有効期限に関する考慮事項」）も参照してください。
+
+   UA は、上位ドメインとして一致した Known HSTS Host の有効期限または
+   includeSubDomains ディレクティブを変更してはなりません（MUST NOT）。
+
+   Known HSTS Host は、そのキャッシュエントリの有効期限が過去の日付である場合、
+   「期限切れ」です。キャッシュ内に期限切れの Known HSTS Host が存在する場合、
+   UA はいつでも、期限切れの Known HSTS Host をすべてキャッシュから削除
+   しなければなりません（MUST）。
+
+<span class="h3"><a class="selflink" id="section-8.2" href="#section-8.2">8.2</a>.  既知の HSTS ホストのドメイン名照合</span>
+
+   特定のドメイン名は、Known HSTS Host のドメイン名に対して、2 つの方法の
+   一方または両方で一致することがあります。すなわち、合同一致、または
+   上位ドメイン一致です。あるいは、一致しないこともあります。
+
+   以下の手順により、一致があるかどうか、およびある場合はどの種類の一致かを
+   判定します。
+
+      与えられたドメイン名を、UA の期限切れでない各 Known HSTS Host の
+      ドメイン名と比較します。各 Known HSTS Host のドメイン名については、
+      与えられたドメイン名とラベル単位（ラベルのみを比較）で、右端のラベルから
+      始めて右から左へ継続し、ASCII 大文字小文字を区別しない比較を用いて
+      比較します。<a href="./rfc5890#section-2.3.2.4">[RFC5890] のセクション&nbsp;2.3.2.4</a> も参照してください。
+
+      *  上位ドメイン一致
+
+         Known HSTS Host のドメイン名全体と、与えられたドメイン名の右側部分との
+         ラベル単位の一致が見つかった場合、この Known HSTS Host のドメイン名は、
+         与えられたドメイン名に対する上位ドメイン一致です。特定のドメイン名に
+         対して複数の上位ドメイン一致が存在することがあります。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 20]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-21" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+         例:
+
+            与えられたドメイン名 (DN):   qaz.bar.foo.example.com
+
+            上位ドメインとして一致した
+            Known HSTS Host DN:           bar.foo.example.com
+
+            上位ドメインとして一致した
+            Known HSTS Host DN:               foo.example.com
+
+
+      *  合同一致
+
+         Known HSTS Host のドメイン名と与えられたドメイン名との間で
+         ラベル単位の一致が見つかった場合 -- すなわち、比較すべき追加の
+         ラベルがない場合 -- 与えられたドメイン名は、この Known HSTS Host と
+         合同に一致します。
+
+         例:
+
+            与えられたドメイン名:                foo.example.com
+
+            合同に一致した
+            Known HSTS Host DN:               foo.example.com
+
+
+      *  それ以外の場合、一致が見つからなければ、与えられたドメイン名は
+         Known HSTS Host を表しません。
+
+<span class="h3"><a class="selflink" id="section-8.3" href="#section-8.3">8.3</a>.  URI 読み込みとポート対応付け</span>
+
+   UA が任意の "http" URI [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>]（HTTP リダイレクト [<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] に従う場合を
+   含む）を「読み込む」（「参照解除する」とも呼ばれる）準備をするたびに、
+   UA はまず、URI にドメイン名が与えられているかどうか、およびそれが
+   Known HSTS Host と一致するかどうかを、次の手順を用いて判定
+   しなければなりません（MUST）。
+
+   1.  URI の authority 構成要素の host 構成要素によって記述される部分文字列を
+       URI から抽出します。
+
+   2.  その部分文字列が null である場合、どの Known HSTS Host とも一致しません。
+
+   3.  そうでなく、その部分文字列が非 null であり、<a href="./rfc3986#section-3.2.2">[RFC3986] の
+       セクション&nbsp;3.2.2</a> にある IP-literal または IPv4address 生成規則に
+       構文的に一致する場合、どの Known HSTS Host とも一致しません。
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 21]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-22" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   4.  それ以外の場合、その部分文字列は与えられたドメイン名であり、
+       <a href="#section-8.2">セクション 8.2</a>（「既知の HSTS ホストのドメイン名照合」）の手順を
+       用いて、UA の Known HSTS Hosts と照合しなければなりません（MUST）。
+
+   5.  ドメイン名照合を実行した結果、includeSubDomains ディレクティブが
+       主張された上位ドメイン一致が見つかった場合、またはそのような上位ドメイン
+       一致が見つからず、合同一致が見つかった場合（includeSubDomains
+       ディレクティブが主張されているかどうかにかかわらず）、読み込みを
+       続行する前に次を行います。
+
+          UA は URI スキームを "https" [<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>] に置換しなければならず
+          （MUST）、かつ
+
+          URI が明示的なポート構成要素 "80" を含む場合、UA はそのポート
+          構成要素を "443" に変換しなければなりません（MUST）。または、
+
+          URI が "80" と等しくない明示的なポート構成要素を含む場合、
+          そのポート構成要素の値は保持されなければなりません（MUST）。
+          それ以外の場合、
+
+          URI が明示的なポート構成要素を含まない場合、UA はそれを追加しては
+          なりません（MUST NOT）。
+
+          注記:  これらの手順により、HSTS ポリシーが HSTS ホストの任意の TCP
+                 ポート上の HTTP に適用されることが保証されます。
+
+   注記:  明示的なポートが指定されている場合（および、より小さい程度では
+          サブドメインの場合）、指定されたポートで実際には HTTP
+          （すなわち非セキュア）サーバーが実行されており、したがって HTTPS
+          要求が失敗する可能性がかなり高いです（<a href="#appendix-A">付録 A</a>
+          （「設計判断に関する注記」）の項目 6 を参照）。
+
+<span class="h3"><a class="selflink" id="section-8.4" href="#section-8.4">8.4</a>.  セキュアトランスポート確立時のエラー</span>
+
+   Known HSTS Host に接続する際、基盤となるセキュアトランスポートに
+   「警告」、「致命的」、またはその他の任意のエラーレベルのエラーがある場合、
+   UA は接続を終了しなければなりません（MUST）（<a href="#section-12">セクション 12</a>
+   （「ユーザーエージェント実装に関する助言」）も参照）。たとえば、
+   これには、UA が用いる証明書有効性検査で検出されるエラーが含まれます。
+   たとえば Certificate Revocation Lists (CRLs) [<a href="./rfc5280" title="&quot;Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile&quot;">RFC5280</a>]、
+   Online Certificate Status Protocol (OCSP) [<a href="./rfc2560" title="&quot;X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP&quot;">RFC2560</a>]、および TLS
+   サーバー識別検査 [<a href="./rfc6125" title="&quot;Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)&quot;">RFC6125</a>] によるものです。
+
+<span class="h3"><a class="selflink" id="section-8.5" href="#section-8.5">8.5</a>.  HTTP-Equiv &lt;Meta&gt; 要素属性</span>
+
+   UA は、受信したコンテンツ内の &lt;meta&gt; 要素 [<a href="#ref-W3C.REC-html401-19991224">W3C.REC-html401-19991224</a>] 上の
+   http-equiv="Strict-Transport-Security" 属性設定に従ってはなりません
+   （MUST NOT）。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 22]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-23" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-8.6" href="#section-8.6">8.6</a>.  Strict-Transport-Security 応答ヘッダーフィールドの欠落</span>
+
+   UA が Known HSTS Host からセキュアチャネル上で HTTP 応答を受信したものの、
+   その応答に STS ヘッダーフィールドが欠けている場合、UA はその
+   Known HSTS Host に関する知識の max-age 値に到達するまで、そのホストを
+   Known HSTS Host として扱い続けなければなりません（MUST）。特定の
+   Known HSTS Host について、max-age 値は実質的に無限であることがある点に
+   注意してください。たとえば、Known HSTS Host が、リスト項目が決して
+   「期限切れにならない」ように実装された事前設定リストの一部である場合が
+   これに該当します。
+
+<span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  有効要求 URI の構築</span>
+
+   このセクションでは、HSTS ホストが受信した HTTP 要求について
+   Effective Request URI をどのように構築しなければならないかを規定します。
+
+   HTTP 要求は、対象リソースの absoluteURI を運ばないことがよくあります。
+   その代わりに、URI は Request-URI、Host ヘッダーフィールド、および接続
+   コンテキストから推論される必要があります（[<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>]、セクション <a href="#section-3.2.1">3.2.1</a>、
+   5.1.2、および 5.2）。この処理の結果は「effective request URI (ERU)」と
+   呼ばれます。「target resource」とは、effective request URI によって
+   識別されるリソースです。
+
+<span class="h3"><a class="selflink" id="section-9.1" href="#section-9.1">9.1</a>.  ERU の基本定義</span>
+
+   HTTP 要求メッセージの最初の行である Request-Line は、<a href="./rfc2616#section-5.1">[RFC2616],
+   セクション&nbsp;5.1</a> の次の ABNF によって規定されます。
+
+     Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
+
+   Request-Line 内の Request-URI は、<a href="./rfc2616#section-5.1.2">[RFC2616], セクション&nbsp;5.1.2</a> の
+   次の ABNF によって規定されます。
+
+     Request-URI    = "*" | absoluteURI | abs_path | authority
+
+   Host 要求ヘッダーフィールドは、<a href="./rfc2616#section-14.23">[RFC2616], セクション&nbsp;14.23</a> の
+   次の ABNF によって規定されます。
+
+     Host = "Host" ":" host [ ":" port ]
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 23]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-24" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-9.2" href="#section-9.2">9.2</a>.  有効要求 URI の決定</span>
+
+   Request-URI が absoluteURI である場合、有効要求 URI は Request-URI です。
+
+   Request-URI が abs_path 形式またはアスタリスク形式を使用し、かつ
+   Host ヘッダーフィールドが存在する場合、有効要求 URI は次を連結して構築されます。
+
+   o  スキーム名: 要求が非セキュア TCP 接続上で受信された場合は "http"、
+      TLS/SSL で保護された TCP 接続上で受信された場合は "https"、および
+
+   o  オクテット列 "://”、および
+
+   o  Host ヘッダーフィールドからの host と port（存在する場合）、および
+
+   o  Request-Line から取得した Request-URI。ただし Request-URI が単なる
+      アスタリスク "*" である場合を除きます。
+
+   Request-URI が abs_path 形式またはアスタリスク形式を使用し、かつ
+   Host ヘッダーフィールドが存在しない場合、有効要求 URI は未定義です。
+
+   それ以外の場合、Request-URI が authority 形式を使用するとき、有効要求 URI は
+   未定義です。
+
+   有効要求 URI は、<a href="./rfc2616#section-3.2.3">[RFC2616] セクション&nbsp;3.2.3</a> で述べられる規則を
+   用いて比較されます。ただし、空の path 構成要素を "/" の絶対パスと
+   等価として扱ってはなりません（MUST NOT）。
+
+<span class="h4"><a class="selflink" id="section-9.2.1" href="#section-9.2.1">9.2.1</a>.  有効要求 URI の例</span>
+
+   例 1: 次のメッセージの有効要求 URI
+
+     GET /pub/WWW/TheProject.html HTTP/1.1
+     Host: www.example.org:8080
+
+   （非セキュア TCP 接続上で受信）は、"http" に "://” を加え、
+   authority 構成要素 "www.example.org:8080" を加え、さらに request-target
+   "/pub/WWW/TheProject.html" を加えたものです。したがって、それは
+   "<a href="http://www.example.org:8080/pub/WWW/TheProject.html">http://www.example.org:8080/pub/WWW/TheProject.html</a>" です。
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 24]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-25" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   例 2: 次のメッセージの有効要求 URI
+
+     OPTIONS * HTTP/1.1
+     Host: www.example.org
+
+   （SSL/TLS で保護された TCP 接続上で受信）は、"https" に "://” を加え、
+   authority 構成要素 "www.example.org" を加えたものです。したがって、それは
+   "https://www.example.org" です。
+
+<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  ドメイン名の IDNA 正規化</span>
+
+   IDNA 正規化済みドメイン名とは、次の手順によって生成される出力文字列です。
+   入力は、任意の組合せの "A-labels"、"U-labels"、および "NR-LDH labels"
+   （<a href="./rfc5890#section-2">[RFC5890] のセクション&nbsp;2</a>を参照）から成ると推定されるドメイン名文字列で、
+   それらが何らかの区切り文字（通常は "."）で連結されたものです。
+
+   1.  入力の推定ドメイン名文字列を、順序を保持した個々のラベル文字列の列へ
+       変換します。
+
+   2.  IDNA2008 を実装する場合、個々のラベル文字列の列の中に見つかった
+       各 A-label および U-label を、[<a href="./rfc5891" title="&quot;Internationalized Domain Names in Applications (IDNA): Protocol&quot;">RFC5891</a>] のセクション <a href="#section-5.3">5.3</a> から <a href="#section-5.5">5.5</a>
+       で定義される手順を用いて、変換、検証、および検査します。
+
+       それ以外の場合、IDNA2003 を実装するときは、<a href="./rfc3490#section-4">[RFC3490] のセクション&nbsp;4</a> の
+       "ToASCII" 変換を用いて各ラベルを変換します（<a href="./rfc3490#section-2">[RFC3490] の
+       セクション&nbsp;2</a> における「ラベルの等価性」の定義も参照）。
+
+   3.  前述の手順中にエラーが発生しなかった場合、列内のすべてのラベルを
+       順番に 1 つの文字列へ連結し、各ラベルと次のラベルの間を %x2E (".")
+       文字で区切ります。結果として得られる文字列は、IDNA 正規化済み
+       ドメイン名と呼ばれ、<a href="#section-8">セクション 8</a>（「ユーザーエージェント処理モデル」）の
+       文脈で使用するのに適しています。
+
+       それ以外の場合、エラーが発生しています。入力の推定ドメイン名文字列は
+       正常に IDNA 正規化されませんでした。この手順の呼び出し元は、適切な
+       エラー回復を試みるべきです。
+
+   さらなる詳細および考慮事項については、本仕様のセクション <a href="#section-13">13</a>
+   （「Internationalized Domain Names for Applications (IDNA): Dependency and Migration」）
+   および 14.10（「国際化ドメイン名」）も参照してください。
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 25]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-26" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h2"><a class="selflink" id="section-11" href="#section-11">11</a>.  サーバー実装および配備に関する助言</span>
+
+   このセクションは非規範的です。
+
+<span class="h3"><a class="selflink" id="section-11.1" href="#section-11.1">11.1</a>.  非適合ユーザーエージェントに関する考慮事項</span>
+
+   非適合 UA は Strict-Transport-Security ヘッダーフィールドを無視します。
+   したがって、非適合ユーザーエージェントは <a href="#section-2.3.1">セクション 2.3.1</a>
+   （「対処対象となる脅威」）で述べられる脅威に対処しません。さらなる議論に
+   ついては、<a href="#section-14.2">セクション 14.2</a>（「非適合ユーザーエージェントの含意」）を
+   参照してください。
+
+<span class="h3"><a class="selflink" id="section-11.2" href="#section-11.2">11.2</a>.  HSTS ポリシー有効期限に関する考慮事項</span>
+
+   サーバー実装および配備する Web サイトは、将来に向けた一定値として
+   有効期限を設定しているのか、それとも固定された時点として有効期限を
+   設定しているのかを考慮する必要があります。
+
+   「将来に向けた一定値」の手法は、同じ max-age 値を UA に継続的に送信する
+   ことで実現できます。
+
+   たとえば、7776000 秒の max-age 値は 90 日です。
+
+     Strict-Transport-Security: max-age=7776000
+
+   UA がこのヘッダーを受信するたびに、UA はこの Known HSTS Host に関する
+   知識をいつ削除しなければならないかという認識を更新する必要がある点に
+   注意してください。
+
+   「固定された時点」の手法は、望ましい有効期限までの残り時間を表す
+   max-age 値を送信することで実現できます。これには、HSTS ホストが各 HTTP
+   応答で新たに計算した max-age 値を送信する必要があります。
+
+   ここでの考慮事項は、配備者が、通知される HSTS ポリシーの有効期限を
+   Web サイトのドメイン証明書の有効期限と一致させたいかどうかです。
+
+   さらに、サーバー実装者は、配備設定システムでデフォルトの max-age 値として
+   0 を採用することを検討すべきです。これにより、配備者は、UA にそのホストの
+   HSTS ポリシーを適用させるために意図的に max-age を設定する必要があり、
+   任意の非ゼロ期間で HSTS を不注意に有効化してしまうことから保護されます。
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 26]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-27" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-11.3" href="#section-11.3">11.3</a>.  自己署名公開鍵と併せた HSTS の使用</span>
+<span class="h3">       証明書</span>
+
+   次の 4 つの条件がすべて真である場合...
+
+   o  Web サイト/組織/企業が、Web サイト用に独自のセキュアトランスポート
+      公開鍵証明書を生成しており、かつ
+
+   o  その組織のルート認証局 (CA) 証明書が、通常、ブラウザーおよび/または
+      オペレーティングシステムの CA 証明書ストアにデフォルトで組み込まれて
+      いない、かつ
+
+   o  組織の CA によって署名された証明書（すなわち「自己署名証明書」）を
+      使用して自身を識別するホスト上で HSTS ポリシーが有効化されており、かつ
+
+   o  この証明書が、TLSA プロトコル仕様 [<a href="./rfc6698" title="&quot;The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA&quot;">RFC6698</a>] の <a href="#section-4">セクション 4</a> で
+      定義される、利用可能な TLS 証明書関連付けに一致しない、
+
+   ...その場合、HSTS の設計に従い、そのサイトへのセキュア接続は失敗します。
+   これは、上で論じたさまざまな能動的攻撃から保護するためです。
+
+   しかし、当該組織が自らの CA および自己署名証明書を HSTS と組み合わせて
+   使用したい場合、利用者のブラウザーまたはオペレーティングシステムの
+   CA ルート証明書ストアに自らのルート CA 証明書を配備することで、それを
+   行うことができます。さらに、または代わりに、特定のホスト用のエンド
+   エンティティ証明書を利用者のブラウザーに配布することもできます。これを
+   達成する方法はいくつかあります（詳細は本仕様の範囲外です）。いったん
+   ルート CA 証明書がブラウザーにインストールされると、そのサイトで HSTS
+   ポリシーを使用できます。
+
+   あるいは、その組織は TLSA プロトコルを配備できます。その場合、TLSA も使用する
+   すべてのブラウザーは、TLSA を介して示される利用可能な TLS 証明書関連付けに
+   よって識別される証明書を信頼できるようになります。
+
+   注記:  たとえば電子メールを介してルート CA 証明書を利用者に対話的に配布し、
+          利用者にそれをインストールさせることは、利用者をフィッシング攻撃の
+          一形態に影響されやすくするよう訓練しているとも言えます。
+          <a href="#section-14.8">セクション 14.8</a>（「偽のルート CA 証明書フィッシングと DNS
+          キャッシュポイズニング攻撃」）を参照してください。したがって、
+          そのような証明書を利用者のシステムおよびブラウザーに配布し、
+          インストールする方法には注意を払うべきです。
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 27]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-28" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-11.4" href="#section-11.4">11.4</a>.  includeSubDomains の含意</span>
+
+   includeSubDomains ディレクティブには、慎重な検討に値する実務上の含意が
+   あります。2 つの例示的なシナリオは次のとおりです。
+
+   o  HSTS ホストが、その HSTS ホストのドメイン名の代替ポートまたは
+      さまざまなサブドメインで、保護されていない HTTP ベースのサービスを
+      提供している。
+
+   o  HSTS ホストの別々のサブドメインで別々の Web アプリケーションが提供されており、
+      UA が、HSTS ホストのドメイン名で提供されている Web アプリケーション
+      （存在する場合）と必ずしもやり取りすることなく、これらのサブドメインの
+      Web アプリケーションと直接やり取りすることが多い。
+
+   以下のセクションでは、これらの各シナリオを順に論じます。
+
+<span class="h4"><a class="selflink" id="section-11.4.1" href="#section-11.4.1">11.4.1</a>.  HSTS ホストの代替ポートまたはサブドメインで</span>
+<span class="h4">         保護されない HTTP サービスを提供する場合の考慮事項</span>
+
+   たとえば、認証局はしばしば、CRL 配布および OCSP サービス [<a href="./rfc2560" title="&quot;X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP&quot;">RFC2560</a>] を
+   平文 HTTP 上で提供し、時には TLS/SSL で保護されている可能性のある公開
+   Web アプリケーションのサブドメインで提供します。たとえば、
+   &lt;https://ca.example.com/&gt; は、認証局である "Example CA" の公開
+   Web アプリケーションです。顧客はこの Web アプリケーションを使用して
+   公開鍵を登録し、証明書を取得します。"Example CA" は、"CRL Distribution
+   Points" および "Authority Information Access:OCSP" 証明書フィールドの値として
+   &lt;<a href="http://crl-and-ocsp.ca.example.com/">http://crl-and-ocsp.ca.example.com/</a>&gt; を含む顧客用証明書を生成します。
+
+   ca.example.com が includeSubDomains ディレクティブを含む HSTS ポリシーを
+   発行した場合、ca.example.com Web アプリケーションとやり取りしたことのある
+   HSTS を実装する HTTP ベースのユーザーエージェントは、CRL の取得と
+   証明書の OCSP チェックに失敗します。なぜなら、これらのサービスが
+   平文 HTTP 上で提供されているからです。
+
+   この場合、Example CA は次のいずれかを行えます。
+
+   o  includeSubDomains ディレクティブを使用しない、または
+
+   o  ca.example.com のサブドメインで提供される HTTP ベースのサービスも、
+      TLS/SSL 上で一様に提供されるようにする、または
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 28]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-29" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   o  平文 HTTP ベースのサービスを別のドメイン名、たとえば
+      crl-and-ocsp.ca.example.NET で提供する、または
+
+   o  証明書ステータス情報を配布する代替手法を利用し、CRL 配布および OCSP
+      サービスを平文 HTTP 上で提供する必要をなくす（たとえば "Certificate
+      Status Request" TLS 拡張 [<a href="./rfc6066" title="&quot;Transport Layer Security (TLS) Extensions: Extension Definitions&quot;">RFC6066</a>]、口語的にはしばしば
+      "OCSP Stapling" と呼ばれます）。
+
+   注記:  上記の点は明示的に単なる例であり、関係するすべての複雑さに対処する
+          ことを意図するものではありません。たとえば、"OCSP Stapling" のような
+          手法を配備する際には、CA、証明書配備者、およびアプリケーション
+          （たとえばブラウザー）の側で、多くの考慮事項が関わります。そのような
+          問題は本仕様の範囲外です。
+
+<span class="h4"><a class="selflink" id="section-11.4.2" href="#section-11.4.2">11.4.2</a>.  HSTS ホストのサブドメインで Web アプリケーションを</span>
+<span class="h4">         提供する場合の考慮事項</span>
+
+   このシナリオでは、HSTS ホストが includeSubDomains ディレクティブを含む
+   HSTS ポリシーを宣言し、さらに HSTS ホストの別々のサブドメインで提供される
+   別々の Web アプリケーションが存在し、UA が必ずしも HSTS ホストとやり取り
+   したことがないまま、それらのサブドメインの Web アプリケーションと
+   直接やり取りすることが多いとします。このような場合、UA は HSTS ポリシーを
+   受信せず、適用もしません。
+
+   たとえば、HSTS ホストが "example.com" であり、includeSubDomains
+   ディレクティブを含む STS ヘッダーフィールドを発行するよう設定されていると
+   します。しかし、example.com の実際の Web アプリケーションは "www.example.com" で
+   アドレス指定され、example.com は単にユーザーエージェントを
+   "https://www.example.com/" へリダイレクトします。
+
+   STS ヘッダーフィールドが "example.com" からのみ発行される一方で、UA が
+   通常 "www.example.com" をブックマークし、かつ（Web 上のどこからであれ）
+   リンクも通常 "www.example.com" に対して張られ、"example.com" がすべての
+   ユーザーエージェントによって何らかの非ゼロ割合のやり取りで直接接触されない
+   場合、一部の UA は "example.com" を HSTS ホストとして記録せず、
+   "www.example.com" の一部の利用者は HSTS ポリシーによって保護されません。
+
+   これに対処するため、HSTS ホストは、includeSubDomains ディレクティブを
+   使用するかどうかにかかわらず、自身の Web アプリケーションへのよく知られた
+   「入口点」を構成する各 HSTS ホストドメイン名またはサブドメイン名で、
+   STS ヘッダーフィールドが直接発行されるように設定されるべきです。
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 29]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-30" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   したがって、この例では、STS ヘッダーフィールドが "example.com" と
+   "www.example.com" の両方から発行されるなら、この問題は対処されます。
+   また、"foo.example.com" など、"example.com" によって提供される
+   Web アプリケーションへの他のよく知られた入口点がある場合、それらも
+   STS ヘッダーフィールドを発行するよう設定されるべきです。
+
+<span class="h2"><a class="selflink" id="section-12" href="#section-12">12</a>.  ユーザーエージェント実装に関する助言</span>
+
+   このセクションは非規範的です。
+
+   利用者および Web サイトにより効果的な保護を提供し、UA による HSTS
+   ポリシーのキャッシュを管理するための制御も提供するため、UA 実装者は
+   次のような機能を含めることを検討すべきです。
+
+<span class="h3"><a class="selflink" id="section-12.1" href="#section-12.1">12.1</a>.  利用者に回避手段を与えない</span>
+
+   （<a href="#section-8.4">セクション 8.4</a>（「セキュアトランスポート確立時のエラー」）に従い）
+   いかなる警告またはエラーでもセキュア接続確立を失敗させることは、
+   「利用者に回避手段を与えない」形で行われるべきです。これは、続行する
+   選択肢を与えるダイアログを利用者に提示すべきではないことを意味します。
+   むしろ、対象 Web アプリケーションとのやり取りに関して利用者ができることは、
+   待って再試行する以外に何もない、サーバーエラーと同様に扱うべきです。
+
+   本質的に、「いかなる警告またはエラー」とは、接続確立に関して何かが
+   完全には正しくないことを UA 実装が利用者に通知する原因となるものを
+   意味します。
+
+   これを行わないこと、すなわち「警告/エラーダイアログをクリックして通過する」
+   などの利用者による回避を許すことは、中間者攻撃を招く定石です。
+   Web アプリケーションが HSTS ポリシーを発行する場合、それは暗黙のうちに
+   「利用者に回避手段を与えない」手法を選択していることになります。この手法では、
+   すべての証明書エラーまたは警告が接続終了を引き起こし、利用者を「だまして」
+   誤った判断をさせ、自身を危険にさらす機会を与えません。
+
+<span class="h3"><a class="selflink" id="section-12.2" href="#section-12.2">12.2</a>.  利用者宣言 HSTS ポリシー</span>
+
+   利用者宣言 HSTS ポリシーとは、利用者が特定のドメイン名を HSTS ホストを表す
+   ものとして明示的に宣言し、それとの実際のやり取りの前に Known HSTS Host として
+   種まきできる機能です。これは、<a href="#section-14.6">セクション 14.6</a>（「ブートストラップ MITM
+   脆弱性」）で論じるように、ブートストラップ MITM 脆弱性から保護する助けに
+   なります。
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 30]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-31" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   注記:  そのような機能をサイトごとに正しく実現することは困難です。
+          [<a href="#ref-ForceHTTPS">ForceHTTPS</a>] のセクション 5.5 にある「rewrite rules」の議論を
+          参照してください。たとえば、任意の Web サイトがすべての URI を
+          "https" スキームで実体化しているとは限らず、そのため、UA がそのような
+          URI のみを使用してサイトにアクセスしようとすると「壊れる」可能性が
+          あります。また、この機能は「HSTS 事前読み込みリスト」機能を補完しますが、
+          それとは独立していることにも注意してください（<a href="#section-12.3">セクション 12.3</a>を参照）。
+
+<span class="h3"><a class="selflink" id="section-12.3" href="#section-12.3">12.3</a>.  HSTS 事前読み込みリスト</span>
+
+   HSTS 事前読み込みリストとは、Web サイト管理者が、自身のサイトについて
+   HSTS ポリシーを UA ベンダーにより UA に事前設定してもらうことができる
+   仕組みです。これはいわゆる「事前読み込みリスト」であり、ルート CA 証明書が
+   ブラウザーに「工場出荷時に」埋め込まれる方法に似ています。これは、
+   ブートストラップ MITM 脆弱性（<a href="#section-14.6">セクション 14.6</a>）から保護する助けに
+   なります。
+
+   注記:  そのような仕組みは、「利用者宣言 HSTS ポリシー」機能
+          （<a href="#section-12.2">セクション 12.2</a>）を補完するものです。
+
+<span class="h3"><a class="selflink" id="section-12.4" href="#section-12.4">12.4</a>.  混在セキュリティコンテキストの読み込み禁止</span>
+
+   「混在セキュリティコンテキスト」の読み込みは、UA がセキュアトランスポート上で
+   取得した Web アプリケーションリソースが、その後、セキュアトランスポートを
+   使用せずに 1 つ以上の他のリソースの取得を引き起こす場合に発生します。
+   これは一般に「混在コンテンツ」の読み込みとも呼ばれます（
+   [<a href="#ref-W3C.REC-wsc-ui-20100812">W3C.REC-wsc-ui-20100812</a>] の <a href="#section-5.3">セクション 5.3</a>
+   （「Mixed Content」）を参照）が、XML や HTML などのマークアップ言語の文脈でも
+   使われる同じ「混在コンテンツ」という用語と混同しないでください。
+
+   注記:  UA 実装間で挙動の一貫性を提供するためには、混在セキュリティ
+          コンテキストの概念について、さらなる標準化作業が必要になります。
+          たとえば、用語をより明確に定義し、それに関する具体的な挙動を
+          定義する必要があります。
+
+<span class="h3"><a class="selflink" id="section-12.5" href="#section-12.5">12.5</a>.  HSTS ポリシー削除</span>
+
+   HSTS ポリシー削除とは、HSTS ホストごとに UA のキャッシュ済み HSTS
+   ポリシーを削除できる機能です。
+
+   注記:  そのような機能を追加する場合、ユーザーインターフェイス面および
+          セキュリティ面の両方で、非常に慎重に行うべきです。Known HSTS Host の
+          キャッシュエントリを削除することは、非常に意図的で十分に検討された
+          行為であるべきです。たとえば、作業を進めるために単に「クリックして
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 31]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-32" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+          通過する」ような、利用者が日常的に行うことに慣れてしまうものであっては
+          なりません。また実装は、攻撃者がコード、たとえば ECMAscript を UA に
+          注入し、UA の Known HSTS Hosts キャッシュからエントリを密かに
+          プログラム的に削除することを許さないよう防御する必要があります。
+
+<span class="h2"><a class="selflink" id="section-13" href="#section-13">13</a>.  Internationalized Domain Names for Applications (IDNA): 依存関係</span>
+<span class="h2">     と移行</span>
+
+   現代のインターネットにおけるテキスト形式のドメイン名には、1 つ以上の
+   「国際化」ドメイン名ラベルが含まれることがあります。そのようなドメイン名は
+   「国際化ドメイン名」(IDNs) と呼ばれます。IDN とそれを使用するための
+   プロトコルを定義する仕様群は、"Internationalized Domain Names for
+   Applications (IDNA)" と名付けられています。現時点では、そのような仕様群は
+   2 つあります。IDNA2008 [<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>] と、その前身である IDNA2003 [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] です。
+
+   IDNA2008 は IDNA2003 を廃止しますが、2 つの仕様の間には違いがあり、
+   したがって、一方で登録されたドメイン名ラベルと他方で登録されたものとでは、
+   処理（たとえば変換）に違いが生じる可能性があります。IDNA2003 ベースの
+   ドメイン名ラベルが実際の環境に存在する移行期間がしばらく続くでしょう。
+   その IDNA 移行を容易にするため、ユーザーエージェントは IDNA2008 [<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>] を
+   実装すべきであり（SHOULD）、[<a href="./rfc5895" title="&quot;Mapping Characters for Internationalized Domain Names in Applications (IDNA) 2008&quot;">RFC5895</a>]（<a href="./rfc5894#section-7">[RFC5894] のセクション&nbsp;7</a>も参照）
+   または [<a href="#ref-UTS46" title="&quot;Unicode IDNA Compatibility Processing&quot;">UTS46</a>] を実装してもよい（MAY）です。
+   ユーザーエージェントが IDNA2008 を実装しない場合、そのユーザーエージェントは
+   IDNA2003 を実装しなければなりません（MUST）。
+
+<span class="h2"><a class="selflink" id="section-14" href="#section-14">14</a>.  セキュリティ上の考慮事項</span>
+
+   本仕様は、HSTS ポリシーの表現、伝達、および適用に関するものです。
+   対処される脅威と対処されない脅威を含む全体的な HSTS ポリシー脅威モデルは、
+   <a href="#section-2.3">セクション 2.3</a>（「脅威モデル」）で示されています。
+
+   さらに、以下のセクションでは、HSTS ポリシーの運用上の影響を論じ、機能の
+   根拠を示し、HSTS ポリシーの潜在的な誤用を論じ、HSTS ポリシー体制における
+   いくつかの既知の脆弱性を強調します。
+
+<span class="h3"><a class="selflink" id="section-14.1" href="#section-14.1">14.1</a>.  基盤となるセキュアトランスポートに関する考慮事項</span>
+
+   本仕様は、HTTP の基盤となるセキュアトランスポートから独立するように
+   作られています。しかし、<a href="#section-2">セクション 2</a>（「概要」）の脅威分析と要件は、
+   実際には TLS または SSL を基盤となるセキュアトランスポートとして想定しています。
+   したがって、他のセキュアトランスポートプロトコル上で動作する HTTP の文脈で
+   HSTS を使用するには、その文脈における HSTS の後続のセキュリティ特性を評価するため、
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 32]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-33" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   HTTP がその上にどのように階層化されるかの詳細と併せて、その
+   セキュアトランスポートプロトコルのセキュリティモデルを評価する必要があります。
+
+<span class="h3"><a class="selflink" id="section-14.2" href="#section-14.2">14.2</a>.  非適合ユーザーエージェントの含意</span>
+
+   非適合ユーザーエージェントは Strict-Transport-Security ヘッダーフィールドを
+   無視します。したがって、非適合ユーザーエージェントは
+   <a href="#section-2.3.1">セクション 2.3.1</a>（「対処対象となる脅威」）で述べられる脅威に
+   対処しません。
+
+   これは、その Web アプリケーションと、それを利用する非適合 UA の利用者が、
+   次の両方に対して脆弱になることを意味します。
+
+   o  Web サイトの開発および配備上のバグに起因する受動的ネットワーク攻撃:
+
+         たとえば、Web アプリケーションが Web アプリケーションサーバーへの
+         安全でない参照（たとえば "http"）を含み、かつすべての Cookie に
+         "Secure" フラグが付けられていない場合、その Cookie は受動的な
+         ネットワークスニッフィング、および潜在的にはその後の利用者資格情報の
+         誤用に対して脆弱になります。
+
+   o  能動的ネットワーク攻撃:
+
+         たとえば、攻撃者が「中間者」を配置できる場合、セキュアトランスポート
+         接続の試行は利用者に警告を出す可能性が高いですが、HSTS ポリシーが
+         適用されていなければ、現在の一般的な慣行では、利用者が「クリックして
+         通過」して続行することが許されています。これにより、利用者および場合に
+         よっては Web アプリケーションが、そのような攻撃者による悪用にさらされます。
+
+   これは本質的に、HSTS ポリシーが存在しない場合の、すべての Web
+   アプリケーションとその利用者にとっての現状です。Web アプリケーション提供者は、
+   自身の Web アプリケーションがやり取りする UA の種類やバージョンを通常は
+   制御できないため、その含意として、HSTS ホストの配備者は一般に、HSTS
+   ポリシーを主張していない場合と同じ水準の注意を払い、Web サイトの開発および
+   配備上のバグ（<a href="#section-2.3.1.3">セクション 2.3.1.3</a>を参照）を避ける必要があります。
+
+<span class="h3"><a class="selflink" id="section-14.3" href="#section-14.3">14.3</a>.  エラーのないセキュアトランスポート上でのみ HSTS ポリシーを</span>
+<span class="h3">       確立することの影響</span>
+
+   <a href="#section-8">セクション 8</a>（「ユーザーエージェント処理モデル」）で定義される
+   ユーザーエージェント処理モデルは、UA が基盤となるセキュアトランスポートの
+   エラーまたは警告を伴わないセキュアトランスポート接続上で STS
+   ヘッダーフィールドを受信した場合に限り、ホストを最初に Known HSTS Host として
+   記録する、または Known HSTS Host のキャッシュ済み情報を更新すると規定します。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 33]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-34" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   その根拠は、「中間者」(MITM) が存在する場合、それが正当に配備された
+   プロキシであれ不正な主体であれ、さまざまな悪さを引き起こし得るためです
+   （<a href="#appendix-A">付録 A</a>（「設計判断に関する注記」）の項目 3、および
+   <a href="#section-14.6">セクション 14.6</a>（「ブートストラップ MITM 脆弱性」）も参照）。たとえば:
+
+   o  ホストを Known HSTS Host として無断で記録させること。これは、そのホストが
+      セキュアトランスポート上で一様にサービスを提供していない場合、サービス拒否
+      状態につながる可能性があります（<a href="#section-14.5">セクション 14.5</a>（「サービス拒否」）も参照）。
+
+   o  UA に返される max-age ヘッダーフィールドパラメーター値を操作することで、
+      そのホストが Known HSTS Host として指定される有効期間をリセットすること。
+      max-age が 0 として返されると、そのホストは UA によって Known HSTS Host と
+      見なされなくなり、そのホストへの安全でない接続、またはそのホストが
+      セキュアトランスポート上でのみサービスを提供している場合には、場合によっては
+      サービス拒否につながります。
+
+   しかし、これは、UA が、たとえば企業イントラネット内の MITM 非透過 TLS
+   プロキシの「背後」にあり、そのプロキシの向こう側にある未知の HSTS ホストと
+   やり取りする場合、利用者に従来のセキュア接続エラーダイアログが提示される
+   可能性があることを意味します。たとえリスクが受け入れられ、利用者が
+   「クリックして通過」しても、そのホストは HSTS ホストとして記録されません。
+   したがって、UA がそのようなプロキシの背後にいる限り、利用者は脆弱であり、
+   まだ未知の HSTS ホストについて、従来のセキュア接続エラーダイアログが
+   提示される可能性があります。
+
+   UA が未知の HSTS ホストにエラーのないセキュアトランスポート上で正常に
+   接続すると、そのホストは Known HSTS Host として記録されます。その結果、
+   干渉するプロキシの背後からの後続の接続試行は失敗します。
+
+   上記の議論は、警告やエラーがあり、かつホストが Known HSTS Host である場合は、
+   常に「利用者に回避手段を与えない」形でセキュア接続を終了するという
+   <a href="#section-12">セクション 12</a>（「ユーザーエージェント実装に関する助言」）の推奨に
+   関連しています。そのような姿勢は、利用者がセキュリティ警告を「クリックして
+   通過」し、自身をリスクにさらすことから保護します。
+
+<span class="h3"><a class="selflink" id="section-14.4" href="#section-14.4">14.4</a>.  includeSubDomains の必要性</span>
+
+   includeSubDomains ディレクティブがなければ、Web アプリケーションはいわゆる
+   「ドメイン Cookie」を十分に保護できません（たとえこれらの Cookie に
+   "Secure" フラグが設定され、したがってセキュアチャネル上でのみ伝達される
+   としても）。これらは、Web アプリケーションが、Web アプリケーションの任意かつ
+   すべてのサブドメインに対して UA が返すことを期待する Cookie です。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 34]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-35" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   たとえば、example.com が Web アプリケーションの最上位 DNS 名を表すとします。
+   さらに、この Cookie が example.com ドメイン全体に設定されている、すなわち
+   「ドメイン Cookie」であり、その Secure フラグが設定されているとします。
+   example.com はこの UA にとって Known HSTS Host ですが、includeSubDomains
+   ディレクティブは設定されていないとします。
+
+   ここで、攻撃者が UA に対し、Web アプリケーション内にすでに存在する可能性が
+   低いサブドメイン名、たとえば "https://uxdhbpahpdsf.example.com/" を
+   要求させ、かつ攻撃者がそれを DNS に登録し、攻撃者の制御下にある HTTP
+   サーバーを指すようにできた場合、次のようになります。
+
+   1.  UA は "uxdhbpahpdsf.example.com" について、すでに HSTS ポリシーを
+       確立している可能性が低いです。
+
+   2.  uxdhbpahpdsf.example.com に送信される HTTP 要求には、Secure フラグ付きの
+       ドメイン Cookie が含まれます。
+
+   3.  "uxdhbpahpdsf.example.com" が TLS 確立中に証明書を返し、利用者が提示される
+       可能性のある警告を「クリックして通過」した場合（そのようなドメイン名に
+       必要な証明書を取得して、警告が表示される場合も表示されない場合もある
+       状態にすることは可能ですが、確実ではありません）、攻撃者は、表向きは
+       保護されている Secure フラグ付きドメイン Cookie を取得できます。
+
+   "includeSubDomains" ディレクティブがなければ、HSTS はそのような Secure
+   フラグ付きドメイン Cookie を保護できません。
+
+<span class="h3"><a class="selflink" id="section-14.5" href="#section-14.5">14.5</a>.  サービス拒否</span>
+
+   HSTS は、Web サイトに対して特定の形態の Denial-of-Service (DoS) 攻撃を
+   仕掛けるために使用される可能性があります。DoS 攻撃とは、1 つ以上の
+   ネットワーク主体が被害主体を標的にし、その被害者が有用な作業を行うことを
+   妨げようとする攻撃です。このセクションでは、そのようなシナリオを HSTS の
+   観点から論じますが、この一覧は網羅的ではありません。インターネット全体の
+   DoS に関する考慮事項については、[<a href="./rfc4732" title="&quot;Internet Denial-of- Service Considerations&quot;">RFC4732</a>] も参照してください。
+
+   o  HTTP 上で利用可能な Web アプリケーション
+
+      攻撃者がそのような Web アプリケーションのホストに HSTS ポリシーを
+      設定するよう UA に仕向けることができる場合、セキュアトランスポートなしの
+      HTTP 上でのみ利用可能な Web アプリケーション（またはその重要部分）に対して、
+      DoS 攻撃を行う機会が生じます。
+
+      これは、Web アプリケーションのホストに対して UA 内で HSTS ポリシーが
+      設定されると、UA はそのホストと通信するためにセキュアトランスポートのみを
+      使用するようになるためです。そのホストがセキュア
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 35]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-36" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+      トランスポートを使用していない、または Web アプリケーションの重要部分で
+      それを使用していない場合、その Web アプリケーションは UA の利用者にとって
+      使用不能になります。
+
+      注記:  これは、<a href="#section-12.5">セクション 12.5</a>（「HSTS ポリシー削除」）で述べた
+             「HSTS ポリシー削除」機能を UA が提供するユースケースです。
+
+      被害ホストに対する HSTS ポリシーは、さまざまな方法で設定され得ます。
+
+      *  Web アプリケーションに HTTP 応答分割脆弱性 [<a href="#ref-CWE-113" title="&quot;CWE-113: Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Response Splitting')&quot;">CWE-113</a>] がある場合
+         （これは「HTTP ヘッダー注入」を容易にするために悪用され得ます）。
+
+      *  攻撃者が、安全でない被害サイト、たとえば &lt;http://example.com/&gt; から
+         &lt;https://example.com/&gt; へのリダイレクトを偽装でき、後者が攻撃者に
+         よって制御され、見かけ上有効な証明書を持っている場合。この状況では、
+         攻撃者は example.com に対して、また example.com のすべてのサブドメインに
+         対して HSTS ポリシーを設定できます。
+
+      *  攻撃者が、被害ホストに対して HSTS ポリシーを手動設定するよう利用者を
+         説得できる場合。これは、その UA がそのような機能を提供していることを
+         前提とします（<a href="#section-12">セクション 12</a>（「ユーザーエージェント実装に関する助言」）を
+         参照）。あるいは、そのような UA 設定がスクリプト可能であれば、攻撃者は
+         UA に自分のスクリプトを実行させ、任意の望むドメインに対して HSTS
+         ポリシーを設定できます。
+
+   o  includeSubDomains の不注意な使用
+
+      includeSubDomains ディレクティブは、与えられた HSTS ホストのすべての
+      サブドメインを Known HSTS Host として自動的に見なすよう UA に指示します。
+      そのようなサブドメインのいずれかが、適切に構成されたセキュア
+      トランスポートをサポートしていない場合、それらはそのような UA から
+      到達不能になります。
+
+<span class="h3"><a class="selflink" id="section-14.6" href="#section-14.6">14.6</a>.  ブートストラップ MITM 脆弱性</span>
+
+   ブートストラップ MITM（中間者）脆弱性とは、利用者が "https" URI ではなく
+   "http" URI を使用して、未知の HSTS ホストへ手動入力する、またはリンクを
+   辿る状況で、利用者と HSTS ホストが遭遇する脆弱性です。UA は指定された
+   サーバーとの初回のやり取りの試行で安全でないチャネルを使用するため、その
+   初回のやり取りはさまざまな攻撃に対して脆弱です（[<a href="#ref-ForceHTTPS">ForceHTTPS</a>] の
+   セクション 5.3 を参照）。
+
+   注記:  UA 実装がこの脆弱性を緩和するために採用できるさまざまな機能/仕組みが
+          あります。<a href="#section-12">セクション 12</a>（「ユーザーエージェント実装に関する助言」）を
+          参照してください。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 36]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-37" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-14.7" href="#section-14.7">14.7</a>.  ネットワーク時刻攻撃</span>
+
+   能動的ネットワーク攻撃は、Network Time Protocol (NTP) [<a href="./rfc5905" title="&quot;Network Time Protocol Version 4: Protocol and Algorithms Specification&quot;">RFC5905</a>] などの
+   ネットワーク時刻プロトコルを破壊でき、NTP を信頼する、またはリアルタイム
+   クロックを持たないクライアントに対して HSTS の効果を弱めます。ネットワーク
+   時刻攻撃は本仕様の範囲外です。現代のオペレーティングシステムはデフォルトで
+   NTP を使用することに注意してください。<a href="./rfc4732#section-2.10">[RFC4732] のセクション&nbsp;2.10</a>も
+   参照してください。
+
+<span class="h3"><a class="selflink" id="section-14.8" href="#section-14.8">14.8</a>.  偽のルート CA 証明書フィッシングと DNS キャッシュポイズニング攻撃</span>
+
+   攻撃者は、偽のルート CA 証明書フィッシングと DNS キャッシュポイズニング攻撃を
+   介して、HSTS で保護された被害 Web アプリケーションに属する利用者のログイン
+   資格情報を取得できる可能性があります。
+
+   たとえば、攻撃者はまず、HSTS ポリシーで保護された被害 Web アプリケーションの
+   利用者に対し、被害 Web アプリケーションの CA を表すと（偽って）称する
+   攻撃者版のルート CA 証明書をインストールするよう説得する可能性があります。
+   これは、そのような証明書へのリンクを含むフィッシングメールメッセージを
+   利用者に送信し、クリックされた場合にブラウザーがインストールを提案することで
+   達成されるかもしれません。
+
+   次に、攻撃者が利用者の DNS サーバーに対する攻撃を実行できる場合
+   （たとえばキャッシュポイズニングによって）、かつ自分たちの偽 Web
+   アプリケーションに対して HSTS ポリシーを有効化すると、影響を受けた利用者の
+   ブラウザーは、正規の Web アプリケーションではなく攻撃者の Web
+   アプリケーションにアクセスすることになります。
+
+   この種の攻撃は、HSTS の範囲外にあるベクトルを利用します。しかし、そのような
+   脅威の実現可能性は、Web アプリケーション全体の配備手法の中で、HSTS に加えて、
+   DNS Security Extensions [<a href="./rfc4033" title="&quot;DNS Security Introduction and Requirements&quot;">RFC4033</a>] などのセキュリティ機能、および
+   電子メールフィッシングや偽証明書注入を阻止する技術を適切に使用することにより
+   緩和できます。
+
+<span class="h3"><a class="selflink" id="section-14.9" href="#section-14.9">14.9</a>.  HSTS ポリシーストアの創造的操作</span>
+
+   HSTS ホストは自らのホスト名およびそのサブドメインを選択でき、この情報は
+   適合 UA の HSTS ポリシーストアにキャッシュされるため、1 つ以上の HSTS
+   ホストを制御する者が、自ら制御するドメイン名に情報を符号化し、そのような
+   UA に、HSTS ホストを記録する過程で当然のようにこの情報をキャッシュさせることが
+   可能です。この情報は、巧妙に構築され読み込まれた Web リソースを通じて
+   他のホストから取得できます。その結果、UA は符号化されたドメイン名の
+   （変種）にクエリを送信します。そのようなクエリは、UA が以前に元の
+   HSTS ホスト（およびサブドメイン）を訪問したかどうかを明らかにできます。
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 37]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-38" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   そのような技術は、さらに別の形態の「Web 追跡」[<a href="#ref-WebTracking">WebTracking</a>] として
+   悪用される可能性があります。
+
+<span class="h3"><a class="selflink" id="section-14.10" href="#section-14.10">14.10</a>.  国際化ドメイン名</span>
+
+   インターネットセキュリティは、部分的に DNS とそれがホストするドメイン名に
+   依存しています。ドメイン名は、利用者がインターネットホストやその他の
+   ネットワークリソースを識別し、接続するために使用されます。たとえば、利用者が
+   入力した国際化ドメイン名 (IDN) の解釈が異なることに基づいて、異なるホストに
+   接続される場合、インターネットセキュリティは損なわれます。
+
+   本仕様で規定される処理モデルは、それらが操作するドメイン名が IDNA
+   正規化されており、かつ正規化処理が、必要な仕様に従って適切なすべての
+   IDNA および Unicode の検証と文字リスト検査を正しく実行したことを前提とします
+   （たとえば、<a href="#section-10">セクション 10</a>（「ドメイン名の IDNA 正規化」）で述べられている
+   とおり）。これらの手順は、さまざまな潜在的に危険な状況を避けるために
+   必要です。
+
+   簡潔に言えば、慎重で一貫した Unicode および IDNA の検証が欠けていることに
+   起因し得る問題の例には、予期しない処理例外、切り捨てエラー、
+   バッファーオーバーフロー、ならびにドメイン名照合結果の偽陽性および/または
+   偽陰性があります。前述のいずれの問題も、攻撃者によってさまざまな形で
+   利用される可能性があります。
+
+   さらに、IDNA2008 [<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>] は、許可されない文字および文字マッピング規約の点で
+   IDNA2003 [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] と異なります。この状況も、ドメイン名照合結果の
+   偽陽性および/または偽陰性につながり、その結果、たとえば利用者が意図しない
+   ホストと通信してしまう、または意図したホストに到達できない可能性があります。
+
+   詳細については、[<a href="./rfc5890" title="&quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;">RFC5890</a>]、[<a href="./rfc5891" title="&quot;Internationalized Domain Names in Applications (IDNA): Protocol&quot;">RFC5891</a>]、および [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] の
+   セキュリティ上の考慮事項セクション、ならびにそれらが規範的に参照する仕様を
+   参照してください。さらに、[<a href="./rfc5894" title="&quot;Internationalized Domain Names for Applications (IDNA): Background, Explanation, and Rationale&quot;">RFC5894</a>] は、特に IDNA2008 について、また
+   IDNA とその問題全般について、詳細な背景と根拠を提供しており、前述の仕様と
+   併せて参照すべきです。
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 38]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-39" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h2"><a class="selflink" id="section-15" href="#section-15">15</a>.  IANA に関する考慮事項</span>
+
+   以下は、[<a href="./rfc3864" title="&quot;Registration Procedures for Message Header Fields&quot;">RFC3864</a>] に従う Internet Assigned Numbers Authority (IANA) の
+   Permanent Message Header Field 登録情報です。
+
+     Header field name:           Strict-Transport-Security
+     Applicable protocol:         http
+     Status:                      standard
+     Author/Change controller:    IETF
+     Specification document(s):   this one
+
+<span class="h2"><a class="selflink" id="section-16" href="#section-16">16</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-16.1" href="#section-16.1">16.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, 1997年3月.
+
+   [<a id="ref-RFC2616">RFC2616</a>]  Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
+              Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
+              Transfer Protocol -- HTTP/1.1", <a href="./rfc2616">RFC 2616</a>, 1999年6月.
+
+   [<a id="ref-RFC2818">RFC2818</a>]  Rescorla, E., "HTTP Over TLS", <a href="./rfc2818">RFC 2818</a>, 2000年5月.
+
+   [<a id="ref-RFC3490">RFC3490</a>]  Faltstrom, P., Hoffman, P., and A. Costello,
+              "Internationalizing Domain Names in Applications (IDNA)",
+              <a href="./rfc3490">RFC 3490</a>, 2003年3月.
+
+   [<a id="ref-RFC3864">RFC3864</a>]  Klyne, G., Nottingham, M., and J. Mogul, "Registration
+              Procedures for Message Header Fields", <a href="https://www.rfc-editor.org/bcp/bcp90">BCP 90</a>, <a href="./rfc3864">RFC 3864</a>,
+              2004年9月.
+
+   [<a id="ref-RFC3986">RFC3986</a>]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              <a href="./rfc3986">RFC 3986</a>, 2005年1月.
+
+   [<a id="ref-RFC5246">RFC5246</a>]  Dierks, T. and E. Rescorla, "The Transport Layer Security
+              (TLS) Protocol Version 1.2", <a href="./rfc5246">RFC 5246</a>, 2008年8月.
+
+   [<a id="ref-RFC5890">RFC5890</a>]  Klensin, J., "Internationalized Domain Names for
+              Applications (IDNA): Definitions and Document Framework",
+              <a href="./rfc5890">RFC 5890</a>, 2010年8月.
+
+   [<a id="ref-RFC5891">RFC5891</a>]  Klensin, J., "Internationalized Domain Names in
+              Applications (IDNA): Protocol", <a href="./rfc5891">RFC 5891</a>, 2010年8月.
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 39]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-40" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   [<a id="ref-RFC5895">RFC5895</a>]  Resnick, P. and P. Hoffman, "Mapping Characters for
+              Internationalized Domain Names in Applications
+              (IDNA) 2008", <a href="./rfc5895">RFC 5895</a>, 2010年9月.
+
+   [<a id="ref-RFC6698">RFC6698</a>]  Hoffman, P. and J. Schlyter, "The DNS-Based Authentication
+              of Named Entities (DANE) Transport Layer Security (TLS)
+              Protocol: TLSA", <a href="./rfc6698">RFC 6698</a>, 2012年8月.
+
+   [<a id="ref-UTS46">UTS46</a>]    Davis, M. and M. Suignard, "Unicode IDNA Compatibility
+              Processing", Unicode Technical Standard #46,
+              &lt;<a href="http://unicode.org/reports/tr46/">http://unicode.org/reports/tr46/</a>&gt;.
+
+   [<a id="ref-Unicode">Unicode</a>]  The Unicode Consortium, "The Unicode Standard",
+              &lt;<a href="http://www.unicode.org/versions/latest/">http://www.unicode.org/versions/latest/</a>&gt;.
+
+   [<a id="ref-W3C.REC-html401-19991224">W3C.REC-html401-19991224</a>]
+              Raggett, D., Le Hors, A., and I. Jacobs, "HTML 4.01
+              Specification", World Wide Web Consortium Recommendation
+              REC-html401-19991224, 1999年12月,
+              &lt;<a href="http://www.w3.org/TR/1999/REC-html401-19991224/">http://www.w3.org/TR/1999/REC-html401-19991224/</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-16.2" href="#section-16.2">16.2</a>.  参考情報</span>
+
+   [<a id="ref-Aircrack-ng">Aircrack-ng</a>]
+              d'Otreppe, T., "Aircrack-ng", Accessed: 11-Jul-2010,
+              &lt;<a href="http://www.aircrack-ng.org/">http://www.aircrack-ng.org/</a>&gt;.
+
+   [<a id="ref-BeckTews09">BeckTews09</a>]
+              Beck, M. and E. Tews, "Practical Attacks Against WEP and
+              WPA", Second ACM Conference on Wireless Network
+              Security Zurich, Switzerland, 2009,
+              &lt;<a href="http://dl.acm.org/citation.cfm?id=1514286">http://dl.acm.org/citation.cfm?id=1514286</a>&gt;.
+
+   [<a id="ref-CWE-113">CWE-113</a>]  "CWE-113: Improper Neutralization of CRLF Sequences in
+              HTTP Headers ('HTTP Response Splitting')", Common Weakness
+              Enumeration &lt;<a href="http://cwe.mitre.org/">http://cwe.mitre.org/</a>&gt;, The Mitre
+              Corporation &lt;<a href="http://www.mitre.org/">http://www.mitre.org/</a>&gt;,
+              &lt;<a href="http://cwe.mitre.org/data/definitions/113.html">http://cwe.mitre.org/data/definitions/113.html</a>&gt;.
+
+   [<a id="ref-Firesheep">Firesheep</a>]
+              Various, "Firesheep", Wikipedia Online, ongoing, &lt;<a href="https://secure.wikimedia.org/wikipedia/en/w/index.php?title=Firesheep&amp;oldid=517474182">https://</a>
+              <a href="https://secure.wikimedia.org/wikipedia/en/w/index.php?title=Firesheep&amp;oldid=517474182">secure.wikimedia.org/wikipedia/en/w/</a>
+              <a href="https://secure.wikimedia.org/wikipedia/en/w/index.php?title=Firesheep&amp;oldid=517474182">index.php?title=Firesheep&amp;oldid=517474182</a>&gt;.
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 40]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-41" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   [<a id="ref-ForceHTTPS">ForceHTTPS</a>]
+              Jackson, C. and A. Barth, "ForceHTTPS:  Protecting High-
+              Security Web Sites from Network Attacks", In Proceedings
+              of the 17th International World Wide Web Conference
+              (WWW2008) , 2008,
+              &lt;<a href="https://crypto.stanford.edu/forcehttps/">https://crypto.stanford.edu/forcehttps/</a>&gt;.
+
+   [<a id="ref-GoodDhamijaEtAl05">GoodDhamijaEtAl05</a>]
+              Good, N., Dhamija, R., Grossklags, J., Thaw, D.,
+              Aronowitz, S., Mulligan, D., and J. Konstan, "Stopping
+              Spyware at the Gate: A User Study of Privacy, Notice and
+              Spyware", In Proceedings of Symposium On Usable Privacy
+              and Security (SOUPS) Pittsburgh, PA, USA, 2005年7月,
+              &lt;<a href="http://www.law.berkeley.edu/files/Spyware_at_the_Gate.pdf">http://www.law.berkeley.edu/files/</a>
+              <a href="http://www.law.berkeley.edu/files/Spyware_at_the_Gate.pdf">Spyware_at_the_Gate.pdf</a>&gt;.
+
+   [<a id="ref-HTTP1_1-UPD">HTTP1_1-UPD</a>]
+              Fielding, R., Ed., and J. Reschke, Ed., "Hypertext
+              Transfer Protocol (HTTP/1.1): Message Syntax and Routing",
+              Work in Progress, 2012年10月.
+
+   [<a id="ref-JacksonBarth2008">JacksonBarth2008</a>]
+              Jackson, C. and A. Barth, "Beware of Finer-Grained
+              Origins", Web 2.0 Security and Privacy Workshop, Oakland,
+              CA, USA, 2008,
+              &lt;<a href="http://seclab.stanford.edu/websec/origins/fgo.pdf">http://seclab.stanford.edu/websec/origins/fgo.pdf</a>&gt;.
+
+   [<a id="ref-OWASP-TLSGuide">OWASP-TLSGuide</a>]
+              Coates, M., Wichers, D., Boberski, M., and T. Reguly,
+              "Transport Layer Protection Cheat Sheet",
+              Accessed: 11-Jul-2010, &lt;<a href="http://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet">http://www.owasp.org/index.php/</a>
+              <a href="http://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet">Transport_Layer_Protection_Cheat_Sheet</a>&gt;.
+
+   [<a id="ref-RFC1035">RFC1035</a>]  Mockapetris, P., "Domain names - implementation and
+              specification", STD 13, <a href="./rfc1035">RFC 1035</a>, 1987年11月.
+
+   [<a id="ref-RFC2560">RFC2560</a>]  Myers, M., Ankney, R., Malpani, A., Galperin, S., and C.
+              Adams, "X.509 Internet Public Key Infrastructure Online
+              Certificate Status Protocol - OCSP", <a href="./rfc2560">RFC 2560</a>, 1999年6月.
+
+   [<a id="ref-RFC4033">RFC4033</a>]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "DNS Security Introduction and Requirements",
+              <a href="./rfc4033">RFC 4033</a>, 2005年3月.
+
+   [<a id="ref-RFC4732">RFC4732</a>]  Handley, M., Rescorla, E., and IAB, "Internet Denial-of-
+              Service Considerations", <a href="./rfc4732">RFC 4732</a>, 2006年12月.
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 41]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-42" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   [<a id="ref-RFC4949">RFC4949</a>]  Shirey, R., "Internet Security Glossary, Version 2",
+              <a href="./rfc4949">RFC 4949</a>, 2007年8月.
+
+   [<a id="ref-RFC5226">RFC5226</a>]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
+              IANA Considerations Section in RFCs", <a href="https://www.rfc-editor.org/bcp/bcp26">BCP 26</a>, <a href="./rfc5226">RFC 5226</a>,
+              2008年5月.
+
+   [<a id="ref-RFC5280">RFC5280</a>]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+              Housley, R., and W. Polk, "Internet X.509 Public Key
+              Infrastructure Certificate and Certificate Revocation List
+              (CRL) Profile", <a href="./rfc5280">RFC 5280</a>, 2008年5月.
+
+   [<a id="ref-RFC5894">RFC5894</a>]  Klensin, J., "Internationalized Domain Names for
+              Applications (IDNA): Background, Explanation, and
+              Rationale", <a href="./rfc5894">RFC 5894</a>, 2010年8月.
+
+   [<a id="ref-RFC5905">RFC5905</a>]  Mills, D., Martin, J., Burbank, J., and W. Kasch, "Network
+              Time Protocol Version 4: Protocol and Algorithms
+              Specification", <a href="./rfc5905">RFC 5905</a>, 2010年6月.
+
+   [<a id="ref-RFC6066">RFC6066</a>]  Eastlake, D., "Transport Layer Security (TLS) Extensions:
+              Extension Definitions", <a href="./rfc6066">RFC 6066</a>, 2011年1月.
+
+   [<a id="ref-RFC6101">RFC6101</a>]  Freier, A., Karlton, P., and P. Kocher, "The Secure
+              Sockets Layer (SSL) Protocol Version 3.0", <a href="./rfc6101">RFC 6101</a>,
+              2011年8月.
+
+   [<a id="ref-RFC6125">RFC6125</a>]  Saint-Andre, P. and J. Hodges, "Representation and
+              Verification of Domain-Based Application Service Identity
+              within Internet Public Key Infrastructure Using X.509
+              (PKIX) Certificates in the Context of Transport Layer
+              Security (TLS)", <a href="./rfc6125">RFC 6125</a>, 2011年3月.
+
+   [<a id="ref-RFC6265">RFC6265</a>]  Barth, A., "HTTP State Management Mechanism", <a href="./rfc6265">RFC 6265</a>,
+              2011年4月.
+
+   [<a id="ref-RFC6454">RFC6454</a>]  Barth, A., "The Web Origin Concept", <a href="./rfc6454">RFC 6454</a>,
+              2011年12月.
+
+   [<a id="ref-SunshineEgelmanEtAl09">SunshineEgelmanEtAl09</a>]
+              Sunshine, J., Egelman, S., Almuhimedi, H., Atri, N., and
+              L. Cranor, "Crying Wolf: An Empirical Study of SSL Warning
+              Effectiveness", In Proceedings of 18th USENIX Security
+              Symposium Montreal, Canada, 2009年8月, &lt;<a href="http://www.usenix.org/events/sec09/tech/full_papers/sunshine.pdf">http://</a>
+              <a href="http://www.usenix.org/events/sec09/tech/full_papers/sunshine.pdf">www.usenix.org/events/sec09/tech/full_papers/</a>
+              <a href="http://www.usenix.org/events/sec09/tech/full_papers/sunshine.pdf">sunshine.pdf</a>&gt;.
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 42]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-43" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+   [<a id="ref-W3C.REC-wsc-ui-20100812">W3C.REC-wsc-ui-20100812</a>]
+              Roessler, T. and A. Saldhana, "Web Security Context: User
+              Interface Guidelines", World Wide Web Consortium
+              Recommendation REC-wsc-ui-20100812, 2010年8月,
+              &lt;<a href="http://www.w3.org/TR/2010/REC-wsc-ui-20100812">http://www.w3.org/TR/2010/REC-wsc-ui-20100812</a>&gt;.
+
+   [<a id="ref-WebTracking">WebTracking</a>]
+              Schmucker, N., "Web Tracking", SNET2 Seminar Paper
+              - Summer Term, 2011, &lt;<a href="http://www.snet.tu-berlin.de/fileadmin/fg220/courses/SS11/snet-project/web-tracking_schmuecker.pdf">http://www.snet.tu-berlin.de/</a>
+              <a href="http://www.snet.tu-berlin.de/fileadmin/fg220/courses/SS11/snet-project/web-tracking_schmuecker.pdf">fileadmin/fg220/courses/SS11/snet-project/</a>
+              <a href="http://www.snet.tu-berlin.de/fileadmin/fg220/courses/SS11/snet-project/web-tracking_schmuecker.pdf">web-tracking_schmuecker.pdf</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 43]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-44" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">付録 A</a>.  設計判断に関する注記</span>
+
+   この付録は、さまざまな設計判断を文書化します。
+
+   1.  Cookie は HSTS ポリシーの表現に適していません。なぜなら、（UA に
+       保存されている間）潜在的に変更可能だからです。したがって、HTTP
+       ヘッダーフィールドが採用されています。
+
+   2.  UA 実装上の考慮事項および分類上の困難さのため、「混在セキュリティ
+       コンテキストの読み込み」（「混在コンテンツの読み込み」としても知られる）を
+       どのように扱うかを規定しようとはしないことを選びました。
+
+   3.  HSTS ホストは、新しい HSTS ヘッダーフィールドパラメーター値を介して、
+       UA の HSTS ポリシーに関する認識を更新できます。サーバーから受信した
+       「最新の」情報を UA が尊重するようにしたのは、Web サイトが複数年の
+       max-age 値や誤った includeSubDomains ディレクティブなど、誤った HSTS
+       ポリシーを送信する可能性があるためです。HSTS ホストがそのようなエラーを
+       プロトコル上で修正できなければ、利用者への何らかの告知と、利用者側での
+       手動介入が必要になり、これは Web アプリケーション提供者とその利用者の
+       両方にとって容易ではない問題になり得ます。
+
+   4.  HSTS ホストはドメイン名によってのみ識別されます。すべての形態の明示的な
+       IP アドレス識別は除外されます。これは単純化のためであり、また PKI ベースの
+       セキュリティと組み合わせて直接 IP アドレス識別を使用することに関する
+       さまざまな問題を認識しているためでもあります。
+
+   5.  キャッシュ済み HSTS ポリシーの有効期間値として HSTS ホストが単純な整数の
+       秒数を提供する max-age 手法は、将来の有効期限時刻を述べる手法ではなく、
+       さまざまな理由により選択されました。その理由には、時計同期が不要であること、
+       日付および時刻値の構文を定義する必要がないこと（仕様の単純さ）、および
+       実装の単純さが含まれます。
+
+   6.  ポート対応付けを採用するかどうかを決定する際、明示的なポートを持つ
+       URL の参照解除を単に拒否するという選択肢が検討されました。しかし、
+       参照解除される URI が誤っている可能性（そして、そのポートに実際には
+       有効な HTTPS サーバーがある可能性）は、HTTP サーバーへの HTTPS 取得が
+       無駄になるかもしれない小さなコストに見合うと判断されました。
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 44]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-45" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-B" href="#appendix-B">付録 B</a>.  HSTS ポリシーと同一生成元ポリシーの違い</span>
+
+   HSTS ポリシーには、次の主要な特性があります。
+
+      HSTS ポリシーは、ホストごとに、UA からホストへの接続確立の
+      セキュリティ特性に関する要件を規定します。
+
+      ホストは HSTS ポリシーを UA に明示的に宣言します。適合 UA は、
+      ホストが宣言した HSTS ポリシーを実装する義務があります。
+
+      HSTS ポリシーは、プロトコル上でホストから UA へ伝達されます。
+
+      UA は Known HSTS Hosts のキャッシュを維持します。
+
+      UA は、Known HSTS Host への HTTP 接続を行うたびに、ホストのポート番号に
+      かかわらず HSTS ポリシーを適用します。すなわち、Known HSTS Host 上の
+      すべてのポートに適用されます。ホストは HSTS ポリシーのこの側面に
+      影響を与えることができません。
+
+      ホストは任意で、自身の HSTS ポリシーがホストドメイン名のすべての
+      サブドメインに適用されると宣言できます。
+
+   対照的に、Same-Origin Policy (SOP) [<a href="./rfc6454" title="&quot;The Web Origin Concept&quot;">RFC6454</a>] には次の主要な特性があります。
+
+      生成元とは、リソースを識別する URI のスキーム、ホスト、およびポートです。
+
+      UA は URI を参照解除し、それによって URI が識別するリソースの表現を
+      読み込むことがあります。UA は、リソース表現に、その URI から導かれる
+      生成元でラベル付けします。
+
+      SOP は、UA 内で実装される一連の原則を指し、UA 内のリソース表現間の
+      分離および通信、ならびにリソース表現によるネットワークリソースへの
+      アクセスを統制します。
+
+   要約すると、HSTS ポリシーと SOP はどちらも UA によって適用されますが、
+   HSTS ポリシーはホストによって任意で宣言され、生成元ベースではありません。
+   一方、SOP は適合 UA によってすべてのホストから読み込まれるすべての
+   リソース表現に適用されます。
+
+
+
+
+
+
+
+
+
+<span class="grey">Hodges, et al.               Standards Track                   [Page 45]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-46" ></span>
+<span class="grey"><a href="./rfc6797">RFC 6797</a>          HTTP Strict Transport Security (HSTS)    2012年11月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-C" href="#appendix-C">付録 C</a>.  謝辞</span>
+
+   著者らは、Devdatta Akhawe、Michael Barrett、Ben Campbell、
+   Tobias Gondrom、Paul Hoffman、Murray Kucherawy、Barry Leiba、James
+   Manger、Alexey Melnikov、Haevard Molland、Yoav Nir、Yngve N.
+   Pettersen、Laksh Raghavan、Marsh Ray、Julian Reschke、Eric Rescorla、
+   Tom Ritter、Peter Saint-Andre、Brian Smith、Robert Sparks、Maciej
+   Stachowiak、Sid Stamm、Andy Steingrubl、Brandon Sterne、Martin
+   Thomson、Daniel Veditz、および Jan Wrobel に感謝します。また、
+   さまざまなレビューと有益な貢献を行った websec ワーキンググループの
+   すべての参加者およびその他の方々にも感謝します。
+
+   有効要求 URI テキストの優雅な書き換えについて Julian Reschke に感謝します。
+   彼は ERU の概念を HTTP/1.1 [<a href="#ref-HTTP1_1-UPD">HTTP1_1-UPD</a>] の更新に組み込む際に
+   それを行いました。その後、本仕様の ERU テキストは、更新された HTTP/1.1
+   （part 1）仕様における Julian の作業から取り出され、[<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] ABNF に
+   適合するよう調整されました。
+
+著者の連絡先
+
+   Jeff Hodges
+   PayPal
+   2211 North First Street
+   San Jose, California  95131
+   US
+
+   EMail: Jeff.Hodges@PayPal.com
+
+
+   Collin Jackson
+   Carnegie Mellon University
+
+   EMail: collin.jackson@sv.cmu.edu
+
+
+   Adam Barth
+   Google, Inc.
+
+   EMail: ietf@adambarth.com
+   URI:   <a href="http://www.adambarth.com/">http://www.adambarth.com/</a>
+
+
+
+
+
+
+
+
+
+
+
+Hodges, et al.               Standards Track                   [Page 46]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
