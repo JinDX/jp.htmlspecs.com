@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+    <meta charset="utf-8">
+    <title>
+        Web 共有ターゲット API
+    </title>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+    <script class='remove'>
+        var respecConfig = {
+            specStatus: "unofficial", // until we publish a FPWD!
+            github: {
+                repoURL: "w3c/web-share-target",
+                branch: "main"
+            },
+            group: "webapps",
+            editors: [{
+                name: "Matt Giuca",
+                company: "Google Inc.",
+                companyURL: "https://google.com",
+                w3cid: 91260
+            },
+            {
+                name: "Eric Willigers",
+                company: "Google Inc.",
+                companyURL: "https://google.com",
+                w3cid: 67534
+            }],
+            // eventually add mdn: true, and caniuse: "web-share-target"
+            xref: "web-platform",
+        };
+    </script>
+</head>
+
+<body data-cite="Web-Share encoding secure-contexts appmanifest">
+    <section id="abstract">
+        <p>
+            この仕様は、ウェブサイトが自身を<a>ウェブ共有ターゲット</a>として宣言できるようにする
+            API を定義する。ウェブ共有ターゲットは、[[[Web-Share]]]、またはシステムイベント
+            （例えば、ネイティブアプリからの共有）から共有コンテンツを受け取ることができる。
+        </p>
+        <p>
+            これは {{NavigatorContentUtils/registerProtocolHandler()}} と似た仕組みであり、
+            ユーザーエージェントにウェブサイトを登録しておき、後で別のサイトまたは
+            ネイティブアプリケーションから、ユーザーエージェントを介して（場合によっては
+            ユーザーの裁量で）<a>呼び出される</a>ようにする点で同様である。違いは、
+            {{NavigatorContentUtils/registerProtocolHandler()}} がプログラム的な API によって
+            ハンドラーを登録するのに対し、Web Share Target は [[[appmanifest]]] 内で宣言され、
+            ユーザーエージェントまたはユーザーが選択する時点で登録される点である。
+        </p>
+    </section>
+    <section id="sotd">
+        <p>
+            これは Web Share Target 仕様の初期ドラフトである。
+        </p>
+    </section>
+    <section>
+        <h2>
+            前提条件
+        </h2>
+        <p>
+            この API を実装するためには、ユーザーエージェントは [[[appmanifest]]] を
+            サポートしなければならない（MUST）。この仕様は [[[Web-Share]]] 仕様の一部の
+            定義も再利用する。ただし、[[[Web-Share]]] のサポートは任意である（OPTIONAL）。
+        </p>
+    </section>
+    <section class="informative">
+        <h2>
+            使用例
+        </h2>
+        <p>
+            サイトを共有ターゲットとして登録するには、次のように、[=manifest/share_target=]
+            エントリーを [[[appmanifest]]] に追加する。
+        </p>
+        <pre class="example json" title="manifest.webmanifest">
+      {
+        "name": "Includinator",
+        "share_target": {
+          "action": "share.html",
+          "params": {
+            "title": "name",
+            "text": "description",
+            "url": "link"
+          }
+        }
+      }
+      </pre>
+        <p>
+            [=ShareTarget/params=] のキーは [[[Web-Share]]] の {{ShareData}} における
+            キー名に対応し、その値は、ターゲットが起動されたときにクエリパラメーターとして
+            使用される任意の名前である。
+        </p>
+        <p>
+            共有が行われ、ユーザーがこの共有ターゲットを選択した場合、ユーザーエージェントは
+            HTML フォーム送信と同様に、共有データを含むクエリパラメーター値を付けて、
+            `action` URL に新しい閲覧コンテキストを開く。
+        </p>
+        <p>
+            この例では、マニフェストが
+            `https://example.org/includinator/manifest.webmanifest` にあるものとする。
+        </p>
+        <pre class="example html" title="share.html">
+      &lt;html&gt;
+      &lt;link rel="manifest" href="manifest.webmanifest"&gt;
+      &lt;script&gt;
+        window.addEventListener('load', () =&gt; {
+          const parsedUrl = new URL(window.location);
+          const { searchParams } = parsedUrl;
+          console.log("Title shared:", searchParams.get('name'));
+          console.log("Text shared:", searchParams.get('description'));
+          console.log("URL shared:", searchParams.get('link'));
+        });
+      &lt;/script&gt;
+      </pre>
+        <p>
+            入ってくる共有にタイトル "My News" と URL `http://example.com/news` が含まれる場合、
+            ユーザーエージェントは新しいウィンドウまたはタブを開き、次へ移動する。
+        </p>
+        <pre>
+https://example.org/includinator/share.html?name=My+News&amp;link=http%3A%2F%2Fexample.com%2Fnews
+</pre>
+        <p class="warning">
+            [=`application\/x-www-form-urlencoded`=] エンコーディングを使用するため、
+            U+0020（SPACE）文字は、予想されるかもしれない "`%20`" ではなく "`+`" として
+            エンコードされる。処理系は、U+002B（+）文字を U+0020（SPACE）としてデコードするよう
+            注意しなければならない。ECMAScript の
+            <a data-cite="ECMASCRIPT#sec-decodeuricomponent-encodeduricomponent">`decodeURIComponent`</a>
+            関数を含む一部の URL デコードライブラリは、これを自動的には行わない場合がある。
+        </p>
+        <p>
+            クエリパラメーターには、共有される {{ShareData}} からの情報が設定される。
+            {{ShareData}} に特定のメンバーの情報が含まれない場合、そのクエリパラメーターは
+            省略される。
+        </p>
+        <p>
+            共有ターゲットは、{{ShareData}} メンバーの一部だけに関心を持つ場合がある。
+            この例では、`POST` リクエストとしてデータを受け取る共有ターゲットも示している。
+            リクエストが即時の副作用を引き起こす場合は、この方式にすべきである。
+        </p>
+        <pre class="example json" title="manifest.webmanifest">
+      {
+        "name": "Bookmark",
+        "share_target": {
+          "action": "/bookmark",
+          "method": "POST",
+          "enctype": "multipart/form-data",
+          "params": {
+            "url": "link"
+          }
+        }
+      }
+      </pre>
+        <p data-cite="service-workers-1">
+            共有された情報は、サーバーへネットワーク越しに送信されるのではなく、
+            [=service worker=] によって読み取られる場合がある。
+        </p>
+        <pre class="example javascript" title="sw.js">
+        self.addEventListener("fetch", (event) =&gt; {
+          if (event.request.method !== "POST") {
+            event.respondWith(fetch(event.request));
+            return;
+          }
+
+          const formDataPromise = event.request.formData();
+          event.respondWith(
+            formDataPromise.then((formData) =&gt; {
+              const link = formData.get("link") || "";
+              saveBookmark(link);
+              return new Response(`Bookmark saved: ${link}`);
+            })
+          );
+        });
+      </pre>
+        <p>
+            ハンドラーが共有データをどのように扱うかはハンドラーの裁量であり、
+            一般にはアプリの種類に依存する。いくつかの提案を以下に示す。
+        </p>
+        <ul>
+            <li>メールクライアントは、`title` をメールの件名として使用し、`text` と `url` を
+                連結して本文として使用して、新しいメールの下書きを作成する場合がある。
+            </li>
+            <li>ソーシャルネットワーキングアプリは、`title` を無視し、`text` をメッセージ本文として
+                使用し、`url` をリンクとして追加して、新しい投稿の下書きを作成する場合がある。
+                `text` が欠けている場合、本文にも `url` を使用することがある。`url` が欠けている
+                場合、`text` を走査して URL を探し、それをリンクとして追加することがある。
+            </li>
+            <li>テキストメッセージングアプリは、`title` を無視し、`text` と `url` を連結して
+                新しいメッセージの下書きを作成する場合がある。メッセージサイズに収まるよう、
+                テキストを切り詰めたり、`url` を短縮リンクに置き換えたりすることがある。
+            </li>
+        </ul>
+    </section>
+    <section>
+        <h2>
+            Web App Manifest への拡張
+        </h2>
+        <p>
+            [=manifest=] は <abbr title="JavaScript Object Notation">JSON</abbr> であるため、
+            この仕様は [[JSON]] 仕様で定義される型、すなわち
+            <dfn data-cite="JSON#section-4">object</dfn> と
+            <dfn data-cite="JSON#section-7">string</dfn> に依存する。
+        </p>
+        <p>
+            次の手順を [=processing extension-point of
+            web manifest=] に追加する。
+        </p>
+        <ol class="algorithm">
+            <li>|json| と |manifest| を、[=processing a manifest=] からの対応する変数とする。
+            </li>
+            <li>|json| と |manifest| を用いて [=Process the `share_target` member=] を行う。
+            </li>
+        </ol>
+        <section>
+            <h3>
+                `share_target` メンバー
+            </h3>
+            <p>
+                マニフェストの <code><dfn data-dfn-for="manifest">share_target</dfn></code>
+                メンバーは [=object=] である。存在する場合、このアプリケーションを
+                <a>ウェブ共有ターゲット</a>として宣言し、アプリケーションが共有データを
+                どのように受け取るかを記述する。
+            </p>
+            <p>
+                <dfn data-export="">ウェブ共有ターゲット</dfn>は、
+                [=manifest/share_target=] メンバーを含む有効な [=manifest=] を持つウェブサイトである。
+            </p>
+            <p>
+                ウェブ共有ターゲットは、<a>共有ターゲット</a>の一種である（他の種類、
+                例えば一部のシステムアプリケーションも利用可能な場合がある）。
+            </p>
+            <p>
+                [=object=] |json:JSON| と [=ordered map=] |manifest:ordered map| が与えられたとき、
+                <dfn>`share_target` メンバーを処理する</dfn>には、次を実行する。
+            </p>
+            <ol class="algorithm">
+                <li>|json|["share_target"] が [=object=] でない場合、返る。
+                </li>
+                <li>|target:object| を |json|["share_target"] とする。
+                </li>
+                <li>|target|["action"] または |target|["params"] が欠けている場合、返る。
+                </li>
+                <li>[=ShareTarget/action=] を処理する。
+                    <ol>
+                        <li>|share target|["action"] を |manifest URL| に相対で、
+                            エンコーディング上書きなしで [=URL parser|parsing=] した結果を
+                            |action:URL| とする。結果が failure の場合、返る。
+                        </li>
+                        <li>|action| が |manifest|["scope"] の [=URL/within scope=] でない場合、
+                            返る。
+                        </li>
+                        <li>|action| の [=url/origin=] が [=potentially
+                            trustworthy origin=] でない場合、返る。
+                        </li>
+                    </ol>
+                </li>
+                <li>|method:string| を "GET" とする。
+                </li>
+                <li>|target|["method"] が存在する場合、[=ShareTarget/method=] を処理する。
+                    <ol>
+                        <li>|target|["method"] が文字列 `"GET"` とも `"POST"` とも
+                            [=ASCII case-insensitive=] 一致しない場合、返る。
+                        </li>
+                        <li>|method| を [=ASCII uppercase=] |target|["method"] に設定する。
+                        </li>
+                    </ol>
+                </li>
+                <li>|enctype:string| を "application/x-www-form-urlencoded" とする。
+                </li>
+                <li>|method| が `"POST"` である場合：
+                    <ol>
+                        <li>|target|["enctype"] が文字列
+                            `"application/x-www-form-urlencoded"` とも
+                            `"multipart/form-data"` とも [=ASCII
+                            case-insensitive=] 一致しない場合、返る。
+                        </li>
+                        <li>|enctype| を [=ASCII lowercase=] |target|["enctype"] に設定する。
+                        </li>
+                    </ol>
+                </li>
+                <li>|params:ordered map| を新しい [=ordered map=] とする。
+                </li>
+                <li>[=ShareTarget/params=] を処理する。
+                    <ol>
+                        <li>« "title", "text", "url"
+                            » の各 |member:string| について [=List/For each=]：
+                            <ol>
+                                <li>|target|["param"] がプロパティ |member| を持たない場合、
+                                    continue する。
+                                </li>
+                                <li>|target|["param"][member] が [=string=] でない場合、返る。
+                                </li>
+                                <li>|params|[member] を |target|["param"][member] に設定する。
+                                </li>
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+                <li>|manifest|["share_target"] を [=ordered map=] «[<br>
+                    "action" → [=URL serializer|serialize=] |action|,<br>
+                    "enctype" → |enctype|,<br>
+                    "method" → |method|,<br>
+                    "params" → |params|,<br>
+                    ]» に設定する。
+                </li>
+            </ol>
+        </section>
+        <section>
+            <h3>
+                `ShareTarget` とそのメンバー
+            </h3>
+            <p>
+                <dfn>ShareTarget</dfn> [=object=] は、次のメンバーを持つことができる。
+            </p>
+            <dl>
+                <dt>
+                    <code><dfn data-dfn-for="ShareTarget">action</dfn></code> メンバー
+                </dt>
+                <dd>
+                    [=web share
+                    target=] 用の [=URL=] を指定する [=string=]。
+                </dd>
+                <dt>
+                    <code><dfn data-dfn-for="ShareTarget">method</dfn></code> メンバー
+                </dt>
+                <dd>
+                    [=web share target=] 用の HTTP [=request=] [=request/method=] を
+                    指定する [=string=]。
+                    <aside class="note">
+                        `GET` リクエストのユースケースは、共有ターゲットが、後でユーザー承認を
+                        受けるためのメッセージの下書きを作成する場合である。それ以外の場合、
+                        共有ターゲットがユーザー操作なしに副作用を実行するなら、`POST` を使用する。
+                    </aside>
+                </dd>
+                <dt>
+                    <code><dfn data-dfn-for="ShareTarget">enctype</dfn></code> メンバー
+                </dt>
+                <dd>
+                    `POST` リクエストの本文で共有データをどのようにエンコードするかを
+                    指定する [=string=]。[=method=] が `"GET"` の場合は無視される。
+                </dd>
+                <dt>
+                    <code><dfn data-dfn-for="ShareTarget">params</dfn></code> メンバー
+                </dt>
+                <dd>
+                    <a>ShareTargetParams</a> [=object=]。
+                </dd>
+            </dl>
+        </section>
+        <section>
+            <h3>
+                `ShareTargetParams` とそのメンバー
+            </h3>
+            <p>
+                <dfn>ShareTargetParams</dfn> [=object=] は、次のメンバーを持つことができる。
+            </p>
+            <dl>
+                <dt>
+                    <code><dfn data-dfn-for="ShareTargetParams">title</dfn></code>
+                    メンバー
+                </dt>
+                <dd>
+                    共有される文書のタイトルに使用されるクエリパラメーター名を指定する
+                    [=string=]。
+                </dd>
+                <dt>
+                    <code><dfn data-dfn-for="ShareTargetParams">text</dfn></code>
+                    メンバー
+                </dt>
+                <dd>
+                    共有されるメッセージ本文を構成する任意のテキストに使用される
+                    クエリパラメーター名を指定する [=string=]。
+                </dd>
+                <dt>
+                    <code><dfn data-dfn-for="ShareTargetParams">url</dfn></code> メンバー
+                </dt>
+                <dd>
+                    共有されるリソースを参照する URL 文字列に使用されるクエリパラメーター名を
+                    指定する [=string=]。
+                </dd>
+            </dl>
+        </section>
+    </section>
+    <section>
+        <h2>
+            ウェブ共有ターゲットの登録
+        </h2>
+        <p>
+            <a>ウェブ共有ターゲット</a>がいつどのように「登録」されるかは、ユーザーエージェント
+            および／またはエンドユーザーの裁量に委ねられる。実際、
+            「登録」はユーザーエージェント固有の概念であり、ここでは正式には定義しない。
+            ユーザーエージェントはウェブ共有ターゲットを「登録」することを要求されない（NOT REQUIRED）。
+            ただし、エンドユーザーが選択したウェブ共有ターゲットへ共有データを伝達するための
+            何らかの仕組みを提供することだけは要求される。ユーザーエージェントは、ウェブ共有ターゲットが
+            [=installed web application|installed=] されていない場合でも、それを「登録済み」と
+            見なしてもよい（MAY）。
+        </p>
+        <p>
+            ユーザーエージェントは、ユーザーがサイトを訪問した際にすべての<a>ウェブ共有ターゲット</a>を
+            自動的に登録してもよい（MAY）が、多数のターゲットの選択肢でユーザーを圧倒しないよう、
+            より慎重に判断することが推奨される（RECOMMENDED）。
+        </p>
+        <div class="note">
+            <p>
+                ユーザーエージェントが採用できる登録戦略の例は次のとおりである。
+            </p>
+            <ul>
+                <li>ウェブ共有ターゲットが [=installed web
+                    application|installed=] された後にのみ登録する。
+                </li>
+                <li>エンドユーザーがそのサイトを一定期間使用した後にのみ登録する。
+                </li>
+                <li>ウェブ共有ターゲットを登録するよう、ユーザーに明示的に促す
+                    （おそらく {{NavigatorContentUtils/registerProtocolHandler()}} と
+                    同じ UI を使用する）。
+                </li>
+                <li>ウェブ共有ターゲットにサービスワーカーがある場合にのみ登録する。
+                </li>
+            </ul>
+        </div>
+        <p>
+            エンドユーザーに<a>ウェブ共有ターゲット</a>の一覧を提示する際、ユーザーエージェントは、
+            事前にマニフェストを索引付けしたオンラインサービスを使用してもよく、その結果、
+            ユーザーが一度も訪問したことがない、または明示的に登録したことがないターゲットを
+            表示してもよい。
+        </p>
+        <div class="issue" data-number="26"></div>
+    </section>
+    <section>
+        <h2>
+            入ってくる共有の処理
+        </h2>
+        <p>
+            <a>ウェブ共有ターゲット</a>は、エンドユーザーが汎用アプリケーション向けの何らかの
+            データを共有しており、そのデータの受信者として特定のウェブ共有ターゲットを
+            示したときに、<dfn data-lt="invoke|invocation">呼び出される</dfn>。
+        </p>
+        <p>
+            データがどこから来るか、またエンドユーザーがどのようにウェブ共有ターゲットを
+            受信者として示すかは規定しない。ただし、考えられる一つの送信元は、
+            同じユーザーエージェント内の {{Navigator}} の {{Navigator/share()}} メソッドへの
+            呼び出しである。
+        </p>
+        <div class="note">
+            <p>
+                <a>ウェブ共有ターゲット</a>の呼び出しにおける、その他の考えられる送信元の例は
+                次のとおりである。
+            </p>
+            <ul>
+                <li>ユーザーエージェントの組み込み UI から（<i>例えば</i>、エンドユーザーが
+                    ブラウザーのメニューから "Share" を選択し、現在のページタイトルを "`title`" として、
+                    現在のページ URL を "`url`" として共有する）。
+                </li>
+                <li>ネイティブアプリケーションから（独自の共有システムを介して）トリガーされた
+                    共有アクションに続き、エンドユーザーが受信者としてウェブ共有ターゲットを選択する。
+                </li>
+            </ul>
+        </div>
+        <section>
+            <h3>
+                `ShareData` の取得
+            </h3>
+            <p>
+                <a>ウェブ共有ターゲット</a>が<a>呼び出された</a>とき、そのデータは未規定の形式である
+                場合がある。ユーザーエージェントは、データがまだ {{ShareData}} オブジェクトでない場合、
+                まず、ホストシステムにおける同等の概念から `ShareData` のメンバーへマッピングすることにより、
+                そのデータを {{ShareData}} オブジェクトへ変換しなければならない（MUST）。
+                送信元が {{Navigator/share()}} への呼び出しであった場合、ユーザーエージェントは
+                {{ShareData}} 引数を変更せずに使用すべきである（SHOULD）（ただし、別の形式を
+                経由して損失を伴う形で往復しなければならない場合があるため、常に可能とは限らない）。
+                ユーザーエージェントは、データを `ShareData` フィールドへできる限り適切に
+                マッピングするためにヒューリスティックを用いてもよい（MAY）。
+            </p>
+            <p class="note">
+                例えば、ホスト共有システムには専用の URL フィールドがなく、プレーンテキストと
+                URL の両方が "text" フィールドで送信されることがある、という慣例を持つ場合がある。
+                Android ではこれが該当する。ユーザーエージェントは、"text" フィールドの全部または一部が
+                [=valid URL string=] であるかを確認し、該当する場合、その部分を "text" フィールドから
+                {{ShareData}} の {{ShareData/url}} メンバーへ移すことができる。
+            </p>
+        </section>
+        <section>
+            <h3>
+                ウェブ共有ターゲットの起動
+            </h3>
+            <p>
+                [=ordered map=] |manifest| を持つ<a>ウェブ共有ターゲット</a>が {{ShareData}} |data| で
+                <a>呼び出された</a>とき、次の手順を実行する。
+            </p>
+            <ol class="algorithm">
+                <li>|manifest|["share_target"]["action"] を [=URL parser|parsing=] した結果を
+                    |url:URL| とする。
+                </li>
+                <li>|entries:list| を新しい空の [=list=] とする。
+                </li>
+                <li>« "title", "text", "url" » の各 |member:string| について [=List/For each=]：
+                    <ol>
+                        <li>|name:string| を
+                            |manifest|["share_target"]["params"][|member|] の値とする。
+                        </li>
+                        <li>|name| が `undefined` または空文字列である場合、continue する。
+                        </li>
+                        <li>|data|[|member|] が `undefined` である場合、continue する。
+                        </li>
+                        <li>|value:string| を
+                            <a data-cite="ecma262#sec-tostring">ToString</a>(|data|[|member|]) とする。
+                        </li>
+                        <li>[=tuple=] (|name|, |value|) を |entry list| に [=List/Append=] する。
+                        </li>
+                    </ol>
+                </li>
+                <li>|header list| を新しく作成された [=Headers/header list=] とする。
+                </li>
+                <li>|method:string| を |manifest|["share_target"]["method"] とする。
+                </li>
+                <li>|enctype:string| を |manifest|["share_target"]["enctype"] とする。
+                </li>
+                <li>|method| が `"GET"` の場合：
+                    <ol>
+                        <li>|query| を、|entries| とエンコーディング上書きなしで [=urlencoded
+                            serializer=] を実行した結果とする。
+                        </li>
+                        <li>|url| の [=URL/query=] コンポーネントを |query| に設定する。
+                        </li>
+                        <li>|body| を null とする。
+                        </li>
+                    </ol>
+                </li>
+                <li>そうではなく、|method| が `"POST"` で |enctype| が
+                    `"application/x-www-form-urlencoded"` の場合：
+                    <ol>
+                        <li>|body:string| を、|entries| とエンコーディング上書きなしで
+                            [=urlencoded serializer=] を実行した結果とする。
+                        </li>
+                        <li>|body| を [=UTF-8 encode=] |body| の結果に設定する。
+                        </li>
+                        <li>[=header list/Append=]
+                            `"Content-Type"`/`"application/x-www-form-urlencoded"` を |header
+                            list| に追加する。
+                        </li>
+                    </ol>
+                </li>
+                <li>そうではなく、|method| が `"POST"` で | enctype| が
+                    `"multipart/form-data"` の場合：
+                    <ol>
+                        <li>|body| を、|entries| と [=UTF-8=] エンコーディングで
+                            <a>multipart/form-data encoding algorithm</a> を実行した結果とする。
+                        </li>
+                        <li>|MIME type:string| を、文字列 `"multipart/form-data;"`、U+0020 SPACE 文字、
+                            文字列 `"boundary="`、および
+                            [=`multipart\/form-data` encoding algorithm=] によって生成された
+                            [=`multipart\/form-data` boundary string=] を連結したものとする。
+                        </li>
+                        <li>[=header list/Append=] `"Content-Type"`/|MIME type| を
+                            |header list| に追加する。
+                        </li>
+                    </ol>
+                </li>
+                <li><a data-cite="HTML#creating-a-new-browsing-context">new</a>
+                    [=top-level browsing context=] を作成した結果を |browsing context| とする。
+                </li>
+                <li>|request:Request| を、method が |method|、url が |url|、header list が
+                    |header list|、body が |body| である新しい [=Request=] とする。
+                </li>
+                <li>|browsing context| を |request =| へ [=Navigate=] する。
+                </li>
+            </ol>
+            <p class="note">
+                このアルゴリズムは、|manifest| に対して [=process the
+                `share_target` member=] アルゴリズムが実行済みであり、その後も
+                [=manifest/share_target=] を持っていることを前提としている。
+            </p>
+        </section>
+    </section>
+    <section class="informative">
+        <h2>
+            アクセシビリティ
+        </h2>
+        <p>
+            この仕様には既知のアクセシビリティ上の考慮事項はない。
+        </p>
+    </section>
+    <section class="informative">
+        <h2>
+            セキュリティおよびプライバシーの考慮事項
+        </h2>
+        <ul>
+            <li><a>ウェブ共有ターゲット</a>を呼び出すことは、潜在的に私的なユーザーデータを
+                第三者のウェブサイトへ送信することを意味する。実装者は、<a>呼び出し</a>
+                アルゴリズムを実行する前に、データがどの相手へ送られるかをユーザーが理解できるよう
+                あらゆる予防策を講じるべきである（<i>例えば</i>、ウェブ共有ターゲットのオリジンを
+                伝えること）。
+            </li>
+            <li>特に懸念されるのはスプーフィングである。すなわち、ウェブ共有ターゲットが自身の
+                名前やアイコンを適切に設定することで、別の主体であるかのように見せかけることである。
+            </li>
+            <li>エンドユーザーが明示的にインストールまたは登録したターゲットの集合ではなく、
+                オンライン索引からウェブ共有ターゲットが選択される場合、スプーフィングのリスクは高まる。
+            </li>
+            <li>ウェブ共有ターゲットのオリジンが [=potentially trustworthy origin=] であるという
+                要件は、私的なユーザーデータが、当該オリジンを制御していない相手や、
+                ネットワーク上で平文のまま送信される相手へ伝送されることを防ぐためである。
+            </li>
+            <li>Web Share API を使用する送信元サイトと、Web Share Target を使用する受信サイトは、
+                ユーザー ID を結合するために協力できる。送信元サイトは
+                `navigator.share(text: my_id_for_this_user)` を使用でき、（ユーザーが選択した）
+                受信者はその情報を使用して、自身のユーザー ID と送信元オリジンのユーザー ID を
+                結合できる。この転送を実現するには、転送の両側がコードを書く必要があり、
+                ユーザーが受信者を選択する必要がある。
+            </li>
+        </ul>
+    </section>
+    <section id="conformance"></section>
+    <section class="appendix informative">
+        <h2>
+            謝辞
+        </h2>
+        <p>
+            ウェブアプリの相互運用性ユースケースの基礎を築いた [[[WEBINTENTS]]] チームに感謝する。
+            特に、Web Share と Web Share Target の初期の普及活動に多大な尽力をした
+            <a href="https://paul.kinlan.me/">Paul Kinlan</a> に感謝する。
+        </p>
+        <p>
+            この仕様の初期ドラフトを執筆し、API の設計とプロトタイプ作成に協力した
+            Connie Pyromallis に感謝する。
+        </p>
+        <p>
+            この仕様の初期ドラフトにフィードバックを提供した Alex Russell と David Baron に
+            感謝する。
+        </p>
+    </section>
+    <section id="index"></section>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
