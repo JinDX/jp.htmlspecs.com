@@ -1,0 +1,3299 @@
+<pre>ネットワーク作業部会                                 T. Berners-Lee
+Request for Comments: 3986                                       W3C/MIT
+STD: 66                                                      R. Fielding
+更新: <a href="./rfc1738">1738</a>                                               Day Software
+廃止: <a href="./rfc2732">2732</a>, <a href="./rfc2396">2396</a>, <a href="./rfc1808">1808</a>                                  L. Masinter
+カテゴリ: 標準化過程                                  Adobe Systems
+                                                            2005年1月
+
+
+           <span class="h1">Uniform Resource Identifier (URI): 汎用構文</span>
+
+このメモの位置づけ
+
+   この文書は、インターネットコミュニティのための
+   インターネット標準化過程プロトコルを規定し、改善のための
+   議論と提案を求めるものである。このプロトコルの標準化状態と
+   位置づけについては、「Internet Official Protocol Standards」
+   (STD 1) の最新版を参照されたい。このメモの配布に制限はない。
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2005).
+
+概要
+
+   Uniform Resource Identifier (URI) は、抽象的または物理的な
+   リソースを識別する、コンパクトな文字列である。本仕様は
+   汎用 URI 構文と、相対形式である可能性のある URI 参照を
+   解決するプロセスを定義するとともに、インターネット上で
+   URI を使用するための指針とセキュリティ上の考慮事項を
+   示す。URI 構文は、すべての有効な URI の上位集合となる
+   文法を定義し、実装があらゆる識別子のスキーム固有の要件を
+   知らなくても、URI 参照の共通コンポーネントを解析できる
+   ようにする。本仕様は URI の生成文法を定義するものではない。
+   その作業は、各 URI スキームの個別仕様によって行われる。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに . . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+       <a href="#section-1.1">1.1</a>.  URI の概要 . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+             <a href="#section-1.1.1">1.1.1</a>.  汎用構文 . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+             <a href="#section-1.1.2">1.1.2</a>.  例 . . . . . . . . . . . . . . . . . . . . .  <a href="#page-7">7</a>
+             <a href="#section-1.1.3">1.1.3</a>.  URI、URL、および URN  . . . . . . . . . . .  <a href="#page-7">7</a>
+       <a href="#section-1.2">1.2</a>.  設計上の考慮事項  . . . . . . . . . . . . . . . . .  <a href="#page-8">8</a>
+             <a href="#section-1.2.1">1.2.1</a>.  転写  . . . . . . . . . . . . . . . . . . . .  <a href="#page-8">8</a>
+             <a href="#section-1.2.2">1.2.2</a>.  識別と相互作用の分離 . . . . . . . . . . .  <a href="#page-9">9</a>
+             <a href="#section-1.2.3">1.2.3</a>.  階層的識別子 . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+       <a href="#section-1.3">1.3</a>.  構文表記  . . . . . . . . . . . . . . . . . . . . . <a href="#page-11">11</a>
+   <a href="#section-2">2</a>.  文字 . . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-11">11</a>
+       <a href="#section-2.1">2.1</a>.  パーセントエンコーディング . . . . . . . . . . . . <a href="#page-12">12</a>
+       <a href="#section-2.2">2.2</a>.  予約文字  . . . . . . . . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+       <a href="#section-2.3">2.3</a>.  非予約文字  . . . . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+       <a href="#section-2.4">2.4</a>.  エンコードまたはデコードすべき時 . . . . . . . . <a href="#page-14">14</a>
+       <a href="#section-2.5">2.5</a>.  識別データ . . . . . . . . . . . . . . . . . . . . . <a href="#page-14">14</a>
+   <a href="#section-3">3</a>.  構文コンポーネント  . . . . . . . . . . . . . . . . . . . . <a href="#page-16">16</a>
+       <a href="#section-3.1">3.1</a>.  Scheme . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+       <a href="#section-3.2">3.2</a>.  Authority  . . . . . . . . . . . . . . . . . . . . . . <a href="#page-17">17</a>
+             <a href="#section-3.2.1">3.2.1</a>.  ユーザー情報 . . . . . . . . . . . . . . . . <a href="#page-18">18</a>
+             <a href="#section-3.2.2">3.2.2</a>.  Host . . . . . . . . . . . . . . . . . . . . <a href="#page-18">18</a>
+             <a href="#section-3.2.3">3.2.3</a>.  Port . . . . . . . . . . . . . . . . . . . . <a href="#page-22">22</a>
+       <a href="#section-3.3">3.3</a>.  Path . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-22">22</a>
+       <a href="#section-3.4">3.4</a>.  Query  . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-23">23</a>
+       <a href="#section-3.5">3.5</a>.  Fragment . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-24">24</a>
+   <a href="#section-4">4</a>.  使用法  . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-25">25</a>
+       <a href="#section-4.1">4.1</a>.  URI 参照  . . . . . . . . . . . . . . . . . . . . . . <a href="#page-25">25</a>
+       <a href="#section-4.2">4.2</a>.  相対参照 . . . . . . . . . . . . . . . . . . . . . . <a href="#page-26">26</a>
+       <a href="#section-4.3">4.3</a>.  絶対 URI . . . . . . . . . . . . . . . . . . . . . . <a href="#page-27">27</a>
+       <a href="#section-4.4">4.4</a>.  同一文書参照  . . . . . . . . . . . . . . . . . . . <a href="#page-27">27</a>
+       <a href="#section-4.5">4.5</a>.  接尾辞参照 . . . . . . . . . . . . . . . . . . . . . <a href="#page-27">27</a>
+   <a href="#section-5">5</a>.  参照解決 . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-28">28</a>
+       <a href="#section-5.1">5.1</a>.  ベース URI の確立  . . . . . . . . . . . . . . . . . <a href="#page-28">28</a>
+             <a href="#section-5.1.1">5.1.1</a>.  内容に埋め込まれたベース URI . . . . . . . <a href="#page-29">29</a>
+             <a href="#section-5.1.2">5.1.2</a>.  カプセル化エンティティからのベース URI . <a href="#page-29">29</a>
+             <a href="#section-5.1.3">5.1.3</a>.  取得 URI からのベース URI  . . . . . . . . <a href="#page-30">30</a>
+             <a href="#section-5.1.4">5.1.4</a>.  既定のベース URI . . . . . . . . . . . . . <a href="#page-30">30</a>
+       <a href="#section-5.2">5.2</a>.  相対解決  . . . . . . . . . . . . . . . . . . . . . . <a href="#page-30">30</a>
+             <a href="#section-5.2.1">5.2.1</a>.  ベース URI の事前解析 . . . . . . . . . . . <a href="#page-31">31</a>
+             <a href="#section-5.2.2">5.2.2</a>.  参照の変換 . . . . . . . . . . . . . . . . . <a href="#page-31">31</a>
+             <a href="#section-5.2.3">5.2.3</a>.  パスの結合  . . . . . . . . . . . . . . . . <a href="#page-32">32</a>
+             <a href="#section-5.2.4">5.2.4</a>.  ドットセグメントの除去  . . . . . . . . . <a href="#page-33">33</a>
+       <a href="#section-5.3">5.3</a>.  コンポーネントの再構成  . . . . . . . . . . . . . <a href="#page-35">35</a>
+       <a href="#section-5.4">5.4</a>.  参照解決の例  . . . . . . . . . . . . . . . . . . . <a href="#page-35">35</a>
+             <a href="#section-5.4.1">5.4.1</a>.  通常の例  . . . . . . . . . . . . . . . . . <a href="#page-36">36</a>
+             <a href="#section-5.4.2">5.4.2</a>.  異常な例  . . . . . . . . . . . . . . . . . <a href="#page-36">36</a>
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   <a href="#section-6">6</a>.  正規化と比較 . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-38">38</a>
+       <a href="#section-6.1">6.1</a>.  等価性  . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-38">38</a>
+       <a href="#section-6.2">6.2</a>.  比較ラダー  . . . . . . . . . . . . . . . . . . . . <a href="#page-39">39</a>
+             <a href="#section-6.2.1">6.2.1</a>.  単純な文字列比較 . . . . . . . . . . . . . . <a href="#page-39">39</a>
+             <a href="#section-6.2.2">6.2.2</a>.  構文ベースの正規化 . . . . . . . . . . . . <a href="#page-40">40</a>
+             <a href="#section-6.2.3">6.2.3</a>.  スキームベースの正規化 . . . . . . . . . . <a href="#page-41">41</a>
+             <a href="#section-6.2.4">6.2.4</a>.  プロトコルベースの正規化 . . . . . . . . . <a href="#page-42">42</a>
+   <a href="#section-7">7</a>.  セキュリティ上の考慮事項  . . . . . . . . . . . . . . . . <a href="#page-43">43</a>
+       <a href="#section-7.1">7.1</a>.  信頼性と一貫性  . . . . . . . . . . . . . . . . . . <a href="#page-43">43</a>
+       <a href="#section-7.2">7.2</a>.  悪意ある構築 . . . . . . . . . . . . . . . . . . . <a href="#page-43">43</a>
+       <a href="#section-7.3">7.3</a>.  バックエンドのトランスコーディング . . . . . . <a href="#page-44">44</a>
+       <a href="#section-7.4">7.4</a>.  まれな IP アドレス形式  . . . . . . . . . . . . . <a href="#page-45">45</a>
+       <a href="#section-7.5">7.5</a>.  機密情報  . . . . . . . . . . . . . . . . . . . . . <a href="#page-45">45</a>
+       <a href="#section-7.6">7.6</a>.  意味論的攻撃 . . . . . . . . . . . . . . . . . . . <a href="#page-45">45</a>
+   <a href="#section-8">8</a>.  IANA に関する考慮事項  . . . . . . . . . . . . . . . . . . <a href="#page-46">46</a>
+   <a href="#section-9">9</a>.  謝辞 . . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-46">46</a>
+   <a href="#section-10">10</a>. 参考文献 . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-46">46</a>
+       <a href="#section-10.1">10.1</a>. 規範的参考文献 . . . . . . . . . . . . . . . . . . <a href="#page-46">46</a>
+       <a href="#section-10.2">10.2</a>. 参考情報 . . . . . . . . . . . . . . . . . . . . . <a href="#page-47">47</a>
+   <a href="#appendix-A">A</a>.  URI の ABNF 集成 . . . . . . . . . . . . . . . . . . . . . . <a href="#page-49">49</a>
+   <a href="#appendix-B">B</a>.  正規表現による URI 参照の解析  . . . . . . . . . . . . . <a href="#page-50">50</a>
+   <a href="#appendix-C">C</a>.  文脈における URI の区切り  . . . . . . . . . . . . . . . <a href="#page-51">51</a>
+   <a href="#appendix-D">D</a>.  <a href="./rfc2396">RFC 2396</a> からの変更  . . . . . . . . . . . . . . . . . . . . <a href="#page-53">53</a>
+       <a href="#appendix-D.1">D.1</a>.  追加事項  . . . . . . . . . . . . . . . . . . . . . <a href="#page-53">53</a>
+       <a href="#appendix-D.2">D.2</a>.  修正事項  . . . . . . . . . . . . . . . . . . . . . <a href="#page-53">53</a>
+   索引  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-56">56</a>
+   著者の連絡先 . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-60">60</a>
+   完全な著作権表示 . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-61">61</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   Uniform Resource Identifier (URI) は、リソースを識別するための
+   単純で拡張可能な手段を提供する。本 URI 構文および意味論の
+   仕様は、World Wide Web グローバル情報イニシアチブによって
+   導入された概念に由来する。これらの識別子の使用は 1990 年に
+   さかのぼり、"Universal Resource Identifiers in WWW"
+   [<a href="./rfc1630" title="&quot;WWW における Universal Resource Identifiers: World-Wide Web で使用されるネットワーク上のオブジェクトの名前とアドレスの表現のための統一構文&quot;">RFC1630</a>] で説明されている。この構文は、
+   "Functional Recommendations for Internet Resource Locators"
+   [<a href="./rfc1736" title="&quot;Internet Resource Locators のための機能的推奨事項&quot;">RFC1736</a>] および "Functional Requirements for Uniform
+   Resource Names" [<a href="./rfc1737" title="&quot;Uniform Resource Names のための機能要件&quot;">RFC1737</a>] に示された
+   推奨事項を満たすように設計されている。
+
+   本文書は [<a href="./rfc2396" title="&quot;Uniform Resource Identifiers (URI): 汎用構文&quot;">RFC2396</a>] を廃止する。RFC 2396 は、すべての URI に
+   対する単一の汎用構文を定義するために、"Uniform Resource
+   Locators" [<a href="./rfc1738" title="&quot;Uniform Resource Locators (URL)&quot;">RFC1738</a>] と "Relative Uniform Resource Locators"
+   [<a href="./rfc1808" title="&quot;Relative Uniform Resource Locators&quot;">RFC1808</a>] を統合したものであった。また本書は、IPv6 アドレスの
+   構文を導入した [<a href="./rfc2732" title="&quot;URL におけるリテラル IPv6 アドレスの形式&quot;">RFC2732</a>] も廃止する。
+   個々の URI スキームの固有構文を定義した <a href="./rfc1738">RFC 1738</a> の
+   部分は、本書から除外される。それらの部分は別個の文書として
+   更新される。新しい URI スキームの登録手続きは [<a href="#ref-BCP35" title="&quot;URL Scheme Names の登録手続き&quot;">BCP35</a>] に
+   よって別途定義される。新しい URI スキームの設計者への助言は
+   [<a href="./rfc2718" title="&quot;新しい URL スキームのための指針&quot;">RFC2718</a>] にある。<a href="./rfc2396">RFC</a>
+   <a href="./rfc2396">2396</a> からの重要な変更はすべて <a href="#appendix-D">Appendix D</a> に記されている。
+
+   本仕様では、「character」および「coded character set」という
+   用語を [<a href="#ref-BCP19" title="&quot;IANA Charset 登録手続き&quot;">BCP19</a>] で与えられた定義に従って使用し、
+   [<a href="#ref-BCP19" title="&quot;IANA Charset 登録手続き&quot;">BCP19</a>] が「charset」と呼ぶものの代わりに
+   「character encoding」を使用する。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  URI の概要</span>
+
+   URI は次のように特徴づけられる。
+
+   Uniform
+
+      統一性はいくつかの利点をもたらす。これにより、リソースへ
+      アクセスするために用いられる仕組みが異なる場合でも、異なる
+      種類のリソース識別子を同じ文脈で使用できる。異なる種類の
+      リソース識別子にまたがって、共通の構文規約を統一的に意味解釈
+      できる。既存の識別子の使われ方を妨げることなく、新しい種類の
+      リソース識別子を導入できる。識別子を多くの異なる文脈で再利用
+      できるため、新しいアプリケーションやプロトコルは、既存の、
+      大規模で広く使われているリソース識別子の集合を活用できる。
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   Resource
+
+      本仕様は、何がリソースになり得るかの範囲を制限しない。
+      むしろ「resource」という用語は、URI によって識別され得る
+      あらゆるものを指す一般的な意味で用いられる。よく知られた
+      例には、電子文書、画像、一貫した目的を持つ情報源
+      （例: 「ロサンゼルスの今日の天気予報」）、サービス
+      （例: HTTP-to-SMS ゲートウェイ）、および他のリソースの
+      集合が含まれる。リソースは必ずしもインターネット経由で
+      アクセス可能である必要はない。たとえば、人間、法人、図書館の
+      製本された本もリソースになり得る。同様に、抽象概念も
+      リソースになり得る。たとえば、数式の演算子と被演算子、
+      関係の種類（例: 「parent」または「employee」）、あるいは
+      数値（例: zero、one、および infinity）である。
+
+   Identifier
+
+      識別子は、その識別の範囲内で、識別対象を他のすべてのもの
+      から区別するために必要な情報を体現する。本書における
+      「identify」および「identifying」という用語の使用は、
+      それがどのような方法で達成されるか（例: 名前、アドレス、
+      または文脈）にかかわらず、あるリソースを他のすべての
+      リソースから区別するという目的を指す。これらの用語は、識別子が
+      参照対象のアイデンティティを定義または体現するという仮定と
+      誤解されるべきではない。ただし、一部の識別子ではそうである
+      場合もある。また、URI を用いるシステムが、識別されたリソースに
+      アクセスするとも仮定すべきではない。多くの場合、URI はアクセス
+      される意図なしにリソースを表すために使用される。同様に、
+      識別される「ひとつの」リソースが単数の性質を持つとは限らない
+      （例: リソースは名前付き集合や、時間とともに変化する
+      マッピングである可能性がある）。
+
+   URI は、<a href="#section-3">Section 3</a> の &lt;URI&gt; という名前の構文規則に一致する
+   文字列からなる識別子である。URI は、別途定義される拡張可能な
+   命名スキーム集合（<a href="#section-3.1">Section 3.1</a>）を通じて、リソースの統一的な
+   識別を可能にする。その識別がどのように実現され、割り当てられ、
+   または可能になるかは、各スキーム仕様に委ねられる。
+
+   本仕様は、リソースの性質、アプリケーションがリソースを参照しよう
+   とする理由、またはリソースを識別するために URI を使用し得る
+   システムの種類について、いかなる制限も課さない。本仕様は、URI が
+   時間を通じて同じリソースを識別し続けることを要求しない。ただし、
+   これはすべての URI スキームに共通する目標である。それでも、本仕様の
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   いかなる部分も、アプリケーションが特定の種類のリソース、または
+   そのアプリケーションが望む特性を維持する URI の部分集合に
+   自身を限定することを妨げない。
+
+   URI はグローバルな範囲を持ち、文脈にかかわらず一貫して
+   解釈される。ただし、その解釈の結果はエンドユーザーの文脈に
+   関係する場合がある。たとえば、"<a href="http://localhost/">http://localhost/</a>" は、その参照の
+   すべての利用者に対して同じ解釈を持つが、「localhost」に対応する
+   ネットワークインターフェイスは各エンドユーザーごとに異なり得る。
+   すなわち、解釈はアクセスから独立している。しかし、その参照に
+   基づいて行われるアクションはエンドユーザーの文脈に関連して
+   実行される。そのため、グローバルに一意なものを参照することを
+   意図したアクションでは、そのリソースを他のすべてのものから
+   区別する URI を使用しなければならない。エンドユーザーのローカルな
+   文脈に関連して識別する URI は、その文脈自体がリソースを定義する
+   側面である場合にのみ使用すべきである。たとえば、オンライン
+   ヘルプマニュアルがエンドユーザーのファイルシステム上のファイル
+   （例: "file:///etc/hosts"）を参照する場合などである。
+
+<span class="h4"><a class="selflink" id="section-1.1.1" href="#section-1.1.1">1.1.1</a>.  汎用構文</span>
+
+   各 URI は、<a href="#section-3.1">Section 3.1</a> で定義される scheme 名から始まる。
+   scheme 名は、その scheme 内で識別子を割り当てる仕様を参照する。
+   したがって URI 構文は、連合的で拡張可能な命名システムであり、
+   各 scheme の仕様は、その scheme を使用する識別子の構文と意味を
+   さらに制限できる。
+
+   本仕様は、すべての URI スキームに必要な、または多くの URI
+   スキームに共通する URI 構文の要素を定義する。したがって、
+   URI 参照に対する scheme 非依存の解析機構を実装するために必要な
+   構文と意味を定義する。これにより、URI の scheme 依存の処理は、
+   scheme 依存の意味が必要になるまで延期できる。同様に、URI 参照を
+   使用するプロトコルおよびデータ形式は、まだ定義されていない
+   scheme を含むすべての URI に許される構文範囲の定義として、
+   本仕様を参照できる。これにより、識別 scheme の進化は、URI を
+   使用するプロトコル、データ形式、および実装の進化から切り離される。
+
+   汎用 URI 構文のパーサーは、任意の URI 参照を主要コンポーネントに
+   解析できる。scheme が決定されると、コンポーネントに対して
+   さらに scheme 固有の解析を行うことができる。言い換えれば、
+   URI 汎用構文は、すべての URI scheme の構文の上位集合である。
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h4"><a class="selflink" id="section-1.1.2" href="#section-1.1.2">1.1.2</a>.  例</span>
+
+   次の URI 例は、いくつかの URI scheme と、それらの共通構文
+   コンポーネントの変形を示す。
+
+      <a href="ftp://ftp.is.co.za/rfc/rfc1808.txt">ftp://ftp.is.co.za/rfc/rfc1808.txt</a>
+
+      <a href="http://www.ietf.org/rfc/rfc2396.txt">http://www.ietf.org/rfc/rfc2396.txt</a>
+
+      ldap://[2001:db8::7]/c=GB?objectClass?one
+
+      mailto:John.Doe@example.com
+
+      news:comp.infosystems.www.servers.unix
+
+      tel:+1-816-555-1212
+
+      telnet://192.0.2.16:80/
+
+      urn:oasis:names:specification:docbook:dtd:xml:4.1.2
+
+
+<span class="h4"><a class="selflink" id="section-1.1.3" href="#section-1.1.3">1.1.3</a>.  URI、URL、および URN</span>
+
+   URI はさらに、locator、name、またはその両方として分類できる。
+   「Uniform Resource Locator」(URL) という用語は、リソースを識別する
+   だけでなく、その主要なアクセス機構（例: そのネットワーク上の
+   「location」）を記述することによってリソースの所在を示す手段を
+   提供する URI の部分集合を指す。「Uniform Resource Name」(URN) という
+   用語は、歴史的には、"urn" scheme [<a href="./rfc2141" title="&quot;URN 構文&quot;">RFC2141</a>] の下にある URI
+   （リソースが存在しなくなる、または利用できなくなっても、グローバルに
+   一意で永続的であることが要求されるもの）と、name の性質を持つ
+   その他の URI の両方を指すために用いられてきた。
+
+   個々の scheme は、「name」または「locator」のどちらか一方だけに
+   分類される必要はない。任意の scheme からの URI インスタンスは、
+   name または locator、あるいはその両方の性質を持ち得る。これは多く
+   の場合、scheme の性質ではなく、命名権限による識別子割り当ての
+   永続性と注意深さに依存する。将来の仕様および関連文書では、より
+   制限的な用語である "URL" および "URN" ではなく、一般的な用語
+   "URI" を使用すべきである [<a href="./rfc3305" title="&quot;Joint W3C/IETF URI Planning Interest Group からの報告: Uniform Resource Identifiers (URIs), URLs, and Uniform Resource Names (URNs): 明確化と推奨事項&quot;">RFC3305</a>]。
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  設計上の考慮事項</span>
+
+<span class="h4"><a class="selflink" id="section-1.2.1" href="#section-1.2.1">1.2.1</a>.  転写</span>
+
+   URI 構文は、グローバルな転写を主要な考慮事項のひとつとして
+   設計されている。URI は非常に限定された集合の文字列である。
+   すなわち、基本ラテンアルファベットの文字、数字、および少数の
+   特殊文字である。URI はさまざまな方法で表現され得る。たとえば、
+   紙の上のインク、画面上のピクセル、または文字エンコーディングの
+   オクテット列である。URI の解釈は、使用される文字のみに依存し、
+   それらの文字がネットワークプロトコルでどのように表現されるかには
+   依存しない。
+
+   転写の目標は、単純なシナリオで説明できる。国際会議のパブで
+   Sam と Kim という 2 人の同僚が座り、研究アイデアを交換していると
+   想像してほしい。Sam が Kim に、詳細情報を得るための場所を尋ねる。
+   そこで Kim は研究サイトの URI をナプキンに書く。帰宅後、Sam は
+   そのナプキンを取り出して URI をコンピュータに入力し、Kim が
+   参照した情報を取得する。
+
+   このシナリオから、いくつかの設計上の考慮事項が明らかになる。
+
+   o  URI は文字列であり、常にオクテット列として表現されるわけでは
+      ない。
+
+   o  URI はネットワーク以外の情報源から転写される場合があるため、
+      言語やロケールをまたぐキーボード（および関連する入力装置）の
+      制約の中で、コンピュータへ入力できる可能性が最も高い文字で
+      構成されるべきである。
+
+   o  URI は人間が記憶しなければならないことが多く、意味のある
+      またはなじみのあるコンポーネントで構成されている場合、人間は
+      URI を記憶しやすい。
+
+   これらの設計上の考慮事項は、常に一致するわけではない。たとえば、
+   URI コンポーネントにとって最も意味のある名前が、一部のシステムでは
+   入力できない文字を必要とすることはよくある。リソース識別子を
+   ある媒体から別の媒体へ転写できることは、URI が最も意味のある
+   コンポーネントで構成されることよりも重要であると考えられてきた。
+
+   ローカルまたは地域的な文脈、および技術の進歩により、ユーザーは
+   より広い範囲の文字を使用できることから利益を得る場合がある。
+   そのような使用は本仕様では定義されない。パーセントエンコード
+   されたオクテット（<a href="#section-2.1">Section 2.1</a>）は、US-ASCII coded character set の
+   範囲外の文字を URI 内で表すために使用できる。ただし、この表現が
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   scheme または URI が参照されるプロトコル要素によって許可される
+   場合に限られる。そのような定義は、URI のためにパーセント
+   エンコードされる前に、それらの文字をオクテットへ対応付けるために
+   使用される character encoding を指定すべきである。
+
+<span class="h4"><a class="selflink" id="section-1.2.2" href="#section-1.2.2">1.2.2</a>.  識別と相互作用の分離</span>
+
+   URI に関する一般的な誤解は、URI がアクセス可能なリソースを
+   参照するためだけに使用されるというものである。URI そのものは
+   識別のみを提供する。URI が存在することによって、リソースへの
+   アクセスが保証されるわけでも、暗示されるわけでもない。代わりに、
+   URI 参照に関連付けられるあらゆる操作は、それが現れるプロトコル
+   要素、データ形式属性、または自然言語テキストによって定義される。
+
+   URI が与えられると、システムはそのリソースに対してさまざまな
+   操作を試みることがある。それらは "access"、"update"、
+   "replace"、または "find attributes" といった語で特徴づけられる
+   場合がある。このような操作は URI を使用するプロトコルによって
+   定義されるものであり、本仕様によって定義されるものではない。
+   ただし、本書では URI に対する一般的な操作を記述するために、いくつか
+   の一般用語を使用する。URI の「resolution」とは、URI を
+   dereference するために必要なアクセス機構と適切なパラメータを
+   決定するプロセスである。この resolution は複数回の反復を必要とする
+   場合がある。そのアクセス機構を使用して URI のリソースに対する
+   アクションを実行することを、URI を「dereference」するという。
+
+   URI が情報検索システム内で情報源を識別するために使用される場合、
+   URI dereference の最も一般的な形式は「retrieval」である。すなわち、
+   関連するリソースの表現を取得するために URI を使用することである。
+   「representation」とは、オクテット列と、それらのオクテットを記述する
+   representation metadata からなり、representation が生成された時点での
+   リソースの状態の記録を構成するものである。retrieval は、URI を
+   キャッシュキーとして使用してローカルにキャッシュされた representation
+   を確認すること、URI の resolution によって適切なアクセス機構
+   （もしあれば）を決定すること、および retrieval 操作を適用するために
+   URI を dereference することを含み得るプロセスによって達成される。
+   retrieval を実行するために使用されるプロトコルに応じて、リソースに
+   関する追加情報（resource metadata）や他のリソースとの関係が
+   供給される場合がある。
+
+   情報検索システムにおける URI 参照は、late-binding となるように
+   設計されている。アクセスの結果は通常、アクセス時に決定され、
+   時間や相互作用の他の側面によって変化し得る。これらの参照は、
+   将来使用されるために作成される。識別されているものは、過去に
+   得られた特定の結果ではなく、将来の結果について真であることが
+   期待される何らかの特性である。そのような場合、URI が参照する
+   リソースは、実際には時間を通じて観察される特性の同一性であり、
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                     [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   リソース提供者による追加のコメントや表明によって明確化される
+   場合もある。
+
+   多くの URI scheme はプロトコルにちなんで名付けられているが、これは
+   それらの URI の使用が、名前の付いたプロトコルを介したリソースへの
+   アクセスをもたらすことを意味しない。URI は、単に識別のために使用
+   されることが多い。URI がリソースの representation を取得するために
+   使用される場合であっても、そのアクセスは gateway、proxy、cache、
+   および scheme 名に関連付けられたプロトコルとは独立した名前解決
+   サービスを通じて行われる場合がある。一部の URI の resolution には、
+   複数のプロトコルの使用が必要となる場合がある（例: ローカルキャッシュ
+   に representation が見つからない場合、"http" URI の origin server に
+   アクセスするためには、通常 DNS と HTTP の両方が使用される）。
+
+<span class="h4"><a class="selflink" id="section-1.2.3" href="#section-1.2.3">1.2.3</a>.  階層的識別子</span>
+
+   URI 構文は階層的に構成されており、コンポーネントは左から右へ、
+   重要度の高い順に並べられる。一部の URI scheme では、可視の階層は
+   scheme 自体に限られる。scheme コンポーネント区切り文字（":"）の
+   後のすべては、URI 処理に対して不透明とみなされる。他の URI scheme
+   は、汎用解析アルゴリズムに対して階層を明示的かつ可視にする。
+
+   汎用構文は、スラッシュ ("/")、疑問符 ("?")、および番号記号 ("#")
+   を使用して、汎用パーサーの階層的解釈において重要なコンポーネントを
+   区切る。なじみのある構文を一貫して使用することで、このような
+   識別子の読みやすさを助けることに加え、命名 scheme をまたぐ階層の
+   この統一表現により、scheme 非依存の参照をその階層に対して相対的に
+   行うことが可能になる。
+
+   共通の目的を果たすために文書のグループまたは「tree」が構築され、
+   それらの文書における URI 参照の大多数が、tree の外部ではなく
+   tree 内のリソースを指していることはよくある。同様に、特定のサイトに
+   置かれた文書は、リモートサイト上のリソースよりも、そのサイト上の
+   他のリソースを参照する可能性がはるかに高い。URI の相対参照により、
+   文書 tree は、その位置とアクセス scheme から部分的に独立できる。
+   たとえば、ハイパーテキスト文書の単一の集合が、相互に相対参照で
+   参照している場合、その文書集合は "file"、"http"、および "ftp" の
+   各 scheme を通じて同時にアクセス可能かつ辿ることが可能である。
+   さらに、そのような文書 tree は、相対参照を変更することなく、
+   全体として移動できる。
+
+   相対参照（<a href="#section-4.2">Section 4.2</a>）は、参照文脈と target URI との間の
+   階層的名前空間内の差分を記述することによって、リソースを参照する。
+   参照解決アルゴリズムは、
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   <a href="#section-5">Section 5</a> に示されており、そのような参照が target URI へどのように
+   変換されるかを定義する。相対参照は階層的 URI の文脈内でのみ
+   使用できるため、新しい URI scheme の設計者は、その scheme 内で
+   相対参照を禁止するやむを得ない理由がない限り、汎用構文の階層的
+   コンポーネントと一貫した構文を使用すべきである。
+
+      注: 以前の仕様では、URI への相対参照を表すために「partial URI」
+      および「relative URI」という用語が使用されていた。一部の読者が
+      これらの用語を、相対 URI が URI を参照する方法ではなく URI の
+      部分集合であるという意味に誤解したため、本仕様では単に
+      相対参照と呼ぶ。
+
+   すべての URI 参照は、使用されるときに汎用構文パーサーによって解析
+   される。しかし、参照で使用される absolute URI が 1 つ以上の
+   dot-segments（<a href="#section-3.3">Section 3.3</a> で説明される "." または ".." の完全な
+   path segment）を含まない限り、階層処理はその URI に影響を与えない。
+   そのため URI scheme 仕様は、slash 文字、question mark 文字、および
+   URI "scheme:." と "scheme:.." の使用を認めないことによって、
+   不透明な識別子を定義できる。
+
+<span class="h3"><a class="selflink" id="section-1.3" href="#section-1.3">1.3</a>.  構文表記</span>
+
+   本仕様は [<a href="./rfc2234" title="&quot;構文仕様のための Augmented BNF: ABNF&quot;">RFC2234</a>] の Augmented Backus-Naur Form (ABNF) 表記を
+   使用する。これには、その仕様によって定義された次の core ABNF
+   構文規則が含まれる: ALPHA（letters）、CR（carriage return）、
+   DIGIT（decimal digits）、DQUOTE（double quote）、HEXDIG
+   （hexadecimal digits）、LF（line feed）、および SP（space）。
+   完全な URI 構文は <a href="#appendix-A">Appendix A</a> に集約されている。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  文字</span>
+
+   URI 構文は、おそらくリソースを識別するために、データを文字列として
+   エンコードする方法を提供する。URI 文字はさらに、転送または表示の
+   ためにオクテットとしてエンコードされることが多い。本仕様は、
+   URI 文字と、それらの文字を格納または転送するために使用される
+   オクテットとの間の対応付けについて、特定の character encoding を
+   義務付けない。URI がプロトコル要素に現れる場合、character encoding
+   はそのプロトコルによって定義される。そのような定義がない場合、
+   URI は周囲のテキストと同じ character encoding であると仮定される。
+
+   ABNF 表記は、その終端値を US-ASCII coded character set [<a href="#ref-ASCII" title="&quot;Coded Character Set -- 7-bit American Standard Code for Information Interchange&quot;">ASCII</a>] に
+   基づく非負整数（codepoints）として定義する。URI は文字列であるため、
+   URI 構文を理解するには、この関係を逆にする必要がある。したがって、
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   ABNF で使用される整数値は、構文規則を完成させるために、US-ASCII を
+   介して対応する文字へ戻して対応付けなければならない。
+
+   URI は、数字、文字、およびいくつかの図形記号からなる限定された
+   文字集合から構成される。これらの文字の予約された部分集合は、
+   URI 内の構文コンポーネントを区切るために使用できる。一方、残りの
+   文字、すなわち非予約集合と、区切り文字として機能していない予約文字
+   は、各コンポーネントの識別データを定義する。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  パーセントエンコーディング</span>
+
+   パーセントエンコーディング機構は、あるコンポーネントにおいて、
+   そのオクテットに対応する文字が許可集合の外にある場合、または
+   コンポーネントの区切り文字として、あるいはコンポーネント内の
+   区切り文字として使用されている場合に、データオクテットを表すために
+   使用される。パーセントエンコードされたオクテットは、パーセント文字
+   "%" に続けて、そのオクテットの数値を表す 2 桁の十六進数字を置く
+   3 文字組としてエンコードされる。たとえば、"%20" は binary octet
+   "00100000"（ABNF: %x20）のパーセントエンコーディングであり、
+   US-ASCII では space 文字 (SP) に対応する。<a href="#section-2.4">Section 2.4</a> は、
+   パーセントエンコーディングとデコーディングがいつ適用されるかを
+   説明する。
+
+      pct-encoded = "%" HEXDIG HEXDIG
+
+   大文字の十六進数字 'A' から 'F' は、それぞれ小文字の 'a' から 'f'
+   と等価である。2 つの URI がパーセントエンコードされたオクテットで
+   使用される十六進数字の大文字小文字だけで異なる場合、それらは等価で
+   ある。一貫性のため、URI 生成者および正規化器は、すべての
+   パーセントエンコーディングに大文字の十六進数字を使用すべきである。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  予約文字</span>
+
+   URI には、"reserved" 集合内の文字によって区切られるコンポーネント
+   およびサブコンポーネントが含まれる。これらの文字は、汎用構文、
+   各 scheme 固有構文、または URI の dereferencing アルゴリズムの
+   実装固有構文によって、区切り文字として定義される場合がある
+   （または定義されない場合もある）ため、"reserved" と呼ばれる。
+   URI コンポーネントのデータが、予約文字の区切り文字としての目的と
+   競合する場合、競合するデータは URI が形成される前にパーセント
+   エンコードされなければならない。
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      reserved    = gen-delims / sub-delims
+
+      gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+
+      sub-delims  = "!" / "$" / "&amp;" / "'" / "(" / ")"
+                  / "*" / "+" / "," / ";" / "="
+
+   予約文字の目的は、URI 内の他のデータと区別できる区切り文字の集合を
+   提供することである。予約文字を対応するパーセントエンコードされた
+   オクテットに置き換えた点だけが異なる URI は等価ではない。予約文字を
+   パーセントエンコードすること、または予約文字に対応する
+   パーセントエンコードされたオクテットをデコードすることは、多くの
+   アプリケーションにおいて URI の解釈を変える。そのため、予約集合内の
+   文字は正規化から保護され、したがって URI 内のデータサブコンポーネント
+   を区切るために、scheme 固有および生成者固有のアルゴリズムで使用しても
+   安全である。
+
+   予約文字の部分集合 (gen-delims) は、<a href="#section-3">Section 3</a> で説明される
+   汎用 URI コンポーネントの区切り文字として使用される。コンポーネントの
+   ABNF 構文規則は、reserved または gen-delims の規則名を直接使用しない。
+   代わりに、各構文規則はそのコンポーネント内で許可される文字
+   （すなわち、それを区切らない文字）を列挙し、それらの文字のうち
+   予約集合にも含まれるものは、コンポーネント内のサブコンポーネント
+   区切り文字としての使用に「予約」される。本仕様では最も一般的な
+   サブコンポーネントのみを定義する。他のサブコンポーネントは、
+   URI scheme の仕様、または URI の dereferencing アルゴリズムの
+   実装固有構文によって定義され得る。ただし、そのようなサブコンポーネント
+   は、そのコンポーネント内で許可される予約集合の文字によって区切られる
+   ものとする。
+
+   URI 生成アプリケーションは、予約集合内の文字に対応するデータ
+   オクテットをパーセントエンコードすべきである。ただし、それらの文字が
+   そのコンポーネント内でデータを表すことを URI scheme によって明示的に
+   許可されている場合は除く。URI コンポーネント内に予約文字が見つかり、
+   その文字に既知の区切り役割がない場合、その文字は US-ASCII における
+   その文字のエンコーディングに対応するデータオクテットを表すものとして
+   解釈されなければならない。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  非予約文字</span>
+
+   URI 内で許可されるが予約された目的を持たない文字は、非予約文字と
+   呼ばれる。これらには、大文字と小文字の文字、十進数字、hyphen、
+   period、underscore、および tilde が含まれる。
+
+      unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   非予約文字を対応するパーセントエンコードされた US-ASCII オクテットに
+   置き換えた点だけが異なる URI は等価であり、同じリソースを識別する。
+   しかし、URI 比較実装は比較前に常に正規化を行うわけではない
+   （<a href="#section-6">Section</a>
+   <a href="#section-6">6</a> を参照）。一貫性のため、ALPHA
+   (%41-%5A および %61-%7A)、DIGIT (%30-%39)、hyphen (%2D)、
+   period (%2E)、underscore (%5F)、または tilde (%7E) の範囲の
+   パーセントエンコードされたオクテットは URI 生成者によって作成される
+   べきではなく、URI 内で見つかった場合、URI 正規化器によって対応する
+   非予約文字へデコードされるべきである。
+
+<span class="h3"><a class="selflink" id="section-2.4" href="#section-2.4">2.4</a>.  エンコードまたはデコードすべき時</span>
+
+   通常の状況では、URI 内のオクテットがパーセントエンコードされるのは、
+   URI をそのコンポーネント部分から生成する過程だけである。このとき、
+   実装は、どの予約文字をサブコンポーネント区切り文字として使用し、
+   どれをデータとして安全に使用できるかを決定する。生成された後、
+   URI は常にパーセントエンコードされた形式である。
+
+   URI が dereference されるとき、scheme 固有の dereferencing プロセス
+   （もしあれば）にとって重要なコンポーネントおよびサブコンポーネントは、
+   それらのコンポーネント内のパーセントエンコードされたオクテットを安全に
+   デコードできる前に、解析され分離されなければならない。そうしないと、
+   データがコンポーネント区切り文字と誤認される可能性がある。唯一の
+   例外は、非予約集合内の文字に対応するパーセントエンコードされた
+   オクテットであり、これはいつでもデコードできる。たとえば、tilde ("~")
+   文字に対応するオクテットは、古い URI 処理実装によって "%7E" と
+   エンコードされることが多い。この "%7E" は解釈を変えずに "~" に
+   置き換えることができる。
+
+   パーセント ("%") 文字はパーセントエンコードされたオクテットの
+   指示子として機能するため、そのオクテットを URI 内のデータとして
+   使用するには "%25" としてパーセントエンコードしなければならない。
+   実装は、同じ文字列を複数回パーセントエンコードまたはデコードしては
+   ならない。すでにデコードされた文字列をデコードすると、パーセント
+   データオクテットをパーセントエンコーディングの開始と誤解する可能性が
+   あり、逆にすでにパーセントエンコードされた文字列をさらに
+   パーセントエンコードする場合にも問題が生じる可能性がある。
+
+<span class="h3"><a class="selflink" id="section-2.5" href="#section-2.5">2.5</a>.  識別データ</span>
+
+   URI 文字は、URI の各コンポーネントに対する識別データを提供し、
+   システム間の識別のための外部インターフェイスとして機能する。URI
+   生成インターフェイスの存在と性質は、その URI を使用するクライアント
+   から隠されている（したがって本仕様で定義される相互運用性要件の範囲外
+   である）が、それは URI 文字の問題の解釈において混乱と誤りの頻繁な
+   原因となる。実装者は、URI の生成と転送には複数の character encoding が
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   関与していることを認識しなければならない。すなわち、ローカルな名前と
+   データのエンコーディング、公開インターフェイスのエンコーディング、
+   URI character encoding、データ形式エンコーディング、および
+   プロトコルエンコーディングである。
+
+   ファイルシステム名のようなローカル名は、ローカルな character
+   encoding で格納される。URI 生成アプリケーション（例: origin server）
+   は通常、意味のある名前を生成するための基礎としてローカルな
+   エンコーディングを使用する。URI 生成者はローカルなエンコーディングを
+   公開インターフェイスに適したものへ変換し、次に公開インターフェイスの
+   エンコーディングを、URI 文字の制限された集合（reserved、unreserved、
+   および percent-encodings）へ変換する。それらの文字はさらに、
+   データ形式（例: 文書の charset）内の参照として使用されるオクテットに
+   エンコードされ、そのようなデータ形式は、多くの場合その後
+   インターネットプロトコル上での転送のためにエンコードされる。
+
+   ほとんどのシステムでは、URI コンポーネント内に現れる非予約文字は、
+   US-ASCII におけるその文字のエンコーディングに対応するデータ
+   オクテットを表すものとして解釈される。URI の利用者は、文字 "X" が
+   オクテット "01011000" に対応すると仮定する。そしてその仮定が誤って
+   いる場合でも、そう仮定しても害はない。EBCDIC など、異なる
+   character encoding の形式で内部的に識別子を提供するシステムは、
+   一般に、内部インターフェイスでテキスト識別子を UTF-8
+   [<a href="#ref-STD63" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">STD63</a>]（または
+   US-ASCII character encoding の他の上位集合）へ文字変換し、元の
+   オクテットを単純にパーセントエンコードした結果よりも意味のある
+   識別子を提供する。
+
+   たとえば、EBCDIC ベースのファイルシステムを使用してローカルに格納
+   されたデータを、HTTP サーバーを通じてインターネット上のクライアントへ
+   提供する情報サービスを考える。著者がそのファイルシステム上に
+   "Laguna Beach" という名前のファイルを作成した場合、そのリソースに
+   対応する "http" URI は、意味のある文字列 "Laguna%20Beach" を含む
+   ことが期待される。しかし、そのサーバーが過度に単純な raw octet
+   mapping を使用して URI を生成した場合、結果は
+   "%D3%81%87%A4%95%81@%C2%85%81%83%88" を含む URI となる。内部
+   トランスコーディングインターフェイスは、URI を生成する前に
+   ローカル名を US-ASCII の上位集合へトランスコードすることでこの問題を
+   解決する。当然、そのようなインターフェイスで受信 URI を適切に解釈する
+   には、逆方向のトランスコーディングを適用してローカル名を得る前に、
+   パーセントエンコードされたオクテットをデコードする必要がある
+   （例: "%20" から SP へ）。
+
+   場合によっては、URI コンポーネントと、それが表すように作られた
+   識別データとの間の内部インターフェイスは、character encoding の
+   変換よりもはるかに直接的でないことがある。たとえば、URI の一部が
+   非 ASCII データに対する query や、地図上の数値座標を反映することが
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   ある。同様に、URI scheme は、コンポーネントを形成し URI を生成する前に
+   適用される追加のエンコーディング要件を持つコンポーネントを定義する
+   ことができる。
+
+   新しい URI scheme が Universal Character Set [<a href="#ref-UCS" title="&quot;Information Technology - Universal Multiple-Octet Coded Character Set (UCS)&quot;">UCS</a>] 由来の
+   文字で構成されるテキストデータを表すコンポーネントを定義する場合、
+   そのデータはまず UTF-8 character encoding [<a href="#ref-STD63" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">STD63</a>] に従って
+   オクテットとしてエンコードされるべきである。その後、非予約集合内の
+   文字に対応しないオクテットだけをパーセントエンコードすべきである。
+   たとえば、文字 A は "A" として表され、文字 LATIN CAPITAL LETTER A
+   WITH GRAVE は "%C3%80" として表され、文字 KATAKANA LETTER A は
+   "%E3%82%A2" として表される。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  構文コンポーネント</span>
+
+   汎用 URI 構文は、scheme、authority、path、query、および fragment と
+   呼ばれるコンポーネントの階層的な列から構成される。
+
+      URI         = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+
+      hier-part   = "//" authority path-abempty
+                  / path-absolute
+                  / path-rootless
+                  / path-empty
+
+   scheme および path コンポーネントは必須である。ただし、path は空
+   （文字なし）であってもよい。authority が存在する場合、path は空である
+   か、slash ("/") 文字で始まらなければならない。authority が存在しない
+   場合、path は 2 つの slash 文字 ("//") で始まることはできない。
+   これらの制約により、path には 5 つの異なる ABNF 規則
+   （<a href="#section-3.3">Section 3.3</a>）が生じ、そのうち任意の URI 参照に一致するのは
+   1 つだけである。
+
+   次に、2 つの URI 例とそのコンポーネント部分を示す。
+
+         foo://example.com:8042/over/there?name=ferret#nose
+         \_/   \______________/\_________/ \_________/ \__/
+          |           |            |            |        |
+       scheme     authority       path        query   fragment
+          |   _____________________|__
+         / \ /                        \
+         urn:example:animal:ferret:nose
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  Scheme</span>
+
+   各 URI は scheme 名から始まる。scheme 名は、その scheme 内で
+   識別子を割り当てる仕様を参照する。したがって URI 構文は、連合的で
+   拡張可能な命名システムであり、各 scheme の仕様は、その scheme を
+   使用する識別子の構文と意味をさらに制限できる。
+
+   Scheme 名は、文字で始まり、その後に文字、数字、plus ("+")、
+   period ("."）、または hyphen ("-") の任意の組み合わせが続く文字列で
+   構成される。scheme は大文字小文字を区別しないが、正準形式は小文字で
+   あり、scheme を指定する文書は小文字で指定しなければならない。実装は、
+   堅牢性のため、scheme 名において大文字を小文字と等価として受け入れる
+   べきである（例: "http" だけでなく "HTTP" も許可する）。ただし、
+   一貫性のため、生成する scheme 名は小文字だけにすべきである。
+
+      scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+
+   個々の scheme は本書では規定されない。新しい URI scheme の登録手続きは
+   [<a href="#ref-BCP35" title="&quot;URL Scheme Names の登録手続き&quot;">BCP35</a>] によって別途定義される。scheme registry は、scheme 名と
+   それらの仕様との対応関係を維持する。新しい URI scheme の設計者への
+   助言は [<a href="./rfc2718" title="&quot;新しい URL スキームのための指針&quot;">RFC2718</a>] にある。URI scheme 仕様は、それぞれ自身の
+   構文を定義しなければならない。その結果、その scheme 固有の構文に
+   一致するすべての文字列が、<a href="#section-4.3">Section 4.3</a> で説明される
+   &lt;absolute-URI&gt; 文法にも一致するようにする必要がある。
+
+   scheme 固有の制約を 1 つ以上違反する URI が提示された場合、
+   scheme 固有の resolution プロセスは、未使用部分を無視するのではなく、
+   その参照をエラーとして示すべきである。そうすることで、等価な URI の
+   数を減らし、ユーザーを誤導するように URI が構築された可能性を示す
+   汎用構文の悪用を検出しやすくなる（<a href="#section-7.6">Section 7.6</a>）。
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  Authority</span>
+
+   多くの URI scheme は、URI の残りの部分によって定義される名前空間の
+   統治をその authority に委任するため、命名 authority のための階層要素を
+   含む（その authority はさらに委任する場合もある）。汎用構文は、
+   登録名またはサーバーアドレスに基づいて authority を区別するための
+   共通の手段を提供し、任意で port およびユーザー情報を伴う。
+
+   authority コンポーネントは double slash ("//") の後に続き、次の
+   slash ("/")、question mark ("?")、number sign ("#") 文字、または
+   URI の終端によって終了する。
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      authority   = [ userinfo "@" ] host [ ":" port ]
+
+   URI 生成者および正規化器は、port コンポーネントが空である場合、
+   host と port を分離する ":" 区切り文字を省略すべきである。一部の
+   scheme は userinfo および/または port サブコンポーネントを許可しない。
+
+   URI が authority コンポーネントを含む場合、path コンポーネントは空で
+   あるか、slash ("/") 文字で始まらなければならない。非検証パーサー
+   （URI 参照を単に主要コンポーネントへ分離するだけのもの）は、URI が
+   dereference されるまで、authority のサブコンポーネント構造を無視し、
+   double-slash から最初の終端区切り文字までを不透明な文字列として扱う
+   ことが多い。
+
+<span class="h4"><a class="selflink" id="section-3.2.1" href="#section-3.2.1">3.2.1</a>.  ユーザー情報</span>
+
+   userinfo サブコンポーネントは、ユーザー名と、任意でリソースへアクセス
+   するための認可を得る方法に関する scheme 固有情報から構成され得る。
+   ユーザー情報が存在する場合、その後には、host と区切る commercial
+   at-sign ("@") が続く。
+
+      userinfo    = *( unreserved / pct-encoded / sub-delims / ":" )
+
+   userinfo フィールドにおける "user:password" 形式の使用は非推奨である。
+   アプリケーションは、userinfo サブコンポーネント内で最初に見つかった
+   colon (":") 文字より後のデータを、clear text として表示すべきでは
+   ない。ただし、colon の後のデータが空文字列（パスワードなしを示す）
+   である場合は除く。アプリケーションは、参照の一部としてそのような
+   データを受信した場合、それを無視または拒否してもよく、そのような
+   データを暗号化されていない形式で保存することは拒否すべきである。
+   認証情報を clear text で渡すことは、それが使用されてきたほぼすべての
+   場合においてセキュリティリスクであることが証明されている。
+
+   グラフィカルなハイパーテキスト閲覧など、ユーザーフィードバックのために
+   URI を表示するアプリケーションは、可能な場合、URI の残りの部分と
+   区別される方法で userinfo を表示すべきである。そのような表示は、
+   userinfo が信頼されたドメイン名のように見えるように誤導的に
+   作られている場合に、ユーザーを支援する（<a href="#section-7.6">Section 7.6</a>）。
+
+<span class="h4"><a class="selflink" id="section-3.2.2" href="#section-3.2.2">3.2.2</a>.  Host</span>
+
+   authority の host サブコンポーネントは、角括弧で囲まれた IP literal、
+   dotted-decimal 形式の IPv4 address、または登録名によって識別される。
+   host サブコンポーネントは大文字小文字を区別しない。URI 内に host
+   サブコンポーネントが存在することは、その scheme がインターネット上の
+   指定された host へのアクセスを必要とすることを意味しない。多くの場合、
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   host 構文は、DNS のために作成され展開された既存の登録プロセスを
+   再利用し、別の registry を展開するコストなしにグローバルに一意な名前を
+   得るためだけに使用される。しかし、そのような使用にはそれ自体のコストが
+   伴う。ドメイン名の所有権は、URI 生成者が予期しない理由で時間とともに
+   変化し得る。他の場合には、host コンポーネント内のデータは、
+   インターネット host とは無関係な登録名を識別する。ABNF 規則に
+   "host" という名前を使用するのは、それが最も一般的な目的だからであり、
+   唯一の目的だからではない。
+
+      host        = IP-literal / IPv4address / reg-name
+
+   host の構文規則は、IPv4address と reg-name を完全には区別しないため
+   曖昧である。この構文を曖昧でなくするために、我々は
+   "first-match-wins" アルゴリズムを適用する。host が IPv4address の
+   規則に一致する場合、それは reg-name ではなく IPv4 address literal と
+   見なされるべきである。host は大文字小文字を区別しないが、生成者および
+   正規化器は、一貫性のため、登録名と hexadecimal address には小文字を
+   使用し、percent-encodings にのみ大文字を使用すべきである。
+
+   Internet Protocol literal address version 6 [<a href="./rfc3513" title="&quot;Internet Protocol Version 6 (IPv6) Addressing Architecture&quot;">RFC3513</a>] 以降によって
+   識別される host は、IP literal を角括弧（"[" および "]"）で囲むことに
+   よって区別される。URI 構文で角括弧文字が許可されるのはここだけで
+   ある。将来の、まだ定義されていない IP literal address 形式を見越して、
+   実装は、そのような形式を heuristic determination に頼るのではなく、
+   明示的に示すために任意の version flag を使用してもよい。
+
+      IP-literal = "[" ( IPv6address / IPvFuture  ) "]"
+
+      IPvFuture  = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+
+   version flag は IP version を示すものではない。むしろ、literal format の
+   将来バージョンを示すものである。したがって、実装は下記で説明される
+   既存の IPv4 および IPv6 literal address 形式に対して version flag を
+   提供してはならない。version flag が存在することを示す "v"
+   （大文字小文字を区別しない）で始まる IP-literal を含む URI が、
+   その version flag の意味を知らないアプリケーションによって
+   dereference された場合、そのアプリケーションは "address mechanism
+   not supported" に対する適切なエラーを返すべきである。
+
+   IPv6 literal address によって識別される host は、先行する version flag
+   なしで角括弧内に表される。ここで与えられる ABNF は、[<a href="./rfc3513" title="&quot;Internet Protocol Version 6 (IPv6) Addressing Architecture&quot;">RFC3513</a>] で
+   与えられた IPv6 literal address のテキスト定義を変換したものである。
+   この構文は IPv6 scoped addressing zone identifiers をサポートしない。
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   128 ビットの IPv6 アドレスは、8 個の 16 ビット片に分割される。
+   各片は、大文字小文字を区別しない十六進数で、1 から 4 個の十六進数字
+   を用いて数値的に表される（先行ゼロは許可される）。8 個の
+   エンコードされた片は、最上位から順に、コロン文字で区切って与えられる。
+   任意で、最下位の 2 片を IPv4 アドレスのテキスト形式で表してもよい。
+   アドレス内の 1 個以上の連続するゼロ値の 16 ビット片の列は省略でき、
+   それらのすべての数字を省き、その位置に正確に 2 個の連続するコロンを
+   残して、省略を示す。
+
+      IPv6address =                            6( h16 ":" ) ls32
+                  /                       "::" 5( h16 ":" ) ls32
+                  / [               h16 ] "::" 4( h16 ":" ) ls32
+                  / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+                  / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+                  / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
+                  / [ *4( h16 ":" ) h16 ] "::"              ls32
+                  / [ *5( h16 ":" ) h16 ] "::"              h16
+                  / [ *6( h16 ":" ) h16 ] "::"
+
+      ls32        = ( h16 ":" h16 ) / IPv4address
+                  ; アドレスの最下位 32 ビット
+
+      h16         = 1*4HEXDIG
+                  ; 十六進数で表されたアドレスの 16 ビット
+
+   IPv4 リテラルアドレスによって識別される host は、dotted-decimal
+   表記（0 から 255 の範囲の 4 個の十進数を "." で区切った列）で表される。
+   これは [<a href="./rfc1123" title="&quot;Requirements for Internet Hosts - Application and Support&quot;">RFC1123</a>] において [<a href="./rfc0952" title="&quot;DoD Internet host table specification&quot;">RFC0952</a>] を参照して説明されている。
+   他の形式のドット表記が一部のプラットフォームで解釈される場合がある
+   ことに注意する（<a href="#section-7.4">Section 7.4</a> で説明）。ただし、この文法で許可されるのは
+   4 オクテットの dotted-decimal 形式のみである。
+
+      IPv4address = dec-octet "." dec-octet "." dec-octet "." dec-octet
+
+      dec-octet   = DIGIT                 ; 0-9
+                  / %x31-39 DIGIT         ; 10-99
+                  / "1" 2DIGIT            ; 100-199
+                  / "2" %x30-34 DIGIT     ; 200-249
+                  / "25" %x30-35          ; 250-255
+
+   登録名によって識別される host は、通常、ローカルに定義された host
+   または service name registry 内で検索することを意図した文字列である。
+   ただし、URI の scheme 固有の意味論により、代わりに特定の registry
+   （または固定名テーブル）の使用が要求される場合もある。最も一般的な
+   名前 registry の仕組みは Domain Name System (DNS) である。DNS での
+   検索を意図した登録名は、
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 20]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-21" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   <a href="./rfc1034#section-3.5">[RFC1034] の Section&nbsp;3.5</a> および <a href="./rfc1123#section-2.1">[RFC1123] の Section&nbsp;2.1</a> で
+   定義される構文を使用する。そのような名前は "." で区切られた
+   domain label の列からなり、各 domain label は英数字で始まり、
+   英数字で終わり、場合によっては "-" 文字を含む。DNS における
+   完全修飾ドメイン名の最右の domain label には、単一の "." を続けてもよく、
+   完全なドメイン名と何らかのローカルドメインを区別する必要がある場合は
+   そうすべきである。
+
+      reg-name    = *( unreserved / pct-encoded / sub-delims )
+
+   URI scheme が host の既定値を定義している場合、host サブコンポーネントが
+   未定義である場合、または登録名が空（長さゼロ）である場合、その既定値が
+   適用される。たとえば、"file" URI scheme は、authority がない場合、
+   空の host、および "localhost" がいずれもエンドユーザーのマシンを
+   意味するように定義されている。一方、"http" scheme は authority の欠落
+   または空の host を無効と見なす。
+
+   本仕様は特定の登録名検索技術を義務付けないため、相互運用性に必要な
+   範囲を超えて reg-name の構文を制限しない。代わりに、登録名構文への
+   適合性の問題を、URI resolution を実行する各アプリケーションの
+   operating system に委ね、その operating system が host 識別の目的で
+   何を許可するかを決定する。URI resolution 実装は、登録名の検索に
+   DNS、host tables、yellow pages、NetInfo、WINS、またはその他の任意の
+   システムを使用し得る。しかし、グローバルスコープを持つことを意図した
+   URI には、DNS の完全修飾ドメイン名のようなグローバルスコープの
+   命名システムが必要である。URI 生成者は、DNS の使用がすぐには明らかで
+   ない場合でも、DNS 構文に適合する名前を使用すべきであり、それらの名前の
+   長さを 255 文字以下に制限すべきである。
+
+   reg-name 構文は、基礎となる名前解決技術から独立した統一的な方法で
+   非 ASCII 登録名を表すために、パーセントエンコードされたオクテットを
+   許可する。非 ASCII 文字は、まず UTF-8 [<a href="#ref-STD63" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">STD63</a>] に従って
+   エンコードされなければならず、その後、対応する UTF-8 列の各オクテットは
+   URI 文字として表されるためにパーセントエンコードされなければならない。
+   URI 生成アプリケーションは、UTF-8 文字列を表すために使用される場合を
+   除き、host 内で percent-encoding を使用してはならない。非 ASCII 登録名が
+   DNS による解決を意図した国際化ドメイン名を表す場合、その名前は
+   名前検索の前に IDNA encoding [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] へ変換されなければならない。
+   URI 生成者は、従来の URI resolver との相互運用性を最大化したい場合、
+   これらの登録名を percent-encoding ではなく IDNA encoding で提供すべきで
+   ある。
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 21]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-22" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h4"><a class="selflink" id="section-3.2.3" href="#section-3.2.3">3.2.3</a>.  Port</span>
+
+   authority の port サブコンポーネントは、host の後に続く任意の
+   十進数 port number によって指定され、単一の colon (":") 文字によって
+   host から区切られる。
+
+      port        = *DIGIT
+
+   scheme は既定の port を定義してもよい。たとえば、"http" scheme は、
+   予約済み TCP port number に対応する既定の port "80" を定義する。
+   port number によって指定される port の種類（例: TCP、UDP、SCTP）は、
+   URI scheme によって定義される。URI 生成者および正規化器は、port が
+   空である場合、またはその値が scheme の既定値と同じである場合、port
+   コンポーネントとその ":" 区切り文字を省略すべきである。
+
+<span class="h3"><a class="selflink" id="section-3.3" href="#section-3.3">3.3</a>.  Path</span>
+
+   path コンポーネントは、通常は階層形式で編成されたデータを含み、
+   非階層の query コンポーネント（<a href="#section-3.4">Section 3.4</a>）内のデータとともに、
+   URI の scheme および naming authority（もしあれば）の範囲内で
+   リソースを識別するために役立つ。path は、最初の question mark ("?")
+   または number sign ("#") 文字、あるいは URI の終端によって終了する。
+
+   URI が authority コンポーネントを含む場合、path コンポーネントは
+   空であるか、slash ("/") 文字で始まらなければならない。URI が
+   authority コンポーネントを含まない場合、path は 2 個の slash 文字
+   ("//") で始まることはできない。さらに、URI 参照（<a href="#section-4.1">Section 4.1</a>）は
+   relative-path reference である場合があり、その場合、最初の path segment は
+   colon (":") 文字を含むことができない。ABNF は、これらの場合を
+   曖昧でなくするために 5 つの別個の規則を必要とし、任意の URI 参照内の
+   path 部分文字列に一致するのはそのうち 1 つだけである。これらの規則の
+   いずれかにパーサーが一致させた URI 部分文字列を説明するために、
+   汎用的な用語 "path component" を使用する。
+
+      path          = path-abempty    ; "/" で始まる、または空
+                    / path-absolute   ; "/" で始まるが "//" ではない
+                    / path-noscheme   ; コロンを含まないセグメントで始まる
+                    / path-rootless   ; セグメントで始まる
+                    / path-empty      ; 文字ゼロ個
+
+      path-abempty  = *( "/" segment )
+      path-absolute = "/" [ segment-nz *( "/" segment ) ]
+      path-noscheme = segment-nz-nc *( "/" segment )
+      path-rootless = segment-nz *( "/" segment )
+      path-empty    = 0&lt;pchar&gt;
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 22]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-23" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      segment       = *pchar
+      segment-nz    = 1*pchar
+      segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
+                    ; colon ":" を含まない非ゼロ長セグメント
+
+      pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+
+   path は、slash ("/") 文字で区切られた path segment の列からなる。
+   path は URI に対して常に定義される。ただし、定義された path は
+   空（長さゼロ）であってもよい。階層を示すために slash 文字を使用する
+   ことが必要となるのは、URI が相対参照の文脈として使用される場合だけで
+   ある。たとえば、URI &lt;mailto:fred@example.com&gt; は
+   "fred@example.com" という path を持つ一方、URI
+   &lt;foo://info.example.com?fred&gt; は空の path を持つ。
+
+   path segment "." および ".." は、dot-segments としても知られ、path name
+   階層内の相対参照のために定義される。これらは、relative-path reference
+   （<a href="#section-4.2">Section 4.2</a>）の先頭で、名前の階層 tree 内の相対位置を示すために
+   使用されることを意図している。これは、一部の operating system の
+   file directory 構造において、それぞれ current directory と parent
+   directory を示す役割に似ている。しかし、file system とは異なり、
+   これらの dot-segments は URI path 階層内でのみ解釈され、resolution
+   プロセスの一部として除去される（<a href="#section-5.2">Section</a>
+   <a href="#section-5.2">5.2</a>）。
+
+   階層的 path 内の dot-segments を除き、path segment は汎用構文によって
+   不透明と見なされる。URI 生成アプリケーションは、segment 内で許可される
+   予約文字を使用して、scheme 固有または dereference-handler 固有の
+   サブコンポーネントを区切ることが多い。たとえば、semicolon (";") と
+   equals ("=") の予約文字は、その segment に適用される parameter および
+   parameter value を区切るためによく使用される。comma (",") の予約文字も
+   同様の目的でよく使用される。たとえば、ある URI 生成者は "name" の
+   version 1.1 への参照を示すために "name;v=1.1" のような segment を
+   使用する一方、別の生成者は同じことを示すために "name,1.1" のような
+   segment を使用するかもしれない。parameter type は scheme 固有の意味論に
+   よって定義され得るが、多くの場合、parameter の構文は URI の
+   dereferencing algorithm の実装に固有である。
+
+<span class="h3"><a class="selflink" id="section-3.4" href="#section-3.4">3.4</a>.  Query</span>
+
+   query コンポーネントは、path コンポーネント（<a href="#section-3.3">Section 3.3</a>）内の
+   データとともに、URI の scheme および naming authority（もしあれば）の
+   範囲内でリソースを識別するために役立つ非階層データを含む。query
+   コンポーネントは、最初の question mark ("?") 文字によって示され、
+   number sign ("#") 文字または URI の終端によって終了する。
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 23]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-24" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      query       = *( pchar / "/" / "?" )
+
+   slash ("/") および question mark ("?") 文字は、query コンポーネント内で
+   データを表してもよい。相対参照（<a href="#section-5.1">Section 5.1</a>）のための base URI として
+   使用される場合、一部の古い誤った実装はそのようなデータを正しく扱えない
+   可能性があることに注意する。これは、階層区切りを探す際に query データと
+   path データを区別できないためであると思われる。しかし、query
+   コンポーネントは "key=value" ペアの形式で識別情報を運ぶためによく
+   使用され、頻繁に使用される値の 1 つが別の URI への参照であるため、
+   usability の観点からは、それらの文字を percent-encoding しない方がよい
+   場合がある。
+
+<span class="h3"><a class="selflink" id="section-3.5" href="#section-3.5">3.5</a>.  Fragment</span>
+
+   URI の fragment identifier コンポーネントは、primary resource と
+   追加の識別情報への参照によって、secondary resource の間接的な識別を
+   可能にする。識別される secondary resource は、primary resource の一部
+   または部分集合、primary resource の representation に対するある view、
+   またはそれらの representation によって定義または記述される他の
+   resource であり得る。fragment identifier コンポーネントは、
+   number sign ("#") 文字の存在によって示され、URI の終端によって終了する。
+
+      fragment    = *( pchar / "/" / "?" )
+
+   fragment identifier の意味論は、primary resource に対する retrieval
+   アクションから生じ得る representation の集合によって定義される。
+   したがって、fragment の形式と resolution は、URI が dereference された
+   場合にのみ retrieval が実行されるにもかかわらず、取得され得る
+   representation の media type [<a href="./rfc2046" title="&quot;Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types&quot;">RFC2046</a>] に依存する。そのような
+   representation が存在しない場合、fragment の意味論は未知と見なされ、
+   実質的に制約されない。fragment identifier の意味論は URI scheme から
+   独立しており、したがって scheme 仕様によって再定義することはできない。
+
+   個々の media type は、その media type によって secondary resource として
+   識別可能な、異なる種類の subset、view、または external reference を
+   指定するために、fragment identifier 構文に対する独自の制約または
+   構造を定義してもよい。primary resource が複数の representation を持つ
+   場合、これは retrieval request の属性に基づいて representation が選択
+   される resource（いわゆる content negotiation）でよくあるが、fragment
+   によって識別されるものは、それらすべての representation にわたって
+   一貫しているべきである。各 representation は、どのように表現されるかに
+   かかわらず、同じ secondary resource に対応するように fragment を
+   定義するか、または fragment を未定義のままにする（すなわち、見つからない）
+   べきである。
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 24]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-25" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   任意の URI と同様に、fragment identifier コンポーネントの使用は、
+   retrieval アクションが行われることを意味しない。fragment identifier を
+   持つ URI は、primary resource がアクセス可能である、または将来アクセス
+   されるという含意なしに、secondary resource を参照するために使用できる。
+
+   Fragment identifier は、情報検索システムにおいて、クライアント側の
+   間接参照の主要な形式として特別な役割を持つ。これにより、著者は
+   resource owner によって間接的にのみ提供される既存 resource の側面を
+   具体的に識別できる。したがって、fragment identifier は URI の
+   scheme 固有処理では使用されない。代わりに、fragment identifier は
+   dereference の前に URI の残りの部分から分離されるため、fragment 自体の
+   識別情報は URI scheme にかかわらず user agent のみによって dereference
+   される。この分離された処理は、特に resource が時間とともに移動する際の
+   参照の正確な redirection にとって、情報の損失と見なされることが多いが、
+   同時に、情報提供者が参照著者に対して resource 内の情報を選択的に
+   参照する権利を拒否することを防ぐ役割も果たす。間接参照はまた、
+   URI を使用するシステムに追加の柔軟性と拡張性を提供する。新しい
+   identification scheme よりも新しい media type の方が定義および展開が
+   容易だからである。
+
+   slash ("/") および question mark ("?") 文字は、fragment identifier 内で
+   データを表すことが許可される。相対参照（<a href="#section-5.1">Section</a>
+   <a href="#section-5.1">5.1</a>）のための base URI として使用される場合、一部の古い誤った実装は
+   このデータを正しく扱えない可能性があることに注意する。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  使用法</span>
+
+   アプリケーションが URI を参照する場合、"URI" 構文規則で定義される
+   完全な参照形式を常に使用するとは限らない。空間を節約し、階層的局所性を
+   利用するため、多くのインターネットプロトコル要素および media type 形式は
+   URI の省略形を許可する一方、他のものは構文を URI の特定形式に制限する。
+   本仕様では、参照構文の最も一般的な形式を定義する。なぜなら、それらは
+   汎用構文の設計に影響し、またそれに依存しており、一貫して解釈されるには
+   統一的な解析アルゴリズムを必要とするからである。
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  URI 参照</span>
+
+   URI-reference は、resource identifier の最も一般的な使用法を表すために
+   使用される。
+
+      URI-reference = URI / relative-ref
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 25]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-26" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   URI-reference は URI または relative reference のいずれかである。
+   URI-reference の prefix が scheme とそれに続く colon separator の構文に
+   一致しない場合、その URI-reference は relative reference である。
+
+   URI-reference は通常、まず 5 つの URI コンポーネントへ解析され、
+   どのコンポーネントが存在するか、および参照が相対的かどうかを判定する。
+   その後、各コンポーネントはその subpart と検証のために解析される。
+   URI-reference の ABNF は、"first-match-wins" の曖昧性解消規則とともに、
+   汎用構文の検証パーサーを定義するのに十分である。正規表現に詳しい読者は、
+   任意の文字列を受け取り URI コンポーネントを抽出する、非検証
+   URI-reference パーサーの例について <a href="#appendix-B">Appendix B</a> を参照されたい。
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  相対参照</span>
+
+   relative reference は、階層構文（<a href="#section-1.2.3">Section 1.2.3</a>）を利用して、
+   別の階層的 URI の name space に対して相対的な URI 参照を表現する。
+
+      relative-ref  = relative-part [ "?" query ] [ "#" fragment ]
+
+      relative-part = "//" authority path-abempty
+                    / path-absolute
+                    / path-noscheme
+                    / path-empty
+
+   relative reference によって参照される URI は target URI とも呼ばれ、
+   <a href="#section-5">Section 5</a> の参照解決アルゴリズムを適用することで得られる。
+
+   2 個の slash 文字で始まる relative reference は network-path reference
+   と呼ばれる。このような参照はまれにしか使用されない。1 個の slash 文字で
+   始まる relative reference は absolute-path reference と呼ばれる。
+   slash 文字で始まらない relative reference は relative-path reference と
+   呼ばれる。
+
+   colon 文字を含む path segment（例: "this:that"）は、scheme 名と
+   誤認されるため、relative-path reference の最初の segment として
+   使用できない。そのような segment は、relative-path reference にするために
+   dot-segment（例: "./this:that"）を前置しなければならない。
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 26]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-27" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-4.3" href="#section-4.3">4.3</a>.  絶対 URI</span>
+
+   一部のプロトコル要素は、fragment identifier を含まない URI の絶対形式
+   のみを許可する。たとえば、後で相対参照に使用する base URI を定義する
+   には、fragment を許可しない absolute-URI 構文規則が必要である。
+
+      absolute-URI  = scheme ":" hier-part [ "?" query ]
+
+   URI scheme 仕様は、それぞれ自身の構文を定義しなければならない。その結果、
+   その scheme 固有の構文に一致するすべての文字列が &lt;absolute-URI&gt; 文法にも
+   一致するようにする必要がある。Scheme 仕様は、その scheme によって識別
+   可能な resource への適用可能性にかかわらず、fragment identifier 構文または
+   使用法を定義しない。fragment identification は scheme 定義と直交するからで
+   ある。ただし、scheme 仕様は、適切な場合にその scheme の URI と
+   fragment identifier の使用を示す例を含め、幅広い例を含めることが
+   奨励される。
+
+<span class="h3"><a class="selflink" id="section-4.4" href="#section-4.4">4.4</a>.  同一文書参照</span>
+
+   URI 参照が、fragment コンポーネント（もしあれば）を除いて base URI
+   （<a href="#section-5.1">Section 5.1</a>）と同一である URI を参照する場合、その参照は
+   "same-document" reference と呼ばれる。same-document reference の最も
+   頻繁な例は、空であるか、number sign ("#") separator に fragment
+   identifier が続くだけの relative reference である。
+
+   same-document reference が retrieval アクションのために dereference
+   される場合、その参照の target は参照と同じ entity（representation、
+   document、または message）内にあるものとして定義される。したがって、
+   dereference は新しい retrieval アクションを生じるべきではない。
+
+   Sections <a href="#section-6.2.2">6.2.2</a> および <a href="#section-6.2.3">6.2.3</a> で説明されるように、比較前に
+   base URI と target URI を正規化することは許可されるが、実際にはほとんど
+   行われない。正規化は same-document reference の集合を増やす可能性があり、
+   一部の caching アプリケーションにとって有益であり得る。そのため、
+   参照著者は、わずかに異なるが等価な reference URI が、任意の
+   アプリケーションによって same-document reference と解釈される（または
+   解釈されない）と仮定すべきではない。
+
+<span class="h3"><a class="selflink" id="section-4.5" href="#section-4.5">4.5</a>.  接尾辞参照</span>
+
+   URI 構文は、resource への曖昧でない参照と URI scheme による拡張性の
+   ために設計されている。しかし、URI identification と使用が一般化するに
+   つれて、従来のメディア（television、radio、newspapers、billboards など）は、
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 27]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-28" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   URI の authority 部分と path 部分だけからなる URI の suffix を参照として
+   使用することが増えている。たとえば、
+
+      www.w3.org/Addressing/
+
+   または単に DNS 登録名だけである。このような参照は主に機械ではなく
+   人間による解釈を意図しており、文脈ベースの heuristics が URI を補完する
+   のに十分であるという仮定に基づいている（例: "www" で始まる多くの
+   登録名は "http://" の URI prefix を持つ可能性が高い）。URI suffix を
+   曖昧でなくするための標準的な heuristics の集合は存在しないが、多くの
+   クライアント実装は、ユーザーがそれらを入力し、heuristically に解決する
+   ことを許可している。
+
+   suffix reference を使用するこの慣行は一般的であるが、可能な限り避ける
+   べきであり、長期的な参照が期待される状況では決して使用すべきではない。
+   上記の heuristics は時間とともに変化し、特に新しい URI scheme が
+   普及した場合には変化しやすく、文脈外で使用されるとしばしば誤りとなる。
+   さらに、それらは [<a href="./rfc1535" title="&quot;A Security Problem and Proposed Correction With Widely Deployed DNS Software&quot;">RFC1535</a>] で説明されるものに沿った
+   セキュリティ問題につながる可能性がある。
+
+   URI suffix は relative-path reference と同じ構文を持つため、relative
+   reference が期待される文脈では suffix reference を使用できない。その結果、
+   suffix reference は、dialog box や offline advertisement など、定義済みの
+   base URI が存在しない場所に限定される。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  参照解決</span>
+
+   本節は、相対参照を許可する文脈内で URI 参照を解決し、その結果が
+   <a href="#section-3">Section 3</a> の &lt;URI&gt; 構文規則に一致する文字列となるプロセスを定義する。
+
+<span class="h3"><a class="selflink" id="section-5.1" href="#section-5.1">5.1</a>.  ベース URI の確立</span>
+
+   "relative" という用語は、相対参照が適用される対象となる "base URI" が
+   存在することを意味する。fragment-only reference（<a href="#section-4.4">Section 4.4</a>）を
+   除き、相対参照は base URI が既知である場合にのみ使用可能である。
+   相対である可能性のある URI 参照を解析する前に、パーサーは base URI を
+   確立しなければならない。base URI は &lt;absolute-URI&gt; 構文規則
+   （<a href="#section-4.3">Section 4.3</a>）に適合しなければならない。base URI が URI 参照から
+   得られる場合、その参照は base URI として使用される前に絶対形式に
+   変換され、fragment コンポーネントを取り除かれなければならない。
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 28]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-29" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   参照の base URI は、以下で説明する 4 つの方法のいずれかで確立できる。
+   それらは優先順位の順に述べられている。優先順位は層として考えることが
+   でき、最も内側で定義された base URI が最も高い優先順位を持つ。
+   これは次のように図示できる。
+
+         .----------------------------------------------------------.
+         |  .----------------------------------------------------.  |
+         |  |  .----------------------------------------------.  |  |
+         |  |  |  .----------------------------------------.  |  |  |
+         |  |  |  |  .----------------------------------.  |  |  |  |
+         |  |  |  |  |       &lt;relative-reference&gt;       |  |  |  |  |
+         |  |  |  |  `----------------------------------'  |  |  |  |
+         |  |  |  | (5.1.1) 内容に埋め込まれた Base URI    |  |  |  |
+         |  |  |  `----------------------------------------'  |  |  |
+         |  |  | (5.1.2) カプセル化エンティティの Base URI   |  |  |
+         |  |  |         (message、representation、または none) |  |
+         |  |  `----------------------------------------------'  |  |
+         |  | (5.1.3) entity の取得に使用された URI             |  |
+         |  `----------------------------------------------------'  |
+         | (5.1.4) 既定の Base URI (application-dependent)         |
+         `----------------------------------------------------------'
+
+<span class="h4"><a class="selflink" id="section-5.1.1" href="#section-5.1.1">5.1.1</a>.  内容に埋め込まれた Base URI</span>
+
+   特定の media type 内では、相対参照のための base URI を content 自体に
+   埋め込むことができ、パーサーが容易に取得できる。これは、通常の
+   retrieval context 以外のプロトコル（例: email または USENET news）を
+   通じて他者に送信される場合がある、目次のような記述文書に有用である。
+
+   各 media type について、base URI をどのように埋め込めるかを指定する
+   ことは本仕様の範囲外である。利用可能な場合、適切な構文は各 media type に
+   関連付けられた data format specification によって説明される。
+
+<span class="h4"><a class="selflink" id="section-5.1.2" href="#section-5.1.2">5.1.2</a>.  カプセル化エンティティからの Base URI</span>
+
+   base URI が埋め込まれていない場合、base URI は representation の
+   retrieval context によって定義される。message または archive のような
+   別の entity に内包されている document の場合、retrieval context はその
+   entity である。したがって、representation の既定の base URI は、その
+   representation がカプセル化されている entity の base URI である。
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 29]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-30" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   MIME container type（例: message および multipart type）内に base URI を
+   埋め込む仕組みは MHTML [<a href="./rfc2557" title="&quot;MIME Encapsulation of Aggregate Documents, such as HTML (MHTML)&quot;">RFC2557</a>] によって定義されている。MIME message
+   header 構文を使用しないが、message 内に何らかの形式の tagged metadata を
+   含めることを許可するプロトコルは、message の一部として base URI を
+   定義するための独自の構文を定義してもよい。
+
+<span class="h4"><a class="selflink" id="section-5.1.3" href="#section-5.1.3">5.1.3</a>.  Retrieval URI からの Base URI</span>
+
+   base URI が埋め込まれておらず、representation が他の entity 内に
+   カプセル化されていない場合、representation を取得するために URI が
+   使用されたならば、その URI が base URI と見なされるものとする。
+   retrieval が redirected request の結果であった場合、使用された最後の URI
+   （すなわち、representation の実際の retrieval をもたらした URI）が
+   base URI であることに注意する。
+
+<span class="h4"><a class="selflink" id="section-5.1.4" href="#section-5.1.4">5.1.4</a>.  既定の Base URI</span>
+
+   上記の条件のいずれにも該当しない場合、base URI はアプリケーションの
+   文脈によって定義される。この定義は必然的に application-dependent である
+   ため、他の方法のいずれかを使用して base URI を定義しない場合、同じ
+   content が異なる種類のアプリケーションによって異なって解釈される可能性が
+   ある。
+
+   相対参照を含む representation の送信者は、それらの参照のための base URI が
+   確立できることを保証する責任を負う。fragment-only reference を除き、
+   相対参照は base URI が明確に定義されている状況でのみ信頼して使用できる。
+
+<span class="h3"><a class="selflink" id="section-5.2" href="#section-5.2">5.2</a>.  相対解決</span>
+
+   本節は、相対である可能性のある URI 参照を、与えられた base URI に
+   対して、その参照の target の解析済みコンポーネントへ変換する
+   アルゴリズムを説明する。その後、<a href="#section-5.3">Section 5.3</a> で説明されるように
+   コンポーネントを再構成して target URI を形成できる。このアルゴリズムは、
+   他の実装の出力をテストするために使用できる決定的な結果を提供する。
+   アプリケーションは、結果がこのアルゴリズムによって与えられるものと
+   一致する限り、他のアルゴリズムを使用して相対参照解決を実装してもよい。
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 30]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-31" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h4"><a class="selflink" id="section-5.2.1" href="#section-5.2.1">5.2.1</a>.  Base URI の事前解析</span>
+
+   base URI (Base) は <a href="#section-5.1">Section 5.1</a> の手順に従って確立され、
+   <a href="#section-3">Section 3</a> で説明される 5 つの主要コンポーネントへ解析される。
+   base URI に存在することが要求されるのは scheme コンポーネントだけであり、
+   他のコンポーネントは空または未定義であってもよいことに注意する。
+   コンポーネントは、関連する delimiter が URI 参照に現れない場合に
+   未定義である。path コンポーネントは未定義になることはないが、空である
+   ことはあり得る。
+
+   Sections <a href="#section-6.2.2">6.2.2</a> および 6.2.3 で説明される base URI の正規化は
+   任意である。URI 参照は、正規化できるようになる前に target URI へ
+   変換されなければならない。
+
+<span class="h4"><a class="selflink" id="section-5.2.2" href="#section-5.2.2">5.2.2</a>.  参照の変換</span>
+
+   各 URI 参照 (R) について、次の擬似コードは R をその target URI (T) へ
+   変換するアルゴリズムを説明する。
+
+      -- The URI reference is parsed into the five URI components
+      --
+      (R.scheme, R.authority, R.path, R.query, R.fragment) = parse(R);
+
+      -- A non-strict parser may ignore a scheme in the reference
+      -- if it is identical to the base URI's scheme.
+      --
+      if ((not strict) and (R.scheme == Base.scheme)) then
+         undefine(R.scheme);
+      endif;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 31]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-32" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      if defined(R.scheme) then
+         T.scheme    = R.scheme;
+         T.authority = R.authority;
+         T.path      = remove_dot_segments(R.path);
+         T.query     = R.query;
+      else
+         if defined(R.authority) then
+            T.authority = R.authority;
+            T.path      = remove_dot_segments(R.path);
+            T.query     = R.query;
+         else
+            if (R.path == "") then
+               T.path = Base.path;
+               if defined(R.query) then
+                  T.query = R.query;
+               else
+                  T.query = Base.query;
+               endif;
+            else
+               if (R.path starts-with "/") then
+                  T.path = remove_dot_segments(R.path);
+               else
+                  T.path = merge(Base.path, R.path);
+                  T.path = remove_dot_segments(T.path);
+               endif;
+               T.query = R.query;
+            endif;
+            T.authority = Base.authority;
+         endif;
+         T.scheme = Base.scheme;
+      endif;
+
+      T.fragment = R.fragment;
+
+<span class="h4"><a class="selflink" id="section-5.2.3" href="#section-5.2.3">5.2.3</a>.  Path の結合</span>
+
+   上記の擬似コードは、relative-path reference を base URI の path と結合する
+   "merge" ルーチンを参照している。これは次のように実現される。
+
+   o  base URI が定義済みの authority コンポーネントと空の path を持つ場合、
+      "/" と参照の path を連結した文字列を返す。それ以外の場合は、
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 32]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-33" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   o  参照の path コンポーネントを、base URI の path の最後の segment を除いた
+      すべてに追加した文字列を返す（すなわち、base URI path 内の最も右側の
+      "/" の後の文字を除外する、または base URI path に "/" 文字が含まれない
+      場合は base URI path 全体を除外する）。
+
+<span class="h4"><a class="selflink" id="section-5.2.4" href="#section-5.2.4">5.2.4</a>.  Dot Segment の除去</span>
+
+   擬似コードは、参照された path から特別な "." および ".." の完全な
+   path segment を解釈し除去するための "remove_dot_segments" ルーチンも
+   参照している。これは、path が相対であったかどうかにかかわらず、
+   参照から path が抽出された後、target URI を形成する前に無効または余分な
+   dot-segment を除去するために行われる。この除去プロセスを実現する方法は
+   多数あるが、ここでは 2 つの文字列 buffer を使用する単純な方法を説明する。
+
+   1.  input buffer は、いま追加された path コンポーネントで初期化され、
+       output buffer は空文字列に初期化される。
+
+   2.  input buffer が空でない間、次のようにループする。
+
+       A.  input buffer が "../" または "./" の prefix で始まる場合、
+           その prefix を input buffer から取り除く。そうでない場合、
+
+       B.  input buffer が "/./" または "/." の prefix で始まり、
+           "." が完全な path segment である場合、その prefix を input buffer 内で
+           "/" に置き換える。そうでない場合、
+
+       C.  input buffer が "/../" または "/.." の prefix で始まり、
+           ".." が完全な path segment である場合、その prefix を input buffer 内で
+           "/" に置き換え、output buffer から最後の segment とその前の "/"
+           （もしあれば）を取り除く。そうでない場合、
+
+       D.  input buffer が "." または ".." のみからなる場合、それを input buffer
+           から取り除く。そうでない場合、
+
+       E.  input buffer 内の最初の path segment を output buffer の末尾へ移動する。
+           これには、先頭の "/" 文字（もしあれば）と、次の "/" 文字または
+           input buffer の終端までの後続文字を含めるが、その次の "/" 文字自体は
+           含めない。
+
+   3.  最後に、output buffer が remove_dot_segments の結果として返される。
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 33]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-34" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   dot-segment は、base URI 内の名前階層に相対的な識別子を表現するために
+   URI 参照で使用されることを意図していることに注意する。
+   remove_dot_segments アルゴリズムは、余分な dot-segment をエラーとして
+   扱ったり dereference 実装によって誤解されるまま残したりするのではなく、
+   それらを除去することによってその階層を尊重する。
+
+   次は、結合された path の 2 つの例について、上記の手順がどのように
+   適用されるかを示し、各手順後の 2 つの buffer の状態を示す。
+
+      STEP   OUTPUT BUFFER         INPUT BUFFER
+
+       1 :                         /a/b/c/./../../g
+       2E:   /a                    /b/c/./../../g
+       2E:   /a/b                  /c/./../../g
+       2E:   /a/b/c                /./../../g
+       2B:   /a/b/c                /../../g
+       2C:   /a/b                  /../g
+       2C:   /a                    /g
+       2E:   /a/g
+
+      STEP   OUTPUT BUFFER         INPUT BUFFER
+
+       <a href="#section-1">1</a> :                         mid/content=5/../6
+       2E:   mid                   /content=5/../6
+       2E:   mid/content=5         /../6
+       2C:   mid                   /6
+       2E:   mid/6
+
+   一部のアプリケーションでは、文字列ではなく 2 つの segment stack を
+   使用して remove_dot_segments アルゴリズムを実装する方が効率的である
+   場合がある。
+
+      注: 一部の古い誤った実装は、base path と reference path を結合する前に
+      参照の query コンポーネントを path コンポーネントから分離できず、
+      query コンポーネントに文字列 "/../" または "/./" が含まれる場合に
+      相互運用性の失敗を引き起こすことに注意する。
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 34]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-35" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-5.3" href="#section-5.3">5.3</a>.  コンポーネントの再構成</span>
+
+   解析済み URI コンポーネントは、対応する URI 参照文字列を得るために
+   再構成できる。擬似コードを用いると、これは次のようになる。
+
+      result = ""
+
+      if defined(scheme) then
+         append scheme to result;
+         append ":" to result;
+      endif;
+
+      if defined(authority) then
+         append "//" to result;
+         append authority to result;
+      endif;
+
+      append path to result;
+
+      if defined(query) then
+         append "?" to result;
+         append query to result;
+      endif;
+
+      if defined(fragment) then
+         append "#" to result;
+         append fragment to result;
+      endif;
+
+      return result;
+
+   separator が参照内に存在しなかったことを意味する未定義の component と、
+   separator が存在し、その直後に次の component separator または参照の終端が
+   続いたことを意味する空の component との区別を保つよう注意していることに
+   注意する。
+
+<span class="h3"><a class="selflink" id="section-5.4" href="#section-5.4">5.4</a>.  参照解決の例</span>
+
+   明確に定義された base URI
+
+      http://a/b/c/d;p?q
+
+   を持つ representation 内では、relative reference は次のように target URI へ
+   変換される。
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 35]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-36" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h4"><a class="selflink" id="section-5.4.1" href="#section-5.4.1">5.4.1</a>.  通常の例</span>
+
+      "g:h"           =  "g:h"
+      "g"             =  "<a href="http://a/b/c/g">http://a/b/c/g</a>"
+      "./g"           =  "<a href="http://a/b/c/g">http://a/b/c/g</a>"
+      "g/"            =  "<a href="http://a/b/c/g/">http://a/b/c/g/</a>"
+      "/g"            =  "<a href="http://a/g">http://a/g</a>"
+      "//g"           =  "http://g"
+      "?y"            =  "http://a/b/c/d;p?y"
+      "g?y"           =  "<a href="http://a/b/c/g?y">http://a/b/c/g?y</a>"
+      "#s"            =  "http://a/b/c/d;p?q#s"
+      "g#s"           =  "<a href="http://a/b/c/g#s">http://a/b/c/g#s</a>"
+      "g?y#s"         =  "<a href="http://a/b/c/g?y#s">http://a/b/c/g?y#s</a>"
+      ";x"            =  "http://a/b/c/;x"
+      "g;x"           =  "http://a/b/c/g;x"
+      "g;x?y#s"       =  "http://a/b/c/g;x?y#s"
+      ""              =  "http://a/b/c/d;p?q"
+      "."             =  "<a href="http://a/b/c/">http://a/b/c/</a>"
+      "./"            =  "<a href="http://a/b/c/">http://a/b/c/</a>"
+      ".."            =  "<a href="http://a/b/">http://a/b/</a>"
+      "../"           =  "<a href="http://a/b/">http://a/b/</a>"
+      "../g"          =  "<a href="http://a/b/g">http://a/b/g</a>"
+      "../.."         =  "<a href="http://a/">http://a/</a>"
+      "../../"        =  "<a href="http://a/">http://a/</a>"
+      "../../g"       =  "<a href="http://a/g">http://a/g</a>"
+
+<span class="h4"><a class="selflink" id="section-5.4.2" href="#section-5.4.2">5.4.2</a>.  異常な例</span>
+
+   次の異常な例は通常の実務では発生しそうにないが、すべての URI パーサーは
+   それらを一貫して解決できるべきである。各例は上記と同じ base を使用する。
+
+   パーサーは、relative-path reference に含まれる ".." segment の数が
+   base URI の path 内の階層レベルより多い場合の処理に注意しなければならない。
+   ".." 構文は URI の authority コンポーネントを変更するためには使用できない
+   ことに注意する。
+
+      "../../../g"    =  "<a href="http://a/g">http://a/g</a>"
+      "../../../../g" =  "<a href="http://a/g">http://a/g</a>"
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 36]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-37" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   同様に、パーサーは dot-segment "." および ".." が path の完全な
+   component である場合にはそれらを除去しなければならないが、segment の一部
+   にすぎない場合には除去してはならない。
+
+      "/./g"          =  "<a href="http://a/g">http://a/g</a>"
+      "/../g"         =  "<a href="http://a/g">http://a/g</a>"
+      "g."            =  "<a href="http://a/b/c/g">http://a/b/c/g</a>."
+      ".g"            =  "<a href="http://a/b/c/.g">http://a/b/c/.g</a>"
+      "g.."           =  "<a href="http://a/b/c/g">http://a/b/c/g</a>.."
+      "..g"           =  "<a href="http://a/b/c/..g">http://a/b/c/..g</a>"
+
+   relative reference が "." および ".." の完全な path segment の不要または
+   無意味な形式を使用する場合は、さらに起こりにくい。
+
+      "./../g"        =  "<a href="http://a/b/g">http://a/b/g</a>"
+      "./g/."         =  "<a href="http://a/b/c/g/">http://a/b/c/g/</a>"
+      "g/./h"         =  "<a href="http://a/b/c/g/h">http://a/b/c/g/h</a>"
+      "g/../h"        =  "<a href="http://a/b/c/h">http://a/b/c/h</a>"
+      "g;x=1/./y"     =  "http://a/b/c/g;x=1/y"
+      "g;x=1/../y"    =  "<a href="http://a/b/c/y">http://a/b/c/y</a>"
+
+   一部のアプリケーションは、参照の query および/または fragment
+   コンポーネントを path コンポーネントから分離する前に、base path と
+   結合して dot-segment を除去してしまう。この誤りは、fragment の典型的な
+   使用が階層 ("/") 文字を含まず、query コンポーネントも通常 relative
+   reference 内で使用されないため、まれにしか気づかれない。
+
+      "g?y/./x"       =  "<a href="http://a/b/c/g?y/./x">http://a/b/c/g?y/./x</a>"
+      "g?y/../x"      =  "<a href="http://a/b/c/g?y/../x">http://a/b/c/g?y/../x</a>"
+      "g#s/./x"       =  "<a href="http://a/b/c/g#s/./x">http://a/b/c/g#s/./x</a>"
+      "g#s/../x"      =  "<a href="http://a/b/c/g#s/../x">http://a/b/c/g#s/../x</a>"
+
+   一部のパーサーは、base URI scheme と同じである場合、relative reference に
+   scheme 名が存在することを許可する。これは、以前の partial URI 仕様
+   [<a href="./rfc1630" title="&quot;Universal Resource Identifiers in WWW: A Unifying Syntax for the Expression of Names and Addresses of Objects on the Network as used in the World-Wide Web&quot;">RFC1630</a>] における抜け穴と見なされる。その使用は避けるべきだが、
+   後方互換性のため許可される。
+
+      "http:g"        =  "http:g"         ; strict parser の場合
+                      /  "<a href="http://a/b/c/g">http://a/b/c/g</a>" ; 後方互換性のため
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 37]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-38" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  正規化と比較</span>
+
+   URI に対する最も一般的な操作の 1 つは単純比較である。すなわち、
+   URI を使用してそれぞれの resource にアクセスすることなく、2 つの URI が
+   等価であるかどうかを判定することである。比較は、response cache が
+   アクセスされるたび、browser が履歴を確認して link に色を付けるたび、
+   または XML parser が namespace 内の tag を処理するたびに実行される。
+   URI 比較前の広範な正規化は、検索空間を刈り込んだり、request action と
+   response storage の重複を減らしたりするために、spider や indexing engine に
+   よってよく使用される。
+
+   URI 比較は特定の目的のために行われる。異なる目的で URI を比較する
+   プロトコルまたは実装は、aliased identifier を減らすためにどれだけの
+   労力を費やすべきかに関して、異なる設計上の trade-off に従うことが
+   多い。本節では、URI を比較するために使用され得るさまざまな方法、
+   それらの間の trade-off、およびそれらを使用し得るアプリケーションの
+   種類について説明する。
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  等価性</span>
+
+   URI は resource を識別するために存在するため、おそらく同じ resource を
+   識別する場合には等価と見なされるべきである。しかし、この等価性の定義は
+   実用上あまり役に立たない。実装が 2 つの resource を完全に把握または
+   制御していない限り、それらを比較する方法がないからである。このため、
+   URI の等価性または相違の判定は文字列比較に基づき、場合によっては
+   URI scheme 定義によって提供される追加規則への参照によって補強される。
+   本書では、そのような比較の可能な結果を説明するために "different" および
+   "equivalent" という用語を使用するが、等価性にはアプリケーション依存の
+   多くの版がある。
+
+   2 つの URI が等価であると判定できる場合であっても、URI 比較は 2 つの
+   URI が異なる resource を識別しているかどうかを判定するには十分ではない。
+   たとえば、2 つの異なるドメイン名の所有者が、同じ resource をその両方から
+   提供することを決定し、結果として 2 つの異なる URI が生じることがある。
+   したがって、比較方法は false negative を最小化しつつ、false positive を
+   厳密に避けるように設計される。
+
+   等価性をテストする際、アプリケーションは relative reference を直接比較
+   すべきではない。比較前に、それらの参照はそれぞれの target URI に変換される
+   べきである。representation の retrieval など、network action を選択
+   （または回避）するために URI が比較される場合、fragment コンポーネント
+   （もしあれば）は比較から除外されるべきである。
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 38]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-39" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  比較ラダー</span>
+
+   実際には、URI の等価性をテストするためにさまざまな方法が使用される。
+   これらの方法は、必要な処理量と、false negative の確率がどの程度低減される
+   かによって区別される範囲に含まれる。上で述べたように、false negative を
+   排除することはできない。実際には、その確率を低減できるが、この低減には
+   より多くの処理が必要であり、すべてのアプリケーションにとって費用対効果が
+   高いわけではない。
+
+   この比較慣行の範囲を ladder と見なすなら、以下の議論は、低コストだが
+   false negative を生成する可能性が比較的高い慣行から始め、より高い計算
+   コストとより低い false negative のリスクを持つ慣行へと、その ladder を
+   上っていく。
+
+<span class="h4"><a class="selflink" id="section-6.2.1" href="#section-6.2.1">6.2.1</a>.  単純な文字列比較</span>
+
+   2 つの URI が文字列として見たときに同一である場合、それらは等価であると
+   結論しても安全である。この種の等価性テストは計算コストが非常に低く、
+   さまざまなアプリケーションで広く使用されており、特に parsing の領域で
+   使用される。
+
+   等価性のために文字列をテストするには、いくつかの基本的な注意が必要で
+   ある。この手順はしばしば "bit-for-bit" または "byte-for-byte" 比較と
+   呼ばれるが、これは誤解を招く可能性がある。文字列の等価性テストは通常、
+   文字列を構成する文字の対比較に基づき、最初から始めて、両方の文字列が
+   尽きすべての文字が等しいと判明するまで、文字の対が等しくないと比較される
+   まで、または一方の文字列が他方より先に尽きるまで進められる。
+
+   この文字比較では、各文字対を比較可能な形式にする必要がある。たとえば、
+   一方の URI が EBCDIC encoding の byte array に格納され、もう一方が
+   Java String object (UTF-16) に格納されている場合、素朴に適用された
+   bit-for-bit 比較は誤りを生じる。byte-for-byte または bit-for-bit に基づく
+   等価性ではなく、character-for-character に基づく等価性について述べる方が
+   よい。実務上、character-by-character 比較は、共通の character encoding へ
+   変換した後に codepoint-by-codepoint で行うべきである。
+
+   false negative は、URI alias の生成と使用によって生じる。不要な alias は、
+   比較方法にかかわらず、すでに正規化された形式（すなわち、下記で説明される
+   正規化を適用した後に生成される形式と同一の形式）で URI 参照を一貫して
+   提供することによって低減できる。
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 39]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-40" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   プロトコルおよびデータ形式は、人や実装が自身の利益のために URI 参照の
+   提供に一貫性を持つ、または少なくとも追加の正規化から得られる効率を
+   打ち消す程度には一貫性を持つという考えに基づいて、一部の URI 比較を
+   単純な文字列比較に限定することが多い。
+
+<span class="h4"><a class="selflink" id="section-6.2.2" href="#section-6.2.2">6.2.2</a>.  構文ベースの正規化</span>
+
+   実装は、本仕様で提供される定義に基づく logic を使用して、false negative の
+   確率を低減してもよい。この処理は character-for-character 文字列比較より
+   も中程度に高いコストを持つ。たとえば、この approach を使用する
+   アプリケーションは、次の 2 つの URI を等価であると合理的に見なせる。
+
+      example://a/b/c/%7Bfoo%7D
+      eXAMPLE://a/./b/../b/%63/%7bfoo%7d
+
+   browser などの Web user agent は、cached response が利用可能かどうかを
+   判定するとき、通常この種類の URI 正規化を適用する。構文ベースの正規化には、
+   case normalization、percent-encoding normalization、および dot-segment の
+   除去といった技法が含まれる。
+
+<span class="h5"><a class="selflink" id="section-6.2.2.1" href="#section-6.2.2.1">6.2.2.1</a>.  大文字小文字の正規化</span>
+
+   すべての URI について、percent-encoding triplet 内の十六進数字
+   （例: "%3a" と "%3A"）は大文字小文字を区別しないため、digits A-F には
+   大文字を使用するように正規化すべきである。
+
+   URI が汎用構文のコンポーネントを使用する場合、component syntax の等価性規則は
+   常に適用される。すなわち、scheme および host は大文字小文字を区別しないため、
+   小文字へ正規化すべきである。たとえば、URI &lt;HTTP://www.EXAMPLE.com/&gt; は
+   &lt;http://www.example.com/&gt; と等価である。他の汎用構文コンポーネントは、
+   scheme によって別途明示的に定義されない限り、大文字小文字を区別すると
+   仮定される（<a href="#section-6.2.3">Section 6.2.3</a> を参照）。
+
+<span class="h5"><a class="selflink" id="section-6.2.2.2" href="#section-6.2.2.2">6.2.2.2</a>.  パーセントエンコーディング正規化</span>
+
+   パーセントエンコーディング機構（<a href="#section-2.1">Section 2.1</a>）は、他の点では同一の
+   URI の間で差異を生じる頻繁な原因である。上で述べた大文字小文字の
+   正規化の問題に加えて、一部の URI 生成者は percent-encoding を必要としない
+   octet を percent-encode し、非エンコードの対応物と等価な URI を生じさせる。
+   これらの URI は、<a href="#section-2.3">Section 2.3</a> で説明されるように、unreserved character に
+   対応する percent-encoded octet をデコードすることによって正規化されるべきで
+   ある。
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 40]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-41" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h5"><a class="selflink" id="section-6.2.2.3" href="#section-6.2.2.3">6.2.2.3</a>.  Path Segment の正規化</span>
+
+   完全な path segment "." および ".." は、相対参照
+   （<a href="#section-4.1">Section 4.1</a>）内でのみ使用されることを意図しており、参照解決
+   プロセス（<a href="#section-5.2">Section 5.2</a>）の一部として除去される。しかし、配備済みの
+   一部の実装は、参照がすでに URI である場合には参照解決は不要であると
+   誤って仮定し、そのため非相対 path に dot-segment が現れても除去しない。
+   URI 正規化器は、<a href="#section-5.2.4">Section 5.2.4</a> で説明されるように、path に
+   remove_dot_segments アルゴリズムを適用して dot-segment を除去すべきである。
+
+<span class="h4"><a class="selflink" id="section-6.2.3" href="#section-6.2.3">6.2.3</a>.  Scheme ベースの正規化</span>
+
+   URI の構文と意味論は、各 scheme の定義仕様で説明されるように、
+   scheme ごとに異なる。実装は、さらに処理コストをかけて、false negative の
+   確率を低減するために scheme 固有の規則を使用してもよい。たとえば、
+   "http" scheme は authority コンポーネントを使用し、既定の port として
+   "80" を持ち、空の path を "/" と等価と定義しているため、次の 4 つの
+   URI は等価である。
+
+      http://example.com
+      http://example.com/
+      <a href="http://example.com:/">http://example.com:/</a>
+      <a href="http://example.com:80/">http://example.com:80/</a>
+
+   一般に、空の path を持つ authority の汎用構文を使用する URI は、"/" の
+   path へ正規化されるべきである。同様に、port が空であるか、その scheme の
+   既定値である明示的な ":port" は、port とその ":" 区切り文字が省略された
+   ものと等価であり、したがって scheme ベースの正規化によって除去される
+   べきである。たとえば、上記の 2 番目の URI が "http" scheme の正規形式で
+   ある。
+
+   正規化が scheme によって異なる別の例は、空の authority コンポーネント
+   または空の host サブコンポーネントの扱いである。多くの scheme 仕様では、
+   空の authority または host はエラーと見なされる。他方で、それを
+   "localhost" またはエンドユーザーの host と等価と見なすものもある。
+   scheme が authority の既定値を定義し、その既定値への URI 参照が望まれる
+   場合、その参照は統一性、簡潔さ、および国際化のために空の authority へ
+   正規化されるべきである。ただし、userinfo または port サブコンポーネントの
+   いずれかが空でない場合は、host が既定値と一致していても明示的に
+   与えられるべきである。
+
+   正規化は、scheme 仕様によってそうする許可が与えられていない限り、
+   関連するコンポーネントが空である場合でも delimiter を除去すべきではない。
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 41]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-42" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   たとえば、URI "http://example.com/?" は、上記の例のいずれかと等価であると
+   仮定することはできない。同様に、userinfo サブコンポーネント内の
+   delimiter の有無は、通常その解釈にとって重要である。fragment
+   コンポーネントはいかなる scheme ベースの正規化の対象にもならない。
+   したがって、suffix "#" だけが異なる 2 つの URI は、scheme にかかわらず
+   異なるものと見なされる。
+
+   一部の scheme は、大文字小文字を区別しないデータからなる追加の
+   サブコンポーネントを定義し、正規化器にこのデータを共通の大文字小文字
+   形式（例: すべて小文字）へ変換する暗黙の許可を与える。たとえば、
+   "mailto" URI scheme のように、path のサブコンポーネントに Internet hostname
+   を含める URI scheme は、そのサブコンポーネントを大文字小文字を区別しない
+   ものにし、したがって大文字小文字の正規化の対象にする
+   （例: "mailto:Joe@Example.COM" は "mailto:Joe@example.com" と等価である。
+   ただし、汎用構文は path コンポーネントを大文字小文字を区別するものと
+   見なす）。
+
+   他の scheme 固有の正規化も可能である。
+
+<span class="h4"><a class="selflink" id="section-6.2.4" href="#section-6.2.4">6.2.4</a>.  プロトコルベースの正規化</span>
+
+   false negative の発生を低減するための相当な努力は、web spider にとって
+   しばしば費用対効果が高い。したがって、それらは URI 比較においてさらに
+   積極的な技法を実装する。たとえば、次のような URI が
+
+      http://example.com/data
+
+   末尾の slash だけが異なる URI へ redirect することを観測した場合、
+
+      http://example.com/data/
+
+   将来、その 2 つを等価と見なす可能性が高い。この種の技法は、resource への
+   アクセス結果と、その scheme の dereference アルゴリズムの一般的慣例の
+   両方によって等価性が明確に示される場合にのみ適切である
+   （この場合、相対参照の問題を避けるために HTTP origin server が redirection
+   を使用すること）。
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 42]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-43" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  セキュリティ上の考慮事項</span>
+
+   URI それ自体はセキュリティ脅威をもたらさない。しかし、URI は
+   ネットワークリソースへのアクセスのためのコンパクトな命令集合を提供する
+   ためによく使用されるため、URI 内のデータを適切に解釈し、そのデータが
+   意図しないアクセスを引き起こすことを防ぎ、plain text で明らかにすべきで
+   ないデータを含めないよう注意しなければならない。
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  信頼性と一貫性</span>
+
+   ある URI が情報の取得に使用されたとしても、将来その同じ情報がその URI で
+   取得可能であるという保証はない。また、将来その URI を介して取得可能な
+   情報が、過去に取得されたものと観察上類似しているという保証もない。
+   URI 構文は、ある scheme または authority がその namespace をどのように
+   配分し、時間とともに維持するかを制約しない。そのような保証は、その
+   namespace および対象 resource を制御する人からのみ得られる。特定の
+   URI scheme は、その scheme のすべての naming authority にその意味論が
+   要求される場合、名前の永続性などの追加の意味論を定義してもよい。
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  悪意ある構築</span>
+
+   一見無害で冪等な操作、たとえば representation の取得を実行しようとする
+   試みが、実際には損害を与え得るリモート操作を引き起こすように URI を
+   構築できる場合がある。安全でない URI は通常、対象のネットワーク
+   プロトコルに予約されたものとは異なる port number を指定することによって
+   構築される。クライアントは知らずに別のプロトコルサービスを実行している
+   サイトに接続し、URI 内のデータは、この別のプロトコルに従って解釈されると
+   予期しない操作を引き起こす命令を含む。このような悪用の頻繁な例として、
+   protocol-based scheme に port コンポーネント "25" を使用し、user agent
+   software をだまして SMTP server 経由で意図しない、またはなりすましの
+   message を送信させるものがある。
+
+   アプリケーションは、その URI を dereference するために使用される
+   プロトコルが、その well-known port で期待されるプロトコルと互換性がある
+   場合を除き、"well-known port" 範囲（0 - 1023）内の TCP port number を
+   指定する URI の dereference を防ぐべきである。IANA は well-known port の
+   registry を維持しているが、アプリケーションは新しいサービスの展開を妨げる
+   ことを避けるため、このような制限をユーザー設定可能にすべきである。
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 43]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-44" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   URI が、特定の resolution または dereference プロトコルの delimiter と
+   一致する percent-encoded octet（たとえば TELNET プロトコルにおける
+   CR および LF 文字）を含む場合、それらの percent-encoding はその
+   プロトコルを介して転送される前にデコードされてはならない。プロトコルに
+   違反する可能性のある percent-encoding の転送は、デコードされた octet が
+   追加の操作またはパラメータとして解釈され、予期しない、場合によっては
+   有害なリモート操作を引き起こすことを許すよりも害が少ない。
+
+<span class="h3"><a class="selflink" id="section-7.3" href="#section-7.3">7.3</a>.  バックエンドのトランスコーディング</span>
+
+   URI が dereference されるとき、その中のデータは多くの場合 user agent と
+   1 つ以上の server の両方によって解析される。たとえば HTTP では、典型的な
+   user agent は URI を 5 つの主要コンポーネントへ解析し、authority の
+   server へアクセスし、authority、path、および query コンポーネント内の
+   データを送信する。典型的な server はその情報を受け取り、path を segment へ、
+   query を key/value pair へ解析し、その後、request に応答するために
+   実装固有の handler を呼び出す。その結果、URI を全体として、または別々の
+   コンポーネントに分割して扱う server 実装にとって一般的なセキュリティ上の
+   懸念は、その URI 内の文字および percent-encoding によって表される
+   octet データを適切に解釈することである。
+
+   percent-encoded octet は、dereference プロセスのどこかの時点でデコード
+   されなければならない。アプリケーションは octet をデコードする前に URI を
+   そのコンポーネントおよびサブコンポーネントへ分割しなければならない。
+   そうしないと、デコードされた octet が delimiter と誤認される可能性が
+   ある。URI 内のデータに対するセキュリティチェックは、octet のデコード後に
+   適用されるべきである。ただし、"%00" percent-encoding (NUL) は特別な扱いを
+   必要とする場合があり、アプリケーションがコンポーネント内で raw data を
+   受け取ることを期待していない場合は拒否されるべきである。
+
+   URI path の解釈プロセスがバックエンドの file system または関連する
+   system function の使用を伴う場合は、特別な注意が必要である。File system は
+   通常、"/"、"\"、":"、"["、および "]" 文字のような特殊文字や、"."、
+   ".."、"..."、"aux"、"lpt" などの特殊な device name に操作上の意味を
+   割り当てる。場合によっては、そのような名前の存在を単にテストするだけで
+   operating system が停止したり、無関係な system call を呼び出したりし、
+   denial of service や意図しないデータ転送に関する重大なセキュリティ上の
+   懸念につながる。この仕様がそのような重要な文字や device name をすべて
+   列挙することは不可能である。実装者は、アプリケーションに接続され得る
+   storage device の種類について reserved name と character を調査し、それに
+   応じて URI コンポーネントから得られたデータの使用を制限すべきである。
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 44]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-45" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.4" href="#section-7.4">7.4</a>.  まれな IP アドレス形式</span>
+
+   IPv4address の URI 構文は、一般的な IPv4 address literal の
+   dotted-decimal 形式のみを許可するが、URI を処理する多くの実装は、
+   文字列 literal を実際の IP address へ変換するために、gethostbyname() や
+   inet_aton() のような platform-dependent な system routine を使用する。
+   残念ながら、そのような system routine はしばしば <a href="#section-3.2.2">Section 3.2.2</a> で
+   説明されたものよりはるかに大きな形式集合を許可し処理する。
+
+   たとえば、多くの実装は 3 つの数値からなる dotted form を許可し、その
+   最後の部分は 16 ビット量として解釈され、network address の最右の 2 バイト
+   に配置される（例: Class B network）。同様に、2 つの数値からなる dotted
+   form は、最後の部分が 24 ビット量として解釈され、network address の最右の
+   3 バイトに配置される（Class A）ことを意味し、単一の数値（dot なし）は
+   32 ビット量として解釈され、network address に直接格納される。混乱を
+   さらに増すことに、一部の実装は、C 言語で指定されるように、各 dotted part を
+   decimal、octal、または hexadecimal として解釈することを許可する
+   （すなわち、先頭の 0x または 0X は hexadecimal を意味し、先頭の 0 は octal
+   を意味し、それ以外の場合、その数値は decimal として解釈される）。
+
+   これらの追加の IP address 形式は、platform 実装間の違いのため、URI 構文では
+   許可されない。しかし、アプリケーションが文字列 literal 形式の IP address に
+   基づいて resource へのアクセスを filter しようとする場合、それらは
+   セキュリティ上の懸念となり得る。この filtering が実行される場合、literal は
+   数値形式へ変換され、文字列形式の prefix または suffix ではなく、その数値に
+   基づいて filter されるべきである。
+
+<span class="h3"><a class="selflink" id="section-7.5" href="#section-7.5">7.5</a>.  機密情報</span>
+
+   URI 生成者は、秘密であることを意図した username または password を含む URI を
+   提供すべきではない。URI は browser によって頻繁に表示され、clear text の
+   bookmark に保存され、user agent history および intermediary application
+   （proxy）によって記録される。userinfo コンポーネント内に現れる password は
+   非推奨であり、その 'password' parameter が公開されることを意図している
+   まれな場合を除き、エラーと見なされる（または単に無視される）べきである。
+
+<span class="h3"><a class="selflink" id="section-7.6" href="#section-7.6">7.6</a>.  意味論的攻撃</span>
+
+   userinfo サブコンポーネントはめったに使用されず、authority コンポーネント内で
+   host の前に現れるため、実際には noise の背後に隠れた別の authority を
+   識別しているにもかかわらず、ある（信頼された）naming authority を識別して
+   いるように見せかけて人間のユーザーを誤導することを意図した URI を
+   構築するために使用できる。たとえば、
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 45]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-46" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      ftp://cnn.example.com&amp;story=breaking_news@10.0.0.1/top_story.htm
+
+   は、人間のユーザーに host が 'cnn.example.com' であると仮定させるかも
+   しれないが、実際には '10.0.0.1' である。誤導的な userinfo
+   サブコンポーネントは、上記の例よりはるかに長くなり得ることに注意する。
+
+   上記のような誤導的な URI は、software 自体への攻撃ではなく、URI の意味に
+   関するユーザーの先入観への攻撃である。User agent は、URI のさまざまな
+   コンポーネントを表示時に区別すること、たとえば userinfo が存在する場合に
+   異なる色や tone を使用して userinfo を表示することによって、このような
+   攻撃の影響を低減できる場合がある。ただし万能薬はない。URI ベースの
+   意味論的攻撃に関する詳細は [<a href="#ref-Siedzik" title="&quot;Semantic Attacks: What's in a URL?&quot;">Siedzik</a>] にある。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  IANA に関する考慮事項</span>
+
+   <a href="#section-3.1">Section 3.1</a> の &lt;scheme&gt; によって定義される URI scheme name は、
+   [<a href="#ref-BCP35" title="&quot;Registration Procedures for URL Scheme Names&quot;">BCP35</a>] で定義される手続きに従って IANA によって管理される登録済み
+   namespace を形成する。本書によって要求される IANA の作業はない。
+
+<span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  謝辞</span>
+
+   本仕様は <a href="./rfc2396">RFC 2396</a> [<a href="./rfc2396" title="&quot;Uniform Resource Identifiers (URI): Generic Syntax&quot;">RFC2396</a>]、<a href="./rfc1808">RFC 1808</a>
+   [<a href="./rfc1808" title="&quot;Relative Uniform Resource Locators&quot;">RFC1808</a>]、および <a href="./rfc1738">RFC 1738</a> [<a href="./rfc1738" title="&quot;Uniform Resource Locators (URL)&quot;">RFC1738</a>] に由来し、それらの文書の
+   謝辞は引き続き適用される。また、Robert M. Hinden、Brian E. Carpenter、
+   および Larry Masinter によって [<a href="./rfc2732" title="&quot;Format for Literal IPv6 Addresses in URL's&quot;">RFC2732</a>] で定義された、host 構文における
+   IPv6 literal の更新（修正を含む）も取り込んでいる。さらに、Gisle Aas、
+   Reese Anschultz、Daniel Barclay、Tim Bray、Mike Brown、Rob Cameron、
+   Jeremy Carroll、Dan Connolly、Adam M. Costello、John Cowan、
+   Jason Diamond、Martin Duerst、Stefan Eissing、Clive D.W. Feather、
+   Al Gilman、Tony Hammond、Elliotte Harold、Pat Hayes、Henry Holtzman、
+   Ian B. Jacobs、Michael Kay、John C. Klensin、Graham Klyne、Dan Kohn、
+   Bruce Lilly、Andrew Main、Dave McAlpin、Ira McDonald、Michael Mealling、
+   Ray Merkert、Stephen Pollei、Julian Reschke、Tomas Rokicki、Miles Sabin、
+   Kai Schaetzl、Mark Thomson、Ronald Tschalaer、Norm Walsh、Marc Warne、
+   Stuart Williams、および Henry Zongaro の貢献に深く感謝する。
+
+<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-10.1" href="#section-10.1">10.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-ASCII">ASCII</a>]    American National Standards Institute, "Coded Character
+              Set -- 7-bit American Standard Code for Information
+              Interchange", ANSI X3.4, 1986.
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 46]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-47" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   [<a id="ref-RFC2234">RFC2234</a>]  Crocker, D. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", <a href="./rfc2234">RFC 2234</a>, November 1997.
+
+   [<a id="ref-STD63">STD63</a>]    Yergeau, F., "UTF-8, a transformation format of
+              ISO 10646", STD 63, <a href="./rfc3629">RFC 3629</a>, November 2003.
+
+   [<a id="ref-UCS">UCS</a>]      International Organization for Standardization,
+              "Information Technology - Universal Multiple-Octet Coded
+              Character Set (UCS)", ISO/IEC 10646:2003, December 2003.
+
+<span class="h3"><a class="selflink" id="section-10.2" href="#section-10.2">10.2</a>.  参考情報</span>
+
+   [<a id="ref-BCP19">BCP19</a>]    Freed, N. and J. Postel, "IANA Charset Registration
+              Procedures", <a href="https://www.rfc-editor.org/bcp/bcp19">BCP 19</a>, <a href="./rfc2978">RFC 2978</a>, October 2000.
+
+   [<a id="ref-BCP35">BCP35</a>]    Petke, R. and I. King, "Registration Procedures for URL
+              Scheme Names", <a href="https://www.rfc-editor.org/bcp/bcp35">BCP 35</a>, <a href="./rfc2717">RFC 2717</a>, November 1999.
+
+   [<a id="ref-RFC0952">RFC0952</a>]  Harrenstien, K., Stahl, M., and E. Feinler, "DoD Internet
+              host table specification", <a href="./rfc952">RFC 952</a>, October 1985.
+
+   [<a id="ref-RFC1034">RFC1034</a>]  Mockapetris, P., "Domain names - concepts and facilities",
+              STD 13, <a href="./rfc1034">RFC 1034</a>, November 1987.
+
+   [<a id="ref-RFC1123">RFC1123</a>]  Braden, R., "Requirements for Internet Hosts - Application
+              and Support", STD 3, <a href="./rfc1123">RFC 1123</a>, October 1989.
+
+   [<a id="ref-RFC1535">RFC1535</a>]  Gavron, E., "A Security Problem and Proposed Correction
+              With Widely Deployed DNS Software", <a href="./rfc1535">RFC 1535</a>,
+              October 1993.
+
+   [<a id="ref-RFC1630">RFC1630</a>]  Berners-Lee, T., "Universal Resource Identifiers in WWW: A
+              Unifying Syntax for the Expression of Names and Addresses
+              of Objects on the Network as used in the World-Wide Web",
+              <a href="./rfc1630">RFC 1630</a>, June 1994.
+
+   [<a id="ref-RFC1736">RFC1736</a>]  Kunze, J., "Functional Recommendations for Internet
+              Resource Locators", <a href="./rfc1736">RFC 1736</a>, February 1995.
+
+   [<a id="ref-RFC1737">RFC1737</a>]  Sollins, K. and L. Masinter, "Functional Requirements for
+              Uniform Resource Names", <a href="./rfc1737">RFC 1737</a>, December 1994.
+
+   [<a id="ref-RFC1738">RFC1738</a>]  Berners-Lee, T., Masinter, L., and M. McCahill, "Uniform
+              Resource Locators (URL)", <a href="./rfc1738">RFC 1738</a>, December 1994.
+
+   [<a id="ref-RFC1808">RFC1808</a>]  Fielding, R., "Relative Uniform Resource Locators",
+              <a href="./rfc1808">RFC 1808</a>, June 1995.
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 47]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-48" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   [<a id="ref-RFC2046">RFC2046</a>]  Freed, N. and N. Borenstein, "Multipurpose Internet Mail
+              Extensions (MIME) Part Two: Media Types", <a href="./rfc2046">RFC 2046</a>,
+              November 1996.
+
+   [<a id="ref-RFC2141">RFC2141</a>]  Moats, R., "URN Syntax", <a href="./rfc2141">RFC 2141</a>, May 1997.
+
+   [<a id="ref-RFC2396">RFC2396</a>]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifiers (URI): Generic Syntax", <a href="./rfc2396">RFC 2396</a>,
+              August 1998.
+
+   [<a id="ref-RFC2518">RFC2518</a>]  Goland, Y., Whitehead, E., Faizi, A., Carter, S., and D.
+              Jensen, "HTTP Extensions for Distributed Authoring --
+              WEBDAV", <a href="./rfc2518">RFC 2518</a>, February 1999.
+
+   [<a id="ref-RFC2557">RFC2557</a>]  Palme, J., Hopmann, A., and N. Shelness, "MIME
+              Encapsulation of Aggregate Documents, such as HTML
+              (MHTML)", <a href="./rfc2557">RFC 2557</a>, March 1999.
+
+   [<a id="ref-RFC2718">RFC2718</a>]  Masinter, L., Alvestrand, H., Zigmond, D., and R. Petke,
+              "Guidelines for new URL Schemes", <a href="./rfc2718">RFC 2718</a>, November 1999.
+
+   [<a id="ref-RFC2732">RFC2732</a>]  Hinden, R., Carpenter, B., and L. Masinter, "Format for
+              Literal IPv6 Addresses in URL's", <a href="./rfc2732">RFC 2732</a>, December 1999.
+
+   [<a id="ref-RFC3305">RFC3305</a>]  Mealling, M. and R. Denenberg, "Report from the Joint
+              W3C/IETF URI Planning Interest Group: Uniform Resource
+              Identifiers (URIs), URLs, and Uniform Resource Names
+              (URNs): Clarifications and Recommendations", <a href="./rfc3305">RFC 3305</a>,
+              August 2002.
+
+   [<a id="ref-RFC3490">RFC3490</a>]  Faltstrom, P., Hoffman, P., and A. Costello,
+              "Internationalizing Domain Names in Applications (IDNA)",
+              <a href="./rfc3490">RFC 3490</a>, March 2003.
+
+   [<a id="ref-RFC3513">RFC3513</a>]  Hinden, R. and S. Deering, "Internet Protocol Version 6
+              (IPv6) Addressing Architecture", <a href="./rfc3513">RFC 3513</a>, April 2003.
+
+   [<a id="ref-Siedzik">Siedzik</a>]  Siedzik, R., "Semantic Attacks: What's in a URL?",
+              April 2001, &lt;<a href="http://www.giac.org/practical/gsec/Richard_Siedzik_GSEC.pdf">http://www.giac.org/practical/gsec/</a>
+              <a href="http://www.giac.org/practical/gsec/Richard_Siedzik_GSEC.pdf">Richard_Siedzik_GSEC.pdf</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 48]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-49" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  URI の ABNF 集成</span>
+
+   URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+
+   hier-part     = "//" authority path-abempty
+                 / path-absolute
+                 / path-rootless
+                 / path-empty
+
+   URI-reference = URI / relative-ref
+
+   absolute-URI  = scheme ":" hier-part [ "?" query ]
+
+   relative-ref  = relative-part [ "?" query ] [ "#" fragment ]
+
+   relative-part = "//" authority path-abempty
+                 / path-absolute
+                 / path-noscheme
+                 / path-empty
+
+   scheme        = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+
+   authority     = [ userinfo "@" ] host [ ":" port ]
+   userinfo      = *( unreserved / pct-encoded / sub-delims / ":" )
+   host          = IP-literal / IPv4address / reg-name
+   port          = *DIGIT
+
+   IP-literal    = "[" ( IPv6address / IPvFuture  ) "]"
+
+   IPvFuture     = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+
+   IPv6address   =                            6( h16 ":" ) ls32
+                 /                       "::" 5( h16 ":" ) ls32
+                 / [               h16 ] "::" 4( h16 ":" ) ls32
+                 / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+                 / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+                 / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
+                 / [ *4( h16 ":" ) h16 ] "::"              ls32
+                 / [ *5( h16 ":" ) h16 ] "::"              h16
+                 / [ *6( h16 ":" ) h16 ] "::"
+
+   h16           = 1*4HEXDIG
+   ls32          = ( h16 ":" h16 ) / IPv4address
+   IPv4address   = dec-octet "." dec-octet "." dec-octet "." dec-octet
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 49]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-50" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   dec-octet     = DIGIT                 ; 0-9
+                 / %x31-39 DIGIT         ; 10-99
+                 / "1" 2DIGIT            ; 100-199
+                 / "2" %x30-34 DIGIT     ; 200-249
+                 / "25" %x30-35          ; 250-255
+
+   reg-name      = *( unreserved / pct-encoded / sub-delims )
+
+   path          = path-abempty    ; "/" で始まる、または空
+                 / path-absolute   ; "/" で始まるが "//" ではない
+                 / path-noscheme   ; コロンを含まないセグメントで始まる
+                 / path-rootless   ; セグメントで始まる
+                 / path-empty      ; 文字ゼロ個
+
+   path-abempty  = *( "/" segment )
+   path-absolute = "/" [ segment-nz *( "/" segment ) ]
+   path-noscheme = segment-nz-nc *( "/" segment )
+   path-rootless = segment-nz *( "/" segment )
+   path-empty    = 0&lt;pchar&gt;
+
+   segment       = *pchar
+   segment-nz    = 1*pchar
+   segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
+                 ; colon ":" を含まない非ゼロ長セグメント
+
+   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+
+   query         = *( pchar / "/" / "?" )
+
+   fragment      = *( pchar / "/" / "?" )
+
+   pct-encoded   = "%" HEXDIG HEXDIG
+
+   unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+   reserved      = gen-delims / sub-delims
+   gen-delims    = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+   sub-delims    = "!" / "$" / "&amp;" / "'" / "(" / ")"
+                 / "*" / "+" / "," / ";" / "="
+
+<span class="h2"><a class="selflink" id="appendix-B" href="#appendix-B">Appendix B</a>.  正規表現による URI 参照の解析</span>
+
+   "first-match-wins" アルゴリズムは POSIX regular expression で使用される
+   "greedy" な曖昧性解消方法と同一であるため、URI 参照の潜在的な 5 つの
+   コンポーネントを解析するために regular expression を使用することは
+   自然で一般的である。
+
+   次の行は、well-formed URI reference をそのコンポーネントへ分解するための
+   regular expression である。
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 50]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-51" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      ^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?
+       12            3  4          5       6  7        8 9
+
+   上の 2 行目の数字は可読性を助けるためだけのものであり、各 subexpression
+   （すなわち、対応する各 parentheses）の参照点を示している。subexpression
+   &lt;n&gt; に一致した値を $&lt;n&gt; と呼ぶ。たとえば、上記の expression を
+
+      <a href="http://www.ics.uci.edu/pub/ietf/uri/#Related">http://www.ics.uci.edu/pub/ietf/uri/#Related</a>
+
+   に一致させると、次の subexpression match が得られる。
+
+      $1 = http:
+      $2 = http
+      $3 = //www.ics.uci.edu
+      $4 = www.ics.uci.edu
+      $5 = /pub/ietf/uri/
+      $6 = &lt;undefined&gt;
+      $7 = &lt;undefined&gt;
+      $8 = #Related
+      $9 = Related
+
+   ここで &lt;undefined&gt; は、上の例の query コンポーネントの場合のように、
+   そのコンポーネントが存在しないことを示す。したがって、5 つの
+   コンポーネントの値は次のように判定できる。
+
+      scheme    = $2
+      authority = $4
+      path      = $5
+      query     = $7
+      fragment  = $9
+
+   逆方向では、<a href="#section-5.3">Section 5.3</a> のアルゴリズムを使用して、コンポーネントから
+   URI 参照を再作成できる。
+
+<span class="h2"><a class="selflink" id="appendix-C" href="#appendix-C">Appendix C</a>.  文脈における URI の区切り</span>
+
+   URI は、その解釈のための明確な文脈を提供しない形式を通じて送信されることが
+   多い。たとえば、URI が plain text に含まれる場面は多い。例として、
+   email、USENET news、および印刷された紙で送られる text がある。このような
+   場合、URI を text の残りの部分から、特に URI の一部と誤認される可能性の
+   ある punctuation mark から区切れることが重要である。
+
+   実際には、URI はさまざまな方法で区切られるが、通常は
+   double-quotes "http://example.com/"、angle brackets
+   &lt;http://example.com/&gt;、または単に whitespace を使用する。
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 51]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-52" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      http://example.com/
+
+   これらの wrapper は URI の一部を形成しない。
+
+   場合によっては、長い URI を複数行に分けるために、余分な whitespace
+   （space、line-break、tab など）を追加しなければならないことがある。
+   URI が抽出されるとき、その whitespace は無視されるべきである。
+
+   hyphen ("-") 文字の後に whitespace を導入すべきではない。一部の組版者や
+   printer は、行を折り返すときに（誤って）行末に hyphen を導入する場合が
+   あるため、hyphen の直後に line break を含む URI の解釈者は、その line break
+   周辺のすべての whitespace を無視し、その hyphen が実際に URI の一部である
+   かもしれないし、そうでないかもしれないことを認識すべきである。
+
+   embedded whitespace を含む参照の区切り形式として、各 URI を &lt;&gt; angle
+   brackets で囲むことが特に推奨される。
+
+   prefix "URL:"（後続の space の有無にかかわらず）は、以前は URI を他の
+   bracketed designator と区別しやすくする方法として推奨されていたが、
+   実際には一般的に使用されておらず、もはや推奨されない。
+
+   堅牢性のため、ユーザー入力された URI を受け入れる software は、delimiter と
+   embedded whitespace の両方を認識して取り除くよう試みるべきである。
+
+   たとえば、text
+
+      Yes, Jim, I found it under "<a href="http://www.w3.org/Addressing/">http://www.w3.org/Addressing/</a>",
+      but you can probably pick it up from &lt;ftp://foo.example.
+      com/rfc/&gt;.  Note the warning in &lt;<a href="http://www.ics.uci.edu/pub/ietf/uri/historical.html#WARNING">http://www.ics.uci.edu/pub/</a>
+      <a href="http://www.ics.uci.edu/pub/ietf/uri/historical.html#WARNING">ietf/uri/historical.html#WARNING</a>&gt;.
+
+   には、次の URI 参照が含まれる。
+
+      <a href="http://www.w3.org/Addressing/">http://www.w3.org/Addressing/</a>
+      ftp://foo.example.com/rfc/
+      <a href="http://www.ics.uci.edu/pub/ietf/uri/historical.html#WARNING">http://www.ics.uci.edu/pub/ietf/uri/historical.html#WARNING</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 52]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-53" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-D" href="#appendix-D">Appendix D</a>.  <a href="./rfc2396">RFC 2396</a> からの変更</span>
+
+<span class="h3"><a class="selflink" id="appendix-D.1" href="#appendix-D.1">D.1</a>.  追加事項</span>
+
+   URI という用語の一般的な使用法の 1 つ、すなわち任意の fragment を持つ
+   absolute URI に対応するため、URI の ABNF 規則が導入された。
+
+   IPv6（およびそれ以降）literal は、[<a href="./rfc2732" title="&quot;Format for Literal IPv6 Addresses in URL's&quot;">RFC2732</a>] で説明されるように、
+   authority コンポーネントの host 部分に対する可能な識別子の一覧に追加された。
+   これには、reserved set への "[" と "]" の追加、および将来の IP literal の
+   バージョンを見越した version flag が含まれる。Square brackets は現在、
+   authority コンポーネント内で reserved として指定され、host 内の IP literal の
+   delimiter としての使用以外では許可されない。この変更を、path、query、
+   および fragment コンポーネントの技術的定義を変更せずに行うため、それらの
+   規則は許可される文字を直接指定するよう再定義された。
+
+   [<a href="./rfc2732" title="&quot;Format for Literal IPv6 Addresses in URL's&quot;">RFC2732</a>] は IPv6 literal address の定義を [<a href="./rfc3513" title="&quot;Internet Protocol Version 6 (IPv6) Addressing Architecture&quot;">RFC3513</a>] に委ねているが、
+   残念ながらそこには IPv6address の ABNF 記述がないため、我々は
+   <a href="./rfc3513#section-2.2">[RFC3513] の Section&nbsp;2.2</a> で定義される text representation に一致する
+   IPv6address の新しい ABNF 規則を作成した。同様に、IPv4address の定義は、
+   各 decimal octet を 0-255 の範囲に制限するために改善された。
+
+   URI の正規化と比較に関する <a href="#section-6">Section 6</a> は、Tim Bray からの input と
+   W3C Technical Architecture Group 内の議論を使用して、完全に書き直され
+   拡張された。
+
+<span class="h3"><a class="selflink" id="appendix-D.2" href="#appendix-D.2">D.2</a>.  修正事項</span>
+
+   <a href="./rfc2396">RFC 2396</a> の ad-hoc BNF 構文は、[<a href="./rfc2234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC2234</a>] の ABNF に
+   置き換えられた。この変更により、以前 underscore character を含んでいた
+   すべての rule name は、代わりに dash を使用するよう改名する必要があった。
+   さらに、全体の grammar をより理解しやすくするため、多数の構文規則が
+   削除または簡略化された。廃止された grammar rule を参照する仕様は、
+   次の表に従ってそれらの rule を置き換えることで理解できる。
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 53]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-54" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   +----------------+--------------------------------------------------+
+   | 廃止された rule | 変換                                             |
+   +----------------+--------------------------------------------------+
+   | absoluteURI    | absolute-URI                                     |
+   | relativeURI    | relative-part [ "?" query ]                      |
+   | hier_part      | ( "//" authority path-abempty /                  |
+   |                | path-absolute ) [ "?" query ]                    |
+   |                |                                                  |
+   | opaque_part    | path-rootless [ "?" query ]                      |
+   | net_path       | "//" authority path-abempty                      |
+   | abs_path       | path-absolute                                    |
+   | rel_path       | path-rootless                                    |
+   | rel_segment    | segment-nz-nc                                    |
+   | reg_name       | reg-name                                         |
+   | server         | authority                                        |
+   | hostport       | host [ ":" port ]                                |
+   | hostname       | reg-name                                         |
+   | path_segments  | path-abempty                                     |
+   | param          | *&lt;pchar excluding ";"&gt;                           |
+   |                |                                                  |
+   | uric           | unreserved / pct-encoded / ";" / "?" / ":"       |
+   |                |  / "@" / "&amp;" / "=" / "+" / "$" / "," / "/"       |
+   |                |                                                  |
+   | uric_no_slash  | unreserved / pct-encoded / ";" / "?" / ":"       |
+   |                |  / "@" / "&amp;" / "=" / "+" / "$" / ","             |
+   |                |                                                  |
+   | mark           | "-" / "_" / "." / "!" / "~" / "*" / "'"          |
+   |                |  / "(" / ")"                                     |
+   |                |                                                  |
+   | escaped        | pct-encoded                                      |
+   | hex            | HEXDIG                                           |
+   | alphanum       | ALPHA / DIGIT                                    |
+   +----------------+--------------------------------------------------+
+
+   scheme-specific syntax の定義に上記の廃止された rule を使用することは
+   非推奨である。
+
+   文字に関する <a href="#section-2">Section 2</a> は、どの文字が reserved であるか、いつ reserved で
+   あるか、およびそれらが汎用構文によって delimiter として使用されない場合でも
+   なぜ reserved であるかを説明するために書き直された。通常デコードすると
+   安全でない mark character、すなわち exclamation mark ("!")、asterisk ("*")、
+   single-quote ("'")、および open/close parentheses ("(" と ")") は、
+   reserved と unreserved の区別を明確化し、願わくは scheme 設計者の最も一般的な
+   疑問に答えるために、reserved set へ移された。同様に、percent-encoded
+   character に関する節も書き直され、URI 正規化器には unreserved character に
+   対応する任意の percent-encoded octet をデコードする許可が与えられるように
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 54]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-55" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   なった。一般に、"escaped" および "unescaped" という用語は、他の形式の
+   escape mechanism との混同を減らすため、それぞれ "percent-encoded" および
+   "decoded" に置き換えられた。
+
+   URI および URI-reference の ABNF は、LALR parser にとってより扱いやすくし、
+   複雑性を減らすために再設計された。その結果、構文記述の layout form は、
+   uric、uric_no_slash、opaque_part、net_path、abs_path、rel_path、
+   path_segments、rel_segment、および mark rule とともに削除された。
+   "opaque" URI へのすべての参照は、path コンポーネントが階層に対して
+   不透明であり得る方法についてのよりよい説明に置き換えられた。
+   relativeURI rule は、それらが URI の部分集合であるかどうかに関する不要な
+   混乱を避けるため、relative-ref に置き換えられた。URI-reference を URI として
+   解析するか、最初の segment に colon を持つ relative-ref として解析するかに
+   関する曖昧性は、5 つの別個の path matching rule を使用することで解消された。
+
+   fragment identifier は、generic syntax component に関する節へ、また URI および
+   relative-ref rule 内へ戻された。ただし、absolute-URI からは引き続き除外される。
+   fragment 構文の再統合の結果、number sign ("#") 文字は reserved set へ戻された。
+
+   ABNF は、path コンポーネントが空であることを許可するよう修正された。
+   これにより、実際に "dav:" namespace [<a href="./rfc2518" title="&quot;HTTP Extensions for Distributed Authoring -- WEBDAV&quot;">RFC2518</a>] や、多くの WWW
+   browser 実装で内部的に使用される "about:" scheme に存在するように、
+   absolute-URI が "scheme:" の後に何もないものとして構成されることも
+   許可される。authority と path の境界に関する曖昧性は、5 つの別個の
+   path matching rule を使用することで解消された。
+
+   汎用構文を使用する registry-based naming authority は、現在 host rule 内で
+   定義される。この変更により、与えられた名前が単純にローカルな名前解決機構へ
+   渡される現在の実装を、仕様と一貫させることができる。また、ここで DNS 名
+   形式を再指定する必要もなくなる。さらに、host コンポーネントが
+   percent-encoded octet を含むことを許可する。これは、国際化ドメイン名を
+   URI 内で提供し、URI 処理より上の application layer で native character
+   encoding によって処理し、UTF-8 character encoding の registered name として
+   IDNA library へ渡せるようにするために必要である。server、hostport、
+   hostname、domainlabel、toplabel、および alphanum rule は削除された。
+
+   [<a href="./rfc2396" title="&quot;Uniform Resource Identifiers (URI): Generic Syntax&quot;">RFC2396</a>] の相対参照解決アルゴリズムは、この改訂で明確性を改善し、
+   次の問題を修正するために擬似コードで書き直された。
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 55]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-56" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   o  <a href="./rfc2396#section-5.2">[RFC2396] section&nbsp;5.2</a> の step 6a は、path を持たない base URI を
+      考慮していなかった。
+
+   o  参照が空の path と定義済みの query コンポーネントを含む場合、
+      target URI が base URI の path コンポーネントを継承するという
+      [<a href="./rfc1808" title="&quot;Relative Uniform Resource Locators&quot;">RFC1808</a>] の挙動を復元した。
+
+   o  URI 参照が same-document reference であるかどうかの判定は URI parser から
+      切り離され、配備済み URI 処理実装の内部アーキテクチャと一貫した形で、
+      アプリケーション内の URI 処理インターフェイスを単純化した。判定は現在、
+      参照自体の形式ではなく、参照を absolute form へ変換した後の base URI との
+      比較に基づく。この変更により、特に alias を減らすために正規化が使用される
+      場合、<a href="./rfc2396">RFC 2396</a> で与えられた規則の下よりも、本仕様の下でより多くの参照が
+      "same-document" と見なされる可能性がある。しかし、既存の same-document
+      reference の status を変更するものではない。
+
+   o  path merge routine を 2 つの routine に分離した。すなわち、base URI path と
+      relative-path reference の組み合わせを説明する merge、および合成された
+      path から特別な "." および ".." segment を除去する方法を説明する
+      remove_dot_segments である。remove_dot_segments アルゴリズムは現在、
+      一般的な実装に一致し、実務における URI の正規化を改善するため、すべての
+      URI 参照 path に適用される。この変更は、base URI が非階層的 path を持つ
+      異常な参照および同一 scheme 参照の解析にのみ影響する。
+
+索引
+
+   A
+      ABNF  11
+      absolute  27
+      absolute-path  26
+      absolute-URI  27
+      access  9
+      authority  17, 18
+
+   B
+      base URI  28
+
+   C
+      character encoding  4
+      character  4
+      characters  8, 11
+      coded character set  4
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 56]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-57" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+   D
+      dec-octet  20
+      dereference  9
+      dot-segments  23
+
+   F
+      fragment  16, 24
+
+   G
+      gen-delims  13
+      generic syntax  6
+
+   H
+      h16  20
+      hier-part  16
+      hierarchical  10
+      host  18
+
+   I
+      identifier  5
+      IP-literal  19
+      IPv4  20
+      IPv4address  19, 20
+      IPv6  19
+      IPv6address  19, 20
+      IPvFuture  19
+
+   L
+      locator  7
+      ls32  20
+
+   M
+      merge  32
+
+   N
+      name  7
+      network-path  26
+
+   P
+      path  16, 22, 26
+         path-abempty  22
+         path-absolute  22
+         path-empty  22
+         path-noscheme  22
+         path-rootless  22
+      path-abempty  16, 22, 26
+      path-absolute  16, 22, 26
+      path-empty  16, 22, 26
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 57]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-58" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+      path-rootless  16, 22
+      pchar  23
+      pct-encoded  12
+      percent-encoding  12
+      port  22
+
+   Q
+      query  16, 23
+
+   R
+      reg-name  21
+      registered name  20
+      relative  10, 28
+      relative-path  26
+      relative-ref  26
+      remove_dot_segments  33
+      representation  9
+      reserved  12
+      resolution  9, 28
+      resource  5
+      retrieval  9
+
+   S
+      same-document  27
+      sameness  9
+      scheme  16, 17
+      segment  22, 23
+         segment-nz  23
+         segment-nz-nc  23
+      sub-delims  13
+      suffix  27
+
+   T
+      transcription  8
+
+   U
+      uniform  4
+      unreserved  13
+      URI grammar
+         absolute-URI  27
+         ALPHA  11
+         authority  18
+         CR  11
+         dec-octet  20
+         DIGIT  11
+         DQUOTE  11
+         fragment  24
+         gen-delims  13
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 58]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-59" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+         h16  20
+         HEXDIG  11
+         hier-part  16
+         host  19
+         IP-literal  19
+         IPv4address  20
+         IPv6address  20
+         IPvFuture  19
+         LF  11
+         ls32  20
+         OCTET  11
+         path  22
+         path-abempty  22
+         path-absolute  22
+         path-empty  22
+         path-noscheme  22
+         path-rootless  22
+         pchar  23
+         pct-encoded  12
+         port  22
+         query  24
+         reg-name  21
+         relative-ref  26
+         reserved  13
+         scheme  17
+         segment  23
+         segment-nz  23
+         segment-nz-nc  23
+         SP  11
+         sub-delims  13
+         unreserved  13
+         URI  16
+         URI-reference  25
+         userinfo  18
+      URI  16
+      URI-reference  25
+      URL  7
+      URN  7
+      userinfo  18
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 59]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-60" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+著者の連絡先
+
+   Tim Berners-Lee
+   World Wide Web Consortium
+   Massachusetts Institute of Technology
+   77 Massachusetts Avenue
+   Cambridge, MA  02139
+   USA
+
+   電話: +1-617-253-5702
+   Fax:   +1-617-258-5999
+   EMail: timbl@w3.org
+   URI:   <a href="http://www.w3.org/People/Berners-Lee/">http://www.w3.org/People/Berners-Lee/</a>
+
+
+   Roy T. Fielding
+   Day Software
+   5251 California Ave., Suite 110
+   Irvine, CA  92617
+   USA
+
+   電話: +1-949-679-2960
+   Fax:   +1-949-679-2972
+   EMail: fielding@gbiv.com
+   URI:   <a href="http://roy.gbiv.com/">http://roy.gbiv.com/</a>
+
+
+   Larry Masinter
+   Adobe Systems Incorporated
+   345 Park Ave
+   San Jose, CA  95110
+   USA
+
+   電話: +1-408-536-3024
+   EMail: LMM@acm.org
+   URI:   <a href="http://larry.masinter.net/">http://larry.masinter.net/</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Berners-Lee, et al.         Standards Track                    [Page 60]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-61" ></span>
+<span class="grey"><a href="./rfc3986">RFC 3986</a>                   URI 汎用構文                    2005年1月</span>
+
+
+完全な著作権表示
+
+   Copyright (C) The Internet Society (2005).
+
+   本文書は、<a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> に含まれる権利、ライセンス、および制限の対象であり、
+   そこに定められている場合を除き、著者はすべての権利を保持する。
+
+   本文書およびここに含まれる情報は "AS IS" basis で提供される。
+   CONTRIBUTOR、HE/SHE が代表する、または支援を受ける組織（もしあれば）、
+   THE INTERNET SOCIETY、および THE INTERNET ENGINEERING TASK FORCE は、
+   明示または黙示を問わず、すべての保証を否認する。これには、ここに含まれる
+   情報の使用がいかなる権利も侵害しないという保証、ならびに商品性または
+   特定目的への適合性に関する黙示の保証を含むが、これらに限定されない。
+
+知的財産
+
+   IETF は、本文書で説明される技術の実装または使用に関係すると主張され得る
+   Intellectual Property Rights またはその他の権利の有効性または範囲について、
+   あるいはそのような権利に基づくライセンスが利用可能である、または利用可能で
+   ない範囲について、いかなる立場も取らない。また、そのような権利を特定する
+   ために独自の努力を行ったとも表明しない。IETF Documents における権利に
+   関する IETF の手続きについての情報は、<a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> および
+   <a href="https://www.rfc-editor.org/bcp/bcp79">BCP 79</a> にある。
+
+   IETF Secretariat に対して行われた IPR 開示の写し、および利用可能にされる
+   ライセンスの保証、または本仕様の実装者もしくは利用者によるそのような
+   proprietary rights の使用について一般的なライセンスまたは許可を得ようと
+   した試みの結果は、IETF の online IPR repository
+   <a href="http://www.ietf.org/ipr">http://www.ietf.org/ipr</a> から入手できる。
+
+   IETF は、この標準を実装するために必要となる可能性がある技術を対象とする
+   copyright、patent または patent application、あるいはその他の proprietary
+   rights について、関心のあるいかなる当事者にも IETF へ知らせることを
+   求める。この情報は IETF の ietf-
+   ipr@ietf.org 宛に送付されたい。
+
+
+謝辞
+
+   RFC Editor 機能のための資金は、現在 Internet Society によって提供されている。
+
+
+
+
+
+
+Berners-Lee, et al.         Standards Track                    [Page 61]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
