@@ -1,0 +1,2770 @@
+<!DOCTYPE html>
+<html lang="ja-JP" class="RFC">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="Common,Latin" name="scripts">
+    <meta content="initial-scale=1.0" name="viewport">
+    <title>RFC 9457: HTTP APIのための問題詳細</title>
+    <meta content="Mark Nottingham" name="author">
+    <meta content="Erik Wilde" name="author">
+    <meta content="Sanjay Dalal" name="author">
+    <meta content='
+       この文書は、HTTP APIのために新しいエラーレスポンス形式を定義する必要を避けるため、HTTPレスポンス内容でエラーの機械可読な詳細を伝達する「問題詳細」を定義します。
+       この文書はRFC 7807を廃止します。
+    ' name="description">
+    <meta content="xml2rfc 3.17.5" name="generator">
+    <meta content="status" name="keyword">
+    <meta content="HTTP" name="keyword">
+    <meta content="error" name="keyword">
+    <meta content="problem" name="keyword">
+    <meta content="API" name="keyword">
+    <meta content="JSON" name="keyword">
+    <meta content="XML" name="keyword">
+    <meta content="9457" name="rfc.number">
+    <!-- Generator version information:
+  xml2rfc 3.17.5
+    Python 3.9.15
+    ConfigArgParse 1.5.3
+    google-i18n-address 3.0.0
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.0
+    platformdirs 3.8.0
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.28.0
+    setuptools 44.1.1
+    six 1.16.0
+    wcwidth 0.2.5
+    weasyprint 56.1
+-->
+    <link href="rfc9457.xml" rel="alternate" type="application/rfc+xml">
+    <link href="#copyright" rel="license">
+    <style type="text/css">
+        /*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+        /* fonts */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+        /* Sans-serif */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Serif');
+        /* Serif (print) */
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+        /* Monospace */
+
+        :root {
+            --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+            --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+            --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+        }
+
+        @viewport {
+            zoom: 1.0;
+        }
+
+        @-ms-viewport {
+            width: extend-to-zoom;
+            zoom: 1.0;
+        }
+
+        /* general and mobile first */
+        html {}
+
+        body {
+            max-width: 90%;
+            margin: 1.5em auto;
+            color: #222;
+            background-color: #fff;
+            font-size: 14px;
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .ears {
+            display: none;
+        }
+
+        /* headings */
+        #title,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        #title {
+            clear: both;
+            border-bottom: 1px solid #ddd;
+            margin: 0 0 0.5em 0;
+            padding: 1em 0 0.5em;
+        }
+
+        .author {
+            padding-bottom: 4px;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin: 1em 0;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-top: -20px;
+            /* provide offset for in-page anchors */
+            padding-top: 33px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h4 {
+            font-size: 16px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h5,
+        h6 {
+            font-size: 14px;
+        }
+
+        #n-copyright-notice {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1em;
+            margin-bottom: 1em;
+        }
+
+        /* general structure */
+        p {
+            padding: 0;
+            margin: 0 0 1em 0;
+            text-align: left;
+        }
+
+        div,
+        span {
+            position: relative;
+        }
+
+        div {
+            margin: 0;
+        }
+
+        .alignRight.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignRight.art-text pre {
+            padding: 0;
+        }
+
+        .alignRight {
+            margin: 1em 0;
+        }
+
+        .alignRight>*:first-child {
+            border: none;
+            margin: 0;
+            float: right;
+            clear: both;
+        }
+
+        .alignRight>*:nth-child(2) {
+            clear: both;
+            display: block;
+            border: none;
+        }
+
+        svg {
+            display: block;
+        }
+
+        svg[font-family~="serif" i],
+        svg [font-family~="serif" i] {
+            font-family: var(--font-serif);
+        }
+
+        svg[font-family~="sans-serif" i],
+        svg [font-family~="sans-serif" i] {
+            font-family: var(--font-sans);
+        }
+
+        svg[font-family~="monospace" i],
+        svg [font-family~="monospace" i] {
+            font-family: var(--font-mono);
+        }
+
+        .alignCenter.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignCenter.art-text pre {
+            padding: 0;
+        }
+
+        .alignCenter {
+            margin: 1em 0;
+        }
+
+        .alignCenter>*:first-child {
+            display: table;
+            border: none;
+            margin: 0 auto;
+        }
+
+        /* lists */
+        ol,
+        ul {
+            padding: 0;
+            margin: 0 0 1em 2em;
+        }
+
+        ol ol,
+        ul ul,
+        ol ul,
+        ul ol {
+            margin-left: 1em;
+        }
+
+        li {
+            margin: 0 0 0.25em 0;
+        }
+
+        .ulCompact li {
+            margin: 0;
+        }
+
+        ul.empty,
+        .ulEmpty {
+            list-style-type: none;
+        }
+
+        ul.empty li,
+        .ulEmpty li {
+            margin-top: 0.5em;
+        }
+
+        ul.ulBare,
+        li.ulBare {
+            margin-left: 0em !important;
+        }
+
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact {
+            line-height: 100%;
+            margin: 0 0 0 2em;
+        }
+
+        /* definition lists */
+        dl {}
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        /* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+        dl>dd {
+            margin-bottom: .8em;
+            min-height: 1.3em;
+        }
+
+        dl.compact>dd,
+        .dlCompact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        /* links */
+        a {
+            text-decoration: none;
+        }
+
+        a[href] {
+            color: #22e;
+            /* Arlen: WCAG 2019 */
+        }
+
+        a[href]:hover {
+            background-color: #f2f2f2;
+        }
+
+        figcaption a[href],
+        a[href].selfRef,
+        .iref+a[href].internal {
+            color: #222;
+        }
+
+        /* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+        /* Figures */
+        tt,
+        code,
+        pre {
+            background-color: #f9f9f9;
+            font-family: var(--font-mono);
+        }
+
+        pre {
+            border: 1px solid #eee;
+            margin: 0;
+            padding: 1em;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        figure blockquote {
+            margin: 0.8em 0.4em 0.4em;
+        }
+
+        figcaption {
+            font-style: italic;
+            margin: 0 0 1em 0;
+        }
+
+        @media screen {
+            pre {
+                overflow-x: auto;
+                max-width: 100%;
+                max-width: calc(100% - 22px);
+            }
+        }
+
+        /* aside, blockquote */
+        aside,
+        blockquote {
+            margin-left: 0;
+            padding: 1.2em 2em;
+        }
+
+        blockquote {
+            background-color: #f9f9f9;
+            color: #111;
+            /* Arlen: WCAG 2019 */
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin: 1em 0;
+        }
+
+        cite {
+            display: block;
+            text-align: right;
+            font-style: italic;
+        }
+
+        /* tables */
+        table {
+            width: 100%;
+            margin: 0 0 1em;
+            border-collapse: collapse;
+            border: 1px solid #eee;
+        }
+
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+            padding: 0.5em 0.75em;
+        }
+
+        th {
+            text-align: left;
+            background-color: #e9e9e9;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f5f5f5;
+        }
+
+        table caption {
+            font-style: italic;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        table p {
+            /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+            margin: 0;
+        }
+
+        /* pilcrow */
+        a.pilcrow {
+            color: #666;
+            /* Arlen: AHDJ 2019 */
+            text-decoration: none;
+            visibility: hidden;
+            user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        @media screen {
+
+            aside:hover>a.pilcrow,
+            p:hover>a.pilcrow,
+            blockquote:hover>a.pilcrow,
+            div:hover>a.pilcrow,
+            li:hover>a.pilcrow,
+            pre:hover>a.pilcrow {
+                visibility: visible;
+            }
+
+            a.pilcrow:hover {
+                background-color: transparent;
+            }
+        }
+
+        /* misc */
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+
+        .bcp14 {
+            font-variant: small-caps;
+        }
+
+        .role {
+            font-variant: all-small-caps;
+        }
+
+        /* info block */
+        #identifiers {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        #identifiers dt {
+            width: 3em;
+            clear: left;
+        }
+
+        #identifiers dd {
+            float: left;
+            margin-bottom: 0;
+        }
+
+        /* Fix PDF info block run off issue */
+        @media print {
+            #identifiers dd {
+                float: none;
+            }
+        }
+
+        #identifiers .authors .author {
+            display: inline-block;
+            margin-right: 1.5em;
+        }
+
+        #identifiers .authors .org {
+            font-style: italic;
+        }
+
+        /* The prepared/rendered info at the very bottom of the page */
+        .docInfo {
+            color: #666;
+            /* Arlen: WCAG 2019 */
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 2em;
+        }
+
+        .docInfo .prepared {
+            float: left;
+        }
+
+        .docInfo .prepared {
+            float: right;
+        }
+
+        /* table of contents */
+        #toc {
+            padding: 0.75em 0 2em 0;
+            margin-bottom: 1em;
+        }
+
+        nav.toc ul {
+            margin: 0 0.5em 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        nav.toc li {
+            line-height: 1.3em;
+            margin: 0.75em 0;
+            padding-left: 1.2em;
+            text-indent: -1.2em;
+        }
+
+        /* references */
+        .references dt {
+            text-align: right;
+            font-weight: bold;
+            min-width: 7em;
+        }
+
+        .references dd {
+            margin-left: 8em;
+            overflow: auto;
+        }
+
+        .refInstance {
+            margin-bottom: 1.25em;
+        }
+
+        .references .ascii {
+            margin-bottom: 0.25em;
+        }
+
+        /* index */
+        .index ul {
+            margin: 0 0 0 1em;
+            padding: 0;
+            list-style: none;
+        }
+
+        .index ul ul {
+            margin: 0;
+        }
+
+        .index li {
+            margin: 0;
+            text-indent: -2em;
+            padding-left: 2em;
+            padding-bottom: 5px;
+        }
+
+        .indexIndex {
+            margin: 0.5em 0 1em;
+        }
+
+        .index a {
+            font-weight: 700;
+        }
+
+        /* make the index two-column on all but the smallest screens */
+        @media (min-width: 600px) {
+            .index ul {
+                -moz-column-count: 2;
+                -moz-column-gap: 20px;
+            }
+
+            .index ul ul {
+                -moz-column-count: 1;
+                -moz-column-gap: 0;
+            }
+        }
+
+        /* authors */
+        address.vcard {
+            font-style: normal;
+            margin: 1em 0;
+        }
+
+        address.vcard .nameRole {
+            font-weight: 700;
+            margin-left: 0;
+        }
+
+        address.vcard .label {
+            font-family: var(--font-sans);
+            margin: 0.5em 0;
+        }
+
+        address.vcard .type {
+            display: none;
+        }
+
+        .alternative-contact {
+            margin: 1.5em 0 1em;
+        }
+
+        hr.addr {
+            border-top: 1px dashed;
+            margin: 0;
+            color: #ddd;
+            max-width: calc(100% - 16px);
+        }
+
+        /* temporary notes */
+        .rfcEditorRemove::before {
+            position: absolute;
+            top: 0.2em;
+            right: 0.2em;
+            padding: 0.2em;
+            content: "The RFC Editor will remove this note";
+            color: #9e2a00;
+            /* Arlen: WCAG 2019 */
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+        }
+
+        .rfcEditorRemove {
+            position: relative;
+            padding-top: 1.8em;
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            border-radius: 3px;
+        }
+
+        .cref {
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            padding: 2px 4px;
+        }
+
+        .crefSource {
+            font-style: italic;
+        }
+
+        /* alternative layout for smaller screens */
+        @media screen and (max-width: 1023px) {
+            body {
+                padding-top: 2em;
+            }
+
+            #title {
+                padding: 1em 0;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-top: -18px;
+                /* provide offset for in-page anchors */
+                padding-top: 38px;
+            }
+
+            #identifiers dd {
+                max-width: 60%;
+            }
+
+            #toc {
+                position: fixed;
+                z-index: 2;
+                top: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+                background-color: inherit;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #toc h2 {
+                margin: -1px 0 0 0;
+                padding: 4px 0 4px 6px;
+                padding-right: 1em;
+                min-width: 190px;
+                font-size: 1.1em;
+                text-align: right;
+                background-color: #444;
+                color: white;
+                cursor: pointer;
+            }
+
+            #toc h2::before {
+                /* css hamburger */
+                float: right;
+                position: relative;
+                width: 1em;
+                height: 1px;
+                left: -164px;
+                margin: 6px 0 0 0;
+                background: white none repeat scroll 0 0;
+                box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+                content: "";
+            }
+
+            #toc nav {
+                display: none;
+                padding: 0.5em 1em 1em;
+                overflow: auto;
+                height: calc(100vh - 48px);
+                border-left: 1px solid #ddd;
+            }
+        }
+
+        /* alternative layout for wide screens */
+        @media screen and (min-width: 1024px) {
+            body {
+                max-width: 724px;
+                margin: 42px auto;
+                padding-left: 1.5em;
+                padding-right: 29em;
+            }
+
+            #toc {
+                position: fixed;
+                top: 42px;
+                right: 42px;
+                width: 25%;
+                margin: 0;
+                padding: 0 1em;
+                z-index: 1;
+            }
+
+            #toc h2 {
+                border-top: none;
+                border-bottom: 1px solid #ddd;
+                font-size: 1em;
+                font-weight: normal;
+                margin: 0;
+                padding: 0.25em 1em 1em 0;
+            }
+
+            #toc nav {
+                display: block;
+                height: calc(90vh - 84px);
+                bottom: 0;
+                padding: 0.5em 0 0;
+                overflow: auto;
+            }
+
+            img {
+                /* future proofing */
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* pagination */
+        @media print {
+            body {
+
+                width: 100%;
+            }
+
+            p {
+                orphans: 3;
+                widows: 3;
+            }
+
+            #n-copyright-notice {
+                border-bottom: none;
+            }
+
+            #toc,
+            #n-introduction {
+                page-break-before: always;
+            }
+
+            #toc {
+                border-top: none;
+                padding-top: 0;
+            }
+
+            figure,
+            pre {
+                page-break-inside: avoid;
+            }
+
+            figure {
+                overflow: scroll;
+            }
+
+            .breakable pre {
+                break-inside: auto;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                page-break-after: avoid;
+            }
+
+            h2+*,
+            h3+*,
+            h4+*,
+            h5+*,
+            h6+* {
+                page-break-before: avoid;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-size: 10pt;
+            }
+
+            table {
+                border: 1px solid #ddd;
+            }
+
+            td {
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        /* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+        /*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+        @page :first {
+            padding-top: 0;
+
+            @top-left {
+                content: normal;
+                border: none;
+            }
+
+            @top-center {
+                content: normal;
+                border: none;
+            }
+
+            @top-right {
+                content: normal;
+                border: none;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin-bottom: 45mm;
+            padding-top: 20px;
+            /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+            /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+        }
+
+        /* Changes introduced to fix issues found during implementation */
+        /* Make sure links are clickable even if overlapped by following H* */
+        a {
+            z-index: 2;
+        }
+
+        /* Separate body from document info even without intervening H1 */
+        section {
+            clear: both;
+        }
+
+
+        /* Top align author divs, to avoid names without organization dropping level with org names */
+        .author {
+            vertical-align: top;
+        }
+
+        /* Leave room in document info to show Internet-Draft on one line */
+        #identifiers dt {
+            width: 8em;
+        }
+
+        /* Don't waste quite as much whitespace between label and value in doc info */
+        #identifiers dd {
+            margin-left: 1em;
+        }
+
+        /* Give floating toc a background color (needed when it's a div inside section */
+        #toc {
+            background-color: white;
+        }
+
+        /* Make the collapsed ToC header render white on gray also when it's a link */
+        @media screen and (max-width: 1023px) {
+
+            #toc h2 a,
+            #toc h2 a:link,
+            #toc h2 a:focus,
+            #toc h2 a:hover,
+            #toc a.toplink,
+            #toc a.toplink:hover {
+                color: white;
+                background-color: #444;
+                text-decoration: none;
+            }
+        }
+
+        /* Give the bottom of the ToC some whitespace */
+        @media screen and (min-width: 1024px) {
+            #toc {
+                padding: 0 0 1em 1em;
+            }
+        }
+
+        /* Style section numbers with more space between number and title */
+        .section-number {
+            padding-right: 0.5em;
+        }
+
+        /* prevent monospace from becoming overly large */
+        tt,
+        code,
+        pre {
+            font-size: 95%;
+        }
+
+        /* Fix the height/width aspect for ascii art*/
+        .sourcecode pre,
+        .art-text pre {
+            line-height: 1.12;
+        }
+
+
+        /* Add styling for a link in the ToC that points to the top of the document */
+        a.toplink {
+            float: right;
+            margin-right: 0.5em;
+        }
+
+        /* Fix the dl styling to match the RFC 7992 attributes */
+        dl>dt,
+        dl.dlParallel>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.dlNewline>dt {
+            float: none;
+        }
+
+        /* Provide styling for table cell text alignment */
+        table td.text-left,
+        table th.text-left {
+            text-align: left;
+        }
+
+        table td.text-center,
+        table th.text-center {
+            text-align: center;
+        }
+
+        table td.text-right,
+        table th.text-right {
+            text-align: right;
+        }
+
+        /* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+        .alternative-contact {
+            margin: 0.5em 0 0.25em 0;
+        }
+
+        address .non-ascii {
+            margin: 0 0 0 2em;
+        }
+
+        /* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+        table {
+            width: auto;
+        }
+
+        /* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+        .references dd {
+            overflow: visible;
+        }
+
+        /* Control caption placement */
+        caption {
+            caption-side: bottom;
+        }
+
+        /* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+        address.vcard {
+            max-width: 30em;
+            margin-right: auto;
+        }
+
+        /* For address alignment dependent on LTR or RTL scripts */
+        address div.left {
+            text-align: left;
+        }
+
+        address div.right {
+            text-align: right;
+        }
+
+        /* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+        table.right {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        table.center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table.left {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Give the table caption label the same styling as the figcaption */
+        caption a[href] {
+            color: #222;
+        }
+
+        @media print {
+            .toplink {
+                display: none;
+            }
+
+            /* avoid overwriting the top border line with the ToC header */
+            #toc {
+                padding-top: 1px;
+            }
+
+            /* Avoid page breaks inside dl and author address entries */
+            .vcard {
+                page-break-inside: avoid;
+            }
+
+        }
+
+        /* Tweak the bcp14 keyword presentation */
+        .bcp14 {
+            font-variant: small-caps;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Tweak the invisible space above H* in order not to overlay links in text above */
+        h2 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 31px;
+        }
+
+        h3 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        h4 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        /* Float artwork pilcrow to the right */
+        @media screen {
+            .artwork a.pilcrow {
+                display: block;
+                line-height: 0.7;
+                margin-top: 0.15em;
+            }
+        }
+
+        /* Make pilcrows on dd visible */
+        @media screen {
+            dd:hover>a.pilcrow {
+                visibility: visible;
+            }
+        }
+
+        /* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+        .alignLeft.art-text,
+        .alignCenter.art-text,
+        .alignRight.art-text {
+            margin-bottom: 0;
+        }
+
+        .alignLeft,
+        .alignCenter,
+        .alignRight {
+            margin: 1em 0 0 0;
+        }
+
+        /* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+        @media print {
+            a.pilcrow {
+                display: none;
+            }
+        }
+
+        /* Styling for the external metadata */
+        div#external-metadata {
+            background-color: #eee;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+            display: none;
+        }
+
+        div#internal-metadata {
+            padding: 0.5em;
+            /* to match the external-metadata padding */
+        }
+
+        /* Styling for title RFC Number */
+        h1#rfcnum {
+            clear: both;
+            margin: 0 0 -1em;
+            padding: 1em 0 0 0;
+        }
+
+        /* Make .olPercent look the same as <ol><li> */
+        dl.olPercent>dd {
+            margin-bottom: 0.25em;
+            min-height: initial;
+        }
+
+        /* Give aside some styling to set it apart */
+        aside {
+            border-left: 1px solid #ddd;
+            margin: 1em 0 1em 2em;
+            padding: 0.2em 2em;
+        }
+
+        aside>dl,
+        aside>ol,
+        aside>ul,
+        aside>table,
+        aside>p {
+            margin-bottom: 0.5em;
+        }
+
+        /* Additional page break settings */
+        @media print {
+
+            figcaption,
+            table caption {
+                page-break-before: avoid;
+            }
+        }
+
+        /* Font size adjustments for print */
+        @media print {
+            body {
+                font-size: 10pt;
+                line-height: normal;
+                max-width: 96%;
+            }
+
+            h1 {
+                font-size: 1.72em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2*1.2 */
+            h2 {
+                font-size: 1.44em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2 */
+            h3 {
+                font-size: 1.2em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2 */
+            h4 {
+                font-size: 1em;
+                padding-top: 1.5em;
+            }
+
+            h5,
+            h6 {
+                font-size: 1em;
+                margin: initial;
+                padding: 0.5em 0 0.3em;
+            }
+        }
+
+        /* Sourcecode margin in print, when there's no pilcrow */
+        @media print {
+
+            .artwork,
+            .artwork>pre,
+            .sourcecode {
+                margin-bottom: 1em;
+            }
+        }
+
+        /* Avoid narrow tables forcing too narrow table captions, which may render badly */
+        table {
+            min-width: 20em;
+        }
+
+        /* ol type a */
+        ol.type-a {
+            list-style-type: lower-alpha;
+        }
+
+        ol.type-A {
+            list-style-type: upper-alpha;
+        }
+
+        ol.type-i {
+            list-style-type: lower-roman;
+        }
+
+        ol.type-I {
+            list-style-type: lower-roman;
+        }
+
+        /* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+        table {
+            border: 1px solid #ddd;
+        }
+
+        td {
+            border-top: 1px solid #ddd;
+        }
+
+        tr {
+            break-inside: avoid;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f8f8f8;
+        }
+
+        /* Use style rules to govern display of the TOC. */
+        @media screen and (max-width: 1023px) {
+            #toc nav {
+                display: none;
+            }
+
+            #toc.active nav {
+                display: block;
+            }
+        }
+
+        /* Add support for keepWithNext */
+        .keepWithNext {
+            break-after: avoid-page;
+            break-after: avoid-page;
+        }
+
+        /* Add support for keepWithPrevious */
+        .keepWithPrevious {
+            break-before: avoid-page;
+        }
+
+        /* Change the approach to avoiding breaks inside artwork etc. */
+        figure,
+        pre,
+        table,
+        .artwork,
+        .sourcecode {
+            break-before: auto;
+            break-after: auto;
+        }
+
+        /* Avoid breaks between <dt> and <dd> */
+        dl {
+            break-before: auto;
+            break-inside: auto;
+        }
+
+        dt {
+            break-before: auto;
+            break-after: avoid-page;
+        }
+
+        dd {
+            break-before: avoid-page;
+            break-after: auto;
+            orphans: 3;
+            widows: 3
+        }
+
+        span.break,
+        dd.break {
+            margin-bottom: 0;
+            min-height: 0;
+            break-before: auto;
+            break-inside: auto;
+            break-after: auto;
+        }
+
+        /* Undo break-before ToC */
+        @media print {
+            #toc {
+                break-before: auto;
+            }
+        }
+
+        /* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+        ul.compact p,
+        .ulCompact p,
+        ol.compact p,
+        .olCompact p {
+            margin: 0;
+        }
+
+        /* But the list as a whole needs the extra space at the end */
+        section ul.compact,
+        section .ulCompact,
+        section ol.compact,
+        section .olCompact {
+            margin-bottom: 1em;
+            /* same as p not within ul.compact etc. */
+        }
+
+        /* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+        tt,
+        code {
+            background-color: transparent;
+        }
+
+        p tt,
+        p code,
+        li tt,
+        li code {
+            background-color: #f8f8f8;
+        }
+
+        /* Tweak the pre margin -- 0px doesn't come out well */
+        pre {
+            margin-top: 0.5px;
+        }
+
+        /* Tweak the compact list text */
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact,
+        dl.compact,
+        .dlCompact {
+            line-height: normal;
+        }
+
+        /* Don't add top margin for nested lists */
+        li>ul,
+        li>ol,
+        li>dl,
+        dd>ul,
+        dd>ol,
+        dd>dl,
+        dl>dd>dl {
+            margin-top: initial;
+        }
+
+        /* Elements that should not be rendered on the same line as a <dt> */
+        /* This should match the element list in writer.text.TextWriter.render_dl() */
+        dd>div.artwork:first-child,
+        dd>aside:first-child,
+        dd>figure:first-child,
+        dd>ol:first-child,
+        dd>div.sourcecode:first-child,
+        dd>table:first-child,
+        dd>ul:first-child {
+            clear: left;
+        }
+
+        /* fix for weird browser behaviour when <dd/> is empty */
+        dt+dd:empty::before {
+            content: "\00a0";
+        }
+
+        /* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+        li>p {
+            margin-bottom: 0.5em
+        }
+
+        /* Don't let p margin spill out from inside list items */
+        li>p:last-of-type:only-child {
+            margin-bottom: 0;
+        }
+    </style>
+    <link href="https://www.rfc-editor.org/rfc/rfc-local.css" rel="stylesheet" type="text/css">
+    <link href="https://dx.doi.org/10.17487/rfc9457" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-httpapi-rfc7807bis-07" rel="prev">
+</head>
+
+<body class="xml2rfc">
+    <script src="https://www.rfc-editor.org/js/metadata.min.js"></script>
+    <table class="ears">
+        <thead>
+            <tr>
+                <td class="left">RFC 9457</td>
+                <td class="center">HTTP APIのための問題詳細</td>
+                <td class="right">2023年7月</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td class="left">Nottingham, et al.</td>
+                <td class="center">標準化過程</td>
+                <td class="right">[Page]</td>
+            </tr>
+        </tfoot>
+    </table>
+    <div id="external-metadata" class="document-information"></div>
+    <div id="internal-metadata" class="document-information">
+        <dl id="identifiers">
+            <dt class="label-stream">ストリーム:</dt>
+            <dd class="stream">インターネット技術タスクフォース（IETF）</dd>
+            <dt class="label-rfc">RFC:</dt>
+            <dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc9457" class="eref">9457</a></dd>
+            <dt class="label-obsoletes">廃止:</dt>
+            <dd class="obsoletes">
+                <a href="https://www.rfc-editor.org/rfc/rfc7807" class="eref">7807</a>
+            </dd>
+            <dt class="label-category">カテゴリー:</dt>
+            <dd class="category">標準化過程</dd>
+            <dt class="label-published">公開:</dt>
+            <dd class="published">
+                <time datetime="2023-07" class="published">2023年7月</time>
+            </dd>
+            <dt class="label-issn">ISSN:</dt>
+            <dd class="issn">2070-1721</dd>
+            <dt class="label-authors">著者:</dt>
+            <dd class="authors">
+                <div class="author">
+                    <div class="author-name">M. Nottingham</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">E. Wilde</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">S. Dalal</div>
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <h1 id="rfcnum">RFC 9457</h1>
+    <h1 id="title">HTTP APIのための問題詳細</h1>
+    <section id="section-abstract">
+        <h2 id="abstract"><a href="#abstract" class="selfRef">概要</a></h2>
+        <p id="section-abstract-1">この文書は、HTTP
+            APIのために新しいエラーレスポンス形式を定義する必要を避けるため、HTTPレスポンス内容でエラーの機械可読な詳細を伝達する「問題詳細」を定義します。<a href="#section-abstract-1"
+                class="pilcrow">¶</a></p>
+        <p id="section-abstract-2">この文書はRFC 7807を廃止します。<a href="#section-abstract-2" class="pilcrow">¶</a>
+        </p>
+    </section>
+    <div id="status-of-memo">
+        <section id="section-boilerplate.1">
+            <h2 id="name-status-of-this-memo">
+                <a href="#name-status-of-this-memo" class="section-name selfRef">このメモの位置付け</a>
+            </h2>
+            <p id="section-boilerplate.1-1">
+                これはインターネット標準化過程の文書です。<a href="#section-boilerplate.1-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-boilerplate.1-2">
+                この文書は、インターネット技術タスクフォース
+                （IETF）の成果物です。これはIETFコミュニティの合意を表します。これは
+                公開レビューを受けており、Internet Engineering Steering Group
+                （IESG）によって公開が承認されています。インターネット標準に関する
+                さらなる情報は、RFC 7841のセクション2で入手できます。<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.1-3">
+                この文書の現在の状態、正誤表、および
+                この文書に関するフィードバックの提供方法についての情報は、
+                <span><a
+                        href="https://www.rfc-editor.org/info/rfc9457">https://www.rfc-editor.org/info/rfc9457</a></span>で入手できます。<a
+                    href="#section-boilerplate.1-3" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="copyright">
+        <section id="section-boilerplate.2">
+            <h2 id="name-copyright-notice">
+                <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+            </h2>
+            <p id="section-boilerplate.2-1">
+                Copyright (c) 2023 IETF Trust and the persons identified as the
+                document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.2-2">
+                This document is subject to BCP 78 and the IETF Trust's Legal
+                Provisions Relating to IETF Documents
+                (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>)
+                in effect on the date of
+                publication of this document. Please review these documents
+                carefully, as they describe your rights and restrictions with
+                respect to this document. Code Components extracted from this
+                document must include Revised BSD License text as described in
+                Section 4.e of the Trust Legal Provisions and are provided without
+                warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2"
+                    class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="toc">
+        <section id="section-toc.1">
+            <a href="#" onclick="scroll(0,0)" class="toplink">▲</a>
+            <h2 id="name-table-of-contents">
+                <a href="#name-table-of-contents" class="section-name selfRef">目次</a>
+            </h2>
+            <nav class="toc">
+                <ul class="compact toc ulBare ulEmpty">
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+                        <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1"
+                                class="auto internal xref">1</a>. <a href="#name-introduction"
+                                class="internal xref">はじめに</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+                        <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2"
+                                class="auto internal xref">2</a>. <a href="#name-requirements-language"
+                                class="internal xref">要件言語</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+                        <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>. <a
+                                href="#name-the-problem-details-json-ob" class="internal xref">問題詳細JSON
+                                オブジェクト</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1"
+                                        class="auto internal xref">3.1</a>. <a href="#name-members-of-a-problem-detail"
+                                        class="internal xref">問題詳細オブジェクトのメンバー</a></p>
+                                <ul class="compact toc ulBare ulEmpty">
+                                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.1">
+                                        <p id="section-toc.1-1.3.2.1.2.1.1" class="keepWithNext"><a
+                                                href="#section-3.1.1" class="auto internal xref">3.1.1</a>. <a
+                                                href="#name-type" class="internal xref">"type"</a></p>
+                                    </li>
+                                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.2">
+                                        <p id="section-toc.1-1.3.2.1.2.2.1"><a href="#section-3.1.2"
+                                                class="auto internal xref">3.1.2</a>. <a href="#name-status"
+                                                class="internal xref">"status"</a></p>
+                                    </li>
+                                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.3">
+                                        <p id="section-toc.1-1.3.2.1.2.3.1"><a href="#section-3.1.3"
+                                                class="auto internal xref">3.1.3</a>. <a href="#name-title"
+                                                class="internal xref">"title"</a></p>
+                                    </li>
+                                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.4">
+                                        <p id="section-toc.1-1.3.2.1.2.4.1"><a href="#section-3.1.4"
+                                                class="auto internal xref">3.1.4</a>. <a href="#name-detail"
+                                                class="internal xref">"detail"</a></p>
+                                    </li>
+                                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1.2.5">
+                                        <p id="section-toc.1-1.3.2.1.2.5.1"><a href="#section-3.1.5"
+                                                class="auto internal xref">3.1.5</a>. <a href="#name-instance"
+                                                class="internal xref">"instance"</a></p>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2"
+                                        class="auto internal xref">3.2</a>. <a href="#name-extension-members"
+                                        class="internal xref">拡張メンバー</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+                        <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>. <a
+                                href="#name-defining-new-problem-types" class="internal xref">新しい問題型の定義</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1"
+                                        class="auto internal xref">4.1</a>. <a href="#name-example"
+                                        class="internal xref">例</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2"
+                                        class="auto internal xref">4.2</a>. <a href="#name-registered-problem-types"
+                                        class="internal xref">登録済み問題型</a></p>
+                                <ul class="compact toc ulBare ulEmpty">
+                                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.1">
+                                        <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1"
+                                                class="auto internal xref">4.2.1</a>. <a href="#name-aboutblank"
+                                                class="internal xref">about:blank</a></p>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+                        <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>. <a
+                                href="#name-security-considerations" class="internal xref">セキュリティ上の考慮事項</a>
+                        </p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+                        <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>. <a
+                                href="#name-iana-considerations" class="internal xref">IANAに関する考慮事項</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+                        <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>. <a
+                                href="#name-references" class="internal xref">参照文献</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1"
+                                        class="auto internal xref">7.1</a>. <a href="#name-normative-references"
+                                        class="internal xref">規範参照</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2"
+                                        class="auto internal xref">7.2</a>. <a href="#name-informative-references"
+                                        class="internal xref">参考参照</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+                        <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref">付録A</a>. <a
+                                href="#name-json-schema-for-http-proble" class="internal xref">HTTP問題用のJSON
+                                Schema</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+                        <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref">付録B</a>. <a
+                                href="#name-http-problems-and-xml" class="internal xref">HTTP問題とXML</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+                        <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref">付録C</a>. <a
+                                href="#name-using-problem-details-with-" class="internal xref">問題詳細を他の形式で
+                                使用する</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+                        <p id="section-toc.1-1.11.1"><a href="#appendix-D" class="auto internal xref">付録D</a>. <a
+                                href="#name-changes-from-rfc-7807" class="internal xref">RFC 7807からの変更点</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+                        <p id="section-toc.1-1.12.1"><a href="#appendix-E" class="auto internal xref"></a><a
+                                href="#name-acknowledgements" class="internal xref">謝辞</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+                        <p id="section-toc.1-1.13.1"><a href="#appendix-F" class="auto internal xref"></a><a
+                                href="#name-authors-addresses" class="internal xref">著者の連絡先</a></p>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+    </div>
+    <div id="introduction">
+        <section id="section-1">
+            <h2 id="name-introduction">
+                <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction"
+                    class="section-name selfRef">はじめに</a>
+            </h2>
+            <p id="section-1-1">HTTPステータスコード（<span>[<a href="#RFC9110" class="cite xref">HTTP</a>]の<a
+                        href="https://www.rfc-editor.org/rfc/rfc9110#section-15" class="relref">セクション15</a></span>）は、
+                エラーについて有用であるのに十分な情報を常に伝達できるとは限りません。Webブラウザーを使用する人間は、多くの場合、
+                HTML <span>[<a href="#HTML5" class="cite xref">HTML5</a>]</span> レスポンス内容を理解できますが、
+                HTTP APIの非人間の利用者がそうするのは困難です。<a href="#section-1-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-2">その欠点に対処するために、この仕様は、遭遇した問題の詳細――「問題詳細」――を記述するための
+                単純なJSON <span>[<a href="#RFC8259" class="cite xref">JSON</a>]</span> および
+                XML <span>[<a href="#XML" class="cite xref">XML</a>]</span> 文書形式を定義します。<a href="#section-1-2"
+                    class="pilcrow">¶</a></p>
+            <p id="section-1-3">たとえば、クライアントのアカウントに十分なクレジットがないことを示すレスポンスを考えます。
+                APIの設計者は、汎用HTTPソフトウェア（クライアントライブラリ、キャッシュ、プロキシなど）にレスポンスの一般的な意味を通知するために、
+                403 Forbiddenステータスコードを使用することを決定するかもしれません。
+                API固有の問題詳細（サーバーがリクエストを拒否した理由や該当するアカウント残高など）は、
+                クライアントがそれらに適切に対処できるように（たとえば、アカウントへの追加クレジットの移転をトリガーするなど）、
+                レスポンス内容で伝達できます。<a href="#section-1-3" class="pilcrow">¶</a></p>
+            <p id="section-1-4">この仕様は、特定の「問題型」（例:「クレジット不足」）を
+                URI <span>[<a href="#RFC3986" class="cite xref">URI</a>]</span>で識別します。HTTP APIは、
+                自身に固有の問題を識別するために自身の管理下にあるURIを使用できます。または、相互運用性を促進し、
+                共通の意味を活用するために既存のものを再利用できます（<a href="#registry" class="auto internal xref">セクション4.2</a>を参照）。<a
+                    href="#section-1-4" class="pilcrow">¶</a></p>
+            <p id="section-1-5">問題詳細には、問題の特定の発生を識別するURIなど、他の情報を含めることができます
+                （実質的に「先週の木曜日にJoeに十分なクレジットがなかった時」という概念に識別子を与えるものです）。これはサポートや
+                フォレンジックの目的に役立つことがあります。<a href="#section-1-5" class="pilcrow">¶</a></p>
+            <p id="section-1-6">問題詳細のデータモデルはJSON <span>[<a href="#RFC8259"
+                        class="cite xref">JSON</a>]</span>オブジェクトです。JSON文書としてシリアライズされる場合、
+                これは"application/problem+json"メディア型を使用します。<a href="#xml-syntax" class="auto internal xref">付録B</a>は、
+                "application/problem+xml"メディア型を使用する同等のXML形式を定義します。<a href="#section-1-6" class="pilcrow">¶</a></p>
+            <p id="section-1-7">問題詳細がHTTPレスポンスで伝達される場合、その内容はプロアクティブネゴシエーションを使用して
+                ネゴシエートできます。[<a href="#RFC9110" class="cite xref">HTTP</a>]の<span><a
+                        href="https://www.rfc-editor.org/rfc/rfc9110#section-12.1"
+                        class="relref">セクション12.1</a></span>を参照してください。特に、
+                人間可読な文字列（titleやdescription内のものなど）で使用される言語は、
+                Accept-Languageリクエストヘッダーフィールド（[<a href="#RFC9110" class="cite xref">HTTP</a>]の<span><a
+                        href="https://www.rfc-editor.org/rfc/rfc9110#section-12.5.4"
+                        class="relref">セクション12.5.4</a></span>）を使用して
+                ネゴシエートできますが、そのネゴシエーションによっても、優先されないデフォルト表現が返されることがあります。<a href="#section-1-7" class="pilcrow">¶</a></p>
+            <p id="section-1-8">問題詳細は任意のHTTPステータスコードで使用できますが、4xxおよび5xxレスポンスの意味に最も自然に適合します。
+                問題詳細は、HTTPで問題の詳細を伝達する唯一の方法では（当然ながら）ないことに注意してください。
+                たとえば、レスポンスが依然としてリソースの表現である場合、そのアプリケーションの形式で関連する詳細を記述することが
+                しばしば望ましいです。同様に、定義済みのHTTPステータスコードは、追加の詳細を伝達する必要なしに多くの状況をカバーします。<a href="#section-1-8"
+                    class="pilcrow">¶</a></p>
+            <p id="section-1-9">この仕様の目的は、共通のエラー形式を必要とするアプリケーションのためにそれを定義し、
+                アプリケーションが独自のものを定義する必要がないようにすること、またはさらに悪いことに、
+                既存のHTTPステータスコードの意味を再定義しようと誘惑されないようにすることです。アプリケーションがエラーを伝達するためにこれを使用しないことを選択した場合でも、
+                その設計を検討することは、既存形式でエラーを伝達するときに直面する設計上の判断を導くのに役立ちます。<a href="#section-1-9" class="pilcrow">¶</a></p>
+            <p id="section-1-10"><span>[<a href="#RFC7807" class="cite xref">RFC7807</a>]</span>からの変更点の一覧については、
+                <a href="#changes" class="auto internal xref">付録D</a>を参照してください。<a href="#section-1-10"
+                    class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="requirements-lang">
+        <section id="section-2">
+            <h2 id="name-requirements-language">
+                <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-requirements-language"
+                    class="section-name selfRef">要件言語</a>
+            </h2>
+            <p id="section-2-1"> この文書におけるキーワード「<span class="bcp14">MUST</span>」、「<span class="bcp14">MUST NOT</span>」、
+                「<span class="bcp14">REQUIRED</span>」、「<span class="bcp14">SHALL</span>」、「<span class="bcp14">SHALL
+                    NOT</span>」、「<span class="bcp14">SHOULD</span>」、「<span class="bcp14">SHOULD NOT</span>」、
+                「<span class="bcp14">RECOMMENDED</span>」、「<span class="bcp14">NOT RECOMMENDED</span>」、
+                「<span class="bcp14">MAY</span>」、および「<span class="bcp14">OPTIONAL</span>」は、
+                ここに示すようにすべて大文字で現れる場合に限り、
+                BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174"
+                        class="cite xref">RFC8174</a>]</span>で説明されているように解釈されます。<a href="#section-2-1"
+                    class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="problem-json">
+        <section id="section-3">
+            <h2 id="name-the-problem-details-json-ob">
+                <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-the-problem-details-json-ob"
+                    class="section-name selfRef">問題詳細JSONオブジェクト</a>
+            </h2>
+            <p id="section-3-1">問題詳細の正規モデルはJSON <span>[<a href="#RFC8259"
+                        class="cite xref">JSON</a>]</span>オブジェクトです。JSON文書でシリアライズされる場合、
+                その形式は"application/problem+json"メディア型で識別されます。<a href="#section-3-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-3-2">例:<a href="#section-3-2" class="pilcrow">¶</a></p>
+            <div class="lang-http-message sourcecode" id="section-3-3">
+                <pre>
+POST /purchase HTTP/1.1
+Host: store.example.com
+Content-Type: application/json
+Accept: application/json, application/problem+json
+
+{
+  "item": 123456,
+  "quantity": 2
+}
+</pre><a href="#section-3-3" class="pilcrow">¶</a>
+            </div>
+            <div class="lang-http-message sourcecode" id="section-3-4">
+                <pre>
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+json
+Content-Language: en
+
+{
+ "type": "https://example.com/probs/out-of-credit",
+ "title": "You do not have enough credit.",
+ "detail": "Your current balance is 30, but that costs 50.",
+ "instance": "/account/12345/msgs/abc",
+ "balance": 30,
+ "accounts": ["/account/12345",
+              "/account/67890"]
+}
+</pre><a href="#section-3-4" class="pilcrow">¶</a>
+            </div>
+            <p id="section-3-5">ここでは、（そのtypeによって識別される）クレジット不足の問題が、
+                "title"で403の理由を示し、"instance"で特定の問題発生を識別し、
+                "detail"で発生固有の詳細を与え、さらに2つの拡張を追加しています。"balance"はアカウントの残高を伝達し、
+                "accounts"はアカウントにチャージできるリンクを一覧表示します。<a href="#section-3-5" class="pilcrow">¶</a></p>
+            <p id="section-3-6">それを受け入れるように設計されている場合、問題固有の拡張は同じ問題型の複数のインスタンスを伝達できます。
+                例:<a href="#section-3-6" class="pilcrow">¶</a></p>
+            <div class="lang-http-message sourcecode" id="section-3-7">
+                <pre>
+POST /details HTTP/1.1
+Host: account.example.com
+Accept: application/json
+
+{
+  "age": 42.3,
+  "profile": {
+    "color": "yellow"
+  }
+}
+</pre><a href="#section-3-7" class="pilcrow">¶</a>
+            </div>
+            <div class="lang-http-message sourcecode" id="section-3-8">
+                <pre>
+HTTP/1.1 422 Unprocessable Content
+Content-Type: application/problem+json
+Content-Language: en
+
+{
+ "type": "https://example.net/validation-error",
+ "title": "Your request is not valid.",
+ "errors": [
+             {
+               "detail": "must be a positive integer",
+               "pointer": "#/age"
+             },
+             {
+               "detail": "must be 'green', 'red' or 'blue'",
+               "pointer": "#/profile/color"
+             }
+          ]
+}
+</pre><a href="#section-3-8" class="pilcrow">¶</a>
+            </div>
+            <p id="section-3-9">ここでの架空の問題型は"errors"拡張を定義します。これは各検証エラーの詳細を記述する配列です。
+                各メンバーは、問題を記述する"detail"と、JSON Pointer <span>[<a href="#RFC6901"
+                        class="cite xref">JSON-POINTER</a>]</span>を使用してリクエスト内容内の問題の位置を示す
+                "pointer"を含むオブジェクトです。<a href="#section-3-9" class="pilcrow">¶</a></p>
+            <p id="section-3-10">APIが同じ型を共有しない複数の問題に遭遇した場合、最も関連性が高い、または緊急度の高い問題を
+                レスポンスで表現することが<span class="bcp14">RECOMMENDED</span>です。複数の異なる型を伝達する汎用的な「バッチ」問題型を作成することは可能ですが、
+                それらはHTTPの意味にうまく対応しません。<a href="#section-3-10" class="pilcrow">¶</a></p>
+            <p id="section-3-11">また、クライアントがAcceptでそれを列挙していなかったにもかかわらず、APIが
+                "application/problem+json"型で応答していることにも注意してください。これはHTTPで許可されています
+                （[<a href="#RFC9110" class="cite xref">HTTP</a>]の<span><a
+                        href="https://www.rfc-editor.org/rfc/rfc9110#section-12.5.1"
+                        class="relref">セクション12.5.1</a></span>を参照）。<a href="#section-3-11" class="pilcrow">¶</a></p>
+            <div id="members">
+                <section id="section-3.1">
+                    <h3 id="name-members-of-a-problem-detail">
+                        <a href="#section-3.1" class="section-number selfRef">3.1. </a><a
+                            href="#name-members-of-a-problem-detail" class="section-name selfRef">問題詳細オブジェクトのメンバー</a>
+                    </h3>
+                    <p id="section-3.1-1">問題詳細オブジェクトは次のメンバーを持つことができます。メンバーの値の型が指定された型と一致しない場合、
+                        そのメンバーは<span class="bcp14">MUST</span>無視されます。すなわち、そのメンバーが存在しなかったかのように処理は継続します。<a
+                            href="#section-3.1-1" class="pilcrow">¶</a></p>
+                    <div id="type">
+                        <section id="section-3.1.1">
+                            <h4 id="name-type">
+                                <a href="#section-3.1.1" class="section-number selfRef">3.1.1. </a><a href="#name-type"
+                                    class="section-name selfRef">"type"</a>
+                            </h4>
+                            <p id="section-3.1.1-1">"type"メンバーは、問題型を識別するURI参照
+                                <span>[<a href="#RFC3986" class="cite xref">URI</a>]</span>を含むJSON文字列です。
+                                利用者は、（必要に応じて解決した後の）"type" URIを問題型の主要な識別子として
+                                <span class="bcp14">MUST</span>使用します。<a href="#section-3.1.1-1" class="pilcrow">¶</a>
+                            </p>
+                            <p id="section-3.1.1-2">このメンバーが存在しない場合、その値は"about:blank"であると見なされます。<a
+                                    href="#section-3.1.1-2" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.1-3">type URIがロケーターである場合（たとえば、"http"または"https"スキームを持つもの）、
+                                それを逆参照すると、問題型に関する人間可読な文書（たとえばHTML <span>[<a href="#HTML5"
+                                        class="cite xref">HTML5</a>]</span>を使用したもの）を提供
+                                <span class="bcp14">SHOULD</span>します。ただし、利用者は、開発者に情報を提供するとき（たとえばデバッグツールが使用中の場合など）を除き、
+                                type URIを自動的に逆参照<span class="bcp14">SHOULD NOT</span>しません。<a href="#section-3.1.1-3"
+                                    class="pilcrow">¶</a>
+                            </p>
+                            <p id="section-3.1.1-4">"type"が相対URIを含む場合、それは<span>[<a href="#RFC3986"
+                                        class="cite xref">URI</a>]の<a
+                                        href="https://www.rfc-editor.org/rfc/rfc3986#section-5" class="relref">セクション
+                                        5</a></span>に従って、文書の基底URIを基準に解決されます。ただし、
+                                相対URIの使用は混乱を招く可能性があり、すべての実装で正しく処理されない可能性があります。<a href="#section-3.1.1-4"
+                                    class="pilcrow">¶</a></p>
+                            <p id="section-3.1.1-5">たとえば、2つのリソース
+                                "https://api.example.org/foo/bar/123"と"https://api.example.org/widget/456"の両方が
+                                相対URI参照"example-problem"と等しい"type"で応答する場合、
+                                解決後にはそれぞれ異なるリソース
+                                （"https://api.example.org/foo/bar/example-problem"と
+                                "https://api.example.org/widget/example-problem"）を識別します。その結果、
+                                可能な場合は"type"で絶対URIを使用し、相対URIを使用する場合は完全なパス（例:
+                                "/types/123"）を含めることが<span class="bcp14">RECOMMENDED</span>です。<a href="#section-3.1.1-5"
+                                    class="pilcrow">¶</a>
+                            </p>
+                            <p id="section-3.1.1-6">type URIは解決不能なURIであることが許可されています。たとえば、
+                                tag URIスキーム <span>[<a href="#RFC4151" class="cite xref">TAG</a>]</span> は、
+                                問題型を一意に識別するために使用できます。<a href="#section-3.1.1-6" class="pilcrow">¶</a></p>
+                            <div class="alignLeft art-text artwork" id="section-3.1.1-7">
+                                <pre>
+tag:example@example.org,2021-09-17:OutOfLuck
+</pre><a href="#section-3.1.1-7" class="pilcrow">¶</a>
+                            </div>
+                            <p id="section-3.1.1-8">しかし、将来URIを解決することが望ましくなる可能性があるため、
+                                この仕様では解決可能なtype URIが推奨されます。たとえば、API設計者が上記のURIを使用し、
+                                後でエラーに関する情報を発見するためにtype URIを解決するツールを採用した場合、その機能を活用するには
+                                解決可能なURIへ切り替える必要があり、問題型に新しい識別性を作成して破壊的変更を導入することになります。<a href="#section-3.1.1-8"
+                                    class="pilcrow">¶</a></p>
+                        </section>
+                    </div>
+                    <div id="status">
+                        <section id="section-3.1.2">
+                            <h4 id="name-status">
+                                <a href="#section-3.1.2" class="section-number selfRef">3.1.2. </a><a
+                                    href="#name-status" class="section-name selfRef">"status"</a>
+                            </h4>
+                            <p id="section-3.1.2-1">"status"メンバーは、この問題の発生についてオリジンサーバーによって生成された
+                                HTTPステータスコード（<span>[<a href="#RFC9110" class="cite xref">HTTP</a>]の<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110#section-15" class="relref">セクション
+                                        15</a></span>）を示すJSON数値です。<a href="#section-3.1.2-1" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.2-2">"status"メンバーは、存在する場合でも助言的なものにすぎません。これは利用者の便宜のために使用された
+                                HTTPステータスコードを伝達します。生成者は、この形式を理解しない汎用HTTPソフトウェアがなお正しく振る舞うことを保証するため、
+                                実際のHTTPレスポンスで同じステータスコードを<span class="bcp14">MUST</span>使用します。
+                                その使用に関する追加の注意については、<a href="#security-considerations" class="auto internal xref">セクション
+                                    5</a>を参照してください。<a href="#section-3.1.2-2" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.2-3">利用者は、（たとえば仲介者またはキャッシュによって）ステータスコードが変更された場合や、
+                                メッセージの内容がHTTP情報なしで永続化された場合に、生成者が使用した元のステータスコードを判断するために
+                                statusメンバーを使用できます。汎用HTTPソフトウェアは引き続きHTTPステータスコードを使用します。<a href="#section-3.1.2-3"
+                                    class="pilcrow">¶</a></p>
+                        </section>
+                    </div>
+                    <div id="title1">
+                        <section id="section-3.1.3">
+                            <h4 id="name-title">
+                                <a href="#section-3.1.3" class="section-number selfRef">3.1.3. </a><a href="#name-title"
+                                    class="section-name selfRef">"title"</a>
+                            </h4>
+                            <p id="section-3.1.3-1">"title"メンバーは、問題型の短く人間可読な要約を含むJSON文字列です。<a href="#section-3.1.3-1"
+                                    class="pilcrow">¶</a></p>
+                            <p id="section-3.1.3-2">これは、ローカライズ（たとえばプロアクティブコンテンツネゴシエーションの使用。
+                                <span>[<a href="#RFC9110" class="cite xref">HTTP</a>]の<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110#section-12.1"
+                                        class="relref">セクション12.1</a></span>を参照）を除き、
+                                問題の発生ごとに変化<span class="bcp14">SHOULD NOT</span>しません。<a href="#section-3.1.3-2"
+                                    class="pilcrow">¶</a>
+                            </p>
+                            <p id="section-3.1.3-3">"title"文字列は助言的なものであり、type URIの意味を知らず、かつ発見できない利用者
+                                （たとえばオフラインログ分析時）のためだけに含まれます。<a href="#section-3.1.3-3" class="pilcrow">¶</a></p>
+                        </section>
+                    </div>
+                    <div id="detail">
+                        <section id="section-3.1.4">
+                            <h4 id="name-detail">
+                                <a href="#section-3.1.4" class="section-number selfRef">3.1.4. </a><a
+                                    href="#name-detail" class="section-name selfRef">"detail"</a>
+                            </h4>
+                            <p id="section-3.1.4-1">"detail"メンバーは、この問題の発生に固有の人間可読な説明を含むJSON文字列です。<a
+                                    href="#section-3.1.4-1" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.4-2">"detail"文字列が存在する場合、それはデバッグ情報を提供するよりも、
+                                クライアントが問題を修正するのを助けることに焦点を当てるべきです。<a href="#section-3.1.4-2" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.4-3">利用者は、情報を得るために"detail"メンバーを解析<span class="bcp14">SHOULD
+                                    NOT</span>しません。
+                                拡張の方がそのような情報を取得するのにより適しており、誤りが少ない方法です。<a href="#section-3.1.4-3" class="pilcrow">¶</a>
+                            </p>
+                        </section>
+                    </div>
+                    <div id="instance">
+                        <section id="section-3.1.5">
+                            <h4 id="name-instance">
+                                <a href="#section-3.1.5" class="section-number selfRef">3.1.5. </a><a
+                                    href="#name-instance" class="section-name selfRef">"instance"</a>
+                            </h4>
+                            <p id="section-3.1.5-1">"instance"メンバーは、問題の特定の発生を識別するURI参照を含むJSON文字列です。<a
+                                    href="#section-3.1.5-1" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.5-2">"instance" URIが逆参照可能である場合、そこから問題詳細オブジェクトを取得できます。
+                                また、プロアクティブコンテンツネゴシエーション（<span>[<a href="#RFC9110" class="cite xref">HTTP</a>]の<a
+                                        href="https://www.rfc-editor.org/rfc/rfc9110#section-12.5.1"
+                                        class="relref">セクション12.5.1</a></span>を参照）の使用を通じて、
+                                他の形式で問題発生に関する情報を返すこともあります。<a href="#section-3.1.5-2" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.5-3">"instance" URIが逆参照可能でない場合、それはサーバーにとって重要である可能性があるが
+                                クライアントにとっては不透明な、問題発生の一意な識別子として機能します。<a href="#section-3.1.5-3" class="pilcrow">¶</a></p>
+                            <p id="section-3.1.5-4">"instance"が相対URIを含む場合、それは<span>[<a href="#RFC3986"
+                                        class="cite xref">URI</a>]の<a
+                                        href="https://www.rfc-editor.org/rfc/rfc3986#section-5" class="relref">セクション
+                                        5</a></span>に従って、文書の基底URIを基準に解決されます。ただし、
+                                相対URIの使用は混乱を招く可能性があり、すべての実装で正しく処理されない可能性があります。<a href="#section-3.1.5-4"
+                                    class="pilcrow">¶</a></p>
+                            <p id="section-3.1.5-5">たとえば、2つのリソース
+                                "https://api.example.org/foo/bar/123"と"https://api.example.org/widget/456"の両方が
+                                相対URI参照"example-instance"と等しい"instance"で応答する場合、解決後にはそれぞれ異なるリソース
+                                （"https://api.example.org/foo/bar/example-instance"と
+                                "https://api.example.org/widget/example-instance"）を識別します。その結果、
+                                可能な場合は"instance"で絶対URIを使用し、相対URIを使用する場合は完全なパス（例:
+                                "/instances/123"）を含めることが<span class="bcp14">RECOMMENDED</span>です。<a
+                                    href="#section-3.1.5-5" class="pilcrow">¶</a>
+                            </p>
+                        </section>
+                    </div>
+                </section>
+            </div>
+            <div id="extension">
+                <section id="section-3.2">
+                    <h3 id="name-extension-members">
+                        <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-extension-members"
+                            class="section-name selfRef">拡張メンバー</a>
+                    </h3>
+                    <p id="section-3.2-1">問題型定義は、その問題型に固有の追加メンバーで問題詳細オブジェクトを拡張
+                        <span class="bcp14">MAY</span>できます。<a href="#section-3.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-3.2-2">たとえば、上記のクレジット不足問題は、追加の問題固有情報を伝達するために、
+                        "balance"と"accounts"という2つの拡張を定義しています。<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+                    <p id="section-3.2-3">同様に、「validation error」の例は、見つかった個々のエラー発生の一覧を含む
+                        "errors"拡張を定義しており、それぞれに詳細と位置へのポインターがあります。<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+                    <p id="section-3.2-4">問題詳細を利用するクライアントは、認識しないそのような拡張をすべて
+                        <span class="bcp14">MUST</span>無視します。これにより、問題型が進化し、将来的に追加情報を含めることが可能になります。<a
+                            href="#section-3.2-4" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-3.2-5">拡張を作成する際、問題型の著者は名前を慎重に選択すべきです。
+                        XML形式（<a href="#xml-syntax" class="auto internal xref">付録B</a>を参照）で使用するには、
+                        それらは<span>[<a href="#XML" class="cite xref">XML</a>]の<a
+                                href="https://www.w3.org/TR/2008/REC-xml-20081126/#NT-Name" class="relref">セクション
+                                2.3</a></span>にあるName規則に適合する必要があります。<a href="#section-3.2-5" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="defining">
+        <section id="section-4">
+            <h2 id="name-defining-new-problem-types">
+                <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-defining-new-problem-types"
+                    class="section-name selfRef">新しい問題型の定義</a>
+            </h2>
+            <p id="section-4-1">HTTP APIがエラー状態を示すレスポンスを定義する必要がある場合、新しい問題型を定義することが
+                適切であるかもしれません。<a href="#section-4-1" class="pilcrow">¶</a></p>
+            <p id="section-4-2">そうする前に、それらが何に適しており、何を他の仕組みに任せる方がよいかを理解することが重要です。<a href="#section-4-2"
+                    class="pilcrow">¶</a></p>
+            <p id="section-4-3">問題詳細は基盤実装のためのデバッグツールではありません。むしろ、HTTPインターフェイス自体について
+                より詳しい詳細を公開する方法です。新しい問題型の設計者は、
+                <span><a href="#security-considerations" class="internal xref">セキュリティ上の考慮事項</a>
+                    （<a href="#security-considerations" class="auto internal xref">セクション5</a>）</span>、
+                特に、エラーメッセージを通じて実装内部を公開することで攻撃ベクトルを露出するリスクを慎重に考慮する必要があります。<a href="#section-4-3" class="pilcrow">¶</a>
+            </p>
+            <p id="section-4-4">同様に、真に汎用的な問題――すなわち、Web上の任意のリソースに適用されうる条件――は、
+                通常、単純なステータスコードとして表現する方がよいです。たとえば、PUTリクエストに対する403 Forbiddenステータスコードは
+                自明であるため、「書き込みアクセスが許可されていない」問題はおそらく不要です。<a href="#section-4-4" class="pilcrow">¶</a></p>
+            <p id="section-4-5">最後に、アプリケーションには、すでに定義している形式でエラーを伝達する、より適切な方法があるかもしれません。
+                問題詳細は、新しい「fault」または「error」文書形式を確立する必要性を避けることを意図しており、
+                既存のドメイン固有形式を置き換えることを意図していません。<a href="#section-4-5" class="pilcrow">¶</a></p>
+            <p id="section-4-6">とはいえ、HTTPコンテンツネゴシエーションを使用して既存のHTTP APIに問題詳細のサポートを追加することは可能です
+                （たとえば、この形式への優先を示すためにAcceptリクエストヘッダーを使用するなど。
+                <span>[<a href="#RFC9110" class="cite xref">HTTP</a>]の<a
+                        href="https://www.rfc-editor.org/rfc/rfc9110#section-12.5.1" class="relref">セクション
+                        12.5.1</a></span>を参照）。<a href="#section-4-6" class="pilcrow">¶</a>
+            </p>
+            <p id="section-4-7">新しい問題型定義は、次を文書化<span class="bcp14">MUST</span>します。<a href="#section-4-7"
+                    class="pilcrow">¶</a></p>
+            <ol start="1" type="1" class="normal type-1" id="section-4-8">
+                <li id="section-4-8.1">type URI（通常は"http"または"https"スキームを持つ）<a href="#section-4-8.1"
+                        class="pilcrow">¶</a>
+                </li>
+                <li id="section-4-8.2">それを適切に説明するtitle（短く考えること）<a href="#section-4-8.2" class="pilcrow">¶</a>
+                </li>
+                <li id="section-4-8.3">それとともに使用されるHTTPステータスコード<a href="#section-4-8.3" class="pilcrow">¶</a>
+                </li>
+            </ol>
+            <p id="section-4-9">問題型定義は、適切な状況でRetry-Afterレスポンスヘッダー
+                （<span>[<a href="#RFC9110" class="cite xref">HTTP</a>]の<a
+                        href="https://www.rfc-editor.org/rfc/rfc9110#section-10.2.3" class="relref">セクション
+                        10.2.3</a></span>）の使用を指定<span class="bcp14">MAY</span>できます。<a href="#section-4-9"
+                    class="pilcrow">¶</a></p>
+            <p id="section-4-10">問題型URIは、問題を解決する方法を説明するHTML <span>[<a href="#HTML5"
+                        class="cite xref">HTML5</a>]</span>文書に解決
+                <span class="bcp14">SHOULD</span>します。<a href="#section-4-10" class="pilcrow">¶</a>
+            </p>
+            <p id="section-4-11">問題型定義は、問題詳細オブジェクト上の追加メンバーを指定
+                <span class="bcp14">MAY</span>できます。
+
+                たとえば、拡張は、機械が問題を解決するために使用できる別のリソースへの型付きリンク
+                <span>[<a href="#RFC8288" class="cite xref">WEB-LINKING</a>]</span>を使用するかもしれません。<a href="#section-4-11"
+                    class="pilcrow">¶</a>
+            </p>
+            <p id="section-4-12">そのような追加メンバーが定義される場合、その名前は文字（ALPHA、<span>[<a href="#RFC5234"
+                        class="cite xref">ABNF</a>]の<a href="https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1"
+                        class="relref">付録
+                        B.1</a></span>に従う）で始まる
+                <span class="bcp14">SHOULD</span>であり、ALPHA、DIGIT
+                （<span>[<a href="#RFC5234" class="cite xref">ABNF</a>]の<a
+                        href="https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1" class="relref">付録
+                        B.1</a></span>）および"_"の文字で構成される
+                <span class="bcp14">SHOULD</span>であり（JSON以外の形式でもシリアライズできるようにするため）、
+                3文字以上である<span class="bcp14">SHOULD</span>です。<a href="#section-4-12" class="pilcrow">¶</a>
+            </p>
+            <div id="example">
+                <section id="section-4.1">
+                    <h3 id="name-example">
+                        <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-example"
+                            class="section-name selfRef">例</a>
+                    </h3>
+                    <p id="section-4.1-1">たとえば、オンラインショッピングカートにHTTP APIを公開している場合、
+                        ユーザーがクレジット不足（上記の例）であるため購入できないことを示す必要があるかもしれません。<a href="#section-4.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.1-2">この情報を収容できるアプリケーション固有の形式がすでにある場合、おそらくそれを行うのが最善です。
+                        しかし、ない場合は、問題詳細形式のいずれか――APIがJSONベースならJSON、その形式を使用するならXML――を使用するかもしれません。<a href="#section-4.1-2"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-4.1-3">そうするために、レジストリ（<a href="#registry"
+                            class="auto internal xref">セクション4.2</a>）で目的に合った既定義のtype URIを探すかもしれません。
+                        利用可能なものがあれば、そのURIを再利用できます。<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+                    <p id="section-4.1-4">利用可能なものがなければ、（自身の管理下にあり、時間が経っても安定しているべき）
+                        新しいtype URI、適切なtitle、およびそれとともに使用されるHTTPステータスコードを作成して文書化し、
+                        それが何を意味し、どのように扱われるべきかを併せて示すことができます。<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="registry">
+                <section id="section-4.2">
+                    <h3 id="name-registered-problem-types">
+                        <a href="#section-4.2" class="section-number selfRef">4.2. </a><a
+                            href="#name-registered-problem-types" class="section-name selfRef">登録済み問題型</a>
+                    </h3>
+                    <p id="section-4.2-1">この仕様は、再利用を促進するために、共通で広く使用される問題型URIのための
+                        "HTTP Problem Types"レジストリを定義します。<a href="#section-4.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.2-2">このレジストリのポリシーは、<span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]の<a
+                                href="https://www.rfc-editor.org/rfc/rfc8126#section-4.6" class="relref">セクション
+                                4.6</a></span>に従うSpecification Requiredです。<a href="#section-4.2-2" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.2-3">リクエストを評価する際、指定専門家は、コミュニティからのフィードバック、問題型がどれほど明確に定義されているか、
+                        およびこの仕様の要件を考慮すべきです。
+                        ベンダー固有、アプリケーション固有、および展開固有の値は登録できません。
+                        仕様文書は安定した自由に利用可能な方法で公開されるべきです（理想的にはURLの場所に置かれる）が、標準である必要はありません。<a href="#section-4.2-3"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-4.2-4">登録は、type URIに接頭辞「<span><a
+                                href="https://iana.org/assignments/http-problem-types#">https://iana.org/assignments/http-problem-types#</a></span>」
+                        を使用<span class="bcp14">MAY</span>できます。それらのURIは解決できない可能性があることに注意してください。<a href="#section-4.2-4"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-4.2-5">登録リクエストには、次のテンプレートを使用すべきです。<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlCompact dlParallel" id="section-4.2-6">
+                        <dt id="section-4.2-6.1">Type URI:</dt>
+                        <dd style="margin-left: 1.5em" id="section-4.2-6.2">[問題型のURI]<a href="#section-4.2-6.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-4.2-6.3">Title:</dt>
+                        <dd style="margin-left: 1.5em" id="section-4.2-6.4">[問題型の短い説明]<a href="#section-4.2-6.4"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-4.2-6.5">推奨HTTPステータスコード:</dt>
+                        <dd style="margin-left: 1.5em" id="section-4.2-6.6">[その型とともに使用するのに最も適切なステータスコード]<a
+                                href="#section-4.2-6.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-4.2-6.7">参照:</dt>
+                        <dd style="margin-left: 1.5em" id="section-4.2-6.8">[その型を定義する仕様へ]<a href="#section-4.2-6.8"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <p id="section-4.2-7">登録リクエストの送付先の詳細については、
+                        <span>&lt;<a
+                                href="https://iana.org/assignments/http-problem-types">https://iana.org/assignments/http-problem-types</a>&gt;</span>
+                        のレジストリを参照してください。<a href="#section-4.2-7" class="pilcrow">¶</a>
+                    </p>
+                    <div id="blank">
+                        <section id="section-4.2.1">
+                            <h4 id="name-aboutblank">
+                                <a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a
+                                    href="#name-aboutblank" class="section-name selfRef">about:blank</a>
+                            </h4>
+                            <p id="section-4.2.1-1">この仕様は、1つのProblem Typeである"about:blank"を次のように登録します。<a
+                                    href="#section-4.2.1-1" class="pilcrow">¶</a></p>
+                            <span class="break"></span>
+                            <dl class="dlCompact dlParallel" id="section-4.2.1-2">
+                                <dt id="section-4.2.1-2.1">Type URI:</dt>
+                                <dd style="margin-left: 1.5em" id="section-4.2.1-2.2">about:blank<a
+                                        href="#section-4.2.1-2.2" class="pilcrow">¶</a>
+                                </dd>
+                                <dd class="break"></dd>
+                                <dt id="section-4.2.1-2.3">Title:</dt>
+                                <dd style="margin-left: 1.5em" id="section-4.2.1-2.4">HTTPステータスコードを参照<a
+                                        href="#section-4.2.1-2.4" class="pilcrow">¶</a>
+                                </dd>
+                                <dd class="break"></dd>
+                                <dt id="section-4.2.1-2.5">推奨HTTPステータスコード:</dt>
+                                <dd style="margin-left: 1.5em" id="section-4.2.1-2.6">N/A<a href="#section-4.2.1-2.6"
+                                        class="pilcrow">¶</a>
+                                </dd>
+                                <dd class="break"></dd>
+                                <dt id="section-4.2.1-2.7">参照:</dt>
+                                <dd style="margin-left: 1.5em" id="section-4.2.1-2.8">RFC 9457<a
+                                        href="#section-4.2.1-2.8" class="pilcrow">¶</a>
+                                </dd>
+                                <dd class="break"></dd>
+                            </dl>
+                            <p id="section-4.2.1-3">"about:blank" URI <span>[<a href="#RFC6694"
+                                        class="cite xref">ABOUT</a>]</span>は、問題型として使用される場合、
+                                その問題がHTTPステータスコードの意味を超える追加の意味を持たないことを示します。<a href="#section-4.2.1-3"
+                                    class="pilcrow">¶</a></p>
+                            <p id="section-4.2.1-4">"about:blank"が使用される場合、titleはそのコードに対して推奨されるHTTPステータス句と同じである
+                                <span class="bcp14">SHOULD</span>です（例: 404の場合は"Not Found"など）。ただし、
+                                クライアントの優先（Accept-Languageリクエストヘッダーで表される）に合わせてローカライズ
+                                <span class="bcp14">MAY</span>されます。<a href="#section-4.2.1-4" class="pilcrow">¶</a>
+                            </p>
+                            <p id="section-4.2.1-5">"type"メンバーの定義方法（<a href="#members"
+                                    class="auto internal xref">セクション3.1</a>）によれば、"about:blank" URIは
+                                そのメンバーのデフォルト値であることに注意してください。したがって、明示的な"type"メンバーを持たない
+                                任意の問題詳細オブジェクトは、暗黙的にこのURIを使用します。<a href="#section-4.2.1-5" class="pilcrow">¶</a></p>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="security-considerations">
+        <section id="section-5">
+            <h2 id="name-security-considerations">
+                <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations"
+                    class="section-name selfRef">セキュリティ上の考慮事項</a>
+            </h2>
+            <p id="section-5-1">新しい問題型を定義する際、含められる情報は慎重に検証されなければなりません。
+                同様に、実際に問題を生成する際には――どのようにシリアライズされるかにかかわらず――与えられる詳細も精査されなければなりません。<a href="#section-5-1"
+                    class="pilcrow">¶</a></p>
+            <p id="section-5-2">リスクには、システム、システムへのアクセス、またはシステムのユーザーのプライバシーを侵害するために悪用されうる情報の漏えいが含まれます。<a
+                    href="#section-5-2" class="pilcrow">¶</a></p>
+            <p id="section-5-3">発生情報へのリンクを提供する生成者は、スタックダンプのような実装詳細をHTTPインターフェイスを通じて利用可能にしないことが推奨されます。
+                これはサーバー実装、そのデータなどの機微な詳細を露出する可能性があるためです。<a href="#section-5-3" class="pilcrow">¶</a></p>
+            <p id="section-5-4">"status"メンバーはHTTPステータスコード自体で利用可能な情報を重複させ、
+                両者の不一致の可能性を生じさせます。不一致が、たとえば仲介者が転送中にHTTPステータスコードを変更したこと
+                （プロキシやキャッシュなどによって）を示している可能性があるため、両者の相対的な優先順位は明確ではありません。
+                汎用HTTPソフトウェア（プロキシ、ロードバランサー、ファイアウォール、ウイルススキャナーなど）は、
+                このメンバーで伝達されるステータスコードを知っている、または尊重する可能性が低いです。<a href="#section-5-4" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="iana-considerations">
+        <section id="section-6">
+            <h2 id="name-iana-considerations">
+                <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations"
+                    class="section-name selfRef">IANAに関する考慮事項</a>
+            </h2>
+            <p id="section-6-1">IANAは、"Media Types"レジストリ配下の"application"レジストリにおいて、
+                "application/problem+json"および"application/problem+xml"の登録をこの文書を参照するよう更新しました。<a href="#section-6-1"
+                    class="pilcrow">¶</a></p>
+            <p id="section-6-2">IANAは、<a href="#registry" class="auto internal xref">セクション4.2</a>で規定される"HTTP Problem
+                Types"レジストリを作成し、
+                <a href="#blank" class="auto internal xref">セクション4.2.1</a>に従って"about:blank"を登録しました。<a
+                    href="#section-6-2" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <section id="section-7">
+        <h2 id="name-references">
+            <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references"
+                class="section-name selfRef">参照文献</a>
+        </h2>
+        <section id="section-7.1">
+            <h3 id="name-normative-references">
+                <a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references"
+                    class="section-name selfRef">規範参照</a>
+            </h3>
+            <dl class="references">
+                <dt id="RFC5234">[ABNF]</dt>
+                <dd>
+                    <span class="refAuthor">Crocker, D., Ed.</span> and <span class="refAuthor">P. Overell</span>, <span
+                        class="refTitle">"構文仕様のための拡張BNF: ABNF"</span>, <span class="seriesInfo">STD 68</span>, <span
+                        class="seriesInfo">RFC 5234</span>, <span class="seriesInfo">DOI 10.17487/RFC5234</span>, <time
+                        datetime="2008-01" class="refDate">2008年1月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc5234">https://www.rfc-editor.org/info/rfc5234</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC9110">[HTTP]</dt>
+                <dd>
+                    <span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M.,
+                        Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP
+                        セマンティクス"</span>, <span class="seriesInfo">STD 97</span>, <span class="seriesInfo">RFC
+                        9110</span>, <span class="seriesInfo">DOI 10.17487/RFC9110</span>, <time datetime="2022-06"
+                        class="refDate">2022年6月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc9110">https://www.rfc-editor.org/info/rfc9110</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8259">[JSON]</dt>
+                <dd>
+                    <span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"JavaScript Object Notation
+                        (JSON)データ交換形式"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC
+                        8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12"
+                        class="refDate">2017年12月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC2119">[RFC2119]</dt>
+                <dd>
+                    <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"要件レベルを示すためにRFCで使用する
+                        キーワード"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>,
+                    <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03"
+                        class="refDate">1997年3月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8126">[RFC8126]</dt>
+                <dd>
+                    <span class="refAuthor">Cotton, M.</span>, <span class="refAuthor">Leiba, B.</span>, and <span
+                        class="refAuthor">T. Narten</span>, <span class="refTitle">"RFCにおけるIANA
+                        Considerationsセクションの書き方に関するガイドライン"</span>, <span class="seriesInfo">BCP 26</span>, <span
+                        class="seriesInfo">RFC 8126</span>, <span class="seriesInfo">DOI 10.17487/RFC8126</span>, <time
+                        datetime="2017-06" class="refDate">2017年6月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8126">https://www.rfc-editor.org/info/rfc8126</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8174">[RFC8174]</dt>
+                <dd>
+                    <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"RFC 2119キーワードにおける大文字と
+                        小文字の曖昧性"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC
+                        8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05"
+                        class="refDate">2017年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC3986">[URI]</dt>
+                <dd>
+                    <span class="refAuthor">Berners-Lee, T.</span>, <span class="refAuthor">Fielding, R.</span>, and
+                    <span class="refAuthor">L. Masinter</span>, <span class="refTitle">"Uniform Resource Identifier
+                        (URI): 汎用構文"</span>, <span class="seriesInfo">STD 66</span>, <span class="seriesInfo">RFC
+                        3986</span>, <span class="seriesInfo">DOI 10.17487/RFC3986</span>, <time datetime="2005-01"
+                        class="refDate">2005年1月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc3986">https://www.rfc-editor.org/info/rfc3986</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="XML">[XML]</dt>
+                <dd>
+                    <span class="refAuthor">Bray, T.</span>, <span class="refAuthor">Paoli, J.</span>, <span
+                        class="refAuthor">Sperberg-McQueen, C. M.</span>, <span class="refAuthor">Maler, E.</span>, and
+                    <span class="refAuthor">F. Yergeau</span>, <span class="refTitle">"Extensible Markup Language (XML)
+                        1.0（第5版）"</span>, <span class="refContent">W3C勧告
+                        REC-xml-20081126</span>, <time datetime="2008-11" class="refDate">2008年11月</time>,
+                    <span>&lt;<a
+                            href="https://www.w3.org/TR/2008/REC-xml-20081126/">https://www.w3.org/TR/2008/REC-xml-20081126/</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+        </section>
+        <section id="section-7.2">
+            <h3 id="name-informative-references">
+                <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references"
+                    class="section-name selfRef">参考参照</a>
+            </h3>
+            <dl class="references">
+                <dt id="RFC6694">[ABOUT]</dt>
+                <dd>
+                    <span class="refAuthor">Moonesamy, S., Ed.</span>, <span class="refTitle">""about" URI
+                        スキーム"</span>, <span class="seriesInfo">RFC 6694</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6694</span>, <time datetime="2012-08" class="refDate">2012年8月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6694">https://www.rfc-editor.org/info/rfc6694</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="HTML5">[HTML5]</dt>
+                <dd>
+                    <span class="refAuthor">WHATWG</span>, <span class="refTitle">"HTML: Living Standard"</span>,
+                    <span>&lt;<a href="https://html.spec.whatwg.org">https://html.spec.whatwg.org</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="ISO-19757-2">[ISO-19757-2]</dt>
+                <dd>
+                    <span class="refAuthor">ISO</span>, <span class="refTitle">"情報技術 -- 文書
+                        スキーマ定義言語（DSDL） -- 第2部: 正規文法ベースの検証 -- RELAX
+                        NG"</span>, <span class="seriesInfo">ISO/IEC 19757-2:2008</span>, <time datetime="2008-12"
+                        class="refDate">2008年12月</time>, <span>&lt;<a
+                            href="https://www.iso.org/standard/52348.html">https://www.iso.org/standard/52348.html</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC6901">[JSON-POINTER]</dt>
+                <dd>
+                    <span class="refAuthor">Bryan, P., Ed.</span>, <span class="refAuthor">Zyp, K.</span>, and <span
+                        class="refAuthor">M. Nottingham, Ed.</span>, <span class="refTitle">"JavaScript Object Notation
+                        (JSON) Pointer"</span>, <span class="seriesInfo">RFC 6901</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6901</span>, <time datetime="2013-04" class="refDate">2013年4月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6901">https://www.rfc-editor.org/info/rfc6901</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="I-D.bhutton-json-schema">[JSON-SCHEMA]</dt>
+                <dd>
+                    <span class="refAuthor">Wright, A., Ed.</span>, <span class="refAuthor">Andrews, H., Ed.</span>,
+                    <span class="refAuthor">Hutton, B., Ed.</span>, and <span class="refAuthor">G. Dennis</span>, <span
+                        class="refTitle">"JSON Schema: JSON文書を記述するためのメディア型"</span>, <span class="refContent">作業中</span>,
+                    <span class="seriesInfo">Internet-Draft,
+                        draft-bhutton-json-schema-01</span>, <time datetime="2022-06-10"
+                        class="refDate">2022年6月10日</time>, <span>&lt;<a
+                            href="https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-01">https://datatracker.ietf.org/doc/html/draft-bhutton-json-schema-01</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RDFA">[RDFA]</dt>
+                <dd>
+                    <span class="refAuthor">Adida, B.</span>, <span class="refAuthor">Birbeck, M.</span>, <span
+                        class="refAuthor">McCarron, S.</span>, and <span class="refAuthor">I. Herman</span>, <span
+                        class="refTitle">"RDFa Core 1.1 - 第3版"</span>, <span class="refContent">W3C
+                        勧告</span>, <time datetime="2015-03" class="refDate">2015年3月</time>, <span>&lt;<a
+                            href="https://www.w3.org/TR/2015/REC-rdfa-core-20150317/">https://www.w3.org/TR/2015/REC-rdfa-core-20150317/</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7807">[RFC7807]</dt>
+                <dd>
+                    <span class="refAuthor">Nottingham, M.</span> and <span class="refAuthor">E. Wilde</span>, <span
+                        class="refTitle">"HTTP APIのための問題詳細"</span>, <span class="seriesInfo">RFC
+                        7807</span>, <span class="seriesInfo">DOI 10.17487/RFC7807</span>, <time datetime="2016-03"
+                        class="refDate">2016年3月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7807">https://www.rfc-editor.org/info/rfc7807</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC4151">[TAG]</dt>
+                <dd>
+                    <span class="refAuthor">Kindberg, T.</span> and <span class="refAuthor">S. Hawke</span>, <span
+                        class="refTitle">"'tag' URIスキーム"</span>, <span class="seriesInfo">RFC 4151</span>, <span
+                        class="seriesInfo">DOI 10.17487/RFC4151</span>, <time datetime="2005-10"
+                        class="refDate">2005年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc4151">https://www.rfc-editor.org/info/rfc4151</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8288">[WEB-LINKING]</dt>
+                <dd>
+                    <span class="refAuthor">Nottingham, M.</span>, <span class="refTitle">"Web Linking"</span>, <span
+                        class="seriesInfo">RFC 8288</span>, <span class="seriesInfo">DOI 10.17487/RFC8288</span>, <time
+                        datetime="2017-10" class="refDate">2017年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8288">https://www.rfc-editor.org/info/rfc8288</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="XSLT">[XSLT]</dt>
+                <dd>
+                    <span class="refAuthor">Clark, J.</span>, <span class="refAuthor">Pieters, S.</span>, and <span
+                        class="refAuthor">H. Thompson</span>, <span class="refTitle">"XML
+                        文書1.0（第2版）にスタイルシートを関連付ける"</span>, <span class="refContent">W3C勧告</span>,
+                    <time datetime="2010-10" class="refDate">2010年10月</time>, <span>&lt;<a
+                            href="https://www.w3.org/TR/2010/REC-xml-stylesheet-20101028/">https://www.w3.org/TR/2010/REC-xml-stylesheet-20101028/</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+        </section>
+    </section>
+    <div id="json-schema">
+        <section id="appendix-A">
+            <h2 id="name-json-schema-for-http-proble">
+                <a href="#appendix-A" class="section-number selfRef">付録A. </a><a
+                    href="#name-json-schema-for-http-proble" class="section-name selfRef">HTTP問題用のJSON
+                    Schema</a>
+            </h2>
+            <p id="appendix-A-1">このセクションは、HTTP問題詳細のための非規範的なJSON Schema
+                <span>[<a href="#I-D.bhutton-json-schema" class="cite xref">JSON-SCHEMA</a>]</span>を示します。
+                これと仕様本文の間に不一致がある場合、後者が優先します。<a href="#appendix-A-1" class="pilcrow">¶</a>
+            </p>
+            <div class="lang-json sourcecode" id="appendix-A-2">
+                <pre>
+# NOTE: '\' line wrapping per RFC 8792
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "An RFC 7807 problem object",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "format": "uri-reference",
+      "description": "A URI reference that identifies the \
+problem type."
+    },
+    "title": {
+      "type": "string",
+      "description": "A short, human-readable summary of the \
+problem type."
+    },
+    "status": {
+      "type": "integer",
+      "description": "The HTTP status code \
+generated by the origin server for this occurrence of the problem.",
+      "minimum": 100,
+      "maximum": 599
+    },
+    "detail": {
+      "type": "string",
+      "description": "A human-readable explanation specific to \
+this occurrence of the problem."
+    },
+    "instance": {
+      "type": "string",
+      "format": "uri-reference",
+      "description": "A URI reference that identifies the \
+specific occurrence of the problem. It may or may not yield \
+further information if dereferenced."
+    }
+  }
+}
+</pre><a href="#appendix-A-2" class="pilcrow">¶</a>
+            </div>
+        </section>
+    </div>
+    <div id="xml-syntax">
+        <section id="appendix-B">
+            <h2 id="name-http-problems-and-xml">
+                <a href="#appendix-B" class="section-number selfRef">付録B. </a><a href="#name-http-problems-and-xml"
+                    class="section-name selfRef">HTTP問題とXML</a>
+            </h2>
+            <p id="appendix-B-1">XML <span>[<a href="#XML" class="cite xref">XML</a>]</span>を使用するHTTPベースのAPIは、
+                この付録で定義される形式を使用して問題詳細を表現できます。<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+            <p id="appendix-B-2">XML形式のためのRELAX NGスキーマ <span>[<a href="#ISO-19757-2"
+                        class="cite xref">ISO-19757-2</a>]</span> は次のとおりです。<a href="#appendix-B-2" class="pilcrow">¶</a>
+            </p>
+            <div class="lang-rnc sourcecode" id="appendix-B-3">
+                <pre>
+   default namespace ns = "urn:ietf:rfc:7807"
+
+   start = problem
+
+   problem =
+     element problem {
+       (  element  type            { xsd:anyURI }?
+        &amp; element  title           { xsd:string }?
+        &amp; element  detail          { xsd:string }?
+        &amp; element  status          { xsd:positiveInteger }?
+        &amp; element  instance        { xsd:anyURI }? ),
+       anyNsElement
+     }
+
+   anyNsElement =
+     (  element    ns:*  { anyNsElement | text }
+      | attribute  *     { text })*
+</pre><a href="#appendix-B-3" class="pilcrow">¶</a>
+            </div>
+            <p id="appendix-B-4">このスキーマは文書化のみを意図しており、XML形式のすべての制約を捉える規範的スキーマではないことに注意してください。
+                選択したスキーマ言語の機能に応じて、他のXMLスキーマ言語を使用して同様の制約の集合を定義することが可能です。<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+            <p id="appendix-B-5">この形式のメディア型は"application/problem+xml"です。<a href="#appendix-B-5" class="pilcrow">¶</a>
+            </p>
+            <p id="appendix-B-6">拡張の配列およびオブジェクトは、1つ以上の子を含む要素をオブジェクトとして表すものと見なすことで、
+                XML形式へシリアライズされます。ただし、"i"という名前の子要素のみを1つ以上含む要素は、配列と見なされます。
+                たとえば、上記の例はXMLでは次のように表されます。<a href="#appendix-B-6" class="pilcrow">¶</a></p>
+            <div class="lang-http-message sourcecode" id="appendix-B-7">
+                <pre>
+HTTP/1.1 403 Forbidden
+Content-Type: application/problem+xml
+Content-Language: en
+
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;problem xmlns="urn:ietf:rfc:7807"&gt;
+  &lt;type&gt;https://example.com/probs/out-of-credit&lt;/type&gt;
+  &lt;title&gt;You do not have enough credit.&lt;/title&gt;
+  &lt;detail&gt;Your current balance is 30, but that costs 50.&lt;/detail&gt;
+  &lt;instance&gt;https://example.net/account/12345/msgs/abc&lt;/instance&gt;
+  &lt;balance&gt;30&lt;/balance&gt;
+  &lt;accounts&gt;
+    &lt;i&gt;https://example.net/account/12345&lt;/i&gt;
+    &lt;i&gt;https://example.net/account/67890&lt;/i&gt;
+  &lt;/accounts&gt;
+&lt;/problem&gt;
+</pre><a href="#appendix-B-7" class="pilcrow">¶</a>
+            </div>
+            <p id="appendix-B-8">この形式はXML名前空間を使用します。これは主に、他のXMLベース形式へ埋め込むことを可能にするためであり、
+                他の名前空間の要素または属性で拡張できる、または拡張すべきであることを意味しません。
+                RELAX NGスキーマは、XML形式で使用される1つの名前空間からの要素のみを明示的に許可します。
+                すべての拡張配列およびオブジェクトは、その名前空間のみを使用してXMLマークアップに
+                <span class="bcp14">MUST</span>シリアライズされます。<a href="#appendix-B-8" class="pilcrow">¶</a>
+            </p>
+            <p id="appendix-B-9">XML形式を使用する場合、参照されるXSL Transformations（XSLT）コード
+                <span>[<a href="#XSLT" class="cite xref">XSLT</a>]</span>を使用してXMLを変換するようクライアントに指示するXML処理命令を、
+                XMLに埋め込むことが可能です。このコードがXMLを(X)HTMLへ変換する場合、XML形式を提供しつつ、
+                変換を実行できるクライアントに、人間にわかりやすい(X)HTMLをレンダリングして表示させることが可能です。
+                この方法を使用する場合、XSLTコードを実行できるクライアントの数を最大化するために、XSLT 1.0を使用することが望ましいことに注意してください。<a href="#appendix-B-9"
+                    class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="using-problem-details-with-other-formats">
+        <section id="appendix-C">
+            <h2 id="name-using-problem-details-with-">
+                <a href="#appendix-C" class="section-number selfRef">付録C. </a><a
+                    href="#name-using-problem-details-with-" class="section-name selfRef">問題詳細を他の形式で
+                    使用する</a>
+            </h2>
+            <p id="appendix-C-1">場合によっては、ここで説明されている形式以外の形式に問題詳細を埋め込むことが有利なことがあります。
+                たとえば、HTML <span>[<a href="#HTML5" class="cite xref">HTML5</a>]</span>を使用するAPIは、
+                その問題詳細を表現するためにもHTMLを使用したいかもしれません。<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+            <p id="appendix-C-2">問題詳細は、既存のシリアライゼーション（JSONまたはXML）のいずれかをその形式にカプセル化するか、
+                問題詳細のモデル（<a href="#problem-json" class="auto internal xref">セクション3</a>で規定）を
+                その形式の慣例へ変換することによって、他の形式に埋め込むことができます。<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+            <p id="appendix-C-3">たとえば、HTMLでは、scriptタグ内にJSONをカプセル化することで問題を埋め込むことができます。<a href="#appendix-C-3"
+                    class="pilcrow">¶</a></p>
+            <div class="sourcecode" id="appendix-C-4">
+                <pre>
+&lt;script type="application/problem+json"&gt;
+  {
+   "type": "https://example.com/probs/out-of-credit",
+   "title": "You do not have enough credit.",
+   "detail": "Your current balance is 30, but that costs 50.",
+   "instance": "/account/12345/msgs/abc",
+   "balance": 30,
+   "accounts": ["/account/12345",
+                "/account/67890"]
+  }
+&lt;/script&gt;
+</pre><a href="#appendix-C-4" class="pilcrow">¶</a>
+            </div>
+            <p id="appendix-C-5">または、Resource Description
+                Framework in Attributes（RDFa）<span>[<a href="#RDFA"
+                        class="cite xref">RDFA</a>]</span>へのマッピングを定義することもできます。<a href="#appendix-C-5"
+                    class="pilcrow">¶</a></p>
+            <p id="appendix-C-6">この仕様は、問題詳細を他の形式に埋め込むことについて具体的な推奨を行いません。
+                それらを埋め込む適切な方法は、使用される形式と、その形式の適用の両方に依存します。<a href="#appendix-C-6" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="changes">
+        <section id="appendix-D">
+            <h2 id="name-changes-from-rfc-7807">
+                <a href="#appendix-D" class="section-number selfRef">付録D. </a><a href="#name-changes-from-rfc-7807"
+                    class="section-name selfRef">RFC 7807からの変更点</a>
+            </h2>
+            <p id="appendix-D-1">この改訂では次の変更が行われました。<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+            <ul class="normal">
+                <li class="normal" id="appendix-D-2.1">
+                    <a href="#registry" class="auto internal xref">セクション4.2</a>は、共通の問題
+                    型URIのレジストリを導入します<a href="#appendix-D-2.1" class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="appendix-D-2.2">
+                    <a href="#problem-json" class="auto internal xref">セクション3</a>は、複数の問題を
+                    どのように扱うべきかを明確化します<a href="#appendix-D-2.2" class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="appendix-D-2.3">
+                    <a href="#type" class="auto internal xref">セクション3.1.1</a>は、逆参照できないtype URIを使用するための
+                    指針を提供します<a href="#appendix-D-2.3" class="pilcrow">¶</a>
+                </li>
+            </ul>
+        </section>
+    </div>
+    <div id="acknowledgements">
+        <section id="appendix-E">
+            <h2 id="name-acknowledgements">
+                <a href="#name-acknowledgements" class="section-name selfRef">謝辞</a>
+            </h2>
+            <p id="appendix-E-1">著者らは、
+                <span class="contact-name">Jan Algermissen</span>、
+                <span class="contact-name">Subbu Allamaraju</span>、
+                <span class="contact-name">Mike Amundsen</span>、
+                <span class="contact-name">Roy Fielding</span>、
+                <span class="contact-name">Eran Hammer</span>、
+                <span class="contact-name">Sam Johnston</span>、
+                <span class="contact-name">Mike McCall</span>、
+                <span class="contact-name">Julian Reschke</span>、および
+                <span class="contact-name">James Snell</span>
+                のコメントと提案に感謝します。<a href="#appendix-E-1" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="authors-addresses">
+        <section id="appendix-F">
+            <h2 id="name-authors-addresses">
+                <a href="#name-authors-addresses" class="section-name selfRef">著者の連絡先</a>
+            </h2>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Mark Nottingham</span></div>
+                <div dir="auto" class="left"><span class="street-address">Prahran</span></div>
+                <div dir="auto" class="left"><span class="country-name">オーストラリア</span></div>
+                <div class="email">
+                    <span>メール:</span>
+                    <a href="mailto:mnot@mnot.net" class="email">mnot@mnot.net</a>
+                </div>
+                <div class="url">
+                    <span>URI:</span>
+                    <a href="https://www.mnot.net/" class="url">https://www.mnot.net/</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Erik Wilde</span></div>
+                <div class="email">
+                    <span>メール:</span>
+                    <a href="mailto:erik.wilde@dret.net" class="email">erik.wilde@dret.net</a>
+                </div>
+                <div class="url">
+                    <span>URI:</span>
+                    <a href="http://dret.net/netdret/" class="url">http://dret.net/netdret/</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Sanjay Dalal</span></div>
+                <div dir="auto" class="left"><span class="country-name">アメリカ合衆国</span></div>
+                <div class="email">
+                    <span>メール:</span>
+                    <a href="mailto:sanjay.dalal@cal.berkeley.edu" class="email">sanjay.dalal@cal.berkeley.edu</a>
+                </div>
+                <div class="url">
+                    <span>URI:</span>
+                    <a href="https://github.com/sdatspun2" class="url">https://github.com/sdatspun2</a>
+                </div>
+            </address>
+        </section>
+    </div>
+    <script>const toc = document.getElementById("toc");
+        toc.querySelector("h2").addEventListener("click", e => {
+            toc.classList.toggle("active");
+        });
+        toc.querySelector("nav").addEventListener("click", e => {
+            toc.classList.remove("active");
+        });
+    </script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
