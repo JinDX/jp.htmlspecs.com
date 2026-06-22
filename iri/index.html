@@ -1,0 +1,2413 @@
+<pre>ネットワーク作業部会                                      M. Duerst
+Request for Comments: 3987                                           W3C
+分類: 標準化過程                                            M. Suignard
+                                                   Microsoft Corporation
+                                                            2005年1月
+
+
+             <span class="h1">国際化リソース識別子（IRI）</span>
+
+このメモの位置付け
+
+   この文書は、インターネット共同体のためのインターネット標準化過程の
+   プロトコルを規定し、改善のための議論と提案を求める。  このプロトコルの
+   標準化状態および位置付けについては、「Internet Official Protocol
+   Standards」（STD 1）の最新版を参照されたい。  このメモの配布に制限はない。
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2005).
+
+概要
+
+   この文書は、Uniform Resource Identifier（URI）を補完するものとして、
+   Internationalized Resource Identifier（IRI）という新しいプロトコル要素を
+   定義する。IRI は、Universal Character Set（Unicode/ISO 10646）の文字列で
+   ある。IRI から URI への写像が定義される。これは、適切な場合には、
+   リソースを識別するために URI の代わりに IRI を使用できることを意味する。
+
+   URI の定義を拡張または変更するのではなく、新しいプロトコル要素を
+   定義する方式が選ばれた。これは、明確な区別を可能にし、既存のソフトウェア
+   との非互換性を避けるためである。現在 URI を扱っている各種プロトコル、
+   フォーマット、およびソフトウェアコンポーネントにおける IRI の使用と
+   配備についての指針が提供される。
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに . . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+       <a href="#section-1.1">1.1</a>.  概要と動機  . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+       <a href="#section-1.2">1.2</a>.  適用可能性  . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+       <a href="#section-1.3">1.3</a>.  定義  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+       <a href="#section-1.4">1.4</a>.  表記法 . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-5">5</a>
+   <a href="#section-2">2</a>.  IRI 構文 . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+       <a href="#section-2.1">2.1</a>.  IRI 構文の概要  . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+       <a href="#section-2.2">2.2</a>.  IRI 参照および IRI のための ABNF . . . . . . . . . .  <a href="#page-7">7</a>
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [1ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   <a href="#section-3">3</a>.  IRI と URI の関係 . . . . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+       <a href="#section-3.1">3.1</a>.  IRI から URI への写像  . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+       <a href="#section-3.2">3.2</a>.  URI から IRI への変換  . . . . . . . . . . . . . . . . <a href="#page-14">14</a>
+             <a href="#section-3.2.1">3.2.1</a>.  例 . . . . . . . . . . . . . . . . . . . . . . <a href="#page-15">15</a>
+   4.  右から左へ書く言語のための双方向 IRI . . . . . . . . . . . <a href="#page-16">16</a>
+       <a href="#section-4.1">4.1</a>.  論理的な格納と視覚的な表示  . . . . . . . . . . . . . <a href="#page-17">17</a>
+       <a href="#section-4.2">4.2</a>.  Bidi IRI 構造 . . . . . . . . . . . . . . . . . . . . <a href="#page-18">18</a>
+       <a href="#section-4.3">4.3</a>.  Bidi IRI の入力 . . . . . . . . . . . . . . . . . . . <a href="#page-19">19</a>
+       <a href="#section-4.4">4.4</a>.  例 . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-19">19</a>
+   <a href="#section-5">5</a>.  正規化と比較 . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-21">21</a>
+       <a href="#section-5.1">5.1</a>.  等価性  . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-22">22</a>
+       <a href="#section-5.2">5.2</a>.  比較の準備 . . . . . . . . . . . . . . . . . . . . . <a href="#page-22">22</a>
+       <a href="#section-5.3">5.3</a>.  比較の階梯  . . . . . . . . . . . . . . . . . . . . . <a href="#page-23">23</a>
+             <a href="#section-5.3.1">5.3.1</a>.  単純な文字列比較 . . . . . . . . . . . . . . <a href="#page-23">23</a>
+             <a href="#section-5.3.2">5.3.2</a>.  構文に基づく正規化 . . . . . . . . . . . . . <a href="#page-24">24</a>
+             <a href="#section-5.3.3">5.3.3</a>.  スキームに基づく正規化 . . . . . . . . . . . <a href="#page-27">27</a>
+             <a href="#section-5.3.4">5.3.4</a>.  プロトコルに基づく正規化 . . . . . . . . . . <a href="#page-28">28</a>
+   <a href="#section-6">6</a>.  IRI の使用  . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-29">29</a>
+       <a href="#section-6.1">6.1</a>.  IRI で許可される UCS 文字の制限  . . . . . . . . . . <a href="#page-29">29</a>
+       <a href="#section-6.2">6.2</a>.  ソフトウェアインターフェイスとプロトコル  . . . . . <a href="#page-29">29</a>
+       <a href="#section-6.3">6.3</a>.  文書およびプロトコルにおける URI と IRI の形式 . . <a href="#page-30">30</a>
+       <a href="#section-6.4">6.4</a>.  元の文字を符号化するための UTF-8 の使用 .. . . . . <a href="#page-30">30</a>
+       <a href="#section-6.5">6.5</a>.  相対 IRI 参照  . . . . . . . . . . . . . . . . . . . . <a href="#page-32">32</a>
+   <a href="#section-7">7</a>.  URI/IRI 処理指針（参考）  . . . . . . . . . . . . . . . . . <a href="#page-32">32</a>
+       <a href="#section-7.1">7.1</a>.  URI/IRI ソフトウェアインターフェイス  . . . . . . . . <a href="#page-32">32</a>
+       <a href="#section-7.2">7.2</a>.  URI/IRI 入力  . . . . . . . . . . . . . . . . . . . . <a href="#page-33">33</a>
+       <a href="#section-7.3">7.3</a>.  アプリケーション間での URI/IRI 転送  . . . . . . . . <a href="#page-33">33</a>
+       <a href="#section-7.4">7.4</a>.  URI/IRI 生成 . . . . . . . . . . . . . . . . . . . . . <a href="#page-34">34</a>
+       <a href="#section-7.5">7.5</a>.  URI/IRI 選択  . . . . . . . . . . . . . . . . . . . . <a href="#page-34">34</a>
+       <a href="#section-7.6">7.6</a>.  URI/IRI の表示 . . . . . . . . . . . . . . . . . . . . <a href="#page-35">35</a>
+       <a href="#section-7.7">7.7</a>.  URI と IRI の解釈  . . . . . . . . . . . . . . . . . . <a href="#page-36">36</a>
+       <a href="#section-7.8">7.8</a>.  アップグレード戦略 . . . . . . . . . . . . . . . . . <a href="#page-36">36</a>
+   <a href="#section-8">8</a>.  セキュリティ上の考慮事項  . . . . . . . . . . . . . . . . <a href="#page-37">37</a>
+   <a href="#section-9">9</a>.  謝辞 . . . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-39">39</a>
+   <a href="#section-10">10</a>. 参考文献 . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-40">40</a>
+       <a href="#section-10.1">10.1</a>. 規範的参考文献 . . . . . . . . . . . . . . . . . . . . <a href="#page-40">40</a>
+       <a href="#section-10.2">10.2</a>. 参考情報としての参考文献 . . . . . . . . . . . . . . <a href="#page-41">41</a>
+   <a href="#appendix-A">A</a>.  設計上の代替案  . . . . . . . . . . . . . . . . . . . . . . <a href="#page-44">44</a>
+       <a href="#appendix-A.1">A.1</a>.  新しいスキーム  . . . . . . . . . . . . . . . . . . . <a href="#page-44">44</a>
+       <a href="#appendix-A.2">A.2</a>.  UTF-8 以外の文字エンコーディング . . . . . . . . . <a href="#page-44">44</a>
+       <a href="#appendix-A.3">A.3</a>.  新しい符号化規約  . . . . . . . . . . . . . . . . . . <a href="#page-44">44</a>
+       <a href="#appendix-A.4">A.4</a>.  URI/IRI における文字エンコーディングの表示  . . . . <a href="#page-45">45</a>
+   著者の連絡先 . . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-45">45</a>
+   完全な著作権表示 . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-46">46</a>
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [2ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  概要と動機</span>
+
+   Uniform Resource Identifier（URI）は、[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] において、
+   US-ASCII [<a href="#ref-ASCII" title="&quot;Coded Character Set -- 7-bit American Standard Code for Information Interchange&quot;">ASCII</a>] 文字のレパートリの限定された部分集合から選ばれた
+   文字列として定義されている。
+
+   URI 中の文字は、自然言語の語を表すために頻繁に用いられる。この用法には
+   多くの利点がある。そのような URI は、記憶しやすく、解釈しやすく、
+   書き写しやすく、作成しやすく、推測しやすい。しかし、英語以外の
+   ほとんどの言語では、自然な表記体系は A -
+   Z 以外の文字を使用する。多くの人にとって、ラテン文字を扱うことは、
+   ラテンアルファベットだけを使用する人が他の表記体系の文字を扱うのと
+   同じくらい難しい。非ラテン表記体系を持つ多くの言語は、ラテン文字で
+   転写される。こうした転写は現在 URI でよく使われているが、追加の曖昧さを
+   もたらす。
+
+   地域の表記体系の文字を適切に扱うための基盤は、現在、オペレーティング
+   システムおよびアプリケーションソフトウェアのローカル版に広く配備されている。
+   多様な表記体系と言語を同時に扱えるソフトウェアはますます一般的になっている。
+   また、広範な文字を運べるプロトコルやフォーマットも増加している。
+
+   この文書は、URI の構文をはるかに広い文字レパートリへ拡張することにより、
+   Internationalized Resource Identifier（IRI）と呼ばれる新しいプロトコル要素を
+   定義する。また、URI 参照など、[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の他の構成要素に
+   対応する「国際化」版も定義する。IRI の構文は <a href="#section-2">2節</a>で定義され、
+   IRI と URI の関係は <a href="#section-3">3節</a>で定義される。
+
+   IRI で A - Z 以外の文字を使用すると、いくつかの困難が生じる。
+   <a href="#section-4">4節</a>では双方向 IRI の特殊な場合を、<a href="#section-5">5節</a>では
+   IRI 間の各種等価性を、<a href="#section-6">6節</a>ではさまざまな状況での
+   IRI の使用を論じる。<a href="#section-7">7節</a>は追加の参考指針を示し、
+   <a href="#section-8">8節</a>はセキュリティ上の考慮事項を示す。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  適用可能性</span>
+
+   IRI は、新しい URI スキームに関する推奨事項 [<a href="./rfc2718" title="&quot;Guidelines for new URL Schemes&quot;">RFC2718</a>] と
+   互換であるように設計されている。この互換性は、IRI 文字列から機能的に
+   等価な URI 文字列への明確に定義された決定的な写像を規定することにより
+   提供される。URI（または URI 参照）の代わりに IRI（または IRI 参照）を
+   実際に使用できるかどうかは、次の条件が満たされているかに依存する。
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [3ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   a.  プロトコル要素またはフォーマット要素は、IRI を運べるものとして
+       明示的に指定されているべきである。その意図は、IRI を受け入れるように
+       定義されていない文脈へ IRI を導入することではない。たとえば、XML
+       schema [<a href="#ref-XMLSchema" title="&quot;XML Schema Part 2: Datatypes&quot;">XMLSchema</a>] は、IRI および IRI 参照を含む明示的な型
+       "anyURI" を持つ。したがって、IRI および IRI 参照は型 "anyURI" の
+       属性および要素内に置くことができる。一方、HTTP プロトコル
+       [<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] では、Request URI は URI として定義されているため、
+       HTTP 要求で IRI を直接使用することは許されない。
+
+   b.  IRI を運ぶプロトコルまたはフォーマットは、IRI で使用される広範な
+       文字を表現するための仕組みを備えているべきである。それはネイティブに
+       表現する方式でも、プロトコルまたはフォーマット固有のエスケープ機構
+       （たとえば [<a href="#ref-XML1" title="&quot;Extensible Markup Language (XML) 1.0 (Third Edition)&quot;">XML1</a>] における数値文字参照）でもよい。
+
+   c.  問題の IRI に対応する URI は、元の文字を UTF-8 を用いてオクテットへ
+       符号化しなければならない。新しい URI スキームについては、これは
+       [<a href="./rfc2718" title="&quot;Guidelines for new URL Schemes&quot;">RFC2718</a>] で推奨されている。これはスキーム全体
+       （例: IMAP URLs [<a href="./rfc2192" title="&quot;IMAP URL Scheme&quot;">RFC2192</a>] および POP URLs [<a href="./rfc2384" title="&quot;POP URL Scheme&quot;">RFC2384</a>]、
+       または URN 構文 [<a href="./rfc2141" title="&quot;URN Syntax&quot;">RFC2141</a>]）に適用できる。URI の特定の部分、
+       たとえばフラグメント識別子（例: [<a href="#ref-XPointer" title="&quot;XPointer Framework&quot;">XPointer</a>]）に適用できる。
+       さらに、特定の URI またはその一部に適用できる。詳細については
+       <a href="#section-6.4">6.4節</a>を参照されたい。
+
+<span class="h3"><a class="selflink" id="section-1.3" href="#section-1.3">1.3</a>.  定義</span>
+
+   この文書では次の定義を用いる。これらは [<a href="./rfc2130" title="&quot;The Report of the IAB Character Set Workshop held 29 February - 1 March, 1996&quot;">RFC2130</a>]、
+   [<a href="./rfc2277" title="&quot;IETF Policy on Character Sets and Languages&quot;">RFC2277</a>]、および [<a href="#ref-ISO10646" title="&quot;ISO/IEC 10646:2003: Information Technology - Universal Multiple-Octet Coded Character Set (UCS)&quot;">ISO10646</a>] の用語に従う。
+
+   character: データの編成、制御、または表現のために使用される要素集合の
+      一員。たとえば、"LATIN CAPITAL LETTER A" はある文字の名前である。
+
+   octet: 1単位として見なされる、順序付けられた 8 ビットの列。
+
+   character repertoire: 文字の集合（数学的意味での集合）。
+
+   sequence of characters: 文字の列（1つずつ順に並んだもの）。
+
+   sequence of octets: オクテットの列（1つずつ順に並んだもの）。
+
+   character encoding: 文字列をオクテット列として表現する方法
+      （変種を伴う場合がある）。また、オクテット列を文字列へ
+      （曖昧さなく）変換する方法。
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [4ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   charset: 文字エンコーディングを識別するために使用されるパラメータまたは
+      属性の名前。
+
+   UCS: Universal Character Set。ISO/IEC 10646 [<a href="#ref-ISO10646" title="&quot;ISO/IEC 10646:2003: Information Technology - Universal Multiple-Octet Coded Character Set (UCS)&quot;">ISO10646</a>] および
+      Unicode Standard [<a href="#ref-UNIV4" title="&quot;The Unicode Standard, Version 4.0.1, defined by: The Unicode Standard, Version 4.0 (Reading, MA, Addison-Wesley, 2003. ISBN 0-321-18578-1), as amended by Unicode 4.0.1 (http://www.unicode.org/versions/Unicode4.0.1/)&quot;">UNIV4</a>] により定義される符号化文字集合。
+
+   IRI reference: Internationalized Resource Identifier の一般的な使用を示す。
+      IRI 参照は絶対でも相対でもよい。しかし、そのような参照から得られる
+      "IRI" には絶対 IRI だけが含まれる。相対 IRI 参照はいずれも絶対形式へ
+      解決される。なお、[<a href="./rfc2396" title="&quot;Uniform Resource Identifiers (URI): Generic Syntax&quot;">RFC2396</a>] では URI はフラグメント識別子を
+      含まなかったが、[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] ではフラグメント識別子は URI の一部である。
+
+   running text: 自然言語の正書法上の慣習に従う構文を持つ人間向けのテキスト
+      （段落、文、句）。機械による処理を容易にするために定義された構文
+      （例: マークアップ、プログラミング言語）とは対照的である。
+
+   protocol element: 当該プロトコルによるメッセージ処理に影響する、
+      メッセージの任意の部分。
+
+   presentation element: プロトコル要素に対応する表示形式。たとえば、
+      より広い範囲の文字を使用すること。
+
+   create (a URI or IRI): URI および IRI に関して、この用語は最初の作成を
+      指して用いられる。これは、特定の識別子を持つリソースの最初の作成で
+      ある場合も、特定の識別子の下でリソースを最初に公開することである
+      場合もある。
+
+   generate (a URI or IRI): URI および IRI に関して、この用語は IRI が
+      他の情報からの導出により生成される場合に用いられる。
+
+<span class="h3"><a class="selflink" id="section-1.4" href="#section-1.4">1.4</a>.  表記法</span>
+
+   RFC および Internet Draft は現在、US-ASCII レパートリ外の文字を
+   許可していない。したがって、この文書では、例の中でそのような文字を
+   表すために各種の特別な表記を用いる。
+
+   本文では、US-ASCII 外の文字が、接頭辞 'U+' とそれに続く 4 桁から
+   6 桁の十六進数字によって参照されることがある。
+
+   例の中で US-ASCII 外の文字を表すため、この文書は
+   'XML Notation' と 'Bidi Notation' の 2 つの表記を用いる。
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [5ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   XML Notation は、先頭の '&amp;#x'、末尾の ';'、およびその間に置かれる
+   UCS 中の文字の十六進数を使用する。たとえば、&amp;#x44F; は
+   CYRILLIC CAPITAL LETTER YA を表す。この表記では、実際の '&amp;' は
+   '&amp;amp;' として表される。
+
+   Bidi Notation は双方向の例に用いられる。小文字は左から右へ書かれる
+   ラテン文字またはその他の文字を表し、大文字は右から左へ書かれる
+   アラビア文字またはヘブライ文字を表す。
+
+   例の中で実際のオクテット（パーセント符号化されたオクテットではないもの）を
+   表すため、オクテットを示す 2 桁の十六進数字は "&lt;" と "&gt;" で囲まれる。
+   たとえば、しばしば 0xc9 と表されるオクテットは、ここでは &lt;c9&gt; と
+   表される。
+
+   この文書において、キーワード "MUST"、"MUST NOT"、"REQUIRED"、
+   "SHALL"、"SHALL NOT"、"SHOULD"、"SHOULD NOT"、"RECOMMENDED"、
+   "MAY"、および "OPTIONAL" は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] に記述されているように
+   解釈されるものとする。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  IRI 構文</span>
+
+   この節は Internationalized Resource Identifiers（IRI）の構文を定義する。
+
+   URI と同様に、IRI はオクテット列ではなく文字列として定義される。
+   この定義は、IRI が紙に書かれたり無線で読み上げられたりするだけでなく、
+   デジタル的に格納または伝送されることもあるという事実に対応している。
+   同じ IRI でも、プロトコルまたは文書が異なる文字エンコーディング
+   （および/または転送エンコーディング）を使用する場合には、異なる
+   オクテット列として表現されることがある。含んでいるプロトコルまたは
+   文書と同じ文字エンコーディングを使用することで、IRI 中の文字を
+   プロトコルまたは文書の残りの部分と同じ方法で扱える
+   （例: 検索、変換、表示）ことが保証される。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  IRI 構文の概要</span>
+
+   IRI は [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の URI と同様に定義されるが、予約されていない文字の
+   クラスは、U+007F を超える UCS（Universal Character Set、
+   [<a href="#ref-ISO10646" title="&quot;ISO/IEC 10646:2003: Information Technology - Universal Multiple-Octet Coded Character Set (UCS)&quot;">ISO10646</a>]）の文字を追加することにより拡張される。ただし、
+   以下の構文規則および <a href="#section-6.1">6.1節</a>で示される制限に従う。
+
+   それ以外の場合、構成要素および予約文字の構文と使用法は [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の
+   ものと同じである。相対参照の解決など、[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] で定義される
+   すべての操作は、URI 処理ソフトウェアによって URI に適用されるのと
+   まったく同じ方法で、IRI 処理ソフトウェアによって IRI に適用できる。
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [6ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   US-ASCII レパートリ外の文字は予約されていないため、新しく定義される
+   スキームにおいて構成要素を区切るなど、構文上の目的に使用してはならない
+   （MUST NOT）。たとえば、U+00A2、CENT SIGN は 'iunreserved' カテゴリに
+   属するため、IRI の区切り子として許されない。これは、'-' が
+   'unreserved' カテゴリに属するため URI の区切り子として使用できない
+   ことに似ている。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  IRI 参照および IRI のための ABNF</span>
+
+   IRI 参照および IRI は、URI 参照および URI への変換だけで定義できるかも
+   しれないが、直接受け入れて処理することもできる。したがって、ここでは
+   IRI 参照（最も一般的な概念であり、文法の開始点）および IRI のための
+   ABNF 定義を示す。この ABNF の構文は [<a href="./rfc2234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC2234</a>] に記述されている。
+   文字番号は、実際のバイナリ符号化を意味することなく UCS から取られる。
+   ABNF の終端記号は文字であり、バイトではない。
+
+   次の文法は [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の URI 文法に厳密に従うが、予約されていない
+   文字の範囲が UCS 文字を含むように拡張されている点が異なる。ただし、
+   private UCS 文字は query 部分にのみ現れ得るという制限がある。この文法は
+   2 つの部分に分けられる。上記の拡張により [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] と異なる規則、
+   および [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] と同じ規則である。[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の規則と異なる
+   規則については、非終端記号の名前を次のように変更している。非終端記号に
+   'URI' が含まれる場合、これは 'IRI' に変更されている。そうでなければ、
+   'i' が前置されている。
+
+   次の規則は [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の規則と異なる。
+
+   IRI            = scheme ":" ihier-part [ "?" iquery ]
+                         [ "#" ifragment ]
+
+   ihier-part     = "//" iauthority ipath-abempty
+                  / ipath-absolute
+                  / ipath-rootless
+                  / ipath-empty
+
+   IRI-reference  = IRI / irelative-ref
+
+   absolute-IRI   = scheme ":" ihier-part [ "?" iquery ]
+
+   irelative-ref  = irelative-part [ "?" iquery ] [ "#" ifragment ]
+
+   irelative-part = "//" iauthority ipath-abempty
+                       / ipath-absolute
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [7ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+                  / ipath-noscheme
+                  / ipath-empty
+
+   iauthority     = [ iuserinfo "@" ] ihost [ ":" port ]
+   iuserinfo      = *( iunreserved / pct-encoded / sub-delims / ":" )
+   ihost          = IP-literal / IPv4address / ireg-name
+
+   ireg-name      = *( iunreserved / pct-encoded / sub-delims )
+
+   ipath          = ipath-abempty   ; "/" で始まる、または空
+                  / ipath-absolute  ; "/" で始まるが "//" ではない
+                  / ipath-noscheme  ; コロンを含まないセグメントで始まる
+                  / ipath-rootless  ; セグメントで始まる
+                  / ipath-empty     ; 0 文字
+
+   ipath-abempty  = *( "/" isegment )
+   ipath-absolute = "/" [ isegment-nz *( "/" isegment ) ]
+   ipath-noscheme = isegment-nz-nc *( "/" isegment )
+   ipath-rootless = isegment-nz *( "/" isegment )
+   ipath-empty    = 0&lt;ipchar&gt;
+
+   isegment       = *ipchar
+   isegment-nz    = 1*ipchar
+   isegment-nz-nc = 1*( iunreserved / pct-encoded / sub-delims
+                        / "@" )
+                  ; コロン ":" を含まない非ゼロ長セグメント
+
+   ipchar         = iunreserved / pct-encoded / sub-delims / ":"
+                  / "@"
+
+   iquery         = *( ipchar / iprivate / "/" / "?" )
+
+   ifragment      = *( ipchar / "/" / "?" )
+
+   iunreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~" / ucschar
+
+   ucschar        = %xA0-D7FF / %xF900-FDCF / %xFDF0-FFEF
+                  / %x10000-1FFFD / %x20000-2FFFD / %x30000-3FFFD
+                  / %x40000-4FFFD / %x50000-5FFFD / %x60000-6FFFD
+                  / %x70000-7FFFD / %x80000-8FFFD / %x90000-9FFFD
+                  / %xA0000-AFFFD / %xB0000-BFFFD / %xC0000-CFFFD
+                  / %xD0000-DFFFD / %xE1000-EFFFD
+
+   iprivate       = %xE000-F8FF / %xF0000-FFFFD / %x100000-10FFFD
+
+   いくつかの生成規則は曖昧である。"first-match-wins"（別名
+   "greedy"）アルゴリズムが適用される。詳細については [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] を参照。
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [8ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   次の規則は [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の規則と同じである。
+
+   scheme         = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+
+   port           = *DIGIT
+
+   IP-literal     = "[" ( IPv6address / IPvFuture  ) "]"
+
+   IPvFuture      = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+
+   IPv6address    =                            6( h16 ":" ) ls32
+                  /                       "::" 5( h16 ":" ) ls32
+                  / [               h16 ] "::" 4( h16 ":" ) ls32
+                  / [ *1( h16 ":" ) h16 ] "::" 3( h16 ":" ) ls32
+                  / [ *2( h16 ":" ) h16 ] "::" 2( h16 ":" ) ls32
+                  / [ *3( h16 ":" ) h16 ] "::"    h16 ":"   ls32
+                  / [ *4( h16 ":" ) h16 ] "::"              ls32
+                  / [ *5( h16 ":" ) h16 ] "::"              h16
+                  / [ *6( h16 ":" ) h16 ] "::"
+
+   h16            = 1*4HEXDIG
+   ls32           = ( h16 ":" h16 ) / IPv4address
+
+   IPv4address    = dec-octet "." dec-octet "." dec-octet "." dec-octet
+
+   dec-octet      = DIGIT                 ; 0-9
+                  / %x31-39 DIGIT         ; 10-99
+                  / "1" 2DIGIT            ; 100-199
+                  / "2" %x30-34 DIGIT     ; 200-249
+                  / "25" %x30-35          ; 250-255
+
+   pct-encoded    = "%" HEXDIG HEXDIG
+
+   unreserved     = ALPHA / DIGIT / "-" / "." / "_" / "~"
+   reserved       = gen-delims / sub-delims
+   gen-delims     = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+   sub-delims     = "!" / "$" / "&amp;" / "'" / "(" / ")"
+                  / "*" / "+" / "," / ";" / "="
+
+   この構文は IPv6 のスコープ付きアドレス指定のゾーン識別子をサポートしない。
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                         [9ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  IRI と URI の関係</span>
+
+   IRI は、UCS に基づく文字レパートリを使用するプロトコル、フォーマット、
+   およびソフトウェアコンポーネントにおいて、リソースを識別するために
+   URI を置き換えることを意図している。これらのプロトコルおよび
+   コンポーネントでは、特にリソース識別子が単に識別目的で使用される場合、
+   URI を直接使用する必要がまったくないこともある。しかし、リソース識別子が
+   リソース取得に使用される場合、現在ほとんどの取得機構は URI について
+   のみ定義されているため、多くの場合、対応する URI を決定する必要がある。
+   この場合、IRI は URI プロトコル要素の表示要素として機能できる。
+   例としては Web ユーザーエージェントのアドレスバーがある。
+   （追加の根拠は <a href="#section-3.1">3.1節</a>に示す。）
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  IRI から URI への写像</span>
+
+   この節は IRI を URI へ写像する方法を定義する。この節のすべては、
+   IRI 参照および URI 参照、ならびにそれらの構成要素
+   （たとえばフラグメント識別子）にも適用される。
+
+   この写像には 2 つの目的がある。
+
+   構文上の目的。多くの URI スキームおよび構成要素は、<a href="#section-2.2">2.2節</a>で
+      捉えられていない追加の構文上の制限を定義している。スキーム固有の
+      制限は、IRI を URI に変換し、その URI をスキーム固有の制限に照らして
+      検査することにより IRI に適用される。
+
+   解釈上の目的。URI はさまざまな方法でリソースを識別する。IRI も
+      リソースを識別する。IRI が識別目的だけに使用される場合、IRI を URI へ
+      写像する必要はない（<a href="#section-5">5節</a>を参照）。しかし、IRI がリソース取得に
+      使用される場合、その IRI が指し示すリソースは、ここで定義される手順に
+      従って IRI を変換して得られる URI が指し示すものと同じである。これは、
+      IRI レベルで解決を別途定義する必要がないことを意味する。
+
+   アプリケーションは、次の 2 つの手順を用いて IRI を URI へ写像しなければならない
+   （MUST）。
+
+   手順 1.  元の IRI 形式から UCS 文字列を生成する。この手順には、入力の
+            形式に応じて、次の 3 つの変種がある。
+
+            a. IRI が紙に書かれている、読み上げられている、または文字
+               エンコーディングから独立した文字列として表現されている場合、
+               IRI を Normalization Form C（NFC、[<a href="#ref-UTR15" title="&quot;Unicode Normalization Forms&quot;">UTR15</a>]）に従って
+               正規化された UCS 文字列として表現する。
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [10ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+            b. IRI が、既知の非 Unicode 文字エンコーディングによる何らかの
+               デジタル表現（例: オクテットストリーム）にある場合、その IRI を
+               NFC に従って正規化された UCS 文字列へ変換する。
+
+            c. IRI が Unicode ベースの文字エンコーディング（たとえば UTF-8
+               または UTF-16）にある場合、正規化しない（詳細については
+               <a href="#section-5.3.2.2">5.3.2.2節</a>を参照）。符号化された Unicode 文字列に
+               手順 2 を直接適用する。
+
+   手順 2.  'ucschar' または 'iprivate' 中の各文字について、以下の手順
+            2.1 から 2.3 を適用する。
+
+       2.1.  UTF-8 [<a href="./rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] を使用して、その文字を 1 つ以上の
+             オクテット列へ変換する。
+
+       2.2.  各オクテットを %HH へ変換する。ここで HH はそのオクテット値の
+             十六進表記である。これは <a href="./rfc3986#section-2.1">[RFC3986] の 2.1節</a>における
+             パーセント符号化機構と同一であることに注意されたい。ばらつきを
+             減らすため、十六進表記は大文字を使用すべきである（SHOULD）。
+
+       2.3.  元の文字を、得られた文字列（すなわち %HH 三つ組の列）で置き換える。
+
+   上記の IRI から URI への写像は、[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] に完全に適合する URI を生成する。
+   この写像は URI に対して恒等変換でもあり、冪等である。写像を 2 回適用しても
+   何も変化しない。すべての URI は、定義上 IRI である。
+
+   IRI を受け入れるシステムは、ドメイン名を ireg-name で使用することが
+   知られているスキームについて、そのスキーム定義が ireg-name に
+   パーセント符号化を許可していない場合、（上記の手順 2 の前に）IRI の
+   ireg-name 構成要素を次のように変換してもよい（MAY）。
+
+   IRI の ireg-name 部分を、各ドット区切りラベルに対して
+   <a href="./rfc3490#section-4.1">[RFC3490] の 4.1節</a>で規定される ToASCII 操作を用いて変換された
+   部分で置き換える。その際、ラベル区切り子として U+002E（FULL STOP）を用い、
+   フラグ UseSTD3ASCIIRules を TRUE に設定し、フラグ AllowUnassigned は
+   IRI の作成時には FALSE、それ以外の場合には TRUE に設定する。
+
+
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [11ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   ToASCII 操作は失敗することがあるが、それは IRI が解決できないことを
+   意味する。この変換は、従来の URI リゾルバとの相互運用性を最大化することが
+   目的である場合に使用すべきである（SHOULD）。たとえば、IRI
+
+   "http://r&amp;#xE9;sum&amp;#xE9;.example.org"
+
+   は、
+
+   "http://xn--rsum-bpad.example.org"
+
+   へ変換されてもよく、
+
+   "<a href="http://r%C3%A9sum%C3%A9.example.org">http://r%C3%A9sum%C3%A9.example.org</a>"
+
+   ではなくてよい。
+
+   ireg-name でドメイン名を使用することが知られているスキームを持つ IRI で、
+   そのスキーム定義が ireg-name にパーセント符号化を許可していない場合、
+   直接変換、または ireg-name に対して ToASCII 操作を使用する変換のいずれかの
+   結果が、スキーム固有の制限を満たす URI になるならば、その IRI は
+   スキーム固有の制限を満たす。
+
+   そのような IRI は、IRI を変換して得られ、ireg-name に ToASCII 操作を
+   使用する URI へ解決される。実装は、同じ結果を生成する限り、この変換を
+   行う必要はない。
+
+   注: 手順 1 の変種 b と c の違い（NFC による正規化を使用することと、
+      正規化をまったく使用しないこと）は、多くの非 Unicode 文字
+      エンコーディングでは、一部のテキストを直接表現できないという事実を
+      考慮したものである。たとえば、"Vietnam" という語は本来
+      "Vi&amp;#x1EC7;t Nam"（LATIN SMALL LETTER E WITH CIRCUMFLEX AND DOT BELOW を含む）
+      と NFC で書かれるが、windows-1258 文字エンコーディングからの直接の
+      トランスコーディングでは、"Vi&amp;#xEA;&amp;#x323;t Nam"（LATIN SMALL
+      LETTER E WITH CIRCUMFLEX に COMBINING DOT BELOW が続くものを含む）になる。
+      ベトナム語の他の 8 ビットエンコーディングを直接トランスコードした場合、
+      他の表現になることがある。
+
+   注: 手順 2 における IRI 全体の一様な扱いは、処理を URI スキームから
+      独立させるために重要である。詳細な議論については [<a href="#ref-Gettys" title="&quot;URI Model Consequences&quot;">Gettys</a>] を参照。
+
+   注: 実際には、IRI から URI への写像と解決が密接に統合されている
+      （例: 同じユーザーエージェント内で実行される）場合、一般的な写像
+      （手順 1 と 2）と [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] の ToASCII 操作のどちらが
+      ireg-name に用いられるかは気付かれない。しかし
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [12ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+      [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] を使用する変換の方が、HTTP プロキシを使用する場合のように
+      写像と解決が分離されている場合、後方互換性の問題によりよく対処できる
+      ことがある。
+
+   注: 国際化ドメイン名は、IRI の ireg-name 部分以外の部分に含まれることが
+      ある。必要な変換を適切な時点で適用する責任は、国際化ドメイン名が
+      スキーム構文の一部である場合にはスキーム固有の実装にあり、
+      国際化ドメイン名が 'iquery' の一部である場合にはサーバー側の実装に
+      ある。例: http://r&amp;#xE9;sum&amp;#xE9;.example.org にある Web ページを
+      検証しようとすると、
+      <a href="http://validator.w3">http://validator.w3</a>.org/check?uri=http%3A%2F%2Fr&amp;#xE9;sum&amp;#xE9;.
+      example.org という IRI になり、これは
+      <a href="http://validator.w3.org/check?uri=http%3A%2F%2Fr%C3%A9sum%C3%A9.example.org">http://validator.w3.org/check?uri=http%3A%2F%2Fr%C3%A9sum%C3%A9.</a>
+      <a href="http://validator.w3.org/check?uri=http%3A%2F%2Fr%C3%A9sum%C3%A9.example.org">example.org</a> という URI に変換される。Web ページを取得できるように
+      必要な変換を行う責任は、サーバー側の実装にある。
+
+   IRI を受け入れるシステムは、上記の手順 2 において、URI で許可されていない
+   US-ASCII の印字可能文字、すなわち "&lt;"、"&gt;"、'"'、空白、
+   "{"、"}"、"|"、"\"、"^"、および "`" を扱ってもよい（MAY）。
+   これらの文字が見つかったにもかかわらず変換されない場合、その変換は
+   失敗すべきである（SHOULD）。番号記号（"#"）、パーセント記号（"%"）、
+   および角括弧文字（"["、"]"）は上記のリストには含まれず、変換しては
+   ならない（MUST NOT）ことに注意されたい。これらの文字を含む以前の IRI
+   定義を使用していたプロトコルおよびフォーマットは、与えられたフィールドから
+   実際の IRI を抽出するための前処理手順として、これらの文字の
+   パーセント符号化を要求してもよい（MAY）。この前処理は、ユーザーに IRI の
+   入力を許すアプリケーションでも使用してよい（MAY）。
+
+   注: この処理（手順 2.3）では、URI 参照で許可される文字および既存の
+      パーセント符号化列は、さらに符号化されない。（この写像は、任意の内容を
+      URI の一部に含めるときに適用される符号化と似ているが異なる。）
+      たとえば、（XML 表記での）
+      "http://www.example.org/red%09ros&amp;#xE9;#red" という IRI は
+      "http://www.example.org/red%09ros%C3%A9#red" に変換され、
+      次のようなものには変換されない。
+      "http%3A%2F%2Fwww.example.org%2Fred%2509ros%C3%A9%23red"
+
+   注: 一部の古いソフトウェアが UTF-8 へトランスコードする場合、特定の入力、
+      とりわけ BMP（Basic Multilingual Plane）外の文字に対して不正な出力を
+      生成することがある。例として、非 BMP 文字を含む IRI（XML 表記）:
+      "http://example.com/&amp;#x10300;&amp;#x10301;&amp;#x10302";
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [13ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+      これは古イタリア文字アルファベットの最初の 3 文字を含み、URI への
+      正しい変換は
+      "http://example.com/%F0%90%8C%80%F0%90%8C%81%F0%90%8C%82"
+      である。
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  URI から IRI への変換</span>
+
+   状況によっては、URI を等価な IRI に変換することが望ましい場合がある。
+   この節では、この変換の手順を示す。この節で説明される変換は、常に、
+   変換の入力として用いられた URI へ写像し戻される IRI を生成する
+   （ただし、パーセント符号化における大文字小文字の潜在的な違い、および
+   パーセント符号化された予約されていない文字の潜在的な違いを除く）。
+   しかし、この変換から得られる IRI は、（もし存在していたとしても）元の IRI と
+   正確に同じであるとは限らない。
+
+   URI から IRI への変換はパーセント符号化を除去するが、すべての
+   パーセント符号化を除去できるわけではない。これにはいくつかの理由がある。
+
+   1.  一部のパーセント符号化は、予約文字のパーセント符号化された使用と
+       符号化されていない使用を区別するために必要である。
+
+   2.  一部のパーセント符号化は、UTF-8 オクテット列として解釈できない。
+
+       （注: UTF-8 のオクテットパターンは非常に規則的である。
+       したがって、UTF-8 オクテット列として解釈できるパーセント符号化が
+       実際に UTF-8 に由来する可能性は非常に高いが、保証はない。
+       詳細な議論については [<a href="#ref-Duerst97" title="&quot;The Properties and Promises of UTF-8&quot;">Duerst97</a>] を参照。）
+
+   3.  変換の結果、IRI に適切でない文字になることがある。詳細については
+       <a href="#section-2.2">2.2節</a>、<a href="#section-4.1">4.1節</a>、および <a href="#section-6.1">6.1節</a>を参照。
+
+   URI から IRI への変換は、次の手順（または同じ結果を生成する他の任意の
+   アルゴリズム）を用いて行われる。
+
+   1.  URI を US-ASCII のオクテット列として表現する。
+
+   2.  すべてのパーセント符号化（"%" に 2 桁の十六進数字が続くもの）を
+       対応するオクテットへ変換する。ただし、"%"、"reserved" 内の文字、
+       および URI で許可されていない US-ASCII 文字に対応するものを除く。
+
+   3.  手順 2 で生成されたオクテットのうち、厳密に合法な UTF-8 オクテット列の
+       一部でないものを再度パーセント符号化する。
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [14ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   4. 手順 3 で生成されたすべてのオクテットのうち、UTF-8 において
+      <a href="#section-2.2">2.2節</a>、<a href="#section-4.1">4.1節</a>、および <a href="#section-6.1">6.1節</a>に照らして
+      適切でない文字を表すものを再度パーセント符号化する。
+
+   5. 結果として得られたオクテット列を、UTF-8 で符号化された文字列として
+      解釈する。
+
+   この手順は、可能な限り多くのパーセント符号化された文字を IRI 内の文字へ
+   変換する。手順 4 の適用時にはいくつかの選択肢があるため（<a href="#section-6.1">6.1節</a>を
+   参照）、結果は異なることがある。
+
+   URI から IRI への変換は、文脈から UTF-8 以外の文字エンコーディングが
+   URI で使用されたと推測できる場合であっても、手順 3 および 4 において
+   UTF-8 以外の文字エンコーディングを使用してはならない（MUST NOT）。
+   たとえば、URI "http://www.example.org/r%E9sum%E9.html" は、推測により
+   iso-8859-1 で符号化された 2 つの e-acute 文字を含むと解釈できるかも
+   しれない。しかし、これらの e-acute 文字を含む IRI に変換してはならない。
+   そうしないと、将来その IRI は
+   "http://www.example.org/r%C3%A9sum%C3%A9.html" へ写像されることになり、
+   これは "http://www.example.org/r%E9sum%E9.html" とは異なる URI である。
+
+<span class="h4"><a class="selflink" id="section-3.2.1" href="#section-3.2.1">3.2.1</a>.  例</span>
+
+   この節では、URI を IRI へ変換するさまざまな例を示す。各例は、手順 1 から
+   5 のそれぞれを適用した後の結果を示す。最終結果には XML 表記を使用する。
+   オクテットは、"&lt;" に続いて 2 桁の十六進数字、さらに "&gt;" が続く形で
+   表される。
+
+   次の例は、厳密に合法な UTF-8 列であり、実際の文字 U+00FC、
+   LATIN SMALL LETTER U WITH DIAERESIS（u-umlaut としても知られる）へ
+   変換される "%C3%BC" という列を含む。
+
+   1.  http://www.example.org/D%C3%BCrst
+
+   2.  http://www.example.org/D&lt;c3&gt;&lt;bc&gt;rst
+
+   3.  http://www.example.org/D&lt;c3&gt;&lt;bc&gt;rst
+
+   4.  http://www.example.org/D&lt;c3&gt;&lt;bc&gt;rst
+
+   5.  http://www.example.org/D&amp;#xFC;rst
+
+   次の例は、iso-8859-1 文字エンコーディングでは U+00FC、
+   LATIN SMALL LETTER U WITH DIAERESIS を表すかもしれない "%FC" という列を
+   含む。（他の文字エンコーディングでは別の文字を表すかもしれない。
+   たとえば、
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [15ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   iso-8859-5 におけるオクテット &lt;fc&gt; は U+045C、CYRILLIC SMALL LETTER KJE を
+   表す。）&lt;fc&gt; は厳密に合法な UTF-8 列の一部ではないため、手順 3 で
+   再度パーセント符号化される。
+
+   1.  http://www.example.org/D%FCrst
+
+   2.  http://www.example.org/D&lt;fc&gt;rst
+
+   3.  http://www.example.org/D%FCrst
+
+   4.  http://www.example.org/D%FCrst
+
+   5.  http://www.example.org/D%FCrst
+
+   次の例は、U+202E、RIGHT-TO-LEFT OVERRIDE のパーセント符号化された
+   UTF-8 文字エンコーディングである "%e2%80%ae" を含む。<a href="#section-4.1">4.1節</a>は、
+   この文字を IRI で直接使用することを禁じている。したがって、対応する
+   オクテットは手順 4 で再度パーセント符号化される。この例は、
+   パーセント符号化で使用される文字の大文字小文字が保持されないことがある
+   ことも示している。この例には、punycode 符号化されたドメイン名ラベル
+   （xn--99zt52a）も含まれており、これは変換されない。
+
+   1.  http://xn--99zt52a.example.org/%e2%80%ae
+
+   2.  http://xn--99zt52a.example.org/&lt;e2&gt;&lt;80&gt;&lt;ae&gt;
+
+   3.  http://xn--99zt52a.example.org/&lt;e2&gt;&lt;80&gt;&lt;ae&gt;
+
+   4.  http://xn--99zt52a.example.org/%E2%80%AE
+
+   5.  http://xn--99zt52a.example.org/%E2%80%AE
+
+   スキーム固有の知識を持つ実装は、ToUnicode 手順を用いて、
+   punycode 符号化されたドメイン名ラベルを対応する文字へ変換してもよい
+   （MAY）。したがって、上の例では、ラベル "xn--99zt52a" は U+7D0D U+8C46
+   （日本語の納豆）へ変換され、その結果として全体の IRI は
+   "http://&amp;#x7D0D;&amp;#x8C46;.example.org/%E2%80%AE" となる。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  右から左へ書く言語のための双方向 IRI</span>
+
+   アラビア文字およびヘブライ文字で使用されるものなど、一部の UCS 文字は
+   固有の右から左（rtl）の書字方向を持つ。これらの文字を含む IRI
+   （双方向 IRI または Bidi IRI と呼ばれる）は、論理表現
+   （デジタル表現および読み/綴りに使用される）と視覚表現
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [16ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   （表示/印刷に使用される）との間の関係が自明でないため、追加の注意を
+   必要とする。
+
+   Bidi IRI の論理表現、視覚表現、および構文の複雑な相互作用のため、
+   さまざまな要件の間で均衡が必要である。主な要件は次のとおりである。
+
+   1.  視覚表現と論理表現との間で、ユーザーが予測できる変換。
+
+   2.  IRI のさまざまな部分に広範な文字を含める能力。
+
+   3.  実装に対する変更または制限が軽微であるか、まったくないこと。
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  論理的な格納と視覚的な表示</span>
+
+   デジタル表現で格納または伝送される場合、双方向 IRI は完全な論理順序で
+   なければならず（MUST）、IRI 構文規則（そのスキームに関連する規則を含む）に
+   適合しなければならない（MUST）。これにより、双方向 IRI は他の IRI と
+   同じ方法で処理できることが保証される。
+
+   双方向 IRI は、Unicode Bidirectional Algorithm [<a href="#ref-UNIV4" title="&quot;The Unicode Standard, Version 4.0.1, defined by: The Unicode Standard, Version 4.0 (Reading, MA, Addison-Wesley, 2003. ISBN 0-321-18578-1), as amended by Unicode 4.0.1 (http://www.unicode.org/versions/Unicode4.0.1/)&quot;">UNIV4</a>]、[<a href="#ref-UNI9" title="&quot;The Bidirectional Algorithm&quot;">UNI9</a>] を用いて
+   レンダリングしなければならない（MUST）。双方向 IRI は、左から右への
+   埋め込み内にある場合と同じように、すなわち U+202A、
+   LEFT-TO-RIGHT EMBEDDING（LRE）が前置され、U+202C、
+   POP DIRECTIONAL FORMATTING（PDF）が後置されているかのように
+   レンダリングしなければならない（MUST）。埋め込み方向の設定は、
+   上位レベルのプロトコル（例: HTML の dir='ltr' 属性）で行うこともできる。
+
+   埋め込みを使用しなくても表示が同じである場合、上記の埋め込みを使用する
+   要件はない。たとえば、英語やキリル文字で使用されるような左から右の
+   基本方向性を持つテキスト内にある双方向 IRI が、空白および強い左から右の
+   文字で前後を挟まれている場合、埋め込みは不要である。また、強い右から左の
+   文字と弱い文字だけを含み、強い右から左の文字で始まり終わる双方向相対 IRI
+   参照が、アラビア語やヘブライ語で使用されるような右から左の基本方向性を
+   持つテキスト内に現れ、空白および強い文字で前後を挟まれている場合も、
+   埋め込みは不要である。
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [17ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   他の場合には、U+200E、LEFT-TO-RIGHT MARK（LRM）を使用するだけで、
+   正しい表示動作を強制するのに十分なことがある。しかし、
+   Unicode Bidirectional algorithm の詳細は必ずしも理解しやすいものではない。
+   実装者は、注意しすぎる側に倒し、埋め込みを使用しなくても表示動作に
+   影響がないと完全に確信できないすべての場合に、埋め込みを使用することが
+   強く推奨される。
+
+   Unicode Bidirectional Algorithm（[<a href="#ref-UNI9" title="&quot;The Bidirectional Algorithm&quot;">UNI9</a>]、4.3節）は、上位レベルの
+   プロトコルが双方向レンダリングに影響を与えることを認めている。
+   上位レベルのプロトコルによるそのような変更は、IRI のレンダリングを
+   変更する場合には使用してはならない（MUST NOT）。
+
+   正しい表示を保証するために IRI の前後で使用されることがある双方向
+   フォーマット文字は、それ自体は IRI の一部ではない。IRI は双方向
+   フォーマット文字（LRM、RLM、LRE、RLE、LRO、RLO、および PDF）を
+   含んではならない（MUST NOT）。それらは IRI の視覚的レンダリングに影響するが、
+   それ自体は現れない。したがって、そのような文字を含む IRI を正しく入力する
+   ことはできない。
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  Bidi IRI 構造</span>
+
+   Unicode Bidirectional Algorithm は主に通常の文章のために設計されている。
+   それが双方向 IRI のレンダリングに過度に影響しないようにするため、
+   双方向 IRI にはいくつかの制限が必要である。これらの制限は、区切り子
+   （構造文字、主に "@"、"."、":"、"/" などの句読文字）および構成要素
+   （通常は主に文字と数字から成る）という観点で与えられる。
+
+   <a href="#section-2.2">2.2節</a>の次の構文規則は、Bidi 動作の目的において構成要素に対応する:
+   iuserinfo、ireg-name、isegment、isegment-nz、isegment-nz-nc、
+   ireg-name、iquery、および ifragment。
+
+   上記の構成要素のいずれかの構文を定義する仕様は、それらをさらに分割し、
+   より小さな部分をこの文書に従った構成要素として定義してもよい（MAY）。
+   例として、双方向ドメイン名に関する [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] の制限は、
+   ireg-name がドメイン名であるスキームにおいて、ドメイン名の各ラベルを
+   構成要素として扱うことに対応する。構成要素が形式的に定義されていない場合でも、
+   何らかの構文を構成要素という観点で考え、関連する制限を適用することが
+   有用な場合がある。たとえば、query 部分における通常の name/value 構文では、
+   各 name および各 value を構成要素として扱うと便利である。別の例として、
+   リソース名の拡張子を別個の構成要素として扱うことができる。
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [18ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   各構成要素には、次の制限が適用される。
+
+   1.  構成要素は、右から左の文字と左から右の文字の両方を使用すべきではない
+       （SHOULD NOT）。
+
+   2.  右から左の文字を使用する構成要素は、右から左の文字で始まり、
+       右から左の文字で終わるべきである（SHOULD）。
+
+   上記の制限は、must ではなく should として与えられている。視覚的に
+   表示されることのない IRI については、それらは関係しない。しかし、
+   一般の IRI については、視覚的表示と論理表現との間の双方向で一貫した
+   変換を保証するために非常に重要である。
+
+   注: 一部の構成要素では、上記の制限が実際に厳密に強制されることがある。
+      たとえば、[<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] は、ireg-name がホスト名であるスキームに
+      おいて、これらの制限をホスト名のラベルに適用することを要求している。
+      他の一部の構成要素（たとえば path 構成要素）では、これらの制限に
+      従うことはそれほど難しくないかもしれない。query 部分の一部など、
+      他の構成要素では、query パラメータの値が任意の文字列であり得るため、
+      制限を強制することは非常に難しいことがある。
+
+   上記の制限を他の方法で満たせない場合、影響を受ける構成要素は常に
+   <a href="#section-3.1">3.1節</a>で説明されるように URI 表記へ写像できる。構成要素全体を
+   写像しなければならないことに注意されたい（下の例 9 も参照）。
+
+<span class="h3"><a class="selflink" id="section-4.3" href="#section-4.3">4.3</a>.  Bidi IRI の入力</span>
+
+   Bidi 入力方式は、<a href="#section-4.1">4.1節</a>に従ってレンダリングしながら、論理順序で
+   Bidi IRI を生成しなければならない（MUST）。入力中は、エンドユーザーの混乱を
+   避けるため、新しい文字が入力されるたびにレンダリングを更新すべきである
+   （SHOULD）。
+
+<span class="h3"><a class="selflink" id="section-4.4" href="#section-4.4">4.4</a>.  例</span>
+
+   この節では、Bidi 表記による双方向 IRI の例を示す。ここでは、論理表現と
+   視覚表現の関係を伴う合法な IRI を示し、この関係における特定の現象が、
+   双方向動作に詳しくない人には奇妙に見えるかもしれないが、アラビア語や
+   ヘブライ語の利用者には馴染みのあるものであることを説明する。また、
+   <a href="#section-4.2">4.2節</a>で与えられた制限に従わない場合に何が起こるかも示す。
+   以下の例は [<a href="#ref-BidiEx" title="&quot;Examples of bidirectional IRIs&quot;">BidiEx</a>] で、アラビア語、ヘブライ語、および Bidi 表記の
+   各変種として見ることができる。
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [19ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   例の中の bidi テキストを読むには、右から左のテキストブロックに出会うまで
+   視覚表現を左から右へ読む。その rtl ブロック（スラッシュおよびその他の
+   特殊文字を含む）を右から左へ読み、その後、次の未読の ltr 文字から続ける。
+
+   例 1: rtl 文字を持つ単一の構成要素が反転される:
+   論理表現: "<a href="http://ab.CDEFGH.ij/kl/mn/op.html">http://ab.CDEFGH.ij/kl/mn/op.html</a>"
+   視覚表現: "<a href="http://ab.HGFEDC.ij/kl/mn/op.html">http://ab.HGFEDC.ij/kl/mn/op.html</a>"
+   構成要素は 1 つずつ読むことができ、各構成要素はその自然な方向で読むことが
+   できる。
+
+   例 2: rtl 文字を持つ連続する複数の構成要素は全体として反転される:
+   論理表現: "<a href="http://ab.CDE.FGH/ij/kl/mn/op.html">http://ab.CDE.FGH/ij/kl/mn/op.html</a>"
+   視覚表現: "<a href="http://ab.HGF.EDC/ij/kl/mn/op.html">http://ab.HGF.EDC/ij/kl/mn/op.html</a>"
+   rtl 構成要素の列は、bidi テキスト中の rtl 語の列が rtl として読まれるのと
+   同じ方法で rtl として読まれる。
+
+   例 3: IRI のすべての構成要素（スキームを除く）が rtl である。
+   すべての rtl 構成要素は全体として反転される:
+   論理表現: "<a href="http://AB.CD">http://AB.CD</a>.EF/GH/IJ/KL?MN=OP;QR=ST#UV"
+   視覚表現: "http://VU#TS=RQ;PO=NM?LK/JI/HG/FE.DC.BA"
+   IRI 全体（スキームを除く）が rtl として読まれる。rtl 構成要素間の区切り子は
+   それぞれの構成要素の間にとどまり、ltr 構成要素と rtl 構成要素の間の区切り子は
+   移動しない。
+
+   例 4: 複数の rtl 構成要素列のそれぞれが、それ自体で反転される:
+   論理表現: "<a href="http://AB.CD.ef/gh/IJ/KL.html">http://AB.CD.ef/gh/IJ/KL.html</a>"
+   視覚表現: "<a href="http://DC.BA.ef/gh/LK/JI.html">http://DC.BA.ef/gh/LK/JI.html</a>"
+   各 rtl 構成要素列は、ltr テキスト中の各 rtl 語の列が rtl として読まれるのと
+   同じ方法で rtl として読まれる。
+
+   例 5: 例 2 を異なる種類の構成要素に適用したもの:
+   論理表現: "<a href="http://ab.cd.EF/GH/ij/kl.html">http://ab.cd.EF/GH/ij/kl.html</a>"
+   視覚表現: "<a href="http://ab.cd.HG/FE/ij/kl.html">http://ab.cd.HG/FE/ij/kl.html</a>"
+   ドメイン名ラベルと path 構成要素の反転は予想外に見えるかもしれないが、
+   これは他の bidi 動作と一貫している。ドメイン構成要素が本当に "ab.cd.EF" で
+   あることを確認するためには、bidi アルゴリズムに従って視覚表現を声に出して
+   読むことが役立つかもしれない。"<a href="http://ab.cd">http://ab.cd</a>." の後、
+   RTL ブロック "E-F-slash-G-H" を読み、これは論理表現に対応する。
+
+   例 6: 例 5 と同じだが、rtl 構成要素がさらに多い:
+   論理表現: "<a href="http://ab.CD.EF/GH/IJ/kl.html">http://ab.CD.EF/GH/IJ/kl.html</a>"
+   視覚表現: "<a href="http://ab.JI/HG/FE.DC/kl.html">http://ab.JI/HG/FE.DC/kl.html</a>"
+   ドメイン名ラベルと path 構成要素の反転は、区切り子も移動するため、
+   より識別しやすいかもしれない。
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [20ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-21" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   例 7: 単一の rtl 構成要素が数字を含む:
+   論理表現: "<a href="http://ab.CDE123FGH.ij/kl/mn/op.html">http://ab.CDE123FGH.ij/kl/mn/op.html</a>"
+   視覚表現: "<a href="http://ab.HGF123EDC.ij/kl/mn/op.html">http://ab.HGF123EDC.ij/kl/mn/op.html</a>"
+   数字はすべての場合に ltr で書かれるが、rtl 文字の連なりの内部にある追加の
+   埋め込みとして扱われる。これは通常の双方向テキストと完全に一貫している。
+
+   例 8（許可されない）: 数字が rtl 構成要素の先頭または末尾にある:
+   論理表現: "<a href="http://ab.cd.ef/GH1/2IJ/KL.html">http://ab.cd.ef/GH1/2IJ/KL.html</a>"
+   視覚表現: "<a href="http://ab.cd.ef/LK/JI1/2HG.html">http://ab.cd.ef/LK/JI1/2HG.html</a>"
+   "1/2" という列は bidi アルゴリズムにより分数として解釈され、
+   構成要素を分断して混乱を招く。数字に近い特別な方法で解釈される他の文字も
+   存在する。特に、"+"、"-"、"#"、"$"、"%"、","、"."、":" である。
+
+   例 9（許可されない）: 前の例の数字がパーセント符号化されている:
+   論理表現: "<a href="http://ab.cd.ef/GH%31/%32IJ/KL.html">http://ab.cd.ef/GH%31/%32IJ/KL.html</a>",
+   視覚表現（ヘブライ語）: "<a href="http://ab.cd.ef/%31HG/LK/JI%32.html">http://ab.cd.ef/%31HG/LK/JI%32.html</a>"
+   視覚表現（アラビア語）: "<a href="http://ab.cd.ef/31%HG/%LK/JI32.html">http://ab.cd.ef/31%HG/%LK/JI32.html</a>"
+   大文字がアラビア文字を表すかヘブライ文字を表すかに応じて、
+   視覚表現は異なる。
+
+   例 10（許可されるが推奨されない）:
+   論理表現: "<a href="http://ab.CDEFGH.123/kl/mn/op.html">http://ab.CDEFGH.123/kl/mn/op.html</a>"
+   視覚表現: "<a href="http://ab.123.HGFEDC/kl/mn/op.html">http://ab.123.HGFEDC/kl/mn/op.html</a>"
+   数字だけから成る構成要素は許可される（それらを禁止するのはかなり難しい）が、
+   隣接する RTL 構成要素と、予測しにくい形で相互作用することがある。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  正規化と比較</span>
+
+      注: この節の構造と内容の多くは <a href="./rfc3986#section-6">[RFC3986] の 6節</a>から
+      取られている。違いは IRI の特性によるものである。
+
+   IRI に対する最も一般的な操作の 1 つは単純な比較である。
+   すなわち、IRI または写像された URI を用いてそれぞれのリソースにアクセスする
+   ことなく、2 つの IRI が等価であるかどうかを判定することである。比較は、
+   応答キャッシュがアクセスされるとき、ブラウザがリンクに色を付けるために
+   履歴を確認するとき、または XML パーサが名前空間内のタグを処理するときに
+   行われる。IRI の比較前に広範な正規化を行うことは、スパイダーや
+   インデックスエンジンが探索空間を刈り込んだり、要求動作および応答格納の
+   重複を減らしたりするために使用されることがある。
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [21ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-22" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   IRI 比較は、何らかの特定の目的のために行われる。異なる目的で IRI を
+   比較するプロトコルまたは実装は、別名識別子を減らすためにどれだけの労力を
+   費やすべきかに関して、しばしば異なる設計上のトレードオフを受ける。
+   この節では、IRI を比較するために使用されることがあるさまざまな方法、
+   それらの間のトレードオフ、およびそれらを使用し得るアプリケーションの種類を
+   説明する。
+
+<span class="h3"><a class="selflink" id="section-5.1" href="#section-5.1">5.1</a>.  等価性</span>
+
+   IRI はリソースを識別するために存在するので、おそらく同じリソースを識別する
+   場合には等価と見なされるべきである。しかし、この等価性の定義は実用上あまり
+   役に立たない。実装が 2 つのリソースを完全に知っているか制御していない限り、
+   それらを比較する方法がないからである。この理由により、IRI の等価性または
+   相違性の判定は文字列比較に基づき、場合によっては URI スキーム定義により
+   提供される追加規則への参照によって拡張される。ここでは、そのような比較の
+   可能な結果を説明するために "different" および "equivalent" という用語を
+   使用するが、アプリケーション依存の等価性の版は多数存在する。
+
+   2 つの IRI が等価であると判定することは可能であっても、IRI 比較は、
+   2 つの IRI が異なるリソースを識別するかどうかを判定するには十分ではない。
+   たとえば、2 つの異なるドメイン名の所有者が、同じリソースをその両方から
+   提供することを決定する場合があり、その結果 2 つの異なる IRI が生じる。
+   したがって、比較方法は偽陽性を厳密に避けつつ、偽陰性を最小化するように
+   設計される。
+
+   等価性を検査する際、アプリケーションは相対参照を直接比較すべきではない。
+   参照は比較前にそれぞれの対象 IRI へ変換すべきである。表現の取得など、
+   ネットワーク動作を選択（または回避）するために IRI が比較される場合、
+   フラグメント構成要素（もしあれば）は比較から除外すべきである。
+
+   プロトコルと関係のない識別トークンとして IRI を使用するアプリケーションは、
+   Simple String Comparison（<a href="#section-5.3.1">5.3.1節</a>を参照）を使用しなければならない
+   （MUST）。その他すべてのアプリケーションは、Comparison Ladder
+   （<a href="#section-5.3">5.3節</a>を参照）から比較方法の 1 つを選択するか、IRI から URI への
+   変換後に <a href="./rfc3986#section-6.2">[RFC3986] の 6.2節</a>にある URI 比較の階梯から
+   比較方法の 1 つを選択しなければならない（MUST）。
+
+<span class="h3"><a class="selflink" id="section-5.2" href="#section-5.2">5.2</a>.  比較の準備</span>
+
+   どのような種類の IRI 比較であっても、IRI を運ぶプロトコルまたは
+   フォーマット内のすべてのエスケープまたは符号化が解決されていることを
+   必要とする（REQUIRES）。これは通常、プロトコルまたはフォーマットが
+   構文解析されるときに行われる。そのような
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [22ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-23" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   そのようなエスケープや符号化の例には、[<a href="#ref-HTML4" title="&quot;HTML 4.01 Specification&quot;">HTML4</a>] および [<a href="#ref-XML1" title="&quot;Extensible Markup Language (XML) 1.0 (Third Edition)&quot;">XML1</a>] における
+   エンティティおよび数値文字参照がある。例として、
+   "http://example.org/ros&amp;eacute;"（HTML 中）、
+   "http://example.org/ros&amp;#233";（HTML または XML 中）、および
+   "http://example.org/ros&amp;#xE9";（HTML または XML 中）はすべて、
+   この文書（<a href="#section-1.4">1.4節</a>を参照）で
+   "http://example.org/ros&amp;#xE9"; と表記されるものへ解決される
+   （ここでの "&amp;#xE9;" は実際の e-acute 文字を表し、この文書が
+   非 ASCII 文字を含められないことを補っている）。
+
+   HTTP における Transfer Codings（[<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] を参照）や
+   MIME における Content Transfer Encodings（[<a href="./rfc2045" title="&quot;Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies&quot;">RFC2045</a>]）などの
+   符号化にも同様の考慮事項が適用される。ただし、これらの場合、符号化は
+   文字ではなくオクテットに基づいており、任意のオクテットだけでなく文字が
+   比較されることを保証するために、追加の注意が必要である
+   （<a href="#section-5.3.1">5.3.1節</a>を参照）。
+
+<span class="h3"><a class="selflink" id="section-5.3" href="#section-5.3">5.3</a>.  比較の階梯</span>
+
+   実際には、IRI の等価性を検査するためにさまざまな方法が用いられる。
+   これらの方法は、必要な処理量と、偽陰性の確率をどの程度低減するかによって
+   区別される範囲に属する。上で述べたように、偽陰性を排除することはできない。
+   実際には、その確率を低減することはできるが、その低減にはより多くの処理が
+   必要であり、すべてのアプリケーションにとって費用対効果が高いわけではない。
+
+   この比較方法の範囲を階梯として考えるならば、以下の議論は、安価だが偽陰性を
+   生じる可能性が比較的高い方法から始め、計算コストは高いが偽陰性のリスクが
+   低い方法へと、その階梯を上っていく。
+
+<span class="h4"><a class="selflink" id="section-5.3.1" href="#section-5.3.1">5.3.1</a>.  単純な文字列比較</span>
+
+   2 つの IRI が文字列として見たときに同一であるなら、それらは等価であると
+   結論して安全である。この種の等価性検査は計算コストが非常に低く、特に
+   構文解析の領域を中心に、さまざまなアプリケーションで広く使用されている。
+   また、使用されるスキームから独立し、ネットワークにアクセスせずに迅速に
+   計算できる、IRI 等価性に関する確定的な答えが必要な場合にも使用される。
+   そのような場合の例は XML Namespaces（[<a href="#ref-XMLNamespace" title="&quot;Namespaces in XML&quot;">XMLNamespace</a>]）である。
+
+   文字列の等価性を検査するには、いくつかの基本的な注意が必要である。この
+   手順はしばしば "bit-for-bit" または "byte-for-byte" 比較と呼ばれるが、
+   これは誤解を招く可能性がある。文字列の等価性検査は通常、文字列を構成する
+   文字を、先頭から始めて対ごとに比較し、
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [23ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-24" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   両方の文字列が尽き、すべての文字が等しいと分かるまで、文字の対が等しく
+   比較されなくなるまで、または一方の文字列が他方より先に尽きるまで続ける
+   ことに基づく。
+
+   この文字比較では、各文字の対が比較可能な符号化形式に置かれている必要が
+   ある。たとえば、一方の IRI が UTF-8 符号化形式のバイト配列に格納され、
+   もう一方が UTF-16 符号化形式に格納されている場合、単純に適用された
+   bit-for-bit 比較は誤りを生じる。byte-for-byte または bit-for-bit ではなく、
+   character-for-character に基づく等価性について述べる方がよい。実際上は、
+   共通の文字エンコーディング形式へ変換した後、コードポイントごとに
+   文字単位の比較を行うべきである。文字ごとに比較する場合、比較関数は IRI を
+   URI へ写像してはならない（MUST NOT）。そのような写像は、追加の見かけ上の
+   等価性を生み出すからである。したがって、この IRI が識別子として使用される
+   可能性が少しでもある場合、転送中に IRI を変更すべきではない（SHOULD NOT）。
+
+   偽陰性は、IRI の別名の生成および使用によって生じる。不要な別名は、比較方法に
+   かかわらず、IRI 参照を一貫してすでに正規化された形式（すなわち、下で説明する
+   正規化が適用された後に生成されるものと同一の形式）で提供することによって
+   低減できる。プロトコルおよびデータフォーマットは、多くの場合、人や実装が
+   自分たちの利益のために IRI 参照を一貫して提供する、または少なくとも追加の
+   正規化から得られる効率を打ち消す程度には一貫して提供する、という考えに
+   基づき、一部の IRI 比較を単純な文字列比較に制限する。
+
+<span class="h4"><a class="selflink" id="section-5.3.2" href="#section-5.3.2">5.3.2</a>.  構文に基づく正規化</span>
+
+   実装は、偽陰性の確率を低減するために、この仕様で提供される定義に基づく
+   論理を使用してよい。この処理は、文字ごとの文字列比較よりも中程度に高い
+   コストを持つ。たとえば、この方式を使用するアプリケーションは、次の 2 つの
+   IRI を等価と見なすことが妥当であろう。
+
+      example://a/b/c/%7Bfoo%7D/ros&amp;#xE9;
+      eXAMPLE://a/./b/../b/%63/%7bfoo%7d/ros%C3%A9
+
+   ブラウザなどの Web ユーザーエージェントは、キャッシュされた応答が利用可能か
+   どうかを判定するとき、通常この種の IRI 正規化を適用する。構文に基づく
+   正規化には、大文字小文字の正規化、文字正規化、パーセント符号化の正規化、
+   およびドットセグメントの除去といった技法が含まれる。
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [24ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-25" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h5"><a class="selflink" id="section-5.3.2.1" href="#section-5.3.2.1">5.3.2.1</a>.  大文字小文字の正規化</span>
+
+   すべての IRI について、パーセント符号化三つ組内の十六進数字
+   （例: "%3a" と "%3A"）は大文字小文字を区別しないため、A - F の数字には
+   大文字を使用するように正規化すべきである。
+
+   IRI が汎用構文の構成要素を使用する場合、構成要素の構文等価性規則は常に
+   適用される。すなわち、スキームおよび US-ASCII のみの host は大文字小文字を
+   区別しないため、小文字へ正規化すべきである。たとえば、URI
+   "HTTP://www.EXAMPLE.com/" は "http://www.example.com/" と等価である。
+   IDN である IRI 構成要素内の非 ASCII 文字に関する大文字小文字の等価性は、
+   <a href="#section-5.3.3">5.3.3節</a>で論じられる。他の汎用構文の構成要素は、スキームによって
+   別途明確に定義されない限り、大文字小文字を区別すると仮定される。
+
+   非 ASCII 文字を含む大文字小文字を区別しない構文構成要素を許すスキームの
+   作成は避けるべきである。非 ASCII 文字の大文字小文字正規化は文化依存に
+   なり得て、常に複雑な操作である。唯一の例外は、文字正規化に case folding から
+   導かれる写像手順が含まれる非 ASCII ホスト名に関するものである。
+
+<span class="h5"><a class="selflink" id="section-5.3.2.2" href="#section-5.3.2.2">5.3.2.2</a>.  文字正規化</span>
+
+   Unicode Standard [<a href="#ref-UNIV4" title="&quot;The Unicode Standard, Version 4.0.1, defined by: The Unicode Standard, Version 4.0 (Reading, MA, Addison-Wesley, 2003. ISBN 0-321-18578-1), as amended by Unicode 4.0.1 (http://www.unicode.org/versions/Unicode4.0.1/)&quot;">UNIV4</a>] は、さまざまな目的のために、文字列の間の
+   さまざまな等価性を定義している。Unicode Standard Annex #15
+   [<a href="#ref-UTR15" title="&quot;Unicode Normalization Forms&quot;">UTR15</a>] は、これらの等価性のためのさまざまな Normalization Forms を
+   定義しており、特に Normalization Form C（NFC、Canonical Decomposition の後に
+   Canonical Composition）および Normalization Form KC（NFKC、
+   Compatibility Decomposition の後に Canonical Composition）を定義している。
+
+   IRI の等価性は、2 つの IRI を比較するときに文字正規化を適用するのではなく、
+   IRI が適切に事前文字正規化されているという前提に依存しなければならない
+   （MUST）。例外は、非デジタル形式からの変換、および非 UCS ベースの文字
+   エンコーディングから UCS ベースの文字エンコーディングへの変換である。
+   これらの場合、相互運用性のために NFC または NFC を使用する正規化
+   トランスコーダを使用しなければならない（MUST）。偽陰性および
+   トランスコーディングの問題を避けるため、IRI は NFC を使用して作成すべきである
+   （SHOULD）。NFKC を使用すれば、たとえば全角ラテン文字ではなく半角
+   ラテン文字を選び、半角カタカナではなく全角カタカナを選ぶことにより、
+   さらに多くの問題を避けられることがある。
+
+   例として、"http://www.example.org/r&amp;#xE9;sum&amp;#xE9;.html"（XML 表記）は
+   NFC である。一方、
+   "http://www.example.org/re&amp;#x301;sume&amp;#x301;.html" は NFC ではない。
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [25ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-26" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   前者は合成済みの e-acute 文字を使用し、後者は "e" 文字に結合用 acute accent が
+   続くものを使用する。両方の用法は [<a href="#ref-UNIV4" title="&quot;The Unicode Standard, Version 4.0.1, defined by: The Unicode Standard, Version 4.0 (Reading, MA, Addison-Wesley, 2003. ISBN 0-321-18578-1), as amended by Unicode 4.0.1 (http://www.unicode.org/versions/Unicode4.0.1/)&quot;">UNIV4</a>] において正準等価と
+   定義されている。
+
+   注: 特定の文字列が文字正規化に関してどのように扱われているかは不明であるため、
+      第三者に IRI を任意に正規化することを許すのは不適切であろう。これは、
+      リソースが作成されるとき、その IRI は可能な限り文字正規化されている
+      べきである（すなわち NFC、場合によっては NFKC）という推奨と矛盾しない。
+      これは大文字/小文字の問題に似ている。URI の一部は大文字小文字を
+      区別しない（ドメイン名）。他の部分については、大文字小文字を区別するのか、
+      区別しないのか、またはその中間なのか（例: 大文字小文字を区別するが、
+      誤った大文字小文字が使用された場合に直接否定の結果ではなく複数選択を行う）
+      不明である。最善の方法は、作成者が妥当な大文字小文字を使用し、URI を
+      転送するときには大文字小文字を決して変更しないことである。
+
+   さまざまな IRI スキームは、ireg-name 部分または他の場所で
+   Internationalized Domain Names（IDN）[<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] の使用を許してよい。
+   文字正規化は、<a href="#section-5.3.3">5.3.3節</a>で論じられるように、IDN にも適用される。
+
+<span class="h5"><a class="selflink" id="section-5.3.2.3" href="#section-5.3.2.3">5.3.2.3</a>.  パーセント符号化の正規化</span>
+
+   パーセント符号化機構（<a href="./rfc3986#section-2.1">[RFC3986] の 2.1節</a>）は、それ以外は同一である
+   IRI 間の差異の頻繁な原因である。上で述べた大文字小文字の正規化の問題に
+   加えて、一部の IRI 生成者は、パーセント符号化を必要としないオクテットを
+   パーセント符号化し、その結果、符号化されていない対応物と等価な IRI を
+   生じさせる。これらの IRI は、[<a href="./rfc3986#section-2.3">RFC3986 の 2.3節</a>] に記述されているように、
+   予約されていない文字に対応するパーセント符号化されたオクテット列を
+   復号することによって正規化すべきである。
+
+   実際の解決においては、（予約文字のパーセント符号化を除く）
+   パーセント符号化の違いは、常に同じリソースを生じなければならない（MUST）。
+   たとえば、"http://example.org/~user"、
+   "http://example.org/%7euser"、および "http://example.org/%7Euser" は、
+   同じリソースへ解決されなければならない。
+
+   この種の等価性を検査する場合、比較される両方の IRI のパーセント符号化を
+   揃える必要がある。たとえば、両方の IRI を URI へ変換し（<a href="#section-3.1">3.1節</a>を参照）、
+   得られた URI におけるエスケープの違いを排除し、パーセント符号化中の
+   十六進文字の大文字小文字が常に同じ（望ましくは大文字）であることを保証する。
+   IRI が別の
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [26ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-27" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   アプリケーションへ渡される、または他の何らかの方法でさらに使用される場合、
+   その元の形式は保持されなければならない（MUST）。ここで説明する変換は、
+   ローカル比較のためだけに実行すべきである。
+
+<span class="h5"><a class="selflink" id="section-5.3.2.4" href="#section-5.3.2.4">5.3.2.4</a>.  パスセグメントの正規化</span>
+
+   完全なパスセグメント "." および ".." は、相対参照（<a href="./rfc3986#section-4.1">[RFC3986] の 4.1節</a>）内で
+   のみ使用されることを意図しており、参照解決処理（<a href="./rfc3986#section-5.2">[RFC3986] の 5.2節</a>）の
+   一部として除去される。しかし、一部の実装は、参照がすでに IRI である場合には
+   参照解決が不要であると誤って仮定し、非相対パス内に現れるドットセグメントを
+   除去しないことがある。IRI 正規化器は、<a href="./rfc3986#section-5.2.4">[RFC3986] の 5.2.4節</a>に記述されている
+   remove_dot_segments アルゴリズムをパスに適用することにより、ドットセグメントを
+   除去すべきである。
+
+<span class="h4"><a class="selflink" id="section-5.3.3" href="#section-5.3.3">5.3.3</a>.  スキームに基づく正規化</span>
+
+   IRI の構文および意味論は、各スキームを定義する仕様に記述されるように、
+   スキームごとに異なる。実装は、追加の処理コストをかけて、偽陰性の確率を
+   低減するためにスキーム固有の規則を使用してよい。たとえば、"http" スキームは
+   authority 構成要素を使用し、既定ポートとして "80" を持ち、空の path を "/" と
+   等価と定義しているため、次の 4 つの IRI は等価である。
+
+      http://example.com
+      http://example.com/
+      <a href="http://example.com:/">http://example.com:/</a>
+      <a href="http://example.com:80/">http://example.com:80/</a>
+
+   一般に、空の path を持つ authority の汎用構文を使用する IRI は、"/" の path へ
+   正規化すべきである。同様に、ポートが空またはそのスキームの既定値である
+   明示的な ":port" は、ポートおよびその ":" 区切り子が省略されたものと等価であり、
+   したがってスキームに基づく正規化によって除去すべきである。たとえば、上の
+   2 番目の IRI が "http" スキームの正規形である。
+
+   正規化がスキームごとに異なる別の例は、空の authority 構成要素または空の
+   host 下位構成要素の扱いである。多くのスキーム仕様では、空の authority または
+   host はエラーと見なされる。他の仕様では、それは "localhost" または
+   エンドユーザーのホストと等価と見なされる。スキームが authority の既定値を
+   定義し、その既定値への IRI 参照が望まれる場合、統一性、簡潔さ、
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [27ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-28" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   および国際化のために、その参照は空の authority へ正規化すべきである。
+   しかし、userinfo または port 下位構成要素のいずれかが空でない場合、その host が
+   既定値と一致していても、明示的に与えるべきである。
+
+   正規化は、スキーム仕様によって許可されていない限り、関連する構成要素が
+   空であっても区切り子を除去すべきではない。たとえば、IRI
+   "http://example.com/?" は、上のいずれの例とも等価であると仮定できない。
+   同様に、userinfo 下位構成要素内の区切り子の有無は、通常、その解釈に
+   意味を持つ。fragment 構成要素は、いかなるスキームに基づく正規化の対象にも
+   ならない。したがって、接尾辞 "#" だけが異なる 2 つの IRI は、スキームに
+   関係なく異なるものと見なされる。
+
+   一部の IRI スキームは、ireg-name 部分または他の場所で
+   Internationalized Domain Names（IDN）[<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] の使用を許してよい。
+   IRI 内で使用される場合、それらの名前は [<a href="./rfc3490" title="&quot;Internationalizing Domain Names in Applications (IDNA)&quot;">RFC3490</a>] で定義される
+   ToASCII 操作を、"UseSTD3ASCIIRules" および "AllowUnassigned" フラグとともに
+   用いて検証すべきである（SHOULD）。無効な IDN を含む IRI は正常に解決できない。
+   検証済みの IRI の IDN 構成要素は、Nameprep 処理 [<a href="./rfc3491" title="&quot;Nameprep: A Stringprep Profile for Internationalized Domain Names (IDN)&quot;">RFC3491</a>] を用いて
+   文字正規化すべきである（SHOULD）。ただし、可読性のために、それらを
+   ASCII Compatible Encoding（ACE）へ変換すべきではない（SHOULD NOT）。
+
+   スキームに基づく正規化は、IDN 構成要素とその punycode への変換を等価と
+   見なしてもよい。例として、
+   "http://r&amp;#xE9;sum&amp;#xE9;.example.org" は
+   "http://xn--rsum-bpad.example.org" と等価と見なされてもよい。
+
+   その他のスキーム固有の正規化も可能である。
+
+<span class="h4"><a class="selflink" id="section-5.3.4" href="#section-5.3.4">5.3.4</a>.  プロトコルに基づく正規化</span>
+
+   偽陰性の発生を減らすための相当な努力は、Web スパイダーにとって費用対効果が
+   高いことが多い。その結果、Web スパイダーは IRI 比較においてさらに積極的な
+   技法を実装する。たとえば、次のような IRI が
+
+      http://example.com/data
+
+   末尾のスラッシュだけが異なる IRI へリダイレクトすることを観察した場合、
+
+      http://example.com/data/
+
+   将来、その 2 つを等価と見なす可能性が高い。この種の技法は、等価性が
+   リソースにアクセスした結果と、
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [28ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-29" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   そのスキームの参照解除アルゴリズムに関する共通慣行の両方によって明確に
+   示される場合にのみ適切である（この場合、相対参照の問題を避けるために
+   HTTP オリジンサーバーがリダイレクトを使用すること）。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  IRI の使用</span>
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  IRI で許可される UCS 文字の制限</span>
+
+   この節では、<a href="#section-2.2">2.2節</a>および <a href="#section-4.1">4.1節</a>で与えられたものを超えて、IRI で
+   使用可能な文字および文字列に関する制限を論じる。この節の考慮事項は、
+   IRI が作成されるとき、および URI が IRI へ変換されるときに関連する。
+
+   a.  各 IRI 構成要素で許可される文字のレパートリは、その構成要素の定義に
+       よって制限される。たとえば、scheme 構成要素の定義は US-ASCII を
+       超える文字を許可していない。
+
+       （注: URI の慣行に従い、汎用 IRI ソフトウェアはそのような制限を
+       検査できず、また検査すべきではない。）
+
+   b.  UCS には、視覚的に非常によく似ている文字の領域が多数含まれる。
+       転写誤りの可能性があるため、これらも避けるべきである。これには、
+       ラテン文字の全角相当文字、日本語の半角カタカナ文字、およびその他多数が
+       含まれる。また、[<a href="./rfc3491" title="&quot;Nameprep: A Stringprep Profile for Internationalized Domain Names (IDN)&quot;">RFC3491</a>] で除外されている "space"、"delims"、
+       "unwise" 文字に非常によく似た多くの文字も含まれる。
+
+   追加情報は [<a href="#ref-UNIXML" title="&quot;Unicode in XML and other Markup Languages&quot;">UNIXML</a>] から入手できる。[<a href="#ref-UNIXML" title="&quot;Unicode in XML and other Markup Languages&quot;">UNIXML</a>] は識別子の文脈ではなく
+   通常の文章の文脈で書かれている。それにもかかわらず、IRI に適切でない文字の
+   多くのカテゴリを論じている。
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  ソフトウェアインターフェイスとプロトコル</span>
+
+   IRI は文字列として定義されているが、URI のソフトウェアインターフェイスは
+   通常、オクテット列または他の種類のコード単位に対して機能する。したがって、
+   ソフトウェアインターフェイスおよびプロトコルは、どの文字エンコーディングを
+   使用するかを定義しなければならない（MUST）。
+
+   IRI に対応したコンポーネントと URI のみに対応したコンポーネントの間にある
+   中間ソフトウェアインターフェイスは、IRI 対応コンポーネントから URI のみに
+   対応したコンポーネントへ転送するとき、<a href="#section-3.1">3.1節</a>に従って IRI を
+   写像しなければならない（MUST）。この写像は可能な限り遅く適用すべきである
+   （SHOULD）。IRI を扱えることが分かっているコンポーネント間では適用すべきではない
+   （SHOULD NOT）。
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [29ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-30" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-6.3" href="#section-6.3">6.3</a>.  文書およびプロトコルにおける URI と IRI の形式</span>
+
+   URI を運ぶ文書フォーマットは、IRI の転送を可能にするようにアップグレードする
+   必要がある場合がある。文書全体がネイティブな文字エンコーディングを持つ場合、
+   IRI もこの文字エンコーディングで符号化され、パーサまたはインタープリタに
+   よってそれに応じて変換されなければならない（MUST）。ネイティブな文字
+   エンコーディングで表現できない IRI 文字は、そのような規約が利用可能であれば、
+   文書フォーマットのエスケープ規約を用いてエスケープすべきである（SHOULD）。
+   あるいは、<a href="#section-3.1">3.1節</a>に従ってパーセント符号化してもよい（MAY）。たとえば、
+   HTML または XML では、数値文字参照を使用すべきである（SHOULD）。文書全体が
+   ネイティブな文字エンコーディングを持ち、その文字エンコーディングが UTF-8
+   ではない場合、IRI を UTF-8 文字エンコーディングでその文書に配置してはならない
+   （MUST NOT）。
+
+   注: 一部のフォーマットは、異なる用語を使用しているものの、すでに IRI に
+      対応している。HTML 4.0 [<a href="#ref-HTML4" title="&quot;HTML 4.01 Specification&quot;">HTML4</a>] は、IRI から URI への変換を
+      エラー回避動作として定義している。XML 1.0 [<a href="#ref-XML1" title="&quot;Extensible Markup Language (XML) 1.0 (Third Edition)&quot;">XML1</a>]、XLink
+      [<a href="#ref-XLink" title="&quot;XML Linking Language (XLink) Version 1.0&quot;">XLink</a>]、XML Schema [<a href="#ref-XMLSchema" title="&quot;XML Schema Part 2: Datatypes&quot;">XMLSchema</a>]、およびそれらに基づく仕様は
+      IRI を許可している。また、関連するすべての新しい W3C フォーマットおよび
+      プロトコルは IRI を扱うことを要求されると期待されている [<a href="#ref-CharMod" title="&quot;Character Model for the World Wide Web: Resource Identifiers&quot;">CharMod</a>]。
+
+<span class="h3"><a class="selflink" id="section-6.4" href="#section-6.4">6.4</a>.  元の文字を符号化するための UTF-8 の使用</span>
+
+   この節では、<a href="#section-1.2">1.2節</a>の c) について詳細を論じ、例を示す。IRI を使用できる
+   ようにするには、問題の IRI に対応する URI が、元の文字を UTF-8 を用いて
+   オクテットへ符号化する必要がある。これは、URI スキームのすべての URI について
+   指定されてもよいし、元の文字をどのように符号化するかを指定していない
+   スキームの個々の URI に適用されてもよい。これは URI 全体に適用されても、
+   一部だけに適用されてもよい。文字を URI へ符号化する背景情報については、
+   <a href="./rfc3986#section-2.5">[RFC3986] の 2.5節</a>も参照。
+
+   新しい URI スキームについては、UTF-8 の使用が [<a href="./rfc2718" title="&quot;Guidelines for new URL Schemes&quot;">RFC2718</a>] で推奨されている。
+   UTF-8 がすでに使用されている例には、URN 構文 [<a href="./rfc2141" title="&quot;URN Syntax&quot;">RFC2141</a>]、
+   IMAP URLs [<a href="./rfc2192" title="&quot;IMAP URL Scheme&quot;">RFC2192</a>]、および POP URLs [<a href="./rfc2384" title="&quot;POP URL Scheme&quot;">RFC2384</a>] がある。一方、
+   HTTP URL スキームは元の文字をどのように符号化するかを指定していないため、
+   対応するが異なる IRI を持てる HTTP URL は一部だけである。
+
+   たとえば、URI が
+   "http://www.example.org/r%C3%A9sum%C3%A9.html" である文書については、
+   対応する IRI（XML 表記、<a href="#section-1.4">1.4節</a>を参照）:
+   "http://www.example.org/r&amp;#xE9;sum&amp;#xE9;.html" を構成できる
+   （"&amp;#xE9"; は e-acute 文字を表し、"%C3%A9" はその文字の UTF-8 で
+   符号化され、パーセント符号化された表現である）。一方、URI が
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [30ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-31" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   "http://www.example.org/r%E9sum%E9.html" である文書については、
+   パーセント符号化されたオクテットは、UTF-8 に基づくものではないため、
+   IRI 内の実際の文字へ変換できない。
+
+   これは、ほとんどの URI スキームについて、IRI とともに機能させるために
+   スキーム定義をアップグレードする必要がないことを意味する。アップグレードが
+   意味を持つ主な場合は、スキーム定義、またはスキームの特定の構成要素が、
+   US-ASCII 文字の使用に厳密に制限されており、パーセント符号化を介して
+   非 ASCII 文字/オクテットを含める規定がない場合、またはスキーム定義が現在、
+   非 ASCII 文字の符号化について高度にスキーム固有の規定を使用している場合である。
+   その例は mailto: スキーム [<a href="./rfc2368" title="&quot;The mailto URL scheme&quot;">RFC2368</a>] である。
+
+   この仕様はいかなるスキーム仕様もどのような形でもアップグレードしない。
+   これは別途行われる必要がある。また、"IRI scheme" というものは存在しないことに
+   注意されたい。すべての IRI は URI スキームを使用し、すべての URI スキームは
+   IRI とともに使用できる。ただし、一部の場合には、変換せずに URI を直接 IRI として
+   使用することによってのみ可能である。
+
+   URI スキームは、スキーム固有 URI の構文に制限を課すことができる。すなわち、
+   汎用 URI 構文 [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の下で許容される URI が、URI スキーム仕様により
+   課されるより狭い構文制約のために許容されないことがある。URI スキーム定義は、
+   汎用 URI 構文の構文制限を広げることはできない。そうでなければ、スキーム固有の
+   構文制約を満たしながら汎用 URI 構文の構文制約を満たさない URI を生成できる
+   ことになる。しかし、URI スキーム仕様によって課される追加の構文制約は IRI に
+   適用される。なぜなら、<a href="#section-3.1">3.1節</a>で定義された写像から得られる対応 URI は、
+   汎用 URI 構文の構文制限および対応する URI スキーム仕様によって課される
+   さらに狭い制限の下で、有効な URI でなければならない（MUST）からである。
+
+   UTF-8 の使用要件は、URI のすべての部分に適用される（ireg-name 部分の潜在的な
+   例外については <a href="#section-3.1">3.1節</a>を参照）。しかし、広範な文字を直接表現できる
+   IRI の能力が、IRI（または IRI 参照）の一部だけで使用されることもあり得る。
+   IRI の他の部分は US-ASCII 文字だけを含んでいてもよく、または UTF-8 に
+   基づいていなくてもよい。それらは別の文字エンコーディングに基づいていてもよく、
+   または生のバイナリデータを直接符号化していてもよい（[<a href="./rfc2397" title="&quot;The &quot;">RFC2397</a>] も参照）。
+
+   たとえば、URI 参照
+   "http://www.example.org/r%E9sum%E9.xml#r%C3%A9sum%C3%A9" を持つことが可能である。
+   ここでは、文書名はサーバー設定に基づいて iso-8859-1 で符号化されているが、
+   fragment identifier は
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [31ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-32" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   [<a href="#ref-XPointer" title="&quot;XPointer Framework&quot;">XPointer</a>] に従って UTF-8 で符号化されている。上記の URI に対応する IRI は
+   （XML 表記で）
+   "http://www.example.org/r%E9sum%E9.xml#r&amp;#xE9;sum&amp;#xE9"; となる。
+
+   同様の考慮事項は query 部分にも適用される。IRI の機能（すなわち、
+   非 ASCII 文字を含めることができる機能）は、query 部分が UTF-8 で
+   符号化されている場合にのみ使用できる。
+
+<span class="h3"><a class="selflink" id="section-6.5" href="#section-6.5">6.5</a>.  相対 IRI 参照</span>
+
+   基底に対する相対 IRI 参照の処理は単純に扱われる。[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] の
+   アルゴリズムを直接適用でき、IRI 参照で追加的に許可される文字を、URI 参照に
+   おける予約されていない文字と同じ方法で扱う。
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  URI/IRI 処理指針（参考）</span>
+
+   この参考節は、現在 URI を処理している同じソフトウェアコンポーネントおよび
+   操作において IRI をサポートするための指針を提供する。URI を扱う
+   ソフトウェアインターフェイス、ユーザーに URI の入力を許すソフトウェア、
+   URI を作成または生成するソフトウェア、URI を表示するソフトウェア、
+   URI を運ぶフォーマットおよびプロトコル、ならびに URI を解釈するソフトウェアで
+   ある。これらはいずれも、IRI とともに適切に機能する前に変更が必要になる場合が
+   ある。この節の考慮事項は、URI 参照および IRI 参照にも適用される。
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  URI/IRI ソフトウェアインターフェイス</span>
+
+   URI 処理 API や URI を転送するプロトコルなど、URI を扱うソフトウェア
+   インターフェイスには、IRI を運ぶように設計されたインターフェイスおよび
+   プロトコル要素が必要である。
+
+   API またはプロトコルにおける現在の処理が US-ASCII に基づいている場合、
+   IRI の文字エンコーディングとして UTF-8 が推奨される。これは US-ASCII と
+   互換であり、[<a href="./rfc2277" title="&quot;IETF Policy on Character Sets and Languages&quot;">RFC2277</a>] の推奨に従い、URI への変換を容易にするからである。
+   いずれの場合でも、API またはプロトコル定義は、使用される文字エンコーディングを
+   明確に定義しなければならない。
+
+   URI のみに対応したコンポーネントから IRI 対応コンポーネントへの転送には、
+   写像は不要である。ただし、上の <a href="#section-3.2">3.2節</a>で説明した変換を実行してもよい。
+   この逆変換を正しく行えない可能性がある場合には、実行しない方が望ましい。
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [32ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-33" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  URI/IRI 入力</span>
+
+   たとえば入力や口述によって、ユーザーが URI をシステムに入力できる
+   コンポーネントがある。このソフトウェアは、IRI 入力を可能にするように
+   更新されなければならない。
+
+   IRI の視覚表現（何らかの視覚表示内で、何らかの順序に並んだグリフ列）を
+   見たり、IRI を聞いたりした人は、そのユーザーの言語の文字に対応する入力方式を
+   使用して IRI を入力する。使用される文字体系および入力方式によって、この処理は
+   多かれ少なかれ複雑になる可能性がある。
+
+   IRI 入力の処理は、可能な限り、<a href="#section-2.2">2.2節</a>で定義された制限が満たされることを
+   保証しなければならない。これは、適切な入力方式またはその変種/設定を選択する、
+   入力される文字を適切に変換する、変換できない文字を除去する、および/または
+   ユーザーに警告またはエラーメッセージを発することによって行われる場合がある。
+
+   変種設定の例として、東アジア言語用の入力方式エディタは通常、ラテン文字および
+   関連文字を全角または半角の版で入力できる。IRI 入力については、入力方式
+   エディタは、半角ラテン文字および句読点、ならびに全角カタカナを生成するように
+   設定されるべきである。
+
+   主にまたは専ら URI/IRI の入力に使用される入力フィールドは、ユーザーが IRI を
+   URI へ写像された形で表示できるようにしてよい。IRI の入力が頻繁な場所では、
+   IRI が URI へ写像された形で表示される可能性を提供してよい。これは、
+   ユーザーが使用する一部のソフトウェアがまだ IRI を受け入れない場合に役立つ。
+
+   IRI 入力コンポーネントが、URI は扱うが IRI は扱わないコンポーネントと
+   インターフェイスする場合、そのコンポーネントへ渡す前に IRI を URI へ
+   写像しなければならない。
+
+   右から左の文字を含む IRI の入力については、<a href="#section-4.3">4.3節</a>を参照されたい。
+
+<span class="h3"><a class="selflink" id="section-7.3" href="#section-7.3">7.3</a>.  アプリケーション間での URI/IRI 転送</span>
+
+   多くのアプリケーション、特にメールユーザーエージェントは、プレーンテキスト内に
+   現れる URI を検出しようとする。このために、URI 構文に基づくいくつかの
+   ヒューリスティックを使用する。その後、ユーザーがそのような URI をクリックし、
+   適切な（通常はスキーム依存の）アプリケーションで対応するリソースを取得できる
+   ようにする。
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [33ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-34" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   そのようなアプリケーションは、ヒューリスティックの基礎として IRI 構文を
+   使用するようにアップグレードされなければならない。特に、非 ASCII 文字を
+   IRI の終端を示すものと見なすべきではない。また、そのようなアプリケーションは、
+   検出された IRI を、それが現れる文書またはアプリケーションの文字エンコーディング
+   から、システム全体の IRI 呼び出し機構で使用される文字エンコーディングへ、
+   またはシステム全体の呼び出し機構が URI のみを受け入れる場合には
+   <a href="#section-3.1">3.1節</a>に従って URI へ、正しく変換することを保証しなければならない。
+
+   クリップボードは、URI および IRI を 1 つのアプリケーションから別の
+   アプリケーションへ転送するための、もう 1 つの頻繁に使用される方法である。
+   ほとんどのプラットフォームでは、クリップボードは多くの言語および文字体系の
+   テキストを格納し転送できる。正しく使用されれば、クリップボードはバイトではなく
+   文字を転送し、これは IRI に対して正しい動作を行う。
+
+<span class="h3"><a class="selflink" id="section-7.4" href="#section-7.4">7.4</a>.  URI/IRI 生成</span>
+
+   インターネットを通じてリソースを提供するシステムでは、それらのリソースに
+   論理名がある場合、提供するリソースの URI を自動的に生成することがある。
+   たとえば、一部の HTTP サーバーはファイルディレクトリのディレクトリ一覧を
+   生成し、その後、生成された URI に対してファイルで応答できる。
+
+   多くの従来の文字エンコーディングが、さまざまなファイルシステムで使用されている。
+   現在配備されている多くのシステムは、URI を生成する前に、基盤システムの
+   ローカル文字表現を変換していない。
+
+   最大限の相互運用性のため、リソース識別子を生成するシステムは、適切な変換を
+   行うべきである。たとえば、ファイルシステムに
+   "r&amp;#xE9;sum&amp;#xE9;.html" という名前のファイルが含まれている場合、サーバーは
+   URI においてこれを "r%C3%A9sum%C3%A9.html" として公開すべきである。これにより、
+   ローカルではファイル名が UTF-8 以外の文字エンコーディングで保持されていても、
+   IRI において "r&amp;#xE9;sum&amp;#xE9;.html" を使用できる。
+
+   この推奨は特に HTTP サーバーに適用される。FTP サーバーについても同様の
+   考慮事項が適用される。[<a href="./rfc2640" title="&quot;Internationalization of the File Transfer Protocol&quot;">RFC2640</a>] を参照。
+
+<span class="h3"><a class="selflink" id="section-7.5" href="#section-7.5">7.5</a>.  URI/IRI 選択</span>
+
+   場合によっては、リソース所有者および発行者が、自分たちのリソースを識別するために
+   使用される IRI を制御できる。この制御は、主としてファイル名などのリソース名を
+   直接制御することによって行われる。
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [34ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-35" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   これらの場合、容易に混同される IRI の選択を避けることが推奨される。
+   たとえば、US-ASCII では、小文字の ell（"l"）は数字の one（"1"）と
+   容易に混同され、大文字の oh（"O"）は数字の zero（"0"）と容易に混同される。
+   発行者は、"br0ken" や "1ame" のような識別子でユーザーを混乱させることを
+   避けるべきである。
+
+   US-ASCII レパートリ外では、混乱の機会はさらに多い。完全な指針群をここに
+   含めるには長すぎる。名前が単一の文字体系の文字に限定されている限り、
+   その文字体系または言語の母語話者が、どのような場合に曖昧さが現れるか、
+   それをどのように避けられるかを最もよく知っている。部外者には曖昧に見えるものも、
+   平均的な母語利用者には完全に明白であることがある。一方で、場合によっては、
+   UCS は互換性の理由から、たとえば組版上の目的のために変種を含んでいる。
+   これらは可能な限り避けるべきである。例外はあるかもしれないが、新しく作成される
+   リソース名は一般に NFKC [<a href="#ref-UTR15" title="&quot;Unicode Normalization Forms&quot;">UTR15</a>] であるべきである
+   （これは、それらが NFC でもあることを意味する）。
+
+   例として、UCS は互換性の理由から U+FB01 に "fi" 合字を含んでいる。
+   可能な限り、IRI は "fi" 合字ではなく 2 つの文字 "f" と "i" を使用すべきである。
+   後者が使用される可能性のある例は、"fi" 合字を含んで書かれた語を明示的に
+   検索する IRI の query 部分である。
+
+   場合によっては、異なる文字体系の文字が同じように見える可能性がある。
+   最もよく知られた例は、ラテン文字の "A"、ギリシア文字の "Alpha"、
+   キリル文字の "A" の類似性である。そのような場合を避けるため、単一の
+   構成要素内のすべての文字が、ある特定の言語で一緒に使用される場合にのみ、
+   IRI を作成すべきである。これは通常、これらすべての文字が同じ文字体系に
+   属することを意味するが、日本語のように異なる文字体系の文字を混在させる言語も
+   ある。これは、上の例で文字と数字を区別するために使用されたヒューリスティックに
+   似ている。また、ラテン文字、ギリシア文字、およびキリル文字については、
+   大文字を使用するよりも小文字を使用した方が曖昧さが少ない。
+
+<span class="h3"><a class="selflink" id="section-7.6" href="#section-7.6">7.6</a>.  URI/IRI の表示</span>
+
+   利用可能なレイアウトおよびフォントリソースを用いて、レンダリングソフトウェアが
+   IRI の非 ASCII 部分を正しく表示することを期待できない状況では、これらの部分は
+   表示前にパーセント符号化すべきである。
+
+   Bidi IRI の表示については、<a href="#section-4.1">4.1節</a>を参照されたい。
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [35ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-36" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.7" href="#section-7.7">7.7</a>.  URI と IRI の解釈</span>
+
+   IRI をローカルリソースの名前として解釈するソフトウェアは、複数の形式の IRI を
+   受け入れ、それらを適切なローカルリソース名へ変換して照合すべきである。
+
+   第一に、複数の表現には、プロトコルのネイティブ文字エンコーディングによる
+   IRI と、それに対応する URI の両方が含まれる。
+
+   第二に、UTF-8 以外の文字エンコーディングに基づいて構成された URI を含むことが
+   ある。これらの URI は、この仕様に適合せず、非 ASCII 文字を URI へ変換するために
+   従来の文字エンコーディングを使用するユーザーエージェントによって生成される
+   ことがある。これが必要かどうか、およびどの文字エンコーディングを対象にするかは、
+   ローカルで使用される従来の文字エンコーディングや、さまざまな版の
+   ユーザーエージェントの分布など、複数の要因に依存する。たとえば、日本語向けの
+   ソフトウェアは、UTF-8 に加えて Shift_JIS および/または EUC-JP の URI を
+   受け入れてよい。
+
+   第三に、よりユーザーフレンドリーで伝送エラーに対して堅牢にするために、
+   追加の写像を含むことがある。これらは、一部のサーバーが現在 URI を大文字小文字を
+   区別しないものとして扱ったり、綴り誤りを考慮するために追加の照合を行ったり
+   する方法に似ている。US-ASCII レパートリを超える文字については、たとえば、
+   受信した IRI またはリソース名のアクセントを無視することが含まれる場合がある。
+   そのような写像は、大文字小文字の写像を含め、言語依存であることに注意されたい。
+
+   あまりにも多くの写像を考慮すると、リソースを曖昧さなく識別することが難しく
+   なることがある。しかし、IRI のパーセント符号化された部分とパーセント符号化
+   されていない部分は常に明確に区別できる。また、UTF-8 の規則性
+   （[<a href="#ref-Duerst97" title="&quot;The Properties and Promises of UTF-8&quot;">Duerst97</a>] を参照）により、衝突の可能性は一見するよりも低くなる。
+
+<span class="h3"><a class="selflink" id="section-7.8" href="#section-7.8">7.8</a>.  アップグレード戦略</span>
+
+   この推奨が、すでに多数のインスタンスが配備されているソフトウェアに追加の
+   制約を課す場合、アップグレードを慎重に導入し、さまざまな相互依存関係を
+   認識しておくことが重要である。
+
+   IRI を正しく解釈できない場合、それらを作成、生成、または転送すべきではない。
+   これは、IRI を受け入れるように URI 解釈ソフトウェアをアップグレードすることが
+   最優先であるべきことを示唆している。
+
+   一方で、単一の IRI は、事前に知られている単一またはごく少数のインタープリタに
+   よってのみ解釈されるが、非常に広範に入力および転送されることがある。
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [36ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-37" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   したがって、IRI は、IRI を入力し転送できるようにするソフトウェアの広範な
+   アップグレードから最も大きな利益を得る。しかし、個々の IRI が公開される前に、
+   さまざまな版の入力および転送ソフトウェアによって受信されることが予想される形式を
+   カバーするため、対応する解釈ソフトウェアをアップグレードするよう注意すべきである。
+
+   ローカル文字エンコーディングを使用する代わりに IRI を生成するように生成
+   ソフトウェアをアップグレードすることは、そのサービスが IRI を受け入れるように
+   アップグレードされた後にのみ行うべきである。同様に、IRI は、そのサービスが
+   IRI を受け入れ、介在する基盤およびプロトコルがそれらを安全に転送することが
+   分かっている場合にのみ生成すべきである。
+
+   表示のために URI から IRI へ変換するソフトウェアは、表示結果を見る対象集団に
+   アップグレード済みの入力ソフトウェアが広く配備された後にのみアップグレードすべきである。
+
+   文字エンコーディングを自由に選択できる場合、別のエンコーディングではなく UTF-8 を
+   使用することで、IRI へのアップグレードに必要な労力および依存関係を軽減できる
+   ことが多い。たとえば、新しいファイルベースの Web サーバーを設定する場合、
+   ファイル名の文字エンコーディングとして UTF-8 を使用すると、IRI への移行が
+   容易になる。同様に、新しい Web フォームをフォームページの文字エンコーディングとして
+   UTF-8 を使用して設定すると、返される query URI は（ユーザーが何らかの理由で
+   文字エンコーディングを変更しない限り）文字エンコーディングとして UTF-8 を使用し、
+   したがって IRI と互換になる。
+
+   これらの推奨を合わせて適用することで、相互運用性の問題を最小化しながら、
+   US-ASCII 以外の文字を扱うために URI から IRI への拡張が可能になる。URI スキーム
+   定義のアップグレードに関する考慮事項については、<a href="#section-6.4">6.4節</a>を参照。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  セキュリティ上の考慮事項</span>
+
+   [<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] で論じられているセキュリティ上の考慮事項は IRI にも適用される。
+   さらに、次の問題は IRI に対して特に注意を要する。
+
+   不正な符号化または復号は、セキュリティ上の問題につながる可能性がある。
+   特に、一部の UTF-8 デコーダは過長バイト列を検査しない。例として、"/" は
+   UTF-8 と US-ASCII の両方でバイト 0x2F により符号化されるが、一部の
+   UTF-8 デコーダは誤って 0xC0 0xAF という列も "/" と解釈する。
+   たとえば、次のような列
+
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [37ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-38" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   "%C0%AF.." は、UTF-8 デコーダがフォールトトレラントであり、変換と検査が
+   正しい順序で行われず、かつ/または予約文字と予約されていない文字が明確に
+   区別されていない場合、一部のセキュリティ検査を通過し、その後 path 内で
+   "/.." と解釈される可能性がある。
+
+   IRI では、"spoofing" が発生し得るさまざまな方法がある。"Spoofing" とは、
+   誰かがユーザーには同じまたは似て見えるが別のリソースを指すリソース名を
+   追加する可能性があることを意味する。追加されたリソースは、非常によく似て見える
+   ことで本物のリソースを装うかもしれないが、発見が難しく、さまざまな問題を
+   引き起こし得るあらゆる種類の変更を含む可能性がある。IRI における spoofing の
+   可能性のほとんどは、URI におけるものの拡張である。
+
+   Spoofing はさまざまな理由で発生し得る。第一に、ユーザーが IRI を入力するとき、
+   または従来の文字エンコーディングから IRI をトランスコードするときの正規化に
+   関する期待または実際の正規化が、サーバー側で使用される正規化と一致しない場合で
+   ある。概念的には、これは大文字小文字を区別しない Web サーバーの使用をめぐる
+   問題と何ら異ならない。たとえば、混在した大文字小文字の名前
+   （"http://big.example.com/PopularPage.html"）を持つ人気の Web ページは、
+   誰かが "http://big.example.com/popularpage.html" を作成できる場合、
+   "spoof" されるかもしれない。しかし、正規化されていない文字列の使用、および
+   ユーザーの便宜のための追加写像の使用は、spoofing の可能性を高めることがある。
+   正規化されていない名前を持つリソースの作成を許すプロトコルおよびサーバーは、
+   そのような攻撃に対して特に脆弱である。これは関連するプロトコル、サーバー、
+   またはリソースに固有のセキュリティ問題であり、IRI に特有のものではないが、
+   完全性のためここで言及している。
+
+   Spoofing は、ドメイン名部分や path 部分など、さまざまな IRI 構成要素で
+   発生し得る。ドメイン名部分に特有の考慮事項については、[<a href="./rfc3491" title="&quot;Nameprep: A Stringprep Profile for Internationalized Domain Names (IDN)&quot;">RFC3491</a>] を参照。
+   path 部分については、独立したユーザーが同じサブ領域にリソースを作成することを
+   許すサイトの管理者は、spoofing の検査に注意する必要があるかもしれない。
+
+   Spoofing は、UCS に非常によく似て見える多くの文字があるために発生し得る。
+   詳細は <a href="#section-7.5">7.5節</a>で論じられている。繰り返すが、これは US-ASCII における
+   spoofing の可能性、たとえば "br0ken" または "1ame" の URI を使用することと
+   非常によく似ている。
+
+   Spoofing は、古いユーザーエージェントに対応するため、さまざまな文字
+   エンコーディングに基づくパーセント符号化を持つ URI が受け入れられる場合に
+   発生し得る。場合によっては、特にラテン文字ベースのリソース名では、これは通常
+   検出しやすい。UTF-8 で符号化された名前は、従来の文字エンコーディングとして
+   解釈され表示されると、ほとんど意味不明になるからである。
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [38ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-39" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   同時に使用される文字エンコーディングが似た構造を持っているが、まったく同じ
+   符号化を持つ文字が存在しない場合、検出はより難しくなる。
+
+   Spoofing は、<a href="#section-4.2">4.2節</a>の制限に従わない場合、双方向 IRI で発生し得る。
+   同じ視覚表現が異なる論理表現として解釈されることがあり、その逆もある。
+   正しい Unicode 双方向実装が使用されることも非常に重要である。
+
+<span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  謝辞</span>
+
+   この文書の多くの初期版（<a href="./draft-masinter-url-i18n-xx">draft-masinter-url-i18n-xx</a>）の共著者としての
+   作業について、Larry Masinter に感謝したい。
+
+   ここで扱う問題に関する議論はかなり以前に始まった。1995年8月に HTML 作業部会で
+   （"Globalizing URIs" という話題で）、1996年7月に www-international
+   メーリングリストで（"Internationalization and URLs" という話題で）スレッドが
+   あり、1995年9月および1997年9月の Unicode 会議でアドホック会合が行われた。
+
+   Francois Yergeau、Matitiahu Allouche、Roy Fielding、Tim Berners-Lee、
+   Mark Davis、M.T. Carrasco Benitez、James Clark、Tim Bray、Chris Wendt、
+   Yaron Goland、Andrea Vine、Misha Wolf、Leslie Daigle、Ted Hardie、
+   Bill Fenner、Margaret Wasserman、Russ Housley、Makoto MURATA、
+   Steven Atkin、Ryan Stansifer、Tex Texin、Graham Klyne、Bjoern Hoehrmann、
+   Chris Lilley、Ian Jacobs、Adam Costello、Dan Oscarson、Elliotte Rusty Harold、
+   Mike J. Brown、Roy Badami、Jonathan Rosenne、Asmus Freytag、Simon Josefsson、
+   Carlos Viegas Damasio、Chris Haynes、Walter Underwood、およびその他多くの方々には、
+   問題および可能な解決策の理解、ならびに詳細を正しくすることへの助力に対し、
+   大いに感謝する。
+
+   この文書は、World Wide Web Consortium（W3C）の Internationalization Working Group
+   （I18N WG）の成果物である。W3C I18N Working Group および Interest Group の
+   メンバーには、その貢献と [<a href="#ref-CharMod" title="&quot;Character Model for the World Wide Web: Resource Identifiers&quot;">CharMod</a>] に関する作業に感謝する。また、
+   IRI を採用した多くの他の W3C Working Groups のメンバー、および
+   Internationalization and Localization に関する Montreal IAB Workshop のメンバーの
+   レビューにも感謝する。
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [39ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-40" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-10.1" href="#section-10.1">10.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-ASCII">ASCII</a>]        American National Standards Institute, "Coded
+                  Character Set -- 7-bit American Standard Code for
+                  Information Interchange", ANSI X3.4, 1986.
+
+   [<a id="ref-ISO10646">ISO10646</a>]     International Organization for Standardization,
+                  "ISO/IEC 10646:2003: Information Technology -
+                  Universal Multiple-Octet Coded Character Set (UCS)",
+                  ISO Standard 10646, December 2003.
+
+   [<a id="ref-RFC2119">RFC2119</a>]      Bradner, S., "Key words for use in RFCs to Indicate
+                  Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, March 1997.
+
+   [<a id="ref-RFC2234">RFC2234</a>]      Crocker, D. and P. Overell, "Augmented BNF for Syntax
+                  Specifications: ABNF", <a href="./rfc2234">RFC 2234</a>, November 1997.
+
+   [<a id="ref-RFC3490">RFC3490</a>]      Faltstrom, P., Hoffman, P., and A. Costello,
+                  "Internationalizing Domain Names in Applications
+                  (IDNA)", <a href="./rfc3490">RFC 3490</a>, March 2003.
+
+   [<a id="ref-RFC3491">RFC3491</a>]      Hoffman, P. and M. Blanchet, "Nameprep: A Stringprep
+                  Profile for Internationalized Domain Names (IDN)", <a href="./rfc3491">RFC</a>
+                  <a href="./rfc3491">3491</a>, March 2003.
+
+   [<a id="ref-RFC3629">RFC3629</a>]      Yergeau, F., "UTF-8, a transformation format of ISO
+                  10646", STD 63, <a href="./rfc3629">RFC 3629</a>, November 2003.
+
+   [<a id="ref-RFC3986">RFC3986</a>]      Berners-Lee, T., Fielding, R., and L. Masinter,
+                  "Uniform Resource Identifier (URI): Generic Syntax",
+                  STD 66, <a href="./rfc3986">RFC 3986</a>, January 2005.
+
+   [<a id="ref-UNI9">UNI9</a>]         Davis, M., "The Bidirectional Algorithm", Unicode
+                  Standard Annex #9, March 2004,
+                  &lt;<a href="http://www.unicode.org/reports/tr9/tr9-13.html">http://www.unicode.org/reports/tr9/tr9-13.html</a>&gt;.
+
+   [<a id="ref-UNIV4">UNIV4</a>]        The Unicode Consortium, "The Unicode Standard, Version
+                  4.0.1, defined by: The Unicode Standard, Version 4.0
+                  (Reading, MA, Addison-Wesley, 2003. ISBN
+                  0-321-18578-1), as amended by Unicode 4.0.1
+                  (<a href="http://www.unicode.org/versions/Unicode4.0.1/">http://www.unicode.org/versions/Unicode4.0.1/</a>)",
+                  March 2004.
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [40ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-41" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   [<a id="ref-UTR15">UTR15</a>]        Davis, M. and M. Duerst, "Unicode Normalization
+                  Forms", Unicode Standard Annex #15, April 2003,
+                  &lt;<a href="http://www.unicode.org/unicode/reports/tr15/tr15-23.html">http://www.unicode.org/unicode/reports/</a>
+                  <a href="http://www.unicode.org/unicode/reports/tr15/tr15-23.html">tr15/tr15-23.html</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-10.2" href="#section-10.2">10.2</a>.  参考情報としての参考文献</span>
+
+   [<a id="ref-BidiEx">BidiEx</a>]       "Examples of bidirectional IRIs",
+                  &lt;<a href="http://www.w3.org/International/iri-edit/BidiExamples">http://www.w3.org/International/iri-edit/</a>
+                  <a href="http://www.w3.org/International/iri-edit/BidiExamples">BidiExamples</a>&gt;.
+
+   [<a id="ref-CharMod">CharMod</a>]      Duerst, M., Yergeau, F., Ishida, R., Wolf, M., and T.
+                  Texin, "Character Model for the World Wide Web:
+                  Resource Identifiers", World Wide Web Consortium
+                  Candidate Recommendation, November 2004,
+                  &lt;<a href="http://www.w3.org/TR/charmod-resid">http://www.w3.org/TR/charmod-resid</a>&gt;.
+
+   [<a id="ref-Duerst97">Duerst97</a>]     Duerst, M., "The Properties and Promises of UTF-8",
+                  Proc.  11th International Unicode Conference, San Jose
+                  , September 1997,
+                  &lt;<a href="http://www.ifi.unizh.ch/mml/mduerst/papers/PDF/IUC11-UTF-8.pdf">http://www.ifi.unizh.ch/mml/mduerst/papers/</a>
+                  <a href="http://www.ifi.unizh.ch/mml/mduerst/papers/PDF/IUC11-UTF-8.pdf">PDF/IUC11-UTF-8.pdf</a>&gt;.
+
+   [<a id="ref-Gettys">Gettys</a>]       Gettys, J., "URI Model Consequences",
+                  &lt;<a href="http://www.w3.org/DesignIssues/ModelConsequences">http://www.w3.org/DesignIssues/ModelConsequences</a>&gt;.
+
+   [<a id="ref-HTML4">HTML4</a>]        Raggett, D., Le Hors, A., and I. Jacobs, "HTML 4.01
+                  Specification", World Wide Web Consortium
+                  Recommendation, December 1999,
+                  &lt;<a href="http://www.w3.org/TR/html401/appendix/notes.html#h-B.2">http://www.w3.org/TR/html401/appendix/</a>
+                  <a href="http://www.w3.org/TR/html401/appendix/notes.html#h-B.2">notes.html#h-B.2</a>&gt;.
+
+   [<a id="ref-RFC2045">RFC2045</a>]      Freed, N. and N. Borenstein, "Multipurpose Internet
+                  Mail Extensions (MIME) Part One: Format of Internet
+                  Message Bodies", <a href="./rfc2045">RFC 2045</a>, November 1996.
+
+   [<a id="ref-RFC2130">RFC2130</a>]      Weider, C., Preston, C., Simonsen, K., Alvestrand, H.,
+                  Atkinson, R., Crispin, M., and P. Svanberg, "The
+                  Report of the IAB Character Set Workshop held 29
+                  February - 1 March, 1996", <a href="./rfc2130">RFC 2130</a>, April 1997.
+
+   [<a id="ref-RFC2141">RFC2141</a>]      Moats, R., "URN Syntax", <a href="./rfc2141">RFC 2141</a>, May 1997.
+
+   [<a id="ref-RFC2192">RFC2192</a>]      Newman, C., "IMAP URL Scheme", <a href="./rfc2192">RFC 2192</a>, September
+                  1997.
+
+   [<a id="ref-RFC2277">RFC2277</a>]      Alvestrand, H., "IETF Policy on Character Sets and
+                  Languages", <a href="https://www.rfc-editor.org/bcp/bcp18">BCP 18</a>, <a href="./rfc2277">RFC 2277</a>, January 1998.
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [41ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-42" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   [<a id="ref-RFC2368">RFC2368</a>]      Hoffman, P., Masinter, L., and J. Zawinski, "The
+                  mailto URL scheme", <a href="./rfc2368">RFC 2368</a>, July 1998.
+
+   [<a id="ref-RFC2384">RFC2384</a>]      Gellens, R., "POP URL Scheme", <a href="./rfc2384">RFC 2384</a>, August 1998.
+
+   [<a id="ref-RFC2396">RFC2396</a>]      Berners-Lee, T., Fielding, R., and L. Masinter,
+                  "Uniform Resource Identifiers (URI): Generic Syntax",
+                  <a href="./rfc2396">RFC 2396</a>, August 1998.
+
+   [<a id="ref-RFC2397">RFC2397</a>]      Masinter, L., "The "data" URL scheme", <a href="./rfc2397">RFC 2397</a>,
+                  August 1998.
+
+   [<a id="ref-RFC2616">RFC2616</a>]      Fielding,  R., Gettys, J., Mogul, J., Frystyk, H.,
+                  Masinter, L., Leach, P., and T. Berners-Lee,
+                  "Hypertext Transfer Protocol -- HTTP/1.1", <a href="./rfc2616">RFC 2616</a>,
+                  June 1999.
+
+   [<a id="ref-RFC2640">RFC2640</a>]      Curtin, B., "Internationalization of the File Transfer
+                  Protocol", <a href="./rfc2640">RFC 2640</a>, July 1999.
+
+   [<a id="ref-RFC2718">RFC2718</a>]      Masinter, L., Alvestrand, H., Zigmond, D., and R.
+                  Petke, "Guidelines for new URL Schemes", <a href="./rfc2718">RFC 2718</a>,
+                  November 1999.
+
+   [<a id="ref-UNIXML">UNIXML</a>]       Duerst, M. and A. Freytag, "Unicode in XML and other
+                  Markup Languages", Unicode Technical Report #20, World
+                  Wide Web Consortium Note, June 2003,
+                  &lt;<a href="http://www.w3.org/TR/unicode-xml/">http://www.w3.org/TR/unicode-xml/</a>&gt;.
+
+   [<a id="ref-XLink">XLink</a>]        DeRose, S., Maler, E., and D. Orchard, "XML Linking
+                  Language (XLink) Version 1.0", World Wide Web
+                  Consortium Recommendation, June 2001,
+                  &lt;<a href="http://www.w3.org/TR/xlink/#link-locators">http://www.w3.org/TR/xlink/#link-locators</a>&gt;.
+
+   [<a id="ref-XML1">XML1</a>]         Bray, T., Paoli, J., Sperberg-McQueen, C., Maler, E.,
+                  and F. Yergeau, "Extensible Markup Language (XML) 1.0
+                  (Third Edition)", World Wide Web Consortium
+                  Recommendation, February 2004,
+                  &lt;<a href="http://www.w3.org/TR/REC-xml#sec-external-ent">http://www.w3.org/TR/REC-xml#sec-external-ent</a>&gt;.
+
+   [<a id="ref-XMLNamespace">XMLNamespace</a>] Bray, T., Hollander, D., and A. Layman, "Namespaces in
+                  XML", World Wide Web Consortium Recommendation,
+                  January 1999, &lt;<a href="http://www.w3.org/TR/REC-xml-names">http://www.w3.org/TR/REC-xml-names</a>&gt;.
+
+   [<a id="ref-XMLSchema">XMLSchema</a>]    Biron, P. and A. Malhotra, "XML Schema Part 2:
+                  Datatypes", World Wide Web Consortium Recommendation,
+                  May 2001, &lt;<a href="http://www.w3.org/TR/xmlschema-2/#anyURI">http://www.w3.org/TR/xmlschema-2/#anyURI</a>&gt;.
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [42ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-43" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   [<a id="ref-XPointer">XPointer</a>]     Grosso, P., Maler, E., Marsh, J. and N. Walsh,
+                  "XPointer Framework", World Wide Web Consortium
+                  Recommendation, March 2003,
+                  &lt;<a href="http://www.w3.org/TR/xptr-framework/#escaping">http://www.w3.org/TR/xptr-framework/#escaping</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [43ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-44" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">付録 A</a>.  設計上の代替案</span>
+
+   この節は、主な設計上の代替案と、それらが選ばれなかった理由を簡潔に
+   要約する。
+
+<span class="h3"><a class="selflink" id="appendix-A.1" href="#appendix-A.1">付録 A.1</a>.  新しいスキーム</span>
+
+   新しいスキーム（たとえば httpi:、ftpi: など）または新しいメタスキーム
+   （例: i:。i:http:、i:ftp: などの URI/IRI 接頭辞につながる）の導入は、
+   IRI から URI への変換をスキーム依存にするため、または IRI から URI への変換に
+   由来するパーセント符号化と従来の文字エンコーディングに由来する
+   パーセント符号化を区別するために提案された。
+
+   URI と真の IRI（すなわち非 ASCII 文字を含む IRI）を区別するために新しい
+   スキームは不要である。パーセント符号化の由来を検出できることの利点は小さい。
+   UTF-8 は非常に高い信頼性で検出できるからである。新しいスキームの配備は
+   非常に困難であるため、IRI に新しいスキームを要求しないことは IRI の配備を
+   大幅に容易にする。変換をスキーム依存にすることは非常に推奨できず、IRI 用の
+   別個のスキームによって助長されることになる。IRI から URI への変換に一様な
+   規約を使用することにより、IRI の実装は実際の新しいスキームの導入と直交する。
+
+<span class="h3"><a class="selflink" id="appendix-A.2" href="#appendix-A.2">付録 A.2</a>.  UTF-8 以外の文字エンコーディング</span>
+
+   初期段階では、IRI が URI へ変換されるときの UTF-8 の代替として UTF-7 が
+   検討された。UTF-7 はパーセント符号化を必要とせず、ほとんどの場合、
+   パーセント符号化された UTF-8 より短くなったであろう。
+
+   UTF-8 を使用することにより、二重の階層化と "+" 文字の使用の過負荷を避ける。
+   UTF-8 は US-ASCII と完全に互換であり、そのため IETF によって推奨され、
+   広く使用されている。
+
+   UTF-7 はあまり使用されたことがなく、現在では明確に非推奨とされている。
+   実装に UTF-8 から UTF-7 へ、およびその逆へ変換することを要求するのは、
+   追加の実装負担となる。
+
+<span class="h3"><a class="selflink" id="appendix-A.3" href="#appendix-A.3">付録 A.3</a>.  新しい符号化規約</span>
+
+   オクテットに基づく URI の既存のパーセント符号化規約を使用する代わりに、
+   新しい符号化規約を作成するという考えがあった。たとえば、UCS コードポイントを
+   導入するために "%u" を使用することである。
+
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [44ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-45" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+   既存のオクテットベースのパーセント符号化機構を使用すれば、URI 構文の
+   アップグレードは不要であり、対応するサーバーのアップグレードも不要である。
+
+<span class="h3"><a class="selflink" id="appendix-A.4" href="#appendix-A.4">付録 A.4</a>.  URI/IRI における文字エンコーディングの表示</span>
+
+   いくつかの提案では、メールおよび Web ページの "charset" パラメータに
+   似た、URI 自体の中の新しい構文規約により、URI または IRI で使用される
+   文字エンコーディングを示すことが提案された。例として、
+   "http://www.example.org/ros[iso-8859-1]&amp;#xE9"; の角括弧内のラベルは、
+   後続の "&amp;#xE9"; を iso-8859-1 として解釈しなければならないことを示していた。
+
+   UTF-8 だけを使用するなら、URI 構文へのアップグレードは不要である。それにより、
+   バスの側面やナプキンの上でさえ、すべての場合に正しく複写されなければならない
+   可能性のある複数のラベルを避けられ、使いやすさの問題（そして非常に煩わしい
+   問題）を避けられる。UTF-8 だけを使用することは、トランスコーディング誤りと
+   混乱も低減する。
+
+著者の連絡先
+
+   Martin Duerst  （注: 可能な限り、"Duerst" は u-umlaut を用いて記述されたい。
+                  たとえば XML および HTML では "D&amp;#252;rst" とする。）
+   World Wide Web Consortium
+   5322 Endo
+   Fujisawa, Kanagawa  252-8520
+   Japan
+
+   Phone: +81 466 49 1170
+   Fax:   +81 466 49 1171
+   EMail: duerst@w3.org
+   URI:   <a href="http://www.w3.org/People/D%C3%BCrst/">http://www.w3.org/People/D%C3%BCrst/</a>
+   （注: これは IRI のパーセント符号化形式である。）
+
+
+   Michel Suignard
+   Microsoft Corporation
+   One Microsoft Way
+   Redmond, WA  98052
+   U.S.A.
+
+   Phone: +1 425 882-8080
+   EMail: michelsu@microsoft.com
+   URI:   <a href="http://www.suignard.com">http://www.suignard.com</a>
+
+
+
+
+
+<span class="grey">Duerst &amp; Suignard           標準化過程                        [45ページ]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-46" ></span>
+<span class="grey"><a href="./rfc3987">RFC 3987</a>         国際化リソース識別子                     2005年1月</span>
+
+
+完全な著作権表示
+
+   Copyright (C) The Internet Society (2005).
+
+   この文書は <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> に含まれる権利、ライセンス、および制限の対象であり、
+   そこに定められている場合を除き、著者はすべての権利を保持する。
+
+   この文書およびここに含まれる情報は「現状のまま」で提供される。貢献者、
+   その者が代表する、または支援を受ける組織（もしあれば）、Internet Society、
+   および Internet Engineering Task Force は、明示または黙示を問わず、
+   ここに含まれる情報の使用がいかなる権利も侵害しないという保証、ならびに
+   商品性または特定目的への適合性に関する黙示の保証を含むがこれらに限定されない、
+   すべての保証を否認する。
+
+知的財産
+
+   IETF は、この文書に記述された技術の実装または使用に関係すると主張される
+   可能性のある知的財産権その他の権利の有効性または範囲、あるいはそのような権利に
+   基づくライセンスが利用可能であるかどうか、またはどの程度利用可能であるかについて、
+   いかなる立場も取らない。また、そのような権利を特定するために独自の努力を
+   行ったことを表明するものでもない。IETF 文書における権利に関する IETF の手続きに
+   ついての情報は、<a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> および <a href="https://www.rfc-editor.org/bcp/bcp79">BCP 79</a> に記載されている。
+
+   IETF 事務局に提出された IPR 開示の写し、ならびに利用可能にされるライセンスの
+   保証、またはこの仕様の実装者もしくは利用者によるそのような財産権の使用に関する
+   一般ライセンスまたは許可を取得しようとした結果は、IETF のオンライン IPR
+   リポジトリ <a href="http://www.ietf.org/ipr">http://www.ietf.org/ipr</a> から入手できる。
+
+   IETF は、この標準を実装するために必要となる可能性のある技術を対象とする
+   著作権、特許または特許出願、その他の財産権について、関心のあるすべての当事者に
+   IETF へ知らせるよう求める。情報は IETF の ietf-
+   ipr@ietf.org 宛に送付されたい。
+
+
+謝辞
+
+   RFC Editor 機能のための資金は、現在 Internet Society によって提供されている。
+
+
+
+
+
+
+Duerst &amp; Suignard           標準化過程                        [46ページ]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
