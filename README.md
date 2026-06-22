@@ -614,3 +614,6 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [The Concealed HTTP Authentication Scheme](https://jp.htmlspecs.com/http/rfc9729.html)（[Source](https://httpwg.org/specs/rfc9729.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [HTTP Strict Transport Security (HSTS)](https://jp.htmlspecs.com/http/rfc6797.html)（[Source](https://www.rfc-editor.org/rfc/rfc6797.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
+### トランスポート層・接続セキュリティ
+- [QUIC: A UDP-Based Multiplexed and Secure Transport](https://jp.htmlspecs.com/quic/)（[Source](https://www.rfc-editor.org/rfc/rfc9000.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+
