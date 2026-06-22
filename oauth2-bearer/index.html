@@ -1,0 +1,1022 @@
+<pre>Internet Engineering Task Force (IETF)                          M. Jones
+Request for Comments: 6750                                     Microsoft
+カテゴリ: 標準化過程                                           D. Hardt
+ISSN: 2070-1721                                              Independent
+                                                            2012年10月
+
+
+       <span class="h1">OAuth 2.0 認可フレームワーク: ベアラー・トークンの利用</span>
+
+概要
+
+   この仕様は、OAuth 2.0 によって保護されたリソースにアクセスする
+   ために、HTTPリクエストでベアラー・トークンを使用する方法を
+   説明します。ベアラー・トークンを所持している任意の当事者
+   （「ベアラー」）は、（暗号鍵の所持を証明することなく）
+   それを使用して関連リソースへのアクセスを取得できます。
+   不正使用を防ぐため、ベアラー・トークンは保存時および
+   転送時に開示から保護される必要があります。
+
+このメモの位置づけ
+
+   これはインターネット標準化過程の文書です。
+
+   この文書は Internet Engineering Task Force (IETF) の成果物です。
+   これは IETF コミュニティの合意を表しています。公開レビューを受け、
+   Internet Engineering Steering Group (IESG) によって公開が承認されて
+   います。インターネット標準に関する詳細情報は
+   <a href="./rfc5741#section-2">RFC 5741 の Section&nbsp;2</a> で入手できます。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc6750">http://www.rfc-editor.org/info/rfc6750</a> で入手できます。
+
+Copyright Notice
+
+   Copyright (c) 2012 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+目次
+
+   <a href="#section-1">1</a>. はじめに ....................................................<a href="#page-2">2</a>
+      <a href="#section-1.1">1.1</a>. 表記上の規約 .............................................<a href="#page-3">3</a>
+      <a href="#section-1.2">1.2</a>. 用語 ....................................................<a href="#page-3">3</a>
+      <a href="#section-1.3">1.3</a>. 概要 ....................................................<a href="#page-3">3</a>
+   <a href="#section-2">2</a>. 認証済みリクエスト ..........................................<a href="#page-4">4</a>
+      <a href="#section-2.1">2.1</a>. Authorizationリクエスト・ヘッダー・フィールド .............<a href="#page-5">5</a>
+      <a href="#section-2.2">2.2</a>. フォーム符号化された本文パラメーター ......................<a href="#page-5">5</a>
+      <a href="#section-2.3">2.3</a>. URIクエリー・パラメーター ................................<a href="#page-6">6</a>
+   <a href="#section-3">3</a>. WWW-Authenticateレスポンス・ヘッダー・フィールド ..............<a href="#page-7">7</a>
+      <a href="#section-3.1">3.1</a>. エラー・コード ...........................................<a href="#page-9">9</a>
+   <a href="#section-4">4</a>. アクセス・トークン・レスポンスの例 ..........................<a href="#page-10">10</a>
+   <a href="#section-5">5</a>. セキュリティに関する考慮事項 ................................<a href="#page-10">10</a>
+      <a href="#section-5.1">5.1</a>. セキュリティ上の脅威 ....................................<a href="#page-10">10</a>
+      <a href="#section-5.2">5.2</a>. 脅威の軽減 ..............................................<a href="#page-11">11</a>
+      <a href="#section-5.3">5.3</a>. 推奨事項の要約 ..........................................<a href="#page-13">13</a>
+   <a href="#section-6">6</a>. IANAに関する考慮事項 ........................................<a href="#page-14">14</a>
+      <a href="#section-6.1">6.1</a>. OAuthアクセス・トークン型の登録 ..........................<a href="#page-14">14</a>
+           <a href="#section-6.1.1">6.1.1</a>. "Bearer" OAuthアクセス・トークン型 ...............<a href="#page-14">14</a>
+      <a href="#section-6.2">6.2</a>. OAuth拡張エラー登録 ......................................<a href="#page-14">14</a>
+           <a href="#section-6.2.1">6.2.1</a>. "invalid_request" エラー値 .......................<a href="#page-14">14</a>
+           <a href="#section-6.2.2">6.2.2</a>. "invalid_token" エラー値 .........................<a href="#page-15">15</a>
+           <a href="#section-6.2.3">6.2.3</a>. "insufficient_scope" エラー値 ....................<a href="#page-15">15</a>
+   <a href="#section-7">7</a>. 参考文献 ....................................................<a href="#page-15">15</a>
+      <a href="#section-7.1">7.1</a>. 規範的参考文献 ..........................................<a href="#page-15">15</a>
+      <a href="#section-7.2">7.2</a>. 参考情報 ................................................<a href="#page-17">17</a>
+   <a href="#appendix-A">Appendix A</a>. 謝辞 ..............................................<a href="#page-18">18</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   OAuthは、リソース所有者の資格情報を直接使用するのではなく、
+   「OAuth 2.0 認可フレームワーク」[<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] で
+   「クライアントに発行されたアクセス認可を表す文字列」として
+   定義されるアクセス・トークンを取得することにより、クライアントが
+   保護リソースにアクセスできるようにします。
+
+   トークンは、リソース所有者の承認を得て、認可サーバーによって
+   クライアントに発行されます。クライアントはアクセス・トークンを使用して、
+   リソース・サーバーがホストする保護リソースにアクセスします。この仕様は、
+   OAuthアクセス・トークンがベアラー・トークンである場合に、
+   保護リソース・リクエストを行う方法を説明します。
+
+   この仕様は、保護リソースにアクセスするために、Transport Layer
+   Security (TLS) [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] を使用して HTTP/1.1
+   [<a href="./rfc2616" title="&quot;Hypertext Transfer Protocol -- HTTP/1.1&quot;">RFC2616</a>] 上でベアラー・トークンを使用する方法を定義します。
+   TLSは、この仕様とともに実装および使用することが必須です。
+   他の仕様は、他のプロトコルで使用するためにこの仕様を拡張できます。
+   OAuth 2.0認可 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] フローの結果として得られるアクセス・トークンを
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   使用してOAuth保護リソースにアクセスするために設計されていますが、
+   この仕様は実際には、任意の発行元からのベアラー・トークンを使用して、
+   それらのベアラー・トークンによって保護された任意のリソースに
+   アクセスできる、一般的なHTTP認可方式を定義しています。
+   Bearer認証スキームは主に、WWW-AuthenticateおよびAuthorization
+   HTTPヘッダーを使用したサーバー認証を意図していますが、
+   プロキシ認証での使用を妨げるものではありません。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  表記上の規約</span>
+
+   この文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY",
+   および "OPTIONAL" は、「RFCで要求レベルを示すために使用する
+   キーワード」[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] で説明されているように解釈されます。
+
+   この文書は、[<a href="./rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>] の Augmented Backus-Naur Form (ABNF)
+   記法を使用します。さらに、HTTP/1.1 [<a href="./rfc2617" title="&quot;HTTP Authentication: Basic and Digest Access Authentication&quot;">RFC2617</a>] から次の
+   ルールを含みます: auth-param および auth-scheme。また、
+   「Uniform Resource Identifier (URI): Generic Syntax」[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>]
+   から URI-reference を含みます。
+
+   特に記載がない限り、すべてのプロトコル・パラメーター名および値は
+   大文字と小文字を区別します。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  用語</span>
+
+   Bearer Token
+      トークンを所持している任意の当事者（「ベアラー」）が、
+      そのトークンを所持している他の任意の当事者と同じ方法で
+      使用できるという性質を持つセキュリティ・トークン。
+      ベアラー・トークンの使用では、ベアラーが暗号鍵素材の所持
+      （proof-of-possession）を証明する必要はありません。
+
+   その他のすべての用語は、「OAuth 2.0 認可フレームワーク」
+   [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] で定義されるとおりです。
+
+<span class="h3"><a class="selflink" id="section-1.3" href="#section-1.3">1.3</a>.  概要</span>
+
+   OAuthは、クライアントがリソース所有者に代わって保護リソースに
+   アクセスするための方法を提供します。一般的な場合、クライアントが
+   保護リソースにアクセスできるようになる前に、まずリソース所有者から
+   認可グラントを取得し、次にその認可グラントをアクセス・トークンと
+   交換しなければなりません。アクセス・トークンは、認可グラントによって
+   付与されたグラントのスコープ、期間、およびその他の属性を表します。
+   クライアントは、アクセス・トークンをリソース・サーバーに提示することで
+   保護リソースにアクセスします。場合によっては、クライアントが
+   リソース所有者から認可グラントをまず取得することなく、自身の資格情報を
+   認可サーバーに直接提示してアクセス・トークンを取得できます。
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   アクセス・トークンは抽象化を提供し、異なる認可構成要素
+   （例: ユーザー名とパスワード、アサーション）を、リソース・サーバーが
+   理解する単一のトークンに置き換えます。この抽象化により、
+   短期間有効なアクセス・トークンを発行できるだけでなく、
+   リソース・サーバーが幅広い認証スキームを理解する必要もなくなります。
+
+     +--------+                               +---------------+
+     |        |--(A)- Authorization Request -&gt;|   Resource    |
+     |        |                               |     Owner     |
+     |        |&lt;-(B)-- Authorization Grant ---|               |
+     |        |                               +---------------+
+     |        |
+     |        |                               +---------------+
+     |        |--(C)-- Authorization Grant --&gt;| Authorization |
+     | Client |                               |     Server    |
+     |        |&lt;-(D)----- Access Token -------|               |
+     |        |                               +---------------+
+     |        |
+     |        |                               +---------------+
+     |        |--(E)----- Access Token ------&gt;|    Resource   |
+     |        |                               |     Server    |
+     |        |&lt;-(F)--- Protected Resource ---|               |
+     +--------+                               +---------------+
+
+                     図1: 抽象プロトコル・フロー
+
+   図1に示す抽象OAuth 2.0フローは、クライアント、リソース所有者、
+   認可サーバー、およびリソース・サーバー（[<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] で説明）間の
+   相互作用を説明しています。この文書では、次の2つのステップを
+   規定します。
+
+   (E)  クライアントはリソース・サーバーに保護リソースを要求し、
+        アクセス・トークンを提示することによって認証します。
+
+   (F)  リソース・サーバーはアクセス・トークンを検証し、有効であれば、
+        リクエストに応答します。
+
+   この文書は、ステップ (D) で返されるアクセス・トークンにも
+   意味上の要求事項を課します。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  認証済みリクエスト</span>
+
+   このセクションでは、リソース・サーバーへのリソース・リクエストで
+   ベアラー・アクセス・トークンを送信する3つの方法を定義します。
+   クライアントは、各リクエストでトークンを送信するために複数の方法を
+   使用してはなりません（MUST NOT）。
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  Authorizationリクエスト・ヘッダー・フィールド</span>
+
+   HTTP/1.1 [<a href="./rfc2617" title="&quot;HTTP Authentication: Basic and Digest Access Authentication&quot;">RFC2617</a>] で定義される "Authorization" リクエスト・ヘッダー・
+   フィールドでアクセス・トークンを送信する場合、クライアントは
+   "Bearer" 認証スキームを使用してアクセス・トークンを送信します。
+
+   例:
+
+     GET /resource HTTP/1.1
+     Host: server.example.com
+     Authorization: Bearer mF_9.B5f-4.1JqM
+
+   このスキームにおける "Authorization" ヘッダー・フィールドの構文は、
+   <a href="./rfc2617#section-2">[RFC2617] の Section&nbsp;2</a> で定義される Basic スキームの使用法に
+   従います。Basicと同様に、<a href="./rfc2617#section-1.2">[RFC2617] の Section&nbsp;1.2</a> で定義される
+   汎用構文には適合しませんが、HTTP 1.1 [<a href="#ref-HTTP-AUTH" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Authentication&quot;">HTTP-AUTH</a>] 用に開発中の
+   一般的な認証フレームワークとは互換性があります。ただし、既存の
+   展開を反映するため、そこで概説されている推奨プラクティスには
+   従いません。Bearer資格情報の構文は次のとおりです。
+
+     b64token    = 1*( ALPHA / DIGIT /
+                       "-" / "." / "_" / "~" / "+" / "/" ) *"="
+     credentials = "Bearer" 1*SP b64token
+
+   クライアントは、"Bearer" HTTP認可スキームとともに "Authorization"
+   リクエスト・ヘッダー・フィールドを使用して、ベアラー・トークンにより
+   認証済みリクエストを行うべきです（SHOULD）。リソース・サーバーは
+   この方法をサポートしなければなりません（MUST）。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  フォーム符号化された本文パラメーター</span>
+
+   HTTPリクエストのエンティティ本文でアクセス・トークンを送信する場合、
+   クライアントは "access_token" パラメーターを使用してアクセス・トークンを
+   リクエスト本文に追加します。クライアントは、次のすべての条件が
+   満たされていない限り、この方法を使用してはなりません（MUST NOT）。
+
+   o  HTTPリクエストのエンティティ・ヘッダーには、"Content-Type"
+      ヘッダー・フィールドが "application/x-www-form-urlencoded" に
+      設定されて含まれている。
+
+   o  エンティティ本文は、HTML 4.01
+      [<a href="#ref-W3C.REC-html401-19991224">W3C.REC-html401-19991224</a>] で定義される
+      "application/x-www-form-urlencoded" コンテンツ型の符号化要件に従う。
+
+   o  HTTPリクエストのエンティティ本文は単一パートである。
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   o  エンティティ本文で符号化される内容は、完全にASCII
+      [<a href="#ref-USASCII" title="&quot;Coded Character Set -- 7-bit American Standard Code for Information Interchange&quot;">USASCII</a>] 文字で構成されなければならない（MUST）。
+
+   o  HTTPリクエスト・メソッドは、リクエスト本文に定義された意味を持つ
+      ものである。特に、これは "GET" メソッドを使用してはならない
+      （MUST NOT）ことを意味します。
+
+   エンティティ本文には、他のリクエスト固有パラメーターを含めることが
+   できます（MAY）。その場合、"access_token" パラメーターは、
+   "&amp;" 文字（ASCIIコード38）を使用して、リクエスト固有パラメーターから
+   適切に分離されなければなりません（MUST）。
+
+   たとえば、クライアントはトランスポート層セキュリティを使用して、
+   次のHTTPリクエストを行います。
+
+     POST /resource HTTP/1.1
+     Host: server.example.com
+     Content-Type: application/x-www-form-urlencoded
+
+     access_token=mF_9.B5f-4.1JqM
+
+   "application/x-www-form-urlencoded" 方式は、参加するブラウザーが
+   "Authorization" リクエスト・ヘッダー・フィールドにアクセスできない
+   アプリケーション・コンテキストを除き、使用すべきではありません
+   （SHOULD NOT）。リソース・サーバーはこの方法をサポートしても
+   かまいません（MAY）。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  URIクエリー・パラメーター</span>
+
+   HTTPリクエストURIでアクセス・トークンを送信する場合、クライアントは
+   「Uniform Resource Identifier (URI): Generic Syntax」[<a href="./rfc3986" title="&quot;Uniform Resource Identifier (URI): Generic Syntax&quot;">RFC3986</a>] で
+   定義されるリクエストURIのクエリー構成要素に、"access_token"
+   パラメーターを使用してアクセス・トークンを追加します。
+
+   たとえば、クライアントはトランスポート層セキュリティを使用して、
+   次のHTTPリクエストを行います。
+
+     GET /resource?access_token=mF_9.B5f-4.1JqM HTTP/1.1
+     Host: server.example.com
+
+   HTTPリクエストURIのクエリーには、他のリクエスト固有パラメーターを
+   含めることができます。その場合、"access_token" パラメーターは、
+   "&amp;" 文字（ASCIIコード38）を使用して、リクエスト固有パラメーターから
+   適切に分離されなければなりません（MUST）。
+
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   例:
+
+    https://server.example.com/resource?access_token=mF_9.B5f-4.1JqM&amp;p=q
+
+   URIクエリー・パラメーター方式を使用するクライアントは、"no-store"
+   オプションを含む Cache-Control ヘッダーも送信すべきです（SHOULD）。
+   これらのリクエストに対するサーバーの成功（2XXステータス）レスポンスは、
+   "private" オプションを持つ Cache-Control ヘッダーを含むべきです
+   （SHOULD）。
+
+   URI方式に関連するセキュリティ上の弱点（<a href="#section-5">Section 5</a> 参照）、
+   とりわけアクセス・トークンを含むURLがログに記録される可能性が高いことから、
+   "Authorization" リクエスト・ヘッダー・フィールドまたはHTTPリクエストの
+   エンティティ本文でアクセス・トークンを転送することが不可能でない限り、
+   この方式を使用すべきではありません（SHOULD NOT）。リソース・サーバーは
+   この方法をサポートしてもかまいません（MAY）。
+
+   この方式は現在の使用状況を文書化するために含められています。
+   セキュリティ上の欠点（<a href="#section-5">Section 5</a> 参照）のため、
+   その使用は推奨されません。また、「Architecture of the World Wide Web,
+   Volume One」[<a href="#ref-W3C.REC-webarch-20041215">W3C.REC-webarch-20041215</a>] によるURI名前空間の
+   ベスト・プラクティスに反して、予約済みのクエリー・パラメーター名を
+   使用するためでもあります。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  WWW-Authenticateレスポンス・ヘッダー・フィールド</span>
+
+   保護リソース・リクエストが認証資格情報を含んでいない場合、または
+   保護リソースへのアクセスを可能にするアクセス・トークンを含んでいない
+   場合、リソース・サーバーはHTTP "WWW-Authenticate" レスポンス・
+   ヘッダー・フィールドを含めなければなりません（MUST）。その他の条件への
+   応答としてこれを含めてもかまいません（MAY）。"WWW-Authenticate"
+   ヘッダー・フィールドは、HTTP/1.1 [<a href="./rfc2617" title="&quot;HTTP Authentication: Basic and Digest Access Authentication&quot;">RFC2617</a>] で定義される
+   フレームワークを使用します。
+
+   この仕様で定義されるすべてのチャレンジは、auth-scheme値 "Bearer" を
+   使用しなければなりません（MUST）。このスキームの後には、1つ以上の
+   auth-param値が続かなければなりません（MUST）。この仕様で使用または
+   定義されるauth-param属性は次のとおりです。その他のauth-param属性も
+   使用できます（MAY）。
+
+   "realm" 属性は、HTTP/1.1 [<a href="./rfc2617" title="&quot;HTTP Authentication: Basic and Digest Access Authentication&quot;">RFC2617</a>] で説明される方法で
+   保護の範囲を示すために含めることができます（MAY）。"realm" 属性は
+   複数回出現してはなりません（MUST NOT）。
+
+   "scope" 属性は、<a href="./rfc6749#section-3.3">[RFC6749] の Section&nbsp;3.3</a> で定義されます。
+   "scope" 属性は、要求されたリソースにアクセスするためにアクセス・
+   トークンに必要なスコープを示す、大文字と小文字を区別するスコープ値の
+   空白区切りリストです。"scope" 値は実装定義であり、それらに対する
+   集中登録簿はありません。許可される値は認可サーバーによって定義されます。
+   "scope" 値の順序には意味がありません。場合によっては、"scope" 値は
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   保護リソースを利用するのに十分なアクセス範囲を持つ新しいアクセス・
+   トークンを要求するときに使用されます。"scope" 属性の使用は任意です
+   （OPTIONAL）。"scope" 属性は複数回出現してはなりません（MUST NOT）。
+   "scope" 値はプログラムでの使用を意図しており、エンドユーザーに
+   表示することを目的としていません。
+
+   以下に2つのスコープ値の例を示します。これらはそれぞれ、OpenID
+   Connect [<a href="#ref-OpenID.Messages">OpenID.Messages</a>] および Open Authentication Technology
+   Committee (OATC) Online Multimedia Authorization Protocol [<a href="#ref-OMAP" title="&quot;Online Multimedia Authorization Protocol: An Industry Standard for Authorized Access to Internet Multimedia Resources&quot;">OMAP</a>]
+   のOAuth 2.0ユースケースから取られたものです。
+
+     scope="openid profile email"
+     scope="urn:example:channel=HBO&amp;urn:example:rating=G,PG-13"
+
+   保護リソース・リクエストにアクセス・トークンが含まれており、
+   認証に失敗した場合、リソース・サーバーは、アクセス・リクエストが
+   拒否された理由をクライアントに提供するために "error" 属性を
+   含めるべきです（SHOULD）。パラメーター値は <a href="#section-3.1">Section 3.1</a> で
+   説明されます。さらに、リソース・サーバーは、開発者向けに人間が
+   読める説明を提供するために "error_description" 属性を含めても
+   かまいません（MAY）。これはエンドユーザーに表示することを目的と
+   していません。また、エラーを説明する人間が読めるWebページを識別する
+   絶対URIを持つ "error_uri" 属性を含めてもかまいません（MAY）。
+   "error", "error_description", および "error_uri" 属性は
+   複数回出現してはなりません（MUST NOT）。
+
+   "scope" 属性の値（<a href="./rfc6749#appendix-A.4">[RFC6749] の Appendix&nbsp;A.4</a> で規定）は、
+   スコープ値を表す %x21 / %x23-5B / %x5D-7E、およびスコープ値間の
+   区切りとしての %x20 の集合外の文字を含んではなりません（MUST NOT）。
+   "error" および "error_description" 属性の値（[<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] の
+   Appendixes A.7 および A.8 で規定）は、%x20-21 / %x23-5B / %x5D-7E
+   の集合外の文字を含んではなりません（MUST NOT）。"error_uri" 属性の
+   値（<a href="./rfc6749#appendix-A.9">[RFC6749] の Appendix&nbsp;A.9</a> で規定）は、URI-reference構文に
+   適合しなければならず、したがって %x21 / %x23-5B / %x5D-7E の
+   集合外の文字を含んではなりません（MUST NOT）。
+
+   たとえば、認証なしの保護リソース・リクエストに対するレスポンスでは:
+
+     HTTP/1.1 401 Unauthorized
+     WWW-Authenticate: Bearer realm="example"
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   また、期限切れのアクセス・トークンを使用した認証試行を伴う
+   保護リソース・リクエストに対するレスポンスでは:
+
+     HTTP/1.1 401 Unauthorized
+     WWW-Authenticate: Bearer realm="example",
+                       error="invalid_token",
+                       error_description="The access token expired"
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  エラー・コード</span>
+
+   リクエストが失敗した場合、リソース・サーバーは適切なHTTPステータス・
+   コード（通常は 400, 401, 403, または 405）を使用して応答し、
+   レスポンスに次のいずれかのエラー・コードを含めます。
+
+   invalid_request
+         リクエストに必須パラメーターが欠落している、サポートされていない
+         パラメーターまたはパラメーター値を含んでいる、同じパラメーターを
+         繰り返している、アクセス・トークンを含めるために複数の方法を
+         使用している、またはその他の形式不正がある。リソース・サーバーは
+         HTTP 400 (Bad Request) ステータス・コードで応答すべきです（SHOULD）。
+
+   invalid_token
+         提供されたアクセス・トークンが期限切れ、取り消し済み、形式不正、
+         またはその他の理由で無効である。リソースは HTTP 401
+         (Unauthorized) ステータス・コードで応答すべきです（SHOULD）。
+         クライアントは新しいアクセス・トークンを要求し、保護リソース・
+         リクエストを再試行してもかまいません（MAY）。
+
+   insufficient_scope
+         リクエストが、アクセス・トークンによって提供されるよりも高い権限を
+         必要とする。リソース・サーバーは HTTP 403 (Forbidden)
+         ステータス・コードで応答すべきであり（SHOULD）、保護リソースに
+         アクセスするために必要なスコープを持つ "scope" 属性を
+         含めてもかまいません（MAY）。
+
+   リクエストに認証情報がまったくない場合（例: クライアントが認証の
+   必要性を認識していなかった、またはサポートされていない認証方式を
+   使用しようとした場合）、リソース・サーバーはエラー・コードまたは
+   その他のエラー情報を含めるべきではありません（SHOULD NOT）。
+
+   例:
+
+     HTTP/1.1 401 Unauthorized
+     WWW-Authenticate: Bearer realm="example"
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                    [ページ 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  アクセス・トークン・レスポンスの例</span>
+
+   通常、ベアラー・トークンはOAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] アクセス・
+   トークン・レスポンスの一部としてクライアントに返されます。
+   そのようなレスポンスの例は次のとおりです。
+
+     HTTP/1.1 200 OK
+     Content-Type: application/json;charset=UTF-8
+     Cache-Control: no-store
+     Pragma: no-cache
+
+     {
+       "access_token":"mF_9.B5f-4.1JqM",
+       "token_type":"Bearer",
+       "expires_in":3600,
+       "refresh_token":"tGzv3JOkF0XG5Qx2TlKWIA"
+     }
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  セキュリティに関する考慮事項</span>
+
+   このセクションでは、ベアラー・トークンを使用する際のトークン処理に
+   関する関連するセキュリティ上の脅威を説明し、これらの脅威を軽減する
+   方法を説明します。
+
+<span class="h3"><a class="selflink" id="section-5.1" href="#section-5.1">5.1</a>.  セキュリティ上の脅威</span>
+
+   次の一覧は、何らかの形式のトークンを利用するプロトコルに対する
+   いくつかの一般的な脅威を示しています。この脅威一覧は、NIST Special
+   Publication 800-63 [<a href="#ref-NIST800-63" title="&quot;NIST Special Publication 800-63-1, INFORMATION SECURITY&quot;">NIST800-63</a>] に基づいています。この文書は
+   OAuth 2.0認可仕様 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] に基づいているため、そこや関連文書で
+   説明されている脅威についての議論は除外します。
+
+   トークンの生成/変更:  攻撃者は偽のトークンを生成したり、既存の
+      トークンの内容（認証文や属性文など）を変更したりして、
+      リソース・サーバーがクライアントに不適切なアクセスを許可するように
+      する可能性があります。たとえば、攻撃者はトークンを変更して
+      有効期間を延長する可能性があります。また、悪意のあるクライアントは、
+      閲覧できるべきでない情報へのアクセスを得るためにアサーションを
+      変更する可能性があります。
+
+   トークンの開示:  トークンには、機密情報を含む認証文および属性文が
+      含まれている可能性があります。
+
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   トークンのリダイレクト:  攻撃者は、あるリソース・サーバーによる利用の
+      ために生成されたトークンを使用して、そのトークンが自分宛てであると
+      誤って信じている別のリソース・サーバーへのアクセスを得ます。
+
+   トークンのリプレイ:  攻撃者は、そのリソース・サーバーで過去に
+      すでに使用されたトークンを使用しようとします。
+
+<span class="h3"><a class="selflink" id="section-5.2" href="#section-5.2">5.2</a>.  脅威の軽減</span>
+
+   トークンの内容をデジタル署名またはMessage Authentication Code (MAC)で
+   保護することにより、広範な脅威を軽減できます。あるいは、
+   ベアラー・トークンは、認可情報を直接符号化するのではなく、
+   認可情報への参照を含むことができます。そのような参照は、攻撃者が
+   推測することが不可能でなければなりません（MUST）。参照を使用する場合、
+   参照を認可情報に解決するために、サーバーとトークン発行者との間で
+   追加の相互作用が必要になることがあります。そのような相互作用の仕組みは
+   この仕様では定義しません。
+
+   この文書はトークンの符号化または内容を規定しません。したがって、
+   トークン完全性保護を保証する手段に関する詳細な推奨事項は、この文書の
+   範囲外です。トークン完全性保護は、トークンの変更を防ぐのに十分で
+   なければなりません（MUST）。
+
+   トークンのリダイレクトに対処するためには、認可サーバーがトークンに
+   意図された受信者（オーディエンス）の識別子、通常は単一のリソース・
+   サーバー（またはリソース・サーバーのリスト）を含めることが重要です。
+   トークンの使用を特定のスコープに制限することも推奨されます
+   （RECOMMENDED）。
+
+   認可サーバーはTLSを実装しなければなりません（MUST）。どのバージョンを
+   実装すべきかは、時間とともに変化し、実装時点での普及状況および既知の
+   セキュリティ脆弱性に依存します。執筆時点では、TLSバージョン1.2
+   [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] が最新バージョンですが、実際の展開は非常に限られており、
+   実装ツールキットで容易に利用できない可能性があります。TLSバージョン1.0
+   [<a href="./rfc2246" title="&quot;The TLS Protocol Version 1.0&quot;">RFC2246</a>] は最も広く展開されているバージョンであり、最も広い
+   相互運用性を提供します。
+
+   トークンの開示を防ぐため、機密性および完全性保護を提供する暗号スイート
+   を用いたTLS [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] により、機密性保護を適用しなければなりません
+   （MUST）。これには、クライアントと認可サーバー間の通信相互作用、
+   およびクライアントとリソース・サーバー間の相互作用の両方が、
+   機密性および完全性保護を利用することが必要です。TLSはこの仕様と
+   ともに実装および使用することが必須であるため、通信チャネルを介した
+   トークン開示を防ぐための推奨される方法です。クライアントがトークンの
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   内容を観察できないようにされている場合には、TLS保護の使用に加えて
+   トークン暗号化を適用しなければなりません（MUST）。トークン開示に対する
+   さらなる防御として、クライアントは保護リソースにリクエストを行う際に、
+   Certificate Revocation List (CRL) [<a href="./rfc5280" title="&quot;Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile&quot;">RFC5280</a>] の確認を含め、
+   TLS証明書チェーンを検証しなければなりません（MUST）。
+
+   Cookieは通常、平文で送信されます。したがって、その中に含まれる情報は
+   開示の危険にさらされます。そのため、ベアラー・トークンは、平文で
+   送信され得るCookieに保存してはなりません（MUST NOT）。Cookieに関する
+   セキュリティ上の考慮事項については、「HTTP State Management Mechanism」
+   [<a href="./rfc6265" title="&quot;HTTP State Management Mechanism&quot;">RFC6265</a>] を参照してください。
+
+   ロードバランサーを利用するものを含む一部の展開では、リソース・
+   サーバーへのTLS接続が、リソースを提供する実際のサーバーより前で
+   終端されます。これにより、TLS接続が終端されるフロントエンド・サーバーと、
+   リソースを提供するバックエンド・サーバーとの間で、トークンが保護されない
+   ままになる可能性があります。そのような展開では、フロントエンドと
+   バックエンドのサーバー間でトークンの機密性を確保するために、十分な措置を
+   講じなければなりません（MUST）。トークンの暗号化は、そのような可能な
+   措置の1つです。
+
+   トークンの捕捉とリプレイに対処するために、次の推奨事項を示します。
+   第一に、トークンの存続期間は制限されなければなりません（MUST）。
+   これを実現する一つの手段は、トークンの保護部分の中に有効期限フィールドを
+   入れることです。短寿命（一時間以下）のトークンを使用すると、
+   それらが漏えいした場合の影響が低減されることに注意してください。
+   第二に、クライアントと認可サーバー間、およびクライアントとリソース・
+   サーバー間の交換に対して、機密性保護を適用しなければなりません
+   （MUST）。その結果、通信経路上の盗聴者はトークン交換を観察できません。
+   したがって、そのような経路上の攻撃者はトークンをリプレイできません。
+   さらに、トークンをリソース・サーバーに提示する際、クライアントは
+   「HTTP Over TLS」[<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>] の <a href="#section-3.1">Section 3.1</a> に従って、そのリソース・
+   サーバーの身元を検証しなければなりません（MUST）。これらのリクエストを
+   保護リソースに行う際、クライアントはTLS証明書チェーンを検証しなければ
+   ならないことに注意してください（MUST）。認証および認可されていない
+   リソース・サーバーにトークンを提示したり、証明書チェーンの検証に
+   失敗したりすると、攻撃者がトークンを盗み、保護リソースへの
+   不正アクセスを得ることを許してしまいます。
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+<span class="h3"><a class="selflink" id="section-5.3" href="#section-5.3">5.3</a>.  推奨事項の要約</span>
+
+   ベアラー・トークンを保護する:  クライアント実装は、ベアラー・トークンが
+      意図しない当事者に漏えいしないようにしなければなりません（MUST）。
+      そのような当事者は、保護リソースへのアクセスを得るためにそれらを
+      使用できるためです。これはベアラー・トークンを使用する際の主要な
+      セキュリティ上の考慮事項であり、以下に続くすべてのより具体的な
+      推奨事項の基礎となります。
+
+   TLS証明書チェーンを検証する:  クライアントは保護リソースにリクエストを
+      行う際に、TLS証明書チェーンを検証しなければなりません（MUST）。
+      これを怠ると、DNSハイジャック攻撃によってトークンが盗まれ、
+      意図しないアクセスを得られる可能性があります。
+
+   常にTLS (https) を使用する:  クライアントは、ベアラー・トークンを用いて
+      リクエストを行う際、常にTLS [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] (https) または同等の
+      トランスポート・セキュリティを使用しなければなりません（MUST）。
+      これを怠ると、トークンは多数の攻撃にさらされ、攻撃者に意図しない
+      アクセスを与える可能性があります。
+
+   ベアラー・トークンをCookieに保存しない:  実装は、平文で送信され得る
+      Cookie（Cookieの既定の送信モード）内にベアラー・トークンを
+      保存してはなりません（MUST NOT）。ベアラー・トークンをCookieに
+      保存する実装は、クロスサイト・リクエスト・フォージェリに対する
+      予防措置を講じなければなりません（MUST）。
+
+   短寿命のベアラー・トークンを発行する:  トークン・サーバーは、特に
+      Webブラウザー内で実行されるクライアントや、情報漏えいが発生する
+      可能性のあるその他の環境に対してトークンを発行する場合、短寿命
+      （一時間以下）のベアラー・トークンを発行すべきです（SHOULD）。
+      短寿命のベアラー・トークンを使用することで、それらが漏えいした場合の
+      影響を低減できます。
+
+   スコープ付きベアラー・トークンを発行する:  トークン・サーバーは、
+      意図された依拠当事者または依拠当事者の集合に使用を限定する、
+      オーディエンス制限を含むベアラー・トークンを発行すべきです
+      （SHOULD）。
+
+   ページURLでベアラー・トークンを渡さない:  ベアラー・トークンは、
+      ページURL（たとえばクエリー文字列パラメーター）で渡すべきでは
+      ありません（SHOULD NOT）。代わりに、ベアラー・トークンは、
+      機密性措置が講じられるHTTPメッセージ・ヘッダーまたはメッセージ本文で
+      渡すべきです（SHOULD）。ブラウザー、Webサーバー、およびその他の
+      ソフトウェアは、ブラウザー履歴、Webサーバー・ログ、およびその他の
+      データ構造内のURLを十分に保護しない可能性があります。ベアラー・
+      トークンがページURLで渡される場合、攻撃者は履歴データ、ログ、または
+      その他の保護されていない場所からそれらを盗むことができる可能性があります。
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  IANAに関する考慮事項</span>
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  OAuthアクセス・トークン型の登録</span>
+
+   この仕様は、[<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] で定義されるOAuth Access Token Types登録簿に、
+   次のアクセス・トークン型を登録します。
+
+<span class="h4"><a class="selflink" id="section-6.1.1" href="#section-6.1.1">6.1.1</a>.  "Bearer" OAuthアクセス・トークン型</span>
+
+   型名:
+      Bearer
+
+   追加のトークン・エンドポイント・レスポンス・パラメーター:
+      （なし）
+
+   HTTP認証スキーム:
+      Bearer
+
+   変更管理者:
+      IETF
+
+   仕様文書:
+      <a href="./rfc6750">RFC 6750</a>
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  OAuth拡張エラー登録</span>
+
+   この仕様は、[<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] で定義されるOAuth Extensions Error登録簿に、
+   次のエラー値を登録します。
+
+<span class="h4"><a class="selflink" id="section-6.2.1" href="#section-6.2.1">6.2.1</a>.  "invalid_request" エラー値</span>
+
+   エラー名:
+      invalid_request
+
+   エラー使用場所:
+      リソース・アクセス・エラー・レスポンス
+
+   関連プロトコル拡張:
+      Bearerアクセス・トークン型
+
+   変更管理者:
+      IETF
+
+   仕様文書:
+      <a href="./rfc6750">RFC 6750</a>
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+<span class="h4"><a class="selflink" id="section-6.2.2" href="#section-6.2.2">6.2.2</a>.  "invalid_token" エラー値</span>
+
+   エラー名:
+      invalid_token
+
+   エラー使用場所:
+      リソース・アクセス・エラー・レスポンス
+
+   関連プロトコル拡張:
+      Bearerアクセス・トークン型
+
+   変更管理者:
+      IETF
+
+   仕様文書:
+      <a href="./rfc6750">RFC 6750</a>
+
+<span class="h4"><a class="selflink" id="section-6.2.3" href="#section-6.2.3">6.2.3</a>.  "insufficient_scope" エラー値</span>
+
+   エラー名:
+      insufficient_scope
+
+   エラー使用場所:
+      リソース・アクセス・エラー・レスポンス
+
+   関連プロトコル拡張:
+      Bearerアクセス・トークン型
+
+   変更管理者:
+      IETF
+
+   仕様文書:
+      <a href="./rfc6750">RFC 6750</a>
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-RFC2119">RFC2119</a>]    Bradner, S., "Key words for use in RFCs to Indicate
+                Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>, 1997年3月.
+
+   [<a id="ref-RFC2246">RFC2246</a>]    Dierks, T. and C. Allen, "The TLS Protocol Version 1.0",
+                <a href="./rfc2246">RFC 2246</a>, 1999年1月.
+
+   [<a id="ref-RFC2616">RFC2616</a>]    Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
+                Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
+                Transfer Protocol -- HTTP/1.1", <a href="./rfc2616">RFC 2616</a>, 1999年6月.
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+   [<a id="ref-RFC2617">RFC2617</a>]    Franks, J., Hallam-Baker, P., Hostetler, J., Lawrence,
+                S., Leach, P., Luotonen, A., and L. Stewart, "HTTP
+                Authentication: Basic and Digest Access Authentication",
+                <a href="./rfc2617">RFC 2617</a>, 1999年6月.
+
+   [<a id="ref-RFC2818">RFC2818</a>]    Rescorla, E., "HTTP Over TLS", <a href="./rfc2818">RFC 2818</a>, 2000年5月.
+
+   [<a id="ref-RFC3986">RFC3986</a>]    Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+                Resource Identifier (URI): Generic Syntax", STD 66,
+                <a href="./rfc3986">RFC 3986</a>, 2005年1月.
+
+   [<a id="ref-RFC5234">RFC5234</a>]    Crocker, D. and P. Overell, "Augmented BNF for Syntax
+                Specifications: ABNF", STD 68, <a href="./rfc5234">RFC 5234</a>, 2008年1月.
+
+   [<a id="ref-RFC5246">RFC5246</a>]    Dierks, T. and E. Rescorla, "The Transport Layer
+                Security (TLS) Protocol Version 1.2", <a href="./rfc5246">RFC 5246</a>,
+                2008年8月.
+
+   [<a id="ref-RFC5280">RFC5280</a>]    Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+                Housley, R., and W. Polk, "Internet X.509 Public Key
+                Infrastructure Certificate and Certificate Revocation
+                List (CRL) Profile", <a href="./rfc5280">RFC 5280</a>, 2008年5月.
+
+   [<a id="ref-RFC6265">RFC6265</a>]    Barth, A., "HTTP State Management Mechanism", <a href="./rfc6265">RFC 6265</a>,
+                2011年4月.
+
+   [<a id="ref-RFC6749">RFC6749</a>]    Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
+                <a href="./rfc6749">RFC 6749</a>, 2012年10月.
+
+   [<a id="ref-USASCII">USASCII</a>]    American National Standards Institute, "Coded Character
+                Set -- 7-bit American Standard Code for Information
+                Interchange", ANSI X3.4, 1986.
+
+   [<a id="ref-W3C.REC-html401-19991224">W3C.REC-html401-19991224</a>]
+                Raggett, D., Le Hors, A., and I. Jacobs, "HTML 4.01
+                Specification", World Wide Web Consortium
+                Recommendation REC-html401-19991224, 1999年12月,
+                &lt;<a href="http://www.w3.org/TR/1999/REC-html401-19991224">http://www.w3.org/TR/1999/REC-html401-19991224</a>&gt;.
+
+   [<a id="ref-W3C.REC-webarch-20041215">W3C.REC-webarch-20041215</a>]
+                Jacobs, I. and N. Walsh, "Architecture of the World Wide
+                Web, Volume One", World Wide Web Consortium
+                Recommendation REC-webarch-20041215, 2004年12月,
+                &lt;<a href="http://www.w3.org/TR/2004/REC-webarch-20041215">http://www.w3.org/TR/2004/REC-webarch-20041215</a>&gt;.
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  参考情報</span>
+
+   [<a id="ref-HTTP-AUTH">HTTP-AUTH</a>]  Fielding, R., Ed., and J. Reschke, Ed., "Hypertext
+                Transfer Protocol (HTTP/1.1): Authentication", Work
+                in Progress, 2012年10月.
+
+   [<a id="ref-NIST800-63">NIST800-63</a>] Burr, W., Dodson, D., Newton, E., Perlner, R., Polk, T.,
+                Gupta, S., and E. Nabbus, "NIST Special Publication
+                800-63-1, INFORMATION SECURITY", 2011年12月,
+                &lt;<a href="http://csrc.nist.gov/publications/">http://csrc.nist.gov/publications/</a>&gt;.
+
+   [<a id="ref-OMAP">OMAP</a>]       Huff, J., Schlacht, D., Nadalin, A., Simmons, J.,
+                Rosenberg, P., Madsen, P., Ace, T., Rickelton-Abdi, C.,
+                and B. Boyer, "Online Multimedia Authorization Protocol:
+                An Industry Standard for Authorized Access to Internet
+                Multimedia Resources", 2012年4月,
+                &lt;<a href="http://www.oatc.us/Standards/Download.aspx">http://www.oatc.us/Standards/Download.aspx</a>&gt;.
+
+   [<a id="ref-OpenID.Messages">OpenID.Messages</a>]
+                Sakimura, N., Bradley, J., Jones, M., de Medeiros, B.,
+                Mortimore, C., and E. Jay, "OpenID Connect Messages
+                1.0", 2012年6月, &lt;<a href="http://openid.net/specs/openid-connect-messages-1_0.html">http://openid.net/specs/</a>
+                <a href="http://openid.net/specs/openid-connect-messages-1_0.html">openid-connect-messages-1_0.html</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Jones &amp; Hardt                標準化過程                   [ページ 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc6750">RFC 6750</a>              OAuth 2.0 ベアラー・トークンの利用          2012年10月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  謝辞</span>
+
+   次の人々が、この文書の予備版に貢献しました: Blaine Cook (BT),
+   Brian Eaton (Google), Yaron Y. Goland (Microsoft), Brent Goldman
+   (Facebook), Raffi Krikorian (Twitter), Luke Shepard (Facebook),
+   and Allen Tom (Yahoo!). その内容および概念は、OAuthコミュニティ、
+   Web Resource Authorization Profiles (WRAP) コミュニティ、および
+   OAuth Working Groupの成果です。David Recordonは、OAuth 2.0
+   [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] へと発展した仕様の初期ドラフトに基づき、この仕様の
+   予備版を作成しました。Michael B. Jonesはその後、Davidの予備文書の
+   一部を使用してこの仕様の最初の版（00）を作成し、その後のすべての版を
+   編集しました。
+
+   OAuth Working Groupには、Michael Adams, Amanda Anganes, Andrew Arnott,
+   Derek Atkins, Dirk Balfanz, John Bradley, Brian Campbell, Francisco
+   Corella, Leah Culver, Bill de hOra, Breno de Medeiros, Brian Ellin,
+   Stephen Farrell, Igor Faynberg, George Fletcher, Tim Freeman,
+   Evan Gilbert, Yaron Y. Goland, Eran Hammer, Thomas Hardjono,
+   Dick Hardt, Justin Hart, Phil Hunt, John Kemp, Chasen Le Hara,
+   Barry Leiba, Amos Jeffries, Michael B. Jones, Torsten Lodderstedt,
+   Paul Madsen, Eve Maler, James Manger, Laurence Miao, William J. Mills,
+   Chuck Mortimore, Anthony Nadalin, Axel Nennker, Mark Nottingham,
+   David Recordon, Julian Reschke, Rob Richards, Justin Richer,
+   Peter Saint-Andre, Nat Sakimura, Rob Sayre, Marius Scurtescu,
+   Naitik Shah, Justin Smith, Christian Stuebner, Jeremy Suriel,
+   Doug Tangren, Paul Tarjan, Hannes Tschofenig, Franklin Tse,
+   Sean Turner, Paul Walker, Shane Weeden, Skylar Woodward, and
+   Zachary Zeltsan を含む、非常に活発な貢献者が数十名おり、
+   この文書のアイデアおよび文言を提案しました。
+
+著者の住所
+
+   Michael B. Jones
+   Microsoft
+
+   EMail: mbj@microsoft.com
+   URI:   <a href="http://self-issued.info/">http://self-issued.info/</a>
+
+
+   Dick Hardt
+   Independent
+
+   EMail: dick.hardt@gmail.com
+   URI:   <a href="http://dickhardt.org/">http://dickhardt.org/</a>
+
+
+
+
+
+
+Jones &amp; Hardt                標準化過程                   [ページ 18]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
