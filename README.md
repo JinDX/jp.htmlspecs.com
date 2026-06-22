@@ -615,5 +615,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [HTTP Strict Transport Security (HSTS)](https://jp.htmlspecs.com/http/rfc6797.html)（[Source](https://www.rfc-editor.org/rfc/rfc6797.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
 ### トランスポート層・接続セキュリティ
-- [QUIC: A UDP-Based Multiplexed and Secure Transport](https://jp.htmlspecs.com/quic/)（[Source](https://www.rfc-editor.org/rfc/rfc9000.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [QUIC: A UDP-Based Multiplexed and Secure Transport](https://jp.htmlspecs.com/http/rfc9000.html)（[Source](https://www.rfc-editor.org/rfc/rfc9000.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [Using TLS to Secure QUIC](https://jp.htmlspecs.com/http/rfc9001.html)（[Source](https://www.rfc-editor.org/rfc/rfc9001.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [QUIC Loss Detection and Congestion Control](https://jp.htmlspecs.com/http/rfc9002.html)（[Source](https://www.rfc-editor.org/rfc/rfc9002.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
