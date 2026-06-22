@@ -1,0 +1,1286 @@
+<pre>Internet Engineering Task Force (IETF)                          M. Jones
+Request for Comments: 8414                                     Microsoft
+Category: Standards Track                                    N. Sakimura
+ISSN: 2070-1721                                                      NRI
+                                                              J. Bradley
+                                                                  Yubico
+                                                               June 2018
+
+
+                <span class="h1">OAuth 2.0 認可サーバー・メタデータ</span>
+
+概要
+
+   本仕様は、OAuth 2.0 クライアントが OAuth 2.0 認可サーバーと
+   やり取りするために必要な情報を取得するために利用できる
+   メタデータ形式を定義する。この情報には、そのエンドポイントの
+   場所および認可サーバーの機能が含まれる。
+
+本文書の位置づけ
+
+   本文書は Internet Standards Track 文書である。
+
+   本文書は Internet Engineering Task Force (IETF) の成果物である。
+   これは IETF コミュニティの総意を表すものである。本文書は
+   公開レビューを受けており、Internet Engineering Steering Group
+   (IESG) によって発行が承認されている。Internet Standards に
+   関する詳細情報は、<a href="./rfc7841#section-2">RFC 7841 の Section&nbsp;2</a> で入手できる。
+
+   本文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、以下で入手できる。
+   <a href="https://www.rfc-editor.org/info/rfc8414">https://www.rfc-editor.org/info/rfc8414</a>.
+
+Copyright Notice
+
+   Copyright (c) 2018 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+目次
+
+   <a href="#section-1">1</a>. はじめに ....................................................<a href="#page-2">2</a>
+      <a href="#section-1.1">1.1</a>. 要件表記および規約 ....................................<a href="#page-3">3</a>
+      <a href="#section-1.2">1.2</a>. 用語 ..................................................<a href="#page-3">3</a>
+   <a href="#section-2">2</a>. 認可サーバー・メタデータ ..................................<a href="#page-4">4</a>
+      <a href="#section-2.1">2.1</a>. 署名付き認可サーバー・メタデータ ......................<a href="#page-8">8</a>
+   <a href="#section-3">3</a>. 認可サーバー・メタデータの取得 ............................<a href="#page-8">8</a>
+      <a href="#section-3.1">3.1</a>. 認可サーバー・メタデータ要求 ..........................<a href="#page-9">9</a>
+      <a href="#section-3.2">3.2</a>. 認可サーバー・メタデータ応答 .........................<a href="#page-10">10</a>
+      <a href="#section-3.3">3.3</a>. 認可サーバー・メタデータ検証 .........................<a href="#page-11">11</a>
+   <a href="#section-4">4</a>. 文字列操作 .................................................<a href="#page-11">11</a>
+   <a href="#section-5">5</a>. 互換性に関する注記 .......................................<a href="#page-11">11</a>
+   <a href="#section-6">6</a>. セキュリティに関する考慮事項 .............................<a href="#page-12">12</a>
+      <a href="#section-6.1">6.1</a>. TLS 要件 ...............................................<a href="#page-12">12</a>
+      <a href="#section-6.2">6.2</a>. なりすまし攻撃 .......................................<a href="#page-12">12</a>
+      <a href="#section-6.3">6.3</a>. 標準形式によるメタデータの公開 .......................<a href="#page-13">13</a>
+      <a href="#section-6.4">6.4</a>. 保護リソース .........................................<a href="#page-13">13</a>
+   <a href="#section-7">7</a>. IANA に関する考慮事項 .....................................<a href="#page-14">14</a>
+      <a href="#section-7.1">7.1</a>. OAuth 認可サーバー・メタデータ登録簿 .................<a href="#page-14">14</a>
+           <a href="#section-7.1.1">7.1.1</a>. 登録テンプレート ..............................<a href="#page-15">15</a>
+           <a href="#section-7.1.2">7.1.2</a>. 初期登録簿の内容 ..............................<a href="#page-16">16</a>
+      <a href="#section-7.2">7.2</a>. 更新された登録手順 ...................................<a href="#page-19">19</a>
+      <a href="#section-7.3">7.3</a>. Well-Known URI 登録簿 .................................<a href="#page-19">19</a>
+           <a href="#section-7.3.1">7.3.1</a>. 登録簿の内容 ..................................<a href="#page-19">19</a>
+   <a href="#section-8">8</a>. 参考文献 ...................................................<a href="#page-20">20</a>
+      <a href="#section-8.1">8.1</a>. 規範的参考文献 .......................................<a href="#page-20">20</a>
+      <a href="#section-8.2">8.2</a>. 参考情報としての参考文献 .............................<a href="#page-22">22</a>
+   謝辞 ..........................................................<a href="#page-23">23</a>
+   著者の連絡先 ..................................................<a href="#page-23">23</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   本仕様は、"OpenID Connect Discovery 1.0" [<a href="#ref-OpenID.Discovery">OpenID.Discovery</a>] で
+   定義されたメタデータ形式を一般化するものであり、OpenID Connect
+   Discovery と互換性を保ちながら、より広い OAuth 2.0 ユースケースの
+   集合に適用できるようにしている。これは、"OAuth 2.0 Dynamic
+   Client Registration Protocol" [<a href="./rfc7591" title="&quot;OAuth 2.0 Dynamic Client Registration Protocol&quot;">RFC7591</a>] が
+   "OpenID Connect Dynamic Client Registration 1.0"
+   [<a href="#ref-OpenID.Registration">OpenID.Registration</a>] で定義された動的クライアント登録の仕組みを、
+   それと互換性のある方法で一般化したことと、意図的に並行している。
+
+   認可サーバーのメタデータは、well-known な場所から JSON
+   [<a href="./rfc8259" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC8259</a>] 文書として取得される。この文書は、そのエンドポイントの
+   場所および認可サーバーの機能を宣言する。この処理は
+   <a href="#section-3">Section 3</a> で説明されている。
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   このメタデータは、HTTPS を介してサーバーのオリジンが自己表明する
+   形式で伝達することも、JSON Web Token (JWT) [<a href="#ref-JWT" title="&quot;JSON Web Token (JWT)&quot;">JWT</a>] 内の
+   クレームとして表現される署名付きメタデータ値の集合として
+   伝達することもできる。JWT の場合、発行者は認可サーバーに関する
+   データの妥当性を保証している。これは、OAuth Dynamic Client
+   Registration [<a href="./rfc7591" title="&quot;OAuth 2.0 Dynamic Client Registration Protocol&quot;">RFC7591</a>] において Software Statement が果たす役割と
+   類似している。
+
+   クライアントが認可サーバーを選択する手段は、本仕様の範囲外である。
+   場合によっては、その issuer identifier がクライアントに手動で
+   設定されることがある。また別の場合には、たとえば
+   "OpenID Connect Discovery 1.0" [<a href="#ref-OpenID.Discovery">OpenID.Discovery</a>] の <a href="#section-2">Section 2</a> で
+   説明されているように、WebFinger [<a href="./rfc7033" title="&quot;WebFinger&quot;">RFC7033</a>] の使用を通じて
+   動的に発見されることがある。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  要件表記および規約</span>
+
+   本文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",
+   "NOT RECOMMENDED", "MAY", および "OPTIONAL" は、ここに示すように
+   すべて大文字で現れる場合に限り、<a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a> [<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>]
+   [<a href="./rfc8174" title="&quot;Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words&quot;">RFC8174</a>] で説明されているとおりに解釈される。
+
+   本仕様における JSON Web Signature (JWS) [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>] および
+   JSON Web Encryption (JWE) [<a href="#ref-JWE" title="&quot;JSON Web Encryption (JWE)&quot;">JWE</a>] データ構造のすべての使用は、
+   JWS Compact Serialization または JWE Compact Serialization を
+   利用する。JWS JSON Serialization および JWE JSON Serialization は
+   使用されない。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  用語</span>
+
+   本仕様は、OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] で定義される "Access Token",
+   "Authorization Code", "Authorization Endpoint", "Authorization Grant",
+   "Authorization Server", "Client", "Client Authentication", "Client
+   Identifier", "Client Secret", "Grant Type", "Protected Resource",
+   "Redirection URI", "Refresh Token", "Resource Owner", "Resource
+   Server", "Response Type", および "Token Endpoint" という用語、
+   JSON Web Token (JWT) [<a href="#ref-JWT" title="&quot;JSON Web Token (JWT)&quot;">JWT</a>] で定義される "Claim Name",
+   "Claim Value", および "JSON Web Token (JWT)" という用語、ならびに
+   "OAuth 2.0 Multiple Response Type Encoding Practices"
+   [<a href="#ref-OAuth.Responses">OAuth.Responses</a>] で定義される "Response Mode" という用語を使用する。
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  認可サーバー・メタデータ</span>
+
+   認可サーバーは、その構成を説明するメタデータを持つことができる。
+   以下の認可サーバー・メタデータ値は、本仕様で使用され、<a href="#section-7.1">Section 7.1</a>
+   で確立される IANA "OAuth Authorization Server Metadata" 登録簿に
+   登録される。
+
+   issuer
+      REQUIRED.  認可サーバーの issuer identifier。これは "https"
+      スキームを使用し、query コンポーネントまたは fragment
+      コンポーネントを持たない URL である。認可サーバー・メタデータは、
+      <a href="#section-3">Section 3</a> で説明されているように、この issuer identifier から
+      導出され、<a href="./rfc5785">RFC 5785</a> [<a href="./rfc5785" title="&quot;Defining Well-Known Uniform Resource Identifiers (URIs)&quot;">RFC5785</a>] に従った ".well-known" な
+      場所で公開される。issuer identifier は、"OAuth 2.0 Mix-Up
+      Mitigation" [<a href="#ref-MIX-UP" title="&quot;OAuth 2.0 Mix-Up Mitigation&quot;">MIX-UP</a>] で説明されているように、認可サーバーの
+      mix-up 攻撃を防ぐために使用される。
+
+   authorization_endpoint
+      認可サーバーの authorization endpoint の URL
+      [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]。authorization endpoint を使用する grant type が
+      サポートされていない場合を除き、これは REQUIRED である。
+
+   token_endpoint
+      認可サーバーの token endpoint の URL [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]。implicit grant
+      type のみがサポートされている場合を除き、これは REQUIRED である。
+
+   jwks_uri
+      OPTIONAL.  認可サーバーの JWK Set [<a href="#ref-JWK" title="&quot;JSON Web Key (JWK)&quot;">JWK</a>] 文書の URL。参照される
+      文書には、認可サーバーからの署名を検証するためにクライアントが
+      使用する署名鍵が含まれる。この URL は "https" スキームを
+      使用しなければならない。JWK Set は、クライアントがサーバーへの
+      要求を暗号化するために使用する、サーバーの暗号化鍵を含むことも
+      MAY である。署名鍵と暗号化鍵の両方が利用可能にされる場合、
+      参照される JWK Set 内のすべての鍵について、各鍵の意図された
+      用途を示す "use" (public key use) パラメーター値が REQUIRED である。
+
+   registration_endpoint
+      OPTIONAL.  認可サーバーの OAuth 2.0 Dynamic Client Registration
+      endpoint [<a href="./rfc7591" title="&quot;OAuth 2.0 Dynamic Client Registration Protocol&quot;">RFC7591</a>] の URL。
+
+   scopes_supported
+      RECOMMENDED.  この認可サーバーがサポートする OAuth 2.0
+      [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] の "scope" 値の一覧を含む JSON 配列。サーバーは、
+      このパラメーターが使用されている場合でも、サポートする一部の
+      scope 値を広告しないことを選択しても MAY である。
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   response_types_supported
+      REQUIRED.  この認可サーバーがサポートする OAuth 2.0
+      "response_type" 値の一覧を含む JSON 配列。使用される配列値は、
+      "OAuth 2.0 Dynamic Client Registration Protocol" [<a href="./rfc7591" title="&quot;OAuth 2.0 Dynamic Client Registration Protocol&quot;">RFC7591</a>] で
+      定義される "response_types" パラメーターで使用される値と同じである。
+
+   response_modes_supported
+      OPTIONAL.  "OAuth 2.0 Multiple Response Type Encoding Practices"
+      [<a href="#ref-OAuth.Responses">OAuth.Responses</a>] で規定される、この認可サーバーがサポートする
+      OAuth 2.0 "response_mode" 値の一覧を含む JSON 配列。省略された場合、
+      デフォルトは "["query", "fragment"]" である。response mode 値
+      "form_post" は、"OAuth 2.0 Form Post Response Mode"
+      [<a href="#ref-OAuth.Post">OAuth.Post</a>] でも定義されている。
+
+   grant_types_supported
+      OPTIONAL.  この認可サーバーがサポートする OAuth 2.0 grant type
+      値の一覧を含む JSON 配列。使用される配列値は、
+      "OAuth 2.0 Dynamic Client Registration Protocol" [<a href="./rfc7591" title="&quot;OAuth 2.0 Dynamic Client Registration Protocol&quot;">RFC7591</a>] で
+      定義される "grant_types" パラメーターで使用される値と同じである。
+      省略された場合、デフォルト値は "["authorization_code",
+      "implicit"]" である。
+
+   token_endpoint_auth_methods_supported
+      OPTIONAL.  この token endpoint がサポートする client
+      authentication method の一覧を含む JSON 配列。client
+      authentication method 値は、<a href="./rfc7591#section-2">[RFC7591] の Section&nbsp;2</a> で定義される
+      "token_endpoint_auth_method" パラメーターで使用される。省略された
+      場合、デフォルトは "client_secret_basic"、すなわち OAuth 2.0
+      [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] の <a href="#section-2.3.1">Section 2.3.1</a> で規定される HTTP Basic Authentication
+      Scheme である。
+
+   token_endpoint_auth_signing_alg_values_supported
+      OPTIONAL.  "private_key_jwt" および "client_secret_jwt"
+      authentication method について token endpoint でクライアントを
+      認証するために使用される JWT [<a href="#ref-JWT" title="&quot;JSON Web Token (JWT)&quot;">JWT</a>] 上の署名に対して、token
+      endpoint がサポートする JWS 署名アルゴリズム ("alg" 値) の一覧を
+      含む JSON 配列。これらの authentication method のいずれかが
+      "token_endpoint_auth_methods_supported" エントリーで指定される場合、
+      このメタデータ・エントリーは存在しなければならない。省略された
+      場合、デフォルトのアルゴリズムは含意されない。サーバーは "RS256"
+      をサポートするべきである。"none" という値は使用してはならない。
+
+   service_documentation
+      OPTIONAL.  認可サーバーを使用する際に、開発者が知りたい、または
+      知る必要がある、人間が読める情報を含むページの URL。特に、
+      認可サーバーが Dynamic Client Registration をサポートしていない
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+      場合には、クライアントを登録する方法に関する情報をこの文書で
+      提供する必要がある。
+
+   ui_locales_supported
+      OPTIONAL.  ユーザーインターフェイスでサポートされる言語および
+      用字系。<a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a> [<a href="./rfc5646" title="&quot;Tags for Identifying Languages&quot;">RFC5646</a>] の language tag 値の JSON 配列として
+      表される。省略された場合、サポートされる言語および用字系の集合は
+      未指定である。
+
+   op_policy_uri
+      OPTIONAL.  認可サーバーが、クライアントを登録する人物に対して
+      提供する URL。その人物は、認可サーバーが提供するデータを
+      クライアントがどのように使用できるかに関する認可サーバーの要件を
+      読むために、この URL を使用する。登録処理は、この URL が与えられて
+      いる場合、クライアントを登録する人物にこの URL を表示するべきである。
+      <a href="#section-5">Section 5</a> で説明されているように、識別子 "op_policy_uri" は
+      OpenID 固有であるように見えるにもかかわらず、本仕様におけるその
+      使用は実際には OpenID Connect に固有ではない一般的な OAuth 2.0
+      機能を指している。
+
+   op_tos_uri
+      OPTIONAL.  認可サーバーが、クライアントを登録する人物に対して
+      提供する URL。その人物は、認可サーバーの利用規約を読むために
+      この URL を使用する。登録処理は、この URL が与えられている場合、
+      クライアントを登録する人物にこの URL を表示するべきである。
+      <a href="#section-5">Section 5</a> で説明されているように、識別子
+      "op_tos_uri" は OpenID 固有であるように見えるにもかかわらず、
+      本仕様におけるその使用は実際には OpenID Connect に固有ではない
+      一般的な OAuth 2.0 機能を指している。
+
+   revocation_endpoint
+      OPTIONAL.  認可サーバーの OAuth 2.0 revocation endpoint
+      [<a href="./rfc7009" title="&quot;OAuth 2.0 Token Revocation&quot;">RFC7009</a>] の URL。
+
+   revocation_endpoint_auth_methods_supported
+      OPTIONAL.  この revocation endpoint がサポートする client
+      authentication method の一覧を含む JSON 配列。有効な client
+      authentication method 値は、IANA "OAuth Token Endpoint
+      Authentication Methods" 登録簿 [<a href="#ref-IANA.OAuth.Parameters">IANA.OAuth.Parameters</a>] に
+      登録されている値である。省略された場合、デフォルトは
+      "client_secret_basic"、すなわち OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] の
+      <a href="#section-2.3.1">Section 2.3.1</a> で規定される HTTP Basic Authentication Scheme である。
+
+   revocation_endpoint_auth_signing_alg_values_supported
+      OPTIONAL.  revocation endpoint でクライアントを認証するために
+      使用される JWT [<a href="#ref-JWT" title="&quot;JSON Web Token (JWT)&quot;">JWT</a>] 上の署名について、revocation endpoint が
+      サポートする JWS 署名アルゴリズム ("alg" 値) の一覧を含む JSON 配列。
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+      これは、"private_key_jwt" および "client_secret_jwt"
+      authentication method のためのものである。これらの authentication
+      method のいずれかが "revocation_endpoint_auth_methods_supported"
+      エントリーで指定される場合、このメタデータ・エントリーは存在し
+      なければならない。省略された場合、デフォルトのアルゴリズムは
+      含意されない。"none" という値は使用してはならない。
+
+   introspection_endpoint
+      OPTIONAL.  認可サーバーの OAuth 2.0 introspection endpoint
+      [<a href="./rfc7662" title="&quot;OAuth 2.0 Token Introspection&quot;">RFC7662</a>] の URL。
+
+   introspection_endpoint_auth_methods_supported
+      OPTIONAL.  この introspection endpoint がサポートする client
+      authentication method の一覧を含む JSON 配列。有効な client
+      authentication method 値は、IANA "OAuth Token Endpoint
+      Authentication Methods" 登録簿 [<a href="#ref-IANA.OAuth.Parameters">IANA.OAuth.Parameters</a>] に
+      登録されている値、または IANA "OAuth Access Token Types" 登録簿
+      [<a href="#ref-IANA.OAuth.Parameters">IANA.OAuth.Parameters</a>] に登録されている値である。（これらの値は、
+      <a href="#section-7.2">Section 7.2</a> により、現在も今後も区別されたままである。）省略された
+      場合、サポートされる authentication method の集合は他の手段で
+      決定されなければならない。
+
+   introspection_endpoint_auth_signing_alg_values_supported
+      OPTIONAL.  "private_key_jwt" および "client_secret_jwt"
+      authentication method について introspection endpoint でクライアントを
+      認証するために使用される JWT [<a href="#ref-JWT" title="&quot;JSON Web Token (JWT)&quot;">JWT</a>] 上の署名に対して、
+      introspection endpoint がサポートする JWS 署名アルゴリズム ("alg" 値) の
+      一覧を含む JSON 配列。これらの authentication method のいずれかが
+      "introspection_endpoint_auth_methods_supported" エントリーで指定される
+      場合、このメタデータ・エントリーは存在しなければならない。省略された
+      場合、デフォルトのアルゴリズムは含意されない。"none" という値は
+      使用してはならない。
+
+   code_challenge_methods_supported
+      OPTIONAL.  この認可サーバーがサポートする Proof Key for Code
+      Exchange (PKCE) [<a href="./rfc7636" title="&quot;Proof Key for Code Exchange by OAuth Public Clients&quot;">RFC7636</a>] code challenge method の一覧を含む
+      JSON 配列。Code challenge method 値は、<a href="./rfc7636#section-4.3">[RFC7636] の Section&nbsp;4.3</a>
+      で定義される "code_challenge_method" パラメーターで使用される。
+      有効な code challenge method 値は、IANA "PKCE Code Challenge
+      Methods" 登録簿 [<a href="#ref-IANA.OAuth.Parameters">IANA.OAuth.Parameters</a>] に登録されている値である。
+      省略された場合、認可サーバーは PKCE をサポートしない。
+
+   追加の認可サーバー・メタデータ・パラメーターを使用しても MAY である。
+   その一部は、OpenID Connect Discovery 1.0 [<a href="#ref-OpenID.Discovery">OpenID.Discovery</a>] などの
+   他の仕様で定義されている。
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  署名付き認可サーバー・メタデータ</span>
+
+   JSON 要素に加えて、メタデータ値は "signed_metadata" 値として提供しても
+   MAY である。これは、認可サーバーに関するメタデータ値を一つの束として
+   表明する JSON Web Token (JWT) [<a href="#ref-JWT" title="&quot;JSON Web Token (JWT)&quot;">JWT</a>] である。署名付き
+   メタデータで使用できるクレームの集合は <a href="#section-2">Section 2</a> で定義される。
+   署名付きメタデータは、JSON Web Signature (JWS) [<a href="#ref-JWS" title="&quot;JSON Web Signature (JWS)&quot;">JWS</a>] を使用して
+   デジタル署名または MAC されていなければならず、署名付きメタデータ内の
+   クレームを証明する当事者を示す "iss" (issuer) クレームを含まなければ
+   ならない。メタデータの消費者は、この機能をサポートしていない場合、
+   署名付きメタデータを無視しても MAY である。メタデータの消費者が
+   署名付きメタデータをサポートする場合、署名付きメタデータで伝達される
+   メタデータ値は、プレーンな JSON 要素を使用して伝達される対応する値より
+   優先されなければならない。
+
+   署名付きメタデータは、次の OPTIONAL メンバーを使用して認可サーバー・
+   メタデータ JSON オブジェクトに含まれる。
+
+   signed_metadata
+      認可サーバーに関するメタデータ値をクレームとして含む JWT。これは、
+      署名付き JWT 全体からなる文字列値である。"signed_metadata"
+      メタデータ値は、JWT 内のクレームとして現れるべきではない。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  認可サーバー・メタデータの取得</span>
+
+   メタデータをサポートする認可サーバーは、<a href="#section-2">Section 2</a> で規定される
+   メタデータを含む JSON 文書を、認可サーバーの issuer identifier に
+   well-known URI 文字列を挿入して形成されるパスで利用可能にしなければ
+   ならない。この挿入は、host コンポーネントと、存在する場合は path
+   コンポーネントとの間に行われる。デフォルトでは、使用される well-known
+   URI 文字列は "/.well-known/oauth-authorization-server" である。この
+   パスは "https" スキームを使用しなければならない。".well-known" の構文
+   および意味は <a href="./rfc5785">RFC 5785</a> [<a href="./rfc5785" title="&quot;Defining Well-Known Uniform Resource Identifiers (URIs)&quot;">RFC5785</a>] で定義される。使用される
+   well-known URI suffix は、IANA "Well-Known URIs" 登録簿
+   [<a href="#ref-IANA.well-known">IANA.well-known</a>] に登録されていなければならない。
+
+   アプリケーション固有の方法で OAuth 認可サーバーを利用するさまざまな
+   アプリケーションは、それらのアプリケーションで使用される認可サーバー・
+   メタデータを公開するために、異なる well-known URI suffix を定義して
+   登録してもよい。たとえば、例示アプリケーションが OAuth 認可サーバーを
+   例示固有の方法で使用し、公開する必要がある例示固有のメタデータ値が
+   ある場合、そのアプリケーションは "example-configuration" URI suffix を
+   登録して使用し、認可サーバーの issuer identifier の host と path
+   コンポーネントの間に "/.well-known/example-configuration" を挿入して
+   形成されるパスでメタデータ文書を公開することがあり得る。あるいは、
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   多くのそのようなアプリケーションは、汎用の OAuth 認可サーバーにとって
+   適切な選択であるデフォルトの well-known URI 文字列
+   "/.well-known/oauth-authorization-server" を使用し、アプリケーション固有の
+   ものを登録しない。
+
+   本仕様を使用する OAuth 2.0 アプリケーションは、この目的でどの
+   well-known URI suffix を使用するかを指定しなければならない。同じ
+   認可サーバーは、issuer identifier から導出される複数の well-known
+   場所でそのメタデータを公開することを選択しても MAY である。たとえば、
+   "/.well-known/example-configuration" と
+   "/.well-known/oauth-authorization-server" の両方でメタデータを公開する
+   場合である。
+
+   一部の OAuth アプリケーションは、well-known URI suffix
+   "openid-configuration" の使用を選択する。<a href="#section-5">Section 5</a> で説明されている
+   ように、識別子 "/.well-known/openid-configuration" は OpenID 固有で
+   あるように見えるにもかかわらず、本仕様におけるその使用は実際には
+   OpenID Connect に固有ではない一般的な OAuth 2.0 機能を指している。
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  認可サーバー・メタデータ要求</span>
+
+   認可サーバー・メタデータ文書は、前に指定されたパスに対する HTTP
+   "GET" 要求を使用して問い合わせなければならない。
+
+   issuer identifier が "https://example.com" であり、well-known URI suffix が
+   "oauth-authorization-server" である場合、issuer identifier は path
+   コンポーネントを含まないため、クライアントはメタデータを取得するために
+   次の要求を行う。
+
+     GET /.well-known/oauth-authorization-server HTTP/1.1
+     Host: example.com
+
+   issuer identifier 値が path コンポーネントを含む場合、終端の "/" はすべて、
+   host コンポーネントと path コンポーネントの間に "/.well-known/" および
+   well-known URI suffix を挿入する前に削除しなければならない。issuer
+   identifier が "https://example.com/issuer1" であり、well-known URI suffix が
+   "oauth-authorization-server" である場合、issuer identifier は path
+   コンポーネントを含むため、クライアントはメタデータを取得するために次の
+   要求を行う。
+
+     GET /.well-known/oauth-authorization-server/issuer1 HTTP/1.1
+     Host: example.com
+
+   path コンポーネントを使用することで、ホストごとに複数の issuer を
+   サポートできる。これは一部のマルチテナント・ホスティング構成で必要と
+   される。この ".well-known" の使用は、ホストごとに複数の issuer を
+   サポートするためのものであり、<a href="./rfc5785">RFC 5785</a> [<a href="./rfc5785" title="&quot;Defining Well-Known Uniform Resource Identifiers (URIs)&quot;">RFC5785</a>] での使用とは
+   異なり、ホストに関する一般的な情報を提供しない。
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                    [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  認可サーバー・メタデータ応答</span>
+
+   応答は、認可サーバーの構成に関するクレームの集合であり、必要なすべての
+   エンドポイントおよび公開鍵の場所に関する情報を含む。成功応答は
+   200 OK HTTP status code を使用しなければならず、"application/json"
+   content type を使用して JSON オブジェクトを返さなければならない。
+   その JSON オブジェクトは、<a href="#section-2">Section 2</a> で定義されるメタデータ値の
+   subset であるクレームの集合をメンバーとして含む。他のクレームを返しても
+   MAY である。
+
+   複数の値を返すクレームは JSON 配列として表される。要素が 0 個の
+   クレームは応答から省略しなければならない。
+
+   エラー応答は、適用可能な HTTP status code 値を使用する。
+
+   次は、非規範的な応答例である。
+
+     HTTP/1.1 200 OK
+     Content-Type: application/json
+
+     {
+      "issuer":
+        "https://server.example.com",
+      "authorization_endpoint":
+        "https://server.example.com/authorize",
+      "token_endpoint":
+        "https://server.example.com/token",
+      "token_endpoint_auth_methods_supported":
+        ["client_secret_basic", "private_key_jwt"],
+      "token_endpoint_auth_signing_alg_values_supported":
+        ["RS256", "ES256"],
+      "userinfo_endpoint":
+        "https://server.example.com/userinfo",
+      "jwks_uri":
+        "https://server.example.com/jwks.json",
+      "registration_endpoint":
+        "https://server.example.com/register",
+      "scopes_supported":
+        ["openid", "profile", "email", "address",
+         "phone", "offline_access"],
+      "response_types_supported":
+        ["code", "code token"],
+      "service_documentation":
+        "http://server.example.com/service_documentation.html",
+      "ui_locales_supported":
+        ["en-US", "en-GB", "en-CA", "fr-FR", "fr-CA"]
+     }
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.3" href="#section-3.3">3.3</a>.  認可サーバー・メタデータ検証</span>
+
+   返された "issuer" 値は、メタデータを取得するために使用された URL を
+   作成するために well-known URI 文字列が挿入された、認可サーバーの
+   issuer identifier 値と同一でなければならない。これらの値が同一でない
+   場合、応答に含まれるデータを使用してはならない。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  文字列操作</span>
+
+   一部の OAuth 2.0 メッセージの処理では、メッセージ内の値を既知の値と
+   比較する必要がある。たとえば、メタデータ応答内のメンバー名は、
+   "issuer" などの特定のメンバー名と比較されることがある。しかし、
+   Unicode [<a href="#ref-UNICODE" title="&quot;The Unicode Standard&quot;">UNICODE</a>] 文字列の比較には、重大なセキュリティ上の
+   含意がある。
+
+   したがって、JSON 文字列とその他の Unicode 文字列との比較は、以下で
+   規定するように実行しなければならない。
+
+   1.  JSON によって適用されたエスケープをすべて除去し、Unicode
+       code point の配列を生成する。
+
+   2.  Unicode Normalization [<a href="#ref-USA15" title="&quot;Unicode Normalization Forms&quot;">USA15</a>] は、JSON 文字列またはそれと
+       比較される文字列のいずれに対しても、いかなる時点でも適用しては
+       ならない。
+
+   3.  2 つの文字列の比較は、Unicode code point 同士の等価性比較として
+       実行しなければならない。
+
+   これは、<a href="./rfc8259#section-8.3">[RFC8259] の Section&nbsp;8.3</a> で説明されているものと同じ
+   等価性比較手順であることに注意されたい。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  互換性に関する注記</span>
+
+   識別子 "/.well-known/openid-configuration", "op_policy_uri", および
+   "op_tos_uri" は、もともと "OpenID Connect Discovery 1.0"
+   [<a href="#ref-OpenID.Discovery">OpenID.Discovery</a>] によって定義された OpenID Connect [<a href="#ref-OpenID.Core">OpenID.Core</a>]
+   仕様群を参照する文字列を含む。OpenID 固有であるように見えるこれらの
+   識別子の再利用にもかかわらず、本仕様におけるそれらの使用は、実際には
+   OpenID Connect に固有ではない一般的な OAuth 2.0 機能を指している。
+
+   <a href="#section-3">Section 3</a> で定義される issuer identifier を認可サーバー・
+   メタデータの場所に変換するアルゴリズムは、issuer identifier が path
+   コンポーネントを含まないことを条件として、"OpenID Connect
+   Discovery 1.0" [<a href="#ref-OpenID.Discovery">OpenID.Discovery</a>] の <a href="#section-4">Section 4</a> で定義される対応する
+   変換と等価である。しかし、path コンポーネントが存在する場合、それらは
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   異なる。これは、OpenID Connect Discovery 1.0 が well-known URI 文字列を
+   issuer identifier に追加する（例:
+   "https://example.com/issuer1/.well-known/openid-configuration"）と
+   規定しているのに対し、本仕様では well-known URI 文字列を issuer
+   identifier の path コンポーネントの前に挿入する（例:
+   "https://example.com/.well-known/openid-configuration/issuer1"）と
+   規定しているためである。
+
+   今後、OAuth 認可サーバー・メタデータの場所は、本仕様で定義される
+   変換を使用するべきである。ただし、OpenID Connect Discovery 1.0 の
+   変換がすでに使用されているレガシー環境に配備される場合、移行期間中に
+   path コンポーネントを含む issuer identifier のメタデータを両方の場所で
+   公開する必要があることがある。この移行期間中、アプリケーションはまず
+   本仕様で定義される変換を適用し、その結果得られる場所から認可サーバー・
+   メタデータの取得を試みるべきである。その場所からの取得に失敗した場合に
+   限り、OpenID Connect Discovery 1.0 によって定義される変換を使用して
+   得られる代替場所からの取得を試みるべきである。この後方互換の挙動が
+   必要となるのは、アプリケーションで採用されている well-known URI suffix が
+   "openid-configuration" である場合に限られるべきである。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  セキュリティに関する考慮事項</span>
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  TLS 要件</span>
+
+   実装は TLS をサポートしなければならない。どのバージョンを実装すべきかは、
+   時間とともに変化し、実装時点での広範な配備状況および既知の
+   セキュリティ脆弱性に依存する。認可サーバーは TLS version 1.2
+   [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] をサポートしなければならず、そのセキュリティ要件を満たす
+   追加の TLS メカニズムをサポートしても MAY である。TLS を使用する場合、
+   クライアントは <a href="./rfc6125">RFC 6125</a> [<a href="./rfc6125" title="&quot;Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)&quot;">RFC6125</a>] に従って TLS/SSL server
+   certificate check を実行しなければならない。実装上のセキュリティに
+   関する考慮事項は、"Recommendations for Secure Use of Transport Layer
+   Security (TLS) and Datagram Transport Layer Security (DTLS)"
+   [<a href="#ref-BCP195" title="&quot;Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)&quot;">BCP195</a>] に記載されている。
+
+   情報漏えいおよび改ざんを防ぐため、機密性および完全性保護を提供する
+   cipher suite を持つ TLS を使用して、機密性保護を適用しなければならない。
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  なりすまし攻撃</span>
+
+   認可サーバー・メタデータ要求を行う際、<a href="#section-6.1">Section 6.1</a> で説明されている
+   ように、クライアントは TLS certificate checking を実行しなければならない。
+   server certificate が issuer identifier URL に対して有効であることを
+   確認することで、man-in-the-middle 攻撃および DNS ベースの攻撃を防ぐ。
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   これらの攻撃は、クライアントが攻撃者の鍵およびエンドポイントを使用する
+   ようにだまされる原因となり、正当な認可サーバーへのなりすましを可能に
+   する。この攻撃者がこれを達成できる場合、攻撃者は、影響を受けた
+   クライアントがアクセス権を持つリソースに、その攻撃者がなりすましている
+   認可サーバーを使用してアクセスできる。
+
+   攻撃者はまた、なりすまそうとしている認可サーバーの issuer identifier
+   URL を使用した "issuer" クレームを含むが、攻撃者自身のエンドポイント
+   および署名鍵を含むメタデータ文書を公開することで、認可サーバーに
+   なりすまそうとすることがある。これがクライアントに受け入れられると、
+   その認可サーバーになりすますことが可能になる。これを防ぐため、
+   クライアントは、メタデータ要求の prefix として使用している issuer
+   identifier URL が、クライアントが受信した認可サーバー・メタデータ文書内の
+   "issuer" メタデータ値と完全に一致することを保証しなければならない。
+
+<span class="h3"><a class="selflink" id="section-6.3" href="#section-6.3">6.3</a>.  標準形式によるメタデータの公開</span>
+
+   認可サーバーに関する情報を標準形式で公開すると、正当なクライアントと
+   攻撃者の双方が認可サーバーを使用しやすくなる。認可サーバーがその
+   メタデータを ad hoc な方法で公開するか、本仕様で定義される標準形式で
+   公開するかにかかわらず、この情報を使用して仕掛けられる可能性のある
+   攻撃に対する同じ防御策を適用するべきである。
+
+<span class="h3"><a class="selflink" id="section-6.4" href="#section-6.4">6.4</a>.  保護リソース</span>
+
+   すべてのユースケースにおいて、認可サーバーとともに使用する適切な
+   保護リソースを安全に決定することは、本仕様の範囲外である。本仕様は、
+   クライアントが認可サーバーとともに使用する適切な保護リソースを決定する
+   手段を持ち、各認可サーバーに対して正しいメタデータを使用していることを
+   前提としている。実装者は、クライアントが不適切な保護リソースを使用した
+   場合、攻撃者が有効な保護リソースへの man-in-the-middle proxy として
+   振る舞い、それが認可サーバーまたはクライアントに検出されない可能性が
+   あることに注意する必要がある。
+
+   認可サーバーとともに使用する適切な保護リソースを決定する方法は、
+   一般にアプリケーション依存である。たとえば、一部の認可サーバーは、
+   固定された保護リソースまたは保護リソースの集合とともに使用される。
+   それらの場所は well-known である場合もあれば、認可サーバーによって
+   メタデータ値として公開される場合もある。他の場合には、認可サーバーと
+   ともに使用できるリソースの集合が、管理操作によって動的に変更されることが
+   ある。認可サーバーと保護リソースの間の適切な関連付けを決定するための
+   多くの他の手段も可能である。
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  IANA に関する考慮事項</span>
+
+   以下の登録手順は、本仕様によって確立される登録簿に使用される。
+
+   値は、Specification Required [<a href="./rfc8126" title="">RFC8126</a>] に基づき、
+   oauth-ext-review@ietf.org メーリングリストでの 2 週間のレビュー期間を
+   経て、1 名以上の Designated Expert の助言により登録される。ただし、
+   公開前に値を割り当てられるようにするため、Designated Expert は、
+   そのような仕様が公開されることに納得した時点で登録を承認してもよい。
+
+   レビューのためにメーリングリストへ送信される登録要求は、適切な件名
+   （例: "Request to register OAuth Authorization Server Metadata:
+   example"）を使用するべきである。
+
+   レビュー期間内に、Designated Expert は登録要求を承認または拒否し、
+   その決定をレビューリストおよび IANA に通知する。拒否には説明を含める
+   べきであり、該当する場合には、要求を成功させる方法についての提案も
+   含めるべきである。21 日を超えて未決定のままの登録要求は、
+   解決のために IESG の注意を促すことができる（iesg@ietf.org
+   メーリングリストを使用する）。
+
+   Designated Expert が適用するべき基準には、提案された登録が既存の
+   機能と重複しているかどうか、一般的な適用可能性を持つ可能性が高いか、
+   それとも単一のアプリケーションにのみ有用であるか、そして登録が
+   妥当であるかを判断することが含まれる。
+
+   IANA は、Designated Expert からの登録簿更新のみを受理しなければ
+   ならず、登録に関するすべての要求をレビュー用メーリングリストに
+   案内するべきである。
+
+   本仕様を使用するさまざまなアプリケーションの観点を代表できる複数の
+   Designated Expert を任命することが提案される。これは、登録判断の
+   広く情報に基づくレビューを可能にするためである。登録判断が特定の
+   Designated Expert に利益相反を生じさせると見なされ得る場合、その
+   Designated Expert は他の Designated Expert の判断に委ねるべきである。
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  OAuth 認可サーバー・メタデータ登録簿</span>
+
+   本仕様は、OAuth 2.0 認可サーバー・メタデータ名のために、IANA
+   "OAuth Authorization Server Metadata" 登録簿を確立する。この登録簿は、
+   認可サーバー・メタデータ・メンバーと、それを定義する仕様への参照を
+   記録する。
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   Designated Expert は、次のいずれかを行わなければならない。
+
+   (a) 登録されるメタデータ名および値が、二重引用符 ('"') および
+   バックスラッシュ ('\') を除く表示可能な ASCII 文字（code point が
+   U+0021、U+0023 から U+005B、および U+005D から U+007E の
+   Unicode 文字）のみを使用することを要求する。
+
+   (b) 他の code point を使用する新しいメタデータ・メンバーまたは値が
+   定義される場合、それらの定義が、それらを表すために使用される
+   Unicode code point の正確な列を規定することを要求する。さらに、
+   エスケープ文字としてのみ JSON 文字列で表現できる Unicode code point を
+   使用する提案登録は、受理してはならない。
+
+<span class="h4"><a class="selflink" id="section-7.1.1" href="#section-7.1.1">7.1.1</a>.  登録テンプレート</span>
+
+   Metadata Name:
+      要求される名前（例: "issuer"）。この名前は大文字小文字を区別する。
+      Designated Expert が例外を認める説得力のある理由があると述べない
+      限り、名前は、大文字小文字を区別しない方法で他の登録済み名と
+      一致してはならない（両方の文字列に Unicode toLowerCase() 操作を
+      適用した場合に一致を生じさせるようなもの）。
+
+   Metadata Description:
+      メタデータの簡潔な説明（例: "Issuer identifier URL"）。
+
+   Change Controller:
+      Standards Track RFC の場合は "IESG" を列挙する。それ以外の場合は、
+      責任を負う当事者の名前を示す。その他の詳細（例: 郵送先住所、
+      メールアドレス、ホームページ URI）を含めてもよい。
+
+   Specification Document(s):
+      パラメーターを規定する文書への参照。可能であれば、その文書の
+      コピーを取得するために使用できる URI を含める。関連する節の
+      表示を含めてもよいが、必須ではない。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+<span class="h4"><a class="selflink" id="section-7.1.2" href="#section-7.1.2">7.1.2</a>.  初期登録簿の内容</span>
+
+   o  Metadata Name: issuer
+   o  Metadata Description: 認可サーバーの issuer identifier URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: authorization_endpoint
+   o  Metadata Description: 認可サーバーの authorization endpoint の
+      URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: token_endpoint
+   o  Metadata Description: 認可サーバーの token endpoint の URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: jwks_uri
+   o  Metadata Description: 認可サーバーの JWK Set 文書の URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: registration_endpoint
+   o  Metadata Description: 認可サーバーの OAuth 2.0 Dynamic Client
+      Registration Endpoint の URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: scopes_supported
+   o  Metadata Description: この認可サーバーがサポートする OAuth
+      2.0 "scope" 値の一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: response_types_supported
+   o  Metadata Description: この認可サーバーがサポートする OAuth
+      2.0 "response_type" 値の一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: response_modes_supported
+   o  Metadata Description: この認可サーバーがサポートする OAuth
+      2.0 "response_mode" 値の一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   o  Metadata Name: grant_types_supported
+   o  Metadata Description: この認可サーバーがサポートする OAuth
+      2.0 grant type 値の一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: token_endpoint_auth_methods_supported
+   o  Metadata Description: この token endpoint がサポートする client
+      authentication method の一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: token_endpoint_auth_signing_alg_values_supported
+   o  Metadata Description: token endpoint でクライアントを認証するために
+      使用される JWT 上の署名について、token endpoint がサポートする
+      JWS 署名アルゴリズムの一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: service_documentation
+   o  Metadata Description: 認可サーバーを使用する際に、開発者が
+      知りたい、または知る必要がある、人間が読める情報を含むページの
+      URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: ui_locales_supported
+   o  Metadata Description: ユーザーインターフェイスでサポートされる言語
+      および用字系。<a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a> の language tag 値の JSON 配列として表される
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: op_policy_uri
+   o  Metadata Description: 認可サーバーが、クライアントを登録する人物に
+      提供する URL。その人物は、認可サーバーが提供するデータを
+      クライアントがどのように使用できるかに関する認可サーバーの要件を
+      読むために、この URL を使用する
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: op_tos_uri
+   o  Metadata Description: 認可サーバーが、クライアントを登録する人物に
+      提供する URL。その人物は、認可サーバーの利用規約を読むために
+      この URL を使用する
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   o  Metadata Name: revocation_endpoint
+   o  Metadata Description: 認可サーバーの OAuth 2.0 revocation
+      endpoint の URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: revocation_endpoint_auth_methods_supported
+   o  Metadata Description: この revocation endpoint がサポートする
+      client authentication method の一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name:
+      revocation_endpoint_auth_signing_alg_values_supported
+   o  Metadata Description: revocation endpoint でクライアントを認証するために
+      使用される JWT 上の署名について、revocation endpoint がサポートする
+      JWS 署名アルゴリズムの一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: introspection_endpoint
+   o  Metadata Description: 認可サーバーの OAuth 2.0 introspection
+      endpoint の URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: introspection_endpoint_auth_methods_supported
+   o  Metadata Description: この introspection endpoint がサポートする
+      client authentication method の一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name:
+      introspection_endpoint_auth_signing_alg_values_supported
+   o  Metadata Description: introspection endpoint でクライアントを認証するために
+      使用される JWT 上の署名について、introspection endpoint が
+      サポートする JWS 署名アルゴリズムの一覧を含む JSON 配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+   o  Metadata Name: code_challenge_methods_supported
+   o  Metadata Description: この認可サーバーがサポートする PKCE code
+      challenge method
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2">RFC 8414 の Section&nbsp;2</a>
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   o  Metadata Name: signed_metadata
+   o  Metadata Description: 認可サーバーに関するメタデータ値をクレームとして
+      含む署名付き JWT
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc8414#section-2.1">RFC 8414 の Section&nbsp;2.1</a>
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  更新された登録手順</span>
+
+   本仕様は、次の IANA 登録簿の Designated Expert に対する手順を追加する。
+   これらはいずれも "OAuth Parameters" 登録簿
+   [<a href="#ref-IANA.OAuth.Parameters">IANA.OAuth.Parameters</a>] 内にある。
+
+   o  OAuth Access Token Types
+   o  OAuth Token Endpoint Authentication Methods
+
+   IANA は、これらの登録簿の Reference セクションに本仕様へのリンクを
+   追加した。
+
+   これらの登録簿について、Designated Expert は、一方の登録簿にすでに
+   出現している値について、他方の登録簿での登録要求を拒否しなければ
+   ならない。これは、"introspection_endpoint_auth_methods_supported"
+   パラメーターがいずれかの登録簿の値の使用を認めているために必要である。
+   そうすることで、2 つの登録簿の値は引き続き相互に排他的であり、
+   曖昧さは生じない。
+
+<span class="h3"><a class="selflink" id="section-7.3" href="#section-7.3">7.3</a>.  Well-Known URI 登録簿</span>
+
+   本仕様は、<a href="#section-3">Section 3</a> で定義される well-known URI を、<a href="./rfc5785">RFC 5785</a>
+   [<a href="./rfc5785" title="&quot;Defining Well-Known Uniform Resource Identifiers (URIs)&quot;">RFC5785</a>] によって確立された IANA "Well-Known URIs" 登録簿
+   [<a href="#ref-IANA.well-known">IANA.well-known</a>] に登録する。
+
+<span class="h4"><a class="selflink" id="section-7.3.1" href="#section-7.3.1">7.3.1</a>.  登録簿の内容</span>
+
+   o  URI suffix: oauth-authorization-server
+   o  Change controller: IESG
+   o  Specification document: <a href="./rfc8414#section-3">RFC 8414 の Section&nbsp;3</a>
+   o  Related information: （なし）
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-8.1" href="#section-8.1">8.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-BCP195">BCP195</a>]   Sheffer, Y., Holz, R., and P. Saint-Andre,
+              "Transport Layer Security (TLS) および Datagram Transport
+              Layer Security (DTLS) の安全な使用に関する勧告",
+              <a href="https://www.rfc-editor.org/bcp/bcp195">BCP 195</a>, <a href="./rfc7525">RFC 7525</a>, May 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/bcp195">http://www.rfc-editor.org/info/bcp195</a>&gt;.
+
+   [<a id="ref-IANA.OAuth.Parameters">IANA.OAuth.Parameters</a>]
+              IANA, "OAuth Parameters",
+              &lt;<a href="https://www.iana.org/assignments/oauth-parameters">https://www.iana.org/assignments/oauth-parameters</a>&gt;.
+
+   [<a id="ref-JWE">JWE</a>]      Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
+              <a href="./rfc7516">RFC 7516</a>, DOI 10.17487/RFC7516, May 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7516">https://www.rfc-editor.org/info/rfc7516</a>&gt;.
+
+   [<a id="ref-JWK">JWK</a>]      Jones, M., "JSON Web Key (JWK)", <a href="./rfc7517">RFC 7517</a>,
+              DOI 10.17487/RFC7517, May 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7517">https://www.rfc-editor.org/info/rfc7517</a>&gt;.
+
+   [<a id="ref-JWS">JWS</a>]      Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", <a href="./rfc7515">RFC 7515</a>, DOI 10.17487/RFC7515, May
+              2015, &lt;<a href="https://www.rfc-editor.org/info/rfc7515">https://www.rfc-editor.org/info/rfc7515</a>&gt;.
+
+   [<a id="ref-JWT">JWT</a>]      Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
+              (JWT)", <a href="./rfc7519">RFC 7519</a>, DOI 10.17487/RFC7519, May 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;.
+
+   [<a id="ref-OAuth.Post">OAuth.Post</a>]
+              Jones, M. and B. Campbell, "OAuth 2.0 Form Post Response
+              Mode", April 2015, &lt;<a href="http://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html">http://openid.net/specs/</a>
+              <a href="http://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html">oauth-v2-form-post-response-mode-1_0.html</a>&gt;.
+
+   [<a id="ref-OAuth.Responses">OAuth.Responses</a>]
+              de Medeiros, B., Ed., Scurtescu, M., Tarjan, P., and M.
+              Jones, "OAuth 2.0 Multiple Response Type Encoding
+              Practices", February 2014, &lt;<a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html">http://openid.net/specs/</a>
+              <a href="http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html">oauth-v2-multiple-response-types-1_0.html</a>&gt;.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "RFC において要件レベルを示すために
+              使用されるキーワード", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>,
+              DOI 10.17487/RFC2119, March 1997,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 20]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-21" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   [<a id="ref-RFC5246">RFC5246</a>]  Dierks, T. and E. Rescorla, "The Transport Layer Security
+              (TLS) Protocol Version 1.2", <a href="./rfc5246">RFC 5246</a>,
+              DOI 10.17487/RFC5246, August 2008,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc5246">https://www.rfc-editor.org/info/rfc5246</a>&gt;.
+
+   [<a id="ref-RFC5646">RFC5646</a>]  Phillips, A., Ed. and M. Davis, Ed., "言語を識別するための
+              タグ", <a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a>, <a href="./rfc5646">RFC 5646</a>, DOI 10.17487/RFC5646,
+              September 2009, &lt;<a href="https://www.rfc-editor.org/info/rfc5646">https://www.rfc-editor.org/info/rfc5646</a>&gt;.
+
+   [<a id="ref-RFC5785">RFC5785</a>]  Nottingham, M. and E. Hammer-Lahav, "Well-Known Uniform
+              Resource Identifier (URI) の定義", <a href="./rfc5785">RFC 5785</a>,
+              DOI 10.17487/RFC5785, April 2010,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc5785">https://www.rfc-editor.org/info/rfc5785</a>&gt;.
+
+   [<a id="ref-RFC6125">RFC6125</a>]  Saint-Andre, P. and J. Hodges, "Transport Layer Security
+              (TLS) の文脈における X.509 (PKIX) 証明書を使用した
+              Internet Public Key Infrastructure 内でのドメインベースの
+              アプリケーションサービス識別情報の表現および検証",
+              <a href="./rfc6125">RFC 6125</a>, DOI 10.17487/RFC6125, March
+              2011, &lt;<a href="https://www.rfc-editor.org/info/rfc6125">https://www.rfc-editor.org/info/rfc6125</a>&gt;.
+
+   [<a id="ref-RFC6749">RFC6749</a>]  Hardt, D., Ed., "OAuth 2.0 認可フレームワーク",
+              <a href="./rfc6749">RFC 6749</a>, DOI 10.17487/RFC6749, October 2012,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc6749">https://www.rfc-editor.org/info/rfc6749</a>&gt;.
+
+   [<a id="ref-RFC7009">RFC7009</a>]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
+              2.0 Token Revocation", <a href="./rfc7009">RFC 7009</a>, DOI 10.17487/RFC7009,
+              August 2013, &lt;<a href="https://www.rfc-editor.org/info/rfc7009">https://www.rfc-editor.org/info/rfc7009</a>&gt;.
+
+   [<a id="ref-RFC7033">RFC7033</a>]  Jones, P., Salgueiro, G., Jones, M., and J. Smarr,
+              "WebFinger", <a href="./rfc7033">RFC 7033</a>, DOI 10.17487/RFC7033, September
+              2013, &lt;<a href="https://www.rfc-editor.org/info/rfc7033">https://www.rfc-editor.org/info/rfc7033</a>&gt;.
+
+   [<a id="ref-RFC7591">RFC7591</a>]  Richer, J., Ed., Jones, M., Bradley, J., Machulak, M., and
+              P. Hunt, "OAuth 2.0 Dynamic Client Registration Protocol",
+              <a href="./rfc7591">RFC 7591</a>, DOI 10.17487/RFC7591, July 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7591">https://www.rfc-editor.org/info/rfc7591</a>&gt;.
+
+   [<a id="ref-RFC7636">RFC7636</a>]  Sakimura, N., Ed., Bradley, J., and N. Agarwal, "OAuth
+              Public Client のための Proof Key for Code Exchange",
+              <a href="./rfc7636">RFC 7636</a>,
+              DOI 10.17487/RFC7636, September 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7636">https://www.rfc-editor.org/info/rfc7636</a>&gt;.
+
+   [<a id="ref-RFC7662">RFC7662</a>]  Richer, J., Ed., "OAuth 2.0 Token Introspection",
+              <a href="./rfc7662">RFC 7662</a>, DOI 10.17487/RFC7662, October 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7662">https://www.rfc-editor.org/info/rfc7662</a>&gt;.
+
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 21]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-22" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+   [<a id="ref-RFC8126">RFC8126</a>]  Cotton, M., Leiba, B., and T. Narten, "RFC における
+              IANA Considerations セクションの書き方に関する指針",
+              <a href="https://www.rfc-editor.org/bcp/bcp26">BCP 26</a>,
+              <a href="./rfc8126">RFC 8126</a>, DOI 10.17487/RFC8126, June 2017,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc8126">https://www.rfc-editor.org/info/rfc8126</a>&gt;.
+
+   [<a id="ref-RFC8174">RFC8174</a>]  Leiba, B., "<a href="./rfc2119">RFC</a>
+              <a href="./rfc2119">2119</a> キーワードにおける大文字と小文字の曖昧性", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>,
+              <a href="./rfc8174">RFC 8174</a>, DOI 10.17487/RFC8174,
+              May 2017, &lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;.
+
+   [<a id="ref-RFC8259">RFC8259</a>]  Bray, T., Ed., "JavaScript Object Notation (JSON) Data
+              Interchange Format", STD 90, <a href="./rfc8259">RFC 8259</a>,
+              DOI 10.17487/RFC8259, December 2017,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;.
+
+   [<a id="ref-UNICODE">UNICODE</a>]  The Unicode Consortium, "The Unicode Standard",
+              &lt;<a href="http://www.unicode.org/versions/latest/">http://www.unicode.org/versions/latest/</a>&gt;.
+
+   [<a id="ref-USA15">USA15</a>]    Davis, M., Ed. and K. Whistler, Ed., "Unicode
+              Normalization Forms", Unicode Standard Annex #15, May
+              2018, &lt;<a href="http://www.unicode.org/reports/tr15/">http://www.unicode.org/reports/tr15/</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-8.2" href="#section-8.2">8.2</a>.  参考情報としての参考文献</span>
+
+   [<a id="ref-IANA.well-known">IANA.well-known</a>]
+              IANA, "Well-Known URIs",
+              &lt;<a href="https://www.iana.org/assignments/well-known-uris">https://www.iana.org/assignments/well-known-uris</a>&gt;.
+
+   [<a id="ref-MIX-UP">MIX-UP</a>]   Jones, M., Bradley, J., and N. Sakimura, "OAuth 2.0 Mix-Up
+              Mitigation", Work in Progress, <a href="./draft-ietf-oauth-mix-up-mitigation-01">draft-ietf-oauth-mix-up-</a>
+              <a href="./draft-ietf-oauth-mix-up-mitigation-01">mitigation-01</a>, July 2016.
+
+   [<a id="ref-OpenID.Core">OpenID.Core</a>]
+              Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and
+              C. Mortimore, "OpenID Connect Core 1.0", November 2014,
+              &lt;<a href="http://openid.net/specs/openid-connect-core-1_0.html">http://openid.net/specs/openid-connect-core-1_0.html</a>&gt;.
+
+   [<a id="ref-OpenID.Discovery">OpenID.Discovery</a>]
+              Sakimura, N., Bradley, J., Jones, M., and E. Jay, "OpenID
+              Connect Discovery 1.0", November 2014,
+              &lt;<a href="http://openid.net/specs/openid-connect-discovery-1_0.html">http://openid.net/specs/</a>
+              <a href="http://openid.net/specs/openid-connect-discovery-1_0.html">openid-connect-discovery-1_0.html</a>&gt;.
+
+   [<a id="ref-OpenID.Registration">OpenID.Registration</a>]
+              Sakimura, N., Bradley, J., and M. Jones, "OpenID Connect
+              Dynamic Client Registration 1.0", November 2014,
+              &lt;<a href="http://openid.net/specs/openid-connect-registration-1_0.html">http://openid.net/specs/</a>
+              <a href="http://openid.net/specs/openid-connect-registration-1_0.html">openid-connect-registration-1_0.html</a>&gt;.
+
+
+
+
+<span class="grey">Jones, et al.                Standards Track                   [Page 22]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-23" ></span>
+<span class="grey"><a href="./rfc8414">RFC 8414</a>         OAuth 2.0 認可サーバー・メタデータ       June 2018</span>
+
+
+謝辞
+
+   本仕様は、OpenID Foundation の OpenID Connect working group によって
+   作成された OpenID Connect Discovery 1.0 仕様に基づいている。本仕様は、
+   OAuth 認可サーバー・メタデータを公開するために OpenID Connect
+   Discovery で定義されたメタデータ形式を使用する、de facto な利用を
+   標準化するものである。
+
+   著者らは、本仕様をレビューしてくれた以下の人々に感謝したい。
+   Shwetha Bhandari, Ben Campbell, Brian Campbell, Brian Carpenter,
+   William Denniss, Vladimir Dzhuvinov, Donald Eastlake, Samuel Erdtman,
+   George Fletcher, Dick Hardt, Phil Hunt, Alexey Melnikov, Tony Nadalin,
+   Mark Nottingham, Eric Rescorla, Justin Richer, Adam Roach,
+   Hannes Tschofenig, and Hans Zandbelt.
+
+著者の連絡先
+
+   Michael B. Jones
+   Microsoft
+
+   Email: mbj@microsoft.com
+   URI:   <a href="http://self-issued.info/">http://self-issued.info/</a>
+
+
+   Nat Sakimura
+   Nomura Research Institute, Ltd.
+
+   Email: n-sakimura@nri.co.jp
+   URI:   <a href="http://nat.sakimura.org/">http://nat.sakimura.org/</a>
+
+
+   John Bradley
+   Yubico
+
+   Email: <a href="./rfc8414">RFC8414</a>@ve7jtb.com
+   URI:   <a href="http://www.thread-safe.com/">http://www.thread-safe.com/</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Jones, et al.                Standards Track                   [Page 23]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
