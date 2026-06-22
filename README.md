@@ -400,7 +400,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)），- [How to Read](https://jp.htmlspecs.com/css/read/)（[Source](https://www.w3.org/Style/CSS/read)）
 - [CSS Snapshot 2024](https://jp.htmlspecs.com/css/css-2024/)（[Source](https://www.w3.org/TR/2025/NOTE-css-2024-20250225/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [CSS Snapshot 2025](https://jp.htmlspecs.com/css/css-2025/)（[Source](https://www.w3.org/TR/2025/NOTE-css-2025-20250918/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
-- [CSS Snapshot 2026](https://jp.htmlspecs.com/css/css-2026/)（[Source](https://www.w3.org/TR/2026/NOTE-css-2026-20260326/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
+- [CSS Snapshot 2026](https://jp.htmlspecs.com/css/css-2026/)（[Source](https://www.w3.org/TR/2026/NOTE-css-2026-20260622/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 
 ### 構文・カスケード・セレクター・値
 - [CSS Namespaces Module Level 3](https://jp.htmlspecs.com/css/css-namespaces-3/)（[Source](https://www.w3.org/TR/2014/REC-css-namespaces-3-20140320/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
