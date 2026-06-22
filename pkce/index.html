@@ -1,0 +1,1120 @@
+<pre>Internet Engineering Task Force (IETF)                  N. Sakimura, Ed.
+Request for Comments: 7636                     Nomura Research Institute
+Category: Standards Track                                     J. Bradley
+ISSN: 2070-1721                                            Ping Identity
+                                                              N. Agarwal
+                                                                  Google
+                                                          September 2015
+
+
+          <span class="h1">OAuthパブリック・クライアントによるコード交換のための証明鍵</span>
+
+概要
+
+   認可コード・グラントを利用するOAuth 2.0パブリック・
+   クライアントは、認可コード横取り攻撃を受けやすい。
+   本仕様は、その攻撃と、Proof Key for Code Exchange
+   （PKCE、「ピクシー」と発音）の使用によってその脅威を
+   軽減するための技術を説明する。
+
+このメモの位置付け
+
+   これはInternet Standards Track文書である。
+
+   この文書は、Internet Engineering Task Force（IETF）の成果物である。
+   これはIETFコミュニティの合意を表している。公開レビューを受け、
+   Internet Engineering Steering Group（IESG）によって公開が承認されている。
+   Internet Standardsに関する詳しい情報は、
+   <a href="./rfc5741#section-2">RFC 5741のセクション&nbsp;2</a>で入手できる。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc7636">http://www.rfc-editor.org/info/rfc7636</a> で入手できる。
+
+Copyright Notice
+
+   Copyright (c) 2015 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+目次
+
+   <a href="#section-1">1</a>. はじめに ....................................................<a href="#page-3">3</a>
+      <a href="#section-1.1">1.1</a>. プロトコル・フロー ......................................<a href="#page-5">5</a>
+   <a href="#section-2">2</a>. 表記規約 ....................................................<a href="#page-6">6</a>
+   <a href="#section-3">3</a>. 用語 ........................................................<a href="#page-7">7</a>
+      <a href="#section-3.1">3.1</a>. 略語 ....................................................<a href="#page-7">7</a>
+   <a href="#section-4">4</a>. プロトコル ..................................................<a href="#page-8">8</a>
+      <a href="#section-4.1">4.1</a>. クライアントがコード検証子を作成する ......................<a href="#page-8">8</a>
+      <a href="#section-4.2">4.2</a>. クライアントがコード・チャレンジを作成する ................<a href="#page-8">8</a>
+      4.3. クライアントが認可リクエストとともに
+           コード・チャレンジを送信する ..........................<a href="#page-9">9</a>
+      <a href="#section-4.4">4.4</a>. サーバーがコードを返す ..................................<a href="#page-9">9</a>
+           <a href="#section-4.4.1">4.4.1</a>. エラー応答 ......................................<a href="#page-9">9</a>
+      4.5. クライアントが認可コードとコード検証子を
+           トークン・エンドポイントへ送信する ....................<a href="#page-10">10</a>
+      4.6. サーバーはトークンを返す前にcode_verifierを
+           検証する ..............................................<a href="#page-10">10</a>
+   <a href="#section-5">5</a>. 互換性 ......................................................<a href="#page-11">11</a>
+   <a href="#section-6">6</a>. IANAに関する考慮事項 ........................................<a href="#page-11">11</a>
+      <a href="#section-6.1">6.1</a>. OAuth Parametersレジストリ ...............................<a href="#page-11">11</a>
+      <a href="#section-6.2">6.2</a>. PKCE Code Challenge Methodレジストリ .....................<a href="#page-11">11</a>
+           <a href="#section-6.2.1">6.2.1</a>. 登録テンプレート .................................<a href="#page-12">12</a>
+           <a href="#section-6.2.2">6.2.2</a>. 初期レジストリ内容 ...............................<a href="#page-13">13</a>
+   <a href="#section-7">7</a>. セキュリティに関する考慮事項 ................................<a href="#page-13">13</a>
+      <a href="#section-7.1">7.1</a>. code_verifierのエントロピー .............................<a href="#page-13">13</a>
+      <a href="#section-7.2">7.2</a>. 盗聴者に対する保護 ......................................<a href="#page-13">13</a>
+      <a href="#section-7.3">7.3</a>. code_challengeへのソルト付与 ............................<a href="#page-14">14</a>
+      <a href="#section-7.4">7.4</a>. OAuthセキュリティに関する考慮事項 .......................<a href="#page-14">14</a>
+      <a href="#section-7.5">7.5</a>. TLSセキュリティに関する考慮事項 .........................<a href="#page-15">15</a>
+   <a href="#section-8">8</a>. 参考文献 ....................................................<a href="#page-15">15</a>
+      <a href="#section-8.1">8.1</a>. 規範的参考文献 ..........................................<a href="#page-15">15</a>
+      <a href="#section-8.2">8.2</a>. 参考情報 ................................................<a href="#page-16">16</a>
+   <a href="#appendix-A">付録 A</a>. パディングなしでBase64urlエンコードを
+                実装する際の注記  .................................<a href="#page-17">17</a>
+   <a href="#appendix-B">付録 B</a>. S256 code_challenge_methodの例 .......................<a href="#page-17">17</a>
+   謝辞 ...........................................................<a href="#page-19">19</a>
+   著者の連絡先 ...................................................<a href="#page-20">20</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]のパブリック・クライアントは、
+   認可コード横取り攻撃を受けやすい。
+
+   この攻撃では、攻撃者は、クライアントのオペレーティング・
+   システム内のアプリケーション間通信など、Transport Layer
+   Security（TLS）で保護されていない通信経路内で、認可
+   エンドポイントから返される認可コードを横取りする。
+
+   攻撃者は認可コードへのアクセスを得ると、それを使用して
+   アクセス・トークンを取得できる。
+
+   図1はこの攻撃を図で示している。ステップ(1)では、
+   スマートフォンなどのエンド・デバイス上で実行される
+   ネイティブ・アプリケーションが、ブラウザー／オペレーティング・
+   システムを介してOAuth 2.0認可リクエストを発行する。
+   この場合のリダイレクション・エンドポイントURIは、通常、
+   カスタムURIスキームを使用する。ステップ(1)は、横取り
+   できない安全なAPIを通じて行われるが、高度な攻撃シナリオ
+   では観測される可能性がある。その後、リクエストはステップ
+   (2)でOAuth 2.0認可サーバーに転送される。OAuthはTLSの
+   使用を要求するため、この通信はTLSによって保護され、
+   横取りできない。認可サーバーはステップ(3)で認可コードを
+   返す。ステップ(4)では、認可コードが、ステップ(1)で
+   提供されたリダイレクション・エンドポイントURIを介して
+   リクエスト元に返される。
+
+   悪意のあるアプリが、正当なOAuth 2.0アプリに加えて、
+   自身をカスタム・スキームのハンドラーとして登録できることに
+   注意すること。いったんそうすると、悪意のあるアプリは
+   ステップ(4)で認可コードを横取りできるようになる。これにより、
+   攻撃者はステップ(5)および(6)で、それぞれアクセス・トークンを
+   リクエストして取得できる。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+    +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
+    | エンド・デバイス              |
+    | （例: スマートフォン）        |
+    | +-------------+   +----------+ | (6) Access Token  +----------+
+    | |正当な       |   | 悪意の   |&lt;--------------------|          |
+    | |OAuth 2.0アプリ| | アプリ   |--------------------&gt;|          |
+    | +-------------+   +----------+ | (5) Authorization |          |
+    |        |    ^          ^       |        Grant      |          |
+    |        |     \         |       |                   |          |
+    |        |      \   (4)  |       |                   |          |
+    |    (1) |       \  Authz|       |                   |          |
+    |   Authz|        \ Code |       |                   |  Authz   |
+    | Request|         \     |       |                   |  Server  |
+    |        |          \    |       |                   |          |
+    |        |           \   |       |                   |          |
+    |        v            \  |       |                   |          |
+    | +----------------------------+ |                   |          |
+    | |                            | | (3) Authz Code    |          |
+    | |     オペレーティング・     |&lt;--------------------|          |
+    | |     システム／ブラウザー   |--------------------&gt;|          |
+    | |                            | | (2) Authz Request |          |
+    | +----------------------------+ |                   +----------+
+    +~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+
+
+             図1: 認可コード横取り攻撃
+
+   この攻撃が成立するには、いくつかの前提条件が満たされている
+   必要がある。
+
+   1. 攻撃者がクライアント・デバイス上に悪意のあるアプリケーションを
+      登録し、別のアプリケーションでも使用されているカスタムURI
+      スキームを登録することに成功する。オペレーティング・
+      システムは、複数のアプリケーションによるカスタムURI
+      スキームの登録を許可していなければならない。
+
+   2. OAuth 2.0認可コード・グラントが使用されている。
+
+   3. 攻撃者がOAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]の"client_id"および
+      "client_secret"（プロビジョニングされている場合）にアクセス
+      できる。すべてのOAuth 2.0ネイティブ・アプリのクライアント・
+      インスタンスは同じ"client_id"を使用する。クライアントの
+      バイナリ・アプリケーションにプロビジョニングされたシークレットは、
+      機密であるとは見なせない。
+
+   4. 次のいずれかの条件が満たされている。
+
+      4a. 攻撃者が（インストールされたアプリケーションを介して）
+          認可エンドポイントからの応答のみを観測できる。
+          "code_challenge_method"の値が"plain"である場合、
+          軽減されるのはこの攻撃のみである。
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+      4b. より高度な攻撃シナリオにより、攻撃者が認可エンドポイントへの
+          リクエスト（応答に加えて）を観測できる。ただし、攻撃者は
+          中間者として動作することはできない。これはOS内でhttp
+          ログ情報が漏えいしたことによって発生した。これを軽減するには、
+          "code_challenge_method"の値を"S256"、または暗号学的に安全な
+          "code_challenge_method"拡張によって定義された値のいずれかに
+          設定しなければならない。
+
+   これは長い前提条件のリストであるが、説明した攻撃は実際に観測
+   されており、OAuth 2.0の展開において考慮されなければならない。
+   OAuth 2.0脅威モデル（<a href="./rfc6819#section-4.4.1">[RFC6819]のセクション&nbsp;4.4.1</a>）は軽減技術を
+   説明しているが、残念ながら、それらはクライアント・インスタンス
+   ごとのシークレットまたはクライアント・インスタンスごとの
+   リダイレクトURIに依存しているため、適用できない。
+
+   この攻撃を軽減するために、この拡張は"code verifier"と呼ばれる、
+   動的に作成される暗号学的にランダムな鍵を利用する。各認可
+   リクエストごとに一意のコード検証子が作成され、その変換値である
+   "code challenge"が認可コードを取得するために認可サーバーへ
+   送信される。取得された認可コードは、その後、"code verifier"と
+   ともにトークン・エンドポイントへ送信され、サーバーはそれを
+   以前に受信したリクエスト・コードと比較することで、クライアント
+   による"code verifier"の所持証明を行える。攻撃者はこのワンタイム
+   鍵を知らないため、これは軽減策として機能する。この鍵はTLS上で
+   送信され、横取りできないからである。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  プロトコル・フロー</span>
+
+                                                 +-------------------+
+                                                 |   Authz Server    |
+       +--------+                                | +---------------+ |
+       |        |--(A)- Authorization Request ----&gt;|               | |
+       |        |       + t(code_verifier), t_m  | | Authorization | |
+       |        |                                | |    Endpoint   | |
+       |        |&lt;-(B)---- Authorization Code -----|               | |
+       |        |                                | +---------------+ |
+       | Client |                                |                   |
+       |        |                                | +---------------+ |
+       |        |--(C)-- Access Token Request ----&gt;|               | |
+       |        |          + code_verifier       | |    Token      | |
+       |        |                                | |   Endpoint    | |
+       |        |&lt;-(D)------ Access Token ---------|               | |
+       +--------+                                | +---------------+ |
+                                                 +-------------------+
+
+                     図2: 抽象プロトコル・フロー
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   本仕様は、図2に抽象形式で示すOAuth 2.0の認可リクエストおよび
+   アクセス・トークン・リクエストに追加パラメーターを追加する。
+
+   A. クライアントは"code_verifier"という名前のシークレットを作成
+      して記録し、変換されたバージョン"t(code_verifier)"（"code_challenge"
+      と呼ばれる）を導出する。これは変換メソッド"t_m"とともに
+      OAuth 2.0認可リクエストで送信される。
+
+   B. 認可エンドポイントは通常どおり応答するが、
+      "t(code_verifier)"と変換メソッドを記録する。
+
+   C. クライアントはその後、通常どおりアクセス・トークン・リクエスト
+      に認可コードを送信するが、(A)で生成した"code_verifier"
+      シークレットを含める。
+
+   D. 認可サーバーは"code_verifier"を変換し、(B)の
+      "t(code_verifier)"と比較する。それらが等しくない場合、
+      アクセスは拒否される。
+
+   (B)で認可コードを横取りした攻撃者は、"code_verifier"シークレットを
+   所持していないため、それをアクセス・トークンと引き換えることが
+   できない。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  表記規約</span>
+
+   本文書におけるキーワード"MUST"、"MUST NOT"、"REQUIRED"、"SHALL"、
+   "SHALL NOT"、"SHOULD"、"SHOULD NOT"、"RECOMMENDED"、
+   "NOT RECOMMENDED"、"MAY"、および"OPTIONAL"は、"Key words for
+   use in RFCs to Indicate Requirement Levels" [<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>]に記述
+   されているように解釈される。これらの語が大文字で綴られずに
+   使用されている場合は、自然言語上の意味で解釈される。
+
+   本仕様は、[<a href="./rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>]のAugmented Backus-Naur Form（ABNF）
+   表記を使用する。
+
+   STRINGは、0個以上のASCII [<a href="./rfc20" title="&quot;ASCII format for network interchange&quot;">RFC20</a>]文字の列を表す。
+
+   OCTETSは、0個以上のオクテットの列を表す。
+
+   ASCII(STRING)は、0個以上のASCII文字の列であるSTRINGの
+   ASCII [<a href="./rfc20" title="&quot;ASCII format for network interchange&quot;">RFC20</a>]表現のオクテットを表す。
+
+   BASE64URL-ENCODE(OCTETS)は、<a href="#appendix-A">付録A</a>に従ったOCTETSのbase64url
+   エンコードを表し、STRINGを生成する。
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   BASE64URL-DECODE(STRING)は、<a href="#appendix-A">付録A</a>に従ったSTRINGのbase64url
+   デコードを表し、オクテット列を生成する。
+
+   SHA256(OCTETS)は、OCTETSのSHA2 256ビット・ハッシュ [<a href="./rfc6234" title="&quot;US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)&quot;">RFC6234</a>]を
+   表す。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  用語</span>
+
+   OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]で定義されている用語に加えて、本仕様は
+   次の用語を定義する。
+
+   code verifier
+      認可リクエストとトークン・リクエストを対応付けるために
+      使用される、暗号学的にランダムな文字列。
+
+   code challenge
+      コード検証子から導出され、後で照合されるために認可
+      リクエストで送信されるチャレンジ。
+
+   code challenge method
+      code challengeの導出に使用されたメソッド。
+
+   Base64url Encoding
+      <a href="./rfc4648#section-5">[RFC4648]のセクション&nbsp;5</a>で定義されるURLおよびファイル名に
+      安全な文字セットを使用するBase64エンコードであり、すべての
+      末尾の'='文字を省略し（<a href="./rfc4648#section-3.2">[RFC4648]のセクション&nbsp;3.2</a>で許可される）、
+      行区切り、空白、その他の追加文字を含めないもの。
+      （パディングなしでbase64urlエンコードを実装する際の注記については
+      <a href="#appendix-A">付録A</a>を参照。）
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  略語</span>
+
+   ABNF   Augmented Backus-Naur Form
+
+   Authz  Authorization
+
+   PKCE   Proof Key for Code Exchange
+
+   MITM   Man-in-the-middle
+
+   MTI    Mandatory To Implement
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  プロトコル</span>
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  クライアントがコード検証子を作成する</span>
+
+   クライアントはまず、次の方法で、各OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]認可
+   リクエストについて、コード検証子"code_verifier"を作成する。
+
+   code_verifier = <a href="./rfc3986#section-2.3">[RFC3986]のセクション&nbsp;2.3</a>にある予約されていない文字
+   [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~"を使用した、
+   高エントロピーの暗号学的ランダムSTRINGであり、最小長は43文字、
+   最大長は128文字である。
+
+   "code_verifier"のABNFは次のとおりである。
+
+   code-verifier = 43*128unreserved
+   unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+   ALPHA = %x41-5A / %x61-7A
+   DIGIT = %x30-39
+
+   注記: コード検証子は、その値を推測することが現実的でないよう、
+   十分なエントロピーを持つべきである。適切な乱数生成器の出力を
+   使用して32オクテット列を作成することが推奨される。その後、
+   そのオクテット列をbase64urlエンコードして、コード検証子として
+   使用する43オクテットのURL安全文字列を生成する。
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  クライアントがコード・チャレンジを作成する</span>
+
+   クライアントは次に、コード検証子に対して次の変換のいずれかを
+   使用して、コード検証子から導出されるコード・チャレンジを作成する。
+
+   plain
+      code_challenge = code_verifier
+
+   S256
+      code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+
+   クライアントが"S256"を使用できる場合、サーバーで"S256"は
+   Mandatory To Implement（MTI）であるため、"S256"を使用しなければ
+   ならない。クライアントは、何らかの技術的理由で"S256"をサポート
+   できず、帯域外設定によりサーバーが"plain"をサポートしていることを
+   知っている場合に限り、"plain"の使用を許可される。
+
+   plain変換は、既存の展開との互換性、およびS256変換を使用できない
+   制約のある環境のためのものである。
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   "code_challenge"のABNFは次のとおりである。
+
+   code-challenge = 43*128unreserved
+   unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+   ALPHA = %x41-5A / %x61-7A
+   DIGIT = %x30-39
+
+<span class="h3"><a class="selflink" id="section-4.3" href="#section-4.3">4.3</a>.  クライアントが認可リクエストとともにコード・チャレンジを送信する</span>
+
+   クライアントは、次の追加パラメーターを使用して、OAuth 2.0
+   認可リクエスト（<a href="./rfc6749#section-4.1.1">[RFC6749]のセクション&nbsp;4.1.1</a>）の一部として
+   コード・チャレンジを送信する。
+
+   code_challenge
+      REQUIRED.  コード・チャレンジ。
+
+   code_challenge_method
+      OPTIONAL。リクエストに存在しない場合のデフォルトは"plain"。
+      コード検証子の変換メソッドは"S256"または"plain"である。
+
+<span class="h3"><a class="selflink" id="section-4.4" href="#section-4.4">4.4</a>.  サーバーがコードを返す</span>
+
+   サーバーが認可応答で認可コードを発行する際、後で検証できるよう、
+   "code_challenge"および"code_challenge_method"の値を認可コードに
+   関連付けなければならない。
+
+   通常、"code_challenge"および"code_challenge_method"の値は
+   "code"自体の中に暗号化された形式で保存されるが、代替として、
+   コードに関連付けてサーバー上に保存してもよい。サーバーは、
+   他のエンティティが抽出できる形式で、"code_challenge"値を
+   クライアント・リクエストに含めてはならない。
+
+   サーバーが発行済み"code"に"code_challenge"を関連付けるために
+   使用する正確な方法は、本仕様の範囲外である。
+
+<span class="h4"><a class="selflink" id="section-4.4.1" href="#section-4.4.1">4.4.1</a>.  エラー応答</span>
+
+   サーバーがOAuthパブリック・クライアントにProof Key for Code
+   Exchange（PKCE）を要求しており、クライアントがリクエスト内で
+   "code_challenge"を送信しない場合、認可エンドポイントは"error"値を
+   "invalid_request"に設定した認可エラー応答を返さなければならない。
+   "error_description"または"error_uri"の応答は、エラーの性質
+   （例: code challenge required）を説明すべきである。
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                    [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   PKCEをサポートするサーバーが、リクエストされた変換をサポート
+   しない場合、認可エンドポイントは"error"値を"invalid_request"に
+   設定した認可エラー応答を返さなければならない。
+   "error_description"または"error_uri"の応答は、エラーの性質
+   （例: transform algorithm not supported）を説明すべきである。
+
+<span class="h3"><a class="selflink" id="section-4.5" href="#section-4.5">4.5</a>.  クライアントが認可コードとコード検証子を</span>
+<span class="h3">      トークン・エンドポイントへ送信する</span>
+
+   認可コードを受信すると、クライアントはトークン・エンドポイントへ
+   アクセス・トークン・リクエストを送信する。OAuth 2.0アクセス・
+   トークン・リクエスト（<a href="./rfc6749#section-4.1.3">[RFC6749]のセクション&nbsp;4.1.3</a>）で定義
+   されるパラメーターに加えて、次のパラメーターを送信する。
+
+   code_verifier
+      REQUIRED.  コード検証子
+
+   "code_challenge_method"は、認可コードが発行されるときに認可コードへ
+   バインドされる。これは、トークン・エンドポイントが
+   "code_verifier"の検証に使用しなければならないメソッドである。
+
+<span class="h3"><a class="selflink" id="section-4.6" href="#section-4.6">4.6</a>.  サーバーはトークンを返す前にcode_verifierを検証する</span>
+
+   トークン・エンドポイントでリクエストを受信すると、サーバーは、
+   受信した"code_verifier"からコード・チャレンジを計算し、
+   まずクライアントが指定した"code_challenge_method"メソッドに従って
+   変換したうえで、以前に関連付けられた"code_challenge"と比較して、
+   それを検証する。
+
+   <a href="#section-4.3">セクション4.3</a>の"code_challenge_method"が"S256"であった場合、
+   受信した"code_verifier"はSHA-256でハッシュされ、base64url
+   エンコードされ、その後"code_challenge"と比較される。すなわち:
+
+   BASE64URL-ENCODE(SHA256(ASCII(code_verifier))) == code_challenge
+
+   <a href="#section-4.3">セクション4.3</a>の"code_challenge_method"が"plain"であった場合、
+   それらは直接比較される。すなわち:
+
+   code_verifier == code_challenge.
+
+   値が等しい場合、トークン・エンドポイントは（OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]で
+   定義されるように）通常どおり処理を継続しなければならない。
+   値が等しくない場合、<a href="./rfc6749#section-5.2">[RFC6749]のセクション&nbsp;5.2</a>に記述される
+   "invalid_grant"を示すエラー応答を返さなければならない。
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  互換性</span>
+
+   本仕様のサーバー実装は、この拡張を実装していないOAuth2.0
+   クライアントを受け入れてもよい。"code_verifier"がクライアントから
+   認可リクエストで受信されない場合、後方互換性をサポートする
+   サーバーは、この拡張なしのOAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]プロトコルへ
+   戻る。
+
+   OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]のサーバー応答は本仕様によって変更されないため、
+   本仕様のクライアント実装は、サーバーが本仕様を実装しているか
+   どうかを知る必要はなく、<a href="#section-4">セクション4</a>で定義される追加パラメーターを
+   すべてのサーバーに送信すべきである。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  IANAに関する考慮事項</span>
+
+   IANAは、本書に従って次の登録を行った。
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  OAuth Parametersレジストリ</span>
+
+   本仕様は、OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]で定義されるIANAの
+   "OAuth Parameters"レジストリに、次のパラメーターを登録する。
+
+   o  Parameter name: code_verifier
+   o  Parameter usage location: token request
+   o  Change controller: IESG
+   o  Specification document(s): <a href="./rfc7636">RFC 7636</a> (this document)
+
+   o  Parameter name: code_challenge
+   o  Parameter usage location: authorization request
+   o  Change controller: IESG
+   o  Specification document(s): <a href="./rfc7636">RFC 7636</a> (this document)
+
+   o  Parameter name: code_challenge_method
+   o  Parameter usage location: authorization request
+   o  Change controller: IESG
+   o  Specification document(s): <a href="./rfc7636">RFC 7636</a> (this document)
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  PKCE Code Challenge Methodレジストリ</span>
+
+   本仕様は、"PKCE Code Challenge Methods"レジストリを確立する。
+   新しいレジストリは、"OAuth Parameters"レジストリの
+   サブレジストリであるべきである。
+
+   認可エンドポイントで使用する追加の"code_challenge_method"型は、
+   Specification Requiredポリシー [<a href="./rfc5226" title="">RFC5226</a>]を使用して登録される。
+   これには、1人以上のDesignated Experts（DE）によるリクエストの
+   レビューが含まれる。DEは、oauth-ext-
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   review@ietf.orgメーリング・リスト上で少なくとも2週間のレビューが
+   行われること、およびそのリスト上の議論が収束してからリクエストに
+   応答することを保証する。公開前の値の割り当てを可能にするため、
+   Designated Expert(s)は、許容可能な仕様が公開されることに満足した
+   時点で、登録を承認してもよい。
+
+   登録リクエストおよびoauth-ext-review@ietf.orgメーリング・リスト上の
+   議論では、"Request for PKCE code_challenge_method: example"のような
+   適切な件名を使用すべきである）。
+
+   Designated Expert(s)は、登録リクエストを評価する際、メーリング・
+   リスト上の議論に加え、チャレンジ・メソッド全体のセキュリティ
+   特性も考慮すべきである。新しいメソッドは、認可エンドポイントへの
+   リクエストにおいてcode_verifierの値を開示すべきではない。
+   拒否には説明を含めるべきであり、該当する場合は、リクエストを
+   成功させる方法に関する提案も含めるべきである。
+
+<span class="h4"><a class="selflink" id="section-6.2.1" href="#section-6.2.1">6.2.1</a>.  登録テンプレート</span>
+
+   Code Challenge Method Parameter Name:
+      リクエストされた名前（例: "example"）。本仕様の中心的な目標の
+      1つは、結果として得られる表現をコンパクトにすることであるため、
+      名前は短くすることが推奨される -- そうする説得力のある理由が
+      ない限り、8文字を超えないこと。この名前は大文字小文字を区別する。
+      Designated Expert(s)が、その特定の場合に例外を許可する説得力の
+      ある理由があると述べない限り、名前は大文字小文字を区別しない
+      形で他の登録済み名と一致してはならない。
+
+   Change Controller:
+      Standards Track RFCの場合は"IESG"と記載する。それ以外の場合は、
+      責任者の名前を記載する。その他の詳細（例: 郵送先住所、
+      メール・アドレス、ホームページURI）も含めてもよい。
+
+   Specification Document(s):
+      パラメーターを規定する文書への参照。できれば、文書のコピーを
+      取得するために使用できるURIを含める。関連セクションの表示も
+      含めてもよいが、必須ではない。
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+<span class="h4"><a class="selflink" id="section-6.2.2" href="#section-6.2.2">6.2.2</a>.  初期レジストリ内容</span>
+
+   本書に従い、IANAはこのレジストリに、<a href="#section-4.2">セクション4.2</a>で定義される
+   Code Challenge Method Parameter Namesを登録した。
+
+   o  Code Challenge Method Parameter Name: plain
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7636#section-4.2">RFC 7636のセクション&nbsp;4.2</a> (this document)
+
+   o  Code Challenge Method Parameter Name: S256
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7636#section-4.2">RFC 7636のセクション&nbsp;4.2</a> (this document)
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  セキュリティに関する考慮事項</span>
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  code_verifierのエントロピー</span>
+
+   セキュリティ・モデルは、コード検証子が攻撃者に知られず、また
+   推測されないという事実に依存している。この原則を守ることは
+   きわめて重要である。したがって、コード検証子は、暗号学的に
+   ランダムで、攻撃者が推測することが現実的でない高いエントロピーを
+   持つような方法で作成されなければならない。
+
+   クライアントは、最小256ビットのエントロピーを持つ"code_verifier"を
+   作成すべきである。これは、適切な乱数生成器に32オクテット列を
+   作成させることで実現できる。その後、そのオクテット列をbase64url
+   エンコードして、必要なエントロピーを持つ"code_challenge"として
+   使用する43オクテットのURL安全文字列を生成できる。
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  盗聴者に対する保護</span>
+
+   クライアントは、"S256"メソッドを試した後に"plain"へダウングレード
+   してはならない。PKCEをサポートするサーバーは"S256"をサポートする
+   ことが要求されており、PKCEをサポートしないサーバーは未知の
+   "code_verifier"を単に無視する。したがって、"S256"が提示された
+   ときのエラーは、サーバーに不具合があるか、MITM攻撃者が
+   ダウングレード攻撃を試みていることを意味するだけである。
+
+   "S256"メソッドは、盗聴者が"code_challenge"を観測または横取りする
+   ことに対して保護する。なぜなら、そのチャレンジは検証子なしでは
+   使用できないからである。"plain"メソッドでは、"code_challenge"が
+   デバイス上またはhttpリクエスト内で攻撃者に観測される可能性が
+   ある。この場合、コード・チャレンジはコード検証子と同じであるため、
+   "plain"メソッドは初期リクエストの盗聴に対して保護しない。
+
+   "S256"の使用は、"code_verifier"値の攻撃者への開示に対して保護する。
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   このため、"plain"は使用すべきではなく、リクエスト経路がすでに
+   保護されている展開済み実装との互換性のためにのみ存在する。
+   何らかの技術的理由で"S256"をサポートできない場合を除き、
+   新しい実装では"plain"メソッドを使用すべきではない。
+
+   "S256"コード・チャレンジ・メソッド、またはその他の暗号学的に
+   安全なコード・チャレンジ・メソッド拡張を使用すべきである。
+   "plain"コード・チャレンジ・メソッドは、オペレーティング・
+   システムおよびトランスポート・セキュリティがリクエストを
+   攻撃者に開示しないことに依存する。
+
+   コード・チャレンジ・メソッドが"plain"であり、ステートレス・
+   サーバーを実現するためにコード・チャレンジを認可"code"の中で
+   返す場合、それはサーバーのみが復号して抽出できるような方法で
+   暗号化されなければならない。
+
+<span class="h3"><a class="selflink" id="section-7.3" href="#section-7.3">7.3</a>.  code_challengeへのソルト付与</span>
+
+   実装の複雑さを軽減するため、コード・チャレンジの生成では
+   ソルトを使用しない。コード検証子には、総当たり攻撃を防ぐのに
+   十分なエントロピーが含まれているからである。公開既知の値を
+   コード検証子（256ビットのエントロピーを含む）に連結し、その後
+   SHA256でハッシュしてコード・チャレンジを生成しても、コード検証子の
+   有効な値を総当たりで見つけるのに必要な試行回数は増加しない。
+
+   "S256"変換はパスワードのハッシュ化に似ているが、重要な違いが
+   ある。パスワードは比較的低エントロピーの語であることが多く、
+   オフラインでハッシュ化し、そのハッシュを辞書で検索できる。
+   ハッシュ化の前に各パスワードへ一意だが公開の値を連結することで、
+   攻撃者が検索する必要のある辞書空間は大きく拡張される。
+
+   現代のグラフィックス・プロセッサーにより、攻撃者はディスクから
+   検索するよりも高速に、リアルタイムでハッシュを計算できるように
+   なっている。これにより、低エントロピー・パスワードであっても、
+   総当たり攻撃の複雑さを増加させるというソルトの価値は失われる。
+
+<span class="h3"><a class="selflink" id="section-7.4" href="#section-7.4">7.4</a>.  OAuthセキュリティに関する考慮事項</span>
+
+   [<a href="./rfc6819" title="&quot;OAuth 2.0 Threat Model and Security Considerations&quot;">RFC6819</a>]で提示されているすべてのOAuthセキュリティ分析が適用
+   されるため、読者はそれに注意深く従うべきである。
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.5" href="#section-7.5">7.5</a>.  TLSセキュリティに関する考慮事項</span>
+
+   現在のセキュリティに関する考慮事項は、"Recommendations for
+   Secure Use of Transport Layer Security (TLS) and Datagram Transport
+   Layer Security (DTLS)" [<a href="#ref-BCP195" title="&quot;Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)&quot;">BCP195</a>]に記載されている。これはOAuth 2.0
+   [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>]におけるTLSバージョンの推奨事項を置き換える。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-8.1" href="#section-8.1">8.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-BCP195">BCP195</a>]   Sheffer, Y., Holz, R., and P. Saint-Andre,
+              "Recommendations for Secure Use of Transport Layer
+              Security (TLS) and Datagram Transport Layer Security
+              (DTLS)", <a href="https://www.rfc-editor.org/bcp/bcp195">BCP 195</a>, <a href="./rfc7525">RFC 7525</a>, May 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/bcp195">http://www.rfc-editor.org/info/bcp195</a>&gt;.
+
+   [<a id="ref-RFC20">RFC20</a>]    Cerf, V., "ASCII format for network interchange", STD 80,
+              <a href="./rfc20">RFC 20</a>, DOI 10.17487/RFC0020, October 1969,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc20">http://www.rfc-editor.org/info/rfc20</a>&gt;.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>,
+              DOI 10.17487/RFC2119, March 1997,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+   [<a id="ref-RFC3986">RFC3986</a>]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66, <a href="./rfc3986">RFC</a>
+              <a href="./rfc3986">3986</a>, DOI 10.17487/RFC3986, January 2005,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc3986">http://www.rfc-editor.org/info/rfc3986</a>&gt;.
+
+   [<a id="ref-RFC4648">RFC4648</a>]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", <a href="./rfc4648">RFC 4648</a>, DOI 10.17487/RFC4648, October 2006,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc4648">http://www.rfc-editor.org/info/rfc4648</a>&gt;.
+
+   [<a id="ref-RFC5226">RFC5226</a>]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
+              IANA Considerations Section in RFCs", <a href="https://www.rfc-editor.org/bcp/bcp26">BCP 26</a>, <a href="./rfc5226">RFC 5226</a>,
+              DOI 10.17487/RFC5226, May 2008,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5226">http://www.rfc-editor.org/info/rfc5226</a>&gt;.
+
+   [<a id="ref-RFC5234">RFC5234</a>]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, <a href="./rfc5234">RFC 5234</a>,
+              DOI 10.17487/RFC5234, January 2008,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5234">http://www.rfc-editor.org/info/rfc5234</a>&gt;.
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   [<a id="ref-RFC6234">RFC6234</a>]  Eastlake 3rd, D. and T. Hansen, "US Secure Hash Algorithms
+              (SHA and SHA-based HMAC and HKDF)", <a href="./rfc6234">RFC 6234</a>,
+              DOI 10.17487/RFC6234, May 2011,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6234">http://www.rfc-editor.org/info/rfc6234</a>&gt;.
+
+   [<a id="ref-RFC6749">RFC6749</a>]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
+              <a href="./rfc6749">RFC 6749</a>, DOI 10.17487/RFC6749, October 2012,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6749">http://www.rfc-editor.org/info/rfc6749</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-8.2" href="#section-8.2">8.2</a>.  参考情報</span>
+
+   [<a id="ref-RFC6819">RFC6819</a>]  Lodderstedt, T., Ed., McGloin, M., and P. Hunt, "OAuth 2.0
+              Threat Model and Security Considerations", <a href="./rfc6819">RFC 6819</a>,
+              DOI 10.17487/RFC6819, January 2013,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6819">http://www.rfc-editor.org/info/rfc6819</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">付録 A</a>.  パディングなしでBase64urlエンコードを実装する際の注記</span>
+
+   この付録では、パディングを使用する標準のbase64エンコード関数に
+   基づいて、パディングなしのbase64urlエンコード関数を実装する
+   方法を説明する。
+
+   具体的にするため、これらの関数を実装するC#コード例を以下に示す。
+   同様のコードは他の言語でも使用できる。
+
+     static string base64urlencode(byte [] arg)
+     {
+       string s = Convert.ToBase64String(arg); // 通常のbase64エンコーダー
+       s = s.Split('=')[0]; // 末尾の'='をすべて削除
+       s = s.Replace('+', '-'); // エンコードの62番目の文字
+       s = s.Replace('/', '_'); // エンコードの63番目の文字
+       return s;
+     }
+
+   エンコードされていない値とエンコードされた値の対応例を次に示す。
+   下のオクテット列は下の文字列へエンコードされ、デコードすると
+   そのオクテット列が再現される。
+
+   3 236 255 224 193
+
+   A-z_4ME
+
+<span class="h2"><a class="selflink" id="appendix-B" href="#appendix-B">付録 B</a>.  S256 code_challenge_methodの例</span>
+
+   クライアントは、適切な乱数生成器の出力を使用して32オクテット列を
+   作成する。この例の値を表すオクテット（JSON配列表記を使用）は
+   次のとおりである。
+
+      [116, 24, 223, 180, 151, 153, 224, 37, 79, 250, 96, 125, 216, 173,
+      187, 186, 22, 212, 37, 77, 105, 214, 191, 240, 91, 88, 5, 88, 83,
+      132, 141, 121]
+
+   このオクテット列をbase64urlとしてエンコードすると、code_verifierの
+   値が得られる。
+
+       dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+
+   次に、code_verifierをSHA256ハッシュ関数でハッシュして、次を生成する。
+
+     [19, 211, 30, 150, 26, 26, 216, 236, 47, 22, 177, 12, 76, 152, 46,
+      8, 118, 168, 120, 173, 109, 241, 68, 86, 110, 225, 137, 74, 203,
+      112, 249, 195]
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+   このオクテット列をbase64urlとしてエンコードすると、code_challengeの
+   値が得られる。
+
+       E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
+
+   認可リクエストには次が含まれる。
+
+       code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
+       &amp;code_challenge_method=S256
+
+   認可サーバーはその後、クライアントに付与されるコードとともに、
+   code_challengeおよびcode_challenge_methodを記録する。
+
+   token_endpointへのリクエストで、クライアントは認可応答で受信した
+   コードに加えて、追加パラメーターを含める。
+
+       code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+
+   認可サーバーは、コード・グラントに関する情報を取得する。
+   記録されたcode_challenge_methodがS256であることに基づいて、
+   code_verifierの値をハッシュし、base64urlエンコードする。
+
+   BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+
+   計算された値は、その後"code_challenge"の値と比較される。
+
+   BASE64URL-ENCODE(SHA256(ASCII(code_verifier))) == code_challenge
+
+   2つの値が等しい場合、認可サーバーは、リクエストに他のエラーが
+   ない限り、トークンを提供できる。値が等しくない場合、リクエストは
+   拒否され、エラーが返されなければならない。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+謝辞
+
+   本仕様の初期ドラフト版は、OpenID FoundationのOpenID AB/Connect
+   Working Groupによって作成された。
+
+   本仕様はOAuth Working Groupの成果であり、そこには多数の活発で
+   献身的な参加者が含まれる。特に、次の個人は、最終仕様を形作り
+   形成したアイデア、フィードバック、および文言に貢献した。
+
+      Anthony Nadalin, Microsoft
+      Axel Nenker, Deutsche Telekom
+      Breno de Medeiros, Google
+      Brian Campbell, Ping Identity
+      Chuck Mortimore, Salesforce
+      Dirk Balfanz, Google
+      Eduardo Gueiros, Jive Communications
+      Hannes Tschonfenig, ARM
+      James Manger, Telstra
+      Justin Richer, MIT Kerberos
+      Josh Mandel, Boston Children's Hospital
+      Lewis Adam, Motorola Solutions
+      Madjid Nakhjiri, Samsung
+      Michael B. Jones, Microsoft
+      Paul Madsen, Ping Identity
+      Phil Hunt, Oracle
+      Prateek Mishra, Oracle
+      Ryo Ito, mixi
+      Scott Tomilson, Ping Identity
+      Sergey Beryozkin
+      Takamichi Saito
+      Torsten Lodderstedt, Deutsche Telekom
+      William Denniss, Google
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Sakimura, et al.             Standards Track                   [Page 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc7636">RFC 7636</a>                       OAUTH PKCE                 September 2015</span>
+
+
+著者の連絡先
+
+   Nat Sakimura (editor)
+   Nomura Research Institute
+   1-6-5 Marunouchi, Marunouchi Kitaguchi Bldg.
+   Chiyoda-ku, Tokyo  100-0005
+   Japan
+
+   Phone: +81-3-5533-2111
+   Email: n-sakimura@nri.co.jp
+   URI:   <a href="http://nat.sakimura.org/">http://nat.sakimura.org/</a>
+
+
+   John Bradley
+   Ping Identity
+   Casilla 177, Sucursal Talagante
+   Talagante, RM
+   Chile
+
+   Phone: +44 20 8133 3718
+   Email: ve7jtb@ve7jtb.com
+   URI:   <a href="http://www.thread-safe.com/">http://www.thread-safe.com/</a>
+
+
+   Naveen Agarwal
+   Google
+   1600 Amphitheatre Parkway
+   Mountain View, CA  94043
+   United States
+
+   Phone: +1 650-253-0000
+   Email: naa@google.com
+   URI:   <a href="http://google.com/">http://google.com/</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sakimura, et al.             Standards Track                   [Page 20]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
