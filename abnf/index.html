@@ -1,0 +1,873 @@
+<pre>ネットワーク作業部会                              D. Crocker, Ed.
+Request for Comments: 5234                   Brandenburg InternetWorking
+STD: 68                                                       P. Overell
+Obsoletes: <a href="./rfc4234">4234</a>                                                THUS plc.
+Category: Standards Track                                   January 2008
+
+
+             <span class="h1">構文仕様のための拡張BNF：ABNF</span>
+
+本文書の位置づけ
+
+   本文書は、インターネットコミュニティのためのインターネット
+   標準化過程プロトコルを規定し、改善のための議論および提案を
+   求めるものである。このプロトコルの標準化状況および状態については、
+   「Internet Official Protocol Standards」（STD 1）の最新版を参照
+   されたい。本メモの配布に制限はない。
+
+要旨
+
+   インターネット技術仕様では、しばしば形式構文を定義する必要が
+   ある。長年にわたり、Backus-Naur Form（BNF）の修正版である
+   Augmented BNF（ABNF）は、多くのインターネット仕様の間で広く
+   用いられてきた。本仕様はABNFを文書化するものである。これは、
+   簡潔さおよび単純さと、妥当な表現能力との均衡をとる。標準BNFと
+   ABNFの相違点は、規則の命名、反復、代替、順序独立性、および
+   値範囲に関するものである。本仕様はまた、いくつかのインターネット
+   仕様に共通する種類の中核字句解析器のための追加の規則定義および
+   符号化も提供する。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+   <a href="#section-2">2</a>.  規則定義  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+     <a href="#section-2.1">2.1</a>.  規則の命名  . . . . . . . . . . . . . . . . . . . . .  <a href="#page-3">3</a>
+     <a href="#section-2.2">2.2</a>.  規則の形式  . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+     <a href="#section-2.3">2.3</a>.  終端値  . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-4">4</a>
+     <a href="#section-2.4">2.4</a>.  外部符号化 . . . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+   <a href="#section-3">3</a>.  演算子  . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+     <a href="#section-3.1">3.1</a>.  連結:  Rule1 Rule2  . . . . . . . . . . . . . . . . .  <a href="#page-6">6</a>
+     <a href="#section-3.2">3.2</a>.  代替:  Rule1 / Rule2 . . . . . . . . . . . . . . . .  <a href="#page-7">7</a>
+     <a href="#section-3.3">3.3</a>.  増分的代替: Rule1 =/ Rule2 . . . . . . . . . . . . .  <a href="#page-7">7</a>
+     <a href="#section-3.4">3.4</a>.  値範囲代替:  %c##-## . . . . . . . . . . . . . . . .  <a href="#page-8">8</a>
+     <a href="#section-3.5">3.5</a>.  列グループ:  (Rule1 Rule2) . . . . . . . . . . . . .  <a href="#page-8">8</a>
+     <a href="#section-3.6">3.6</a>.  可変反復:  *Rule  . . . . . . . . . . . . . . . . .  <a href="#page-9">9</a>
+     <a href="#section-3.7">3.7</a>.  指定反復:  nRule  . . . . . . . . . . . . . . . . .  <a href="#page-9">9</a>
+     <a href="#section-3.8">3.8</a>.  省略可能列:  [RULE] . . . . . . . . . . . . . . . .  <a href="#page-9">9</a>
+     <a href="#section-3.9">3.9</a>.  コメント:  ; Comment  . . . . . . . . . . . . . . .  <a href="#page-9">9</a>
+     <a href="#section-3.10">3.10</a>. 演算子の優先順位  . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+   <a href="#section-4">4</a>.  ABNFによるABNFの定義  . . . . . . . . . . . . . . . . . . <a href="#page-10">10</a>
+   <a href="#section-5">5</a>.  セキュリティ上の考慮事項  . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+   <a href="#section-6">6</a>.  参考文献 . . . . . . . . . . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+     <a href="#section-6.1">6.1</a>.  規範参考文献 . . . . . . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+     <a href="#section-6.2">6.2</a>.  参考参考文献 . . . . . . . . . . . . . . . . . . . . <a href="#page-12">12</a>
+   <a href="#appendix-A">Appendix A</a>.  謝辞  . . . . . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+   <a href="#appendix-B">Appendix B</a>.  ABNFの中核ABNF . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+     <a href="#appendix-B.1">B.1</a>.  中核規則 . . . . . . . . . . . . . . . . . . . . . . <a href="#page-13">13</a>
+     <a href="#appendix-B.2">B.2</a>.  共通符号化  . . . . . . . . . . . . . . . . . . . . <a href="#page-15">15</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   インターネット技術仕様では、しばしば形式構文を定義する必要があり、
+   その著者が有用と考える任意の記法を用いることができる。長年に
+   わたり、Backus-Naur Form（BNF）の修正版であるAugmented BNF
+   （ABNF）は、多くのインターネット仕様の間で広く用いられてきた。
+   これは、簡潔さおよび単純さと、妥当な表現能力との均衡をとる。
+   Arpanetの初期には、各仕様が独自のABNF定義を含んでいた。これには
+   電子メール仕様、[<a href="./rfc733" title="&quot;Standard for the format of ARPA network text messages&quot;">RFC733</a>] およびその後の [<a href="./rfc822" title="&quot;Standard for the format of ARPA Internet text messages&quot;">RFC822</a>] が含まれ、
+   これらはABNFを定義するための共通の引用文献となった。現在の
+   文書は、選択的な参照を可能にするため、これらの定義を分離する。
+   予想されるとおり、本書はまた、いくつかの修正および拡張も提供する。
+
+   標準BNFとABNFの相違点は、規則の命名、反復、代替、順序独立性、
+   および値範囲に関するものである。<a href="#appendix-B">Appendix B</a> は、いくつかの
+   インターネット仕様に共通する種類の中核字句解析器のための規則定義
+   および符号化を提供する。これは便宜のために提供されるものであり、
+   それ以外の点では、本文で定義されるメタ言語からも、その形式的な
+   地位からも分離されている。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  規則定義</span>
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  規則の命名</span>
+
+   規則の名前は単にその名前そのものであり、英字で始まり、その後に
+   英字、数字、およびハイフン（ダッシュ）の組み合わせが続く文字列で
+   ある。
+
+   注記:
+
+      規則名では大文字と小文字は区別されない。
+
+   &lt;rulename&gt;、&lt;Rulename&gt;、&lt;RULENAME&gt;、および &lt;rUlENamE&gt; は
+   すべて同じ規則を参照する。
+
+   元のBNFとは異なり、山括弧（"&lt;"、"&gt;"）は必須ではない。
+   しかし、規則名の使用を判別しやすくする場合には、規則名の周囲に
+   山括弧を使用してもよい。これは通常、自由形式の散文中の規則名
+   参照、または以下の反復に関する説明で示されるように、空白で
+   区切られずに文字列へ結合される部分規則を区別する場合に限られる。
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  規則の形式</span>
+
+   規則は次の列によって定義される。
+
+         name =  elements crlf
+
+   ここで、&lt;name&gt; は規則の名前、&lt;elements&gt; は1個以上の規則名
+   または終端仕様、&lt;crlf&gt; は行末指示子（復帰の後に改行が続くもの）
+   である。等号は、名前を規則の定義から分離する。要素は、本文書で
+   定義される各種演算子（代替および反復など）に従って結合される、
+   1個以上の規則名および/または値定義の列を形成する。
+
+   見やすくするため、規則定義は左揃えにされる。規則が複数行を
+   必要とする場合、継続行はインデントされる。左揃えおよび
+   インデントは、ABNF規則の最初の行を基準とするものであり、文書の
+   左余白と一致している必要はない。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  終端値</span>
+
+   規則は終端値の文字列へ解決され、これは文字と呼ばれることもある。
+   ABNFにおいて、文字は単に非負整数である。特定の文脈では、値を
+   文字集合（ASCIIなど）へ対応付ける具体的な対応（符号化）が指定
+   される。
+
+   終端は1個以上の数字文字によって指定され、その文字の基数解釈は
+   明示的に示される。現在、次の基数が定義されている。
+
+         b           =  binary
+
+         d           =  decimal
+
+         x           =  hexadecimal
+
+   したがって:
+
+         CR          =  %d13
+
+         CR          =  %x0D
+
+   はそれぞれ、復帰に対する [<a href="#ref-US-ASCII" title="&quot;Coded Character Set -- 7-bit American Standard Code for Information Interchange&quot;">US-ASCII</a>] の10進表現および16進表現を
+   指定する。
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+   そのような値の連結文字列は、値内の文字の区切りを示すために
+   ピリオド（"."）を用いて、簡潔に指定される。したがって:
+
+         CRLF        =  %d13.10
+
+   ABNFでは、引用符で囲んでリテラルテキスト文字列を直接指定する
+   ことができる。したがって:
+
+         command     =  "command string"
+
+   リテラルテキスト文字列は、印字可能文字の連結集合として解釈される。
+
+   注記:
+
+      ABNF文字列では大文字と小文字は区別されず、これらの文字列の
+      文字集合はUS-ASCIIである。
+
+   したがって:
+
+         rulename = "abc"
+
+   および:
+
+         rulename = "aBc"
+
+   は、"abc"、"Abc"、"aBc"、"abC"、"ABc"、"aBC"、"AbC"、および
+   "ABC" に一致する。
+
+      大文字と小文字を区別する規則を指定するには、文字を個別に
+      指定する。
+
+   例:
+
+         rulename    =  %d97 %d98 %d99
+
+   または
+
+         rulename    =  %d97.98.99
+
+   は、小文字の文字 abc のみから成る文字列だけに一致する。
+
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h3"><a class="selflink" id="section-2.4" href="#section-2.4">2.4</a>.  外部符号化</span>
+
+   終端値文字の外部表現は、保存環境または伝送環境における制約に
+   従って変化する。したがって、同一のABNFベースの文法は、複数の
+   外部符号化を持ち得る。たとえば、7ビットUS-ASCII環境用のもの、
+   バイナリオクテット環境用のもの、さらに16ビットUnicodeを用いる
+   場合の別のものなどである。符号化の詳細はABNFの範囲外であるが、
+   <a href="#appendix-B">Appendix B</a> は、インターネットの多くで一般的であった7ビット
+   US-ASCII環境のための定義を提供する。
+
+   構文から外部符号化を分離することにより、同じ構文に対して代替の
+   符号化環境を利用できるようにすることが意図されている。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  演算子</span>
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  連結:  </span>Rule1 Rule2
+
+   規則は、規則名の列を列挙することにより、値の単純な順序付き文字列
+   （すなわち、連続する文字の連結）を定義できる。例:
+
+         foo         =  %x61           ; a
+
+         bar         =  %x62           ; b
+
+         mumble      =  foo bar foo
+
+   これにより、規則 &lt;mumble&gt; は小文字文字列 "aba" に一致する。
+
+   線形空白: 連結はABNF解析モデルの中核にある。連続する文字（値）の
+   文字列は、ABNFで定義された規則に従って解析される。インターネット
+   仕様では、特殊文字や原子的文字列を区切るような主要構成要素の周囲に、
+   線形空白（スペースおよび水平タブ）を自由かつ暗黙的に挿入することを
+   許す歴史がいくらかある。
+
+   注記:
+
+      本ABNF仕様は、線形空白を暗黙的に指定する仕組みを提供しない。
+
+   区切り記号または文字列セグメントの周囲に線形空白を許容したい
+   文法は、それを明示的に指定しなければならない。そのような空白は、
+   さまざまな上位レベル規則の間で用いられる「中核」規則で提供する
+   と有用な場合が多い。「中核」規則は、字句解析器として形成される
+   場合もあれば、単に主要な規則集合の一部である場合もある。
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  代替:  </span>Rule1 / Rule2
+
+   スラッシュ（"/"）で区切られた要素は代替である。したがって、
+
+         foo / bar
+
+   は &lt;foo&gt; または &lt;bar&gt; を受け入れる。
+
+   注記:
+
+      英字を含む引用文字列は、代替文字を指定する特殊な形式であり、
+      含まれる文字を指定された順序で持ち、大文字と小文字の任意の
+      混在を許す組合せ文字列の集合を表す非終端として解釈される。
+
+<span class="h3"><a class="selflink" id="section-3.3" href="#section-3.3">3.3</a>.  増分的代替: Rule1 =/ Rule2</span>
+
+   代替のリストを断片に分けて指定すると便利な場合がある。すなわち、
+   初期規則が1個以上の代替に一致し、後続の規則定義が代替集合へ
+   追加する場合である。これは、同じ親規則集合から派生する、相互に
+   独立した仕様で特に有用である。たとえば、パラメータリストでよく
+   生じる。ABNFは、次の構成によってこの増分的定義を許す。
+
+         oldrule     =/ additional-alternatives
+
+   したがって、規則集合
+
+         ruleset     =  alt1 / alt2
+
+         ruleset     =/ alt3
+
+         ruleset     =/ alt4 / alt5
+
+   は、次を指定することと同じである。
+
+         ruleset     =  alt1 / alt2 / alt3 / alt4 / alt5
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.4" href="#section-3.4">3.4</a>.  値範囲代替:  </span>%c##-##
+
+   代替となる数値の範囲は、その代替値の範囲を示すためにダッシュ
+   （"-"）を用いて簡潔に指定できる。したがって:
+
+         DIGIT       =  %x30-39
+
+   は次と等価である。
+
+         DIGIT       =  "0" / "1" / "2" / "3" / "4" / "5" / "6" /
+
+                        "7" / "8" / "9"
+
+   連結された数値と数値範囲は、同じ文字列内で指定することはできない。
+   数値は、連結のためにドット記法を用いることも、1個の値範囲を
+   指定するためにダッシュ記法を用いることもできる。したがって、
+   行末列の間に1個の印字可能文字を指定するには、仕様は次のように
+   書くことができる。
+
+         char-line = %x0D.0A %x20-7E %x0D.0A
+
+<span class="h3"><a class="selflink" id="section-3.5" href="#section-3.5">3.5</a>.  列グループ:  </span>(Rule1 Rule2)
+
+   括弧で囲まれた要素は単一の要素として扱われ、その内容は厳密に
+   順序付けられる。したがって、
+
+         elem (foo / bar) blat
+
+   は (elem foo blat) または (elem bar blat) に一致し、
+
+         elem foo / bar blat
+
+   は (elem foo) または (bar blat) に一致する。
+
+   注記:
+
+      代替が複数の規則名またはリテラルから成る場合には、「裸の」
+      代替の正しい読み取りに依存するのではなく、グループ化記法を
+      用いることが強く推奨される。
+
+   したがって、次の形式を使用することが推奨される。
+
+        (elem foo) / (bar blat)
+
+   これにより、何気ない読者による誤解を避けられる。
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+   列グループ記法は、自由文中で要素列を散文から区切るためにも用いられる。
+
+<span class="h3"><a class="selflink" id="section-3.6" href="#section-3.6">3.6</a>.  可変反復:  </span>*Rule
+
+   要素の前に置かれる演算子 "*" は反復を示す。完全な形式は次の通り
+   である。
+
+         &lt;a&gt;*&lt;b&gt;element
+
+   ここで、&lt;a&gt; および &lt;b&gt; は省略可能な10進値であり、要素の出現が
+   少なくとも &lt;a&gt; 回、最大で &lt;b&gt; 回であることを示す。
+
+   既定値は0および無限大であるため、*&lt;element&gt; は0回を含む任意の
+   回数を許し、1*&lt;element&gt; は少なくとも1回を要求し、3*3&lt;element&gt;
+   はちょうど3回を許し、1*2&lt;element&gt; は1回または2回を許す。
+
+<span class="h3"><a class="selflink" id="section-3.7" href="#section-3.7">3.7</a>.  指定反復:  </span>nRule
+
+   次の形式の規則:
+
+         &lt;n&gt;element
+
+   は次と等価である。
+
+         &lt;n&gt;*&lt;n&gt;element
+
+   すなわち、&lt;element&gt; がちょうど &lt;n&gt; 回出現することである。
+   したがって、2DIGIT は2桁の数であり、3ALPHA は3文字の英字から
+   成る文字列である。
+
+<span class="h3"><a class="selflink" id="section-3.8" href="#section-3.8">3.8</a>.  省略可能列:  </span>[RULE]
+
+   角括弧は省略可能な要素列を囲む。
+
+         [foo bar]
+
+   は次と等価である。
+
+         *1(foo bar).
+
+<span class="h3"><a class="selflink" id="section-3.9" href="#section-3.9">3.9</a>.  コメント:  </span>; Comment
+
+   セミコロンは、行末まで続くコメントを開始する。これは、仕様と並行して
+   有用な注記を含めるための単純な方法である。
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                     [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.10" href="#section-3.10">3.10</a>.  演算子の優先順位</span>
+
+   上で述べた各種機構には次の優先順位があり、上が最も高い
+   （最も強く結合する）もの、下が最も低い（最も緩く結合する）もの
+   である。
+
+      Rule name, prose-val, Terminal value
+
+      Comment
+
+      Value range
+
+      Repetition
+
+      Grouping, Optional
+
+      Concatenation
+
+      Alternative
+
+   代替演算子を連結と自由に混在させると、混乱を招く可能性がある。
+
+      繰り返しになるが、連結グループを明示するためにグループ化演算子を
+      用いることが推奨される。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  ABNFによるABNFの定義</span>
+
+   注記:
+
+      1.  この構文は、比較的厳密な規則の書式化を要求する。したがって、
+          仕様に含められる規則集合の版は、ABNFパーサによって解釈
+          できることを保証するために前処理が必要となる場合がある。
+
+      2.  この構文は <a href="#appendix-B">Appendix B</a> で提供される規則を用いる。
+
+
+         rulelist       =  1*( rule / (*c-wsp c-nl) )
+
+         rule           =  rulename defined-as elements c-nl
+                                ; continues if next line starts
+                                ;  with white space
+
+         rulename       =  ALPHA *(ALPHA / DIGIT / "-")
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                    [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+         defined-as     =  *c-wsp ("=" / "=/") *c-wsp
+                                ; basic rules definition and
+                                ;  incremental alternatives
+
+         elements       =  alternation *c-wsp
+
+         c-wsp          =  WSP / (c-nl WSP)
+
+         c-nl           =  comment / CRLF
+                                ; comment or newline
+
+         comment        =  ";" *(WSP / VCHAR) CRLF
+
+         alternation    =  concatenation
+                           *(*c-wsp "/" *c-wsp concatenation)
+
+         concatenation  =  repetition *(1*c-wsp repetition)
+
+         repetition     =  [repeat] element
+
+         repeat         =  1*DIGIT / (*DIGIT "*" *DIGIT)
+
+         element        =  rulename / group / option /
+                           char-val / num-val / prose-val
+
+         group          =  "(" *c-wsp alternation *c-wsp ")"
+
+         option         =  "[" *c-wsp alternation *c-wsp "]"
+
+         char-val       =  DQUOTE *(%x20-21 / %x23-7E) DQUOTE
+                                ; quoted string of SP and VCHAR
+                                ;  without DQUOTE
+
+         num-val        =  "%" (bin-val / dec-val / hex-val)
+
+         bin-val        =  "b" 1*BIT
+                           [ 1*("." 1*BIT) / ("-" 1*BIT) ]
+                                ; series of concatenated bit values
+                                ;  or single ONEOF range
+
+         dec-val        =  "d" 1*DIGIT
+                           [ 1*("." 1*DIGIT) / ("-" 1*DIGIT) ]
+
+         hex-val        =  "x" 1*HEXDIG
+                           [ 1*("." 1*HEXDIG) / ("-" 1*HEXDIG) ]
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                    [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+         prose-val      =  "&lt;" *(%x20-3D / %x3F-7E) "&gt;"
+                                ; bracketed string of SP and VCHAR
+                                ;  without angles
+                                ; prose description, to be used as
+                                ;  last resort
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  セキュリティ上の考慮事項</span>
+
+   セキュリティは本文書には実際に無関係であると考えられている。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  規範参考文献</span>
+
+   [<a id="ref-US-ASCII">US-ASCII</a>]  American National Standards Institute, "Coded Character
+               Set -- 7-bit American Standard Code for Information
+               Interchange", ANSI X3.4, 1986.
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  参考参考文献</span>
+
+   [<a id="ref-RFC733">RFC733</a>]    Crocker, D., Vittal, J., Pogran, K., and D. Henderson,
+               "Standard for the format of ARPA network text messages",
+               <a href="./rfc733">RFC 733</a>, November 1977.
+
+   [<a id="ref-RFC822">RFC822</a>]    Crocker, D., "Standard for the format of ARPA Internet
+               text messages", STD 11, <a href="./rfc822">RFC 822</a>, August 1982.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                    [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  謝辞</span>
+
+   ABNFの構文は、もともと <a href="./rfc733">RFC 733</a> で規定された。SRI International
+   のKen L. Harrenstienは、BNFを、表現をより小さく、より理解しやすく
+   するAugmented BNFへ再符号化する責任を担った。
+
+   この最近のプロジェクトは、電子メール仕様ではない仕様の著者によって
+   繰り返し引用されてきた <a href="./rfc822">RFC 822</a> の部分、すなわちAugmented BNFの
+   説明を切り出す単純な作業として始まった。単に既存のテキストを
+   別文書へ機械的に変換するのではなく、作業部会は、既存仕様および
+   過去15年間に利用可能となった関連仕様の欠点と利点の双方を慎重に
+   検討することを選び、そのため拡張を追求した。これにより、この
+   プロジェクトは当初意図されたものよりもかなり野心的なものとなった。
+   興味深いことに、結果はその原型と大きく異なるものではないが、
+   リスト記法の削除などの決定は驚きをもって受け止められた。
+
+   この仕様の「分離」版はDRUMS作業部会の一部であり、Jerome Abela、
+   Harald Alvestrand、Robert Elz、Roger Fajman、Aviva Garrett、Tom
+   Harsch、Dan Kohn、Bill McQuillan、Keith Moore、Chris Newman、Pete
+   Resnick、およびHenning Schulzrinneから重要な貢献があった。
+
+   Julian Reschkeには、Draft Standard版をXMLソース形式へ変換したことに
+   対して特別な謝意を表する。
+
+<span class="h2"><a class="selflink" id="appendix-B" href="#appendix-B">Appendix B</a>.  ABNFの中核ABNF</span>
+
+   この付録には、共通して使用されるいくつかの基本規則が含まれる。
+   基本規則は大文字で表記される。これらの規則は、7ビットASCIIで
+   符号化されたABNF、または7ビットASCIIの上位集合である文字集合に
+   おいてのみ有効であることに注意されたい。
+
+<span class="h3"><a class="selflink" id="appendix-B.1" href="#appendix-B.1">B.1</a>.  中核規則</span>
+
+   SP、HTAB、CRLF、DIGIT、ALPHAなど、特定の基本規則は大文字である。
+
+         ALPHA          =  %x41-5A / %x61-7A   ; A-Z / a-z
+
+         BIT            =  "0" / "1"
+
+         CHAR           =  %x01-7F
+                                ; any 7-bit US-ASCII character,
+                                ;  excluding NUL
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                    [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+         CR             =  %x0D
+                                ; carriage return
+
+         CRLF           =  CR LF
+                                ; Internet standard newline
+
+         CTL            =  %x00-1F / %x7F
+                                ; controls
+
+         DIGIT          =  %x30-39
+                                ; 0-9
+
+         DQUOTE         =  %x22
+                                ; " (Double Quote)
+
+         HEXDIG         =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
+
+         HTAB           =  %x09
+                                ; horizontal tab
+
+         LF             =  %x0A
+                                ; linefeed
+
+         LWSP           =  *(WSP / CRLF WSP)
+                                ; Use of this linear-white-space rule
+                                ;  permits lines containing only white
+                                ;  space that are no longer legal in
+                                ;  mail headers and have caused
+                                ;  interoperability problems in other
+                                ;  contexts.
+                                ; Do not use when defining mail
+                                ;  headers and use with caution in
+                                ;  other contexts.
+
+         OCTET          =  %x00-FF
+                                ; 8 bits of data
+
+         SP             =  %x20
+
+         VCHAR          =  %x21-7E
+                                ; visible (printing) characters
+
+         WSP            =  SP / HTAB
+                                ; white space
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                    [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+<span class="h3"><a class="selflink" id="appendix-B.2" href="#appendix-B.2">B.2</a>.  共通符号化</span>
+
+   外部的には、データは「ネットワーク仮想ASCII」（すなわち、8ビット
+   フィールド内の7ビットUS-ASCII）として表現され、高位（8番目）の
+   ビットは0に設定される。値の文字列は「ネットワークバイト順」で
+   あり、より高位のバイトが左側に表現され、ネットワーク上で先に送信
+   される。
+
+著者の連絡先
+
+   Dave Crocker (editor)
+   Brandenburg InternetWorking
+   675 Spruce Dr.
+   Sunnyvale, CA  94086
+   US
+
+   Phone: +1.408.246.8253
+   EMail: dcrocker@bbiw.net
+
+
+   Paul Overell
+   THUS plc.
+   1/2 Berkeley Square,
+   99 Berkeley Street
+   Glasgow  G3 7HR
+   UK
+
+   EMail: paul.overell@thus.net
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Crocker &amp; Overell           Standards Track                    [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc5234">RFC 5234</a>                          ABNF                      January 2008</span>
+
+
+完全な著作権表示
+
+   Copyright (C) The IETF Trust (2008).
+
+   本文書は <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> に含まれる権利、ライセンスおよび制限の対象であり、
+   そこで定められている場合を除き、著者はすべての権利を保持する。
+
+   本文書およびここに含まれる情報は「AS IS」ベースで提供され、
+   CONTRIBUTOR、HE/SHEを代表する組織またはHE/SHEを支援する組織
+   （もしあれば）、INTERNET SOCIETY、IETF TRUST、およびINTERNET
+   ENGINEERING TASK FORCEは、明示または黙示を問わず、ここに含まれる
+   情報の使用がいかなる権利も侵害しないことの保証、または商品性もしくは
+   特定目的適合性の黙示の保証を含むがこれらに限定されない、すべての
+   保証を否認する。
+
+知的財産
+
+   IETFは、本文書に記述された技術の実装または使用に関係すると主張
+   され得る知的財産権その他の権利の有効性または範囲、ならびにそのような
+   権利に基づくライセンスが利用可能であるか否か、または利用可能となる
+   範囲について、いかなる立場も取らない。また、そのような権利を特定
+   するために独自の努力を行ったことを表明するものでもない。RFC文書に
+   おける権利に関する手続きについての情報は、<a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> および
+   <a href="https://www.rfc-editor.org/bcp/bcp79">BCP 79</a> に記載されている。
+
+   IETF事務局に提出されたIPR開示の写し、および実装者または利用者が
+   本仕様を使用するために必要となる可能性のある専有的権利の使用について、
+   一般ライセンスまたは許可を取得しようとした結果、もしくは提供される
+   ライセンスの保証は、IETFオンラインIPRリポジトリ
+   <a href="http://www.ietf.org/ipr">http://www.ietf.org/ipr</a> から取得できる。
+
+   IETFは、本標準を実装するために必要となる可能性のある技術を対象とする
+   著作権、特許、特許出願、またはその他の専有的権利を、関心のある者が
+   IETFの注意に持ち込むことを歓迎する。その情報はIETF宛
+   ietf-ipr@ietf.org に送付されたい。
+
+
+
+
+
+
+
+
+
+
+
+
+Crocker &amp; Overell           Standards Track                    [Page 16]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
