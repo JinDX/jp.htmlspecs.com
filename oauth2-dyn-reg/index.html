@@ -1,0 +1,2198 @@
+<pre>Internet Engineering Task Force (IETF)                    J. Richer, Ed.
+Request for Comments: 7591
+Category: Standards Track                                       M. Jones
+ISSN: 2070-1721                                                Microsoft
+                                                              J. Bradley
+                                                           Ping Identity
+                                                             M. Machulak
+                                                    Newcastle University
+                                                                 P. Hunt
+                                                      Oracle Corporation
+                                                               July 2015
+
+
+             <span class="h1">OAuth 2.0 動的クライアント登録プロトコル</span>
+
+概要
+
+   この仕様は、OAuth 2.0 クライアントを認可サーバーに
+   動的に登録するための仕組みを定義する。登録リクエストは、
+   要求されるクライアントメタデータ値の集合を認可サーバーへ
+   送信する。結果として返される登録レスポンスは、認可サーバーで
+   使用するクライアント識別子と、そのクライアントについて
+   登録されたクライアントメタデータ値を返す。クライアントは
+   その後、この登録情報を使用して、OAuth 2.0 プロトコルにより
+   認可サーバーと通信できる。この仕様はまた、登録時に
+   クライアントが使用する共通のクライアントメタデータフィールド
+   および値の集合も定義する。
+
+このメモの位置付け
+
+   これはインターネット標準化過程の文書である。
+
+   この文書は、Internet Engineering Task Force (IETF) の成果物である。
+   これは IETF コミュニティの合意を表している。公開レビューを受け、
+   Internet Engineering Steering Group (IESG) によって公開が承認されている。
+   インターネット標準に関する詳細情報は、
+   <a href="./rfc5741#section-2">RFC 5741 の Section&nbsp;2</a> に記載されている。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、次の場所で入手できる。
+   <a href="http://www.rfc-editor.org/info/rfc7591">http://www.rfc-editor.org/info/rfc7591</a>.
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+Copyright Notice
+
+   Copyright (c) 2015 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに  . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+     <a href="#section-1.1">1.1</a>.  表記上の規約  . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+     <a href="#section-1.2">1.2</a>.  用語  . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+     <a href="#section-1.3">1.3</a>.  プロトコルフロー  . . . . . . . . . . . . . . . . . . .   <a href="#page-7">7</a>
+   <a href="#section-2">2</a>.  クライアントメタデータ  . . . . . . . . . . . . . . . . .   <a href="#page-8">8</a>
+     <a href="#section-2.1">2.1</a>.  グラントタイプとレスポンスタイプの関係 . . . . . . .  <a href="#page-12">12</a>
+     <a href="#section-2.2">2.2</a>.  人間が読めるクライアントメタデータ  . . . . . . . . .  <a href="#page-13">13</a>
+     <a href="#section-2.3">2.3</a>.  ソフトウェアステートメント  . . . . . . . . . . . . .  <a href="#page-14">14</a>
+   <a href="#section-3">3</a>.  クライアント登録エンドポイント  . . . . . . . . . . . . .  <a href="#page-15">15</a>
+     <a href="#section-3.1">3.1</a>.  クライアント登録リクエスト . . . . . . . . . . . . . .  <a href="#page-16">16</a>
+       3.1.1.  ソフトウェアステートメントを使用する
+               クライアント登録リクエスト . . . . . . . . . . .  <a href="#page-18">18</a>
+     <a href="#section-3.2">3.2</a>.  レスポンス . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-19">19</a>
+       <a href="#section-3.2.1">3.2.1</a>.  クライアント情報レスポンス . . . . . . . . . . . .  <a href="#page-19">19</a>
+       <a href="#section-3.2.2">3.2.2</a>.  クライアント登録エラーレスポンス  . . . . . . . .  <a href="#page-21">21</a>
+   <a href="#section-4">4</a>.  IANA に関する考慮事項 . . . . . . . . . . . . . . . . . .  <a href="#page-23">23</a>
+     <a href="#section-4.1">4.1</a>.  OAuth 動的クライアント登録メタデータレジストリ . . .  <a href="#page-22">22</a>
+       <a href="#section-4.1.1">4.1.1</a>.  登録テンプレート . . . . . . . . . . . . . . . . .  <a href="#page-24">24</a>
+       <a href="#section-4.1.2">4.1.2</a>.  初期レジストリ内容 . . . . . . . . . . . . . . . .  <a href="#page-24">24</a>
+     <a href="#section-4.2">4.2</a>.  OAuth トークンエンドポイント認証方式レジストリ  . .  <a href="#page-27">27</a>
+       <a href="#section-4.2.1">4.2.1</a>.  登録テンプレート . . . . . . . . . . . . . . . . .  <a href="#page-28">28</a>
+       <a href="#section-4.2.2">4.2.2</a>.  初期レジストリ内容 . . . . . . . . . . . . . . . .  <a href="#page-28">28</a>
+   <a href="#section-5">5</a>.  セキュリティに関する考慮事項 . . . . . . . . . . . . . .  <a href="#page-28">28</a>
+   <a href="#section-6">6</a>.  プライバシーに関する考慮事項  . . . . . . . . . . . . .  <a href="#page-32">32</a>
+   <a href="#section-7">7</a>.  参考文献  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-33">33</a>
+     <a href="#section-7.1">7.1</a>.  規範的参考文献  . . . . . . . . . . . . . . . . . . .  <a href="#page-33">33</a>
+     <a href="#section-7.2">7.2</a>.  参考情報文献  . . . . . . . . . . . . . . . . . . . .  <a href="#page-35">35</a>
+   <a href="#appendix-A">付録 A</a>.  ユースケース  . . . . . . . . . . . . . . . . . . .  <a href="#page-33">33</a>
+     <a href="#appendix-A.1">A.1</a>.  オープンな動的クライアント登録と保護された
+           動的クライアント登録 . . . . . . . . . . . . . . . .  <a href="#page-34">34</a>
+       <a href="#appendix-A.1.1">A.1.1</a>.  オープンな動的クライアント登録  . . . . . . . . .  <a href="#page-34">34</a>
+       <a href="#appendix-A.1.2">A.1.2</a>.  保護された動的クライアント登録 . . . . . . . . .  <a href="#page-34">34</a>
+     <a href="#appendix-A.2">A.2</a>.  ソフトウェアステートメントなし、またはありの登録  .  <a href="#page-34">34</a>
+       <a href="#appendix-A.2.1">A.2.1</a>.  ソフトウェアステートメントなしの登録 . . . . . .  <a href="#page-34">34</a>
+       <a href="#appendix-A.2.2">A.2.2</a>.  ソフトウェアステートメントありの登録  . . . . .  <a href="#page-34">34</a>
+     <a href="#appendix-A.3">A.3</a>.  クライアントまたは開発者による登録 . . . . . . . . .  <a href="#page-34">34</a>
+       <a href="#appendix-A.3.1">A.3.1</a>.  クライアントによる登録  . . . . . . . . . . . . .  <a href="#page-35">35</a>
+       <a href="#appendix-A.3.2">A.3.2</a>.  開発者による登録 . . . . . . . . . . . . . . . . .  <a href="#page-35">35</a>
+     <a href="#appendix-A.4">A.4</a>.  クライアントインスタンスごとのクライアント ID、
+           またはクライアントソフトウェアごとのクライアント ID  <a href="#page-35">35</a>
+       <a href="#appendix-A.4.1">A.4.1</a>.  クライアントソフトウェアインスタンスごとの
+               クライアント ID  . . . . . . . . . . . . . . . .  <a href="#page-35">35</a>
+       A.4.2.  クライアントソフトウェアのすべての
+               インスタンスで共有されるクライアント ID . . . . .  <a href="#page-35">35</a>
+     <a href="#appendix-A.5">A.5</a>.  ステートフルまたはステートレスな登録  . . . . . . .  <a href="#page-35">35</a>
+       <a href="#appendix-A.5.1">A.5.1</a>.  ステートフルなクライアント登録  . . . . . . . . .  <a href="#page-36">36</a>
+       <a href="#appendix-A.5.2">A.5.2</a>.  ステートレスなクライアント登録 . . . . . . . . .  <a href="#page-36">36</a>
+   謝辞 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-36">36</a>
+   著者の連絡先  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-36">36</a>
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] クライアントが OAuth 2.0
+   認可サーバーを利用するためには、そのサーバーとやり取りするための
+   特定の情報が必要であり、これにはそのサーバーで使用する
+   OAuth 2.0 クライアント識別子が含まれる。この仕様は、
+   OAuth 2.0 クライアントがこの情報を取得するために、
+   認可サーバーに動的に登録される方法を説明する。
+
+   登録プロセスの一部として、この仕様は、クライアントが有効な
+   リダイレクト URI の集合などのメタデータ集合を認可サーバーへ
+   提示するための仕組みも定義する。このメタデータは、
+   自己主張の形で伝達することも、ソフトウェアステートメントと
+   呼ばれるメタデータ集合として伝達することもできる。
+   ソフトウェアステートメントは、デジタル署名されるか、
+   Message Authentication Code (MAC) で保護される。
+   ソフトウェアステートメントの場合、発行者はクライアントに
+   関するデータの妥当性を保証する。
+
+   従来、認可サーバーへのクライアント登録は手動で行われる。
+   この仕様で定義される仕組みは、クライアントが自身を認可サーバーに
+   動的に登録するためにも、クライアント開発者がプログラムにより
+   クライアントを認可サーバーへ登録するためにも使用できる。
+   OAuth 2.0 を使用する複数のアプリケーションは、これまでに
+   そのような登録を実現する仕組みを開発している。この仕様は、
+   "OpenID Connect Dynamic Client Registration 1.0"
+   [<a href="#ref-OpenID.Registration">OpenID.Registration</a>] によって定義され、
+   "User Managed Access (UMA) Profile of OAuth 2.0" [<a href="#ref-UMA-Core">UMA-Core</a>]
+   で使用される登録の仕組みを、両者と互換性を保ちつつ、
+   より広い OAuth 2.0 ユースケース集合に適用できるよう一般化する。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  表記上の規約</span>
+
+   この文書におけるキーワード 'MUST', 'MUST NOT', 'REQUIRED',
+   'SHALL', 'SHALL NOT', 'SHOULD', 'SHOULD NOT', 'RECOMMENDED',
+   'MAY', および 'OPTIONAL' は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] に記載されるとおりに
+   解釈されるものとする。
+
+   特に注記がない限り、すべてのプロトコルパラメータ名および値は
+   大文字と小文字を区別する。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  用語</span>
+
+   この仕様は、OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] で定義される
+   "access token", "authorization code", "authorization endpoint",
+   "authorization grant", "authorization server", "client",
+   "client identifier", "client secret", "grant type",
+   "protected resource", "redirection URI",
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   "refresh token", "resource owner", "resource server",
+   "response type", および "token endpoint" という用語を使用し、
+   JSON Web Token (JWT) [<a href="./rfc7519" title="&quot;JSON Web Token (JWT)&quot;">RFC7519</a>] で定義される "Claim" という用語も
+   使用する。
+
+   この仕様は、次の用語を定義する。
+
+   Client Software
+      OAuth 2.0 クライアントを実装するソフトウェア。
+
+   Client Instance
+      クライアントソフトウェアのデプロイ済みインスタンス。
+
+   Client Developer
+      クライアントソフトウェアパッケージを構築し、配布のために
+      準備する個人または組織。クライアントが構築される時点では、
+      開発者は多くの場合、デプロイするサービスプロバイダー組織が
+      誰になるかを把握していない。クライアント開発者は、
+      デプロイメント URL など、ソフトウェアの側面をコンパイル時に
+      予測できない場合、動的登録を使用する必要がある。たとえば、
+      これはソフトウェア API パブリッシャーとデプロイ組織が
+      同一でない場合に起こり得る。
+
+   Client Registration Endpoint
+      クライアントを認可サーバーに登録できる OAuth 2.0
+      エンドポイント。このエンドポイントの URL を取得する手段は、
+      この仕様の範囲外である。
+
+   Initial Access Token
+      認可サーバーが開発者またはクライアントへ任意で発行し、
+      クライアント登録エンドポイントへの呼び出しを認可するために
+      使用される OAuth 2.0 アクセストークン。このトークンの種類と
+      形式はサービス固有である可能性が高く、この仕様の範囲外である。
+      認可サーバーがこのトークンを発行する手段、および登録
+      エンドポイントがこのトークンを検証する手段も、この仕様の
+      範囲外である。認可サーバーがクライアントを登録できる当事者を
+      制限する場合、初期アクセストークンの使用が必要となる。
+
+   Deployment Organization
+      ソフトウェア API（サービス）がデプロイされ、OAuth 2.0
+      フレームワークによって保護される管理上のセキュリティドメイン。
+      いくつかの OAuth シナリオでは、デプロイ組織とソフトウェア
+      API パブリッシャーは同一である。これらの場合、デプロイ組織は
+      多くの場合、クライアントソフトウェア開発者と密接な関係を持つ。
+      他の多くの場合、サービスの定義者は独立した第三者
+      パブリッシャーまたは標準化団体であることがある。ある API の
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+      公開仕様に従って作業する場合、クライアントソフトウェア
+      開発者は、そのソフトウェア API（サービス）をデプロイする
+      可能性のある多数のデプロイ組織と事前の関係を持つことが
+      できない。
+
+   Software API Deployment
+      特定のデプロイ組織ドメインにおいて、OAuth 2.0 により
+      保護されるソフトウェア API（保護リソース）のデプロイ済み
+      インスタンス。特定のソフトウェア API には、1 つ以上の
+      デプロイメントが存在し得る。ソフトウェア API デプロイメントは
+      通常、関連付けられた OAuth 2.0 認可サーバーと
+      クライアント登録エンドポイントを持つ。エンドポイントを
+      取得する手段は、この仕様の範囲外である。
+
+   Software API Publisher
+      1 つ以上のデプロイ環境にデプロイされ得る、特定の
+      Web アクセス可能な API を定義する組織。パブリッシャーは、
+      OAuth 2.0 によって保護され得るソフトウェアおよび API 仕様の
+      公開と配布に責任を持つ、標準化団体、商業組織、公的組織、
+      私的組織、またはオープンソース組織のいずれでもよい。
+      場合によっては、ソフトウェア API パブリッシャーと
+      クライアント開発者が同一組織であることもある。
+      Web アクセス可能な API の公開時点では、ソフトウェア
+      パブリッシャーは多くの場合、デプロイする組織と事前の
+      関係を持っていない。
+
+   Software Statement
+      クライアントソフトウェアに関するメタデータ値を表明する、
+      デジタル署名済みまたは MAC 付きの JSON Web Token (JWT)
+      [<a href="./rfc7519" title="&quot;JSON Web Token (JWT)&quot;">RFC7519</a>]。場合によっては、ソフトウェアステートメントは
+      クライアント開発者によって直接発行される。他の場合には、
+      ソフトウェアステートメントは、クライアント開発者が使用するために
+      第三者組織によって発行される。いずれの場合も、認可サーバーが
+      ソフトウェアステートメントの発行者と持つ信頼関係は、
+      登録リクエストを受け入れるかどうかの評価への入力として
+      使用されることを意図している。ソフトウェアステートメントは、
+      クライアント登録リクエストの一部として認可サーバーへ
+      提示できる。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h3"><a class="selflink" id="section-1.3" href="#section-1.3">1.3</a>.  プロトコルフロー</span>
+
+        +--------(A)- Initial Access Token (OPTIONAL)
+        |
+        |   +----(B)- Software Statement (OPTIONAL)
+        |   |
+        v   v
+    +-----------+                                      +---------------+
+    |           |--(C)- Client Registration Request --&gt;|    Client     |
+    | Client or |                                      | Registration  |
+    | Developer |&lt;-(D)- Client Information Response ---|   Endpoint    |
+    |           |        or Client Error Response      +---------------+
+    +-----------+
+
+   図 1: 抽象的な動的クライアント登録フロー
+
+   図 1 に示す抽象的な OAuth 2.0 クライアント動的登録フローは、
+   クライアントまたは開発者と、この仕様で定義されるエンドポイントとの
+   相互作用を説明する。この図はエラー条件を示していない。
+   このフローには次の手順が含まれる。
+
+   (A)   任意で、クライアントまたは開発者に、クライアント登録
+         エンドポイントへのアクセスを与える初期アクセストークンが
+         発行される。初期アクセストークンをクライアントまたは
+         開発者へ発行する方法は、この仕様の範囲外である。
+
+   (B)   任意で、クライアントまたは開発者に、クライアント登録
+         エンドポイントで使用するソフトウェアステートメントが
+         発行される。ソフトウェアステートメントをクライアントまたは
+         開発者へ発行する方法は、この仕様の範囲外である。
+
+   (C)   クライアントまたは開発者は、クライアントが要求する登録
+         メタデータを伴ってクライアント登録エンドポイントを呼び出し、
+         認可サーバーが要求する場合には、任意で (A) の
+         初期アクセストークンを含める。
+
+   (D)   認可サーバーはクライアントを登録し、次を返す。
+
+         *  クライアントの登録済みメタデータ、
+
+         *  サーバーで一意なクライアント識別子、および
+
+         *  このクライアントに適用される場合、クライアントシークレット
+            などのクライアント資格情報の集合。
+
+   さまざまな構成および使用法の例は、<a href="#appendix-A">付録 A</a> に含まれている。
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  クライアントメタデータ</span>
+
+   登録済みクライアントは、有効なリダイレクト URI の一覧や
+   表示名など、認可サーバーにおけるクライアント識別子に関連付けられた
+   メタデータ値の集合を持つ。
+
+   これらのクライアントメタデータ値は、次の 2 つの方法で使用される。
+
+   o  登録リクエストへの入力値として、および
+
+   o  登録レスポンスにおける出力値として。
+
+   次のクライアントメタデータフィールドは、この仕様によって
+   定義される。別途記載されない限り、すべてのクライアント
+   メタデータフィールドの実装および使用は OPTIONAL である。
+   すべてのデータメンバー型（文字列、配列、数値）は、JSON
+   [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] 表現に基づいて定義される。
+
+   redirect_uris
+      認可コードフローやインプリシットフローなど、リダイレクト
+      ベースのフローで使用するリダイレクト URI 文字列の配列。
+      OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] の <a href="#section-2">Section 2</a> で要求されるとおり、
+      リダイレクトを伴うフローを使用するクライアントは、
+      自身のリダイレクト URI 値を登録しなければならない。
+      リダイレクトベースのフローに対する動的登録をサポートする
+      認可サーバーは、このメタデータ値のサポートを実装しなければ
+      ならない。
+
+   token_endpoint_auth_method
+      トークンエンドポイントに対して要求される認証方式を示す
+      文字列。この仕様で定義される値は次のとおりである。
+
+      *  "none": クライアントは OAuth 2.0 の <a href="#section-2.1">Section 2.1</a> で
+         定義されるパブリッククライアントであり、クライアント
+         シークレットを持たない。
+
+      *  "client_secret_post": クライアントは OAuth 2.0 の
+         <a href="#section-2.3.1">Section 2.3.1</a> で定義される HTTP POST パラメータを使用する。
+
+      *  "client_secret_basic": クライアントは OAuth 2.0 の
+         <a href="#section-2.3.1">Section 2.3.1</a> で定義される HTTP Basic を使用する。
+
+      追加の値は、<a href="#section-4.2">Section 4.2</a> で確立される IANA
+      "OAuth Token Endpoint Authentication Methods" レジストリを
+      通じて定義できる。絶対 URI も、登録なしにこのパラメータの
+      値として使用できる。指定されない、または省略された場合、
+      デフォルトは "client_secret_basic" であり、OAuth 2.0 の
+      <a href="#section-2.3.1">Section 2.3.1</a> で規定される HTTP Basic 認証方式を示す。
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   grant_types
+      クライアントがトークンエンドポイントで使用できる OAuth 2.0
+      グラントタイプ文字列の配列。これらのグラントタイプは
+      次のように定義される。
+
+      *  "authorization_code": OAuth 2.0 の <a href="#section-4.1">Section 4.1</a> で
+         定義される認可コードグラントタイプ。
+
+      *  "implicit": OAuth 2.0 の <a href="#section-4.2">Section 4.2</a> で定義される
+         インプリシットグラントタイプ。
+
+      *  "password": OAuth 2.0 の <a href="#section-4.3">Section 4.3</a> で定義される
+         リソース所有者パスワード資格情報グラントタイプ。
+
+      *  "client_credentials": OAuth 2.0 の <a href="#section-4.4">Section 4.4</a> で
+         定義されるクライアント資格情報グラントタイプ。
+
+      *  "refresh_token": OAuth 2.0 の <a href="#section-6">Section 6</a> で定義される
+         リフレッシュトークングラントタイプ。
+
+      *  "urn:ietf:params:oauth:grant-type:jwt-bearer":
+         OAuth JWT Bearer Token Profiles [<a href="./rfc7523" title="&quot;JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants&quot;">RFC7523</a>] で定義される
+         JWT Bearer Token Grant Type。
+
+      *  "urn:ietf:params:oauth:grant-type:saml2-bearer":
+         OAuth SAML 2 Bearer Token Profiles [<a href="./rfc7522" title="&quot;Security Assertion Markup Language (SAML) 2.0 Profile for OAuth 2.0 Client Authentication and Authorization Grants&quot;">RFC7522</a>] で定義される
+         SAML 2.0 Bearer Assertion Grant。
+
+      そのグラントタイプでトークンエンドポイントが使用される場合、
+      このパラメータの値は、グラントタイプ定義で定義され、
+      トークンエンドポイントへ渡される "grant_type" パラメータの
+      値と同じでなければならない。認可サーバーは、OAuth 2.0 の
+      <a href="#section-4.5">Section 4.5</a> で説明されるグラントタイプ拡張プロセスで
+      定義される他の値を許可してもよい。省略された場合、
+      デフォルトの動作は、クライアントが "authorization_code"
+      Grant Type のみを使用することである。
+
+   response_types
+      クライアントが認可エンドポイントで使用できる OAuth 2.0
+      レスポンスタイプ文字列の配列。これらのレスポンスタイプは
+      次のように定義される。
+
+      *  "code": OAuth 2.0 の <a href="#section-4.1">Section 4.1</a> で定義される
+         認可コードレスポンスタイプ。
+
+      *  "token": OAuth 2.0 の <a href="#section-4.2">Section 4.2</a> で定義される
+         インプリシットレスポンスタイプ。
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                         [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+      認可エンドポイントがそのグラントタイプによって使用される場合、
+      このパラメータの値は、グラントタイプ定義で定義され、
+      認可エンドポイントへ渡される "response_type" パラメータの
+      値と同じでなければならない。認可サーバーは、OAuth 2.0 の
+      <a href="#section-4.5">Section 4.5</a> で説明されるグラントタイプ拡張プロセスで
+      定義される他の値を許可してもよい。省略された場合、
+      デフォルトは、クライアントが "code" レスポンスタイプのみを
+      使用することである。
+
+   client_name
+      認可中にエンドユーザーへ提示される、クライアントの
+      人間が読める文字列名。省略された場合、認可サーバーは
+      代わりに生の "client_id" 値をエンドユーザーへ表示してもよい。
+      クライアントは常にこのフィールドを送信することが RECOMMENDED
+      である。このフィールドの値は、<a href="#section-2.2">Section 2.2</a> に記載される
+      ように国際化してもよい。
+
+   client_uri
+      クライアントに関する情報を提供する Web ページの URL 文字列。
+      存在する場合、サーバーはこの URL をクリック可能な形で
+      エンドユーザーへ表示すべきである。クライアントは常にこの
+      フィールドを送信することが RECOMMENDED である。このフィールドの
+      値は有効な Web ページを指していなければならない。このフィールドの
+      値は、<a href="#section-2.2">Section 2.2</a> に記載されるように国際化してもよい。
+
+   logo_uri
+      クライアントのロゴを参照する URL 文字列。存在する場合、
+      サーバーは承認中にこの画像をエンドユーザーへ表示すべきである。
+      このフィールドの値は有効な画像ファイルを指していなければ
+      ならない。このフィールドの値は、<a href="#section-2.2">Section 2.2</a> に記載される
+      ように国際化してもよい。
+
+   scope
+      クライアントがアクセストークンを要求するときに使用できる
+      スコープ値の空白区切りリストを含む文字列（OAuth 2.0
+      [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] の <a href="#section-3.3">Section 3.3</a> に記載）。このリスト内の値の意味は
+      サービス固有である。省略された場合、認可サーバーは
+      デフォルトのスコープ集合でクライアントを登録してもよい。
+
+   contacts
+      このクライアントの責任者へ連絡する方法を表す文字列の配列。
+      通常は電子メールアドレスである。認可サーバーは、クライアントに
+      関するサポートリクエストのために、これらの連絡先アドレスを
+      エンドユーザーが利用できるようにしてもよい。プライバシーに
+      関する考慮事項については <a href="#section-6">Section 6</a> を参照すること。
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   tos_uri
+      クライアントに対する人間が読めるサービス利用規約文書を指す
+      URL 文字列。この文書は、エンドユーザーがクライアントを
+      認可するときに受け入れる、エンドユーザーとクライアントとの
+      契約関係を説明する。提供されている場合、認可サーバーはこの
+      URL をエンドユーザーへ表示すべきである。このフィールドの値は
+      有効な Web ページを指していなければならない。このフィールドの
+      値は、<a href="#section-2.2">Section 2.2</a> に記載されるように国際化してもよい。
+
+   policy_uri
+      デプロイ組織が個人データをどのように収集、使用、保持、
+      開示するかを説明する、人間が読めるプライバシーポリシー文書を
+      指す URL 文字列。提供されている場合、認可サーバーはこの
+      URL をエンドユーザーへ表示すべきである。このフィールドの値は
+      有効な Web ページを指していなければならない。このフィールドの
+      値は、<a href="#section-2.2">Section 2.2</a> に記載されるように国際化してもよい。
+
+   jwks_uri
+      クライアントの公開鍵を含む、クライアントの JSON Web Key
+      (JWK) Set [<a href="./rfc7517" title="&quot;JSON Web Key (JWK)&quot;">RFC7517</a>] 文書を参照する URL 文字列。このフィールドの
+      値は有効な JWK Set 文書を指していなければならない。
+      これらの鍵は、署名または暗号化を使用する上位レベルの
+      プロトコルで使用できる。たとえば、これらの鍵は、
+      クライアント認証に JWT を使用する場合 [<a href="./rfc7523" title="&quot;JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants&quot;">RFC7523</a>] に、
+      トークンエンドポイントへ行われる署名付きリクエストを検証する
+      ために、いくつかのアプリケーションで使用されることがある。
+      このパラメータの使用は、鍵ローテーションを容易にするため、
+      "jwks" パラメータよりも望ましい。"jwks_uri" パラメータと
+      "jwks" パラメータは、同一のリクエストまたはレスポンスに
+      両方存在してはならない。
+
+   jwks
+      クライアントの公開鍵を含む、クライアントの JSON Web Key Set
+      [<a href="./rfc7517" title="&quot;JSON Web Key (JWK)&quot;">RFC7517</a>] 文書値。このフィールドの値は、有効な JWK Set を含む
+      JSON オブジェクトでなければならない。これらの鍵は、署名または
+      暗号化を使用する上位レベルのプロトコルで使用できる。
+      このパラメータは、公開 URL をホストできないネイティブ
+      クライアントなど、"jwks_uri" パラメータを使用できない
+      クライアントによって使用されることを意図している。
+      "jwks_uri" パラメータと "jwks" パラメータは、同一の
+      リクエストまたはレスポンスに両方存在してはならない。
+
+   software_id
+      動的に登録されるクライアントソフトウェアを登録エンドポイントが
+      識別するために使用する、クライアント開発者またはソフトウェア
+      パブリッシャーによって割り当てられる一意な識別子文字列
+      （例: Universally Unique Identifier (UUID)）。認可サーバーに
+      よって発行され、インスタンス間で異なるべきである
+      "client_id" とは異なり、"software_id" はクライアント
+      ソフトウェアのすべてのインスタンスで同一のままであるべきである。
+      "software_id" は、同一ソフトウェア片の複数の更新または
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+      バージョンをまたいでも同一のままであるべきである。このフィールドの
+      値は人間が読むことを意図しておらず、通常はクライアントおよび
+      認可サーバーに対して不透明である。
+
+   software_version
+      "software_id" によって識別されるクライアントソフトウェアの
+      バージョン識別子文字列。"software_version" の値は、
+      同じ "software_id" によって識別されるクライアントソフトウェアの
+      あらゆる更新時に変更されるべきである。このフィールドの値は、
+      文字列の等価一致を使用して比較されることを意図しており、
+      この仕様では他の比較意味論は定義されない。このフィールドの値は
+      この仕様の範囲外であるが、人間が読むことを意図しておらず、
+      通常はクライアントおよび認可サーバーに対して不透明である。
+      この値の変更を引き起こすクライアントソフトウェア更新が何を
+      構成するかの定義は、そのソフトウェア自体に固有であり、
+      この仕様の範囲外である。
+
+   この仕様の拡張およびプロファイルは、この文書の <a href="#section-4">Section 4</a> の
+   IANA に関する考慮事項に従って登録されたメタデータ名および説明で、
+   この一覧を拡張できる。認可サーバーは、クライアントから送信された
+   理解できないクライアントメタデータを無視しなければならない
+   （たとえば、処理中にクライアントの登録レコードから未知の
+   メタデータを黙って削除することによる）。認可サーバーは、
+   要求されたクライアントメタデータ値を、<a href="#section-3.2.1">Section 3.2.1</a> に
+   記載される適切なデフォルトで置き換えるか、<a href="#section-3.2.2">Section 3.2.2</a> に
+   記載されるエラーレスポンスを返すことにより、拒否してもよい。
+
+   クライアントメタデータ値は、<a href="#section-3.1">Section 3.1</a> に記載されるように
+   登録リクエストの本文で直接伝達することも、<a href="#section-2.3">Section 2.3</a> に
+   記載されるようにソフトウェアステートメント内のクレームとして
+   含めることもできる。両者を混在させることも可能である。
+   同じクライアントメタデータ名が両方の場所に存在し、かつ
+   ソフトウェアステートメントが認可サーバーによって信頼される場合、
+   ソフトウェアステートメント内のクレームの値が優先されなければ
+   ならない。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  グラントタイプとレスポンスタイプの関係</span>
+
+   上で説明した "grant_types" と "response_types" の値は、
+   OAuth プロトコルの異なるエンドポイントへ渡される引数を指すため、
+   部分的に直交している。しかし、クライアントが利用できる
+   "grant_types" は、そのクライアントが使用を許可される
+   "response_types" に影響し、その逆も同様であるという点で
+   関連している。たとえば、"authorization_code" を含む
+   "grant_types" 値は、"code" を含む "response_types" 値を
+   含意する。どちらの値も OAuth 2.0 認可コードグラントの一部として
+   定義されているためである。したがって、これらのフィールドを
+   サポートするサーバーは、
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   たとえば一貫性のない登録リクエストに対して
+   "invalid_client_metadata" エラーレスポンスを返すことにより、
+   クライアントが一貫しない状態で自身を登録できないようにする
+   手段を講じるべきである。
+
+   2 つのフィールド間の相関関係を、下の表に示す。
+
+   +-----------------------------------------------+-------------------+
+   | grant_types value includes:                   | response_types    |
+   |                                               | value includes:   |
+   +-----------------------------------------------+-------------------+
+   | authorization_code                            | code              |
+   | implicit                                      | token             |
+   | password                                      | (none)            |
+   | client_credentials                            | (none)            |
+   | refresh_token                                 | (none)            |
+   | urn:ietf:params:oauth:grant-type:jwt-bearer   | (none)            |
+   | urn:ietf:params:oauth:grant-type:saml2-bearer | (none)            |
+   +-----------------------------------------------+-------------------+
+
+   "grant_types" または "response_types" パラメータに新しい値を
+   導入する、この文書の拡張およびプロファイルは、これら 2 つの
+   パラメータ型間のすべての対応関係を文書化しなければならない。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  人間が読めるクライアントメタデータ</span>
+
+   人間が読めるクライアントメタデータ値、および人間が読める値を
+   参照するクライアントメタデータ値は、複数の言語および文字体系で
+   表現してもよい。たとえば、"client_name", "tos_uri",
+   "policy_uri", "logo_uri", および "client_uri" などのフィールドの
+   値は、異なる場所での利用を容易にするため、一部のクライアント登録で
+   複数のロケール固有の値を持つことがある。
+
+   言語および文字体系を指定するため、<a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a> [<a href="./rfc5646" title="&quot;Tags for Identifying Languages&quot;">RFC5646</a>] 言語タグが
+   クライアントメタデータメンバー名に追加され、"#" 文字で区切られる。
+   JSON [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] のメンバー名は大文字と小文字を区別するため、
+   Claim Names で使用される言語タグ値は、"IANA Language Subtag"
+   レジストリ [<a href="#ref-IANA.Language">IANA.Language</a>] に登録されている文字の大小文字で
+   綴ることが RECOMMENDED である。特に、通常、言語名は小文字で、
+   地域名は大文字で、言語は混在した大小文字で綴られる。ただし、
+   <a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a> 言語タグ値は大文字と小文字を区別しないため、実装は
+   提供された言語タグ値を大文字と小文字を区別しない方法で解釈すべきである。
+   <a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a> の推奨に従い、メタデータメンバー名で使用される
+   言語タグ値は、必要な限りでのみ具体的にすべきである。たとえば、
+   多くの文脈では "fr-CA" や "fr-FR" ではなく、"fr" を使用すれば
+   十分であることがある。
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   たとえば、クライアントは同一の登録リクエスト内で、英語での
+   名前を "client_name#en": "My Client" として、日本語での名前を
+   "client_name#ja-Jpan-JP":
+   "\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u540D" として表現できる。
+   認可サーバーは、システム構成、ユーザー設定、またはその他の要因に
+   基づいて表示する名前を選択し、認可手順中にこれらの名前のいずれか
+   またはすべてをリソース所有者へ表示してもよい。
+
+   人間が読めるフィールドが言語タグなしで送信された場合、
+   それを使用する当事者は、その文字列値の言語、文字セット、または
+   文字体系についていかなる仮定もしてはならず、その文字列値は、
+   ユーザーインターフェイスで提示される場所では常にそのまま使用され
+   なければならない。相互運用性を容易にするため、クライアントおよび
+   サーバーは、言語固有フィールドに加えて、言語タグなしの
+   人間が読めるフィールドを使用することが RECOMMENDED であり、
+   言語タグなしで送信される人間が読めるフィールドには、多様な
+   システムで表示するのに適した値を含めることが RECOMMENDED である。
+
+   実装者向け注記: 多くの JSON ライブラリでは、JSON オブジェクトの
+   メンバーを、ライブラリのネイティブプログラミング環境における
+   オブジェクト構造のメンバーとして参照できる。しかし、"#" 文字は
+   JSON オブジェクトのメンバー名の内部では有効な文字である一方、
+   多くのプログラミング環境ではオブジェクトメンバー名として使用できる
+   有効な文字ではない。したがって、実装はこれらのクレームに対して
+   代替のアクセス形式を使用する必要がある。たとえば JavaScript で、
+   "var j = JSON.parse(json);" のように JSON を解析した場合、回避策として
+   メンバー "client_name#en-us" は JavaScript 構文
+   "j["client_name#en-us"]" を使用してアクセスできる。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  ソフトウェアステートメント</span>
+
+   ソフトウェアステートメントは、クライアントソフトウェアに関する
+   メタデータ値を束として表明する JSON Web Token (JWT)
+   [<a href="./rfc7519" title="&quot;JSON Web Token (JWT)&quot;">RFC7519</a>] である。ソフトウェアステートメントで使用できる
+   クレームの集合は <a href="#section-2">Section 2</a> で定義される。クライアント登録
+   リクエストの一部として認可サーバーへ提示される場合、
+   ソフトウェアステートメントは JSON Web Signature (JWS)
+   [<a href="./rfc7515" title="&quot;JSON Web Signature (JWS)&quot;">RFC7515</a>] を使用してデジタル署名されているか、MAC 付きで
+   なければならず、ソフトウェアステートメント内のクレームを
+   証明する当事者を示す "iss"（issuer）クレームを含まなければ
+   ならない。ソフトウェアステートメントは "RS256" 署名アルゴリズムを
+   使用してデジタル署名されることが RECOMMENDED であるが、特定の
+   アプリケーションは異なるアルゴリズムの使用を規定してもよい。
+   認可サーバーが同一のソフトウェアステートメントを使用する
+   ソフトウェアの異なるインスタンスを関連付けられるようにするため、
+   ソフトウェアステートメントには "software_id" クレームを含めることが
+   RECOMMENDED である。
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   たとえば、ソフトウェアステートメントは次のクレームを含むことができる。
+
+     {
+      "software_id": "4NRB1-0XZABZI9E6-5SM3R",
+      "client_name": "Example Statement-based Client",
+      "client_uri": "https://client.example.net/"
+     }
+
+   次の非規範的な JWT の例は、これらのクレームを含み、
+   "RS256" を使用して非対称署名されている（改行は表示目的のみ）。
+
+     eyJhbGciOiJSUzI1NiJ9.
+     eyJzb2Z0d2FyZV9pZCI6IjROUkIxLTBYWkFCWkk5RTYtNVNNM1IiLCJjbGll
+     bnRfbmFtZSI6IkV4YW1wbGUgU3RhdGVtZW50LWJhc2VkIENsaWVudCIsImNs
+     aWVudF91cmkiOiJodHRwczovL2NsaWVudC5leGFtcGxlLm5ldC8ifQ.
+     GHfL4QNIrQwL18BSRdE595T9jbzqa06R9BT8w409x9oIcKaZo_mt15riEXHa
+     zdISUvDIZhtiyNrSHQ8K4TvqWxH6uJgcmoodZdPwmWRIEYbQDLqPNxREtYn0
+     5X3AR7ia4FRjQ2ojZjk5fJqJdQ-JcfxyhK-P8BAWBd6I2LLA77IG32xtbhxY
+     fHX7VhuU5ProJO8uvu3Ayv4XRhLZJY4yKfmyjiiKiPNe-Ia4SMy_d_QSWxsk
+     U5XIQl5Sa2YRPMbDRXttm2TfnZM1xx70DoYi8g6czz-CPGRi4SW_S2RKHIJf
+     IjoI3zTJ0Y2oe0_EJAiXbL6OyF9S5tKxDXV8JIndSA
+
+   ソフトウェアステートメントは通常、クライアントアプリケーションの
+   すべてのインスタンスとともに配布される。クライアントまたは開発者が
+   ソフトウェアステートメントを取得する手段は、この仕様の範囲外である。
+   一般的な方法としては、クライアント開発者がソフトウェア API
+   パブリッシャーに登録し、クライアントのクラス用のソフトウェア
+   ステートメントを取得することにより、クライアント固有の JWT を
+   生成する方法などがあり得る。
+
+   認可サーバーがソフトウェアステートメント内の情報を信頼し利用するか
+   どうかを判断する基準は、この仕様の範囲外である。
+
+   場合によっては、認可サーバーは、事前に動的クライアント登録が
+   行われていなくても、認可リクエスト内のクライアント識別子として、
+   ソフトウェアステートメント値を直接受け入れることを選択してもよい。
+   認可サーバーがそうする状況、およびこの場合に必要な具体的な
+   ソフトウェアステートメントの特性は、この仕様の範囲外である。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  クライアント登録エンドポイント</span>
+
+   クライアント登録エンドポイントは、この文書で定義される OAuth 2.0
+   エンドポイントであり、クライアントを認可サーバーに登録できるように
+   設計されている。クライアント登録エンドポイントは、リクエスト
+   パラメータがエンティティ本文内で "application/json" 形式により
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   符号化された HTTP POST メッセージを受け入れなければならない。
+   クライアント登録エンドポイントは、<a href="#section-5">Section 5</a> に記載されるように、
+   トランスポート層セキュリティ機構によって保護されなければならない。
+
+   クライアント登録エンドポイントは、OAuth 2.0 [<a href="./rfc6749" title="&quot;The OAuth 2.0 Authorization Framework&quot;">RFC6749</a>] の
+   保護リソースであってもよく、登録を事前に認可された当事者のみに
+   制限するため、OAuth 2.0 アクセストークンの形式の初期アクセス
+   トークンを受け入れてもよい。クライアントまたは開発者が初期
+   アクセストークンを取得する方法は、一般に帯域外であり、この仕様の
+   範囲外である。クライアント登録エンドポイントが初期アクセス
+   トークンを確認および検証する方法は、この仕様の範囲外である。
+
+   オープン登録をサポートし、より広い相互運用性を容易にするため、
+   クライアント登録エンドポイントは、認可なし（すなわち、リクエスト内に
+   初期アクセストークンなし）の登録リクエストを許可すべきである。
+   これらのリクエストは、クライアント登録エンドポイントに対する
+   サービス拒否攻撃を防ぐため、レート制限またはその他の制限を
+   受けてもよい。
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  クライアント登録リクエスト</span>
+
+   この操作は、クライアントを認可サーバーに登録する。認可サーバーは、
+   このクライアントに一意なクライアント識別子を割り当て、任意で
+   クライアントシークレットを割り当て、リクエストで提供された
+   メタデータを、発行されたクライアント識別子に関連付ける。
+   リクエストには、登録中にクライアントについて指定される任意の
+   クライアントメタデータパラメータが含まれる。認可サーバーは、
+   クライアントメタデータで省略された項目に対してデフォルト値を
+   プロビジョニングしてもよい。
+
+   登録するため、クライアントまたは開発者は、"application/json" の
+   コンテントタイプでクライアント登録エンドポイントへ HTTP POST を
+   送信する。HTTP エンティティペイロードは、JSON オブジェクトと、
+   その JSON オブジェクトのトップレベルメンバーとしての要求された
+   すべてのクライアントメタデータ値からなる JSON [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] 文書である。
+
+   たとえば、サーバーがオープン登録（初期アクセストークンなし）を
+   サポートする場合、クライアントは次の登録リクエストを
+   クライアント登録エンドポイントへ送信できる。
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   次は、初期アクセストークンを使用しない非規範的なリクエスト例である。
+
+     POST /register HTTP/1.1
+     Content-Type: application/json
+     Accept: application/json
+     Host: server.example.com
+
+     {
+      "redirect_uris": [
+        "https://client.example.org/callback",
+        "https://client.example.org/callback2"],
+      "client_name": "My Example Client",
+      "client_name#ja-Jpan-JP":
+         "\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u540D",
+      "token_endpoint_auth_method": "client_secret_basic",
+      "logo_uri": "https://client.example.org/logo.png",
+      "jwks_uri": "https://client.example.org/my_public_keys.jwks",
+      "example_extension_parameter": "example_value"
+     }
+
+   あるいは、サーバーが認可済み登録をサポートする場合、開発者または
+   クライアントには初期アクセストークンがプロビジョニングされる。
+   （初期アクセストークンを取得する方法は、この仕様の範囲外である。）
+   開発者またはクライアントは、次の認可済み登録リクエストを
+   クライアント登録エンドポイントへ送信する。この例で送信される
+   初期アクセストークンは OAuth 2.0 Bearer Token [<a href="./rfc6750" title="&quot;The OAuth 2.0 Authorization Framework: Bearer Token Usage&quot;">RFC6750</a>] であるが、
+   認可サーバーは任意の OAuth 2.0 トークンタイプを使用できることに
+   注意すること。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   次は、初期アクセストークンを使用し、JWK Set を値として登録する
+   非規範的なリクエスト例である（値内の改行は表示目的のみ）。
+
+     POST /register HTTP/1.1
+     Content-Type: application/json
+     Accept: application/json
+     Authorization: Bearer ey23f2.adfj230.af32-developer321
+     Host: server.example.com
+
+     {
+      "redirect_uris": ["https://client.example.org/callback",
+         "https://client.example.org/callback2"],
+      "client_name": "My Example Client",
+      "client_name#ja-Jpan-JP":
+         "\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u540D",
+      "token_endpoint_auth_method": "client_secret_basic",
+      "policy_uri": "https://client.example.org/policy.html",
+      "jwks": {"keys": [{
+         "e": "AQAB",
+         "n": "nj3YJwsLUFl9BmpAbkOswCNVx17Eh9wMO-_AReZwBqfaWFcfG
+   HrZXsIV2VMCNVNU8Tpb4obUaSXcRcQ-VMsfQPJm9IzgtRdAY8NN8Xb7PEcYyk
+   lBjvTtuPbpzIaqyiUepzUXNDFuAOOkrIol3WmflPUUgMKULBN0EUd1fpOD70p
+   RM0rlp_gg_WNUKoW1V-3keYUJoXH9NztEDm_D2MQXj9eGOJJ8yPgGL8PAZMLe
+   2R7jb9TxOCPDED7tY_TU4nFPlxptw59A42mldEmViXsKQt60s1SLboazxFKve
+   qXC_jpLUt22OC6GUG63p-REw-ZOr3r845z50wMuzifQrMI9bQ",
+         "kty": "RSA"
+      }]},
+      "example_extension_parameter": "example_value"
+     }
+
+<span class="h4"><a class="selflink" id="section-3.1.1" href="#section-3.1.1">3.1.1</a>.  ソフトウェアステートメントを使用するクライアント登録リクエスト</span>
+
+   JSON 要素に加えて、<a href="#section-2.3">Section 2.3</a> に記載されるように、
+   クライアントメタデータ値はソフトウェアステートメント内でも
+   提供してもよい。認可サーバーは、この機能をサポートしない場合、
+   ソフトウェアステートメントを無視してもよい。サーバーが
+   ソフトウェアステートメントをサポートする場合、ソフトウェア
+   ステートメントで伝達されるクライアントメタデータ値は、プレーンな
+   JSON 要素を使用して伝達される値より優先されなければならない。
+
+   ソフトウェアステートメントは、この OPTIONAL メンバーを使用して、
+   リクエスト JSON オブジェクト内に含められる。
+
+   software_statement
+      クライアントソフトウェアに関するクライアントメタデータ値を
+      クレームとして含むソフトウェアステートメント。これは署名済み
+      JWT 全体を含む文字列値である。
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   次の例では、一部の登録パラメータは <a href="#section-2.3">Section 2.3</a> の例にある
+   ソフトウェアステートメント内のクレームとして伝達され、一方で
+   クライアントインスタンスに固有の一部の値は通常のパラメータとして
+   伝達される（値内の改行は表示目的のみ）。
+
+     POST /register HTTP/1.1
+     Content-Type: application/json
+     Accept: application/json
+     Host: server.example.com
+
+     {
+       "redirect_uris": [
+         "https://client.example.org/callback",
+         "https://client.example.org/callback2"
+       ],
+       "software_statement": "eyJhbGciOiJSUzI1NiJ9.
+   eyJzb2Z0d2FyZV9pZCI6IjROUkIxLTBYWkFCWkk5RTYtNVNNM1IiLCJjbGll
+   bnRfbmFtZSI6IkV4YW1wbGUgU3RhdGVtZW50LWJhc2VkIENsaWVudCIsImNs
+   aWVudF91cmkiOiJodHRwczovL2NsaWVudC5leGFtcGxlLm5ldC8ifQ.
+   GHfL4QNIrQwL18BSRdE595T9jbzqa06R9BT8w409x9oIcKaZo_mt15riEXHa
+   zdISUvDIZhtiyNrSHQ8K4TvqWxH6uJgcmoodZdPwmWRIEYbQDLqPNxREtYn0
+   5X3AR7ia4FRjQ2ojZjk5fJqJdQ-JcfxyhK-P8BAWBd6I2LLA77IG32xtbhxY
+   fHX7VhuU5ProJO8uvu3Ayv4XRhLZJY4yKfmyjiiKiPNe-Ia4SMy_d_QSWxsk
+   U5XIQl5Sa2YRPMbDRXttm2TfnZM1xx70DoYi8g6czz-CPGRi4SW_S2RKHIJf
+   IjoI3zTJ0Y2oe0_EJAiXbL6OyF9S5tKxDXV8JIndSA",
+       "scope": "read write",
+       "example_extension_parameter": "example_value"
+     }
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  レスポンス</span>
+
+   登録リクエストが成功すると、認可サーバーはクライアントの
+   クライアント識別子を返す。サーバーは HTTP 201 Created
+   ステータスコードと、<a href="#section-3.2.1">Section 3.2.1</a> に記載される内容を含む
+   "application/json" 型の本文で応答する。
+
+   登録リクエストが成功しなかった場合、認可サーバーは
+   <a href="#section-3.2.2">Section 3.2.2</a> に記載されるようにエラーで応答する。
+
+<span class="h4"><a class="selflink" id="section-3.2.1" href="#section-3.2.1">3.2.1</a>.  クライアント情報レスポンス</span>
+
+   レスポンスはクライアント識別子を含み、クライアントが
+   コンフィデンシャルクライアントである場合にはクライアント
+   シークレットも含む。レスポンスは、この仕様への拡張で規定される
+   追加フィールドを含んでもよい。
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   client_id
+      REQUIRED.  OAuth 2.0 クライアント識別子文字列。認可サーバーの
+      裁量により、登録済みクライアントの複数のインスタンスに同じ
+      クライアント識別子を発行してもよいが、現在他の登録済み
+      クライアントに対して有効であるべきではない。
+
+   client_secret
+      OPTIONAL.  OAuth 2.0 クライアントシークレット文字列。
+      発行される場合、これは各 "client_id" ごとに一意でなければならず、
+      同じ "client_id" を使用するクライアントの複数インスタンスでも
+      一意であるべきである。この値は、OAuth 2.0
+      <a href="./rfc6749#section-2.3.1">[RFC6749], Section&nbsp;2.3.1</a> に記載されるように、
+      コンフィデンシャルクライアントがトークンエンドポイントへ
+      認証するために使用する。
+
+   client_id_issued_at
+      OPTIONAL.  クライアント識別子が発行された時刻。この時刻は、
+      1970-01-01T00:00:00Z から発行日時までを UTC で測定した
+      秒数として表される。
+
+   client_secret_expires_at
+      "client_secret" が発行される場合は REQUIRED. クライアント
+      シークレットが失効する時刻、または失効しない場合は 0。
+      この時刻は、1970-01-01T00:00:00Z から失効日時までを UTC で
+      測定した秒数として表される。
+
+   さらに、認可サーバーは、認可サーバー自身によって
+   プロビジョニングされた任意のフィールドを含め、このクライアントに
+   関するすべての登録済みメタデータを返さなければならない。
+   認可サーバーは、登録中に送信されたクライアントが要求した
+   メタデータ値のいずれかを拒否または置換し、適切な値で
+   置き換えてもよい。クライアントまたは開発者は、レスポンス内の値を
+   確認して、その登録が利用に十分かどうか（例: 登録された
+   "token_endpoint_auth_method" がクライアントソフトウェアでサポート
+   されているか）を判断し、クライアントソフトウェアに適した対応方針を
+   決定できる。そのような状況への対応はこの仕様の範囲外であるが、
+   アプリケーション開発者または認可サーバープロバイダーに報告を
+   提出すること、異なるメタデータ値で再登録を試みること、または
+   その他のさまざまな方法を含み得る。たとえば、サーバーが [<a href="./rfc7592" title="&quot;OAuth 2.0 Dynamic Client Registration Management Protocol&quot;">RFC7592</a>] で
+   定義されるような登録管理機構もサポートする場合、クライアントまたは
+   開発者は異なるメタデータ値で登録の更新を試みることができる。
+   このプロセスは、[<a href="#ref-OpenID.Discovery">OpenID.Discovery</a>] のようなサービス発見プロトコルに
+   よっても補助され得る。これはサーバーの機能を列挙できるため、
+   クライアントはより十分な情報に基づいた登録リクエストを行える。
+   そのような管理または発見システムの使用はいずれも任意であり、
+   この仕様の範囲外である。
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 20]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-21" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   成功した登録レスポンスは HTTP 201 Created ステータスコードを
+   使用し、オブジェクトのトップレベルメンバーとしてすべての
+   パラメータを含む単一の JSON オブジェクト [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] からなる
+   "application/json" 型の本文を使用する。
+
+   登録の一部としてソフトウェアステートメントが使用された場合、
+   その値は "software_statement" メンバー名を使用して、他の
+   メタデータとともに変更されずにレスポンスで返されなければならない。
+   ソフトウェアステートメントから使用されたクライアントメタデータ
+   要素も、登録レスポンス内でトップレベルのクライアントメタデータ値
+   として直接返されなければならない（要求された値と使用された値が
+   異なる可能性があるため、値が異なる場合もある）。
+
+   次は、成功した登録の非規範的なレスポンス例である。
+
+     HTTP/1.1 201 Created
+     Content-Type: application/json
+     Cache-Control: no-store
+     Pragma: no-cache
+
+     {
+      "client_id": "s6BhdRkqt3",
+      "client_secret": "cf136dc3c1fc93f31185e5885805d",
+      "client_id_issued_at": 2893256800,
+      "client_secret_expires_at": 2893276800,
+      "redirect_uris": [
+        "https://client.example.org/callback",
+        "https://client.example.org/callback2"],
+      "grant_types": ["authorization_code", "refresh_token"],
+      "client_name": "My Example Client",
+      "client_name#ja-Jpan-JP":
+         "\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u540D",
+      "token_endpoint_auth_method": "client_secret_basic",
+      "logo_uri": "https://client.example.org/logo.png",
+      "jwks_uri": "https://client.example.org/my_public_keys.jwks",
+      "example_extension_parameter": "example_value"
+     }
+
+<span class="h4"><a class="selflink" id="section-3.2.2" href="#section-3.2.2">3.2.2</a>.  クライアント登録エラーレスポンス</span>
+
+   クライアントが無効な初期アクセストークンを提示するなど、
+   OAuth 2.0 エラー条件が発生した場合、認可サーバーは OAuth 2.0
+   トークンタイプに適したエラーレスポンスを返す。
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 21]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-22" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   登録エラー条件が発生した場合、認可サーバーは（別途規定されない限り）
+   HTTP 400 ステータスコードを返し、レスポンス本文内でエラーを説明する
+   JSON オブジェクト [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] からなる "application/json"
+   コンテントタイプで応答する。
+
+   JSON オブジェクトに含めるため、2 つのメンバーが定義される。
+
+   error
+      REQUIRED.  単一の ASCII エラーコード文字列。
+
+   error_description
+      OPTIONAL.  デバッグに使用される、人間が読める ASCII テキストの
+      エラー説明。
+
+   他のメンバーも含めてもよく、それらが理解されない場合は
+   無視されなければならない。
+
+   この仕様は、次のエラーコードを定義する。
+
+   invalid_redirect_uri
+      1 つ以上のリダイレクト URI の値が無効である。
+
+   invalid_client_metadata
+      いずれかのクライアントメタデータフィールドの値が無効であり、
+      サーバーはこのリクエストを拒否した。認可サーバーは、
+      クライアントのメタデータで要求された任意のパラメータについて、
+      有効な値を代替として使用することを選択してもよいことに注意する。
+
+   invalid_software_statement
+      提示されたソフトウェアステートメントが無効である。
+
+   unapproved_software_statement
+      提示されたソフトウェアステートメントは、この認可サーバーでの
+      使用が承認されていない。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 22]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-23" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   次は、認可サーバーによってブラックリスト登録されたリダイレクト URI に
+   起因するエラーレスポンスの非規範的な例である（値内の改行は
+   表示目的のみ）。
+
+     HTTP/1.1 400 Bad Request
+     Content-Type: application/json
+     Cache-Control: no-store
+     Pragma: no-cache
+
+     {
+      "error": "invalid_redirect_uri",
+      "error_description": "The redirection URI
+        http://sketchy.example.com is not allowed by this server."
+     }
+
+   次は、"response_types" と "grant_types" 値の一貫性のない組み合わせに
+   起因するエラーレスポンスの非規範的な例である（値内の改行は
+   表示目的のみ）。
+
+     HTTP/1.1 400 Bad Request
+     Content-Type: application/json
+     Cache-Control: no-store
+     Pragma: no-cache
+
+     {
+      "error": "invalid_client_metadata",
+      "error_description": "The grant type 'authorization_code' must be
+        registered along with the response type 'code' but found only
+       'implicit' instead."
+     }
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  IANA に関する考慮事項</span>
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  OAuth 動的クライアント登録メタデータレジストリ</span>
+
+   この仕様は、"OAuth Dynamic Client Registration Metadata"
+   レジストリを確立する。
+
+   OAuth 登録クライアントメタデータ名および説明は、
+   oauth-ext-review@ietf.org メーリングリストでの 2 週間のレビュー期間後、
+   1 名以上の Designated Experts の助言に基づき、Specification Required
+   ([<a href="./rfc5226" title="">RFC5226</a>]) により登録される。ただし、公開前の名前の割り当てを
+   可能にするため、Designated Experts は、その仕様が公開されることに
+   納得した時点で、[<a href="./rfc7120" title="&quot;Early IANA Allocation of Standards Track Code Points&quot;">RFC7120</a>] に従って登録を承認してもよい。
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 23]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-24" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   レビューのためにメーリングリストへ送信される登録リクエストは、
+   適切な件名（例: "Request to register OAuth Dynamic Client
+   Registration Metadata name: example"）を使用すべきである。
+
+   レビュー期間内に、Designated Experts は登録リクエストを承認または
+   拒否し、この決定をレビューリストおよび IANA へ伝達する。
+   拒否には説明を含めるべきであり、該当する場合はリクエストを
+   成功させる方法についての提案も含めるべきである。
+
+   IANA は Designated Experts からのレジストリ更新のみを受け入れ
+   なければならず、すべての登録リクエストをレビュー用メーリングリストへ
+   案内すべきである。
+
+<span class="h4"><a class="selflink" id="section-4.1.1" href="#section-4.1.1">4.1.1</a>.  登録テンプレート</span>
+
+   Client Metadata Name:
+      要求される名前（例: "example"）。この名前は大文字と小文字を
+      区別する。大文字と小文字を区別しない比較で、他の登録済み名と
+      一致する名前は受け入れるべきではない。
+
+   Client Metadata Description:
+      メタデータ値の簡潔な説明（例: "Example description"）。
+
+   Change Controller:
+      Standards Track RFC の場合は "IESG" を列挙する。それ以外の場合は、
+      責任を負う当事者の名前を記載する。その他の詳細（例: 郵送先住所、
+      電子メールアドレス、ホームページ URI）も含めてもよい。
+
+   Specification Document(s):
+      クライアントメタデータ定義を規定する文書への参照。文書の
+      コピーを取得するために使用できる URI を含めることが望ましい。
+      関連するセクションの表示も含めてもよいが、必須ではない。
+
+<span class="h4"><a class="selflink" id="section-4.1.2" href="#section-4.1.2">4.1.2</a>.  初期レジストリ内容</span>
+
+   "OAuth Dynamic Client Registration Metadata" レジストリの初期内容は
+   次のとおりである。
+
+   o  Client Metadata Name: "redirect_uris"
+   o  Client Metadata Description: リダイレクトベースのフローで使用する
+      リダイレクト URI の配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 24]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-25" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   o  Client Metadata Name: "token_endpoint_auth_method"
+   o  Client Metadata Description: トークンエンドポイントに対して要求される
+      認証方式
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "grant_types"
+   o  Client Metadata Description: クライアントが使用してもよい OAuth 2.0
+      グラントタイプの配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "response_types"
+   o  Client Metadata Description: クライアントが使用してもよい OAuth 2.0
+      レスポンスタイプの配列
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "client_name"
+   o  Client Metadata Description: ユーザーへ提示される、クライアントの
+      人間が読める名前
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "client_uri"
+   o  Client Metadata Description: クライアントに関する情報を提供する
+      Web ページの URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "logo_uri"
+   o  Client Metadata Description: クライアントのロゴを参照する URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "scope"
+   o  Client Metadata Description: OAuth 2.0 スコープ値の空白区切りリスト
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 25]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-26" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   o  Client Metadata Name: "contacts"
+   o  Client Metadata Description: このクライアントの責任者への連絡方法を
+      表す文字列の配列。通常は電子メールアドレス
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "tos_uri"
+   o  Client Metadata Description: クライアントの、人間が読める
+      サービス利用規約文書を指す URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "policy_uri"
+   o  Client Metadata Description: クライアントの、人間が読める
+      ポリシー文書を指す URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "jwks_uri"
+   o  Client Metadata Description: クライアントの公開鍵を表す、
+      クライアントの JSON Web Key Set [<a href="./rfc7517" title="&quot;JSON Web Key (JWK)&quot;">RFC7517</a>] 文書を参照する URL
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "jwks"
+   o  Client Metadata Description: クライアントの公開鍵を表す、
+      クライアントの JSON Web Key Set [<a href="./rfc7517" title="&quot;JSON Web Key (JWK)&quot;">RFC7517</a>] 文書
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "software_id"
+   o  Client Metadata Description: クライアントを構成するソフトウェアの識別子
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "software_version"
+   o  Client Metadata Description: クライアントを構成するソフトウェアの
+      バージョン識別子
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "client_id"
+   o  Client Metadata Description: クライアント識別子
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 26]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-27" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   o  Client Metadata Name: "client_secret"
+   o  Client Metadata Description: クライアントシークレット
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "client_id_issued_at"
+   o  Client Metadata Description: クライアント識別子が発行された時刻
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Client Metadata Name: "client_secret_expires_at"
+   o  Client Metadata Description: クライアントシークレットが失効する時刻
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  OAuth トークンエンドポイント認証方式レジストリ</span>
+
+   この仕様は、"OAuth Token Endpoint Authentication Methods"
+   レジストリを確立する。
+
+   "token_endpoint_auth_method" 値として使用する追加値は、
+   oauth-ext-review@ietf.org メーリングリストでの 2 週間のレビュー期間後、
+   1 名以上の Designated Experts の助言に基づき、Specification Required
+   ([<a href="./rfc5226" title="">RFC5226</a>]) により登録される。ただし、公開前の値の割り当てを
+   可能にするため、Designated Experts は、その仕様が公開されることに
+   納得した時点で、[<a href="./rfc7120" title="&quot;Early IANA Allocation of Standards Track Code Points&quot;">RFC7120</a>] に従って登録を承認してもよい。
+
+   登録リクエストは、レビューおよびコメントのため、
+   oauth-ext-review@ietf.org メーリングリストへ、適切な件名
+   （例: "Request to register token_endpoint_auth_method value:
+   example"）を付けて送信しなければならない。
+
+   レビュー期間内に、Designated Experts は登録リクエストを承認または
+   拒否し、この決定をレビューリストおよび IANA へ伝達する。
+   拒否には説明を含めるべきであり、該当する場合はリクエストを
+   成功させる方法についての提案も含めるべきである。
+
+   IANA は Designated Experts からのレジストリ更新のみを受け入れ
+   なければならず、すべての登録リクエストをレビュー用メーリングリストへ
+   案内すべきである。
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 27]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-28" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h4"><a class="selflink" id="section-4.2.1" href="#section-4.2.1">4.2.1</a>.  登録テンプレート</span>
+
+   Token Endpoint Authentication Method Name:
+      要求される名前（例: "example"）。この名前は大文字と小文字を
+      区別する。大文字と小文字を区別しない比較で、他の登録済み名と
+      一致する名前は受け入れるべきではない。
+
+   Change Controller:
+      Standards Track RFC の場合は "IESG" を列挙する。それ以外の場合は、
+      責任を負う当事者の名前を記載する。その他の詳細（例: 郵送先住所、
+      電子メールアドレス、ホームページ URI）も含めてもよい。
+
+   Specification Document(s):
+      トークンエンドポイント認証方式を規定する文書への参照。文書の
+      コピーを取得するために使用できる URI を含めることが望ましい。
+      関連するセクションの表示も含めてもよいが、必須ではない。
+
+<span class="h4"><a class="selflink" id="section-4.2.2" href="#section-4.2.2">4.2.2</a>.  初期レジストリ内容</span>
+
+   "OAuth Token Endpoint Authentication Methods" レジストリの初期内容は
+   次のとおりである。
+
+   o  Token Endpoint Authentication Method Name: "none"
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Token Endpoint Authentication Method Name: "client_secret_post"
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+   o  Token Endpoint Authentication Method Name: "client_secret_basic"
+   o  Change Controller: IESG
+   o  Specification Document(s): <a href="./rfc7591">RFC 7591</a>
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  セキュリティに関する考慮事項</span>
+
+   クライアント登録エンドポイントへのリクエストは、（HTTP リクエスト
+   およびレスポンス内で）平文の資格情報の送信を伴うため、
+   認可サーバーは登録エンドポイントへリクエストを送信するときに
+   トランスポート層セキュリティ機構の使用を要求しなければならない。
+   サーバーは TLS 1.2 [<a href="./rfc5246" title="&quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;">RFC5246</a>] をサポートしなければならず、
+   そのセキュリティ要件を満たす追加のトランスポート層セキュリティ
+   機構をサポートしてもよい。TLS を使用する場合、クライアントは
+   <a href="./rfc6125">RFC 6125</a> [<a href="./rfc6125" title="&quot;Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)&quot;">RFC6125</a>] に従って TLS/SSL サーバー証明書チェックを
+   実行しなければならない。実装上のセキュリティに関する考慮事項は、
+   Recommendations for Secure Use of TLS and DTLS [<a href="#ref-BCP195" title="&quot;Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)&quot;">BCP195</a>] に記載されている。
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 28]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-29" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   "authorization_code" や "implicit" などのリダイレクトベースの
+   グラントタイプを使用するクライアントについて、認可サーバーは
+   クライアントにリダイレクト URI 値の登録を要求しなければならない。
+   これは、不正な行為者が有効に登録されたクライアントを挿入して
+   なりすまし、無効なリダイレクト URI またはオープンリダイレクタを
+   通じてその認可コードまたはトークンを傍受する攻撃を軽減するのに
+   役立つ。さらに、リダイレクトの戻り値のハイジャックを防止するため、
+   登録済みリダイレクト URI 値は次のいずれかでなければならない。
+
+   o  TLS によって保護されたリモート Web サイト
+      （例: https://client.example.com/oauth_redirect）
+   o  HTTP URI を使用してローカルマシン上でホストされる Web サイト
+      （例: <a href="http://localhost:8080/oauth_redirect">http://localhost:8080/oauth_redirect</a>）
+   o  クライアントアプリケーションのみが利用できる、
+      非 HTTP のアプリケーション固有 URL
+      （例: exampleapp://oauth_redirect）
+
+   認可サーバーのポリシーが許可する場合、パブリッククライアントは
+   このプロトコルを使用して認可サーバーに登録してもよい。
+   パブリッククライアントは "token_endpoint_auth_method" メタデータ
+   フィールドに "none" 値を使用し、一般に "implicit" グラントタイプで
+   使用される。多くの場合、これらのクライアントは、ユーザーの
+   リソースへのアクセスを要求する短命のブラウザー内アプリケーションで
+   あり、アクセスは認可サーバーにおけるユーザーのアクティブ
+   セッションに結び付けられる。このようなクライアントは多くの場合、
+   長期ストレージを持たないため、ブラウザーアプリケーションが
+   読み込まれるたびに再登録する必要がある可能性がある。
+   結果として発生する使用されないクライアント識別子の増加を避けるため、
+   認可サーバーは、一定期間が経過した後、特定の基準を満たす既存の
+   クライアントの登録を失効させることを決定してもよい。あるいは、
+   そのようなクライアントは、ブラウザー内アプリケーションのコードが
+   提供されるサーバー上で登録され、クライアントの構成がコードとともに
+   ブラウザーへプッシュされてもよい。
+
+   異なる OAuth 2.0 グラントタイプは異なるセキュリティ特性および
+   使用特性を持つため、認可サーバーは、あるソフトウェア片が複数の
+   グラントタイプをサポートするために、別々の登録を要求してもよい。
+   たとえば、認可サーバーは、"authorization_code" グラントタイプを
+   使用するすべてのクライアントに "token_endpoint_auth_method" として
+   クライアントシークレットの使用を要求し、"implicit" グラントタイプを
+   使用するクライアントにはトークンエンドポイントでいかなる認証も
+   使用しないことを要求する場合がある。そのような状況では、サーバーは
+   クライアントが "authorization_code" と "implicit" グラントタイプの
+   両方に同時に登録することを許可しなくてもよい。同様に、
+   "authorization_code" グラントタイプはエンドユーザーの代理での
+   アクセスを表すために使用されるが、"client_credentials" グラントタイプは
+   クライアント自身の代理でのアクセスを表す。セキュリティ上の理由により、
+   認可サーバーは、これらの異なる使用
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 29]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-30" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   ケースに対して異なるスコープを使用することを要求でき、その結果として、
+   これら 2 つのグラントタイプを同じクライアントが同時に登録することを
+   許可しなくてもよい。これらすべての場合において、認可サーバーは
+   "invalid_client_metadata" エラーレスポンスで応答する。
+
+   ソフトウェアステートメント内のクレームとして使用される場合を除き、
+   認可サーバーはすべてのクライアントメタデータを自己主張として
+   扱わなければならない。たとえば、不正なクライアントは、なりすまそうと
+   している正当なクライアントの名前やロゴを使用するかもしれない。
+   さらに、不正なクライアントは、正当なクライアントのソフトウェア
+   識別子またはソフトウェアバージョンを使用して、認可サーバー上で
+   自身を正当なクライアントのインスタンスと関連付けようとするかもしれない。
+   これに対抗するため、認可サーバーは、登録リクエスト全体および
+   クライアント構成を確認することにより、このリスクを軽減するための
+   適切な手段を講じなければならない。たとえば、認可サーバーは、
+   ロゴのドメイン/サイトがリダイレクト URI のドメイン/サイトと一致しない
+   場合に警告を発行できる。認可サーバーは、既知のソフトウェア識別子からの
+   登録リクエストが異なるリダイレクト URI または異なるクライアント URI を
+   要求している場合、その登録リクエストを拒否することもできる。
+   認可サーバーはまた、すべての場合において、動的に登録された
+   クライアントについてエンドユーザーに警告メッセージを提示することも
+   できる。特に、そのようなクライアントが最近登録されたものである場合、
+   または認可サーバーでこれまでどのユーザーにも信頼されていない場合である。
+
+   認可サーバーがオープンクライアント登録をサポートしている状況では、
+   ユーザーへ表示されるクライアント提供の URL（例: "logo_uri",
+   "tos_uri", "client_uri", および "policy_uri"）について、極めて
+   慎重でなければならない。たとえば、不正なクライアントは
+   "policy_uri" にドライブバイダウンロードへの参照を含む登録リクエストを
+   指定し、認可中にユーザーがそれをクリックするよう誘導する可能性がある。
+   認可サーバーは、"logo_uri", "tos_uri", "client_uri", および
+   "policy_uri" が "redirect_uris" の配列で定義されるものと同じホスト
+   およびスキームを持ち、これらすべての URI が有効な Web ページへ解決
+   されるかどうかを確認すべきである。これらの URI 値は認可ページで
+   ユーザーへ表示されることを意図しているため、認可サーバーは可能な限り、
+   それらの URL にホストされている悪意あるコンテンツからユーザーを
+   保護すべきである。たとえば、認可ページで URL をユーザーへ提示する前に、
+   認可サーバーはその URL にホストされているコンテンツをダウンロードし、
+   マルウェアスキャナーおよびブラックリストフィルターでコンテンツを確認し、
+   URL に安全なコンテンツと安全でないコンテンツが混在しているかどうかを
+   判断し、その他のサーバー側の軽減策を講じることができる。これらの URL の
+   コンテンツはいつでも変更され得るため、認可サーバーは URL の安全性について
+   完全な信頼を提供することはできないが、これらの実践は役立ち得る。
+   この種の脅威をさらに軽減するため、認可サーバーは、URL リンクが
+   第三者によって提供されたものであり、注意して扱うべきであり、
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 30]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-31" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   認可サーバー自身によってホストされていないことをユーザーに
+   警告することもできる。たとえば、HTML アンカーでリンクを直接提供する
+   代わりに、認可サーバーは、ユーザーが対象 URL へ進むことを許可する前に、
+   中間警告ページへ誘導できる。
+
+   クライアントは、登録リクエストの一部としてクライアントメタデータを
+   認可サーバーへ提示するために、直接の JSON オブジェクトと JWT 符号化
+   されたソフトウェアステートメントの両方を使用してもよい。
+   ソフトウェアステートメントは暗号学的に保護され、ステートメントの
+   発行者によって行われるクレームを表す。一方、JSON オブジェクトは、
+   クライアントまたは開発者が直接行う自己主張のクレームを表す。
+   ソフトウェアステートメントが有効であり、受け入れ可能な機関
+   （ソフトウェア API パブリッシャーなど）によって署名されている場合、
+   ソフトウェアステートメント内のクライアントメタデータ値は、
+   傍受され変更された可能性のあるプレーンな JSON オブジェクトで提示された
+   メタデータ値より優先されなければならない。
+
+   すべてのメタデータ値と同様に、ソフトウェアステートメントは、
+   その内容がソフトウェアステートメントの発行者によってデジタル署名
+   または MAC 付けされているとしても、クライアントによって自己主張される
+   項目である。そのため、多くの場合、ソフトウェアステートメントの提示は、
+   クライアントソフトウェア片を完全に識別するのに十分ではない。
+   これに対し、初期アクセストークンは、特定のクライアントソフトウェア片に
+   関する情報を必ずしも含まず、代わりに登録エンドポイントを使用するための
+   認可を表す。認可サーバーは、ある登録リクエストを受け入れるかどうかを
+   決定するとき、ソフトウェアステートメント、初期アクセストークン、および
+   JSON クライアントメタデータ値を含む登録リクエスト全体を考慮しなければ
+   ならない。
+
+   認可サーバーが、同時に複数インスタンスが登録されることを意図していない
+   クライアントの登録リクエストを受け取り、認可サーバーが登録の重複を
+   推測できる場合（例: 別の既存クライアントと同じ "software_id" および
+   "software_version" 値を使用している場合）、サーバーは新しい登録を
+   疑わしいものとして扱い、その登録を拒否すべきである。新しいクライアントが、
+   ユーザーをだましてそれを認可させるために既存クライアントになりすまそうと
+   している可能性、または元の登録がもはや有効でない可能性がある。
+   この状況の管理の詳細は認可サーバーのデプロイメントに固有であり、
+   この仕様の範囲外である。
+
+   クライアント識別子は、認可エンドポイントでクライアントになりすますために
+   使用できる公開値であるため、登録済みクライアントの複数インスタンスに
+   同じクライアント識別子を発行することを決定した認可サーバーは、
+   それが発生する状況について非常に慎重である必要がある。たとえば、
+   認可サーバーは、あるクライアント識別子を、同じ
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 31]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-32" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   リダイレクトベースのフローと同じリダイレクト URI を使用する
+   クライアントに限定できる。認可サーバーは、同じクライアント識別子を
+   発行する場合であっても、登録済みクライアントの複数インスタンスに
+   同じクライアントシークレットを発行すべきではない。さもなければ、
+   クライアントシークレットが漏洩し、悪意あるなりすまし者が
+   コンフィデンシャルクライアントになりすますことを許してしまう。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  プライバシーに関する考慮事項</span>
+
+   この仕様で説明されるプロトコルは、ほぼ専ら人ではなくソフトウェアに
+   関する情報を扱うため、その使用に関するプライバシー上の懸念は
+   非常に少ない。注目すべき例外は、<a href="#section-2">Section 2</a> で定義される
+   "contacts" フィールドであり、これはクライアントソフトウェアの責任を
+   負う開発者またはその他の当事者の連絡先情報を含む。これらの値は
+   エンドユーザーへ表示されることを意図しており、認可サーバーの
+   管理者にも利用可能になる。そのため、開発者は、個人用または業務用の
+   アドレスを使用する代わりに、クライアントのサポート目的専用の
+   電子メールアドレスまたはその他の連絡先情報を提供したいと考える
+   かもしれない。あるいは、開発者が離れ、別の人物がその責任を
+   引き継いだ後もクライアントソフトウェアの継続的な連絡およびサポートを
+   可能にするため、開発者はクライアント用の集合メールアドレスを
+   提供したいと考えるかもしれない。
+
+   一般に、クライアント名やソフトウェア識別子などのクライアントの
+   メタデータは、クライアントソフトウェア片のすべてのインスタンスで
+   共通であり、そのためエンドユーザーに対するプライバシー問題は生じない。
+   一方、クライアント識別子は、特定のクライアントインスタンスに一意で
+   あることが多い。多くのユーザーによって使用される Web サイトのような
+   クライアントについては、クライアント識別子に関して重大なプライバシー上の
+   懸念はないかもしれないが、単一のエンドユーザーのデバイスに
+   インストールされるネイティブアプリケーションのようなクライアントでは、
+   OAuth 2.0 トランザクション中にクライアント識別子が一意に追跡され、
+   その使用がその単一のエンドユーザーに結び付けられる可能性がある。
+   しかし、クライアントソフトウェアは依然として OAuth 2.0 認可グラントを
+   通じてリソース所有者により認可される必要があるため、この種の追跡は、
+   クライアント識別子が一意であるかどうかにかかわらず、認証済みの
+   リソース所有者を要求元クライアント識別子と関連付けることで発生し得る。
+
+   この仕様では、クライアントが自身のクライアント識別子を作成することは
+   禁止されていることに注意すること。クライアントがそれを行える場合、
+   個々のクライアントインスタンスが、共謀する複数の認可サーバーを横断して
+   追跡され、プライバシーおよびセキュリティ上の問題につながる可能性がある。
+   さらに、クライアント識別子は一般に、同じソフトウェアインスタンスで
+   あっても登録リクエストごとに一意に発行される。このようにして、
+   アプリケーションは複数回登録し、完全に別個の
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 32]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-33" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   アプリケーションであるように見せることで、プライバシーをわずかに
+   向上させることができる。しかし、この手法は、リソース所有者ごとに
+   複数回の認可を必要とするという重大なユーザビリティコストを伴うため、
+   実際には使用される可能性は低い。
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-BCP195">BCP195</a>]   Sheffer, Y., Holz, R., and P. Saint-Andre,
+              "Transport Layer Security (TLS) および Datagram Transport
+              Layer Security (DTLS) の安全な使用に関する推奨事項",
+              <a href="https://www.rfc-editor.org/bcp/bcp195">BCP 195</a>, <a href="./rfc7525">RFC 7525</a>, May 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/bcp195">http://www.rfc-editor.org/info/bcp195</a>&gt;.
+
+   [<a id="ref-IANA.Language">IANA.Language</a>]
+              IANA, "Language Subtag Registry",
+              &lt;<a href="http://www.iana.org/assignments/language-subtag-registry">http://www.iana.org/assignments/</a>
+              <a href="http://www.iana.org/assignments/language-subtag-registry">language-subtag-registry</a>&gt;.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "RFC において要求レベルを示すために
+              使用するキーワード", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>,
+              DOI 10.17487/RFC2119, March 1997,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+   [<a id="ref-RFC5226">RFC5226</a>]  Narten, T. and H. Alvestrand, "RFC における IANA に
+              関する考慮事項セクションの書き方に関するガイドライン",
+              <a href="https://www.rfc-editor.org/bcp/bcp26">BCP 26</a>, <a href="./rfc5226">RFC 5226</a>,
+              DOI 10.17487/RFC5226, May 2008,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5226">http://www.rfc-editor.org/info/rfc5226</a>&gt;.
+
+   [<a id="ref-RFC5246">RFC5246</a>]  Dierks, T. and E. Rescorla, "The Transport Layer Security
+              (TLS) Protocol Version 1.2", <a href="./rfc5246">RFC 5246</a>,
+              DOI 10.17487/RFC5246, August 2008,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5246">http://www.rfc-editor.org/info/rfc5246</a>&gt;.
+
+   [<a id="ref-RFC5646">RFC5646</a>]  Phillips, A., Ed. and M. Davis, Ed., "言語を識別する
+              ためのタグ", <a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a>, <a href="./rfc5646">RFC 5646</a>, DOI 10.17487/RFC5646,
+              September 2009, &lt;<a href="http://www.rfc-editor.org/info/rfc5646">http://www.rfc-editor.org/info/rfc5646</a>&gt;.
+
+   [<a id="ref-RFC6125">RFC6125</a>]  Saint-Andre, P. and J. Hodges, "Transport Layer
+              Security (TLS) の文脈における X.509 (PKIX) 証明書を使用した
+              インターネット公開鍵基盤内でのドメインベースの
+              アプリケーションサービス識別性の表現および検証",
+              <a href="./rfc6125">RFC 6125</a>, DOI 10.17487/RFC6125, March
+              2011, &lt;<a href="http://www.rfc-editor.org/info/rfc6125">http://www.rfc-editor.org/info/rfc6125</a>&gt;.
+
+   [<a id="ref-RFC6749">RFC6749</a>]  Hardt, D., Ed., "OAuth 2.0 認可フレームワーク",
+              <a href="./rfc6749">RFC 6749</a>, DOI 10.17487/RFC6749, October 2012,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6749">http://www.rfc-editor.org/info/rfc6749</a>&gt;.
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 33]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-34" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+   [<a id="ref-RFC6750">RFC6750</a>]  Jones, M. and D. Hardt, "OAuth 2.0 認可フレームワーク:
+              Bearer Token の使用", <a href="./rfc6750">RFC 6750</a>,
+              DOI 10.17487/RFC6750, October 2012,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6750">http://www.rfc-editor.org/info/rfc6750</a>&gt;.
+
+   [<a id="ref-RFC7120">RFC7120</a>]  Cotton, M., "Standards Track Code Points の早期 IANA
+              割り当て", <a href="https://www.rfc-editor.org/bcp/bcp100">BCP 100</a>, <a href="./rfc7120">RFC 7120</a>, DOI 10.17487/RFC7120, January
+              2014, &lt;<a href="http://www.rfc-editor.org/info/rfc7120">http://www.rfc-editor.org/info/rfc7120</a>&gt;.
+
+   [<a id="ref-RFC7159">RFC7159</a>]  Bray, T., Ed., "JavaScript Object Notation (JSON)
+              データ交換形式", <a href="./rfc7159">RFC 7159</a>, DOI 10.17487/RFC7159, March
+              2014, &lt;<a href="http://www.rfc-editor.org/info/rfc7159">http://www.rfc-editor.org/info/rfc7159</a>&gt;.
+
+   [<a id="ref-RFC7515">RFC7515</a>]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", <a href="./rfc7515">RFC 7515</a>, DOI 10.17487/RFC7515, May
+              2015, &lt;<a href="http://www.rfc-editor.org/info/rfc7515">http://www.rfc-editor.org/info/rfc7515</a>&gt;.
+
+   [<a id="ref-RFC7517">RFC7517</a>]  Jones, M., "JSON Web Key (JWK)", <a href="./rfc7517">RFC 7517</a>,
+              DOI 10.17487/RFC7517, May 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7517">http://www.rfc-editor.org/info/rfc7517</a>&gt;.
+
+   [<a id="ref-RFC7519">RFC7519</a>]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
+              (JWT)", <a href="./rfc7519">RFC 7519</a>, DOI 10.17487/RFC7519, May 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7519">http://www.rfc-editor.org/info/rfc7519</a>&gt;.
+
+   [<a id="ref-RFC7522">RFC7522</a>]  Campbell, B., Mortimore, C., and M. Jones, "OAuth 2.0
+              クライアント認証および認可グラントのための Security
+              Assertion Markup Language (SAML) 2.0 プロファイル", <a href="./rfc7522">RFC 7522</a>,
+              DOI 10.17487/RFC7522, May 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7522">http://www.rfc-editor.org/info/rfc7522</a>&gt;.
+
+   [<a id="ref-RFC7523">RFC7523</a>]  Jones, M., Campbell, B., and C. Mortimore, "OAuth 2.0
+              クライアント認証および認可グラントのための JSON Web Token
+              (JWT) プロファイル", <a href="./rfc7523">RFC 7523</a>, DOI 10.17487/RFC7523, May
+              2015, &lt;<a href="http://www.rfc-editor.org/info/rfc7523">http://www.rfc-editor.org/info/rfc7523</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 34]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-35" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  参考情報文献</span>
+
+   [<a id="ref-OpenID.Discovery">OpenID.Discovery</a>]
+              Sakimura, N., Bradley, J., Jones, M., and E. Jay, "OpenID
+              Connect Discovery 1.0", November 2014,
+              &lt;<a href="http://openid.net/specs/openid-connect-discovery-1_0.html">http://openid.net/specs/</a>
+              <a href="http://openid.net/specs/openid-connect-discovery-1_0.html">openid-connect-discovery-1_0.html</a>&gt;.
+
+   [<a id="ref-OpenID.Registration">OpenID.Registration</a>]
+              Sakimura, N., Bradley, J., and M. Jones, "OpenID Connect
+              Dynamic Client Registration 1.0", November 2014,
+              &lt;<a href="http://openid.net/specs/openid-connect-registration-1_0.html">http://openid.net/specs/</a>
+              <a href="http://openid.net/specs/openid-connect-registration-1_0.html">openid-connect-registration-1_0.html</a>&gt;.
+
+   [<a id="ref-RFC7592">RFC7592</a>]  Richer, J., Jones, M., Bradley, J., and M. Machulak,
+              "OAuth 2.0 動的クライアント登録管理プロトコル",
+              <a href="./rfc7592">RFC 7592</a>, DOI 10.17487/RFC7592, July 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7592">http://www.rfc-editor.org/info/rfc7592</a>&gt;.
+
+   [<a id="ref-UMA-Core">UMA-Core</a>]
+              Hardjono, T., Maler, E., Machulak, M., and D. Catalano,
+              "User-Managed Access (UMA) Profile of OAuth 2.0", Work in
+              Progress, <a href="./draft-hardjono-oauth-umacore-13">draft-hardjono-oauth-umacore-13</a>, April 2015.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 35]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-36" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">付録 A</a>.  ユースケース</span>
+
+   この付録は、この仕様を利用できるさまざまな方法を説明し、
+   行う必要があり得るいくつかの選択肢も説明する。いくつかの選択肢は
+   独立しており組み合わせて使用できる一方、いくつかの選択肢は
+   相互に関連している。
+
+<span class="h3"><a class="selflink" id="appendix-A.1" href="#appendix-A.1">A.1</a>.  オープンな動的クライアント登録と保護された動的クライアント登録</span>
+
+<span class="h4"><a class="selflink" id="appendix-A.1.1" href="#appendix-A.1.1">A.1.1</a>.  オープンな動的クライアント登録</span>
+
+   オープン登録をサポートする認可サーバーは、初期アクセストークンなしで
+   登録が行われることを許可する。これにより、すべてのクライアント
+   ソフトウェアが認可サーバーに登録できる。
+
+<span class="h4"><a class="selflink" id="appendix-A.1.2" href="#appendix-A.1.2">A.1.2</a>.  保護された動的クライアント登録</span>
+
+   保護された登録をサポートする認可サーバーは、登録リクエストを行う際に
+   初期アクセストークンを使用することを要求する。クライアントまたは
+   開発者がこの初期アクセストークンを受け取る方法、および認可サーバーが
+   この初期アクセストークンを検証する方法は、この仕様の範囲外であるが、
+   一般的な方法は、開発者が認可サーバーの手動事前登録ポータルを使用し、
+   そのポータルが開発者に初期アクセストークンを発行することである。
+
+<span class="h3"><a class="selflink" id="appendix-A.2" href="#appendix-A.2">A.2</a>.  ソフトウェアステートメントなし、またはありの登録</span>
+
+<span class="h4"><a class="selflink" id="appendix-A.2.1" href="#appendix-A.2.1">A.2.1</a>.  ソフトウェアステートメントなしの登録</span>
+
+   登録リクエストでソフトウェアステートメントが使用されない場合、
+   認可サーバーは、クライアントメタデータ値がいずれの機関によっても
+   デジタル署名または MAC 付けされていない（したがって証明されていない）
+   状態で、それらを使用する意思を持っていなければならない。
+   （この選択は、オープンか保護かの選択とは独立しており、
+   初期アクセストークンは別の可能な証明形式であることに注意する。）
+
+<span class="h4"><a class="selflink" id="appendix-A.2.2" href="#appendix-A.2.2">A.2.2</a>.  ソフトウェアステートメントありの登録</span>
+
+   ソフトウェアステートメントは、登録リクエストで使用して、
+   クライアントメタデータ値の集合について機関による証明を提供できる。
+   これは、認可サーバーが登録を一連の機関によって証明された
+   クライアントソフトウェアに制限したい場合、または複数の登録
+   リクエストが同じクライアントソフトウェア片を指していることを
+   知りたい場合に有用である。
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 36]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-37" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h3"><a class="selflink" id="appendix-A.3" href="#appendix-A.3">A.3</a>.  クライアントまたは開発者による登録</span>
+
+<span class="h4"><a class="selflink" id="appendix-A.3.1" href="#appendix-A.3.1">A.3.1</a>.  クライアントによる登録</span>
+
+   いくつかのユースケースでは、クライアントソフトウェアは、
+   認可サーバーとやり取りするために必要なクライアント識別子および
+   その他の情報を取得するため、認可サーバーへ自身を動的に登録する。
+   この場合、認可サーバー用のクライアント識別子はクライアント
+   ソフトウェアに同梱されない。
+
+<span class="h4"><a class="selflink" id="appendix-A.3.2" href="#appendix-A.3.2">A.3.2</a>.  開発者による登録</span>
+
+   場合によっては、開発者（または開発者が使用する開発ソフトウェア）が、
+   クライアントソフトウェアを認可サーバーまたは認可サーバーの集合へ
+   事前登録する。この場合、認可サーバー用のクライアント識別子値は
+   クライアントソフトウェアに同梱できる。
+
+<span class="h3"><a class="selflink" id="appendix-A.4" href="#appendix-A.4">A.4</a>.  クライアントインスタンスごとのクライアント ID、またはクライアントソフトウェアごとのクライアント ID</span>
+
+<span class="h4"><a class="selflink" id="appendix-A.4.1" href="#appendix-A.4.1">A.4.1</a>.  クライアントソフトウェアインスタンスごとのクライアント ID</span>
+
+   場合によっては、クライアントソフトウェア片の各デプロイ済み
+   インスタンスが動的に登録し、それぞれ異なるクライアント識別子値を
+   取得する。これは、たとえばコードフローが使用される場合に有利であり、
+   各クライアントインスタンスが自身のクライアントシークレットを持つことも
+   可能にする。これは、ソフトウェアに同梱されたクライアントシークレット値の
+   秘密性を維持できないネイティブクライアントにとって有用であり得る。
+   ただし、インスタンスごとのクライアントシークレットの秘密性は
+   維持できる可能性がある。
+
+<span class="h4"><a class="selflink" id="appendix-A.4.2" href="#appendix-A.4.2">A.4.2</a>.  クライアントソフトウェアのすべてのインスタンスで共有されるクライアント ID</span>
+
+   場合によっては、クライアントソフトウェア片の各デプロイ済み
+   インスタンスが共通のクライアント識別子値を共有する。たとえば、
+   これはクライアントシークレットが関与しないインプリシットフローを
+   使用するブラウザー内クライアントでよく見られる。特定の認可サーバーは、
+   たとえばソフトウェアステートメント値とクライアント識別子値との間の
+   マッピングを維持し、特定のソフトウェア片に対するすべての
+   登録リクエストに対して同じクライアント識別子値を返すことを選択する
+   かもしれない。認可サーバーがそうする状況、およびこの場合に必要な
+   具体的なソフトウェアステートメントの特性は、この仕様の範囲外である。
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 37]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-38" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+<span class="h3"><a class="selflink" id="appendix-A.5" href="#appendix-A.5">A.5</a>.  ステートフルまたはステートレスな登録</span>
+
+<span class="h4"><a class="selflink" id="appendix-A.5.1" href="#appendix-A.5.1">A.5.1</a>.  ステートフルなクライアント登録</span>
+
+   場合によっては、認可サーバーは登録済みクライアントに関する状態を
+   維持し、通常はクライアント識別子値を使用してこの状態を索引付けする。
+   この状態には通常、クライアント登録に関連付けられた
+   クライアントメタデータ値が含まれ、場合によっては認可サーバーの実装に
+   固有のその他の状態も含まれる。ステートフル登録が使用される場合、
+   この状態の取得および/または更新をサポートする操作がサポートされてもよい。
+   ステートフル登録に対する可能な操作集合の 1 つは、[<a href="./rfc7592" title="&quot;OAuth 2.0 Dynamic Client Registration Management Protocol&quot;">RFC7592</a>] で
+   説明されている。
+
+<span class="h4"><a class="selflink" id="appendix-A.5.2" href="#appendix-A.5.2">A.5.2</a>.  ステートレスなクライアント登録</span>
+
+   場合によっては、認可サーバーは登録済みクライアントに関する
+   ローカル状態を一切維持しなくてもよい方式で実装される。
+   これを行う 1 つの手段は、返されるクライアント識別子値内に
+   登録状態をすべて符号化し、場合によっては、その状態の機密性および
+   完全性を維持するために認可サーバー宛てにその状態を暗号化することである。
+
+謝辞
+
+   著者らは、この文書への意見提供について、OAuth Working Group、
+   User-Managed Access Working Group、および OpenID Connect Working Group の
+   参加者に感謝する。特に、次の各氏は、この文書のさまざまな
+   ドラフト版のレビューおよび貢献において重要な役割を果たした。
+   Amanda Anganes, Derek Atkins, Tim Bray, Domenico Catalano, Donald
+   Coffin, Vladimir Dzhuvinov, George Fletcher, Thomas Hardjono,
+   William Kim, Torsten Lodderstedt, Eve Maler, Josh Mandel, Nov Matake,
+   Tony Nadalin, Nat Sakimura, Christian Scholz, and Hannes Tschofenig.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Richer, et al.               標準化過程                        [Page 38]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-39" ></span>
+<span class="grey"><a href="./rfc7591">RFC 7591</a>             OAuth 2.0 動的登録                     2015年7月</span>
+
+
+著者の連絡先
+
+   Justin Richer (editor)
+
+   Email: ietf@justin.richer.org
+
+
+   Michael B. Jones
+   Microsoft
+
+   Email: mbj@microsoft.com
+   URI:   <a href="http://self-issued.info/">http://self-issued.info/</a>
+
+
+   John Bradley
+   Ping Identity
+
+   Email: ve7jtb@ve7jtb.com
+
+
+   Maciej Machulak
+   Newcastle University
+
+   Email: maciej.machulak@gmail.com
+
+
+   Phil Hunt
+   Oracle Corporation
+
+   Email: phil.hunt@yahoo.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Richer, et al.               標準化過程                        [Page 39]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
