@@ -62,6 +62,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [RDF 1.2 Concepts and Abstract Data Model](https://jp.htmlspecs.com/rdf12-concepts/)（[Source](https://www.w3.org/TR/2026/CR-rdf12-concepts-20260407/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [RDF 1.2 Primer](https://jp.htmlspecs.com/rdf12-primer/)（[Source](https://www.w3.org/TR/2026/DNOTE-rdf12-primer-20260416/) ![Note Draft](https://img.shields.io/badge/DNOTE-ffcc00)）
 - [RDF 1.2 Schema](https://jp.htmlspecs.com/rdf12-schema/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-schema-20260328/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [RDF 1.2 Turtle](https://jp.htmlspecs.com/rdf12-turtle/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-turtle-20260612/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [GraphQL](https://jp.htmlspecs.com/graphql/)（[Source](https://spec.graphql.org/draft/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [OpenAPI Specification v3.2.0](https://jp.htmlspecs.com/openapi/)（[Source](https://spec.openapis.org/oas/latest.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [URI Template](https://jp.htmlspecs.com/uri-template/)（[Source](https://www.rfc-editor.org/rfc/rfc6570.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
