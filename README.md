@@ -139,7 +139,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Keyboard Lock](https://jp.htmlspecs.com/keyboard-lock/)（[Source](https://wicg.github.io/keyboard-lock/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Virtual Keyboard](https://jp.htmlspecs.com/virtual-keyboard/)（[Source](https://www.w3.org/TR/2022/WD-virtual-keyboard-20220505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Pointer Lock 2.0](https://jp.htmlspecs.com/pointerlock/)（[Source](https://www.w3.org/TR/2026/WD-pointerlock-2-20260225/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Clipboard API and events](https://jp.htmlspecs.com/clipboard-apis/)（[Source](https://www.w3.org/TR/2025/WD-clipboard-apis-20251124/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Clipboard API and events](https://jp.htmlspecs.com/clipboard-apis/)（[Source](https://www.w3.org/TR/2026/WD-clipboard-apis-20260624/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Selection API](https://jp.htmlspecs.com/selection-api/)（[Source](https://www.w3.org/TR/2026/WD-selection-api-20260611/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Input Events Level 1](https://jp.htmlspecs.com/input-events-1/)（[Source](https://www.w3.org/TR/2023/DISC-input-events-1-20230928/) ![Discontinued Draft](https://img.shields.io/badge/DISC-ffcc00)）
 - [Input Events Level 2](https://jp.htmlspecs.com/input-events-2/)（[Source](https://www.w3.org/TR/2026/WD-input-events-2-20260501/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
