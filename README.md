@@ -474,7 +474,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS Box Sizing Module Level 3](https://jp.htmlspecs.com/css/css-sizing-3/)（[Source](https://www.w3.org/TR/2021/WD-css-sizing-3-20211217/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Box Sizing Module Level 4](https://jp.htmlspecs.com/css/css-sizing-4/)（[Source](https://www.w3.org/TR/2021/WD-css-sizing-4-20210520/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Box Alignment Module Level 3](https://jp.htmlspecs.com/css/css-align-3/)（[Source](https://www.w3.org/TR/2026/WD-css-align-3-20260130/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [CSS Gap Decorations Module Level 1](https://jp.htmlspecs.com/css/css-gaps-1/)（[Source](https://www.w3.org/TR/2026/WD-css-gaps-1-20260227/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Gaps Module Level 1](https://jp.htmlspecs.com/css/css-gaps-1/)（[Source](https://www.w3.org/TR/2026/WD-css-gaps-1-20260624/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Anchor Positioning Module Level 1](https://jp.htmlspecs.com/css/css-anchor-position-1/)（[Source](https://www.w3.org/TR/2026/WD-css-anchor-position-1-20260327/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Anchor Positioning Module Level 2](https://jp.htmlspecs.com/css/css-anchor-position-2/)（[Source](https://www.w3.org/TR/2025/WD-css-anchor-position-2-20251021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
