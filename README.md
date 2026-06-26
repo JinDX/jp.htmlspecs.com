@@ -174,6 +174,9 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Gyroscope](https://jp.htmlspecs.com/gyroscope/)（[Source](https://www.w3.org/TR/2026/CRD-gyroscope-20260514/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Gamepad](https://jp.htmlspecs.com/gamepad/)（[Source](https://www.w3.org/TR/2025/WD-gamepad-20250710/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
+### Web of Things・IoT
+- [Web of Things (WoT) Thing Description 2.0](https://jp.htmlspecs.com/wot-thing-description-2.0/)（[Source](https://www.w3.org/TR/2025/WD-wot-thing-description-2.0-20251104/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+
 ### ウィンドウ・画面・システム統合
 - [Screen Orientation](https://jp.htmlspecs.com/screen-orientation/)（[Source](https://www.w3.org/TR/2025/WD-screen-orientation-20251021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Screen Wake Lock](https://jp.htmlspecs.com/screen-wake-lock/)（[Source](https://www.w3.org/TR/2024/WD-screen-wake-lock-20241024/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
