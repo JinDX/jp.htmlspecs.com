@@ -269,7 +269,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Image Resource](https://jp.htmlspecs.com/image-resource/)（[Source](https://www.w3.org/TR/2021/WD-image-resource-20210604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### AI と機械学習
-- [Web Neural Network API](https://jp.htmlspecs.com/webnn/)（[Source](https://www.w3.org/TR/2026/CRD-webnn-20260521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Web Neural Network API](https://jp.htmlspecs.com/webnn/)（[Source](https://www.w3.org/TR/2026/CRD-webnn-20260626/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Model Loader API](https://jp.htmlspecs.com/model-loader/)（[Source](https://webmachinelearning.github.io/model-loader/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Translator and Language Detector APIs](https://jp.htmlspecs.com/translation-api/)（[Source](https://webmachinelearning.github.io/translation-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Prompt API](https://jp.htmlspecs.com/prompt-api/)（[Source](https://webmachinelearning.github.io/prompt-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
