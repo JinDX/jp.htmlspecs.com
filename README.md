@@ -176,6 +176,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### Web of Things・IoT
 - [Web of Things (WoT) Thing Description 2.0](https://jp.htmlspecs.com/wot-thing-description-2.0/)（[Source](https://www.w3.org/TR/2025/WD-wot-thing-description-2.0-20251104/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Web of Things (WoT) Use Cases and Requirements](https://jp.htmlspecs.com/wot-usecases/)（[Source](https://www.w3.org/TR/2026/NOTE-wot-usecases-20260205/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 
 ### ウィンドウ・画面・システム統合
 - [Screen Orientation](https://jp.htmlspecs.com/screen-orientation/)（[Source](https://www.w3.org/TR/2025/WD-screen-orientation-20251021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
