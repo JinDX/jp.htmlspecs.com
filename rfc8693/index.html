@@ -1,0 +1,3882 @@
+<!DOCTYPE html>
+<html lang="ja-JP" class="RFC">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="Common,Latin" name="scripts">
+    <meta content="initial-scale=1.0" name="viewport">
+    <title>RFC 8693: OAuth 2.0 トークン交換</title>
+    <meta content="Michael B. Jones" name="author">
+    <meta content="Anthony Nadalin" name="author">
+    <meta content="Brian Campbell" name="author">
+    <meta content="John Bradley" name="author">
+    <meta content="Chuck Mortimore" name="author">
+    <meta content="
+       
+ 本仕様は、OAuth 2.0 認可サーバーからセキュリティトークンを要求し取得する方法を定義することにより、HTTP および JSON ベースの
+ Security Token Service (STS) のためのプロトコルを定義する。
+ これには、なりすましおよび委任を用いるセキュリティトークンも含まれる。
+       
+    " name="description">
+    <meta content="xml2rfc 2.38.0" name="generator">
+    <meta content="JSON Web Token" name="keyword">
+    <meta content="JWT" name="keyword">
+    <meta content="Delegation" name="keyword">
+    <meta content="Impersonation" name="keyword">
+    <meta content="STS" name="keyword">
+    <meta content="Security Token Service" name="keyword">
+    <meta content="Exchange" name="keyword">
+    <meta content="Token" name="keyword">
+    <meta content="OAuth" name="keyword">
+    <meta content="8693" name="rfc.number">
+    <link href="rfc8693.xml" type="application/rfc+xml" rel="alternate">
+    <link href="#copyright" rel="license">
+    <style type="text/css">
+        /*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necssary during the development of the v3
+  formatters.
+
+*/
+
+        /* fonts */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+        /* Sans-serif */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Serif');
+        /* Serif (print) */
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+        /* Monospace */
+
+        @viewport {
+            zoom: 1.0;
+            width: extend-to-zoom;
+        }
+
+        @-ms-viewport {
+            width: extend-to-zoom;
+            zoom: 1.0;
+        }
+
+        /* general and mobile first */
+        html {}
+
+        body {
+            max-width: 90%;
+            margin: 1.5em auto;
+            color: #222;
+            background-color: #fff;
+            font-size: 14px;
+            font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .ears {
+            display: none;
+        }
+
+        /* headings */
+        #title,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        #title {
+            clear: both;
+            border-bottom: 1px solid #ddd;
+            margin: 0 0 0.5em 0;
+            padding: 1em 0 0.5em;
+        }
+
+        .author {
+            padding-bottom: 4px;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin: 1em 0;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-top: -20px;
+            /* provide offset for in-page anchors */
+            padding-top: 33px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h4 {
+            font-size: 16px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h5,
+        h6 {
+            font-size: 14px;
+        }
+
+        #n-copyright-notice {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1em;
+            margin-bottom: 1em;
+        }
+
+        /* general structure */
+        p {
+            padding: 0;
+            margin: 0 0 1em 0;
+            text-align: left;
+        }
+
+        div,
+        span {
+            position: relative;
+        }
+
+        div {
+            margin: 0;
+        }
+
+        .alignRight.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignRight.art-text pre {
+            padding: 0;
+        }
+
+        .alignRight {
+            margin: 1em 0;
+        }
+
+        .alignRight>*:first-child {
+            border: none;
+            margin: 0;
+            float: right;
+            clear: both;
+        }
+
+        .alignRight>*:nth-child(2) {
+            clear: both;
+            display: block;
+            border: none;
+        }
+
+        svg {
+            display: block;
+        }
+
+        .alignCenter.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignCenter.art-text pre {
+            padding: 0;
+        }
+
+        .alignCenter {
+            margin: 1em 0;
+        }
+
+        .alignCenter>*:first-child {
+            border: none;
+            /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+            display: table;
+            margin: 0 auto;
+        }
+
+        /* lists */
+        ol,
+        ul {
+            padding: 0;
+            margin: 0 0 1em 2em;
+        }
+
+        ol ol,
+        ul ul,
+        ol ul,
+        ul ol {
+            margin-left: 1em;
+        }
+
+        li {
+            margin: 0 0 0.25em 0;
+        }
+
+        .ulCompact li {
+            margin: 0;
+        }
+
+        ul.empty,
+        .ulEmpty {
+            list-style-type: none;
+        }
+
+        ul.empty li,
+        .ulEmpty li {
+            margin-top: 0.5em;
+        }
+
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact {
+            line-height: 100%;
+            margin: 0 0 0 2em;
+        }
+
+        /* definition lists */
+        dl {}
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        /* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+        dl>dd {
+            margin-bottom: .8em;
+            min-height: 1.3em;
+        }
+
+        dl.compact>dd,
+        .dlCompact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        /* links */
+        a {
+            text-decoration: none;
+        }
+
+        a[href] {
+            color: #22e;
+            /* Arlen: WCAG 2019 */
+        }
+
+        a[href]:hover {
+            background-color: #f2f2f2;
+        }
+
+        figcaption a[href],
+        a[href].selfRef {
+            color: #222;
+        }
+
+        /* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+        /* Figures */
+        tt,
+        code,
+        pre,
+        code {
+            background-color: #f9f9f9;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        pre {
+            border: 1px solid #eee;
+            margin: 0;
+            padding: 1em;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        figure blockquote {
+            margin: 0.8em 0.4em 0.4em;
+        }
+
+        figcaption {
+            font-style: italic;
+            margin: 0 0 1em 0;
+        }
+
+        @media screen {
+            pre {
+                overflow-x: auto;
+                max-width: 100%;
+                max-width: calc(100% - 22px);
+            }
+        }
+
+        /* aside, blockquote */
+        aside,
+        blockquote {
+            margin-left: 0;
+            padding: 1.2em 2em;
+        }
+
+        blockquote {
+            background-color: #f9f9f9;
+            color: #111;
+            /* Arlen: WCAG 2019 */
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin: 1em 0;
+        }
+
+        cite {
+            display: block;
+            text-align: right;
+            font-style: italic;
+        }
+
+        /* tables */
+        table {
+            width: 100%;
+            margin: 0 0 1em;
+            border-collapse: collapse;
+            border: 1px solid #eee;
+        }
+
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+            padding: 0.5em 0.75em;
+        }
+
+        th {
+            text-align: left;
+            background-color: #e9e9e9;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f5f5f5;
+        }
+
+        table caption {
+            font-style: italic;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        table p {
+            /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+            margin: 0;
+        }
+
+        /* pilcrow */
+        a.pilcrow {
+            color: #666;
+            /* Arlen: AHDJ 2019 */
+            text-decoration: none;
+            visibility: hidden;
+            user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        @media screen {
+
+            aside:hover>a.pilcrow,
+            p:hover>a.pilcrow,
+            blockquote:hover>a.pilcrow,
+            div:hover>a.pilcrow,
+            li:hover>a.pilcrow,
+            pre:hover>a.pilcrow {
+                visibility: visible;
+            }
+
+            a.pilcrow:hover {
+                background-color: transparent;
+            }
+        }
+
+        /* misc */
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+
+        .bcp14 {
+            font-variant: small-caps;
+        }
+
+        .role {
+            font-variant: all-small-caps;
+        }
+
+        /* info block */
+        #identifiers {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        #identifiers dt {
+            width: 3em;
+            clear: left;
+        }
+
+        #identifiers dd {
+            float: left;
+            margin-bottom: 0;
+        }
+
+        #identifiers .authors .author {
+            display: inline-block;
+            margin-right: 1.5em;
+        }
+
+        #identifiers .authors .org {
+            font-style: italic;
+        }
+
+        /* The prepared/rendered info at the very bottom of the page */
+        .docInfo {
+            color: #666;
+            /* Arlen: WCAG 2019 */
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 2em;
+        }
+
+        .docInfo .prepared {
+            float: left;
+        }
+
+        .docInfo .prepared {
+            float: right;
+        }
+
+        /* table of contents */
+        #toc {
+            padding: 0.75em 0 2em 0;
+            margin-bottom: 1em;
+        }
+
+        nav.toc ul {
+            margin: 0 0.5em 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        nav.toc li {
+            line-height: 1.3em;
+            margin: 0.75em 0;
+            padding-left: 1.2em;
+            text-indent: -1.2em;
+        }
+
+        /* references */
+        .references dt {
+            text-align: right;
+            font-weight: bold;
+            min-width: 7em;
+        }
+
+        .references dd {
+            margin-left: 8em;
+            overflow: auto;
+        }
+
+        .refInstance {
+            margin-bottom: 1.25em;
+        }
+
+        .references .ascii {
+            margin-bottom: 0.25em;
+        }
+
+        /* index */
+        .index ul {
+            margin: 0 0 0 1em;
+            padding: 0;
+            list-style: none;
+        }
+
+        .index ul ul {
+            margin: 0;
+        }
+
+        .index li {
+            margin: 0;
+            text-indent: -2em;
+            padding-left: 2em;
+            padding-bottom: 5px;
+        }
+
+        .indexIndex {
+            margin: 0.5em 0 1em;
+        }
+
+        .index a {
+            font-weight: 700;
+        }
+
+        /* make the index two-column on all but the smallest screens */
+        @media (min-width: 600px) {
+            .index ul {
+                -moz-column-count: 2;
+                -moz-column-gap: 20px;
+            }
+
+            .index ul ul {
+                -moz-column-count: 1;
+                -moz-column-gap: 0;
+            }
+        }
+
+        /* authors */
+        address.vcard {
+            font-style: normal;
+            margin: 1em 0;
+        }
+
+        address.vcard .nameRole {
+            font-weight: 700;
+            margin-left: 0;
+        }
+
+        address.vcard .label {
+            font-family: "Noto Sans", Arial, Helvetica, sans-serif;
+            margin: 0.5em 0;
+        }
+
+        address.vcard .type {
+            display: none;
+        }
+
+        .alternative-contact {
+            margin: 1.5em 0 1em;
+        }
+
+        hr.addr {
+            border-top: 1px dashed;
+            margin: 0;
+            color: #ddd;
+            max-width: calc(100% - 16px);
+        }
+
+        /* temporary notes */
+        .rfcEditorRemove::before {
+            position: absolute;
+            top: 0.2em;
+            right: 0.2em;
+            padding: 0.2em;
+            content: "The RFC Editor will remove this note";
+            color: #9e2a00;
+            /* Arlen: WCAG 2019 */
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+        }
+
+        .rfcEditorRemove {
+            position: relative;
+            padding-top: 1.8em;
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            border-radius: 3px;
+        }
+
+        .cref {
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            padding: 2px 4px;
+        }
+
+        .crefSource {
+            font-style: italic;
+        }
+
+        /* alternative layout for smaller screens */
+        @media screen and (max-width: 1023px) {
+            body {
+                padding-top: 2em;
+            }
+
+            #title {
+                padding: 1em 0;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-top: -18px;
+                /* provide offset for in-page anchors */
+                padding-top: 38px;
+            }
+
+            #identifiers dd {
+                max-width: 60%;
+            }
+
+            #toc {
+                position: fixed;
+                z-index: 2;
+                top: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+                background-color: inherit;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #toc h2 {
+                margin: -1px 0 0 0;
+                padding: 4px 0 4px 6px;
+                padding-right: 1em;
+                min-width: 190px;
+                font-size: 1.1em;
+                text-align: right;
+                background-color: #444;
+                color: white;
+                cursor: pointer;
+            }
+
+            #toc h2::before {
+                /* css hamburger */
+                float: right;
+                position: relative;
+                width: 1em;
+                height: 1px;
+                left: -164px;
+                margin: 6px 0 0 0;
+                background: white none repeat scroll 0 0;
+                box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+                content: "";
+            }
+
+            #toc nav {
+                display: none;
+                padding: 0.5em 1em 1em;
+                overflow: auto;
+                height: calc(100vh - 48px);
+                border-left: 1px solid #ddd;
+            }
+        }
+
+        /* alternative layout for wide screens */
+        @media screen and (min-width: 1024px) {
+            body {
+                max-width: 724px;
+                margin: 42px auto;
+                padding-left: 1.5em;
+                padding-right: 29em;
+            }
+
+            #toc {
+                position: fixed;
+                top: 42px;
+                right: 42px;
+                width: 25%;
+                margin: 0;
+                padding: 0 1em;
+                z-index: 1;
+            }
+
+            #toc h2 {
+                border-top: none;
+                border-bottom: 1px solid #ddd;
+                font-size: 1em;
+                font-weight: normal;
+                margin: 0;
+                padding: 0.25em 1em 1em 0;
+            }
+
+            #toc nav {
+                display: block;
+                height: calc(90vh - 84px);
+                bottom: 0;
+                padding: 0.5em 0 0;
+                overflow: auto;
+            }
+
+            img {
+                /* future proofing */
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* pagination */
+        @media print {
+            body {
+
+                width: 100%;
+            }
+
+            p {
+                orphans: 3;
+                widows: 3;
+            }
+
+            #n-copyright-notice {
+                border-bottom: none;
+            }
+
+            #toc,
+            #n-introduction {
+                page-break-before: always;
+            }
+
+            #toc {
+                border-top: none;
+                padding-top: 0;
+            }
+
+            figure,
+            pre {
+                page-break-inside: avoid;
+            }
+
+            figure {
+                overflow: scroll;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                page-break-after: avoid;
+            }
+
+            h2+*,
+            h3+*,
+            h4+*,
+            h5+*,
+            h6+* {
+                page-break-before: avoid;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-size: 10pt;
+            }
+
+            table {
+                border: 1px solid #ddd;
+            }
+
+            td {
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        /* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+        /*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+        @page :first {
+            padding-top: 0;
+
+            @top-left {
+                content: normal;
+                border: none;
+            }
+
+            @top-center {
+                content: normal;
+                border: none;
+            }
+
+            @top-right {
+                content: normal;
+                border: none;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin-bottom: 45mm;
+            padding-top: 20px;
+            /* The follwing is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+            /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+        }
+
+        /* Changes introduced to fix issues found during implementation */
+        /* Make sure links are clickable even if overlapped by following H* */
+        a {
+            z-index: 2;
+        }
+
+        /* Separate body from document info even without intervening H1 */
+        section {
+            clear: both;
+        }
+
+
+        /* Top align author divs, to avoid names without organization dropping level with org names */
+        .author {
+            vertical-align: top;
+        }
+
+        /* Leave room in document info to show Internet-Draft on one line */
+        #identifiers dt {
+            width: 8em;
+        }
+
+        /* Don't waste quite as much whitespace between label and value in doc info */
+        #identifiers dd {
+            margin-left: 1em;
+        }
+
+        /* Give floating toc a background color (needed when it's a div inside section */
+        #toc {
+            background-color: white;
+        }
+
+        /* Make the collapsed ToC header render white on gray also when it's a link */
+        @media screen and (max-width: 1023px) {
+
+            #toc h2 a,
+            #toc h2 a:link,
+            #toc h2 a:focus,
+            #toc h2 a:hover,
+            #toc a.toplink,
+            #toc a.toplink:hover {
+                color: white;
+                background-color: #444;
+                text-decoration: none;
+            }
+        }
+
+        /* Give the bottom of the ToC some whitespace */
+        @media screen and (min-width: 1024px) {
+            #toc {
+                padding: 0 0 1em 1em;
+            }
+        }
+
+        /* Style section numbers with more space between number and title */
+        .section-number {
+            padding-right: 0.5em;
+        }
+
+        /* prevent monospace from becoming overly large */
+        tt,
+        code,
+        pre,
+        code {
+            font-size: 95%;
+        }
+
+        /* Fix the height/width aspect for ascii art*/
+        pre.sourcecode,
+        .art-text pre {
+            line-height: 1.12;
+        }
+
+
+        /* Add styling for a link in the ToC that points to the top of the document */
+        a.toplink {
+            float: right;
+            margin-right: 0.5em;
+        }
+
+        /* Fix the dl styling to match the RFC 7992 attributes */
+        dl>dt,
+        dl.dlParallel>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.dlNewline>dt {
+            float: none;
+        }
+
+        /* Provide styling for table cell text alignment */
+        table td.text-left,
+        table th.text-left {
+            text-align: left;
+        }
+
+        table td.text-center,
+        table th.text-center {
+            text-align: center;
+        }
+
+        table td.text-right,
+        table th.text-right {
+            text-align: right;
+        }
+
+        /* Make the alternative author contact informatio look less like just another
+   author, and group it closer with the primary author contact information */
+        .alternative-contact {
+            margin: 0.5em 0 0.25em 0;
+        }
+
+        address .non-ascii {
+            margin: 0 0 0 2em;
+        }
+
+        /* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+        table {
+            width: auto;
+        }
+
+        /* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+        .references dd {
+            overflow: visible;
+        }
+
+        /* Control caption placement */
+        caption {
+            caption-side: bottom;
+        }
+
+        /* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+        address.vcard {
+            max-width: 30em;
+            margin-right: auto;
+        }
+
+        /* For address alignment dependent on LTR or RTL scripts */
+        address div.left {
+            text-align: left;
+        }
+
+        address div.right {
+            text-align: right;
+        }
+
+        /* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+        table.right {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        table.center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table.left {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Give the table caption label the same styling as the figcaption */
+        caption a[href] {
+            color: #222;
+        }
+
+        @media print {
+            .toplink {
+                display: none;
+            }
+
+            /* avoid overwriting the top border line with the ToC header */
+            #toc {
+                padding-top: 1px;
+            }
+
+            /* Avoid page breaks inside dl and author address entries */
+            .vcard {
+                page-break-inside: avoid;
+            }
+
+        }
+
+        /* Avoid wrapping of URLs in references */
+        @media screen {
+            .references a {
+                white-space: nowrap;
+            }
+        }
+
+        /* Tweak the bcp14 keyword presentation */
+        .bcp14 {
+            font-variant: small-caps;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Tweak the invisible space above H* in order not to overlay links in text above */
+        h2 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 31px;
+        }
+
+        h3 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        h4 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        /* Float artwork pilcrow to the right */
+        @media screen {
+            .artwork a.pilcrow {
+                display: block;
+                line-height: 0.7;
+                margin-top: 0.15em;
+            }
+        }
+
+        /* Make pilcrows on dd visible */
+        @media screen {
+            dd:hover>a.pilcrow {
+                visibility: visible;
+            }
+        }
+
+        /* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+        .alignLeft.art-text,
+        .alignCenter.art-text,
+        .alignRight.art-text {
+            margin-bottom: 0;
+        }
+
+        .alignLeft,
+        .alignCenter,
+        .alignRight {
+            margin: 1em 0 0 0;
+        }
+
+        /* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+        @media print {
+            a.pilcrow {
+                display: none;
+            }
+        }
+
+        /* Styling for the external metadata */
+        div#external-metadata {
+            background-color: #eee;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+            display: none;
+        }
+
+        div#internal-metadata {
+            padding: 0.5em;
+            /* to match the external-metadata padding */
+        }
+
+        /* Styling for title RFC Number */
+        h1#rfcnum {
+            clear: both;
+            margin: 0 0 -1em;
+            padding: 1em 0 0 0;
+        }
+
+        /* Make .olPercent look the same as <ol><li> */
+        dl.olPercent>dd {
+            margin: 0 0 0.25em 0;
+            min-height: initial;
+        }
+
+        /* Give aside some styling to set it apart */
+        aside {
+            border-left: 1px solid #ddd;
+            margin: 1em 0 1em 2em;
+            padding: 0.2em 2em;
+        }
+
+        aside>dl,
+        aside>ol,
+        aside>ul,
+        aside>table,
+        aside>p {
+            margin-bottom: 0.5em;
+        }
+
+        /* Additional page break settings */
+        @media print {
+
+            figcaption,
+            table caption {
+                page-break-before: avoid;
+            }
+        }
+
+        /* Font size adjustments for print */
+        @media print {
+            body {
+                font-size: 10pt;
+                line-height: normal;
+                max-width: 96%;
+            }
+
+            h1 {
+                font-size: 1.72em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2*1.2 */
+            h2 {
+                font-size: 1.44em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2 */
+            h3 {
+                font-size: 1.2em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2 */
+            h4 {
+                font-size: 1em;
+                padding-top: 1.5em;
+            }
+
+            h5,
+            h6 {
+                font-size: 1em;
+                margin: initial;
+                padding: 0.5em 0 0.3em;
+            }
+        }
+
+        /* Sourcecode margin in print, when there's no pilcrow */
+        @media print {
+
+            .artwork,
+            .sourcecode {
+                margin-bottom: 1em;
+            }
+        }
+
+        /*
+  The margin-left: 0 on <dd> removes all distinction
+  between levels from nested <dl>s.  Undo that.
+*/
+        dl.olPercent>dd,
+        dd {
+            margin-left: revert;
+        }
+
+        /* Avoid narrow tables forcing too narrow table captions, which may render badly */
+        table {
+            min-width: 20em;
+        }
+    </style>
+    <link href="https://www.rfc-editor.org/rfc/rfc-local.css" rel="stylesheet" type="text/css">
+    <link href="https://dx.doi.org/10.17487/rfc8693" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-oauth-token-exchange-19" rel="prev">
+</head>
+
+<body>
+    <script src="https://www.rfc-editor.org/js/metadata.min.js"></script>
+    <table class="ears">
+        <thead>
+            <tr>
+                <td class="left">RFC 8693</td>
+                <td class="center">OAuth 2.0 トークン交換</td>
+                <td class="right">2020年1月</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td class="left">Jones, et al.</td>
+                <td class="center">標準化過程</td>
+                <td class="right">[ページ]</td>
+            </tr>
+        </tfoot>
+    </table>
+    <div id="external-metadata" class="document-information"></div>
+    <div id="internal-metadata" class="document-information">
+        <dl id="identifiers">
+            <dt class="label-stream">ストリーム:</dt>
+            <dd class="stream">インターネット技術タスクフォース (IETF)</dd>
+            <dt class="label-rfc">RFC:</dt>
+            <dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc8693" class="eref">8693</a></dd>
+            <dt class="label-category">分類:</dt>
+            <dd class="category">標準化過程</dd>
+            <dt class="label-published">公開:</dt>
+            <dd class="published">
+                <time datetime="2020-01" class="published">2020年1月</time>
+            </dd>
+            <dt class="label-issn">ISSN:</dt>
+            <dd class="issn">2070-1721</dd>
+            <dt class="label-authors">著者:</dt>
+            <dd class="authors">
+                <div class="author">
+                    <div class="author-name">M. Jones</div>
+                    <div class="org">Microsoft</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">A. Nadalin</div>
+                    <div class="org">Microsoft</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">B. Campbell, <span class="editor">編</span>
+                    </div>
+                    <div class="org">Ping Identity</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">J. Bradley</div>
+                    <div class="org">Yubico</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">C. Mortimore</div>
+                    <div class="org">Visa</div>
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <h1 id="rfcnum">RFC 8693</h1>
+    <h1 id="title">OAuth 2.0 トークン交換</h1>
+    <section id="section-abstract">
+        <h2 id="abstract"><a href="#abstract" class="selfRef">概要</a></h2>
+        <p id="section-abstract-1">
+            本仕様は、OAuth 2.0 認可サーバーからセキュリティトークンを要求し取得する方法を定義することにより、
+            HTTP および JSON ベースの Security Token Service (STS) のためのプロトコルを定義する。
+            これには、なりすましおよび委任を用いるセキュリティトークンも含まれる。<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+    </section>
+    <div id="status-of-memo">
+        <section id="section-boilerplate.1">
+            <h2 id="name-status-of-this-memo">
+                <a href="#name-status-of-this-memo" class="section-name selfRef">このメモの位置付け</a>
+            </h2>
+            <p id="section-boilerplate.1-1">
+                これはインターネット標準化過程の文書である。<a href="#section-boilerplate.1-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-boilerplate.1-2">
+                本文書は Internet Engineering Task Force
+                (IETF) の成果物である。これは IETF コミュニティの合意を表すものである。本文書は
+                公開レビューを受けており、Internet Engineering Steering Group (IESG) によって
+                公開が承認されている。インターネット標準に関する詳細情報は、
+                RFC 7841 のセクション 2 で入手できる。<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.1-3">
+                本文書の現在の状態、正誤表、およびフィードバックの提供方法に関する情報は、
+                <span><a
+                        href="https://www.rfc-editor.org/info/rfc8693">https://www.rfc-editor.org/info/rfc8693</a></span>
+                で入手できる。<a href="#section-boilerplate.1-3" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="copyright">
+        <section id="section-boilerplate.2">
+            <h2 id="name-copyright-notice">
+                <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+            </h2>
+            <p id="section-boilerplate.2-1">
+                Copyright (c) 2020 IETF Trust and the persons identified as the
+                document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.2-2">
+                This document is subject to BCP 78 and the IETF Trust's Legal
+                Provisions Relating to IETF Documents
+                (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>)
+                in effect on the date of
+                publication of this document. Please review these documents
+                carefully, as they describe your rights and restrictions with
+                respect to this document. Code Components extracted from this
+                document must include Simplified BSD License text as described in
+                Section 4.e of the Trust Legal Provisions and are provided without
+                warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2"
+                    class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="toc">
+        <section id="section-toc.1">
+            <a href="#" onclick="scroll(0,0)" class="toplink">▲</a>
+            <h2 id="name-table-of-contents">
+                <a href="#name-table-of-contents" class="section-name selfRef">目次</a>
+            </h2>
+            <nav class="toc">
+                <ul class="toc ulEmpty">
+                    <li class="toc ulEmpty" id="section-toc.1-1.1">
+                        <p id="section-toc.1-1.1.1"><a href="#section-1" class="xref">1</a>. <a
+                                href="#name-introduction" class="xref">導入</a><a href="#section-toc.1-1.1.1"
+                                class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.1.2.1">
+                                <p id="section-toc.1-1.1.2.1.1"><a href="#section-1.1" class="xref">1.1</a>. <a
+                                        href="#name-delegation-vs-impersonation" class="xref">委任と
+                                        なりすましのセマンティクス</a><a href="#section-toc.1-1.1.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.1.2.2">
+                                <p id="section-toc.1-1.1.2.2.1"><a href="#section-1.2" class="xref">1.2</a>. <a
+                                        href="#name-requirements-notation-and-c" class="xref">要件表記および
+                                        規約</a><a href="#section-toc.1-1.1.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.1.2.3">
+                                <p id="section-toc.1-1.1.2.3.1"><a href="#section-1.3" class="xref">1.3</a>. <a
+                                        href="#name-terminology" class="xref">用語</a><a href="#section-toc.1-1.1.2.3.1"
+                                        class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.2">
+                        <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>. <a
+                                href="#name-token-exchange-request-and-" class="xref">トークン交換リクエストおよび
+                                レスポンス</a><a href="#section-toc.1-1.2.1" class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.1">
+                                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>. <a
+                                        href="#name-request" class="xref">リクエスト</a><a href="#section-toc.1-1.2.2.1.1"
+                                        class="pilcrow">¶</a></p>
+                                <ul class="toc ulEmpty">
+                                    <li class="toc ulEmpty" id="section-toc.1-1.2.2.1.2.1">
+                                        <p id="section-toc.1-1.2.2.1.2.1.1"><a href="#section-2.1.1"
+                                                class="xref">2.1.1</a>. <a href="#name-relationship-between-resour"
+                                                class="xref">Resource、Audience、Scope の関係</a><a
+                                                href="#section-toc.1-1.2.2.1.2.1.1" class="pilcrow">¶</a></p>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.2">
+                                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>. <a
+                                        href="#name-response" class="xref">レスポンス</a><a href="#section-toc.1-1.2.2.2.1"
+                                        class="pilcrow">¶</a></p>
+                                <ul class="toc ulEmpty">
+                                    <li class="toc ulEmpty" id="section-toc.1-1.2.2.2.2.1">
+                                        <p id="section-toc.1-1.2.2.2.2.1.1"><a href="#section-2.2.1"
+                                                class="xref">2.2.1</a>. <a href="#name-successful-response"
+                                                class="xref">成功レスポンス</a><a href="#section-toc.1-1.2.2.2.2.1.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.2.2.2.2.2">
+                                        <p id="section-toc.1-1.2.2.2.2.2.1"><a href="#section-2.2.2"
+                                                class="xref">2.2.2</a>. <a href="#name-error-response"
+                                                class="xref">エラーレスポンス</a><a href="#section-toc.1-1.2.2.2.2.2.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.2.2.3">
+                                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="xref">2.3</a>. <a
+                                        href="#name-example-token-exchange" class="xref">トークン交換の例</a><a
+                                        href="#section-toc.1-1.2.2.3.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.3">
+                        <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>. <a
+                                href="#name-token-type-identifiers" class="xref">トークン種別識別子</a><a
+                                href="#section-toc.1-1.3.1" class="pilcrow">¶</a></p>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.4">
+                        <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>. <a
+                                href="#name-json-web-token-claims-and-i" class="xref">JSON Web Token クレームおよび
+                                イントロスペクションレスポンスパラメーター</a><a href="#section-toc.1-1.4.1" class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.4.2.1">
+                                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>. <a
+                                        href="#name-act-actor-claim" class="xref">"act" (Actor) クレーム</a><a
+                                        href="#section-toc.1-1.4.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.4.2.2">
+                                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>. <a
+                                        href="#name-scope-scopes-claim" class="xref">"scope" (Scopes) クレーム</a><a
+                                        href="#section-toc.1-1.4.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.4.2.3">
+                                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="xref">4.3</a>. <a
+                                        href="#name-client_id-client-identifier" class="xref">"client_id" (Client
+                                        Identifier) クレーム</a><a href="#section-toc.1-1.4.2.3.1" class="pilcrow">¶</a>
+                                </p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.4.2.4">
+                                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="xref">4.4</a>. <a
+                                        href="#name-may_act-authorized-actor-cl" class="xref">"may_act" (Authorized
+                                        Actor) クレーム</a><a href="#section-toc.1-1.4.2.4.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.5">
+                        <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>. <a
+                                href="#name-security-considerations" class="xref">セキュリティ上の考慮事項</a><a
+                                href="#section-toc.1-1.5.1" class="pilcrow">¶</a></p>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.6">
+                        <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>. <a
+                                href="#name-privacy-considerations" class="xref">プライバシー上の考慮事項</a><a
+                                href="#section-toc.1-1.6.1" class="pilcrow">¶</a></p>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.7">
+                        <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>. <a
+                                href="#name-iana-considerations" class="xref">IANA に関する考慮事項</a><a
+                                href="#section-toc.1-1.7.1" class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.7.2.1">
+                                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>. <a
+                                        href="#name-oauth-uri-registration" class="xref">OAuth URI 登録</a><a
+                                        href="#section-toc.1-1.7.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.7.2.2">
+                                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>. <a
+                                        href="#name-oauth-parameters-registrati" class="xref">OAuth パラメーター
+                                        登録</a><a href="#section-toc.1-1.7.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.7.2.3">
+                                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="xref">7.3</a>. <a
+                                        href="#name-oauth-access-token-type-reg" class="xref">OAuth アクセストークン種別
+                                        登録</a><a href="#section-toc.1-1.7.2.3.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.7.2.4">
+                                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="xref">7.4</a>. <a
+                                        href="#name-json-web-token-claims-regis" class="xref">JSON Web Token クレーム
+                                        登録</a><a href="#section-toc.1-1.7.2.4.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.7.2.5">
+                                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="xref">7.5</a>. <a
+                                        href="#name-oauth-token-introspection-r" class="xref">OAuth トークンイントロスペクション
+                                        レスポンス登録</a><a href="#section-toc.1-1.7.2.5.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.8">
+                        <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>. <a href="#name-references"
+                                class="xref">参考文献</a><a href="#section-toc.1-1.8.1" class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.8.2.1">
+                                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="xref">8.1</a>. <a
+                                        href="#name-normative-references" class="xref">規範的参考文献</a><a
+                                        href="#section-toc.1-1.8.2.1.1" class="pilcrow">¶</a></p>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.8.2.2">
+                                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="xref">8.2</a>. <a
+                                        href="#name-informative-references" class="xref">参考情報</a><a
+                                        href="#section-toc.1-1.8.2.2.1" class="pilcrow">¶</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.9">
+                        <p id="section-toc.1-1.9.1"><a href="#section-appendix.a" class="xref">付録 A</a>. <a
+                                href="#name-additional-token-exchange-e" class="xref">追加のトークン交換
+                                例</a><a href="#section-toc.1-1.9.1" class="pilcrow">¶</a></p>
+                        <ul class="toc ulEmpty">
+                            <li class="toc ulEmpty" id="section-toc.1-1.9.2.1">
+                                <p id="section-toc.1-1.9.2.1.1"><a href="#section-a.1" class="xref">A.1</a>. <a
+                                        href="#name-impersonation-token-exchang" class="xref">なりすましトークン
+                                        交換例</a><a href="#section-toc.1-1.9.2.1.1" class="pilcrow">¶</a></p>
+                                <ul class="toc ulEmpty">
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.1.2.1">
+                                        <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#section-a.1.1"
+                                                class="xref">A.1.1</a>. <a href="#name-token-exchange-request-2"
+                                                class="xref">トークン交換リクエスト</a><a href="#section-toc.1-1.9.2.1.2.1.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.1.2.2">
+                                        <p id="section-toc.1-1.9.2.1.2.2.1"><a href="#section-a.1.2"
+                                                class="xref">A.1.2</a>. <a href="#name-subject-token-claims"
+                                                class="xref">Subject Token クレーム</a><a
+                                                href="#section-toc.1-1.9.2.1.2.2.1" class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.1.2.3">
+                                        <p id="section-toc.1-1.9.2.1.2.3.1"><a href="#section-a.1.3"
+                                                class="xref">A.1.3</a>. <a href="#name-token-exchange-response-2"
+                                                class="xref">トークン交換レスポンス</a><a href="#section-toc.1-1.9.2.1.2.3.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.1.2.4">
+                                        <p id="section-toc.1-1.9.2.1.2.4.1"><a href="#section-a.1.4"
+                                                class="xref">A.1.4</a>. <a href="#name-issued-token-claims"
+                                                class="xref">発行されたトークンのクレーム</a><a href="#section-toc.1-1.9.2.1.2.4.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="toc ulEmpty" id="section-toc.1-1.9.2.2">
+                                <p id="section-toc.1-1.9.2.2.1"><a href="#section-a.2" class="xref">A.2</a>. <a
+                                        href="#name-delegation-token-exchange-e" class="xref">委任トークン交換
+                                        例</a><a href="#section-toc.1-1.9.2.2.1" class="pilcrow">¶</a></p>
+                                <ul class="toc ulEmpty">
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.2.2.1">
+                                        <p id="section-toc.1-1.9.2.2.2.1.1"><a href="#section-a.2.1"
+                                                class="xref">A.2.1</a>. <a href="#name-token-exchange-request-4"
+                                                class="xref">トークン交換リクエスト</a><a href="#section-toc.1-1.9.2.2.2.1.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.2.2.2">
+                                        <p id="section-toc.1-1.9.2.2.2.2.1"><a href="#section-a.2.2"
+                                                class="xref">A.2.2</a>. <a href="#name-subject-token-claims-3"
+                                                class="xref">Subject Token クレーム</a><a
+                                                href="#section-toc.1-1.9.2.2.2.2.1" class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.2.2.3">
+                                        <p id="section-toc.1-1.9.2.2.2.3.1"><a href="#section-a.2.3"
+                                                class="xref">A.2.3</a>. <a href="#name-actor-token-claims"
+                                                class="xref">Actor Token クレーム</a><a href="#section-toc.1-1.9.2.2.2.3.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.2.2.4">
+                                        <p id="section-toc.1-1.9.2.2.2.4.1"><a href="#section-a.2.4"
+                                                class="xref">A.2.4</a>. <a href="#name-token-exchange-response-4"
+                                                class="xref">トークン交換レスポンス</a><a href="#section-toc.1-1.9.2.2.2.4.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                    <li class="toc ulEmpty" id="section-toc.1-1.9.2.2.2.5">
+                                        <p id="section-toc.1-1.9.2.2.2.5.1"><a href="#section-a.2.5"
+                                                class="xref">A.2.5</a>. <a href="#name-issued-token-claims-3"
+                                                class="xref">発行されたトークンのクレーム</a><a href="#section-toc.1-1.9.2.2.2.5.1"
+                                                class="pilcrow">¶</a></p>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.10">
+                        <p id="section-toc.1-1.10.1"><a href="#section-appendix.b" class="xref"></a><a
+                                href="#name-acknowledgements" class="xref">謝辞</a><a href="#section-toc.1-1.10.1"
+                                class="pilcrow">¶</a></p>
+                    </li>
+                    <li class="toc ulEmpty" id="section-toc.1-1.11">
+                        <p id="section-toc.1-1.11.1"><a href="#section-appendix.c" class="xref"></a><a
+                                href="#name-authors-addresses" class="xref">著者の連絡先</a><a href="#section-toc.1-1.11.1"
+                                class="pilcrow">¶</a></p>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+    </div>
+    <div id="Introduction">
+        <section id="section-1">
+            <h2 id="name-introduction">
+                <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction"
+                    class="section-name selfRef">導入</a>
+            </h2>
+            <p id="section-1-1">
+                セキュリティトークンは、異種環境またはセキュリティドメインをまたいで
+                アイデンティティおよびセキュリティ情報の共有を容易にする情報の集合である。
+                セキュリティトークンの例には、JSON Web Tokens
+                (JWTs) <span>[<a href="#RFC7519" class="xref">JWT</a>]</span> および Security Assertion Markup Language
+                (SAML)
+                2.0 アサーション <span>[<a href="#OASIS.saml-core-2.0-os" class="xref">OASIS.saml-core-2.0-os</a>]</span>
+                が含まれる。
+                セキュリティトークンは、
+                通常、完全性を達成するために署名され、ときには
+                機密性を達成するために暗号化もされる。セキュリティトークンは、<span>[<a href="#RFC7521" class="xref">RFC7521</a>]</span> のように
+                アサーションとも呼ばれることがある。<a href="#section-1-1" class="pilcrow">¶</a></p>
+            <p id="section-1-2">
+                Security Token Service (STS) は、提供された
+                セキュリティトークンを検証し、それに応答して新しいセキュリティトークンを発行できる
+                サービスであり、これによりクライアントは、異種環境またはセキュリティ
+                ドメインをまたいだリソースに対する適切な
+                アクセス資格情報を取得できる。
+                Web Service クライアントは、トークン交換のために STS と対話するプロトコルとして
+                WS-Trust <span>[<a href="#WS-Trust" class="xref">WS-Trust</a>]</span>
+                を使用してきた。
+                WS-Trust は XML と SOAP を使用するが、現代の Web 開発の流れは
+                RESTful (Representational State Transfer) パターンと JSON へ向かっている。
+                OAuth 2.0 Authorization Framework <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span>
+                および OAuth 2.0 Bearer Tokens <span>[<a href="#RFC6750" class="xref">RFC6750</a>]</span>
+                は、HTTP および RESTful リソースへの第三者
+                アプリケーションアクセスを認可するための一般的な標準として
+                登場している。
+                従来の OAuth 2.0 の相互作用では、リソース所有者認可の何らかの
+                表現をアクセストークンと交換するが、
+                これは実際に非常に有用なパターンであることが証明されている。しかし、
+                その入力と出力は、そのままではセキュリティトークン交換フレームワークを完全に
+                収容するにはやや制約が強すぎる。<a href="#section-1-2" class="pilcrow">¶</a></p>
+            <p id="section-1-3">
+                本仕様は、STS の役割を担う認可サーバーから
+                クライアントがセキュリティトークンを要求し取得できるようにする、
+                OAuth 2.0 を拡張するプロトコルを定義する。
+                OAuth 2.0 と同様に、本仕様はクライアント開発者にとっての単純さに重点を置き、
+                現代の開発環境でほぼ普遍的に利用可能な
+                HTTP クライアントと JSON パーサーのみを必要とする。本仕様で定義される STS プロトコルは、
+                それ自体は RESTful ではない (STS は REST
+                アプローチに特に適しているわけではない) が、RESTful システムでの作業に慣れた
+                開発者にとって馴染みのあるはずの通信パターンおよびデータ形式を利用する。<a href="#section-1-3" class="pilcrow">¶</a></p>
+            <p id="section-1-4">
+                トークン交換リクエストの新しいグラントタイプ、および
+                トークンエンドポイントに対するそのようなリクエストに関連する具体的なパラメーターは、
+                本仕様によって定義される。
+                トークン交換レスポンスは、トークンエンドポイントからの通常の OAuth 2.0 レスポンスであり、
+                クライアントへ情報を提供するために本仕様で定義される追加パラメーターをいくつか含む。<a href="#section-1-4" class="pilcrow">¶</a></p>
+            <p id="section-1-5">
+                トークン交換のリクエストを行うエンティティは、トークン交換相互作用の文脈において
+                クライアントと見なされる。ただし、これは
+                このプロファイルの使用を従来の OAuth クライアントに限定するものではない。たとえば OAuth リソースサーバーは、
+                保護リソースリクエストで受け取った
+                アクセストークンを、バックエンドサービスへの呼び出しに含めるのに適した
+                新しいトークンと交換するために、トークン交換中に
+                クライアントの役割を担うことがある。この新しいトークンは、下流サービス向けに
+                より狭いスコープを持つアクセストークンである場合もあれば、まったく異なる種類
+                のトークンである場合もある。<a href="#section-1-5" class="pilcrow">¶</a></p>
+            <p id="section-1-6">
+                本仕様の範囲は、OAuth 2.0 を利用する
+                STS スタイルのトークン交換のための基本的なリクエストおよびレスポンスプロトコルの
+                定義に限定される。
+                委任セマンティクスを表現できるようにする新しい JWT クレームがいくつか定義されているが、
+                トークン自体の具体的な構文、セマンティクス、およびセキュリティ特性
+                (認可サーバーに提示されるものとクライアントが取得するものの両方)
+                は明示的に範囲外であり、実装が展開される可能性のある
+                信頼モデルには要件を課さない。追加プロファイルは、
+                トークンの署名および/または暗号化が必要か、または proof-of-possession スタイルの
+                トークンが要求または発行されるかなど、関係する当事者および信頼の具体的な性質に関する
+                より詳細な要件を提供することができる。しかし、そのような詳細は、
+                個々の展開の具体的なニーズに関して行われるポリシー上の決定であることが多く、
+                それに応じて構成または実装される。<a href="#section-1-6" class="pilcrow">¶</a></p>
+            <p id="section-1-7">
+                取得されたセキュリティトークンは多くの文脈で使用できるが、
+                その具体的内容も本仕様の範囲外である。<a href="#section-1-7" class="pilcrow">¶</a></p>
+            <div id="DelegationImpersonation">
+                <section id="section-1.1">
+                    <h3 id="name-delegation-vs-impersonation">
+                        <a href="#section-1.1" class="section-number selfRef">1.1. </a><a
+                            href="#name-delegation-vs-impersonation" class="section-name selfRef">委任と
+                            なりすましのセマンティクス</a>
+                    </h3>
+                    <p id="section-1.1-1">
+                        STS の一般的なユースケースの 1 つ (前のセクションで示唆したように) は、
+                        リソースサーバー A が、要求ユーザー B の
+                        代理としてバックエンドサービス C を呼び出せるようにすることである。ローカルサイトポリシーおよび
+                        認可インフラストラクチャに応じて、A が B の代理として
+                        動作していることを何らかの形で示す注釈とともに、自身の
+                        資格情報を用いて C にアクセスすること ("委任")、または A に C への限定されたアクセス
+                        資格情報を付与するが、それが引き続き B を認可された
+                        エンティティとして識別すること ("なりすまし") が望ましい場合がある。委任と
+                        なりすましは、複数の参加者が関わる他のシナリオでも有用な
+                        概念となり得る。<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+                    <p id="section-1.1-2">
+                        プリンシパル A がプリンシパル B になりすます場合、A は
+                        定義された権利コンテキストの範囲内で B が持つすべての
+                        権利を与えられ、そのコンテキストでは B と区別できない。
+                        したがって、プリンシパル A がプリンシパル B になりすます場合、
+                        そのようなトークンを受け取るエンティティに関する限り、
+                        それらは実際には B とやり取りしていることになる。
+                        アイデンティティシステムの一部の構成員が、なりすましが
+                        行われていることを認識している可能性はあるが、それは要件ではない。
+                        あらゆる意図と目的において、A が B になりすましている場合、A は
+                        トークンによって認可された権利のコンテキスト内では B である。A が B になりすます能力は、
+                        トークンの内容または帯域外メカニズムによって、
+                        スコープまたは時間、さらには 1 回限りの使用制限に限定されることがある。<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+                    <p id="section-1.1-3">
+                        委任セマンティクスは、
+                        なりすましセマンティクスとは異なるが、両者は密接に関連している。
+                        委任セマンティクスでは、プリンシパル A は B とは別個の自身のアイデンティティを
+                        引き続き持ち、B がその権利の一部を A に委任した可能性はあるものの、
+                        行われるあらゆるアクションは、B を代表する A によって
+                        行われていることが明示的に理解される。ある意味で、A は B のエージェントである。<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+                    <p id="section-1.1-4">
+                        委任となりすましは、すべての状況を包含するものではない。
+                        たとえば、プリンシパルが直接自身の代理として動作している場合、
+                        委任もなりすましも関係していない。しかし、それらは
+                        トークン交換で動作するより一般的なセマンティクスであり、そのため
+                        本仕様ではより直接的に扱われる。<a href="#section-1.1-4" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-1.1-5">
+                        委任セマンティクスは通常、トークンの主たる主体と、その主体が権利の一部を委任した
+                        アクターの両方に関する情報を含めることによって、トークン内で表現される。
+                        このようなトークンは、複数の主体に関する情報で構成されるため、
+                        複合トークンと呼ばれることがある。通常、リクエストでは、<code>subject_token</code>
+                        はトークンが要求される相手方の
+                        代理となる当事者のアイデンティティを表し、<code>actor_token</code> は
+                        発行されるトークンのアクセス権が委任される当事者の
+                        アイデンティティを表す。
+                        認可サーバーによって発行される複合トークンは、両当事者に関する情報を
+                        含む。
+                        複合トークンが発行されるかどうか、およびいつ発行されるかは、認可サーバーならびに
+                        適用されるポリシーおよび構成の裁量に委ねられる。<a href="#section-1.1-5" class="pilcrow">¶</a></p>
+                    <p id="section-1.1-6">
+                        複合トークンを表現する具体的な方法、さらには
+                        そのようなトークンが発行されるかどうかは、実装の詳細と
+                        トークンの種類に依存する。JWT ではない複合トークンの表現は、
+                        本仕様の範囲外である。ただし、<code>actor_token</code> リクエスト
+                        パラメーターは、望まれるアクターに関する情報を提供する
+                        手段を提供し、JWT の
+                        <code>act</code> クレームは委任の連鎖の表現を提供できる。<a href="#section-1.1-6" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="RNC">
+                <section id="section-1.2">
+                    <h3 id="name-requirements-notation-and-c">
+                        <a href="#section-1.2" class="section-number selfRef">1.2. </a><a
+                            href="#name-requirements-notation-and-c" class="section-name selfRef">要件表記
+                            および規約</a>
+                    </h3>
+                    <p id="section-1.2-1">
+                        本文書におけるキーワード "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span
+                            class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span
+                            class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span
+                            class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span
+                            class="bcp14">NOT RECOMMENDED</span>",
+                        "<span class="bcp14">MAY</span>", および "<span class="bcp14">OPTIONAL</span>" は、
+                        ここに示すようにすべて大文字で現れる場合に限り、
+                        BCP 14 <span>[<a href="#RFC2119" class="xref">RFC2119</a>]</span> <span>[<a href="#RFC8174"
+                                class="xref">RFC8174</a>]</span>
+                        に記述されるとおりに解釈される。<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="Terminology">
+                <section id="section-1.3">
+                    <h3 id="name-terminology">
+                        <a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-terminology"
+                            class="section-name selfRef">用語</a>
+                    </h3>
+                    <p id="section-1.3-1">
+                        本仕様は、OAuth 2.0 <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span>
+                        で定義される
+                        "access token type", "authorization server", "client", "client identifier",
+                        "resource server", "token endpoint", "token request", および "token response"
+                        という用語、ならびに
+                        JSON Web Token (JWT) <span>[<a href="#RFC7519" class="xref">JWT</a>]</span> で定義される
+                        "Base64url Encoding", "Claim", および "JWT Claims Set" という用語を使用する。<a href="#section-1.3-1"
+                            class="pilcrow">¶</a></p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="Messages">
+        <section id="section-2">
+            <h2 id="name-token-exchange-request-and-">
+                <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-token-exchange-request-and-"
+                    class="section-name selfRef">トークン交換リクエストおよびレスポンス</a>
+            </h2>
+            <div id="Request">
+                <section id="section-2.1">
+                    <h3 id="name-request">
+                        <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-request"
+                            class="section-name selfRef">リクエスト</a>
+                    </h3>
+                    <p id="section-2.1-1">
+                        クライアントは、<span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.5" class="relref">[<a
+                                    href="#RFC6749" class="xref">RFC6749</a>] の
+                                セクション 4.5</a></span> で定義される拡張グラントタイプメカニズムを用いて、
+                        認可サーバーのトークンエンドポイントへトークンリクエストを行うことにより、
+                        セキュリティトークンを要求する。<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+                    <p id="section-2.1-2">
+                        認可サーバーに対するクライアント認証は、OAuth 2.0 によって提供される通常の
+                        メカニズムを用いて行われる。
+                        <span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-2.3.1" class="relref">[<a
+                                    href="#RFC6749" class="xref">RFC6749</a>] の
+                                セクション 2.3.1</a></span>
+                        はクライアントのパスワードベース認証を定義しているが、
+                        クライアント認証は拡張可能であり、他のメカニズムも可能である。
+                        たとえば、<span>[<a href="#RFC7523" class="xref">RFC7523</a>]</span> は bearer
+                        JSON Web Tokens (JWTs) <span>[<a href="#RFC7519" class="xref">JWT</a>]</span> を用いたクライアント
+                        認証を定義している。
+                        サポートされるクライアント認証方法、および
+                        認証されていない、または識別されていないクライアントを許可するかどうかは、
+                        認可サーバーの裁量による展開上の決定である。
+                        クライアント認証を省略すると、侵害されたトークンを所有する
+                        誰でも、そのトークンを STS 経由で他のトークンへ
+                        活用できることに注意されたい。したがって、クライアント
+                        認証により、他のエンティティになりすます、または他の
+                        エンティティから委任を受けることが許可されるエンティティに関して、
+                        STS による追加の認可チェックが可能となる。<a href="#section-2.1-2" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.1-3">
+                        クライアントは、HTTP <code>POST</code> メソッドを使用し、拡張
+                        グラントタイプを伴ってトークンエンドポイントへトークン交換リクエストを行う。
+                        以下のパラメーターは、<span><a href="https://www.rfc-editor.org/rfc/rfc6749#appendix-B" class="relref">[<a
+                                    href="#RFC6749" class="xref">RFC6749</a>] の付録 B</a></span>
+                        に記述されるとおり、UTF-8 の文字エンコーディングを用いた
+                        <code>application/x-www-form-urlencoded</code>
+                        形式で HTTP リクエスト entity-body に含められる。<a href="#section-2.1-3" class="pilcrow">¶</a>
+                    </p>
+                    <dl class="dlNewline" id="section-2.1-4">
+                        <dt id="section-2.1-4.1">grant_type</dt>
+                        <dd id="section-2.1-4.2">
+                            <span class="bcp14">REQUIRED</span>. 値
+                            <code>urn:ietf:params:oauth:grant-type:token-exchange</code>
+                            は、トークン交換が実行されていることを示す。<a href="#section-2.1-4.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.3">resource</dt>
+                        <dd id="section-2.1-4.4">
+                            <span class="bcp14">OPTIONAL</span>.
+                            クライアントが要求されたセキュリティトークンを使用しようとする
+                            対象サービスまたはリソースを示す URI。これにより、認可サーバーは、
+                            発行されるトークンの種別と内容を決定したり、トークンを暗号化するかどうか、および
+                            どのように暗号化するかを決定したりするなど、
+                            対象に応じて適切なポリシーを適用できる。
+                            多くの場合、クライアントは相互作用するシステムの論理的構成を
+                            知らず、
+                            トークンを使用しようとするサービスの URI だけを知っている。
+                            <code>resource</code> パラメーターにより、クライアントは、
+                            発行されたトークンを使用しようとする場所を認可
+                            サーバーに示すことができる。これは通常、https
+                            URL として、トークン交換リクエスト内でそのリソースにアクセスする際に使用されるのと
+                            同じ形式で場所を提供することによって行われる。
+                            認可サーバーは通常、リソース URI 値から
+                            適切なポリシーへマッピングする能力を持つ。<code>resource</code> パラメーターの値は、
+                            <span><a href="https://www.rfc-editor.org/rfc/rfc3986#section-4.3" class="relref">[<a
+                                        href="#RFC3986" class="xref">RFC3986</a>] のセクション
+                                    4.3</a></span> で指定される
+                            絶対 URI でなければならず (<span class="bcp14">MUST</span>)、
+                            クエリコンポーネントを含んでもよい (<span class="bcp14">MAY</span>) が、
+                            フラグメントコンポーネントを含んではならない (<span class="bcp14">MUST
+                                NOT</span>)。
+                            発行されたトークンが列挙された複数のリソースで使用されることを示すために、
+                            複数の <code>resource</code> パラメーターを使用できる。
+                            <code>resource</code> パラメーターの追加の背景および使用法については
+                            <span>[<a href="#I-D.ietf-oauth-resource-indicators" class="xref">OAUTH-RESOURCE</a>]</span>
+                            を参照されたい。<a href="#section-2.1-4.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.5">audience</dt>
+                        <dd id="section-2.1-4.6">
+                            <span class="bcp14">OPTIONAL</span>. クライアントが要求されたセキュリティトークンを
+                            使用しようとする対象サービスの論理名。これは
+                            <code>resource</code> パラメーターと同様の目的を果たすが、クライアントが
+                            対象サービスの論理名を提供する点が異なる。その名前の解釈には、
+                            値がクライアントと認可サーバーの双方に理解されるものである必要がある。
+                            OAuth クライアント識別子、SAML エンティティ識別子
+                            <span>[<a href="#OASIS.saml-core-2.0-os" class="xref">OASIS.saml-core-2.0-os</a>]</span>、および
+                            OpenID Connect
+                            Issuer Identifier <span>[<a href="#OpenID.Core" class="xref">OpenID.Core</a>]</span> は、
+                            <code>audience</code> パラメーター値として使用され得るものの例である。
+                            ただし、特定の認可サーバーで使用される <code>audience</code> 値は、
+                            意図された値の種別として適切に解釈されることを保証するために、
+                            そのサーバー内で一意でなければならない。発行されたトークンが
+                            列挙された複数の audience で使用されることを示すために、
+                            複数の <code>audience</code> パラメーターを使用できる。
+                            <code>audience</code> および <code>resource</code> パラメーターは、
+                            論理名とリソース URI が混在する複数の対象サービスを示すために
+                            併用できる。<a href="#section-2.1-4.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.7">scope</dt>
+                        <dd id="section-2.1-4.8">
+                            <span class="bcp14">OPTIONAL</span>. <span><a
+                                    href="https://www.rfc-editor.org/rfc/rfc6749#section-3.3" class="relref">[<a
+                                        href="#RFC6749" class="xref">RFC6749</a>] のセクション 3.3</a></span>
+                            で定義される、スペース区切りで大文字小文字を区別する
+                            文字列のリストであり、クライアントが、トークンが使用される
+                            サービスまたはリソースの文脈において、要求するセキュリティトークンの
+                            望ましいスコープを指定できるようにする。スコープの値と関連するセマンティクスは
+                            サービス固有であり、関連するサービスドキュメントに記述されることが期待される。<a href="#section-2.1-4.8" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.9">requested_token_type</dt>
+                        <dd id="section-2.1-4.10">
+                            <span class="bcp14">OPTIONAL</span>.
+                            <a href="#TokenTypeIdentifiers" class="xref">セクション 3</a> に記述される、
+                            要求されたセキュリティトークンの種別の識別子。
+                            要求される種別が指定されていない場合、発行されるトークン種別は
+                            認可サーバーの裁量によるものであり、
+                            <code>resource</code> または
+                            <code>audience</code> パラメーターによって示される
+                            サービスまたはリソースの要件に関する知識によって
+                            決定されることがある。<a href="#section-2.1-4.10" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.11">subject_token</dt>
+                        <dd id="section-2.1-4.12">
+                            <span class="bcp14">REQUIRED</span>.
+                            リクエストが行われる相手方の代理となる
+                            当事者のアイデンティティを表すセキュリティトークン。
+                            通常、このトークンの subject は、リクエストへの応答として
+                            発行されるセキュリティトークンの subject となる。<a href="#section-2.1-4.12" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.13">subject_token_type</dt>
+                        <dd id="section-2.1-4.14">
+                            <span class="bcp14">REQUIRED</span>.
+                            <a href="#TokenTypeIdentifiers" class="xref">セクション 3</a> に記述される識別子であり、
+                            <code>subject_token</code> パラメーター内のセキュリティトークンの種別を
+                            示す。<a href="#section-2.1-4.14" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.15">actor_token</dt>
+                        <dd id="section-2.1-4.16">
+                            <span class="bcp14">OPTIONAL</span>.
+                            動作する当事者のアイデンティティを表す
+                            セキュリティトークン。通常、これは要求されたセキュリティトークンを
+                            使用し、subject の代理として動作することを認可された当事者である。<a href="#section-2.1-4.16" class="pilcrow">¶</a>
+                        </dd>
+                        <dt id="section-2.1-4.17">actor_token_type</dt>
+                        <dd id="section-2.1-4.18">
+                            <a href="#TokenTypeIdentifiers" class="xref">セクション 3</a> に記述される識別子であり、
+                            <code>actor_token</code> パラメーター内のセキュリティトークンの種別を
+                            示す。
+                            これは、リクエストに <code>actor_token</code> パラメーターが存在する場合に
+                            <span class="bcp14">REQUIRED</span> であるが、それ以外の場合は含めてはならない (<span class="bcp14">MUST
+                                NOT</span>)。<a href="#section-2.1-4.18" class="pilcrow">¶</a>
+                        </dd>
+                    </dl>
+                    <p id="section-2.1-5">
+                        リクエストの処理において、認可サーバーは、示されたトークン
+                        種別に対して適切な検証手続きを実行しなければならず (<span class="bcp14">MUST</span>)、
+                        actor token が存在する場合には、その示されたトークン種別に対しても
+                        適切な検証手続きを実行しなければならない。
+                        特定のトークンの有効性基準および詳細は、本文書の範囲外であり、
+                        それぞれのトークン種別およびその内容に固有である。<a href="#section-2.1-5" class="pilcrow">¶</a></p>
+                    <p id="section-2.1-6">
+                        1 回限りの使用またはトークン種別に固有のその他のセマンティクスがない場合、
+                        トークン交換を実行する行為は、subject token または actor token の有効性に影響を与えない。
+                        さらに、交換は 1 回限りのイベントであり、入力トークンと出力トークンの間に
+                        密接なリンクを作成しない。そのため、たとえば出力トークンの有効期限が
+                        入力トークンの有効期限の影響を受けることはあっても、
+                        入力トークンの更新または延長が出力トークンのプロパティに反映されることは
+                        期待されない。トークン失効イベントを伝播することが適切または望ましい場合は
+                        依然としてあり得る。しかし、それは STS プロトコルの一般的な性質ではなく、
+                        特定の実装、トークン種別、または展開に固有のものとなる。<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+                    <section id="section-2.1.1">
+                        <h4 id="name-relationship-between-resour">
+                            <a href="#section-2.1.1" class="section-number selfRef">2.1.1. </a><a
+                                href="#name-relationship-between-resour"
+                                class="section-name selfRef">Resource、Audience、Scope
+                                の関係</a>
+                        </h4>
+                        <p id="section-2.1.1-1">
+                            トークンを要求する際、クライアントは <code>audience</code> および
+                            <code>resource</code> パラメーターによって、そのトークンを使用しようとする
+                            望ましい対象サービスを示すことができ、また
+                            <code>scope</code> パラメーターを用いて要求するトークンの望ましいスコープを示すことができる。
+
+                            このようなリクエストのセマンティクスは、クライアントが、要求されたすべての対象サービスで使用可能な
+                            要求スコープを持つトークンを求めているということである。実質的に、
+                            トークンの要求されたアクセス権は、すべての対象サービスにおけるすべてのスコープの
+                            デカルト積である。<a href="#section-2.1.1-1" class="pilcrow">¶</a>
+                        </p>
+                        <p id="section-2.1.1-2">
+                            認可サーバーは、任意のトークンリクエストを満たすことを望まない、または
+                            満たせない場合があるが、非常に広範なアクセス権が求められている場合には、
+                            満たせないリクエストとなる可能性が大幅に高くなる。
+                            そのため、展開におけるシステム間の関係に関する具体的な知識がない場合、
+                            クライアントは要求するアクセスの広さ、特に
+                            対象サービスの数に慎重であるべきである。認可サーバーは、
+                            クライアントが同時に過度に多くの対象サービスへのアクセスを要求したことを通知するために、
+                            <a href="#ErrorResponse" class="xref">セクション 2.2.2</a> で定義される
+                            <code>invalid_target</code> エラーコードを使用できる。<a href="#section-2.1.1-2" class="pilcrow">¶</a>
+                        </p>
+                    </section>
+                </section>
+            </div>
+            <div id="Response">
+                <section id="section-2.2">
+                    <h3 id="name-response">
+                        <a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-response"
+                            class="section-name selfRef">レスポンス</a>
+                    </h3>
+                    <p id="section-2.2-1">
+                        認可サーバーは、<span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-5" class="relref">[<a
+                                    href="#RFC6749" class="xref">RFC6749</a>] のセクション 5</a></span>
+                        で指定されるとおり、トークンエンドポイントからの通常の
+                        OAuth 2.0 レスポンスでトークン交換リクエストに応答する。追加の詳細および
+                        説明は、以下のサブセクションで提供される。<a href="#section-2.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <div id="SuccessfulResponse">
+                        <section id="section-2.2.1">
+                            <h4 id="name-successful-response">
+                                <a href="#section-2.2.1" class="section-number selfRef">2.2.1. </a><a
+                                    href="#name-successful-response" class="section-name selfRef">成功
+                                    レスポンス</a>
+                            </h4>
+                            <p id="section-2.2.1-1">
+                                リクエストが有効で、認可サーバーのすべてのポリシーおよびその他の基準を満たす場合、
+                                成功トークンレスポンスは、以下のパラメーターを
+                                "application/json" メディアタイプを用いて HTTP レスポンスの entity-body に追加し、
+                                <span>[<a href="#RFC8259" class="xref">RFC8259</a>]</span> で指定されるとおり、
+                                HTTP 200 ステータスコードとともに構築される。
+                                パラメーターは、各パラメーターをトップレベルに追加することにより、
+                                JavaScript Object Notation (JSON)
+                                構造へシリアライズされる。
+                                パラメーター名および文字列値は JSON 文字列として含められる。
+                                数値は JSON 数値として含められる。
+                                パラメーターの順序は重要ではなく、変化してもよい。<a href="#section-2.2.1-1" class="pilcrow">¶</a>
+                            </p>
+                            <dl class="dlNewline" id="section-2.2.1-2">
+                                <dt id="section-2.2.1-2.1">access_token</dt>
+                                <dd id="section-2.2.1-2.2">
+                                    <span class="bcp14">REQUIRED</span>. トークン交換リクエストへの応答として
+                                    認可サーバーによって発行されたセキュリティトークン。
+                                    <span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-5.1"
+                                            class="relref">[<a href="#RFC6749" class="xref">RFC6749</a>] のセクション
+                                            5.1</a></span> の
+                                    <code>access_token</code> パラメーターは、要求された
+                                    トークンを運ぶためにここで使用される。これにより、このトークン交換プロトコルは、
+                                    トークンエンドポイント向けに定義された既存の OAuth 2.0 リクエスト
+                                    およびレスポンス構成を使用できる。
+                                    <code>access_token</code> という識別子は歴史的理由で使用されており、
+                                    発行されたトークンは OAuth アクセストークンである必要はない。<a href="#section-2.2.1-2.2" class="pilcrow">¶</a>
+                                </dd>
+                                <dt id="section-2.2.1-2.3">issued_token_type</dt>
+                                <dd id="section-2.2.1-2.4">
+                                    <span class="bcp14">REQUIRED</span>. <a href="#TokenTypeIdentifiers"
+                                        class="xref">セクション 3</a> に記述される、
+                                    発行されたセキュリティトークンの表現の識別子。<a href="#section-2.2.1-2.4" class="pilcrow">¶</a>
+                                </dd>
+                                <dt id="section-2.2.1-2.5">token_type</dt>
+                                <dd id="section-2.2.1-2.6">
+                                    <span class="bcp14">REQUIRED</span>. <span><a
+                                            href="https://www.rfc-editor.org/rfc/rfc6749#section-7.1" class="relref">[<a
+                                                href="#RFC6749" class="xref">RFC6749</a>] のセクション 7.1</a></span>
+                                    で指定される、発行された
+                                    アクセストークンを使用する方法を指定する、大文字小文字を区別しない値。
+                                    これは、保護リソースにアクセスするためにアクセストークンを
+                                    どのように利用するかに関する情報をクライアントに提供する。たとえば、
+                                    <span>[<a href="#RFC6750" class="xref">RFC6750</a>]</span> で指定される
+                                    <code>Bearer</code> の値は、発行されたセキュリティトークンが bearer トークンであり、
+                                    クライアントがトークン自体の内容を超える追加の適格性証明なしに、
+                                    それをそのまま提示できることを示す。この
+                                    パラメーターの意味は <code>issued_token_type</code>
+                                    パラメーターの意味とは異なることに注意されたい。後者は
+                                    発行されたセキュリティトークンの表現を宣言するものである。"token type" という語は、
+                                    本仕様のすべての <code>*_token_type</code> パラメーターにおけるように、
+                                    セキュリティトークンの構造的または構文的表現を意味するために
+                                    より一般的に使用される。
+                                    発行されたトークンがアクセストークンでない、またはアクセストークンとして使用できない場合、
+                                    <code>token_type</code> 値 <code>N_A</code>
+                                    は、そのコンテキストに OAuth 2.0 <code>token_type</code>
+                                    識別子が適用できないことを示すために使用される。<a href="#section-2.2.1-2.6" class="pilcrow">¶</a>
+                                </dd>
+                                <dt id="section-2.2.1-2.7">expires_in</dt>
+                                <dd id="section-2.2.1-2.8">
+                                    <span class="bcp14">RECOMMENDED</span>. 認可サーバーによって発行された
+                                    トークンの有効期間を秒単位で表す。多くの場合、クライアントは
+                                    トークンの内容を調べる意欲または能力を持たず、このパラメーターは、
+                                    トークンがどの程度の期間有効であると期待できるかについて、
+                                    一貫した、トークン種別に依存しない
+                                    指示を提供する。
+                                    たとえば、値 1800 は、レスポンスが生成された時点から
+                                    30 分後にトークンが期限切れになることを示す。<a href="#section-2.2.1-2.8" class="pilcrow">¶</a>
+                                </dd>
+                                <dt id="section-2.2.1-2.9">scope</dt>
+                                <dd id="section-2.2.1-2.10">
+                                    発行されたセキュリティトークンのスコープがクライアントによって要求されたスコープと
+                                    同一である場合は <span class="bcp14">OPTIONAL</span> であり、
+                                    それ以外の場合は <span class="bcp14">REQUIRED</span> である。<a href="#section-2.2.1-2.10"
+                                        class="pilcrow">¶</a>
+                                </dd>
+                                <dt id="section-2.2.1-2.11">refresh_token</dt>
+                                <dd id="section-2.2.1-2.12">
+                                    <span class="bcp14">OPTIONAL</span>.
+                                    交換が一時的な資格情報 (subject_token) から、別の文脈で使用するための
+                                    異なる一時的な資格情報 (発行されたトークン) への交換である場合、
+                                    refresh token は通常発行されない。
+                                    refresh token は、トークン交換のクライアントが、元の資格情報が
+                                    もはや有効でない場合でもリソースにアクセスする能力を必要とする場合
+                                    (例: クライアントとのアクティブセッションを維持しているユーザーがもはや存在しない、
+                                    user-not-present または offline シナリオ) に発行され得る。
+                                    本仕様のプロファイルまたは展開は、
+                                    <code>urn:ietf:params:oauth:grant-type:token-exchange</code>
+                                    グラントタイプリクエストに応答してクライアントが refresh token を期待すべき条件を
+                                    明確に文書化するべきである。<a href="#section-2.2.1-2.12" class="pilcrow">¶</a>
+                                </dd>
+                            </dl>
+                        </section>
+                    </div>
+                    <div id="ErrorResponse">
+                        <section id="section-2.2.2">
+                            <h4 id="name-error-response">
+                                <a href="#section-2.2.2" class="section-number selfRef">2.2.2. </a><a
+                                    href="#name-error-response" class="section-name selfRef">エラーレスポンス</a>
+                            </h4>
+                            <p id="section-2.2.2-1">
+                                リクエスト自体が有効でない場合、または <code>subject_token</code> または
+                                <code>actor_token</code> のいずれかが何らかの理由で無効であるか、
+                                ポリシーに基づいて受け入れ不能である場合、認可サーバーは、
+                                <span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">[<a
+                                            href="#RFC6749" class="xref">RFC6749</a>] のセクション
+                                        5.2</a></span> で指定されるエラーレスポンスを
+                                構築しなければならない (<span class="bcp14">MUST</span>)。
+                                <code>error</code> パラメーターの値は、
+                                <code>invalid_request</code> エラーコードでなければならない (<span class="bcp14">MUST</span>)。<a
+                                    href="#section-2.2.2-1" class="pilcrow">¶</a>
+                            </p>
+                            <p id="section-2.2.2-2">
+                                認可サーバーが、<code>resource</code> または <code>audience</code> パラメーターで
+                                示された任意の対象サービスに対してトークンを発行する意思がない、または発行できない場合、
+                                エラーレスポンスでは <code>invalid_target</code> エラーコードを使用するべきである
+                                (<span class="bcp14">SHOULD</span>)。<a href="#section-2.2.2-2" class="pilcrow">¶</a></p>
+                            <p id="section-2.2.2-3">
+                                認可
+                                サーバーは、<span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-5.2"
+                                        class="relref">[<a href="#RFC6749" class="xref">RFC6749</a>] のセクション
+                                        5.2</a></span> で説明されるように、
+                                <code>error_description</code> を使用して、エラーの理由に関する追加情報を
+                                含めてもよい (<span class="bcp14">MAY</span>)。<a href="#section-2.2.2-3" class="pilcrow">¶</a>
+                            </p>
+                            <p id="section-2.2.2-4">
+                                他のエラーコードも、適切に使用してよい。<a href="#section-2.2.2-4" class="pilcrow">¶</a></p>
+                        </section>
+                    </div>
+                </section>
+            </div>
+            <div id="MainExample">
+                <section id="section-2.3">
+                    <h3 id="name-example-token-exchange">
+                        <a href="#section-2.3" class="section-number selfRef">2.3. </a><a
+                            href="#name-example-token-exchange" class="section-name selfRef">トークン交換の例</a>
+                    </h3>
+                    <p id="section-2.3-1">
+                        以下の例は、OAuth リソースサーバーが
+                        交換中にクライアントの役割を担う仮想的なトークン交換を示す。
+                        リソースサーバーは、保護リソースリクエストで受け取ったアクセストークンを、
+                        バックエンドサービスを呼び出すために使用する新しい
+                        トークンと交換する
+                        (例における余分な改行およびインデントは表示目的のみである)。<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+                    <p id="section-2.3-2">
+                        <a href="#main-prr" class="xref">図 1</a> は、<span><a
+                                href="https://www.rfc-editor.org/rfc/rfc6750#section-2.1" class="relref">[<a
+                                    href="#RFC6750" class="xref">RFC6750</a>] のセクション
+                                2.1</a></span> で指定されるとおり、
+                        Authorization ヘッダーに OAuth アクセストークンを含む保護リソースリクエストを
+                        リソースサーバーが受け取る様子を示す。<a href="#section-2.3-2" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-protected-resource-request"></span>
+                    <div id="main-prr">
+                        <figure id="figure-1">
+                            <div class="artwork art-text alignLeft" id="section-2.3-3.1">
+                                <pre>
+ GET /resource HTTP/1.1
+ Host: frontend.example.com
+ Authorization: Bearer accVkjcJyb4BWCxGsndESCJQbdFMogUC5PbRDqceLTC
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-1" class="selfRef">図 1</a>:
+                                <a href="#name-protected-resource-request" class="selfRef">保護リソース
+                                    リクエスト</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-2.3-4">
+                        <a href="#main-tereq" class="xref">図 2</a> では、リソースサーバーがトークン交換の
+                        クライアントの役割を担い、<a href="#main-prr" class="xref">図 1</a> のリクエストからの
+                        アクセストークンが、<a href="#Request" class="xref">セクション 2.1</a> で指定されるリクエストを用いて
+                        認可サーバーに送信される。
+                        <code>subject_token</code> パラメーターの値はアクセストークンを運び、
+                        <code>subject_token_type</code> パラメーターの値は、それが OAuth 2.0 アクセストークンであることを
+                        示す。クライアントの役割を担うリソースサーバーは、
+                        HTTP Basic 認証スキームを用いて認可サーバーへ認証するために、
+                        その識別子とシークレットを使用する。
+                        <code>resource</code> パラメーターは、発行されたトークンが使用される
+                        バックエンドサービス &lt;https://backend.example.com/api&gt; の場所を示す。<a href="#section-2.3-4"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-token-exchange-request"></span>
+                    <div id="main-tereq">
+                        <figure id="figure-2">
+                            <div class="artwork art-text alignLeft" id="section-2.3-5.1">
+                                <pre>
+ POST /as/token.oauth2 HTTP/1.1
+ Host: as.example.com
+ Authorization: Basic cnMwODpsb25nLXNlY3VyZS1yYW5kb20tc2VjcmV0
+ Content-Type: application/x-www-form-urlencoded
+
+ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange
+ &amp;resource=https%3A%2F%2Fbackend.example.com%2Fapi
+ &amp;subject_token=accVkjcJyb4BWCxGsndESCJQbdFMogUC5PbRDqceLTC
+ &amp;subject_token_type=
+  urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Aaccess_token
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-2" class="selfRef">図 2</a>:
+                                <a href="#name-token-exchange-request" class="selfRef">トークン交換リクエスト</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-2.3-6">
+                        認可サーバーは、トークン交換リクエストで提示された
+                        クライアント資格情報および
+                        <code>subject_token</code> を検証する。
+                        <code>resource</code> パラメーターから、認可サーバーは
+                        リクエストに適用すべき適切なポリシーを判定でき、
+                        &lt;https://backend.example.com&gt; での使用に適したトークンを発行する。
+                        <a href="#main-teresp" class="xref">図 3</a> に示すレスポンスの
+                        <code>access_token</code> パラメーターは新しいトークンを含み、
+                        それ自体は 1 分間有効な bearer OAuth
+                        アクセストークンである。このトークンはたまたま
+                        JWT であるが、その構造および形式はクライアントにとって不透明であるため、
+                        <code>issued_token_type</code>
+                        は、それがアクセストークンであることのみを示す。<a href="#section-2.3-6" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-token-exchange-response"></span>
+                    <div id="main-teresp">
+                        <figure id="figure-3">
+                            <div class="artwork art-text alignLeft" id="section-2.3-7.1">
+                                <pre>
+ HTTP/1.1 200 OK
+ Content-Type: application/json
+ Cache-Control: no-cache, no-store
+
+ {
+  "access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjllciJ9.eyJhdWQiOiJo
+    dHRwczovL2JhY2tlbmQuZXhhbXBsZS5jb20iLCJpc3MiOiJodHRwczovL2FzLmV
+    4YW1wbGUuY29tIiwiZXhwIjoxNDQxOTE3NTkzLCJpYXQiOjE0NDE5MTc1MzMsIn
+    N1YiI6ImJkY0BleGFtcGxlLmNvbSIsInNjb3BlIjoiYXBpIn0.40y3ZgQedw6rx
+    f59WlwHDD9jryFOr0_Wh3CGozQBihNBhnXEQgU85AI9x3KmsPottVMLPIWvmDCM
+    y5-kdXjwhw",
+  "issued_token_type":
+      "urn:ietf:params:oauth:token-type:access_token",
+  "token_type":"Bearer",
+  "expires_in":60
+ }
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-3" class="selfRef">図 3</a>:
+                                <a href="#name-token-exchange-response" class="selfRef">トークン交換レスポンス</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-2.3-8">
+                        リソースサーバーは、<a href="#main-beprr" class="xref">図
+                            4</a> に示すように、新たに取得したアクセストークンを用いて
+                        バックエンドサーバーへリクエストを行うことができる。<a href="#section-2.3-8" class="pilcrow">¶</a></p>
+                    <span id="name-backend-protected-resource-"></span>
+                    <div id="main-beprr">
+                        <figure id="figure-4">
+                            <div class="artwork art-text alignLeft" id="section-2.3-9.1">
+                                <pre>
+ GET /api HTTP/1.1
+ Host: backend.example.com
+ Authorization: Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6IjllciJ9.eyJhdWQ
+    iOiJodHRwczovL2JhY2tlbmQuZXhhbXBsZS5jb20iLCJpc3MiOiJodHRwczovL2
+    FzLmV4YW1wbGUuY29tIiwiZXhwIjoxNDQxOTE3NTkzLCJpYXQiOjE0NDE5MTc1M
+    zMsInN1YiI6ImJkY0BleGFtcGxlLmNvbSIsInNjb3BlIjoiYXBpIn0.40y3ZgQe
+    dw6rxf59WlwHDD9jryFOr0_Wh3CGozQBihNBhnXEQgU85AI9x3KmsPottVMLPIW
+    vmDCMy5-kdXjwhw
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-4" class="selfRef">図 4</a>:
+                                <a href="#name-backend-protected-resource-" class="selfRef">バックエンド保護リソース
+                                    リクエスト</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-2.3-10">
+                        追加の例は <a href="#AdditionalExamples" class="xref">付録 A</a> にある。<a href="#section-2.3-10"
+                            class="pilcrow">¶</a></p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="TokenTypeIdentifiers">
+        <section id="section-3">
+            <h2 id="name-token-type-identifiers">
+                <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-token-type-identifiers"
+                    class="section-name selfRef">トークン種別識別子</a>
+            </h2>
+            <p id="section-3-1">
+                本仕様のいくつかのパラメーターは、対象となるトークンを
+                記述するための値として識別子を利用する。
+                具体的には、それらはリクエストの
+                <code>requested_token_type</code>,
+                <code>subject_token_type</code>, および <code>actor_token_type</code>
+                パラメーター、ならびにレスポンスの <code>issued_token_type</code> メンバーである。
+                トークン種別識別子は URI である。
+                トークン交換は、他の当事者によって発行されたトークンと、
+                指定された認可サーバーからのトークンの両方で機能できる。前者の場合、トークン種別識別子は
+                構文 (例: JWT または SAML 2.0) を示し、認可サーバーがそれを解析できるようにする。後者の場合、
+                それは、
+                指定された認可サーバーが何のためにそれを発行したか (例: <code>access_token</code> または
+                <code>refresh_token</code>) を示す。<a href="#section-3-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-3-2">
+                以下のトークン種別識別子は本仕様によって定義される。
+                他のトークン種別を示すために、他の URI を使用してもよい (<span class="bcp14">MAY</span>)。<a href="#section-3-2"
+                    class="pilcrow">¶</a></p>
+            <dl class="dlNewline" id="section-3-3">
+                <dt id="section-3-3.1">urn:ietf:params:oauth:token-type:access_token</dt>
+                <dd id="section-3-3.2">
+                    トークンが指定された認可サーバーによって発行された OAuth 2.0 アクセストークンであることを示す。<a href="#section-3-3.2" class="pilcrow">¶</a>
+                </dd>
+                <dt id="section-3-3.3">urn:ietf:params:oauth:token-type:refresh_token</dt>
+                <dd id="section-3-3.4">
+                    トークンが指定された認可サーバーによって発行された OAuth 2.0 refresh token であることを示す。<a href="#section-3-3.4"
+                        class="pilcrow">¶</a>
+                </dd>
+                <dt id="section-3-3.5">urn:ietf:params:oauth:token-type:id_token</dt>
+                <dd id="section-3-3.6">
+                    トークンが <span>[<a href="#OpenID.Core" class="xref">OpenID.Core</a>]</span> のセクション 2 で定義される ID Token
+                    であることを示す。<a href="#section-3-3.6" class="pilcrow">¶</a>
+                </dd>
+                <dt id="section-3-3.7">urn:ietf:params:oauth:token-type:saml1</dt>
+                <dd id="section-3-3.8">
+                    トークンが base64url エンコードされた SAML 1.1 <span>[<a href="#OASIS.saml-core-1.1"
+                            class="xref">OASIS.saml-core-1.1</a>]</span> アサーションであることを示す。<a href="#section-3-3.8"
+                        class="pilcrow">¶</a>
+                </dd>
+                <dt id="section-3-3.9">urn:ietf:params:oauth:token-type:saml2</dt>
+                <dd id="section-3-3.10">
+                    トークンが base64url エンコードされた SAML 2.0 <span>[<a href="#OASIS.saml-core-2.0-os"
+                            class="xref">OASIS.saml-core-2.0-os</a>]</span> アサーションであることを示す。<a href="#section-3-3.10"
+                        class="pilcrow">¶</a>
+                </dd>
+            </dl>
+            <p id="section-3-4">
+                <span><a href="https://www.rfc-editor.org/rfc/rfc7519#section-9" class="relref">[<a href="#RFC7519"
+                            class="xref">JWT</a>] のセクション 9</a></span> で定義される
+                値 <code>urn:ietf:params:oauth:token-type:jwt</code> は、トークンが JWT であることを示す。<a href="#section-3-4"
+                    class="pilcrow">¶</a>
+            </p>
+            <p id="section-3-5">
+                アクセストークンと JWT の区別は微妙である。
+                アクセストークンは委任された認可決定を表す一方、JWT はトークン形式である。
+                アクセストークンは JWT として形式化されることがあるが、必ずしもそうである必要はない。そして、
+                JWT がアクセストークンであることも十分あり得るが、すべての JWT がアクセストークンであるわけではない。
+
+                本仕様の意図は、<code>urn:ietf:params:oauth:token-type:access_token</code>
+                が、該当する認可サーバーによって発行された典型的な OAuth アクセストークンであり、
+                クライアントにとって不透明で、
+                その認可サーバーから取得された他のアクセストークンと同じ方法で使用可能であることを示す
+                指標となることである。
+                (それが JWT である可能性は十分にあるが、クライアントはその事実を認識しておらず、
+                認識する必要もない。)
+                一方、<code>urn:ietf:params:oauth:token-type:jwt</code> は、
+                JWT が具体的に要求または送信されていることを示すためのものである
+                (たとえば、<span>[<a href="#RFC7523" class="xref">RFC7523</a>]</span> によって促進されるように、
+                JWT が異なる認可サーバーからアクセストークンを取得するための認可
+                グラントとして使用されるクロスドメインユースケースなど)。<a href="#section-3-5" class="pilcrow">¶</a>
+            </p>
+            <p id="section-3-6">
+                バイナリの性質を持つトークンについては、それらを伝達するために使用される URI は、
+                HTTP および OAuth での使用に適した base64 またはその他の
+                エンコーディングのセマンティクスと関連付けられている必要があることに注意されたい。<a href="#section-3-6" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="JWTClaims">
+        <section id="section-4">
+            <h2 id="name-json-web-token-claims-and-i">
+                <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-json-web-token-claims-and-i"
+                    class="section-name selfRef">JSON Web Token クレームおよびイントロスペクションレスポンスパラメーター</a>
+            </h2>
+            <p id="section-4-1">
+                トークン内で委任を表現するため、また
+                委任またはなりすましの認可を表現するための定義済みメカニズムを持つことは有用である。
+                ここで記述されるトークン交換プロトコルは
+                任意の種類のトークンとともに使用できるが、このセクションでは、
+                JWT および OAuth 2.0 Token Introspection <span>[<a href="#RFC7662" class="xref">RFC7662</a>]</span>
+                レスポンスにおいて、
+                そのようなセマンティクスを具体的に表現するためのクレームを定義する。
+                他の種類のトークンに対する同様の定義も可能であるが、本仕様の範囲外である。<a href="#section-4-1" class="pilcrow">¶</a></p>
+            <p id="section-4-2">
+                ここで確立されていないが、例および説明で使用される
+                <code>iss</code>, <code>sub</code>,
+                <code>exp</code> などのクレームは、<span>[<a href="#RFC7519" class="xref">JWT</a>]</span> によって定義されることに注意されたい。<a
+                    href="#section-4-2" class="pilcrow">¶</a>
+            </p>
+            <div id="actor">
+                <section id="section-4.1">
+                    <h3 id="name-act-actor-claim">
+                        <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-act-actor-claim"
+                            class="section-name selfRef">"act" (Actor) クレーム</a>
+                    </h3>
+                    <p id="section-4.1-1">
+                        <code>act</code> (actor) クレームは、JWT 内で
+                        委任が発生したことを表現し、権限が委任された
+                        動作当事者を識別する手段を提供する。<code>act</code> クレーム値は JSON
+                        オブジェクトであり、JSON オブジェクト内のメンバーは actor を識別するクレームである。
+                        <code>act</code> クレームを構成するクレームは、actor を識別し、場合によっては
+                        actor に関する追加情報を提供する。たとえば、
+                        2 つのクレーム <code>iss</code> と <code>sub</code> の組み合わせが、
+                        actor を一意に識別するために必要となることがある。<a href="#section-4.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.1-2">
+                        しかし、<code>act</code> クレーム内のクレームは actor のアイデンティティにのみ関係し、
+                        トップレベルのクレームと同じ方法で、それを含む JWT の有効性には関係しない。
+                        したがって、非アイデンティティクレーム (例: <code>exp</code>, <code>nbf</code>,
+                        および <code>aud</code>) は
+                        <code>act</code> クレーム内で使用されても意味がないため、使用されない。<a href="#section-4.1-2" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.1-3"><a href="#act-ex" class="xref">図 5</a> は、JWT Claims Set 内の
+                        <code>act</code>
+                        (actor) クレームを示す。
+                        トークン自体のクレームは user@example.com に関するものであり、<code>act</code> クレームは
+                        admin@example.com が現在の actor であることを示す。<a href="#section-4.1-3" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-actor-claim"></span>
+                    <div id="act-ex">
+                        <figure id="figure-5">
+                            <div id="section-4.1-4.1">
+                                <pre class="sourcecode lang-json">
+ {
+   "aud":"https://consumer.example.com",
+   "iss":"https://issuer.example.com",
+   "exp":1443904177,
+   "nbf":1443904077,
+   "sub":"user@example.com",
+   "act":
+   {
+     "sub":"admin@example.com"
+   }
+ }</pre>
+                            </div>
+                            <figcaption><a href="#figure-5" class="selfRef">図 5</a>:
+                                <a href="#name-actor-claim" class="selfRef">Actor クレーム</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-4.1-5">
+                        ある <code>act</code> クレームを別の <code>act</code> クレーム内に
+                        ネストすることにより、委任の連鎖を表現できる。最も外側の
+                        <code>act</code> クレームは現在の actor を表し、ネストされた
+                        <code>act</code> クレームは以前の actor を表す。最も古い actor は最も深く
+                        ネストされる。ネストされた <code>act</code> クレームは、
+                        最初のリクエストおよび subject から、現在の actor に到達する前に行われた
+                        さまざまな委任ステップまでを接続する履歴の痕跡として機能する。
+                        この意味で、現在の actor は、ここで記述するネスト構造へ自然につながる
+                        全体の認可/委任履歴を含むものと見なされる。<a href="#section-4.1-5" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.1-6">
+                        アクセス制御ポリシーを適用する目的では、トークンの消費者は、
+                        トークンのトップレベルクレームと、<code>act</code>
+                        クレームによって現在の actor として識別される当事者のみを考慮しなければならない
+                        (<span class="bcp14">MUST</span>)。ネストされた <code>act</code> クレームによって識別される以前の actor は
+                        情報提供のみであり、アクセス制御決定で考慮されてはならない。<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+                    <p id="section-4.1-7">
+                        <a href="#acts-ex" class="xref">図 6</a> の以下の例は、JWT Claims Set 内のネストされた
+                        <code>act</code> (actor) クレームを示す。
+                        トークン自体のクレームは user@example.com に関するものであり、<code>act</code> クレームは、
+                        システム &lt;https://service16.example.com&gt; が現在の actor であり、
+                        &lt;https://service77.example.com&gt; が以前の actor であったことを示す。
+                        このようなトークンは、service16 が service77 からの呼び出しでトークンを受け取り、
+                        service26 を呼び出すのに適したトークンと交換した結果として生じ得る。その際、認可サーバーは
+                        新しく発行されたトークン内でその状況を記録する。<a href="#section-4.1-7" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-nested-actor-claim"></span>
+                    <div id="acts-ex">
+                        <figure id="figure-6">
+                            <div id="section-4.1-8.1">
+                                <pre class="sourcecode lang-json">
+ {
+   "aud":"https://service26.example.com",
+   "iss":"https://issuer.example.com",
+   "exp":1443904100,
+   "nbf":1443904000,
+   "sub":"user@example.com",
+   "act":
+   {
+     "sub":"https://service16.example.com",
+     "act":
+     {
+       "sub":"https://service77.example.com"
+     }
+   }
+ }
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-6" class="selfRef">図 6</a>:
+                                <a href="#name-nested-actor-claim" class="selfRef">ネストされた Actor クレーム</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-4.1-9">
+                        OAuth トークンイントロスペクションレスポンスのトップレベルメンバーとして含まれる場合、
+                        <code>act</code> は
+                        同名のクレームと同じセマンティクスおよび形式を持つ。<a href="#section-4.1-9" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="scopes">
+                <section id="section-4.2">
+                    <h3 id="name-scope-scopes-claim">
+                        <a href="#section-4.2" class="section-number selfRef">4.2. </a><a
+                            href="#name-scope-scopes-claim" class="section-name selfRef">"scope" (Scopes) クレーム</a>
+                    </h3>
+                    <p id="section-4.2-1">
+                        <code>scope</code> クレームの値は、
+                        <span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-3.3" class="relref">[<a
+                                    href="#RFC6749" class="xref">RFC6749</a>] のセクション
+                                3.3</a></span> に記述される形式で、
+                        トークンに関連付けられたスコープのスペース区切りリストを含む
+                        JSON 文字列である。<a href="#section-4.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.2-2"><a href="#scope-ex" class="xref">図 7</a> は、
+                        JWT Claims Set 内の
+                        <code>scope</code> クレームを示す。<a href="#section-4.2-2" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-scopes-claim"></span>
+                    <div id="scope-ex">
+                        <figure id="figure-7">
+                            <div id="section-4.2-3.1">
+                                <pre class="sourcecode lang-json">
+ {
+   "aud":"https://consumer.example.com",
+   "iss":"https://issuer.example.com",
+   "exp":1443904177,
+   "nbf":1443904077,
+   "sub":"dgaf4mvfs75Fci_FL3heQA",
+   "scope":"email profile phone address"
+ }
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-7" class="selfRef">図 7</a>:
+                                <a href="#name-scopes-claim" class="selfRef">Scopes クレーム</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-4.2-4">
+                        <span><a href="#RFC7662" class="xref">OAuth 2.0 Token Introspection</a> [<a href="#RFC7662"
+                                class="xref">RFC7662</a>]</span> は、トークンに関連付けられたスコープを伝達するために
+                        <code>scope</code>
+                        パラメーターをすでに定義している。<a href="#section-4.2-4" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="client_id">
+                <section id="section-4.3">
+                    <h3 id="name-client_id-client-identifier">
+                        <a href="#section-4.3" class="section-number selfRef">4.3. </a><a
+                            href="#name-client_id-client-identifier" class="section-name selfRef">"client_id" (Client
+                            Identifier) クレーム</a>
+                    </h3>
+                    <p id="section-4.3-1">
+                        <code>client_id</code> クレームは、
+                        トークンを要求した <span><a href="#RFC6749" class="xref">OAuth 2.0</a> [<a href="#RFC6749"
+                                class="xref">RFC6749</a>]</span> クライアントの
+                        クライアント識別子を運ぶ。<a href="#section-4.3-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.3-2">
+                        <a href="#client_id-ex" class="xref">図 8</a> の以下の例は、JWT Claims Set 内の
+                        <code>client_id</code> クレームを示し、
+                        "s6BhdRkqt3" を識別子とする OAuth 2.0 クライアントを示している。<a href="#section-4.3-2" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-client-identifier-claim"></span>
+                    <div id="client_id-ex">
+                        <figure id="figure-8">
+                            <div id="section-4.3-3.1">
+                                <pre class="sourcecode lang-json">
+ {
+   "aud":"https://consumer.example.com",
+   "iss":"https://issuer.example.com",
+   "exp":1443904177,
+   "sub":"user@example.com",
+   "client_id":"s6BhdRkqt3"
+ }
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-8" class="selfRef">図 8</a>:
+                                <a href="#name-client-identifier-claim" class="selfRef">Client Identifier クレーム</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-4.3-4">
+                        <span><a href="#RFC7662" class="xref">OAuth 2.0 Token Introspection</a> [<a href="#RFC7662"
+                                class="xref">RFC7662</a>]</span> は、トークンを要求した OAuth 2.0 クライアントの
+                        クライアント識別子として
+                        <code>client_id</code> パラメーターをすでに定義している。<a href="#section-4.3-4" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="may_act">
+                <section id="section-4.4">
+                    <h3 id="name-may_act-authorized-actor-cl">
+                        <a href="#section-4.4" class="section-number selfRef">4.4. </a><a
+                            href="#name-may_act-authorized-actor-cl" class="section-name selfRef">"may_act" (Authorized
+                            Actor) クレーム</a>
+                    </h3>
+                    <p id="section-4.4-1">
+                        <code>may_act</code> クレームは、ある当事者が actor となり、
+                        別の当事者の代理として動作することを認可されているという表明を行う。
+                        このクレームは、たとえば、<code>subject_token</code> が
+                        トークン交換リクエストでトークンエンドポイントに提示され、subject token 内の
+                        <code>may_act</code> クレームを、クライアント (または
+                        <code>actor_token</code> で識別される当事者) が要求された委任または
+                        なりすましに関与することを認可されているかどうかを認可
+                        サーバーが判定するために使用できる場合に用いられることがある。
+                        クレーム値は JSON オブジェクトであり、JSON オブジェクト内のメンバーは、
+                        クレームを含む JWT によって識別される当事者のために
+                        行動する資格があると主張される当事者を識別するクレームである。
+                        <code>may_act</code>
+                        クレームを構成するクレームは、認可された actor を識別し、場合によっては
+                        追加情報を提供する。
+                        たとえば、<code>iss</code>
+                        および <code>sub</code> の 2 つのクレームの組み合わせが、
+                        認可された actor を一意に識別するために必要となることがあり、
+                        一方で <code>email</code> クレームは、その当事者に関する追加の有用な情報を提供するために
+                        使用されることがある。<a href="#section-4.4-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.4-2">
+                        しかし、<code>may_act</code> クレーム内のクレームはその当事者のアイデンティティにのみ関係し、
+                        トップレベルクレームと同じ方法で、それを含む JWT の
+                        有効性には関係しない。
+                        したがって、<code>exp</code>, <code>nbf</code>, および
+                        <code>aud</code> のようなクレームは、<code>may_act</code>
+                        クレーム内で使用されても意味がないため、使用されない。<a href="#section-4.4-2" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-4.4-3"><a href="#may_act-ex" class="xref">図 9</a> は、
+                        JWT Claims Set 内の
+                        <code>may_act</code> クレームを示す。
+                        トークン自体のクレームは user@example.com に関するものであり、<code>may_act</code> クレームは
+                        admin@example.com が user@example.com の代理として動作することを認可されていることを
+                        示す。<a href="#section-4.4-3" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-authorized-actor-claim"></span>
+                    <div id="may_act-ex">
+                        <figure id="figure-9">
+                            <div id="section-4.4-4.1">
+                                <pre class="sourcecode lang-json">
+ {
+   "aud":"https://consumer.example.com",
+   "iss":"https://issuer.example.com",
+   "exp":1443904177,
+   "nbf":1443904077,
+   "sub":"user@example.com",
+   "may_act":
+   {
+     "sub":"admin@example.com"
+   }
+ }
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-9" class="selfRef">図 9</a>:
+                                <a href="#name-authorized-actor-claim" class="selfRef">Authorized Actor クレーム</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <p id="section-4.4-5">
+                        OAuth トークンイントロスペクションレスポンスのトップレベルメンバーとして含まれる場合、
+                        <code>may_act</code>
+                        は同名のクレームと同じセマンティクスおよび形式を持つ。<a href="#section-4.4-5" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="Security">
+        <section id="section-5">
+            <h2 id="name-security-considerations">
+                <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations"
+                    class="section-name selfRef">セキュリティ上の考慮事項</a>
+            </h2>
+            <p id="section-5-1">
+                <span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-10" class="relref">[<a href="#RFC6749"
+                            class="xref">RFC6749</a>] のセクション 10</a></span>、
+                The OAuth 2.0 Authorization Framework の Security Considerations にあるガイダンスの多くは、
+                ここにも適用可能である。
+                さらに、<span>[<a href="#RFC6819" class="xref">RFC6819</a>]</span>
+                は OAuth に関する追加のセキュリティ上の考慮事項を提供し、
+                <span>[<a href="#I-D.ietf-oauth-security-topics" class="xref">OAUTH-SECURITY</a>]</span>
+                は OAuth 2.0 が最初に公開されて以降に出現した展開経験および新しい脅威に基づいて、
+                セキュリティガイダンスを更新している。<a href="#section-5-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-5-2">
+                <span>[<a href="#RFC7519" class="xref">JWT</a>]</span> で議論される通常のセキュリティ上の問題すべて、
+                特に URI の比較および認識されない値の扱いに関するものも、
+                ここに適用される。<a href="#section-5-2" class="pilcrow">¶</a>
+            </p>
+            <p id="section-5-3">
+                加えて、委任となりすましのいずれも固有の
+                セキュリティ問題を導入する。あるプリンシパルの権利が
+                別のプリンシパルへ委任されるたびに、悪用の可能性が懸念となる。
+                そのような悪用の可能性を緩和するために、<code>scope</code> クレームの使用
+                (限定されたトークン有効期間などの他の典型的な制約に加えて)
+                が示唆される。これは、委任された権利を行使できる文脈を制限するためである。<a href="#section-5-3" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="Privacy">
+        <section id="section-6">
+            <h2 id="name-privacy-considerations">
+                <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-privacy-considerations"
+                    class="section-name selfRef">プライバシー上の考慮事項</a>
+            </h2>
+            <p id="section-6-1">
+                ここで記述される機能の文脈で使用されるトークンは、
+                プライバシーに敏感な情報を含むことがあり、そのような情報が
+                意図しない当事者に開示されることを防ぐため、
+                Transport Layer Security
+                (TLS) などの暗号化されたチャネル上でのみ送信されなければならない (<span class="bcp14">MUST</span>)。
+                クライアントへの特定の情報の開示を防ぐことが望ましい場合、
+                トークンはその意図された受信者に対して暗号化されなければならない (<span class="bcp14">MUST</span>)。
+                展開では、最小限必要なデータ量を決定し、そのような情報のみを発行トークンに
+                含めるべきである (<span class="bcp14">SHOULD</span>)。
+                場合によっては、データ最小化に、匿名または仮名のユーザーのみを
+                表現することが含まれる。<a href="#section-6-1" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="IANA">
+        <section id="section-7">
+            <h2 id="name-iana-considerations">
+                <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations"
+                    class="section-name selfRef">IANA に関する考慮事項</a>
+            </h2>
+            <div id="URIReg">
+                <section id="section-7.1">
+                    <h3 id="name-oauth-uri-registration">
+                        <a href="#section-7.1" class="section-number selfRef">7.1. </a><a
+                            href="#name-oauth-uri-registration" class="section-name selfRef">OAuth URI 登録</a>
+                    </h3>
+                    <p id="section-7.1-1">
+                        IANA は、"OAuth Parameters" レジストリ
+                        <span>[<a href="#IANA.OAuth.Parameters" class="xref">IANA.OAuth.Parameters</a>]</span> の
+                        "OAuth URI" サブレジストリに以下の値を登録した。
+                        "OAuth URI" サブレジストリは
+                        <span>[<a href="#RFC6755" class="xref">RFC6755</a>]</span> によって確立された。<a href="#section-7.1-1"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <ul>
+                        <li id="section-7.1-2.1">URN: urn:ietf:params:oauth:grant-type:token-exchange<a
+                                href="#section-7.1-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-2.2">共通名: OAuth 2.0 用トークン交換グラントタイプ<a href="#section-7.1-2.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-2.3">変更管理者: IESG<a href="#section-7.1-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-2.4">仕様文書: RFC 8693 の <a href="#Request" class="xref">セクション 2.1</a><a
+                                href="#section-7.1-2.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.1-3.1">URN: urn:ietf:params:oauth:token-type:access_token<a
+                                href="#section-7.1-3.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-3.2">共通名: OAuth 2.0 アクセストークン用トークン種別 URI<a href="#section-7.1-3.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-3.3">変更管理者: IESG<a href="#section-7.1-3.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-3.4">仕様文書: RFC 8693 の <a href="#TokenTypeIdentifiers" class="xref">セクション
+                                3</a><a href="#section-7.1-3.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.1-4.1">URN: urn:ietf:params:oauth:token-type:refresh_token<a
+                                href="#section-7.1-4.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-4.2">共通名: OAuth 2.0 refresh token 用トークン種別 URI<a href="#section-7.1-4.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-4.3">変更管理者: IESG<a href="#section-7.1-4.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-4.4">仕様文書: RFC 8693 の <a href="#TokenTypeIdentifiers" class="xref">セクション
+                                3</a><a href="#section-7.1-4.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.1-5.1">URN: urn:ietf:params:oauth:token-type:id_token<a
+                                href="#section-7.1-5.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-5.2">共通名: ID Token 用トークン種別 URI<a href="#section-7.1-5.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-5.3">変更管理者: IESG<a href="#section-7.1-5.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-5.4">仕様文書: RFC 8693 の <a href="#TokenTypeIdentifiers" class="xref">セクション
+                                3</a><a href="#section-7.1-5.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.1-6.1">URN: urn:ietf:params:oauth:token-type:saml1<a href="#section-7.1-6.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-6.2">共通名: base64url エンコードされた SAML 1.1
+                            アサーション用トークン種別 URI<a href="#section-7.1-6.2" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-6.3">変更管理者: IESG<a href="#section-7.1-6.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-6.4">仕様文書: RFC 8693 の <a href="#TokenTypeIdentifiers" class="xref">セクション
+                                3</a><a href="#section-7.1-6.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.1-7.1">URN: urn:ietf:params:oauth:token-type:saml2<a href="#section-7.1-7.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-7.2">共通名: base64url エンコードされた SAML 2.0
+                            アサーション用トークン種別 URI<a href="#section-7.1-7.2" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-7.3">変更管理者: IESG<a href="#section-7.1-7.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.1-7.4">仕様文書: RFC 8693 の <a href="#TokenTypeIdentifiers" class="xref">セクション
+                                3</a><a href="#section-7.1-7.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <div id="OAuthParametersReg">
+                <section id="section-7.2">
+                    <h3 id="name-oauth-parameters-registrati">
+                        <a href="#section-7.2" class="section-number selfRef">7.2. </a><a
+                            href="#name-oauth-parameters-registrati" class="section-name selfRef">OAuth パラメーター
+                            登録</a>
+                    </h3>
+                    <p id="section-7.2-1">
+                        IANA は、
+                        "OAuth Parameters" レジストリ
+                        <span>[<a href="#IANA.OAuth.Parameters" class="xref">IANA.OAuth.Parameters</a>]</span> の
+                        "OAuth Parameters" サブレジストリに以下の値を登録した。
+                        "OAuth Parameters"
+                        サブレジストリは
+                        <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> によって確立された。<a href="#section-7.2-1"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <ul>
+                        <li id="section-7.2-2.1">パラメーター名: audience<a href="#section-7.2-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-2.2">パラメーター使用場所: token request<a href="#section-7.2-2.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-2.3">変更管理者: IESG<a href="#section-7.2-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-2.4">仕様文書: RFC 8693 の <a href="#Request" class="xref">セクション
+                                2.1</a><a href="#section-7.2-2.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.2-3.1">パラメーター名: requested_token_type<a href="#section-7.2-3.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-3.2">パラメーター使用場所: token request<a href="#section-7.2-3.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-3.3">変更管理者: IESG<a href="#section-7.2-3.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-3.4">仕様文書: RFC 8693 の <a href="#Request" class="xref">セクション
+                                2.1</a><a href="#section-7.2-3.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.2-4.1">パラメーター名: subject_token<a href="#section-7.2-4.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-4.2">パラメーター使用場所: token request<a href="#section-7.2-4.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-4.3">変更管理者: IESG<a href="#section-7.2-4.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-4.4">仕様文書: RFC 8693 の <a href="#Request" class="xref">セクション
+                                2.1</a><a href="#section-7.2-4.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.2-5.1">パラメーター名: subject_token_type<a href="#section-7.2-5.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-5.2">パラメーター使用場所: token request<a href="#section-7.2-5.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-5.3">変更管理者: IESG<a href="#section-7.2-5.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-5.4">仕様文書: RFC 8693 の <a href="#Request" class="xref">セクション
+                                2.1</a><a href="#section-7.2-5.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.2-6.1">パラメーター名: actor_token<a href="#section-7.2-6.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-6.2">パラメーター使用場所: token request<a href="#section-7.2-6.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-6.3">変更管理者: IESG<a href="#section-7.2-6.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-6.4">仕様文書: RFC 8693 の <a href="#Request" class="xref">セクション
+                                2.1</a><a href="#section-7.2-6.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.2-7.1">パラメーター名: actor_token_type<a href="#section-7.2-7.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-7.2">パラメーター使用場所: token request<a href="#section-7.2-7.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-7.3">変更管理者: IESG<a href="#section-7.2-7.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-7.4">仕様文書: RFC 8693 の <a href="#Request" class="xref">セクション
+                                2.1</a><a href="#section-7.2-7.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.2-8.1">パラメーター名: issued_token_type<a href="#section-7.2-8.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-8.2">パラメーター使用場所: token response<a href="#section-7.2-8.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-8.3">変更管理者: IESG<a href="#section-7.2-8.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.2-8.4">仕様文書: RFC 8693 の <a href="#SuccessfulResponse" class="xref">セクション
+                                2.2.1</a><a href="#section-7.2-8.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <div id="TokenTypeReg">
+                <section id="section-7.3">
+                    <h3 id="name-oauth-access-token-type-reg">
+                        <a href="#section-7.3" class="section-number selfRef">7.3. </a><a
+                            href="#name-oauth-access-token-type-reg" class="section-name selfRef">OAuth アクセストークン
+                            種別登録</a>
+                    </h3>
+                    <p id="section-7.3-1">
+                        IANA は、"OAuth
+                        Parameters" レジストリ
+                        <span>[<a href="#IANA.OAuth.Parameters" class="xref">IANA.OAuth.Parameters</a>]</span> の
+                        "OAuth Access Token Types" サブレジストリに
+                        以下のアクセストークン種別を登録した。
+                        "OAuth Access Token
+                        Types" サブレジストリは
+                        <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> によって確立された。<a href="#section-7.3-1"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <ul>
+                        <li id="section-7.3-2.1">種別名: N_A<a href="#section-7.3-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.3-2.2">追加のトークンエンドポイントレスポンスパラメーター: なし<a href="#section-7.3-2.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.3-2.3">HTTP 認証スキーム: なし<a href="#section-7.3-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.3-2.4">変更管理者: IESG<a href="#section-7.3-2.4" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.3-2.5">仕様文書: RFC 8693 の <a href="#SuccessfulResponse" class="xref">セクション
+                                2.2.1</a><a href="#section-7.3-2.5" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <div id="ClaimsReg">
+                <section id="section-7.4">
+                    <h3 id="name-json-web-token-claims-regis">
+                        <a href="#section-7.4" class="section-number selfRef">7.4. </a><a
+                            href="#name-json-web-token-claims-regis" class="section-name selfRef">JSON Web Token クレーム
+                            登録</a>
+                    </h3>
+                    <p id="section-7.4-1">
+                        IANA は、"JSON Web Token
+                        (JWT)" レジストリ
+                        <span>[<a href="#IANA.JWT" class="xref">IANA.JWT</a>]</span> の
+                        "JSON Web Token Claims" サブレジストリに、以下の Claims を登録した。
+                        "JSON Web Token Claims"
+                        サブレジストリは
+                        <span>[<a href="#RFC7519" class="xref">JWT</a>]</span> によって確立された。<a href="#section-7.4-1"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <ul>
+                        <li id="section-7.4-2.1">Claim Name: act<a href="#section-7.4-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-2.2">Claim Description: Actor<a href="#section-7.4-2.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-2.3">変更管理者: IESG<a href="#section-7.4-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-2.4">仕様文書: RFC 8693 の <a href="#actor" class="xref">セクション
+                                4.1</a><a href="#section-7.4-2.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.4-3.1">Claim Name: scope<a href="#section-7.4-3.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-3.2">Claim Description: Scope Values<a href="#section-7.4-3.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-3.3">変更管理者: IESG<a href="#section-7.4-3.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-3.4">仕様文書: RFC 8693 の <a href="#scopes" class="xref">セクション
+                                4.2</a><a href="#section-7.4-3.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.4-4.1">Claim Name: client_id<a href="#section-7.4-4.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-4.2">Claim Description: Client Identifier<a href="#section-7.4-4.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-4.3">変更管理者: IESG<a href="#section-7.4-4.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-4.4">仕様文書: RFC 8693 の <a href="#client_id" class="xref">セクション
+                                4.3</a><a href="#section-7.4-4.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.4-5.1">Claim Name: may_act<a href="#section-7.4-5.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-5.2">Claim Description: Authorized Actor - actor となることを認可された当事者<a
+                                href="#section-7.4-5.2" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-5.3">変更管理者: IESG<a href="#section-7.4-5.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.4-5.4">仕様文書: RFC 8693 の <a href="#may_act" class="xref">セクション
+                                4.4</a><a href="#section-7.4-5.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <div id="IntrospectionReg">
+                <section id="section-7.5">
+                    <h3 id="name-oauth-token-introspection-r">
+                        <a href="#section-7.5" class="section-number selfRef">7.5. </a><a
+                            href="#name-oauth-token-introspection-r" class="section-name selfRef">OAuth トークン
+                            イントロスペクションレスポンス登録</a>
+                    </h3>
+                    <p id="section-7.5-1">
+                        IANA は、"OAuth
+                        Parameters" レジストリ
+                        <span>[<a href="#IANA.OAuth.Parameters" class="xref">IANA.OAuth.Parameters</a>]</span> の
+                        "OAuth Token Introspection Response" レジストリに
+                        以下の値を登録した。
+                        "OAuth Token
+                        Introspection Response" レジストリは
+                        <span>[<a href="#RFC7662" class="xref">RFC7662</a>]</span> によって確立された。<a href="#section-7.5-1"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <ul>
+                        <li id="section-7.5-2.1">Name: act<a href="#section-7.5-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.5-2.2">Description: Actor<a href="#section-7.5-2.2" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.5-2.3">変更管理者: IESG<a href="#section-7.5-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.5-2.4">仕様文書: RFC 8693 の <a href="#actor" class="xref">セクション
+                                4.1</a><a href="#section-7.5-2.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li id="section-7.5-3.1">Name: may_act<a href="#section-7.5-3.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.5-3.2">Description: Authorized Actor - actor となることを認可された当事者<a
+                                href="#section-7.5-3.2" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.5-3.3">変更管理者: IESG<a href="#section-7.5-3.3" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-7.5-3.4">仕様文書: RFC 8693 の <a href="#may_act" class="xref">セクション
+                                4.4</a><a href="#section-7.5-3.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </section>
+    </div>
+    <section id="section-8">
+        <h2 id="name-references">
+            <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references"
+                class="section-name selfRef">参考文献</a>
+        </h2>
+        <section id="section-8.1">
+            <h3 id="name-normative-references">
+                <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references"
+                    class="section-name selfRef">規範的参考文献</a>
+            </h3>
+            <dl class="references">
+                <dt id="IANA.JWT">[IANA.JWT]</dt>
+                <dd>
+                    <span class="refAuthor">IANA</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>,
+                    <span>&lt;<a
+                            href="https://www.iana.org/assignments/jwt">https://www.iana.org/assignments/jwt</a>&gt;</span>.
+                </dd>
+                <dt id="IANA.OAuth.Parameters">[IANA.OAuth.Parameters]</dt>
+                <dd>
+                    <span class="refAuthor">IANA</span>, <span class="refTitle">"OAuth Parameters"</span>, <span>&lt;<a
+                            href="https://www.iana.org/assignments/oauth-parameters">https://www.iana.org/assignments/oauth-parameters</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7519">[JWT]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span><span class="refAuthor">, Bradley, J.</span><span
+                        class="refAuthor">, and N. Sakimura</span>, <span class="refTitle">"JSON Web Token
+                        (JWT)"</span>, <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7519</span>, <time datetime="2015-05">2015年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>.
+                </dd>
+                <dt id="RFC2119">[RFC2119]</dt>
+                <dd>
+                    <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"RFC において
+                        要件レベルを示すために使用するキーワード"</span>, <span class="seriesInfo">BCP 14</span>, <span
+                        class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time
+                        datetime="1997-03">1997年3月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>.
+                </dd>
+                <dt id="RFC3986">[RFC3986]</dt>
+                <dd>
+                    <span class="refAuthor">Berners-Lee, T.</span><span class="refAuthor">, Fielding, R.</span><span
+                        class="refAuthor">, and L. Masinter</span>, <span class="refTitle">"Uniform Resource Identifier
+                        (URI): 汎用構文"</span>, <span class="seriesInfo">STD 66</span>, <span class="seriesInfo">RFC
+                        3986</span>, <span class="seriesInfo">DOI 10.17487/RFC3986</span>, <time
+                        datetime="2005-01">2005年1月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc3986">https://www.rfc-editor.org/info/rfc3986</a>&gt;</span>.
+                </dd>
+                <dt id="RFC6749">[RFC6749]</dt>
+                <dd>
+                    <span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"OAuth 2.0 Authorization
+                        Framework"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6749</span>, <time datetime="2012-10">2012年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6749">https://www.rfc-editor.org/info/rfc6749</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7662">[RFC7662]</dt>
+                <dd>
+                    <span class="refAuthor">Richer, J., Ed.</span>, <span class="refTitle">"OAuth 2.0 Token
+                        Introspection"</span>, <span class="seriesInfo">RFC 7662</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7662</span>, <time datetime="2015-10">2015年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7662">https://www.rfc-editor.org/info/rfc7662</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8174">[RFC8174]</dt>
+                <dd>
+                    <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"RFC 2119 キーワードにおける大文字と
+                        小文字の曖昧性"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC
+                        8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time
+                        datetime="2017-05">2017年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>.
+                </dd>
+                <dt id="RFC8259">[RFC8259]</dt>
+                <dd>
+                    <span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"JavaScript Object Notation
+                        (JSON) データ交換形式"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC
+                        8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time
+                        datetime="2017-12">2017年12月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;</span>.
+                </dd>
+            </dl>
+        </section>
+        <section id="section-8.2">
+            <h3 id="name-informative-references">
+                <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references"
+                    class="section-name selfRef">参考情報</a>
+            </h3>
+            <dl class="references">
+                <dt id="OASIS.saml-core-1.1">[OASIS.saml-core-1.1]</dt>
+                <dd>
+                    <span class="refAuthor">Maler, E.</span><span class="refAuthor">, Mishra, P.</span><span
+                        class="refAuthor">, and R. Philpott</span>, <span class="refTitle">"OASIS Security Assertion
+                        Markup Language (SAML) V1.1 の
+                        アサーションおよびプロトコル"</span>, <span class="seriesInfo">OASIS
+                        Standard oasis-sstc-saml-core-1.1</span>, <time datetime="2003-09">2003年9月</time>,
+                    <span>&lt;<a
+                            href="https://www.oasis-open.org/committees/download.php/3406/oasis-sstc-saml-core-1.1.pdf">https://www.oasis-open.org/committees/download.php/3406/oasis-sstc-saml-core-1.1.pdf</a>&gt;</span>.
+                </dd>
+                <dt id="OASIS.saml-core-2.0-os">[OASIS.saml-core-2.0-os]</dt>
+                <dd>
+                    <span class="refAuthor">Cantor, S.</span><span class="refAuthor">, Kemp, J.</span><span
+                        class="refAuthor">, Philpott, R.</span><span class="refAuthor">, and E. Maler</span>, <span
+                        class="refTitle">"OASIS Security Assertion Markup Language
+                        (SAML) V2.0 のアサーションおよびプロトコル"</span>, <span class="seriesInfo">OASIS Standard
+                        saml-core-2.0-os</span>, <time datetime="2005-03">2005年3月</time>, <span>&lt;<a
+                            href="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf">http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf</a>&gt;</span>.
+                </dd>
+                <dt id="I-D.ietf-oauth-resource-indicators">[OAUTH-RESOURCE]</dt>
+                <dd>
+                    <span class="refAuthor">Campbell, B.</span><span class="refAuthor">, Bradley, J.</span><span
+                        class="refAuthor">, and H. Tschofenig</span>, <span class="refTitle">"OAuth 2.0 の
+                        Resource Indicators"</span>, <span class="refContent">進行中の作業</span>, <span
+                        class="seriesInfo">Internet-Draft, draft-ietf-oauth-resource-indicators-08</span>, <time
+                        datetime="2019-09-11">2019年9月11日</time>, <span>&lt;<a
+                            href="https://tools.ietf.org/html/draft-ietf-oauth-resource-indicators-08">https://tools.ietf.org/html/draft-ietf-oauth-resource-indicators-08</a>&gt;</span>.
+                </dd>
+                <dt id="I-D.ietf-oauth-security-topics">[OAUTH-SECURITY]</dt>
+                <dd>
+                    <span class="refAuthor">Lodderstedt, T.</span><span class="refAuthor">, Bradley, J.</span><span
+                        class="refAuthor">, Labunets, A.</span><span class="refAuthor">, and D. Fett</span>, <span
+                        class="refTitle">"OAuth 2.0 Security Best Current Practice"</span>, <span
+                        class="refContent">進行中の作業</span>, <span class="seriesInfo">Internet-Draft,
+                        draft-ietf-oauth-security-topics-13</span>, <time datetime="2019-07-08">2019年7月8日</time>,
+                    <span>&lt;<a
+                            href="https://tools.ietf.org/html/draft-ietf-oauth-security-topics-13">https://tools.ietf.org/html/draft-ietf-oauth-security-topics-13</a>&gt;</span>.
+                </dd>
+                <dt id="OpenID.Core">[OpenID.Core]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N.</span><span class="refAuthor">, Bradley, J.</span><span
+                        class="refAuthor">, Jones, M.</span><span class="refAuthor">, de Medeiros, B.</span><span
+                        class="refAuthor">, and C. Mortimore</span>, <span class="refTitle">"OpenID Connect Core
+                        1.0"</span>, <time datetime="2014-11">2014年11月</time>, <span>&lt;<a
+                            href="https://openid.net/specs/openid-connect-core-1_0.html">https://openid.net/specs/openid-connect-core-1_0.html</a>&gt;</span>.
+                </dd>
+                <dt id="RFC6750">[RFC6750]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span><span class="refAuthor"> and D. Hardt</span>, <span
+                        class="refTitle">"OAuth 2.0 Authorization Framework: Bearer Token Usage"</span>, <span
+                        class="seriesInfo">RFC 6750</span>, <span class="seriesInfo">DOI 10.17487/RFC6750</span>, <time
+                        datetime="2012-10">2012年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6750">https://www.rfc-editor.org/info/rfc6750</a>&gt;</span>.
+                </dd>
+                <dt id="RFC6755">[RFC6755]</dt>
+                <dd>
+                    <span class="refAuthor">Campbell, B.</span><span class="refAuthor"> and H. Tschofenig</span>, <span
+                        class="refTitle">"OAuth のための IETF URN サブ名前空間"</span>, <span class="seriesInfo">RFC
+                        6755</span>, <span class="seriesInfo">DOI 10.17487/RFC6755</span>, <time
+                        datetime="2012-10">2012年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6755">https://www.rfc-editor.org/info/rfc6755</a>&gt;</span>.
+                </dd>
+                <dt id="RFC6819">[RFC6819]</dt>
+                <dd>
+                    <span class="refAuthor">Lodderstedt, T., Ed.</span><span class="refAuthor">, McGloin, M.</span><span
+                        class="refAuthor">, and P. Hunt</span>, <span class="refTitle">"OAuth 2.0 脅威モデルおよび
+                        セキュリティ上の考慮事項"</span>, <span class="seriesInfo">RFC 6819</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6819</span>, <time datetime="2013-01">2013年1月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6819">https://www.rfc-editor.org/info/rfc6819</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7521">[RFC7521]</dt>
+                <dd>
+                    <span class="refAuthor">Campbell, B.</span><span class="refAuthor">, Mortimore, C.</span><span
+                        class="refAuthor">, Jones, M.</span><span class="refAuthor">, and Y. Goland</span>, <span
+                        class="refTitle">"OAuth 2.0 クライアント認証および認可
+                        グラントのためのアサーションフレームワーク"</span>, <span class="seriesInfo">RFC 7521</span>, <span
+                        class="seriesInfo">DOI
+                        10.17487/RFC7521</span>, <time datetime="2015-05">2015年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7521">https://www.rfc-editor.org/info/rfc7521</a>&gt;</span>.
+                </dd>
+                <dt id="RFC7523">[RFC7523]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span><span class="refAuthor">, Campbell, B.</span><span
+                        class="refAuthor">, and C. Mortimore</span>, <span class="refTitle">"OAuth 2.0
+                        クライアント認証および認可グラントのための
+                        JSON Web Token (JWT)
+                        プロファイル"</span>, <span class="seriesInfo">RFC 7523</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7523</span>, <time datetime="2015-05">2015年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7523">https://www.rfc-editor.org/info/rfc7523</a>&gt;</span>.
+                </dd>
+                <dt id="WS-Trust">[WS-Trust]</dt>
+                <dd>
+                    <span class="refAuthor">Nadalin, A., Ed.</span><span class="refAuthor">, Goodner, M.,
+                        Ed.</span><span class="refAuthor">, Gudgin, M., Ed.</span><span class="refAuthor">, Barbir, A.,
+                        Ed.</span><span class="refAuthor">, and H. Granqvist, Ed.</span>, <span
+                        class="refTitle">"WS-Trust 1.4"</span>, <time datetime="2012-02">2012年2月</time>,
+                    <span>&lt;<a
+                            href="https://docs.oasis-open.org/ws-sx/ws-trust/v1.4/ws-trust.html">https://docs.oasis-open.org/ws-sx/ws-trust/v1.4/ws-trust.html</a>&gt;</span>.
+                </dd>
+            </dl>
+        </section>
+    </section>
+    <div id="AdditionalExamples">
+        <section id="section-appendix.a">
+            <h2 id="name-additional-token-exchange-e">
+                <a href="#section-appendix.a" class="section-number selfRef">付録 A. </a><a
+                    href="#name-additional-token-exchange-e" class="section-name selfRef">追加のトークン交換
+                    例</a>
+            </h2>
+            <p id="section-appendix.a-1">
+                以下のセクションでは、なりすましと委任をそれぞれ示す
+                2 つのトークン交換例が提供される
+                (表示目的のみの余分な改行およびインデントを含む)。<a href="#section-appendix.a-1" class="pilcrow">¶</a></p>
+            <div id="ImpersonationExample">
+                <section id="section-a.1">
+                    <h2 id="name-impersonation-token-exchang">
+                        <a href="#section-a.1" class="section-number selfRef">A.1. </a><a
+                            href="#name-impersonation-token-exchang" class="section-name selfRef">なりすましトークン
+                            交換例</a>
+                    </h2>
+                    <div id="ImpersonationRequest">
+                        <section id="section-a.1.1">
+                            <h3 id="name-token-exchange-request-2">
+                                <a href="#section-a.1.1" class="section-number selfRef">A.1.1. </a><a
+                                    href="#name-token-exchange-request-2" class="section-name selfRef">トークン交換
+                                    リクエスト</a>
+                            </h3>
+                            <p id="section-a.1.1-1">
+                                以下のトークン交換リクエストでは、クライアントは
+                                なりすましセマンティクスを持つトークンを要求している
+                                (<code>subject_token</code> のみで
+                                <code>actor_token</code> がない場合、委任は不可能である)。
+                                クライアントは、論理名
+                                <code>urn:example:cooperation-context</code> を持つ対象サービスで使用するための
+                                トークンが必要であることを認可サーバーに伝える。<a href="#section-a.1.1-1" class="pilcrow">¶</a>
+                            </p>
+                            <span id="name-token-exchange-request-3"></span>
+                            <div id="ImpersonationRequestEx">
+                                <figure id="figure-10">
+                                    <div class="artwork art-text alignLeft" id="section-a.1.1-2.1">
+                                        <pre>
+ POST /as/token.oauth2 HTTP/1.1
+ Host: as.example.com
+ Content-Type: application/x-www-form-urlencoded
+
+ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange
+ &amp;audience=urn%3Aexample%3Acooperation-context
+ &amp;subject_token=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.eyJhdWQiOiJodHRwc
+   zovL2FzLmV4YW1wbGUuY29tIiwiaXNzIjoiaHR0cHM6Ly9vcmlnaW5hbC1pc3N1ZXI
+   uZXhhbXBsZS5uZXQiLCJleHAiOjE0NDE5MTA2MDAsIm5iZiI6MTQ0MTkwOTAwMCwic
+   3ViIjoiYmRjQGV4YW1wbGUubmV0Iiwic2NvcGUiOiJvcmRlcnMgcHJvZmlsZSBoaXN
+   0b3J5In0.PRBg-jXn4cJuj1gmYXFiGkZzRuzbXZ_sDxdE98ddW44ufsbWLKd3JJ1VZ
+   hF64pbTtfjy4VXFVBDaQpKjn5JzAw
+ &amp;subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-10" class="selfRef">図 10</a>:
+                                        <a href="#name-token-exchange-request-3" class="selfRef">トークン交換
+                                            リクエスト</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="ImpersonationSubjectClaims">
+                        <section id="section-a.1.2">
+                            <h3 id="name-subject-token-claims">
+                                <a href="#section-a.1.2" class="section-number selfRef">A.1.2. </a><a
+                                    href="#name-subject-token-claims" class="section-name selfRef">Subject Token
+                                    クレーム</a>
+                            </h3>
+                            <p id="section-a.1.2-1">
+                                前のリクエストの <code>subject_token</code> は JWT であり、
+                                デコードされた JWT Claims Set がここに示されている。JWT は
+                                特定の時間枠内で認可サーバーによって消費されることを意図している。
+                                JWT の subject (<code>bdc@example.net</code>) は、
+                                新しいトークンがその代理として要求されている当事者である。<a href="#section-a.1.2-1" class="pilcrow">¶</a></p>
+                            <span id="name-subject-token-claims-2"></span>
+                            <div id="ImpersonationSubjectClaimsEx">
+                                <figure id="figure-11">
+                                    <div id="section-a.1.2-2.1">
+                                        <pre class="sourcecode lang-json">
+  {
+    "aud":"https://as.example.com",
+    "iss":"https://original-issuer.example.net",
+    "exp":1441910600,
+    "nbf":1441909000,
+    "sub":"bdc@example.net",
+    "scope":"orders profile history"
+  }
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-11" class="selfRef">図 11</a>:
+                                        <a href="#name-subject-token-claims-2" class="selfRef">Subject Token クレーム</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="ImpersonationResponse">
+                        <section id="section-a.1.3">
+                            <h3 id="name-token-exchange-response-2">
+                                <a href="#section-a.1.3" class="section-number selfRef">A.1.3. </a><a
+                                    href="#name-token-exchange-response-2" class="section-name selfRef">トークン交換
+                                    レスポンス</a>
+                            </h3>
+                            <p id="section-a.1.3-1">
+                                以下に示すトークン交換レスポンスの <code>access_token</code> パラメーターは、
+                                クライアントが要求した新しいトークンを含む。
+                                レスポンスの他のパラメーターは、そのトークンが 1 時間で期限切れとなる
+                                bearer アクセストークンであることを示す。<a href="#section-a.1.3-1" class="pilcrow">¶</a></p>
+                            <span id="name-token-exchange-response-3"></span>
+                            <div id="ImpersonationResponseEx">
+                                <figure id="figure-12">
+                                    <div class="artwork art-text alignLeft" id="section-a.1.3-2.1">
+                                        <pre>
+ HTTP/1.1 200 OK
+ Content-Type: application/json
+ Cache-Control: no-cache, no-store
+
+ {
+  "access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjcyIn0.eyJhdWQiOiJ1cm4
+    6ZXhhbXBsZTpjb29wZXJhdGlvbi1jb250ZXh0IiwiaXNzIjoiaHR0cHM6Ly9hcy5l
+    eGFtcGxlLmNvbSIsImV4cCI6MTQ0MTkxMzYxMCwic3ViIjoiYmRjQGV4YW1wbGUub
+    mV0Iiwic2NvcGUiOiJvcmRlcnMgcHJvZmlsZSBoaXN0b3J5In0.rMdWpSGNACTvnF
+    uOL74sYZ6MVuld2Z2WkGLmQeR9ztj6w2OXraQlkJmGjyiCq24kcB7AI2VqVxl3wSW
+    nVKh85A",
+  "issued_token_type":
+    "urn:ietf:params:oauth:token-type:access_token",
+  "token_type":"Bearer",
+  "expires_in":3600
+ }
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-12" class="selfRef">図 12</a>:
+                                        <a href="#name-token-exchange-response-3" class="selfRef">トークン交換
+                                            レスポンス</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="ImpersonationIssuedClaims">
+                        <section id="section-a.1.4">
+                            <h3 id="name-issued-token-claims">
+                                <a href="#section-a.1.4" class="section-number selfRef">A.1.4. </a><a
+                                    href="#name-issued-token-claims" class="section-name selfRef">発行されたトークンの
+                                    クレーム</a>
+                            </h3>
+                            <p id="section-a.1.4-1">
+                                発行されたトークンのデコードされた JWT Claims Set を以下に示す。新しい JWT は
+                                認可サーバーによって発行され、論理名
+                                <code>urn:example:cooperation-context</code>
+                                で知られるシステムエンティティによって、その有効期限前であればいつでも消費されることを意図している。
+                                JWT の subject (<code>sub</code>)
+                                は、リクエストを行うために使用されたトークンの subject と同じであり、
+                                これにより、クライアントはトークンを使用することにより、
+                                <code>urn:example:cooperation-context</code> の論理名で知られる
+                                システムエンティティにおいて、その subject になりすますことが
+                                事実上可能になる。<a href="#section-a.1.4-1" class="pilcrow">¶</a>
+                            </p>
+                            <span id="name-issued-token-claims-2"></span>
+                            <div id="ImpersonationIssuedClaimsEx">
+                                <figure id="figure-13">
+                                    <div id="section-a.1.4-2.1">
+                                        <pre class="sourcecode lang-json">
+  {
+    "aud":"urn:example:cooperation-context",
+    "iss":"https://as.example.com",
+    "exp":1441913610,
+    "sub":"bdc@example.net",
+    "scope":"orders profile history"
+  }
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-13" class="selfRef">図 13</a>:
+                                        <a href="#name-issued-token-claims-2" class="selfRef">発行されたトークンのクレーム</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+            <div id="DelegationExample">
+                <section id="section-a.2">
+                    <h2 id="name-delegation-token-exchange-e">
+                        <a href="#section-a.2" class="section-number selfRef">A.2. </a><a
+                            href="#name-delegation-token-exchange-e" class="section-name selfRef">委任トークン
+                            交換例</a>
+                    </h2>
+                    <div id="DelegationRequest">
+                        <section id="section-a.2.1">
+                            <h3 id="name-token-exchange-request-4">
+                                <a href="#section-a.2.1" class="section-number selfRef">A.2.1. </a><a
+                                    href="#name-token-exchange-request-4" class="section-name selfRef">トークン交換
+                                    リクエスト</a>
+                            </h3>
+                            <p id="section-a.2.1-1">
+                                以下のトークン交換リクエストでは、クライアントはトークンを要求し、
+                                <code>subject_token</code> と <code>actor_token</code> の両方を提供している。
+                                クライアントは、論理名
+                                <code>urn:example:cooperation-context</code> を持つ対象サービスで使用するための
+                                トークンが必要であることを認可サーバーに伝える。認可サーバーの
+                                ポリシーは、発行されるトークンが複合であることを指示する。<a href="#section-a.2.1-1" class="pilcrow">¶</a>
+                            </p>
+                            <span id="name-token-exchange-request-5"></span>
+                            <div id="DelegationRequestEx">
+                                <figure id="figure-14">
+                                    <div class="artwork art-text alignLeft" id="section-a.2.1-2.1">
+                                        <pre>
+ POST /as/token.oauth2 HTTP/1.1
+ Host: as.example.com
+ Content-Type: application/x-www-form-urlencoded
+
+ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Atoken-exchange
+ &amp;audience=urn%3Aexample%3Acooperation-context
+ &amp;subject_token=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.eyJhdWQiOiJodHRwc
+   zovL2FzLmV4YW1wbGUuY29tIiwiaXNzIjoiaHR0cHM6Ly9vcmlnaW5hbC1pc3N1ZXI
+   uZXhhbXBsZS5uZXQiLCJleHAiOjE0NDE5MTAwNjAsInNjb3BlIjoic3RhdHVzIGZlZ
+   WQiLCJzdWIiOiJ1c2VyQGV4YW1wbGUubmV0IiwibWF5X2FjdCI6eyJzdWIiOiJhZG1
+   pbkBleGFtcGxlLm5ldCJ9fQ.4rPRSWihQbpMIgAmAoqaJojAxj-p2X8_fAtAGTXrvM
+   xU-eEZHnXqY0_AOZgLdxw5DyLzua8H_I10MCcckF-Q_g
+ &amp;subject_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt
+ &amp;actor_token=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.eyJhdWQiOiJodHRwczo
+   vL2FzLmV4YW1wbGUuY29tIiwiaXNzIjoiaHR0cHM6Ly9vcmlnaW5hbC1pc3N1ZXIuZ
+   XhhbXBsZS5uZXQiLCJleHAiOjE0NDE5MTAwNjAsInN1YiI6ImFkbWluQGV4YW1wbGU
+   ubmV0In0.7YQ-3zPfhUvzje5oqw8COCvN5uP6NsKik9CVV6cAOf4QKgM-tKfiOwcgZ
+   oUuDL2tEs6tqPlcBlMjiSzEjm3yBg
+ &amp;actor_token_type=urn%3Aietf%3Aparams%3Aoauth%3Atoken-type%3Ajwt
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-14" class="selfRef">図 14</a>:
+                                        <a href="#name-token-exchange-request-5" class="selfRef">トークン交換
+                                            リクエスト</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="DelegationSubjectClaims">
+                        <section id="section-a.2.2">
+                            <h3 id="name-subject-token-claims-3">
+                                <a href="#section-a.2.2" class="section-number selfRef">A.2.2. </a><a
+                                    href="#name-subject-token-claims-3" class="section-name selfRef">Subject Token
+                                    クレーム</a>
+                            </h3>
+                            <p id="section-a.2.2-1">
+                                前のリクエストの <code>subject_token</code> は JWT であり、
+                                デコードされた JWT Claims Set がここに示されている。JWT は
+                                特定の有効期限前に認可サーバーによって消費されることを
+                                意図している。
+                                JWT の subject
+                                (<code>user@example.net</code>) は、
+                                新しいトークンがその代理として要求されている当事者である。<a href="#section-a.2.2-1" class="pilcrow">¶</a></p>
+                            <span id="name-subject-token-claims-4"></span>
+                            <div id="DelegationSubjectClaimsEx">
+                                <figure id="figure-15">
+                                    <div id="section-a.2.2-2.1">
+                                        <pre class="sourcecode lang-json">
+  {
+    "aud":"https://as.example.com",
+    "iss":"https://original-issuer.example.net",
+    "exp":1441910060,
+    "scope":"status feed",
+    "sub":"user@example.net",
+    "may_act":
+    {
+      "sub":"admin@example.net"
+    }
+  }
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-15" class="selfRef">図 15</a>:
+                                        <a href="#name-subject-token-claims-4" class="selfRef">Subject Token クレーム</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="DelegationActorClaims">
+                        <section id="section-a.2.3">
+                            <h3 id="name-actor-token-claims">
+                                <a href="#section-a.2.3" class="section-number selfRef">A.2.3. </a><a
+                                    href="#name-actor-token-claims" class="section-name selfRef">Actor Token クレーム</a>
+                            </h3>
+                            <p id="section-a.2.3-1">
+                                前のリクエストの <code>actor_token</code> は JWT であり、
+                                デコードされた JWT Claims Set がここに示されている。この JWT もまた、
+                                特定の有効期限前に認可サーバーによって消費されることを
+                                意図している。
+                                JWT の subject
+                                (<code>admin@example.net</code>) は、
+                                要求されているセキュリティトークンを行使する actor である。<a href="#section-a.2.3-1" class="pilcrow">¶</a></p>
+                            <span id="name-actor-token-claims-2"></span>
+                            <div id="DelegationActorClaimsEx">
+                                <figure id="figure-16">
+                                    <div id="section-a.2.3-2.1">
+                                        <pre class="sourcecode lang-json">
+  {
+    "aud":"https://as.example.com",
+    "iss":"https://original-issuer.example.net",
+    "exp":1441910060,
+    "sub":"admin@example.net"
+  }
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-16" class="selfRef">図 16</a>:
+                                        <a href="#name-actor-token-claims-2" class="selfRef">Actor Token クレーム</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="DelegationResponse">
+                        <section id="section-a.2.4">
+                            <h3 id="name-token-exchange-response-4">
+                                <a href="#section-a.2.4" class="section-number selfRef">A.2.4. </a><a
+                                    href="#name-token-exchange-response-4" class="section-name selfRef">トークン交換
+                                    レスポンス</a>
+                            </h3>
+                            <p id="section-a.2.4-1">
+                                以下に示すトークン交換レスポンスの <code>access_token</code> パラメーターは、
+                                クライアントが要求した新しいトークンを含む。
+                                レスポンスの他のパラメーターは、そのトークンが 1 時間で期限切れとなる JWT
+                                であり、発行されたトークンがアクセストークンではないため
+                                アクセストークン種別が適用できないことを示す。<a href="#section-a.2.4-1" class="pilcrow">¶</a></p>
+                            <span id="name-token-exchange-response-5"></span>
+                            <div id="DelegationResponseEx">
+                                <figure id="figure-17">
+                                    <div class="artwork art-text alignLeft" id="section-a.2.4-2.1">
+                                        <pre>
+ HTTP/1.1 200 OK
+ Content-Type: application/json
+ Cache-Control: no-cache, no-store
+
+ {
+  "access_token":"eyJhbGciOiJFUzI1NiIsImtpZCI6IjcyIn0.eyJhdWQiOiJ1cm4
+    6ZXhhbXBsZTpjb29wZXJhdGlvbi1jb250ZXh0IiwiaXNzIjoiaHR0cHM6Ly9hcy5l
+    eGFtcGxlLmNvbSIsImV4cCI6MTQ0MTkxMzYxMCwic2NvcGUiOiJzdGF0dXMgZmVlZ
+    CIsInN1YiI6InVzZXJAZXhhbXBsZS5uZXQiLCJhY3QiOnsic3ViIjoiYWRtaW5AZX
+    hhbXBsZS5uZXQifX0.3paKl9UySKYB5ng6_cUtQ2qlO8Rc_y7Mea7IwEXTcYbNdwG
+    9-G1EKCFe5fW3H0hwX-MSZ49Wpcb1SiAZaOQBtw",
+  "issued_token_type":"urn:ietf:params:oauth:token-type:jwt",
+  "token_type":"N_A",
+  "expires_in":3600
+ }
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-17" class="selfRef">図 17</a>:
+                                        <a href="#name-token-exchange-response-5" class="selfRef">トークン交換
+                                            レスポンス</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                    <div id="DelegationIssuedClaims">
+                        <section id="section-a.2.5">
+                            <h3 id="name-issued-token-claims-3">
+                                <a href="#section-a.2.5" class="section-number selfRef">A.2.5. </a><a
+                                    href="#name-issued-token-claims-3" class="section-name selfRef">発行されたトークンの
+                                    クレーム</a>
+                            </h3>
+                            <p id="section-a.2.5-1">
+                                発行されたトークンのデコードされた JWT Claims Set を以下に示す。新しい JWT は
+                                認可サーバーによって発行され、論理名
+                                <code>urn:example:cooperation-context</code>
+                                で知られるシステムエンティティによって、
+                                その有効期限前であればいつでも消費されることを意図している。
+                                JWT の subject (<code>sub</code>)
+                                は、リクエストを行うために使用された
+                                <code>subject_token</code> の subject と同じである。
+                                JWT の actor (<code>act</code>) は、リクエストを行うために使用された
+                                <code>actor_token</code> の subject と同じである。
+
+                                これは委任を示し、
+                                <code>admin@example.net</code> を、<code>user@example.net</code> の代理として
+                                動作する権限が委任された現在の actor として識別する。<a href="#section-a.2.5-1" class="pilcrow">¶</a>
+                            </p>
+                            <span id="name-issued-token-claims-4"></span>
+                            <div id="DelegationIssuedClaimsEx">
+                                <figure id="figure-18">
+                                    <div id="section-a.2.5-2.1">
+                                        <pre class="sourcecode lang-json">
+  {
+    "aud":"urn:example:cooperation-context",
+    "iss":"https://as.example.com",
+    "exp":1441913610,
+    "scope":"status feed",
+    "sub":"user@example.net",
+    "act":
+    {
+      "sub":"admin@example.net"
+    }
+  }
+</pre>
+                                    </div>
+                                    <figcaption><a href="#figure-18" class="selfRef">図 18</a>:
+                                        <a href="#name-issued-token-claims-4" class="selfRef">発行されたトークンのクレーム</a>
+                                    </figcaption>
+                                </figure>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="Acknowledgements">
+        <section id="section-appendix.b">
+            <h2 id="name-acknowledgements">
+                <a href="#name-acknowledgements" class="section-name selfRef">謝辞</a>
+            </h2>
+            <p id="section-appendix.b-1">
+                本仕様は OAuth Working Group 内で開発された。このワーキンググループには、
+                数十名の活発で献身的な参加者が含まれる。
+                本仕様は、
+                <span class="contact-name">Hannes Tschofenig</span>, <span class="contact-name">Derek Atkins</span>, および
+                <span class="contact-name">Rifaat Shekh-Yusef</span> の議長の下で作成され、
+                <span class="contact-name">Kathleen Moriarty</span>, <span class="contact-name">Stephen
+                    Farrell</span>, <span class="contact-name">Eric Rescorla</span>, <span class="contact-name">Roman
+                    Danyliw</span>, および <span class="contact-name">Benjamin Kaduk</span> が
+                Security Area Directors を務めた。<a href="#section-appendix.b-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-appendix.b-2">
+                以下の個人は、本仕様に対してアイデア、フィードバック、および文言を
+                提供した:
+                <span class="contact-name">Caleb Baker</span>,
+                <span class="contact-name">Vittorio Bertocci</span>,
+                <span class="contact-name">Mike Brown</span>,
+                <span class="contact-name">Thomas Broyer</span>,
+                <span class="contact-name">Roman Danyliw</span>,
+                <span class="contact-name">William Denniss</span>,
+                <span class="contact-name">Vladimir Dzhuvinov</span>,
+                <span class="contact-name">Eric Fazendin</span>,
+                <span class="contact-name">Phil Hunt</span>,
+                <span class="contact-name">Benjamin Kaduk</span>,
+                <span class="contact-name">Jason Keglovitz</span>,
+                <span class="contact-name">Torsten Lodderstedt</span>,
+                <span class="contact-name">Barry Leiba</span>,
+                <span class="contact-name">Adam Lewis</span>,
+                <span class="contact-name">James Manger</span>,
+                <span class="contact-name">Nov Matake</span>,
+                <span class="contact-name">Matt Miller</span>,
+                <span class="contact-name">Hilarie Orman</span>,
+                <span class="contact-name">Matthew Perry</span>,
+                <span class="contact-name">Eric Rescorla</span>,
+                <span class="contact-name">Justin Richer</span>,
+                <span class="contact-name">Adam Roach</span>,
+                <span class="contact-name">Rifaat Shekh-Yusef</span>,
+                <span class="contact-name">Scott Tomilson</span>,
+                and
+                <span class="contact-name">Hannes Tschofenig</span>。<a href="#section-appendix.b-2"
+                    class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="authors-addresses">
+        <section id="section-appendix.c">
+            <h2 id="name-authors-addresses">
+                <a href="#name-authors-addresses" class="section-name selfRef">著者の連絡先</a>
+            </h2>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Michael B. Jones</span></div>
+                <div dir="auto" class="left"><span class="org">Microsoft</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:mbj@microsoft.com" class="email">mbj@microsoft.com</a>
+                </div>
+                <div class="url">
+                    <span>URI:</span>
+                    <a href="https://self-issued.info/" class="url">https://self-issued.info/</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Anthony Nadalin</span></div>
+                <div dir="auto" class="left"><span class="org">Microsoft</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:tonynad@microsoft.com" class="email">tonynad@microsoft.com</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Brian Campbell (<span
+                            class="role">editor</span>)</span></div>
+                <div dir="auto" class="left"><span class="org">Ping Identity</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:brian.d.campbell@gmail.com" class="email">brian.d.campbell@gmail.com</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">John Bradley</span></div>
+                <div dir="auto" class="left"><span class="org">Yubico</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:ve7jtb@ve7jtb.com" class="email">ve7jtb@ve7jtb.com</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Chuck Mortimore</span></div>
+                <div dir="auto" class="left"><span class="org">Visa</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:chuck.mortimore@visa.com" class="email">chuck.mortimore@visa.com</a>
+                </div>
+            </address>
+        </section>
+    </div>
+    <script>var toc = document.getElementById("toc");
+        var tocToggle = toc.querySelector("h2");
+        var tocNav = toc.querySelector("nav");
+
+        // mobile menu toggle
+        tocToggle.onclick = function (event) {
+            if (window.innerWidth < 1024) {
+                var tocNavDisplay = tocNav.currentStyle ? tocNav.currentStyle.display : getComputedStyle(tocNav, null).display;
+                if (tocNavDisplay == "none") {
+                    tocNav.style.display = "block";
+                } else {
+                    tocNav.style.display = "none";
+                }
+            }
+        }
+
+        // toc anchor scroll to anchor
+        tocNav.addEventListener("click", function (event) {
+            event.preventDefault();
+            if (event.target.nodeName == 'A') {
+                if (window.innerWidth < 1024) {
+                    tocNav.style.display = "none";
+                }
+                var href = event.target.getAttribute("href");
+                var anchorId = href.substr(1);
+                var anchor = document.getElementById(anchorId);
+                anchor.scrollIntoView(true);
+                window.history.pushState("", "", href);
+            }
+        });
+
+        // switch toc mode when window resized
+        window.onresize = function () {
+            if (window.innerWidth < 1024) {
+                tocNav.style.display = "none";
+            } else {
+                tocNav.style.display = "block";
+            }
+        }
+    </script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
