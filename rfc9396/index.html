@@ -1,0 +1,4321 @@
+<!DOCTYPE html>
+<html lang="ja-JP" class="RFC">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="Common,Latin" name="scripts">
+    <meta content="initial-scale=1.0" name="viewport">
+    <title>RFC 9396: OAuth 2.0 リッチ認可リクエスト</title>
+    <meta content="Torsten Lodderstedt" name="author">
+    <meta content="Justin Richer" name="author">
+    <meta content="Brian Campbell" name="author">
+    <meta content="
+       この文書は、新しいパラメーター  authorization_details  を規定します。これは
+OAuthメッセージで細粒度の認可データを伝達するために使用されます。 
+    " name="description">
+    <meta content="xml2rfc 3.17.1" name="generator">
+    <meta content="security" name="keyword">
+    <meta content="oauth2" name="keyword">
+    <meta content="9396" name="rfc.number">
+    <!-- Generator version information:
+  xml2rfc 3.17.1
+    Python 3.9.15
+    appdirs 1.4.4
+    ConfigArgParse 1.5.3
+    google-i18n-address 2.5.1
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.0
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.28.0
+    setuptools 44.1.1
+    six 1.16.0
+    wcwidth 0.2.5
+    weasyprint 56.1
+-->
+    <link href="rfc9396.xml" rel="alternate" type="application/rfc+xml">
+    <link href="#copyright" rel="license">
+    <style type="text/css">
+        /*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+        /* fonts */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+        /* Sans-serif */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Serif');
+        /* Serif (print) */
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+        /* Monospace */
+
+        :root {
+            --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+            --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+            --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+        }
+
+        @viewport {
+            zoom: 1.0;
+        }
+
+        @-ms-viewport {
+            width: extend-to-zoom;
+            zoom: 1.0;
+        }
+
+        /* general and mobile first */
+        html {}
+
+        body {
+            max-width: 90%;
+            margin: 1.5em auto;
+            color: #222;
+            background-color: #fff;
+            font-size: 14px;
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .ears {
+            display: none;
+        }
+
+        /* headings */
+        #title,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        #title {
+            clear: both;
+            border-bottom: 1px solid #ddd;
+            margin: 0 0 0.5em 0;
+            padding: 1em 0 0.5em;
+        }
+
+        .author {
+            padding-bottom: 4px;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin: 1em 0;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-top: -20px;
+            /* provide offset for in-page anchors */
+            padding-top: 33px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h4 {
+            font-size: 16px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h5,
+        h6 {
+            font-size: 14px;
+        }
+
+        #n-copyright-notice {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1em;
+            margin-bottom: 1em;
+        }
+
+        /* general structure */
+        p {
+            padding: 0;
+            margin: 0 0 1em 0;
+            text-align: left;
+        }
+
+        div,
+        span {
+            position: relative;
+        }
+
+        div {
+            margin: 0;
+        }
+
+        .alignRight.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignRight.art-text pre {
+            padding: 0;
+        }
+
+        .alignRight {
+            margin: 1em 0;
+        }
+
+        .alignRight>*:first-child {
+            border: none;
+            margin: 0;
+            float: right;
+            clear: both;
+        }
+
+        .alignRight>*:nth-child(2) {
+            clear: both;
+            display: block;
+            border: none;
+        }
+
+        svg {
+            display: block;
+        }
+
+        svg[font-family~="serif" i],
+        svg [font-family~="serif" i] {
+            font-family: var(--font-serif);
+        }
+
+        svg[font-family~="sans-serif" i],
+        svg [font-family~="sans-serif" i] {
+            font-family: var(--font-sans);
+        }
+
+        svg[font-family~="monospace" i],
+        svg [font-family~="monospace" i] {
+            font-family: var(--font-mono);
+        }
+
+        .alignCenter.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignCenter.art-text pre {
+            padding: 0;
+        }
+
+        .alignCenter {
+            margin: 1em 0;
+        }
+
+        .alignCenter>*:first-child {
+            display: table;
+            border: none;
+            margin: 0 auto;
+        }
+
+        /* lists */
+        ol,
+        ul {
+            padding: 0;
+            margin: 0 0 1em 2em;
+        }
+
+        ol ol,
+        ul ul,
+        ol ul,
+        ul ol {
+            margin-left: 1em;
+        }
+
+        li {
+            margin: 0 0 0.25em 0;
+        }
+
+        .ulCompact li {
+            margin: 0;
+        }
+
+        ul.empty,
+        .ulEmpty {
+            list-style-type: none;
+        }
+
+        ul.empty li,
+        .ulEmpty li {
+            margin-top: 0.5em;
+        }
+
+        ul.ulBare,
+        li.ulBare {
+            margin-left: 0em !important;
+        }
+
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact {
+            line-height: 100%;
+            margin: 0 0 0 2em;
+        }
+
+        /* definition lists */
+        dl {}
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        /* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+        dl>dd {
+            margin-bottom: .8em;
+            min-height: 1.3em;
+        }
+
+        dl.compact>dd,
+        .dlCompact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        /* links */
+        a {
+            text-decoration: none;
+        }
+
+        a[href] {
+            color: #22e;
+            /* Arlen: WCAG 2019 */
+        }
+
+        a[href]:hover {
+            background-color: #f2f2f2;
+        }
+
+        figcaption a[href],
+        a[href].selfRef,
+        .iref+a[href].internal {
+            color: #222;
+        }
+
+        /* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+        /* Figures */
+        tt,
+        code,
+        pre {
+            background-color: #f9f9f9;
+            font-family: var(--font-mono);
+        }
+
+        pre {
+            border: 1px solid #eee;
+            margin: 0;
+            padding: 1em;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        figure blockquote {
+            margin: 0.8em 0.4em 0.4em;
+        }
+
+        figcaption {
+            font-style: italic;
+            margin: 0 0 1em 0;
+        }
+
+        @media screen {
+            pre {
+                overflow-x: auto;
+                max-width: 100%;
+                max-width: calc(100% - 22px);
+            }
+        }
+
+        /* aside, blockquote */
+        aside,
+        blockquote {
+            margin-left: 0;
+            padding: 1.2em 2em;
+        }
+
+        blockquote {
+            background-color: #f9f9f9;
+            color: #111;
+            /* Arlen: WCAG 2019 */
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin: 1em 0;
+        }
+
+        cite {
+            display: block;
+            text-align: right;
+            font-style: italic;
+        }
+
+        /* tables */
+        table {
+            width: 100%;
+            margin: 0 0 1em;
+            border-collapse: collapse;
+            border: 1px solid #eee;
+        }
+
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+            padding: 0.5em 0.75em;
+        }
+
+        th {
+            text-align: left;
+            background-color: #e9e9e9;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f5f5f5;
+        }
+
+        table caption {
+            font-style: italic;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        table p {
+            /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+            margin: 0;
+        }
+
+        /* pilcrow */
+        a.pilcrow {
+            color: #666;
+            /* Arlen: AHDJ 2019 */
+            text-decoration: none;
+            visibility: hidden;
+            user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        @media screen {
+
+            aside:hover>a.pilcrow,
+            p:hover>a.pilcrow,
+            blockquote:hover>a.pilcrow,
+            div:hover>a.pilcrow,
+            li:hover>a.pilcrow,
+            pre:hover>a.pilcrow {
+                visibility: visible;
+            }
+
+            a.pilcrow:hover {
+                background-color: transparent;
+            }
+        }
+
+        /* misc */
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+
+        .bcp14 {
+            font-variant: small-caps;
+        }
+
+        .role {
+            font-variant: all-small-caps;
+        }
+
+        /* info block */
+        #identifiers {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        #identifiers dt {
+            width: 3em;
+            clear: left;
+        }
+
+        #identifiers dd {
+            float: left;
+            margin-bottom: 0;
+        }
+
+        /* Fix PDF info block run off issue */
+        @media print {
+            #identifiers dd {
+                float: none;
+            }
+        }
+
+        #identifiers .authors .author {
+            display: inline-block;
+            margin-right: 1.5em;
+        }
+
+        #identifiers .authors .org {
+            font-style: italic;
+        }
+
+        /* The prepared/rendered info at the very bottom of the page */
+        .docInfo {
+            color: #666;
+            /* Arlen: WCAG 2019 */
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 2em;
+        }
+
+        .docInfo .prepared {
+            float: left;
+        }
+
+        .docInfo .prepared {
+            float: right;
+        }
+
+        /* table of contents */
+        #toc {
+            padding: 0.75em 0 2em 0;
+            margin-bottom: 1em;
+        }
+
+        nav.toc ul {
+            margin: 0 0.5em 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        nav.toc li {
+            line-height: 1.3em;
+            margin: 0.75em 0;
+            padding-left: 1.2em;
+            text-indent: -1.2em;
+        }
+
+        /* references */
+        .references dt {
+            text-align: right;
+            font-weight: bold;
+            min-width: 7em;
+        }
+
+        .references dd {
+            margin-left: 8em;
+            overflow: auto;
+        }
+
+        .refInstance {
+            margin-bottom: 1.25em;
+        }
+
+        .references .ascii {
+            margin-bottom: 0.25em;
+        }
+
+        /* index */
+        .index ul {
+            margin: 0 0 0 1em;
+            padding: 0;
+            list-style: none;
+        }
+
+        .index ul ul {
+            margin: 0;
+        }
+
+        .index li {
+            margin: 0;
+            text-indent: -2em;
+            padding-left: 2em;
+            padding-bottom: 5px;
+        }
+
+        .indexIndex {
+            margin: 0.5em 0 1em;
+        }
+
+        .index a {
+            font-weight: 700;
+        }
+
+        /* make the index two-column on all but the smallest screens */
+        @media (min-width: 600px) {
+            .index ul {
+                -moz-column-count: 2;
+                -moz-column-gap: 20px;
+            }
+
+            .index ul ul {
+                -moz-column-count: 1;
+                -moz-column-gap: 0;
+            }
+        }
+
+        /* authors */
+        address.vcard {
+            font-style: normal;
+            margin: 1em 0;
+        }
+
+        address.vcard .nameRole {
+            font-weight: 700;
+            margin-left: 0;
+        }
+
+        address.vcard .label {
+            font-family: var(--font-sans);
+            margin: 0.5em 0;
+        }
+
+        address.vcard .type {
+            display: none;
+        }
+
+        .alternative-contact {
+            margin: 1.5em 0 1em;
+        }
+
+        hr.addr {
+            border-top: 1px dashed;
+            margin: 0;
+            color: #ddd;
+            max-width: calc(100% - 16px);
+        }
+
+        /* temporary notes */
+        .rfcEditorRemove::before {
+            position: absolute;
+            top: 0.2em;
+            right: 0.2em;
+            padding: 0.2em;
+            content: "The RFC Editor will remove this note";
+            color: #9e2a00;
+            /* Arlen: WCAG 2019 */
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+        }
+
+        .rfcEditorRemove {
+            position: relative;
+            padding-top: 1.8em;
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            border-radius: 3px;
+        }
+
+        .cref {
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            padding: 2px 4px;
+        }
+
+        .crefSource {
+            font-style: italic;
+        }
+
+        /* alternative layout for smaller screens */
+        @media screen and (max-width: 1023px) {
+            body {
+                padding-top: 2em;
+            }
+
+            #title {
+                padding: 1em 0;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-top: -18px;
+                /* provide offset for in-page anchors */
+                padding-top: 38px;
+            }
+
+            #identifiers dd {
+                max-width: 60%;
+            }
+
+            #toc {
+                position: fixed;
+                z-index: 2;
+                top: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+                background-color: inherit;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #toc h2 {
+                margin: -1px 0 0 0;
+                padding: 4px 0 4px 6px;
+                padding-right: 1em;
+                min-width: 190px;
+                font-size: 1.1em;
+                text-align: right;
+                background-color: #444;
+                color: white;
+                cursor: pointer;
+            }
+
+            #toc h2::before {
+                /* css hamburger */
+                float: right;
+                position: relative;
+                width: 1em;
+                height: 1px;
+                left: -164px;
+                margin: 6px 0 0 0;
+                background: white none repeat scroll 0 0;
+                box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+                content: "";
+            }
+
+            #toc nav {
+                display: none;
+                padding: 0.5em 1em 1em;
+                overflow: auto;
+                height: calc(100vh - 48px);
+                border-left: 1px solid #ddd;
+            }
+        }
+
+        /* alternative layout for wide screens */
+        @media screen and (min-width: 1024px) {
+            body {
+                max-width: 724px;
+                margin: 42px auto;
+                padding-left: 1.5em;
+                padding-right: 29em;
+            }
+
+            #toc {
+                position: fixed;
+                top: 42px;
+                right: 42px;
+                width: 25%;
+                margin: 0;
+                padding: 0 1em;
+                z-index: 1;
+            }
+
+            #toc h2 {
+                border-top: none;
+                border-bottom: 1px solid #ddd;
+                font-size: 1em;
+                font-weight: normal;
+                margin: 0;
+                padding: 0.25em 1em 1em 0;
+            }
+
+            #toc nav {
+                display: block;
+                height: calc(90vh - 84px);
+                bottom: 0;
+                padding: 0.5em 0 0;
+                overflow: auto;
+            }
+
+            img {
+                /* future proofing */
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* pagination */
+        @media print {
+            body {
+
+                width: 100%;
+            }
+
+            p {
+                orphans: 3;
+                widows: 3;
+            }
+
+            #n-copyright-notice {
+                border-bottom: none;
+            }
+
+            #toc,
+            #n-introduction {
+                page-break-before: always;
+            }
+
+            #toc {
+                border-top: none;
+                padding-top: 0;
+            }
+
+            figure,
+            pre {
+                page-break-inside: avoid;
+            }
+
+            figure {
+                overflow: scroll;
+            }
+
+            .breakable pre {
+                break-inside: auto;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                page-break-after: avoid;
+            }
+
+            h2+*,
+            h3+*,
+            h4+*,
+            h5+*,
+            h6+* {
+                page-break-before: avoid;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-size: 10pt;
+            }
+
+            table {
+                border: 1px solid #ddd;
+            }
+
+            td {
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        /* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+        /*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+        @page :first {
+            padding-top: 0;
+
+            @top-left {
+                content: normal;
+                border: none;
+            }
+
+            @top-center {
+                content: normal;
+                border: none;
+            }
+
+            @top-right {
+                content: normal;
+                border: none;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin-bottom: 45mm;
+            padding-top: 20px;
+            /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+            /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+        }
+
+        /* Changes introduced to fix issues found during implementation */
+        /* Make sure links are clickable even if overlapped by following H* */
+        a {
+            z-index: 2;
+        }
+
+        /* Separate body from document info even without intervening H1 */
+        section {
+            clear: both;
+        }
+
+
+        /* Top align author divs, to avoid names without organization dropping level with org names */
+        .author {
+            vertical-align: top;
+        }
+
+        /* Leave room in document info to show Internet-Draft on one line */
+        #identifiers dt {
+            width: 8em;
+        }
+
+        /* Don't waste quite as much whitespace between label and value in doc info */
+        #identifiers dd {
+            margin-left: 1em;
+        }
+
+        /* Give floating toc a background color (needed when it's a div inside section */
+        #toc {
+            background-color: white;
+        }
+
+        /* Make the collapsed ToC header render white on gray also when it's a link */
+        @media screen and (max-width: 1023px) {
+
+            #toc h2 a,
+            #toc h2 a:link,
+            #toc h2 a:focus,
+            #toc h2 a:hover,
+            #toc a.toplink,
+            #toc a.toplink:hover {
+                color: white;
+                background-color: #444;
+                text-decoration: none;
+            }
+        }
+
+        /* Give the bottom of the ToC some whitespace */
+        @media screen and (min-width: 1024px) {
+            #toc {
+                padding: 0 0 1em 1em;
+            }
+        }
+
+        /* Style section numbers with more space between number and title */
+        .section-number {
+            padding-right: 0.5em;
+        }
+
+        /* prevent monospace from becoming overly large */
+        tt,
+        code,
+        pre {
+            font-size: 95%;
+        }
+
+        /* Fix the height/width aspect for ascii art*/
+        .sourcecode pre,
+        .art-text pre {
+            line-height: 1.12;
+        }
+
+
+        /* Add styling for a link in the ToC that points to the top of the document */
+        a.toplink {
+            float: right;
+            margin-right: 0.5em;
+        }
+
+        /* Fix the dl styling to match the RFC 7992 attributes */
+        dl>dt,
+        dl.dlParallel>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.dlNewline>dt {
+            float: none;
+        }
+
+        /* Provide styling for table cell text alignment */
+        table td.text-left,
+        table th.text-left {
+            text-align: left;
+        }
+
+        table td.text-center,
+        table th.text-center {
+            text-align: center;
+        }
+
+        table td.text-right,
+        table th.text-right {
+            text-align: right;
+        }
+
+        /* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+        .alternative-contact {
+            margin: 0.5em 0 0.25em 0;
+        }
+
+        address .non-ascii {
+            margin: 0 0 0 2em;
+        }
+
+        /* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+        table {
+            width: auto;
+        }
+
+        /* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+        .references dd {
+            overflow: visible;
+        }
+
+        /* Control caption placement */
+        caption {
+            caption-side: bottom;
+        }
+
+        /* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+        address.vcard {
+            max-width: 30em;
+            margin-right: auto;
+        }
+
+        /* For address alignment dependent on LTR or RTL scripts */
+        address div.left {
+            text-align: left;
+        }
+
+        address div.right {
+            text-align: right;
+        }
+
+        /* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+        table.right {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        table.center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table.left {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Give the table caption label the same styling as the figcaption */
+        caption a[href] {
+            color: #222;
+        }
+
+        @media print {
+            .toplink {
+                display: none;
+            }
+
+            /* avoid overwriting the top border line with the ToC header */
+            #toc {
+                padding-top: 1px;
+            }
+
+            /* Avoid page breaks inside dl and author address entries */
+            .vcard {
+                page-break-inside: avoid;
+            }
+
+        }
+
+        /* Tweak the bcp14 keyword presentation */
+        .bcp14 {
+            font-variant: small-caps;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Tweak the invisible space above H* in order not to overlay links in text above */
+        h2 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 31px;
+        }
+
+        h3 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        h4 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        /* Float artwork pilcrow to the right */
+        @media screen {
+            .artwork a.pilcrow {
+                display: block;
+                line-height: 0.7;
+                margin-top: 0.15em;
+            }
+        }
+
+        /* Make pilcrows on dd visible */
+        @media screen {
+            dd:hover>a.pilcrow {
+                visibility: visible;
+            }
+        }
+
+        /* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+        .alignLeft.art-text,
+        .alignCenter.art-text,
+        .alignRight.art-text {
+            margin-bottom: 0;
+        }
+
+        .alignLeft,
+        .alignCenter,
+        .alignRight {
+            margin: 1em 0 0 0;
+        }
+
+        /* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+        @media print {
+            a.pilcrow {
+                display: none;
+            }
+        }
+
+        /* Styling for the external metadata */
+        div#external-metadata {
+            background-color: #eee;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+            display: none;
+        }
+
+        div#internal-metadata {
+            padding: 0.5em;
+            /* to match the external-metadata padding */
+        }
+
+        /* Styling for title RFC Number */
+        h1#rfcnum {
+            clear: both;
+            margin: 0 0 -1em;
+            padding: 1em 0 0 0;
+        }
+
+        /* Make .olPercent look the same as <ol><li> */
+        dl.olPercent>dd {
+            margin-bottom: 0.25em;
+            min-height: initial;
+        }
+
+        /* Give aside some styling to set it apart */
+        aside {
+            border-left: 1px solid #ddd;
+            margin: 1em 0 1em 2em;
+            padding: 0.2em 2em;
+        }
+
+        aside>dl,
+        aside>ol,
+        aside>ul,
+        aside>table,
+        aside>p {
+            margin-bottom: 0.5em;
+        }
+
+        /* Additional page break settings */
+        @media print {
+
+            figcaption,
+            table caption {
+                page-break-before: avoid;
+            }
+        }
+
+        /* Font size adjustments for print */
+        @media print {
+            body {
+                font-size: 10pt;
+                line-height: normal;
+                max-width: 96%;
+            }
+
+            h1 {
+                font-size: 1.72em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2*1.2 */
+            h2 {
+                font-size: 1.44em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2 */
+            h3 {
+                font-size: 1.2em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2 */
+            h4 {
+                font-size: 1em;
+                padding-top: 1.5em;
+            }
+
+            h5,
+            h6 {
+                font-size: 1em;
+                margin: initial;
+                padding: 0.5em 0 0.3em;
+            }
+        }
+
+        /* Sourcecode margin in print, when there's no pilcrow */
+        @media print {
+
+            .artwork,
+            .artwork>pre,
+            .sourcecode {
+                margin-bottom: 1em;
+            }
+        }
+
+        /* Avoid narrow tables forcing too narrow table captions, which may render badly */
+        table {
+            min-width: 20em;
+        }
+
+        /* ol type a */
+        ol.type-a {
+            list-style-type: lower-alpha;
+        }
+
+        ol.type-A {
+            list-style-type: upper-alpha;
+        }
+
+        ol.type-i {
+            list-style-type: lower-roman;
+        }
+
+        ol.type-I {
+            list-style-type: lower-roman;
+        }
+
+        /* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+        table {
+            border: 1px solid #ddd;
+        }
+
+        td {
+            border-top: 1px solid #ddd;
+        }
+
+        tr {
+            break-inside: avoid;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f8f8f8;
+        }
+
+        /* Use style rules to govern display of the TOC. */
+        @media screen and (max-width: 1023px) {
+            #toc nav {
+                display: none;
+            }
+
+            #toc.active nav {
+                display: block;
+            }
+        }
+
+        /* Add support for keepWithNext */
+        .keepWithNext {
+            break-after: avoid-page;
+            break-after: avoid-page;
+        }
+
+        /* Add support for keepWithPrevious */
+        .keepWithPrevious {
+            break-before: avoid-page;
+        }
+
+        /* Change the approach to avoiding breaks inside artwork etc. */
+        figure,
+        pre,
+        table,
+        .artwork,
+        .sourcecode {
+            break-before: auto;
+            break-after: auto;
+        }
+
+        /* Avoid breaks between <dt> and <dd> */
+        dl {
+            break-before: auto;
+            break-inside: auto;
+        }
+
+        dt {
+            break-before: auto;
+            break-after: avoid-page;
+        }
+
+        dd {
+            break-before: avoid-page;
+            break-after: auto;
+            orphans: 3;
+            widows: 3
+        }
+
+        span.break,
+        dd.break {
+            margin-bottom: 0;
+            min-height: 0;
+            break-before: auto;
+            break-inside: auto;
+            break-after: auto;
+        }
+
+        /* Undo break-before ToC */
+        @media print {
+            #toc {
+                break-before: auto;
+            }
+        }
+
+        /* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+        ul.compact p,
+        .ulCompact p,
+        ol.compact p,
+        .olCompact p {
+            margin: 0;
+        }
+
+        /* But the list as a whole needs the extra space at the end */
+        section ul.compact,
+        section .ulCompact,
+        section ol.compact,
+        section .olCompact {
+            margin-bottom: 1em;
+            /* same as p not within ul.compact etc. */
+        }
+
+        /* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+        tt,
+        code {
+            background-color: transparent;
+        }
+
+        p tt,
+        p code,
+        li tt,
+        li code {
+            background-color: #f8f8f8;
+        }
+
+        /* Tweak the pre margin -- 0px doesn't come out well */
+        pre {
+            margin-top: 0.5px;
+        }
+
+        /* Tweak the compact list text */
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact,
+        dl.compact,
+        .dlCompact {
+            line-height: normal;
+        }
+
+        /* Don't add top margin for nested lists */
+        li>ul,
+        li>ol,
+        li>dl,
+        dd>ul,
+        dd>ol,
+        dd>dl,
+        dl>dd>dl {
+            margin-top: initial;
+        }
+
+        /* Elements that should not be rendered on the same line as a <dt> */
+        /* This should match the element list in writer.text.TextWriter.render_dl() */
+        dd>div.artwork:first-child,
+        dd>aside:first-child,
+        dd>figure:first-child,
+        dd>ol:first-child,
+        dd>div.sourcecode:first-child,
+        dd>table:first-child,
+        dd>ul:first-child {
+            clear: left;
+        }
+
+        /* fix for weird browser behaviour when <dd/> is empty */
+        dt+dd:empty::before {
+            content: "\00a0";
+        }
+
+        /* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+        li>p {
+            margin-bottom: 0.5em
+        }
+
+        /* Don't let p margin spill out from inside list items */
+        li>p:last-of-type:only-child {
+            margin-bottom: 0;
+        }
+    </style>
+    <link href="https://www.rfc-editor.org/rfc/rfc-local.css" rel="stylesheet" type="text/css">
+    <link href="https://dx.doi.org/10.17487/rfc9396" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-oauth-rar-23" rel="prev">
+</head>
+
+<body class="xml2rfc">
+    <script src="https://www.rfc-editor.org/js/metadata.min.js"></script>
+    <table class="ears">
+        <thead>
+            <tr>
+                <td class="left">RFC 9396</td>
+                <td class="center">OAuth-RAR</td>
+                <td class="right">2023年5月</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td class="left">Lodderstedt ほか</td>
+                <td class="center">標準化過程</td>
+                <td class="right">[ページ]</td>
+            </tr>
+        </tfoot>
+    </table>
+    <div id="external-metadata" class="document-information"></div>
+    <div id="internal-metadata" class="document-information">
+        <dl id="identifiers">
+            <dt class="label-stream">ストリーム:</dt>
+            <dd class="stream">Internet Engineering Task Force (IETF)</dd>
+            <dt class="label-rfc">RFC:</dt>
+            <dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc9396" class="eref">9396</a></dd>
+            <dt class="label-category">分類:</dt>
+            <dd class="category">標準化過程</dd>
+            <dt class="label-published">公開日:</dt>
+            <dd class="published">
+                <time datetime="2023-05" class="published">2023年5月</time>
+            </dd>
+            <dt class="label-issn">ISSN:</dt>
+            <dd class="issn">2070-1721</dd>
+            <dt class="label-authors">著者:</dt>
+            <dd class="authors">
+                <div class="author">
+                    <div class="author-name">T. Lodderstedt</div>
+                    <div class="org">yes.com</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">J. Richer</div>
+                    <div class="org">Bespoke Engineering</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">B. Campbell</div>
+                    <div class="org">Ping Identity</div>
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <h1 id="rfcnum">RFC 9396</h1>
+    <h1 id="title">OAuth 2.0 リッチ認可リクエスト</h1>
+    <section id="section-abstract">
+        <h2 id="abstract"><a href="#abstract" class="selfRef">概要</a></h2>
+        <p id="section-abstract-1">この文書は、新しいパラメーター<code>authorization_details</code>を規定します。これは、
+            OAuthメッセージで細粒度の認可データを伝達するために使用されます。<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+    </section>
+    <div id="status-of-memo">
+        <section id="section-boilerplate.1">
+            <h2 id="name-status-of-this-memo">
+                <a href="#name-status-of-this-memo" class="section-name selfRef">このメモの位置づけ</a>
+            </h2>
+            <p id="section-boilerplate.1-1">
+                これはインターネット標準化過程の文書です。<a href="#section-boilerplate.1-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-boilerplate.1-2">
+                この文書は、Internet Engineering Task Force
+                (IETF)の成果物です。これはIETFコミュニティの合意を表しています。これは
+                公開レビューを受けており、
+                Internet Engineering Steering Group (IESG)によって公開が承認されています。インターネット標準に関する
+                さらなる情報は、RFC 7841のセクション2で入手できます。<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.1-3">
+                この文書の現在の状態、正誤表、
+                およびこれに関するフィードバックの提供方法についての情報は、
+                <span><a
+                        href="https://www.rfc-editor.org/info/rfc9396">https://www.rfc-editor.org/info/rfc9396</a></span>で入手できます。<a
+                    href="#section-boilerplate.1-3" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="copyright">
+        <section id="section-boilerplate.2">
+            <h2 id="name-copyright-notice">
+                <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+            </h2>
+            <p id="section-boilerplate.2-1">
+                Copyright (c) 2023 IETF Trust and the persons identified as the
+                document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.2-2">
+                This document is subject to BCP 78 and the IETF Trust's Legal
+                Provisions Relating to IETF Documents
+                (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>)
+                in effect on the date of
+                publication of this document. Please review these documents
+                carefully, as they describe your rights and restrictions with
+                respect to this document. Code Components extracted from this
+                document must include Revised BSD License text as described in
+                Section 4.e of the Trust Legal Provisions and are provided without
+                warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2"
+                    class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="toc">
+        <section id="section-toc.1">
+            <a href="#" onclick="scroll(0,0)" class="toplink">▲</a>
+            <h2 id="name-table-of-contents">
+                <a href="#name-table-of-contents" class="section-name selfRef">目次</a>
+            </h2>
+            <nav class="toc">
+                <ul class="compact toc ulBare ulEmpty">
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+                        <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1"
+                                class="auto internal xref">1</a>. <a href="#name-introduction"
+                                class="internal xref">はじめに</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1"
+                                        class="auto internal xref">1.1</a>. <a href="#name-conventions-and-terminology"
+                                        class="internal xref">規約および用語</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+                        <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>. <a
+                                href="#name-request-parameter-authoriza" class="internal xref">リクエストパラメーター
+                                "authorization_details"</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1"
+                                        class="auto internal xref">2.1</a>. <a href="#name-authorization-details-types"
+                                        class="internal xref">認可詳細タイプ</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2"
+                                        class="auto internal xref">2.2</a>. <a href="#name-common-data-fields"
+                                        class="internal xref">共通データフィールド</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+                        <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>. <a
+                                href="#name-authorization-request" class="internal xref">認可リクエスト</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1"
+                                        class="auto internal xref">3.1</a>. <a href="#name-relationship-to-the-scope-p"
+                                        class="internal xref">"scope"パラメーターとの関係</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2"
+                                        class="auto internal xref">3.2</a>. <a href="#name-relationship-to-the-resourc"
+                                        class="internal xref">"resource"パラメーターとの関係</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+                        <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>. <a
+                                href="#name-authorization-response" class="internal xref">認可レスポンス</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+                        <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>. <a
+                                href="#name-authorization-error-respons" class="internal xref">認可エラー
+                                レスポンス</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+                        <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>. <a
+                                href="#name-token-request" class="internal xref">トークンリクエスト</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1"
+                                        class="auto internal xref">6.1</a>. <a href="#name-comparing-authorization-det"
+                                        class="internal xref">認可詳細の比較</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+                        <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>. <a
+                                href="#name-token-response" class="internal xref">トークンレスポンス</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1"
+                                        class="auto internal xref">7.1</a>. <a href="#name-enriched-authorization-deta"
+                                        class="internal xref">トークンレスポンスにおける拡充された認可詳細</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+                        <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>. <a
+                                href="#name-token-error-response" class="internal xref">トークンエラーレスポンス</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+                        <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>. <a
+                                href="#name-resource-servers" class="internal xref">リソースサーバー</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1"
+                                        class="auto internal xref">9.1</a>. <a href="#name-jwt-based-access-tokens"
+                                        class="internal xref">JWTベースのアクセストークン</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2"
+                                        class="auto internal xref">9.2</a>. <a href="#name-token-introspection"
+                                        class="internal xref">トークンイントロスペクション</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+                        <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a
+                                href="#name-metadata" class="internal xref">メタデータ</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+                        <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a
+                                href="#name-implementation-consideratio" class="internal xref">実装上の考慮事項</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
+                                <p id="section-toc.1-1.11.2.1.1"><a href="#section-11.1"
+                                        class="auto internal xref">11.1</a>. <a href="#name-using-authorization-details"
+                                        class="internal xref">特定のデプロイメントにおける認可詳細の使用</a>
+                                </p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
+                                <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2"
+                                        class="auto internal xref">11.2</a>. <a href="#name-minimal-implementation-supp"
+                                        class="internal xref">最小実装サポート</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3">
+                                <p id="section-toc.1-1.11.2.3.1"><a href="#section-11.3"
+                                        class="auto internal xref">11.3</a>. <a href="#name-use-of-machine-readable-typ"
+                                        class="internal xref">機械可読なタイプスキーマの使用</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4">
+                                <p id="section-toc.1-1.11.2.4.1"><a href="#section-11.4"
+                                        class="auto internal xref">11.4</a>. <a href="#name-large-requests"
+                                        class="internal xref">大きなリクエスト</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+                        <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a
+                                href="#name-security-considerations" class="internal xref">セキュリティ上の考慮事項</a>
+                        </p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+                        <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a
+                                href="#name-privacy-considerations" class="internal xref">プライバシー上の考慮事項</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+                        <p id="section-toc.1-1.14.1"><a href="#section-14" class="auto internal xref">14</a>. <a
+                                href="#name-iana-considerations" class="internal xref">IANAに関する考慮事項</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
+                                <p id="section-toc.1-1.14.2.1.1"><a href="#section-14.1"
+                                        class="auto internal xref">14.1</a>. <a href="#name-oauth-parameters-registrati"
+                                        class="internal xref">OAuthパラメーター登録</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
+                                <p id="section-toc.1-1.14.2.2.1"><a href="#section-14.2"
+                                        class="auto internal xref">14.2</a>. <a href="#name-json-web-token-claims-regis"
+                                        class="internal xref">JSON Web Tokenクレーム登録</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3">
+                                <p id="section-toc.1-1.14.2.3.1"><a href="#section-14.3"
+                                        class="auto internal xref">14.3</a>. <a href="#name-oauth-token-introspection-r"
+                                        class="internal xref">OAuthトークンイントロスペクションレスポンス登録</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.4">
+                                <p id="section-toc.1-1.14.2.4.1"><a href="#section-14.4"
+                                        class="auto internal xref">14.4</a>. <a href="#name-oauth-authorization-server-"
+                                        class="internal xref">OAuth認可サーバーメタデータ登録</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.5">
+                                <p id="section-toc.1-1.14.2.5.1"><a href="#section-14.5"
+                                        class="auto internal xref">14.5</a>. <a href="#name-oauth-dynamic-client-regist"
+                                        class="internal xref">OAuth動的クライアント登録メタデータ
+                                        登録</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.6">
+                                <p id="section-toc.1-1.14.2.6.1"><a href="#section-14.6"
+                                        class="auto internal xref">14.6</a>. <a href="#name-oauth-extensions-error-regi"
+                                        class="internal xref">OAuth拡張エラー登録</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+                        <p id="section-toc.1-1.15.1"><a href="#section-15" class="auto internal xref">15</a>. <a
+                                href="#name-references" class="internal xref">参考文献</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.1">
+                                <p id="section-toc.1-1.15.2.1.1"><a href="#section-15.1"
+                                        class="auto internal xref">15.1</a>. <a href="#name-normative-references"
+                                        class="internal xref">規範的参考文献</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.2">
+                                <p id="section-toc.1-1.15.2.2.1"><a href="#section-15.2"
+                                        class="auto internal xref">15.2</a>. <a href="#name-informative-references"
+                                        class="internal xref">参考情報の参考文献</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
+                        <p id="section-toc.1-1.16.1"><a href="#appendix-A" class="auto internal xref">付録 A</a>. <a
+                                href="#name-additional-examples" class="internal xref">追加例</a></p>
+                        <ul class="compact toc ulBare ulEmpty">
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16.2.1">
+                                <p id="section-toc.1-1.16.2.1.1"><a href="#appendix-A.1"
+                                        class="auto internal xref">A.1</a>. <a href="#name-openid-connect"
+                                        class="internal xref">OpenID Connect</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16.2.2">
+                                <p id="section-toc.1-1.16.2.2.1"><a href="#appendix-A.2"
+                                        class="auto internal xref">A.2</a>. <a href="#name-remote-electronic-signing"
+                                        class="internal xref">リモート電子署名</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16.2.3">
+                                <p id="section-toc.1-1.16.2.3.1"><a href="#appendix-A.3"
+                                        class="auto internal xref">A.3</a>. <a href="#name-access-to-tax-data"
+                                        class="internal xref">税務データへのアクセス</a></p>
+                            </li>
+                            <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16.2.4">
+                                <p id="section-toc.1-1.16.2.4.1"><a href="#appendix-A.4"
+                                        class="auto internal xref">A.4</a>. <a href="#name-ehealth"
+                                        class="internal xref">eHealth</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17">
+                        <p id="section-toc.1-1.17.1"><a href="#appendix-B" class="auto internal xref"></a><a
+                                href="#name-acknowledgements" class="internal xref">謝辞</a></p>
+                    </li>
+                    <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18">
+                        <p id="section-toc.1-1.18.1"><a href="#appendix-C" class="auto internal xref"></a><a
+                                href="#name-authors-addresses" class="internal xref">著者の連絡先</a></p>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+    </div>
+    <div id="Introduction">
+        <section id="section-1">
+            <h2 id="name-introduction">
+                <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction"
+                    class="section-name selfRef">はじめに</a>
+            </h2>
+            <p id="section-1-1">"The OAuth 2.0 Authorization Framework" <span>[<a href="#RFC6749"
+                        class="cite xref">RFC6749</a>]</span>は、OAuth
+                クライアントがアクセストークンの要求スコープ、すなわち限定された権限を
+                指定できる<code>scope</code>パラメーターを定義しています。
+                この仕組みは、「リソース所有者のプロファイルへの読み取りアクセスを与えてください」
+                のような静的なシナリオおよび粗い粒度の認可リクエストを実装するには十分です。しかし、
+                「Merchant Aに45ユーロを送金させてください」
+                または「ディレクトリAへの読み取りアクセスとファイルXへの書き込みアクセスを与えてください」
+                のような細かい粒度の認可要件を指定するには十分ではありません。<a href="#section-1-1" class="pilcrow">¶</a></p>
+            <p id="section-1-2">この仕様は、JSON
+                <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>データ構造の表現力を使用して、
+                クライアントが細かい粒度の認可要件を指定できる新しいパラメーター
+                <code>authorization_details</code>を導入します。<a href="#section-1-2" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-3">たとえば、信用振替（複数のオープンバンキングの取り組みでは
+                「payment initiation」と呼ばれる）の認可リクエストは、次のようなJSONオブジェクトで表現できます。<a href="#section-1-3" class="pilcrow">¶</a>
+            </p>
+            <span id="name-example-of-an-authorization"></span>
+            <figure id="figure-1">
+                <div class="lang-json sourcecode" id="section-1-4.1">
+                    <pre>{
+   "type": "payment_initiation",
+   "locations": [
+      "https://example.com/payments"
+   ],
+   "instructedAmount": {
+      "currency": "EUR",
+      "amount": "123.50"
+   },
+   "creditorName": "Merchant A",
+   "creditorAccount": {
+      "bic":"ABCIDEFFXXX",
+      "iban": "DE02100100109307118603"
+   },
+   "remittanceInformationUnstructured": "Ref Number Merchant"
+}
+</pre>
+                </div>
+                <figcaption><a href="#figure-1" class="selfRef">図 1</a>:
+                    <a href="#name-example-of-an-authorization" class="selfRef">信用振替の認可リクエストの例</a>
+                </figcaption>
+            </figure>
+            <p id="section-1-5">このオブジェクトには、金額、通貨、債権者など、
+                ユーザーに通知し同意を得るために必要な、意図された支払いに関する詳細情報が含まれます。
+                認可サーバー（AS）とそれぞれのリソースサーバー（RS）（支払い開始APIを提供）は、
+                この同意を共同で強制します。<a href="#section-1-5" class="pilcrow">¶</a></p>
+            <p id="section-1-6">オープンバンキングおよび電子署名分野における新しいユースケースから生じる課題の包括的な議論については、
+                <span>[<a href="#Transaction-Auth" class="cite xref">Transaction-Auth</a>]</span>を参照してください。<a
+                    href="#section-1-6" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-7">この仕様は、カスタム認可リクエストを容易にすることに加えて、
+                異なるAPI間で使用するための共通データ型フィールドのセットも導入します。<a href="#section-1-7" class="pilcrow">¶</a></p>
+            <div id="conventions-and-terminology">
+                <section id="section-1.1">
+                    <h3 id="name-conventions-and-terminology">
+                        <a href="#section-1.1" class="section-number selfRef">1.1. </a><a
+                            href="#name-conventions-and-terminology" class="section-name selfRef">規約および
+                            用語</a>
+                    </h3>
+                    <p id="section-1.1-1">
+                        この文書におけるキーワード"<span class="bcp14">MUST</span>"、"<span class="bcp14">MUST NOT</span>"、"<span
+                            class="bcp14">REQUIRED</span>"、"<span class="bcp14">SHALL</span>"、"<span class="bcp14">SHALL
+                            NOT</span>"、"<span class="bcp14">SHOULD</span>"、"<span class="bcp14">SHOULD
+                            NOT</span>"、"<span class="bcp14">RECOMMENDED</span>"、"<span class="bcp14">NOT
+                            RECOMMENDED</span>"、
+                        "<span class="bcp14">MAY</span>"、および"<span class="bcp14">OPTIONAL</span>"は、
+                        ここで示されるようにすべて大文字で現れる場合に限り、BCP 14
+                        <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174"
+                                class="cite xref">RFC8174</a>]</span>
+                        に記述されているとおりに解釈されます。<a href="#section-1.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-1.1-2">この仕様では、"<a href="#RFC6749" class="internal xref">The OAuth 2.0 Authorization
+                            Framework</a>" <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>で定義される
+                        "access token"、"refresh token"、"authorization server"（AS）、"resource server"（RS）、
+                        "authorization endpoint"、"authorization request"、"authorization response"、"token endpoint"、
+                        "grant type"、"access token request"、"access token response"、および
+                        "client"という用語を使用します。<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="authz_details">
+        <section id="section-2">
+            <h2 id="name-request-parameter-authoriza">
+                <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-request-parameter-authoriza"
+                    class="section-name selfRef">リクエストパラメーター"authorization_details"</a>
+            </h2>
+            <p id="section-2-1">リクエストパラメーター<code>authorization_details</code>は、JSON表記で、
+                オブジェクトの配列を含みます。各JSONオブジェクトには、
+                特定の種類のリソースに関する認可要件を指定するためのデータが含まれます。
+                リソースまたはアクセス要件の種類は
+                <code>type</code>フィールドによって決定されます。このフィールドは次のように定義されます。<a href="#section-2-1" class="pilcrow">¶</a>
+            </p>
+            <span class="break"></span>
+            <dl class="dlParallel" id="section-2-2">
+                <dt id="section-2-2.1">
+                    <code>type</code>:
+                </dt>
+                <dd style="margin-left: 1.5em" id="section-2-2.2">文字列としての認可詳細タイプの識別子。
+                    <code>type</code>フィールドの値は、それを含むオブジェクトで許可される内容を決定します。
+                    値は、ASのコンテキストにおいて、記述されたAPIに対して一意です。このフィールドは
+                    <span class="bcp14">REQUIRED</span>です。<a href="#section-2-2.2" class="pilcrow">¶</a>
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+            <p id="section-2-3"><code>authorization_details</code>配列は、同じ<code>type</code>の複数のエントリーを
+                含むことが<span class="bcp14">MAY</span>です。<a href="#section-2-3" class="pilcrow">¶</a></p>
+            <p id="section-2-4"><a href="#figure2" class="auto internal xref">図 2</a>は、上に示した例データを使用した
+                <code>payment_initiation</code>型の<code>authorization_details</code>を示しています。<a href="#section-2-4"
+                    class="pilcrow">¶</a>
+            </p>
+            <span id="name-example-of-authorization_de"></span>
+            <div id="figure2">
+                <figure id="figure-2">
+                    <div class="lang-json sourcecode" id="section-2-5.1">
+                        <pre>[
+   {
+      "type": "payment_initiation",
+      "actions": [
+         "initiate",
+         "status",
+         "cancel"
+      ],
+      "locations": [
+         "https://example.com/payments"
+      ],
+      "instructedAmount": {
+         "currency": "EUR",
+         "amount": "123.50"
+      },
+      "creditorName": "Merchant A",
+      "creditorAccount": {
+         "iban": "DE02100100109307118603"
+      },
+      "remittanceInformationUnstructured": "Ref Number Merchant"
+   }
+]
+</pre>
+                    </div>
+                    <figcaption><a href="#figure-2" class="selfRef">図 2</a>:
+                        <a href="#name-example-of-authorization_de" class="selfRef">信用振替の
+                            "authorization_details"の例</a>
+                    </figcaption>
+                </figure>
+            </div>
+            <p id="section-2-6"><a href="#figure3" class="auto internal xref">図 3</a>は、
+                アカウント情報へのアクセスと支払いを開始する許可を求める組み合わせリクエストを示しています。<a href="#section-2-6" class="pilcrow">¶</a></p>
+            <span id="name-example-of-authorization_det"></span>
+            <div id="figure3">
+                <figure id="figure-3">
+                    <div class="lang-json sourcecode" id="section-2-7.1">
+                        <pre>[
+   {
+      "type": "account_information",
+      "actions": [
+         "list_accounts",
+         "read_balances",
+         "read_transactions"
+      ],
+      "locations": [
+         "https://example.com/accounts"
+      ]
+   },
+   {
+      "type": "payment_initiation",
+      "actions": [
+         "initiate",
+         "status",
+         "cancel"
+      ],
+      "locations": [
+         "https://example.com/payments"
+      ],
+      "instructedAmount": {
+         "currency": "EUR",
+         "amount": "123.50"
+      },
+      "creditorName": "Merchant A",
+      "creditorAccount": {
+         "iban": "DE02100100109307118603"
+      },
+      "remittanceInformationUnstructured": "Ref Number Merchant"
+   }
+]
+</pre>
+                    </div>
+                    <figcaption><a href="#figure-3" class="selfRef">図 3</a>:
+                        <a href="#name-example-of-authorization_det" class="selfRef">組み合わせリクエストの
+                            "authorization_details"の例</a>
+                    </figcaption>
+                </figure>
+            </div>
+            <p id="section-2-8"><code>account_information</code>および
+                <code>payment_initiation</code>の<code>type</code>フィールドを持つJSONオブジェクトは、
+                同意を求めるためにASによって使用される異なる<code>authorization_details</code>を表します。<a href="#section-2-8"
+                    class="pilcrow">¶</a>
+            </p>
+            <aside id="section-2-9">
+                <p id="section-2-9.1">注: ASはこのデータを、その後、それぞれのRSで利用可能にします（
+                    <a href="#resource_servers" class="auto internal xref">セクション9</a>を参照）。<a href="#section-2-9.1"
+                        class="pilcrow">¶</a>
+                </p>
+            </aside>
+            <div id="authorization-details-types">
+                <section id="section-2.1">
+                    <h3 id="name-authorization-details-types">
+                        <a href="#section-2.1" class="section-number selfRef">2.1. </a><a
+                            href="#name-authorization-details-types" class="section-name selfRef">認可詳細
+                            タイプ</a>
+                    </h3>
+                    <p id="section-2.1-1">ASは、<code>type</code>パラメーターの値の解釈と、
+                        <code>type</code>パラメーターが許可するオブジェクトフィールドを制御します。ただし、
+                        <code>type</code>パラメーターの値は一般に文書化され、開発者によって使用されることを意図しています。
+                        API設計者は、曖昧さなく容易にコピーできる<code>type</code>値を選択することが
+                        <span class="bcp14">RECOMMENDED</span>です。たとえば、いくつかのグリフには同じ視覚的文字に対する
+                        複数のUnicodeコードポイントがあり、開発者がASの定義したものとは異なる文字を入力してしまう可能性があります。
+                        潜在的な混乱を減らす手段としては、値をASCII
+                        <span>[<a href="#RFC0020" class="cite xref">RFC0020</a>]</span>文字に制限すること、データ型値の機械可読な一覧を提供すること、
+                        または開発者に文書から直接コピーして貼り付けるよう指示することが考えられます。<a href="#section-2.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.1-2">アプリケーションまたはAPIが、オープン標準の場合のように
+                        異なるサーバー全体に展開されることが想定される場合、API設計者は、
+                        API設計者が制御するURIなど、自身の制御下にある衝突耐性のある名前空間を使用することが
+                        <span class="bcp14">RECOMMENDED</span>です。<a href="#section-2.1-2" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.1-3">次の例は、実装が衝突耐性のあるタイプ値を確保するために
+                        名前空間<code>https://scheme.example.org/</code>をどのように利用できるかを示しています。<a href="#section-2.1-3"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_deta"></span>
+                    <figure id="figure-4">
+                        <div class="lang-json sourcecode" id="section-2.1-4.1">
+                            <pre>{
+   "type": "https://scheme.example.org/files",
+   "locations": [
+      "https://example.com/files"
+   ],
+   "permissions": [
+      {
+         "path": "/myfiles/A",
+         "access": [
+            "read"
+         ]
+      },
+      {
+         "path": "/myfiles/A/X",
+         "access": [
+            "read",
+            "write"
+         ]
+      }
+   ]
+}
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-4" class="selfRef">図 4</a>:
+                            <a href="#name-example-of-authorization_deta" class="selfRef">タイプ識別子としてURLを持つ
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                </section>
+            </div>
+            <div id="common_data_fields">
+                <section id="section-2.2">
+                    <h3 id="name-common-data-fields">
+                        <a href="#section-2.2" class="section-number selfRef">2.2. </a><a
+                            href="#name-common-data-fields" class="section-name selfRef">共通データフィールド</a>
+                    </h3>
+                    <p id="section-2.2-1">この仕様は、異なる種類のAPI全体で使用できるように設計された
+                        共通データフィールドのセットを定義します。この仕様は、API定義にこれらの共通フィールドの使用を要求せず、
+                        代わりに、API設計者が利用できる再利用可能な汎用コンポーネントとして提供します。
+                        すべてのフィールドの許可される値は、特定の"type"値によって定義される、保護対象のAPIによって決定されます。<a href="#section-2.2-1"
+                            class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-2.2-2">
+                        <dt id="section-2.2-2.1">
+                            <code>locations</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-2.2-2.2">リソースまたはRSの位置を表す文字列の配列。
+                            これらの文字列は通常、RSの位置を識別するURIです。このフィールドにより、
+                            <a href="#security_considerations" class="auto internal xref">セクション12</a>で議論されているように、
+                            クライアントは特定のRSを指定できます。<a href="#section-2.2-2.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-2.2-2.3">
+                            <code>actions</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-2.2-2.4">リソースで実行されるアクションの種類を表す
+                            文字列の配列。<a href="#section-2.2-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-2.2-2.5">
+                            <code>datatypes</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-2.2-2.6">リソースから要求されるデータの種類を表す
+                            文字列の配列。<a href="#section-2.2-2.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-2.2-2.7">
+                            <code>identifier</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-2.2-2.8">APIで利用可能な特定のリソースを示す
+                            文字列識別子。<a href="#section-2.2-2.8" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-2.2-2.9">
+                            <code>privileges</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-2.2-2.10">リソースで要求される特権の種類またはレベルを表す
+                            文字列の配列。<a href="#section-2.2-2.10" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <p id="section-2.2-3">異なる共通データフィールドを組み合わせて使用する場合、
+                        クライアントが要求する権限はすべての値の積になります。
+                        このオブジェクトは、オブジェクト内に列挙されたすべての<code>actions</code>値が、
+                        オブジェクト内に列挙されたすべての<code>locations</code>値において、オブジェクト内に列挙されたすべての
+                        <code>datatypes</code>
+                        値に対して使用されることのリクエストを表します。次の例では、クライアントは
+                        <code>customer_information</code> API内の顧客に属する<code>contacts</code>と<code>photos</code>の両方に対する
+                        <code>read</code>および<code>write</code>
+                        アクセスを要求しています。
+
+                        このリクエストが許可された場合、クライアントは、
+                        写真への読み取りアクセスと連絡先への書き込みアクセスなど、
+                        APIによって定義される権利の任意の組み合わせを使用できると想定するでしょう。<a href="#section-2.2-3" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_detai"></span>
+                    <figure id="figure-5">
+                        <div class="lang-json sourcecode" id="section-2.2-4.1">
+                            <pre>[
+   {
+      "type": "customer_information",
+      "locations": [
+         "https://example.com/customers"
+      ],
+      "actions": [
+         "read",
+         "write"
+      ],
+      "datatypes": [
+         "contacts",
+         "photos"
+      ]
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-5" class="selfRef">図 5</a>:
+                            <a href="#name-example-of-authorization_detai" class="selfRef">共通データフィールドを持つ
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-2.2-5">クライアントがアクセスをより細かく制御したい場合は、
+                        複数のオブジェクトを送信できます。この例では、
+                        クライアントは、同じAPIエンドポイント内の<code>contacts</code>への<code>read</code>アクセスと、
+                        <code>photos</code>への<code>write</code>アクセスを要求しています。
+                        このリクエストが許可された場合、クライアントは連絡先に書き込むことはできません。<a href="#section-2.2-5" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_detail"></span>
+                    <figure id="figure-6">
+                        <div class="lang-json sourcecode" id="section-2.2-6.1">
+                            <pre>[
+   {
+      "type": "customer_information",
+      "locations": [
+         "https://example.com/customers"
+      ],
+      "actions": [
+         "read"
+      ],
+      "datatypes": [
+         "contacts"
+      ]
+   },
+   {
+      "type": "customer_information",
+      "locations": [
+         "https://example.com/customers"
+      ],
+      "actions": [
+         "write"
+      ],
+      "datatypes": [
+         "photos"
+      ]
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-6" class="selfRef">図 6</a>:
+                            <a href="#name-example-of-authorization_detail" class="selfRef">複数オブジェクト内の共通データフィールドを持つ
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-2.2-7">APIは、それぞれの認可オブジェクトの<code>type</code>に従って、
+                        独自の拡張を定義することが<span class="bcp14">MAY</span>です。
+                        API設計者は、この仕様で定義された共通データフィールドと、
+                        API自体に固有のフィールドを組み合わせて使用することが想定されます。
+                        次の非規範的な例は、2つの異なる架空のAPI <code>type</code>値の一部として、
+                        共通フィールドとAPI固有フィールドの両方を使用する方法を示しています。最初の
+                        アクセスリクエストには、ここで指定された<code>actions</code>、<code>locations</code>、および
+                        <code>datatypes</code>
+                        フィールドに加え、指定された座標で撮影された写真へのアクセスを示すAPI固有の
+                        <code>geolocation</code>
+                        フィールドが含まれています。2番目のアクセスリクエストには、ここで指定された
+                        <code>actions</code>および
+                        <code>identifier</code>フィールドに加え、API固有の
+                        <code>currency</code>フィールドが含まれています。<a href="#section-2.2-7" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_details"></span>
+                    <figure id="figure-7">
+                        <div class="lang-json sourcecode" id="section-2.2-8.1">
+                            <pre>[
+   {
+      "type":"photo-api",
+      "actions":[
+         "read",
+         "write"
+      ],
+      "locations":[
+         "https://server.example.net/",
+         "https://resource.local/other"
+      ],
+      "datatypes":[
+         "metadata",
+         "images"
+      ],
+      "geolocation":[
+         {
+            "lat":-32.364,
+            "lng":153.207
+         },
+         {
+            "lat":-35.364,
+            "lng":158.207
+         }
+      ]
+   },
+   {
+      "type":"financial-transaction",
+      "actions":[
+         "withdraw"
+      ],
+      "identifier":"account-14-32-32-3",
+      "currency":"USD"
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-7" class="selfRef">図 7</a>:
+                            <a href="#name-example-of-authorization_details" class="selfRef">共通データフィールドと拡張データフィールドを使用する
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-2.2-9">このリクエストが承認された場合、結果として得られるアクセストークンのアクセス権は、
+                        上記と同様に、2つのAPIそれぞれについて要求されたアクセス種類の和集合になります。<a href="#section-2.2-9" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="authz_request">
+        <section id="section-3">
+            <h2 id="name-authorization-request">
+                <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-authorization-request"
+                    class="section-name selfRef">認可リクエスト</a>
+            </h2>
+            <p id="section-3-1"><code>authorization_details</code>認可リクエストパラメーターは、
+                <code>scope</code>パラメーターが同じ目的で使用されるすべての場所で、
+                認可要件を指定するために使用できます。例には次が含まれます。<a href="#section-3-1" class="pilcrow">¶</a>
+            </p>
+            <ul class="normal">
+                <li class="normal" id="section-3-2.1"><span>[<a href="#RFC6749"
+                            class="cite xref">RFC6749</a>]</span>で指定される認可リクエスト<a href="#section-3-2.1"
+                        class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-3-2.2"><span>[<a href="#RFC8628"
+                            class="cite xref">RFC8628</a>]</span>で指定されるデバイス認可リクエスト<a href="#section-3-2.2"
+                        class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-3-2.3"><span>[<a href="#OID-CIBA"
+                            class="cite xref">OID-CIBA</a>]</span>で定義されるバックチャネル認証リクエスト<a href="#section-3-2.3"
+                        class="pilcrow">¶</a>
+                </li>
+            </ul>
+            <p id="section-3-3"><span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>で定義される認可リクエストの場合、実装者は、
+                フローのセキュリティ、プライバシー、および信頼性を向上させるために、
+                pushed authorization requests <span>[<a href="#RFC9126" class="cite xref">RFC9126</a>]</span>の使用を
+                検討することが<span class="bcp14">MAY</span>です。詳細については、セクション<a href="#security_considerations"
+                    class="auto internal xref">12</a>、<a href="#privacy_considerations"
+                    class="auto internal xref">13</a>、および<a href="#large_requests" class="auto internal xref">11.4</a>
+                を参照してください。<a href="#section-3-3" class="pilcrow">¶</a></p>
+            <p id="section-3-4">パラメーターのエンコーディングは、それぞれのコンテキストによって決定されます。
+                <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>に従った認可リクエストのコンテキストでは、
+                パラメーターは、<a href="#authz_details" class="auto internal xref">セクション2</a>の例を使用して、
+                <a href="#fig8" class="auto internal xref">図 8</a>に示されるように、シリアライズされたJSONの
+                <code>application/x-www-form-urlencoded</code>形式を使用してエンコードされます（改行は表示目的のみ）。<a href="#section-3-4"
+                    class="pilcrow">¶</a>
+            </p>
+            <span id="name-example-of-authorization-re"></span>
+            <div id="fig8">
+                <figure id="figure-8">
+                    <div class="lang-http-message sourcecode" id="section-3-5.1">
+                        <pre>
+GET /authorize?response_type=code
+   &amp;client_id=s6BhdRkqt3
+   &amp;state=af0ifjsldkj
+   &amp;redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb
+   &amp;code_challenge_method=S256
+   &amp;code_challenge=K2-ltc83acc4h0c9w6ESC_rEMTJ3bwc-uCHaoeK1t8U
+   &amp;authorization_details=%5B%7B%22type%22%3A%22account%5Finfo
+   rmation%22%2C%22actions%22%3A%5B%22list%5Faccounts%22%2C%22
+   read%5Fbalances%22%2C%22read%5Ftransactions%22%5D%2C%22loca
+   tions%22%3A%5B%22https%3A%2F%2Fexample%2Ecom%2Faccounts%22%
+   5D%7D%2C%7B%22type%22%3A%22payment%5Finitiation%22%2C%22act
+   ions%22%3A%5B%22initiate%22%2C%22status%22%2C%22cancel%22%5
+   D%2C%22locations%22%3A%5B%22https%3A%2F%2Fexample%2Ecom%2Fp
+   ayments%22%5D%2C%22instructedAmount%22%3A%7B%22currency%22%
+   3A%22EUR%22%2C%22amount%22%3A%22123%2E50%22%7D%2C%22credito
+   rName%22%3A%22Merchant%20A%22%2C%22creditorAccount%22%3A%7B
+   %22iban%22%3A%22DE02100100109307118603%22%7D%2C%22remittanc
+   eInformationUnstructured%22%3A%22Ref%20Number%20Merchant%22
+   %7D%5D HTTP/1.1
+Host: server.example.com
+</pre>
+                    </div>
+                    <figcaption><a href="#figure-8" class="selfRef">図 8</a>:
+                        <a href="#name-example-of-authorization-re"
+                            class="selfRef">"authorization_details"を伴う認可リクエストの例</a>
+                    </figcaption>
+                </figure>
+            </div>
+            <p id="section-3-6"><code>authorization_details</code>パラメーターで提供されたデータに基づき、ASは
+                ユーザーに対して、要求されたアクセス権限への同意を求めます。<a href="#section-3-6" class="pilcrow">¶</a></p>
+            <aside id="section-3-7">
+                <p id="section-3-7.1">注: ユーザーは、要求された認可詳細のサブセットのみを許可することもあります。<a href="#section-3-7.1"
+                        class="pilcrow">¶</a></p>
+            </aside>
+            <p id="section-3-8"><a href="#fig9" class="auto internal xref">図 9</a>では、クライアントは
+                アカウント情報へのアクセスと支払いの開始を取得したいと考えています。<a href="#section-3-8" class="pilcrow">¶</a></p>
+            <span id="name-url-decoded-authorization_d"></span>
+            <div id="fig9">
+                <figure id="figure-9">
+                    <div class="lang-json sourcecode" id="section-3-9.1">
+                        <pre>[
+   {
+      "type": "account_information",
+      "actions": [
+         "list_accounts",
+         "read_balances",
+         "read_transactions"
+      ],
+      "locations": [
+         "https://example.com/accounts"
+      ]
+   },
+   {
+      "type": "payment_initiation",
+      "actions": [
+         "initiate",
+         "status",
+         "cancel"
+      ],
+      "locations": [
+         "https://example.com/payments"
+      ],
+      "instructedAmount": {
+         "currency": "EUR",
+         "amount": "123.50"
+      },
+      "creditorName": "Merchant A",
+      "creditorAccount": {
+         "iban": "DE02100100109307118603"
+      },
+      "remittanceInformationUnstructured": "Ref Number Merchant"
+   }
+]
+</pre>
+                    </div>
+                    <figcaption><a href="#figure-9" class="selfRef">図 9</a>:
+                        <a href="#name-url-decoded-authorization_d" class="selfRef">URLデコードされた
+                            "authorization_details"</a>
+                    </figcaption>
+                </figure>
+            </div>
+            <div id="scope">
+                <section id="section-3.1">
+                    <h3 id="name-relationship-to-the-scope-p">
+                        <a href="#section-3.1" class="section-number selfRef">3.1. </a><a
+                            href="#name-relationship-to-the-scope-p" class="section-name selfRef">"scope"パラメーターとの
+                            関係</a>
+                    </h3>
+                    <p id="section-3.1-1"><code>authorization_details</code>と<code>scope</code>は、
+                        独立した認可要件を運ぶために、同じ認可リクエストで使用できます。<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+                    <p id="section-3.1-2"><code>authorization_details</code>と<code>scope</code>の併用は、
+                        既存のOAuthベースのアプリケーションが段階的に<code>authorization_details</code>のみの使用へ
+                        移行できるようにするため、この仕様で部分的にサポートされています。
+                        特定のAPIは、要件指定の形式を1つだけ使用することが<span class="bcp14">RECOMMENDED</span>です。<a href="#section-3.1-2"
+                            class="pilcrow">¶</a></p>
+                    <p id="section-3.1-3">ASは、与えられた認可リクエストについて、両方の要件セットを相互に組み合わせて処理
+                        <span class="bcp14">MUST</span>します。ASがこれらのパラメーターをどのように組み合わせるかの詳細は、
+                        保護対象のAPIに固有であり、この仕様の範囲外です。<a href="#section-3.1-3" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-3.1-4">ユーザー同意を取得するとき、ASは認可リクエストによって表される統合された要件セットを提示
+                        <span class="bcp14">MUST</span>します。<a href="#section-3.1-4" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-3.1-5">リソース所有者がクライアントに要求されたアクセスを許可した場合、ASは
+                        それぞれの<code>authorization_details</code>（および該当する場合はscope値）に関連付けられた
+                        トークンをクライアントに発行します。<a href="#section-3.1-5" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="relationship-to-resource-parameter">
+                <section id="section-3.2">
+                    <h3 id="name-relationship-to-the-resourc">
+                        <a href="#section-3.2" class="section-number selfRef">3.2. </a><a
+                            href="#name-relationship-to-the-resourc" class="section-name selfRef">"resource"パラメーターとの
+                            関係</a>
+                    </h3>
+                    <p id="section-3.2-1"><span>[<a href="#RFC8707" class="cite xref">RFC8707</a>]</span>で定義される
+                        <code>resource</code>認可リクエストパラメーターは、要求されたスコープを適用できるリソースを
+                        さらに決定するために使用できます。<code>resource</code>
+                        パラメーターは、ASが<code>authorization_details</code>認可リクエストパラメーターを処理する方法には
+                        影響しません。<a href="#section-3.2-1" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="authorization-response">
+        <section id="section-4">
+            <h2 id="name-authorization-response">
+                <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-authorization-response"
+                    class="section-name selfRef">認可レスポンス</a>
+            </h2>
+            <p id="section-4-1">この仕様は、認可レスポンスへの拡張を定義しません。<a href="#section-4-1" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="authz_details_error">
+        <section id="section-5">
+            <h2 id="name-authorization-error-respons">
+                <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-authorization-error-respons"
+                    class="section-name selfRef">認可エラー レスポンス</a>
+            </h2>
+            <p id="section-5-1">ASは、未知の認可詳細タイプまたはそれぞれのタイプ定義に適合しない認可詳細の処理を拒否
+                <span class="bcp14">MUST</span>します。ASは、<code>authorization_details</code>構造内のオブジェクトについて
+                次のいずれかが真である場合、処理を中止し、エラー
+                <code>invalid_authorization_details</code>でクライアントに応答
+                <span class="bcp14">MUST</span>します。<a href="#section-5-1" class="pilcrow">¶</a>
+            </p>
+            <ul class="normal">
+                <li class="normal" id="section-5-2.1">未知の認可詳細タイプ値を含む場合、<a href="#section-5-2.1" class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-5-2.2">既知の型のオブジェクトであるが未知のフィールドを含む場合、<a href="#section-5-2.2"
+                        class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-5-2.3">認可詳細タイプに対して誤った型のフィールドを含む場合、<a href="#section-5-2.3"
+                        class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-5-2.4">認可詳細タイプに対して無効な値を持つフィールドを含む場合、または<a href="#section-5-2.4"
+                        class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-5-2.5">認可詳細タイプに必要なフィールドが欠落している場合。<a href="#section-5-2.5"
+                        class="pilcrow">¶</a>
+                </li>
+            </ul>
+        </section>
+    </div>
+    <div id="token-request">
+        <section id="section-6">
+            <h2 id="name-token-request">
+                <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-token-request"
+                    class="section-name selfRef">トークンリクエスト</a>
+            </h2>
+            <p id="section-6-1"><code>authorization_details</code>トークンリクエストパラメーターは、
+                ASがアクセストークンに割り当てることをクライアントが望む認可詳細を指定するために使用できます。
+                ASは、基礎となるグラント（<code>authorization_code</code>、
+                <code>refresh_token</code>などのグラントタイプの場合）またはクライアントのポリシー（
+                <code>client_credentials</code>グラントタイプの場合）が、要求された認可詳細を持つアクセストークンの発行を
+                許可するかどうかを確認します。そうでない場合、ASはエラーコード
+                <code>invalid_authorization_details</code>（<code>invalid_scope</code>と同様）でリクエストを拒否します。<a
+                    href="#section-6-1" class="pilcrow">¶</a>
+            </p>
+            <div id="comparing-authorization-details">
+                <section id="section-6.1">
+                    <h3 id="name-comparing-authorization-det">
+                        <a href="#section-6.1" class="section-number selfRef">6.1. </a><a
+                            href="#name-comparing-authorization-det" class="section-name selfRef">認可詳細の
+                            比較</a>
+                    </h3>
+                    <p id="section-6.1-1">OAuthプロトコルの多くのアクションでは、ASとRSが、
+                        リクエストが以前の既存のリクエストより「多く」を求めているか「少なく」を求めているかに基づいて
+                        セキュリティ上の判断を行うことができます。たとえば、トークンの更新時に、クライアントは
+                        リソース所有者によって以前に認可されたものより「少ない権限」を持つ新しいアクセストークンを
+                        要求できます。要求されたアクセストークンは削減された権限を伝達しますが、
+                        リソース所有者の以前の認可はこのようなリクエストによって変更されません。
+                        <code>authorization_details</code>内のフィールドの意味は、特定のAPIまたはAPIセットに
+                        実装固有であるため、任意の2つの認可詳細リクエストを比較するための標準化された仕組みはありません。
+                        ASは、ほとんどの場合、単純なオブジェクト比較に依存すべきではありません。
+                        リクエスト内の一部フィールドの交差が、APIがどのように設計および展開されているかに応じて、
+                        付与されるアクセス権に副作用をもたらす可能性があるためです。これは一部のAPIでscope値を使用する場合と
+                        同様の効果です。<a href="#section-6.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-6.1-2">新しいリクエストを既存のリクエストと比較する場合、ASは、
+                        リソース所有者がリクエストを認可する必要があるかどうかを判断するために、
+                        最初にリクエストを許可したときと同じ処理技法を使用できます。この比較の詳細は、
+                        認可リクエストの<code>type</code>の定義に依存し、この仕様の範囲外ですが、
+                        一般的なパターンを適用できます。<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+                    <p id="section-6.1-3">これは、継続している例を使用して説明されます。
+                        <a href="#authz_request" class="auto internal xref">セクション3</a>の認可リクエスト例は、ユーザーによって承認された場合、
+                        次の権限に関連付けられた認可コードの発行をもたらしました。<a href="#section-6.1-3" class="pilcrow">¶</a>
+                    </p>
+                    <ul class="normal">
+                        <li class="normal" id="section-6.1-4.1">アカウントの一覧表示、<a href="#section-6.1-4.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-6.1-4.2">1つ以上のアカウントの残高へのアクセス、<a href="#section-6.1-4.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-6.1-4.3">1つ以上のアカウントの取引へのアクセス、および<a href="#section-6.1-4.3"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-6.1-4.4">支払いの開始、ステータス確認、およびキャンセル。<a href="#section-6.1-4.4"
+                                class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <p id="section-6.1-5">クライアントは次に、アカウント一覧へのアクセス権限だけを割り当てたアクセストークンを発行するよう、
+                        ASに次のように要求できます。<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+                    <span id="name-example-of-authorization_details-"></span>
+                    <figure id="figure-10">
+                        <div class="lang-json sourcecode" id="section-6.1-6.1">
+                            <pre>[
+   {
+      "type": "account_information",
+      "actions": [
+         "list_accounts"
+      ],
+      "locations": [
+         "https://example.com/accounts"
+      ]
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-10" class="selfRef">図 10</a>:
+                            <a href="#name-example-of-authorization_details-" class="selfRef">権限を減らした
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-6.1-7">この例のAPIは、<code>account_information</code>型で使用される各フィールドが
+                        追加的な権利を含み、<code>actions</code>および<code>locations</code>配列内の各値が
+                        異なるアクセス要素を指定するように設計されています。この場合に比較を行うために、
+                        ASは次の手順を実行します。<a href="#section-6.1-7" class="pilcrow">¶</a>
+                    </p>
+                    <ul class="normal">
+                        <li class="normal" id="section-6.1-8.1">前の手順で発行された認可コードに、
+                            <code>account_information</code>型の認可詳細オブジェクトが含まれることを検証する、<a href="#section-6.1-8.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-6.1-8.2">承認済みアクションの一覧に
+                            <code>list_accounts</code>が含まれるかを検証する、および<a href="#section-6.1-8.2" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-6.1-8.3"><code>locations</code>値が、
+                            以前に承認された場所のみを含むかを検証する。<a href="#section-6.1-8.3" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <p id="section-6.1-9">すべてのチェックが成功した場合、ASは削減されたアクセスセットを持つ要求されたアクセストークンを
+                        発行します。<a href="#section-6.1-9" class="pilcrow">¶</a></p>
+                    <p id="section-6.1-10">この比較は、この特定のAPI型定義に関連していることに注意してください。
+                        異なるAPI型定義では、異なる処理規則を持つ可能性があります。たとえば、
+                        <code>actions</code>値が別の<code>actions</code>値に関連付けられた権利を包含する可能性があります。
+                        たとえば、クライアントが最初に<code>write</code>アクセスを持つトークンを要求した場合、
+                        これはこのAPIへの読み取りアクセスと書き込みアクセスの両方を意味します。<a href="#section-6.1-10" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_details-r"></span>
+                    <figure id="figure-11">
+                        <div class="lang-json sourcecode" id="section-6.1-11.1">
+                            <pre>[
+    {
+        "type": "example_api",
+        "actions": [
+            "write"
+        ]
+    }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-11" class="selfRef">図 11</a>:
+                            <a href="#name-example-of-authorization_details-r" class="selfRef">APIへの"write"アクセスを要求する
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-6.1-12">その後、同じクライアントが<code>read</code>
+                        アクセスの更新リクエストを行います。<a href="#section-6.1-12" class="pilcrow">¶</a></p>
+                    <span id="name-example-of-authorization_details-re"></span>
+                    <figure id="figure-12">
+                        <div class="lang-json sourcecode" id="section-6.1-13.1">
+                            <pre>[
+    {
+        "type": "example_api",
+        "actions": [
+            "read"
+        ]
+    }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-12" class="selfRef">図 12</a>:
+                            <a href="#name-example-of-authorization_details-re" class="selfRef">APIへの"read"アクセスを要求する
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-6.1-14">ASは<code>type</code>値と<code>actions</code>
+                        値を比較して、<code>read</code>アクセスが以前にクライアントに付与された
+                        <code>write</code>アクセスによってすでにカバーされていることを判断します。<a href="#section-6.1-14" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-6.1-15">この同じAPIは、<code>privileges</code>の可能な値として
+                        <code>admin</code>を持つように設計できます。この例では、結果のトークンがリソース上の任意の機能を実行できることを
+                        示すために使用されます。
+
+                        その
+                        クライアントがこのようなAPIへの<code>admin</code>特権を付与された場合、
+                        <code>authorization_details</code>は次のようになります。<a href="#section-6.1-15" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_details-w"></span>
+                    <figure id="figure-13">
+                        <div class="lang-json sourcecode" id="section-6.1-16.1">
+                            <pre>[
+    {
+        "type": "example_api",
+        "privileges": [
+            "admin"
+        ]
+    }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-13" class="selfRef">図 13</a>:
+                            <a href="#name-example-of-authorization_details-w" class="selfRef">APIへの"admin"アクセスを持つ
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-6.1-17">ASは<code>type</code>値を比較し、
+                        <code>privileges</code>値が以前にクライアントに付与された
+                        <code>read</code>または<code>write</code>アクセスの任意の側面を包含することを見つけます。
+                        ほかのAPI定義では、値が互いに包含しないように<code>privileges</code>を使用できることに注意してください。<a href="#section-6.1-17"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-6.1-18">次の例は、クライアントが共通データ要素
+                        <code>locations</code>（<a href="#common_data_fields" class="auto internal xref">セクション
+                            2.2</a>を参照）を使用して、特定のRSに制限されたアクセストークンの発行を要求する方法を示しています。
+                        継続例では、クライアントは、<code>https://example.com/payments</code>に存在するRSに適用可能な
+                        <code>payment_initiation</code>型の承認済みグラントのすべての権限を
+                        次のように要求できます。<a href="#section-6.1-18" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_details-re-2"></span>
+                    <figure id="figure-14">
+                        <div class="lang-json sourcecode" id="section-6.1-19.1">
+                            <pre>[
+   {
+      "type": "payment_initiation",
+      "locations": [
+         "https://example.com/payments"
+      ]
+   }
+]
+
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-14" class="selfRef">図 14</a>:
+                            <a href="#name-example-of-authorization_details-re-2"
+                                class="selfRef">オーディエンス制限付きアクセストークンを要求する
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="token-response">
+        <section id="section-7">
+            <h2 id="name-token-response">
+                <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-token-response"
+                    class="section-name selfRef">トークンレスポンス</a>
+            </h2>
+            <p id="section-7-1"><span>[<a href="#RFC6749"
+                        class="cite xref">RFC6749</a>]</span>で定義されるトークンレスポンスパラメーターに加えて、ASは
+                リソース所有者によって付与され、それぞれのアクセストークンに割り当てられた
+                <code>authorization_details</code>も返す
+                <span class="bcp14">MUST</span>です。<a href="#section-7-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-7-2">トークンレスポンスで発行されたアクセストークンに割り当てられる認可詳細は、
+                対応するトークンリクエストの<code>authorization_details</code>パラメーターによって決定されます。
+                クライアントが<code>authorization_details</code>トークンリクエストパラメーターを指定しない場合、ASは
+                結果となる<code>authorization_details</code>を自身の裁量で決定します。<a href="#section-7-2" class="pilcrow">¶</a></p>
+            <p id="section-7-3">ASは、クライアントへの
+                <code>authorization_details</code>内の値を省略することが
+                <span class="bcp14">MAY</span>です。<a href="#section-7-3" class="pilcrow">¶</a>
+            </p>
+            <p id="section-7-4">継続例では、次のようになります。<a href="#section-7-4" class="pilcrow">¶</a></p>
+            <span id="name-example-token-response"></span>
+            <figure id="figure-15">
+                <div class="lang-http-message sourcecode" id="section-7-5.1">
+                    <pre>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+   "access_token": "2YotnFZFEjr1zCsicMWpAA",
+   "token_type": "example",
+   "expires_in": 3600,
+   "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
+   "authorization_details": [
+      {
+         "type": "payment_initiation",
+         "actions": [
+            "initiate",
+            "status",
+            "cancel"
+         ],
+         "locations": [
+            "https://example.com/payments"
+         ],
+         "instructedAmount": {
+            "currency": "EUR",
+            "amount": "123.50"
+         },
+         "creditorName": "Merchant A",
+         "creditorAccount": {
+            "iban": "DE02100100109307118603"
+         },
+         "remittanceInformationUnstructured": "Ref Number Merchant"
+      }
+   ]
+}
+</pre>
+                </div>
+                <figcaption><a href="#figure-15" class="selfRef">図 15</a>:
+                    <a href="#name-example-token-response" class="selfRef">トークンレスポンスの例</a>
+                </figcaption>
+            </figure>
+            <div id="enriched-authorization-details-in-token-response">
+                <section id="section-7.1">
+                    <h3 id="name-enriched-authorization-deta">
+                        <a href="#section-7.1" class="section-number selfRef">7.1. </a><a
+                            href="#name-enriched-authorization-deta" class="section-name selfRef">トークンレスポンスにおける拡充された認可
+                            詳細</a>
+                    </h3>
+                    <p id="section-7.1-1">アクセストークンに付加された認可詳細は、クライアントが要求したものと異なることが
+                        <span class="bcp14">MAY</span>です。ユーザーがクライアントの要求より少ない範囲を認可することに加えて、
+                        ASが認可詳細オブジェクト内のデータを拡充するユースケースがあります。
+                        拡充が許可されるかどうか、およびそれがどのように機能するかの詳細は、
+                        必然的にそれぞれの認可詳細タイプの定義の一部です。<a href="#section-7.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-7.1-2">1つの例として、クライアントがアカウント情報へのアクセスを求めるが、
+                        アクセスできる具体的なアカウントについての決定をユーザーに委ねる場合があります。
+                        認可プロセスの過程で、ユーザーはクライアントにアクセスを許可したいアカウントのサブセットを選択します。
+                        選択されたアカウントを伝達する設計上の選択肢の1つとして、ASはこの情報を
+                        それぞれの認可詳細オブジェクトに追加できます。<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+                    <p id="section-7.1-3">その例では、要求された<code>authorization_details</code>パラメーターは
+                        次のようになります。この例では、空配列は、ASによる拡充中にデータが追加される場所の
+                        プレースホルダーとして機能します。この例は説明のためだけのものであり、
+                        認可詳細タイプの具体的な設計方法としてこの方法を推奨することを意図していません。<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+                    <span id="name-example-of-requested-author"></span>
+                    <figure id="figure-16">
+                        <div class="lang-json sourcecode" id="section-7.1-4.1">
+                            <pre>"authorization_details": [
+   {
+      "type": "account_information",
+      "access": {
+         "accounts": [],
+         "balances": [],
+         "transactions": []
+      },
+      "recurringIndicator":true
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-16" class="selfRef">図 16</a>:
+                            <a href="#name-example-of-requested-author" class="selfRef">要求された
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-7.1-5">その後、ASは認可詳細オブジェクトを拡張し、
+                        それぞれのアカウント識別子を追加します。<a href="#section-7.1-5" class="pilcrow">¶</a></p>
+                    <span id="name-example-of-enriched-authori"></span>
+                    <figure id="figure-17">
+                        <div class="lang-http-message sourcecode" id="section-7.1-6.1">
+                            <pre>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+   "access_token":"2YotnFZFEjr1zCsicMWpAA",
+   "token_type":"example",
+   "expires_in":3600,
+   "refresh_token":"tGzv3JokF0XG5Qx2TlKWIA",
+   "authorization_details":[
+      {
+         "type":"account_information",
+         "access":{
+            "accounts":[
+               {
+                  "iban":"DE2310010010123456789"
+               },
+               {
+                  "maskedPan":"123456xxxxxx1234"
+               }
+            ],
+            "balances":[
+               {
+                  "iban":"DE2310010010123456789"
+               }
+            ],
+            "transactions":[
+               {
+                  "iban":"DE2310010010123456789"
+               },
+               {
+                  "maskedPan":"123456xxxxxx1234"
+               }
+            ]
+         },
+         "recurringIndicator":true
+      }
+   ]
+}
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-17" class="selfRef">図 17</a>:
+                            <a href="#name-example-of-enriched-authori" class="selfRef">拡充された
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-7.1-7">別の例として、クライアントが医療記録へのアクセスを求めているが、
+                        リクエスト時点では記録番号を知らない場合があります。この例では、クライアントは希望するアクセスの種類を指定しますが、
+                        そのアクセスの場所または識別子は指定しません。<a href="#section-7.1-7" class="pilcrow">¶</a></p>
+                    <span id="name-example-of-requested-authori"></span>
+                    <figure id="figure-18">
+                        <div class="lang-json sourcecode" id="section-7.1-8.1">
+                            <pre>{
+"authorization_details": [
+   {
+      "type": "medical_record",
+      "sens": [ "HIV", "ETH", "MART" ],
+      "actions": [ "read" ],
+      "datatypes": [ "Patient", "Observation", "Appointment" ]
+   }
+]}
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-18" class="selfRef">図 18</a>:
+                            <a href="#name-example-of-requested-authori" class="selfRef">要求された
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-7.1-9">ユーザーがASと対話するとき、ユーザーはクライアントに提供する責任のある医療記録を選択します。
+                        この情報はアクセストークンとともに返されます。<a href="#section-7.1-9" class="pilcrow">¶</a></p>
+                    <span id="name-example-of-enriched-authoriz"></span>
+                    <figure id="figure-19">
+                        <div class="lang-json sourcecode" id="section-7.1-10.1">
+                            <pre>{
+   "access_token":"2YotnFZFEjr1zCsicMWpAA",
+   "token_type":"example",
+   "expires_in":3600,
+   "refresh_token":"tGzv3JokF0XG5Qx2TlKWIA",
+   "authorization_details":[
+    {
+      "type": "medical_record",
+      "sens": [ "HIV", "ETH", "MART" ],
+      "actions": [ "read" ],
+      "datatypes": [ "Patient", "Observation", "Appointment" ],
+      "identifier": "patient-541235",
+      "locations": [ "https://records.example.com/" ]
+     }
+  ]
+}
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-19" class="selfRef">図 19</a>:
+                            <a href="#name-example-of-enriched-authoriz" class="selfRef">拡充された
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <aside id="section-7.1-11">
+                        <p id="section-7.1-11.1">注: クライアントは、特定の認可詳細オブジェクトが拡充され得る可能性を
+                            事前に認識している必要があります。この性質は、それぞれの認可詳細タイプの定義の一部であると想定されます。<a href="#section-7.1-11.1"
+                                class="pilcrow">¶</a></p>
+                    </aside>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="token-error-response">
+        <section id="section-8">
+            <h2 id="name-token-error-response">
+                <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-token-error-response"
+                    class="section-name selfRef">トークンエラーレスポンス</a>
+            </h2>
+            <p id="section-8-1">トークンエラーレスポンスは、
+                <a href="#authz_details_error" class="auto internal xref">セクション5</a>で与えられた規則に適合
+                <span class="bcp14">MUST</span>します。<a href="#section-8-1" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="resource_servers">
+        <section id="section-9">
+            <h2 id="name-resource-servers">
+                <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-resource-servers"
+                    class="section-name selfRef">リソースサーバー</a>
+            </h2>
+            <p id="section-9-1">RSが認可プロセスで承認された認可詳細を強制できるようにするため、
+                ASはこのデータをRSで利用可能にする
+                <span class="bcp14">MUST</span>です。ASは、JSON Web Token（JWT）形式のアクセストークンまたは
+                トークンイントロスペクションレスポンスに<code>authorization_details</code>フィールドを追加することが
+                <span class="bcp14">MAY</span>です。<a href="#section-9-1" class="pilcrow">¶</a>
+            </p>
+            <div id="jwt_based_access_tokens">
+                <section id="section-9.1">
+                    <h3 id="name-jwt-based-access-tokens">
+                        <a href="#section-9.1" class="section-number selfRef">9.1. </a><a
+                            href="#name-jwt-based-access-tokens" class="section-name selfRef">JWTベースのアクセストークン</a>
+                    </h3>
+                    <p id="section-9.1-1">アクセストークンがJWT <span>[<a href="#RFC7519"
+                                class="cite xref">RFC7519</a>]</span>である場合、ASは、
+                        特定のオーディエンス向けにフィルタリングされた認可詳細オブジェクトをトップレベルのクレームとして追加することが
+                        <span class="bcp14">RECOMMENDED</span>です。<a href="#section-9.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-9.1-2">ASは通常、RSがリクエスト処理に必要とする追加のクレーム、
+                        たとえばユーザーID、ロール、取引固有のデータもJWTに追加します。
+                        特定のRSが必要とするクレームは、ASとのRS固有ポリシーによって定義されます。<a href="#section-9.1-2" class="pilcrow">¶</a></p>
+                    <p id="section-9.1-3">次は、上記の支払い開始例に関するJWT例の内容を示します。<a href="#section-9.1-3" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_details-i"></span>
+                    <figure id="figure-20">
+                        <div class="lang-json sourcecode" id="section-9.1-4.1">
+                            <pre>{
+   "iss": "https://as.example.com",
+   "sub": "24400320",
+   "aud": "a7AfcPcsl2",
+   "exp": 1311281970,
+   "acr": "psd2_sca",
+   "txn": "8b4729cc-32e4-4370-8cf0-5796154d1296",
+   "authorization_details": [
+      {
+         "type": "https://scheme.example.com/payment_initiation",
+         "actions": [
+            "initiate",
+            "status",
+            "cancel"
+         ],
+         "locations": [
+            "https://example.com/payments"
+         ],
+         "instructedAmount": {
+            "currency": "EUR",
+            "amount": "123.50"
+         },
+         "creditorName": "Merchant A",
+         "creditorAccount": {
+            "iban": "DE02100100109307118603"
+         },
+         "remittanceInformationUnstructured": "Ref Number Merchant"
+      }
+   ],
+   "debtorAccount": {
+      "iban": "DE40100100103307118608",
+      "user_role": "owner"
+   }
+}
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-20" class="selfRef">図 20</a>:
+                            <a href="#name-example-of-authorization_details-i" class="selfRef">JWTベースのアクセストークン内の
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="section-9.1-5">この場合、ASはJWTベースのアクセストークンに次の例のクレームを追加しました。<a href="#section-9.1-5"
+                            class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-9.1-6">
+                        <dt id="section-9.1-6.1">
+                            <code>sub</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-6.2">クライアントが支払い開始を求めている対象ユーザーを示します。<a
+                                href="#section-9.1-6.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-6.3">
+                            <code>txn</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-6.4">プロバイダー<code>example.com</code>のサービス全体で
+                            取引を追跡するために使用される取引ID<a href="#section-9.1-6.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-6.5">
+                            <code>debtorAccount</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-6.6">債務者口座を含むAPI固有フィールド。
+                            この例では、このアカウントは<code>authorization_details</code>で渡されたものではなく、
+                            認可プロセス中にユーザーによって選択されました。<code>user_role</code>フィールドは、
+                            この特定のアカウントに関してユーザーが持つロールを伝達します。この場合、ユーザーは所有者です。
+                            このデータは支払いAPI（RS）でのアクセス制御に使用されます。<a href="#section-9.1-6.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="token_introspection">
+                <section id="section-9.2">
+                    <h3 id="name-token-introspection">
+                        <a href="#section-9.2" class="section-number selfRef">9.2. </a><a
+                            href="#name-token-introspection" class="section-name selfRef">トークンイントロスペクション</a>
+                    </h3>
+                    <p id="section-9.2-1">トークンイントロスペクション <span>[<a href="#RFC7662"
+                                class="cite xref">RFC7662</a>]</span>は、RSがASに問い合わせて
+                        アクセストークンに関する情報を判断する手段を提供します。ASがレスポンスにトークンの認可詳細情報を含める場合、
+                        その情報はイントロスペクションレスポンスJSONオブジェクトのトップレベルメンバーとして
+                        <code>authorization_details</code>で伝達される
+                        <span class="bcp14">MUST</span>です。<code>authorization_details</code>メンバーは、
+                        <a href="#authz_details" class="auto internal xref">セクション2</a>で定義された同じ構造を含む
+                        <span class="bcp14">MUST</span>であり、イントロスペクションリクエストを行うRS向けに
+                        フィルタリングおよび拡張される可能性があります。<a href="#section-9.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-9.2-2">支払い開始例のイントロスペクションレスポンス例を次に示します。<a href="#section-9.2-2" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-authorization_details-in"></span>
+                    <figure id="figure-21">
+                        <div class="lang-json sourcecode" id="section-9.2-3.1">
+                            <pre>{
+   "active": true,
+   "sub": "24400320",
+   "aud": "s6BhdRkqt3",
+   "exp": 1311281970,
+   "acr": "psd2_sca",
+   "txn": "8b4729cc-32e4-4370-8cf0-5796154d1296",
+   "authorization_details": [
+      {
+         "type": "https://scheme.example.com/payment_initiation",
+         "actions": [
+            "initiate",
+            "status",
+            "cancel"
+         ],
+         "locations": [
+            "https://example.com/payments"
+         ],
+         "instructedAmount": {
+            "currency": "EUR",
+            "amount": "123.50"
+         },
+         "creditorName": "Merchant123",
+         "creditorAccount": {
+            "iban": "DE02100100109307118603"
+         },
+         "remittanceInformationUnstructured": "Ref Number Merchant"
+      }
+   ],
+   "debtorAccount": {
+      "iban": "DE40100100103307118608",
+      "user_role": "owner"
+   }
+}
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-21" class="selfRef">図 21</a>:
+                            <a href="#name-example-of-authorization_details-in" class="selfRef">イントロスペクションレスポンス内の
+                                "authorization_details"の例</a>
+                        </figcaption>
+                    </figure>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="metadata">
+        <section id="section-10">
+            <h2 id="name-metadata">
+                <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-metadata"
+                    class="section-name selfRef">メタデータ</a>
+            </h2>
+            <p id="section-10-1">この機能のサポートを広告するために、サポートされている認可詳細タイプの一覧は、
+                メタデータパラメーター<code>authorization_details_types_supported</code>を使用して
+                ASメタデータレスポンス <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>に含められます。これはJSON配列です。<a
+                    href="#section-10-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-10-2">これは次の例で示されます。<a href="#section-10-2" class="pilcrow">¶</a></p>
+            <span id="name-example-of-server-metadata-"></span>
+            <figure id="figure-22">
+                <div class="lang-json sourcecode" id="section-10-3.1">
+                    <pre>{
+   ...
+   "authorization_details_types_supported":[
+      "payment_initiation",
+      "account_information"
+   ]
+}
+</pre>
+                </div>
+                <figcaption><a href="#figure-22" class="selfRef">図 22</a>:
+                    <a href="#name-example-of-server-metadata-" class="selfRef">サポートされている認可詳細に関するサーバーメタデータの例</a>
+                </figcaption>
+            </figure>
+            <p id="section-10-4">クライアントは、クライアント登録メタデータパラメーター
+                <code>authorization_details_types</code>を使用して、認可を要求するときに使用する認可詳細タイプを
+                示すことが<span class="bcp14">MAY</span>です。これはJSON配列です。<a href="#section-10-4" class="pilcrow">¶</a>
+            </p>
+            <p id="section-10-5">これは次の例で示されます。<a href="#section-10-5" class="pilcrow">¶</a></p>
+            <span id="name-example-of-server-metadata-a"></span>
+            <figure id="figure-23">
+                <div class="lang-json sourcecode" id="section-10-6.1">
+                    <pre>{
+   ...
+   "authorization_details_types":[
+      "payment_initiation"
+   ]
+}
+</pre>
+                </div>
+                <figcaption><a href="#figure-23" class="selfRef">図 23</a>:
+                    <a href="#name-example-of-server-metadata-a" class="selfRef">認可詳細に関するサーバーメタデータの例</a>
+                </figcaption>
+            </figure>
+            <p id="section-10-7">ASへの認可詳細タイプの登録は、この仕様の範囲外です。<a href="#section-10-7" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="implementation-considerations">
+        <section id="section-11">
+            <h2 id="name-implementation-consideratio">
+                <a href="#section-11" class="section-number selfRef">11. </a><a href="#name-implementation-consideratio"
+                    class="section-name selfRef">実装上の考慮事項</a>
+            </h2>
+            <div id="using-authorization-details-in-a-certain-deployment">
+                <section id="section-11.1">
+                    <h3 id="name-using-authorization-details">
+                        <a href="#section-11.1" class="section-number selfRef">11.1. </a><a
+                            href="#name-using-authorization-details" class="section-name selfRef">特定のデプロイメントにおける認可
+                            詳細の使用</a>
+                    </h3>
+                    <p id="section-11.1-1">特定のデプロイメントで認可詳細を使用するには、
+                        次の手順が必要です。<a href="#section-11.1-1" class="pilcrow">¶</a></p>
+                    <ul class="normal">
+                        <li class="normal" id="section-11.1-2.1">認可詳細タイプを定義する。<a href="#section-11.1-2.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.1-2.2">OAuthサーバーメタデータで認可詳細タイプを公開する。<a href="#section-11.1-2.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.1-2.3">ユーザー同意プロンプトで認可詳細をどのように表示するかを決定する。<a
+                                href="#section-11.1-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.1-2.4">必要に応じて、ユーザー同意プロセスで認可詳細を拡充する
+                            （例: 選択されたアカウントを追加する、または有効期限を設定する）。<a href="#section-11.1-2.4" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.1-2.5">必要に応じて、認可詳細がアクセストークン内容または
+                            イントロスペクションレスポンスにどのように反映されるかを決定する。<a href="#section-11.1-2.5" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.1-2.6">RSが認可詳細または認可詳細から派生したトークンデータを
+                            どのように処理するかを決定する。<a href="#section-11.1-2.6" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.1-2.7">必要に応じて、クライアントに特定の認可詳細タイプを使用する権利を付与する。<a
+                                href="#section-11.1-2.7" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <div id="minimal-implementation-support">
+                <section id="section-11.2">
+                    <h3 id="name-minimal-implementation-supp">
+                        <a href="#section-11.2" class="section-number selfRef">11.2. </a><a
+                            href="#name-minimal-implementation-supp" class="section-name selfRef">最小実装
+                            サポート</a>
+                    </h3>
+                    <p id="section-11.2-1">この仕様をサポートする一般的なAS実装は、
+                        次の基本機能を提供すべきです。<a href="#section-11.2-1" class="pilcrow">¶</a></p>
+                    <ul class="normal">
+                        <li class="normal" id="section-11.2-2.1">OAuthサーバーメタデータでサポートされている認可詳細タイプの広告をサポートする<a
+                                href="#section-11.2-2.1" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.2-2.2">この仕様に適合する認可リクエストで
+                            <code>authorization_details</code>パラメーターを受け入れることをサポートする<a href="#section-11.2-2.2"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.2-2.3">同意された認可詳細をグラントの一部として保存することをサポートする<a
+                                href="#section-11.2-2.3" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.2-2.4">認可詳細をアクセストークンおよびトークンイントロスペクションレスポンスに追加し、
+                            RSで利用できるようにするための既定の動作を実装する（scope値と同様）。これは任意のグラントタイプ、
+                            特に<code>authorization_code</code>および<code>refresh_token</code>で機能すべきです。<a
+                                href="#section-11.2-2.4" class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <p id="section-11.2-3">認可詳細の処理および提示は、異なる認可詳細タイプ間で大きく異なります。
+                        したがって、実装はそれぞれの動作のカスタマイズをサポートすべきです。特に、実装は
+                        デプロイメントが次を行えるようにすべきです。<a href="#section-11.2-3" class="pilcrow">¶</a></p>
+                    <ul class="normal">
+                        <li class="normal" id="section-11.2-4.1">認可詳細の提示を決定する。<a href="#section-11.2-4.1"
+                                class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.2-4.2">ユーザー同意プロセスで要求された認可詳細を変更する
+                            （例: フィールドの追加）。および<a href="#section-11.2-4.2" class="pilcrow">¶</a>
+                        </li>
+                        <li class="normal" id="section-11.2-4.3">要求された認可詳細と既存の認可詳細をマージする。<a href="#section-11.2-4.3"
+                                class="pilcrow">¶</a>
+                        </li>
+                    </ul>
+                    <p id="section-11.2-5">このようなカスタマイズをサポートする1つのアプローチは、
+                        拡張モジュールの登録を可能にする仕組みを持つことです。各モジュールは、
+                        それぞれのユーザー同意のレンダリングと、構造化アクセストークンまたはトークンイントロスペクションレスポンスを介して
+                        RSに必要なデータを提供するために必要な変換を担当します。<a href="#section-11.2-5" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="use-of-machine-readable-type-schemas">
+                <section id="section-11.3">
+                    <h3 id="name-use-of-machine-readable-typ">
+                        <a href="#section-11.3" class="section-number selfRef">11.3. </a><a
+                            href="#name-use-of-machine-readable-typ" class="section-name selfRef">機械可読なタイプスキーマの
+                            使用</a>
+                    </h3>
+                    <p id="section-11.3-1">実装は、認可詳細タイプを定義するために機械可読なスキーマ言語を
+                        デプロイメントが使用できるようにして、そのようなスキーマに対する認可詳細オブジェクトの作成および検証を
+                        容易にする可能性があります。たとえば、認可詳細
+                        <code>type</code>がJSON Schema <span>[<a href="#JSON.Schema"
+                                class="cite xref">JSON.Schema</a>]</span>を使用して定義された場合、JSON Schema識別子を
+                        それぞれの認可詳細オブジェクト内の<code>type</code>値として使用できます。<a href="#section-11.3-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-11.3-2">ただし、<code>type</code>値はASによって、また必要な範囲で
+                        クライアントおよびRSによって理解される識別子であることに注意してください。
+                        この仕様は、<code>type</code>値が機械可読なスキーマ形式を指すこと、またはシステム内のいずれかの当事者
+                        （クライアント、AS、RSなど）が<code>type</code>フィールドの内容を特定の方法で参照解除または処理することを
+                        前提としていません。<a href="#section-11.3-2" class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="large_requests">
+                <section id="section-11.4">
+                    <h3 id="name-large-requests">
+                        <a href="#section-11.4" class="section-number selfRef">11.4. </a><a href="#name-large-requests"
+                            class="section-name selfRef">大きなリクエスト</a>
+                    </h3>
+                    <p id="section-11.4-1">リクエストパラメーターまたはリクエストオブジェクト内に
+                        <code>authorization_details</code>を含む認可リクエストURIは非常に長くなる可能性があります。
+                        したがって、実装者は、<code>authorization_details</code>を信頼性が高く安全な方法で渡すために、
+                        <span>[<a href="#RFC9101"
+                                class="cite xref">RFC9101</a>]</span>で定義される<code>request_uri</code>パラメーターを、
+                        <span>[<a href="#RFC9126"
+                                class="cite xref">RFC9126</a>]</span>で定義されるプッシュ型リクエストオブジェクト機構と組み合わせて使用することを
+                        検討すべきです。以下は、HTTPSで保護された接続を介して認可リクエストデータをASに直接送信する
+                        そのようなプッシュ型認可リクエストの例です。<a href="#section-11.4-1" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-large-request-in"></span>
+                    <figure id="figure-24">
+                        <div class="lang-http-message sourcecode" id="section-11.4-2.1">
+                            <pre>
+  POST /as/par HTTP/1.1
+  Host: as.example.com
+  Content-Type: application/x-www-form-urlencoded
+  Authorization: Basic czZCaGRSa3F0Mzo3RmpmcDBaQnIxS3REUmJuZlZkbUl3
+
+  response_type=code&amp;
+  client_id=s6BhdRkqt3
+  &amp;state=af0ifjsldkj
+  &amp;redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb
+  &amp;code_challenge_method=S256
+  &amp;code_challenge=K2-ltc83acc4h0c9w6ESC_rEMTJ3bwc-uCHaoeK1t8U
+  &amp;authorization_details=%5B%7B%22type%22%3A%22account_information%22
+  %2C%22actions%22%3A%5B%22list_accounts%22%2C%22read_balances%22%2C%
+  22read_transactions%22%5D%2C%22locations%22%3A%5B%22https%3A%2F%2Fe
+  xample.com%2Faccounts%22%5D%7D%2C%7B%22type%22%3A%22payment_initiat
+  ion%22%2C%22actions%22%3A%5B%22initiate%22%2C%22status%22%2C%22canc
+  el%22%5D%2C%22locations%22%3A%5B%22https%3A%2F%2Fexample.com%2Fpaym
+  ents%22%5D%2C%22instructedAmount%22%3A%7B%22currency%22%3A%22EUR%22
+  %2C%22amount%22%3A%22123.50%22%7D%2C%22creditorName%22%3A%22Merchan
+  t123%22%2C%22creditorAccount%22%3A%7B%22iban%22%3A%22DE021001001093
+  07118603%22%7D%2C%22remittanceInformationUnstructured%22%3A%22Ref%2
+  0Number%20Merchant%22%7D%5D
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-24" class="selfRef">図 24</a>:
+                            <a href="#name-example-of-large-request-in"
+                                class="selfRef">"authorization_details"を含む大きなリクエストの例</a>
+                        </figcaption>
+                    </figure>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="security_considerations">
+        <section id="section-12">
+            <h2 id="name-security-considerations">
+                <a href="#section-12" class="section-number selfRef">12. </a><a href="#name-security-considerations"
+                    class="section-name selfRef">セキュリティ上の考慮事項</a>
+            </h2>
+            <p id="section-12-1"><code>authorization_details</code>パラメーターは、OAuth認可リクエストの場合に
+                ユーザーエージェントを通じて送信されるため、ユーザーによる変更に対して脆弱になります。
+                <code>authorization_details</code>の完全性が懸念される場合、クライアントは
+                <code>authorization_details</code>を改ざんおよび差し替えから保護
+                <span class="bcp14">MUST</span>します。これは、<span>[<a href="#RFC9101"
+                        class="cite xref">RFC9101</a>]</span>で定義される署名付きリクエストオブジェクトを使用して
+                リクエストに署名すること、または<code>request_uri</code>認可リクエストパラメーターを
+                <span>[<a href="#RFC9101" class="cite xref">RFC9101</a>]</span>で定義されるとおりに使用し、
+                <span>[<a href="#RFC9126" class="cite xref">RFC9126</a>]</span>と組み合わせて
+                リクエストオブジェクトのURIをASに渡すことで実現できます。<a href="#section-12-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-12-2"><code>authorization_details</code>パラメーター内のすべての文字列比較は、
+                <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>で定義されるとおりに行われます。
+                文字列値の等価性を評価する際に、追加の変換または正規化は行われません。<a href="#section-12-2" class="pilcrow">¶</a>
+            </p>
+            <p id="section-12-3">共通データフィールド<code>locations</code>により、クライアントは
+                特定の認可を使用しようとする場所、すなわち権限をRSに明確に割り当てることを指定できます。
+                複数のRSが存在する状況では、これはオーディエンス制限を通じて、意図しないクライアント認可
+                （例: メールおよびクラウドサービスの両方に適用され得る<code>read</code> scope値）を防ぎます。<a href="#section-12-3" class="pilcrow">¶</a>
+            </p>
+            <p id="section-12-4">ASは、インジェクション攻撃を防止するために、
+                <code>authorization_details</code>で渡されるデータを適切にサニタイズし処理
+                <span class="bcp14">MUST</span>します。<a href="#section-12-4" class="pilcrow">¶</a>
+            </p>
+            <p id="section-12-5"><span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>、<span>[<a
+                        href="#RFC7662" class="cite xref">RFC7662</a>]</span>、および<span>[<a href="#RFC8414"
+                        class="cite xref">RFC8414</a>]</span>のセキュリティ上の考慮事項も適用されます。<a href="#section-12-5"
+                    class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="privacy_considerations">
+        <section id="section-13">
+            <h2 id="name-privacy-considerations">
+                <a href="#section-13" class="section-number selfRef">13. </a><a href="#name-privacy-considerations"
+                    class="section-name selfRef">プライバシー上の考慮事項</a>
+            </h2>
+            <p id="section-13-1">実装者が、プライバシーを保護する方法で認可詳細を設計および使用することは特に重要です。<a href="#section-13-1"
+                    class="pilcrow">¶</a></p>
+            <p id="section-13-2"><code>authorization_details</code>に含まれる機微な個人データは、
+                たとえばリファラーヘッダーを通じて漏えいすることを防止しなければなりません。
+                実装上の選択肢には、<span>[<a href="#RFC9101" class="cite xref">RFC9101</a>]</span>で定義される暗号化されたリクエストオブジェクト、
+                または<span>[<a href="#RFC9126" class="cite xref">RFC9126</a>]</span>と
+                <span>[<a href="#RFC9101"
+                        class="cite xref">RFC9101</a>]</span>で定義される<code>request_uri</code>認可リクエストパラメーターを利用して、
+                クライアントとAS間のエンドツーエンド暗号化された接続で
+                <code>authorization_details</code>を送信することが含まれます。後者はアプリケーションレベルの暗号化を必要としませんが、
+                クライアントとASの間に別のメッセージ交換を必要とします。<a href="#section-13-2" class="pilcrow">¶</a>
+            </p>
+            <p id="section-13-3">リクエストデータが暗号化されていても、攻撃者は自身が制御するデバイス上の認可リクエストに
+                暗号化されたリクエストデータを注入し、ASのユーザー同意画面を使用して（復号された）ユーザーデータを平文で表示させることで、
+                ASを利用してユーザーのデータを知ることができます。実装はこの攻撃ベクトルを考慮し、
+                たとえばデータの一部のみを表示すること、または可能であれば想定されるユーザーコンテキストが
+                （ユーザー認証後も）同一であるかどうかを判断することによって、適切な対策を実装する必要があります。<a href="#section-13-3" class="pilcrow">¶</a></p>
+            <p id="section-13-4">ASは、<code>authorization_details</code>をクライアントまたはRSと共有する際の
+                プライバシーへの影響を考慮する必要があります。ASは、ローカルポリシーによって決定される
+                「need to know」ベースでこのデータをそれらの当事者と共有すべきです。<a href="#section-13-4" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="iana_considerations">
+        <section id="section-14">
+            <h2 id="name-iana-considerations">
+                <a href="#section-14" class="section-number selfRef">14. </a><a href="#name-iana-considerations"
+                    class="section-name selfRef">IANAに関する考慮事項</a>
+            </h2>
+            <div id="oauth-parameters-registration">
+                <section id="section-14.1">
+                    <h3 id="name-oauth-parameters-registrati">
+                        <a href="#section-14.1" class="section-number selfRef">14.1. </a><a
+                            href="#name-oauth-parameters-registrati" class="section-name selfRef">OAuthパラメーター
+                            登録</a>
+                    </h3>
+                    <p id="section-14.1-1">次のパラメーターは、
+                        <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>によって確立された
+                        "OAuth Parameters"レジストリ <span>[<a href="#IANA.OAuth.Parameters"
+                                class="cite xref">IANA.OAuth.Parameters</a>]</span>に
+                        登録されています。<a href="#section-14.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-14.1-2">
+                        <dt id="section-14.1-2.1">名前:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.1-2.2">
+                            <code>authorization_details</code><a href="#section-14.1-2.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.1-2.3">パラメーター使用場所:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.1-2.4">認可リクエスト、トークンリクエスト、トークン
+                            レスポンス<a href="#section-14.1-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.1-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.1-2.6">IETF<a href="#section-14.1-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.1-2.7">参照:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.1-2.8">RFC 9396<a href="#section-14.1-2.8"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="json-web-token-claims-registration">
+                <section id="section-14.2">
+                    <h3 id="name-json-web-token-claims-regis">
+                        <a href="#section-14.2" class="section-number selfRef">14.2. </a><a
+                            href="#name-json-web-token-claims-regis" class="section-name selfRef">JSON Web Tokenクレーム
+                            登録</a>
+                    </h3>
+                    <p id="section-14.2-1">次の値は、<span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>によって
+                        確立されたIANA "JSON Web Token Claims"レジストリに登録されています。<a href="#section-14.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-14.2-2">
+                        <dt id="section-14.2-2.1">クレーム名:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.2-2.2">
+                            <code>authorization_details</code><a href="#section-14.2-2.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.2-2.3">クレーム説明:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.2-2.4">クレーム
+                            <code>authorization_details</code>は、アクセストークンの権利を表すJSONオブジェクトのJSON配列を含みます。
+                            各JSONオブジェクトには、特定の種類のリソースに関する認可要件を指定するためのデータが含まれます。<a href="#section-14.2-2.4"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.2-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.2-2.6">IETF<a href="#section-14.2-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.2-2.7">参照:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.2-2.8">
+                            RFC 9396の<a href="#jwt_based_access_tokens" class="auto internal xref">セクション9.1</a><a
+                                href="#section-14.2-2.8" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="oauth-token-introspection-response-registration">
+                <section id="section-14.3">
+                    <h3 id="name-oauth-token-introspection-r">
+                        <a href="#section-14.3" class="section-number selfRef">14.3. </a><a
+                            href="#name-oauth-token-introspection-r" class="section-name selfRef">OAuthトークン
+                            イントロスペクションレスポンス登録</a>
+                    </h3>
+                    <p id="section-14.3-1">次の値は、<span>[<a href="#RFC7662"
+                                class="cite xref">RFC7662</a>]</span>によって確立されたIANA "OAuth Token
+                        Introspection Response"レジストリに登録されています。<a href="#section-14.3-1" class="pilcrow">¶</a>
+                    </p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-14.3-2">
+                        <dt id="section-14.3-2.1">名前:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.3-2.2">
+                            <code>authorization_details</code><a href="#section-14.3-2.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.3-2.3">説明:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.3-2.4">メンバー
+                            <code>authorization_details</code>は、アクセストークンの権利を表すJSONオブジェクトのJSON配列を含みます。
+                            各JSONオブジェクトには、特定の種類のリソースに関する認可要件を指定するためのデータが含まれます。<a href="#section-14.3-2.4"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.3-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.3-2.6">IETF<a href="#section-14.3-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.3-2.7">参照:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.3-2.8">
+                            RFC 9396の<a href="#token_introspection" class="auto internal xref">セクション9.2</a><a
+                                href="#section-14.3-2.8" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="oauth-authorization-server-metadata-registration">
+                <section id="section-14.4">
+                    <h3 id="name-oauth-authorization-server-">
+                        <a href="#section-14.4" class="section-number selfRef">14.4. </a><a
+                            href="#name-oauth-authorization-server-" class="section-name selfRef">OAuth認可
+                            サーバーメタデータ登録</a>
+                    </h3>
+                    <p id="section-14.4-1">次の値は、<span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>によって
+                        確立された、<span>[<a href="#IANA.OAuth.Parameters"
+                                class="cite xref">IANA.OAuth.Parameters</a>]</span>のIANA "OAuth Authorization
+                        Server Metadata"レジストリに登録されています。<a href="#section-14.4-1" class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-14.4-2">
+                        <dt id="section-14.4-2.1">メタデータ名:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.4-2.2">
+                            <code>authorization_details_types_supported</code><a href="#section-14.4-2.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.4-2.3">メタデータ説明:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.4-2.4">ASがサポートする認可詳細タイプを含むJSON配列<a
+                                href="#section-14.4-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.4-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.4-2.6">IETF<a href="#section-14.4-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.4-2.7">参照:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.4-2.8">
+                            RFC 9396の<a href="#metadata" class="auto internal xref">セクション10</a><a
+                                href="#section-14.4-2.8" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="oauth-dynamic-client-registration-metadata-registration">
+                <section id="section-14.5">
+                    <h3 id="name-oauth-dynamic-client-regist">
+                        <a href="#section-14.5" class="section-number selfRef">14.5. </a><a
+                            href="#name-oauth-dynamic-client-regist" class="section-name selfRef">OAuth動的クライアント
+                            登録メタデータ登録</a>
+                    </h3>
+                    <p id="section-14.5-1">次の値は、<span>[<a href="#RFC7591" class="cite xref">RFC7591</a>]</span>によって
+                        確立された、<span>[<a href="#IANA.OAuth.Parameters"
+                                class="cite xref">IANA.OAuth.Parameters</a>]</span>のIANA "OAuth Dynamic Client
+                        Registration Metadata"レジストリに登録されています。<a href="#section-14.5-1" class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-14.5-2">
+                        <dt id="section-14.5-2.1">クライアントメタデータ名:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.5-2.2">
+                            <code>authorization_details_types</code><a href="#section-14.5-2.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.5-2.3">クライアントメタデータ説明:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.5-2.4">クライアントが使用する認可詳細タイプを示します。<a
+                                href="#section-14.5-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.5-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.5-2.6">IETF<a href="#section-14.5-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.5-2.7">参照:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.5-2.8">
+                            RFC 9396の<a href="#metadata" class="auto internal xref">セクション10</a><a
+                                href="#section-14.5-2.8" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="oauth-extensions-error-registration">
+                <section id="section-14.6">
+                    <h3 id="name-oauth-extensions-error-regi">
+                        <a href="#section-14.6" class="section-number selfRef">14.6. </a><a
+                            href="#name-oauth-extensions-error-regi" class="section-name selfRef">OAuth拡張エラー
+                            登録</a>
+                    </h3>
+                    <p id="section-14.6-1">次の値は、<span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>によって
+                        確立された、<span>[<a href="#IANA.OAuth.Parameters"
+                                class="cite xref">IANA.OAuth.Parameters</a>]</span>のIANA "OAuth Extensions Error
+                        Registry"に登録されています。<a href="#section-14.6-1" class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-14.6-2">
+                        <dt id="section-14.6-2.1">名前:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.6-2.2">
+                            <code>invalid_authorization_details</code><a href="#section-14.6-2.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.6-2.3">使用場所:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.6-2.4">トークンエンドポイント、認可エンドポイント<a
+                                href="#section-14.6-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.6-2.5">プロトコル拡張:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.6-2.6">OAuth 2.0 Rich Authorization Requests<a
+                                href="#section-14.6-2.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.6-2.7">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.6-2.8">IETF<a href="#section-14.6-2.8"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-14.6-2.9">参照:</dt>
+                        <dd style="margin-left: 1.5em" id="section-14.6-2.10">
+                            RFC 9396の<a href="#authz_details_error" class="auto internal xref">セクション5</a><a
+                                href="#section-14.6-2.10" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+        </section>
+    </div>
+    <section id="section-15">
+        <h2 id="name-references">
+            <a href="#section-15" class="section-number selfRef">15. </a><a href="#name-references"
+                class="section-name selfRef">参考文献</a>
+        </h2>
+        <section id="section-15.1">
+            <h3 id="name-normative-references">
+                <a href="#section-15.1" class="section-number selfRef">15.1. </a><a href="#name-normative-references"
+                    class="section-name selfRef">規範的参考文献</a>
+            </h3>
+            <dl class="references">
+                <dt id="RFC2119">[RFC2119]</dt>
+                <dd>
+                    <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"RFCで要求レベルを
+                        示すために用いられるキーワード"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC
+                        2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03"
+                        class="refDate">1997年3月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7519">[RFC7519]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span
+                        class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>,
+                    <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI 10.17487/RFC7519</span>,
+                    <time datetime="2015-05" class="refDate">2015年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7662">[RFC7662]</dt>
+                <dd>
+                    <span class="refAuthor">Richer, J., Ed.</span>, <span class="refTitle">"OAuth 2.0 Token
+                        Introspection"</span>, <span class="seriesInfo">RFC 7662</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7662</span>, <time datetime="2015-10" class="refDate">2015年10月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7662">https://www.rfc-editor.org/info/rfc7662</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8174">[RFC8174]</dt>
+                <dd>
+                    <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"RFC 2119キーワードにおける
+                        大文字と小文字の曖昧さ"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC
+                        8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05"
+                        class="refDate">2017年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8414">[RFC8414]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span
+                        class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization Server
+                        Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">2018年6月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8414">https://www.rfc-editor.org/info/rfc8414</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8628">[RFC8628]</dt>
+                <dd>
+                    <span class="refAuthor">Denniss, W.</span>, <span class="refAuthor">Bradley, J.</span>, <span
+                        class="refAuthor">Jones, M.</span>, and <span class="refAuthor">H. Tschofenig</span>, <span
+                        class="refTitle">"OAuth 2.0 Device Authorization Grant"</span>, <span class="seriesInfo">RFC
+                        8628</span>, <span class="seriesInfo">DOI 10.17487/RFC8628</span>, <time datetime="2019-08"
+                        class="refDate">2019年8月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8628">https://www.rfc-editor.org/info/rfc8628</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8707">[RFC8707]</dt>
+                <dd>
+                    <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, and <span
+                        class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"Resource Indicators for OAuth
+                        2.0"</span>, <span class="seriesInfo">RFC 8707</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC8707</span>, <time datetime="2020-02" class="refDate">2020年2月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8707">https://www.rfc-editor.org/info/rfc8707</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+        </section>
+        <section id="section-15.2">
+            <h3 id="name-informative-references">
+                <a href="#section-15.2" class="section-number selfRef">15.2. </a><a href="#name-informative-references"
+                    class="section-name selfRef">参考情報の参考文献</a>
+            </h3>
+            <dl class="references">
+                <dt id="CSC">[CSC]</dt>
+                <dd>
+                    <span class="refAuthor">Cloud Signature Consortium</span>, <span
+                        class="refTitle">"リモート署名アプリケーションのための
+                        アーキテクチャおよびプロトコル"</span>, <span class="refContent">Version
+                        1.0.4.0</span>, <time datetime="2019-06" class="refDate">2019年6月</time>, <span>&lt;<a
+                            href="https://cloudsignatureconsortium.org/wp-content/uploads/2020/01/CSC_API_V1_1.0.4.0.pdf">https://cloudsignatureconsortium.org/wp-content/uploads/2020/01/CSC_API_V1_1.0.4.0.pdf</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="ETSI">[ETSI]</dt>
+                <dd>
+                    <span class="refAuthor">ETSI</span>, <span class="refTitle">"Electronic Signatures and
+                        Infrastructures (ESI); リモートデジタル署名作成のためのプロトコル"</span>, <span class="refContent">V1.1.1</span>,
+                    <span class="seriesInfo">ETSI TS 119 432</span>, <time datetime="2019-03"
+                        class="refDate">2019年3月</time>, <span>&lt;<a
+                            href="https://www.etsi.org/deliver/etsi_ts/119400_119499/119432/01.01.01_60/ts_119432v010101p.pdf">https://www.etsi.org/deliver/etsi_ts/119400_119499/119432/01.01.01_60/ts_119432v010101p.pdf</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="IANA.OAuth.Parameters">[IANA.OAuth.Parameters]</dt>
+                <dd>
+                    <span class="refAuthor">IANA</span>, <span class="refTitle">"OAuth Parameters"</span>, <span>&lt;<a
+                            href="https://www.iana.org/assignments/oauth-parameters">https://www.iana.org/assignments/oauth-parameters</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="JSON.Schema">[JSON.Schema]</dt>
+                <dd>
+                    <span class="refAuthor">OpenJS Foundation</span>, <span class="refTitle">"JSON Schema"</span>,
+                    <span>&lt;<a href="https://json-schema.org/">https://json-schema.org/</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="OID-CIBA">[OID-CIBA]</dt>
+                <dd>
+                    <span class="refAuthor">Fernandez, G.</span>, <span class="refAuthor">Walter, F.</span>, <span
+                        class="refAuthor">Nennker, A.</span>, <span class="refAuthor">Tonge, D.</span>, and <span
+                        class="refAuthor">B. Campbell</span>, <span class="refTitle">"OpenID Connect Client-Initiated
+                        Backchannel Authentication Flow - Core 1.0"</span>, <time datetime="2021-09-01"
+                        class="refDate">2021年9月1日</time>, <span>&lt;<a
+                            href="https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html">https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="OIDC">[OIDC]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Bradley, J.</span>, <span
+                        class="refAuthor">Jones, M.</span>, <span class="refAuthor">de Medeiros, B.</span>, and <span
+                        class="refAuthor">C. Mortimore</span>, <span class="refTitle">"OpenID Connect Core 1.0
+                        incorporating errata set 1"</span>, <time datetime="2014-11-08"
+                        class="refDate">2014年11月8日</time>, <span>&lt;<a
+                            href="https://openid.net/specs/openid-connect-core-1_0.html">https://openid.net/specs/openid-connect-core-1_0.html</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC0020">[RFC0020]</dt>
+                <dd>
+                    <span class="refAuthor">Cerf, V.</span>, <span class="refTitle">"ネットワーク交換のためのASCII形式"</span>, <span
+                        class="seriesInfo">STD 80</span>, <span class="seriesInfo">RFC
+                        20</span>, <span class="seriesInfo">DOI 10.17487/RFC0020</span>, <time datetime="1969-10"
+                        class="refDate">1969年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc20">https://www.rfc-editor.org/info/rfc20</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC6749">[RFC6749]</dt>
+                <dd>
+                    <span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"The OAuth 2.0 Authorization
+                        Framework"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6749</span>, <time datetime="2012-10" class="refDate">2012年10月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6749">https://www.rfc-editor.org/info/rfc6749</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7591">[RFC7591]</dt>
+                <dd>
+                    <span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span
+                        class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Machulak, M.</span>, and <span
+                        class="refAuthor">P. Hunt</span>, <span class="refTitle">"OAuth 2.0 Dynamic Client Registration
+                        Protocol"</span>, <span class="seriesInfo">RFC 7591</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7591</span>, <time datetime="2015-07" class="refDate">2015年7月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7591">https://www.rfc-editor.org/info/rfc7591</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8259">[RFC8259]</dt>
+                <dd>
+                    <span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"JavaScript Object Notation
+                        (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span
+                        class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time
+                        datetime="2017-12" class="refDate">2017年12月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC9101">[RFC9101]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Bradley, J.</span>, and <span
+                        class="refAuthor">M. Jones</span>, <span class="refTitle">"The OAuth 2.0 Authorization
+                        Framework: JWT-Secured Authorization Request (JAR)"</span>, <span class="seriesInfo">RFC
+                        9101</span>, <span class="seriesInfo">DOI 10.17487/RFC9101</span>, <time datetime="2021-08"
+                        class="refDate">2021年8月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc9101">https://www.rfc-editor.org/info/rfc9101</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC9126">[RFC9126]</dt>
+                <dd>
+                    <span class="refAuthor">Lodderstedt, T.</span>, <span class="refAuthor">Campbell, B.</span>, <span
+                        class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Tonge, D.</span>, and <span
+                        class="refAuthor">F. Skokan</span>, <span class="refTitle">"OAuth 2.0 Pushed Authorization
+                        Requests"</span>, <span class="seriesInfo">RFC 9126</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC9126</span>, <time datetime="2021-09" class="refDate">2021年9月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc9126">https://www.rfc-editor.org/info/rfc9126</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="Transaction-Auth">[Transaction-Auth]</dt>
+                <dd>
+                    <span class="refAuthor">Lodderstedt, T.</span>, <span class="refTitle">"トランザクション認可、またはなぜOAuthスコープを
+                        再考する必要があるのか"</span>, <time datetime="2019-04-20" class="refDate">2019年4月20日</time>, <span>&lt;<a
+                            href="https://medium.com/oauth-2/transaction-authorization-or-why-we-need-to-re-think-oauth-scopes-2326e2038948">https://medium.com/oauth-2/transaction-authorization-or-why-we-need-to-re-think-oauth-scopes-2326e2038948</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+        </section>
+    </section>
+    <div id="additional-examples">
+        <section id="appendix-A">
+            <h2 id="name-additional-examples">
+                <a href="#appendix-A" class="section-number selfRef">付録 A. </a><a href="#name-additional-examples"
+                    class="section-name selfRef">追加例</a>
+            </h2>
+            <div id="openid">
+                <section id="appendix-A.1">
+                    <h3 id="name-openid-connect">
+                        <a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-openid-connect"
+                            class="section-name selfRef">OpenID Connect</a>
+                    </h3>
+                    <p id="appendix-A.1-1">OpenID Connect <span>[<a href="#OIDC" class="cite xref">OIDC</a>]</span>は、
+                        JSONベースの<code>claims</code>リクエストパラメーターを指定しています。これは、クライアント
+                        （OpenID Connect Relying Partyとして動作）が受け取りたいクレームを、細かい粒度かつ
+                        プライバシーを保護する方法で指定し、それらのクレームを特定の配信機構、すなわちID Tokenまたは
+                        userinfoレスポンスに割り当てるために使用できます。<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+                    <p id="appendix-A.1-2">scope値<code>openid</code>と追加パラメーター<code>claims</code>の組み合わせは、
+                        すべての非OIDC scope値と同じ方法で、<code>authorization_details</code>と併せて使用できます。<a href="#appendix-A.1-2"
+                            class="pilcrow">¶</a></p>
+                    <p id="appendix-A.1-3">あるいは、OpenID Connect用の認可詳細タイプが存在する可能性があります。
+                        このセクションは、そのような認可詳細タイプがどのように見えるかの例を示しますが、
+                        この認可詳細タイプを定義することは、この仕様の範囲外です。<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
+                    <p id="appendix-A.1-4">これらの仮想的な例は、認可プロセスのOpenID Connect部分に固有のすべての詳細を、
+                        認可JSONオブジェクト内にカプセル化しようとするものです。<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
+                    <p id="appendix-A.1-5">トップレベルフィールドは、<span>[<a href="#OIDC"
+                                class="cite xref">OIDC</a>]</span>で与えられた定義に基づいています。<a href="#appendix-A.1-5"
+                            class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="appendix-A.1-6">
+                        <dt id="appendix-A.1-6.1">
+                            <code>claim_sets</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.1-6.2"><code>profile</code>など、
+                            それぞれのscope値の置き換えとなる、事前定義されたクレームセットの名前<a href="#appendix-A.1-6.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.1-6.3">
+                            <code>max_age</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.1-6.4">最大認証経過時間<a href="#appendix-A.1-6.4"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.1-6.5">
+                            <code>acr_values</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.1-6.6">要求されるAuthentication Context Class
+                            Reference（ACR）値<a href="#appendix-A.1-6.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.1-6.7">
+                            <code>claims</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.1-6.8"><span>[<a href="#OIDC"
+                                    class="cite xref">OIDC</a>]</span>で
+                            定義される<code>claims</code> JSON構造<a href="#appendix-A.1-6.8" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <p id="appendix-A.1-7">これは、いくつかのクレームセットに対する単純なリクエストです。<a href="#appendix-A.1-7"
+                            class="pilcrow">¶</a></p>
+                    <span id="name-example-of-openid-connect-r"></span>
+                    <figure id="figure-25">
+                        <div class="lang-json sourcecode" id="appendix-A.1-8.1">
+                            <pre>[
+   {
+      "type": "openid",
+      "locations": [
+         "https://op.example.com/userinfo"
+      ],
+      "claim_sets": [
+         "email",
+         "profile"
+      ]
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-25" class="selfRef">図 25</a>:
+                            <a href="#name-example-of-openid-connect-r" class="selfRef">"authorization_details"を利用する
+                                OpenID Connectリクエストの例</a>
+                        </figcaption>
+                    </figure>
+                    <aside id="appendix-A.1-9">
+                        <p id="appendix-A.1-9.1">注: OpenID Connectでクライアント（Relying Party）が
+                            クレームを取得するためにアクセストークンを使用する唯一の場所であるため、
+                            <code>locations</code>はuserinfoエンドポイントの場所を指定します。<a href="#appendix-A.1-9.1"
+                                class="pilcrow">¶</a>
+                        </p>
+                    </aside>
+                    <p id="appendix-A.1-10">より高度な例を<a href="#fig26" class="auto internal xref">図 26</a>に示します。<a
+                            href="#appendix-A.1-10" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-advanced-example-of-openid-"></span>
+                    <div id="fig26">
+                        <figure id="figure-26">
+                            <div class="lang-json sourcecode" id="appendix-A.1-11.1">
+                                <pre>[
+   {
+      "type": "openid",
+      "locations": [
+         "https://op.example.com/userinfo"
+      ],
+      "max_age": 86400,
+      "acr_values": "urn:mace:incommon:iap:silver",
+      "claims": {
+         "userinfo": {
+            "given_name": {
+               "essential": true
+            },
+            "nickname": null,
+            "email": {
+               "essential": true
+            },
+            "email_verified": {
+               "essential": true
+            },
+            "picture": null,
+            "http://example.com/claims/groups": null
+         },
+         "id_token": {
+            "auth_time": {
+               "essential": true
+            }
+         }
+      }
+   }
+]
+</pre>
+                            </div>
+                            <figcaption><a href="#figure-26" class="selfRef">図 26</a>:
+                                <a href="#name-advanced-example-of-openid-"
+                                    class="selfRef">"authorization_details"を利用するOpenID
+                                    Connectリクエストの高度な例</a>
+                            </figcaption>
+                        </figure>
+                    </div>
+                </section>
+            </div>
+            <div id="signing">
+                <section id="appendix-A.2">
+                    <h3 id="name-remote-electronic-signing">
+                        <a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a
+                            href="#name-remote-electronic-signing" class="section-name selfRef">リモート電子
+                            署名</a>
+                    </h3>
+                    <p id="appendix-A.2-1">次の例は、ETSI TS 119 432 <span>[<a href="#ETSI"
+                                class="cite xref">ETSI</a>]</span>と、
+                        リモート署名作成のためのCloud Signature Consortium（CSC）API
+                        <span>[<a href="#CSC" class="cite xref">CSC</a>]</span>で示されたリモート電子署名の概念に基づいています。<a
+                            href="#appendix-A.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <span id="name-example-of-electronic-signi"></span>
+                    <figure id="figure-27">
+                        <div class="lang-json sourcecode" id="appendix-A.2-2.1">
+                            <pre>[
+   {
+      "type": "sign",
+      "locations": [
+         "https://signing.example.com/signdoc"
+      ],
+      "credentialID": "60916d31-932e-4820-ba82-1fcead1c9ea3",
+      "documentDigests": [
+         {
+            "hash": "sTOgwOm+474gFj0q0x1iSNspKqbcse4IeiqlDg/HWuI=",
+            "label": "Credit Contract"
+         },
+         {
+            "hash": "HZQzZmMAIWekfGH0/ZKW1nsdt0xg3H6bZYztgsMTLw0=",
+            "label": "Contract Payment Protection Insurance"
+         }
+      ],
+      "hashAlgorithmOID": "2.16.840.1.101.3.4.2.1"
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-27" class="selfRef">図 27</a>:
+                            <a href="#name-example-of-electronic-signi" class="selfRef">電子
+                                署名の例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="appendix-A.2-3">トップレベルフィールドには次の意味があります。<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="appendix-A.2-4">
+                        <dt id="appendix-A.2-4.1">
+                            <code>credentialID</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.2-4.2">署名に使用される証明書の識別子<a href="#appendix-A.2-4.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.2-4.3">
+                            <code>documentDigests</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.2-4.4">署名される各文書のハッシュ（<code>hash</code>フィールド）を含む配列。
+                            さらに、対応する<code>label</code>フィールドは、たとえばユーザー同意で使用するために、
+                            それぞれの文書をユーザーに識別します。<a href="#appendix-A.2-4.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.2-4.5">
+                            <code>hashAlgorithm</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.2-4.6">ハッシュ値を計算するために使用されたアルゴリズム<a
+                                href="#appendix-A.2-4.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <p id="appendix-A.2-5">ASは、この構造に列挙された文書の署名作成についてユーザーに同意を求めることが想定されます。
+                        クライアントは、このプロセスの結果として発行されたアクセストークンを使用して、
+                        それぞれの署名サービスの文書署名APIを呼び出し、実際に署名を作成します。このアクセストークンは、
+                        ユーザーが同意したとおりに、クライアント、ユーザーID、およびハッシュ（および署名アルゴリズム）に
+                        バインドされます。<a href="#appendix-A.2-5" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="tax">
+                <section id="appendix-A.3">
+                    <h3 id="name-access-to-tax-data">
+                        <a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a
+                            href="#name-access-to-tax-data" class="section-name selfRef">税務データへのアクセス</a>
+                    </h3>
+                    <p id="appendix-A.3-1">この例は、たとえば信用力を判断するために第三者が市民の
+                        納税申告書および所得証明にアクセスできるAPIから着想を得ています。<a href="#appendix-A.3-1" class="pilcrow">¶</a></p>
+                    <span id="name-example-of-tax-data-access"></span>
+                    <figure id="figure-28">
+                        <div class="lang-json sourcecode" id="appendix-A.3-2.1">
+                            <pre>[
+    {
+        "type": "tax_data",
+        "locations": [
+            "https://taxservice.govehub.no.example.com"
+        ],
+        "actions":"read_tax_declaration",
+        "periods": ["2018"],
+        "duration_of_access": 30,
+        "tax_payer_id": "23674185438934"
+    }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-28" class="selfRef">図 28</a>:
+                            <a href="#name-example-of-tax-data-access" class="selfRef">税務データアクセスの例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="appendix-A.3-3">トップレベルフィールドには次の意味があります。<a href="#appendix-A.3-3" class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="appendix-A.3-4">
+                        <dt id="appendix-A.3-4.1">
+                            <code>periods</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.3-4.2">クライアントがアクセスしたい期間<a href="#appendix-A.3-4.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.3-4.3">
+                            <code>duration_of_access</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.3-4.4">クライアントがデータにアクセスすることを意図する日数<a
+                                href="#appendix-A.3-4.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.3-4.5">
+                            <code>tax_payer_id</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.3-4.6">納税者の識別子（クライアントが知っている場合）<a
+                                href="#appendix-A.3-4.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="ehealth">
+                <section id="appendix-A.4">
+                    <h3 id="name-ehealth">
+                        <a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-ehealth"
+                            class="section-name selfRef">eHealth</a>
+                    </h3>
+                    <p id="appendix-A.4-1">これら2つの例は、ノルウェーのeHealthシステムで使用されるAPIの要件から着想を得ています。<a href="#appendix-A.4-1"
+                            class="pilcrow">¶</a></p>
+                    <p id="appendix-A.4-2">このユースケースでは、理学療法士がローカルのElectronic Health Records（EHR）システムを使用して
+                        コンピューターの前に座っています。彼らは特定の患者の電子患者記録を見たいと考えており、
+                        また、おそらく別の機関または全国的なサービスにある別のシステムから患者の診療記録エントリーを取得したいと考えています。
+                        このデータへのアクセスはAPIによって提供されます。<a href="#appendix-A.4-2" class="pilcrow">¶</a></p>
+                    <p id="appendix-A.4-3">APIでリクエストを認可するために必要な情報はEHRシステムだけが知っており、
+                        APIに提示されなければなりません。<a href="#appendix-A.4-3" class="pilcrow">¶</a></p>
+                    <p id="appendix-A.4-4">最初の例では、認可詳細オブジェクトは組織の識別子を含みます。
+                        この場合、APIは、与えられた組織が機微なデータへのアクセスを与えるために
+                        個人の健康情報を処理する法的根拠を持っているかどうかを知る必要があります。<a href="#appendix-A.4-4" class="pilcrow">¶</a></p>
+                    <span id="name-ehealth-example"></span>
+                    <figure id="figure-29">
+                        <div class="lang-json sourcecode" id="appendix-A.4-5.1">
+                            <pre>"authorization_details": {
+    "type": "patient_record",
+    "requesting_entity": {
+        "type": "Practitioner",
+        "identifier": [
+        {
+            "system": "urn:oid:2.16.578.1.12.4.1.4.4",
+            "value": "1234567"
+        }],
+        "practitioner_role": {
+            "organization": {
+                "identifier": {
+                    "system": "urn:oid:2.16.578.1.12.4.1.2.101",
+                    "type": "ENH",
+                    "value": "[organizational number]"
+                }
+            }
+        }
+    }
+}
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-29" class="selfRef">図 29</a>:
+                            <a href="#name-ehealth-example" class="selfRef">eHealthの例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="appendix-A.4-6">2番目の例では、APIはリクエストを認可するためにより多くの情報を必要とします。
+                        この場合、認可詳細オブジェクトは、保健機関およびリクエスト時点でユーザーが持つ現在の職業に関する
+                        追加情報を含みます。この追加レベルの詳細は、認可とデータ最小化の両方に使用できます。<a href="#appendix-A.4-6" class="pilcrow">¶</a></p>
+                    <span id="name-advanced-ehealth-example"></span>
+                    <figure id="figure-30">
+                        <div class="breakable lang-json sourcecode" id="appendix-A.4-7.1">
+                            <pre>
+[
+   {
+      "type": "patient_record",
+      "location": "https://fhir.example.com/patient",
+      "actions": [
+         "read"
+      ],
+      "patient_identifier": [
+         {
+            "system": "urn:oid:2.16.578.1.12.4.1.4.1",
+            "value": "12345678901"
+         }
+      ],
+      "reason_for_request": "Clinical treatment",
+      "requesting_entity": {
+         "type": "Practitioner",
+         "identifier": [
+            {
+               "system": "urn:oid:2.16.578.1.12.4.1.4.4",
+               "value": "1234567"
+            }
+         ],
+         "practitioner_role": {
+            "organization": {
+               "identifier": [
+                  {
+                     "system": "urn:oid:2.16.578.1.12.4.1.2.101",
+                     "type": "ENH",
+                     "value": "&lt;organizational number&gt;"
+                  }
+               ],
+               "type": {
+                  "coding": [
+                     {
+                        "system":
+                           "http://hl7.example.org/fhir/org-type",
+                        "code": "dept",
+                        "display": "Hospital Department"
+                     }
+                  ]
+               },
+               "name": "Akuttmottak"
+            },
+            "profession": {
+               "coding": [
+                  {
+                     "system": "http://snomed.example.org/sct",
+                     "code": "36682004",
+                     "display": "Physical therapist"
+                  }
+               ]
+            }
+         }
+      }
+   }
+]
+</pre>
+                        </div>
+                        <figcaption><a href="#figure-30" class="selfRef">図 30</a>:
+                            <a href="#name-advanced-ehealth-example" class="selfRef">高度なeHealthの例</a>
+                        </figcaption>
+                    </figure>
+                    <p id="appendix-A.4-8">フィールドの説明:<a href="#appendix-A.4-8" class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="appendix-A.4-9">
+                        <dt id="appendix-A.4-9.1">
+                            <code>patient_identifier</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.4-9.2">OID形式のシステム識別子（名前空間）と、
+                            この名前空間内の実際の値から構成される患者の識別子。<a href="#appendix-A.4-9.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.4-9.3">
+                            <code>reason_for_request</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.4-9.4">ユーザーが特定のAPIにアクセスしたい理由。<a
+                                href="#appendix-A.4-9.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="appendix-A.4-9.5">
+                            <code>requesting_entity</code>:
+                        </dt>
+                        <dd style="margin-left: 1.5em" id="appendix-A.4-9.6">アイデンティティ、ロール、および組織コンテキストによる
+                            リクエスト者の指定。このデータは、認可を容易にし、監査目的のために提供されます。<a href="#appendix-A.4-9.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <p id="appendix-A.4-10">このユースケースでは、ASは患者ではないリクエスト者を認証し、
+                        ポリシーに基づいてアクセスを承認します。<a href="#appendix-A.4-10" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="Acknowledgements">
+        <section id="appendix-B">
+            <h2 id="name-acknowledgements">
+                <a href="#name-acknowledgements" class="section-name selfRef">謝辞</a>
+            </h2>
+            <p id="appendix-B-1">この仕様の作成中に貴重なフィードバックをくださった
+                <span class="contact-name">Daniel Fett</span>、<span class="contact-name">Sebastian Ebling</span>、<span
+                    class="contact-name">Dave Tonge</span>、<span class="contact-name">Mike Jones</span>、<span
+                    class="contact-name">Nat Sakimura</span>、および<span class="contact-name">Rob Otto</span>に感謝します。<a
+                    href="#appendix-B-1" class="pilcrow">¶</a>
+            </p>
+            <p id="appendix-B-2">また、この仕様に貴重なフィードバックをくださった
+                <span class="contact-name">Vladimir Dzhuvinov</span>、
+                <span class="contact-name">Takahiko Kawasaki</span>、<span class="contact-name">Daniel Fett</span>、
+                <span class="contact-name">Dave Tonge</span>、<span class="contact-name">Travis Spencer</span>、
+                <span class="contact-name">Joergen Binningsboe</span>、<span class="contact-name">Aamund Bremer</span>、
+                <span class="contact-name">Steinar Noem</span>、<span class="contact-name">Francis Pouatcha</span>、
+                <span class="contact-name">Jacob Ideskog</span>、<span class="contact-name">Hannes Tschofenig</span>、
+                および<span class="contact-name">Aaron Parecki</span>にも感謝します。<a href="#appendix-B-2" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="authors-addresses">
+        <section id="appendix-C">
+            <h2 id="name-authors-addresses">
+                <a href="#name-authors-addresses" class="section-name selfRef">著者の連絡先</a>
+            </h2>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Torsten Lodderstedt</span></div>
+                <div dir="auto" class="left"><span class="org">yes.com</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:torsten@lodderstedt.net" class="email">torsten@lodderstedt.net</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Justin Richer</span></div>
+                <div dir="auto" class="left"><span class="org">Bespoke Engineering</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:ietf@justin.richer.org" class="email">ietf@justin.richer.org</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Brian Campbell</span></div>
+                <div dir="auto" class="left"><span class="org">Ping Identity</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:bcampbell@pingidentity.com" class="email">bcampbell@pingidentity.com</a>
+                </div>
+            </address>
+        </section>
+    </div>
+    <script>const toc = document.getElementById("toc");
+        toc.querySelector("h2").addEventListener("click", e => {
+            toc.classList.toggle("active");
+        });
+        toc.querySelector("nav").addEventListener("click", e => {
+            toc.classList.remove("active");
+        });
+    </script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
