@@ -1,0 +1,2962 @@
+<!DOCTYPE html>
+<html lang="ja-JP" class="RFC">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="Common,Latin" name="scripts">
+    <meta content="initial-scale=1.0" name="viewport">
+    <title>RFC 9126: OAuth 2.0 プッシュ型認可リクエスト</title>
+    <meta content="Torsten Lodderstedt" name="author">
+    <meta content="Brian Campbell" name="author">
+    <meta content="Nat Sakimura" name="author">
+    <meta content="Dave Tonge" name="author">
+    <meta content="Filip Skokan" name="author">
+    <meta content="
+       本文書はプッシュ型認可リクエスト（PAR）エンドポイントを定義する。これにより、
+クライアントは OAuth 2.0 認可リクエストのペイロードを、直接リクエストを通じて
+認可サーバーへプッシュでき、後続の認可エンドポイントへの呼び出しで
+そのデータへの参照として使用されるリクエスト URI が
+クライアントに提供される。 
+    " name="description">
+    <meta content="xml2rfc 3.9.1" name="generator">
+    <meta content="security" name="keyword">
+    <meta content="oauth2" name="keyword">
+    <meta content="9126" name="rfc.number">
+    <!-- Generator version information:
+  xml2rfc 3.9.1
+    Python 3.6.10
+    appdirs 1.4.4
+    ConfigArgParse 1.2.3
+    google-i18n-address 2.3.5
+    html5lib 1.0.1
+    intervaltree 3.0.2
+    Jinja2 2.11.2
+    kitchen 1.2.6
+    lxml 4.4.2
+    pycairo 1.19.0
+    pycountry 19.8.18
+    pyflakes 2.1.1
+    PyYAML 5.3.1
+    requests 2.22.0
+    setuptools 40.6.2
+    six 1.14.0
+    WeasyPrint 51
+-->
+    <link href="rfc9126.xml" rel="alternate" type="application/rfc+xml">
+    <link href="#copyright" rel="license">
+    <style type="text/css">
+        /*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necssary during the development of the v3
+  formatters.
+
+*/
+
+        /* fonts */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+        /* Sans-serif */
+        @import url('https://fonts.googleapis.com/css?family=Noto+Serif');
+        /* Serif (print) */
+        @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+        /* Monospace */
+
+        @viewport {
+            zoom: 1.0;
+            width: extend-to-zoom;
+        }
+
+        @-ms-viewport {
+            width: extend-to-zoom;
+            zoom: 1.0;
+        }
+
+        /* general and mobile first */
+        html {}
+
+        body {
+            max-width: 90%;
+            margin: 1.5em auto;
+            color: #222;
+            background-color: #fff;
+            font-size: 14px;
+            font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .ears {
+            display: none;
+        }
+
+        /* headings */
+        #title,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 1em 0 0.5em;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        #title {
+            clear: both;
+            border-bottom: 1px solid #ddd;
+            margin: 0 0 0.5em 0;
+            padding: 1em 0 0.5em;
+        }
+
+        .author {
+            padding-bottom: 4px;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin: 1em 0;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-top: -20px;
+            /* provide offset for in-page anchors */
+            padding-top: 33px;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h4 {
+            font-size: 16px;
+            margin-top: -36px;
+            /* provide offset for in-page anchors */
+            padding-top: 42px;
+        }
+
+        h5,
+        h6 {
+            font-size: 14px;
+        }
+
+        #n-copyright-notice {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1em;
+            margin-bottom: 1em;
+        }
+
+        /* general structure */
+        p {
+            padding: 0;
+            margin: 0 0 1em 0;
+            text-align: left;
+        }
+
+        div,
+        span {
+            position: relative;
+        }
+
+        div {
+            margin: 0;
+        }
+
+        .alignRight.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignRight.art-text pre {
+            padding: 0;
+        }
+
+        .alignRight {
+            margin: 1em 0;
+        }
+
+        .alignRight>*:first-child {
+            border: none;
+            margin: 0;
+            float: right;
+            clear: both;
+        }
+
+        .alignRight>*:nth-child(2) {
+            clear: both;
+            display: block;
+            border: none;
+        }
+
+        svg {
+            display: block;
+        }
+
+        .alignCenter.art-text {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            padding: 1em 1em 0;
+            margin-bottom: 1.5em;
+        }
+
+        .alignCenter.art-text pre {
+            padding: 0;
+        }
+
+        .alignCenter {
+            margin: 1em 0;
+        }
+
+        .alignCenter>*:first-child {
+            border: none;
+            /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+            display: table;
+            margin: 0 auto;
+        }
+
+        /* lists */
+        ol,
+        ul {
+            padding: 0;
+            margin: 0 0 1em 2em;
+        }
+
+        ol ol,
+        ul ul,
+        ol ul,
+        ul ol {
+            margin-left: 1em;
+        }
+
+        li {
+            margin: 0 0 0.25em 0;
+        }
+
+        .ulCompact li {
+            margin: 0;
+        }
+
+        ul.empty,
+        .ulEmpty {
+            list-style-type: none;
+        }
+
+        ul.empty li,
+        .ulEmpty li {
+            margin-top: 0.5em;
+        }
+
+        ul.ulBare,
+        li.ulBare {
+            margin-left: 0em !important;
+        }
+
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact {
+            line-height: 100%;
+            margin: 0 0 0 2em;
+        }
+
+        /* definition lists */
+        dl {}
+
+        dl>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        /* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+        dl>dd {
+            margin-bottom: .8em;
+            min-height: 1.3em;
+        }
+
+        dl.compact>dd,
+        .dlCompact>dd {
+            margin-bottom: 0em;
+        }
+
+        dl>dd>dl {
+            margin-top: 0.5em;
+            margin-bottom: 0em;
+        }
+
+        /* links */
+        a {
+            text-decoration: none;
+        }
+
+        a[href] {
+            color: #22e;
+            /* Arlen: WCAG 2019 */
+        }
+
+        a[href]:hover {
+            background-color: #f2f2f2;
+        }
+
+        figcaption a[href],
+        a[href].selfRef {
+            color: #222;
+        }
+
+        /* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+        /* Figures */
+        tt,
+        code,
+        pre,
+        code {
+            background-color: #f9f9f9;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        pre {
+            border: 1px solid #eee;
+            margin: 0;
+            padding: 1em;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        figure blockquote {
+            margin: 0.8em 0.4em 0.4em;
+        }
+
+        figcaption {
+            font-style: italic;
+            margin: 0 0 1em 0;
+        }
+
+        @media screen {
+            pre {
+                overflow-x: auto;
+                max-width: 100%;
+                max-width: calc(100% - 22px);
+            }
+        }
+
+        /* aside, blockquote */
+        aside,
+        blockquote {
+            margin-left: 0;
+            padding: 1.2em 2em;
+        }
+
+        blockquote {
+            background-color: #f9f9f9;
+            color: #111;
+            /* Arlen: WCAG 2019 */
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin: 1em 0;
+        }
+
+        cite {
+            display: block;
+            text-align: right;
+            font-style: italic;
+        }
+
+        /* tables */
+        table {
+            width: 100%;
+            margin: 0 0 1em;
+            border-collapse: collapse;
+            border: 1px solid #eee;
+        }
+
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+            padding: 0.5em 0.75em;
+        }
+
+        th {
+            text-align: left;
+            background-color: #e9e9e9;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f5f5f5;
+        }
+
+        table caption {
+            font-style: italic;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        table p {
+            /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+            margin: 0;
+        }
+
+        /* pilcrow */
+        a.pilcrow {
+            color: #666;
+            /* Arlen: AHDJ 2019 */
+            text-decoration: none;
+            visibility: hidden;
+            user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        @media screen {
+
+            aside:hover>a.pilcrow,
+            p:hover>a.pilcrow,
+            blockquote:hover>a.pilcrow,
+            div:hover>a.pilcrow,
+            li:hover>a.pilcrow,
+            pre:hover>a.pilcrow {
+                visibility: visible;
+            }
+
+            a.pilcrow:hover {
+                background-color: transparent;
+            }
+        }
+
+        /* misc */
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+        }
+
+        .bcp14 {
+            font-variant: small-caps;
+        }
+
+        .role {
+            font-variant: all-small-caps;
+        }
+
+        /* info block */
+        #identifiers {
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        #identifiers dt {
+            width: 3em;
+            clear: left;
+        }
+
+        #identifiers dd {
+            float: left;
+            margin-bottom: 0;
+        }
+
+        #identifiers .authors .author {
+            display: inline-block;
+            margin-right: 1.5em;
+        }
+
+        #identifiers .authors .org {
+            font-style: italic;
+        }
+
+        /* The prepared/rendered info at the very bottom of the page */
+        .docInfo {
+            color: #666;
+            /* Arlen: WCAG 2019 */
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 2em;
+        }
+
+        .docInfo .prepared {
+            float: left;
+        }
+
+        .docInfo .prepared {
+            float: right;
+        }
+
+        /* table of contents */
+        #toc {
+            padding: 0.75em 0 2em 0;
+            margin-bottom: 1em;
+        }
+
+        nav.toc ul {
+            margin: 0 0.5em 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        nav.toc li {
+            line-height: 1.3em;
+            margin: 0.75em 0;
+            padding-left: 1.2em;
+            text-indent: -1.2em;
+        }
+
+        /* references */
+        .references dt {
+            text-align: right;
+            font-weight: bold;
+            min-width: 7em;
+        }
+
+        .references dd {
+            margin-left: 8em;
+            overflow: auto;
+        }
+
+        .refInstance {
+            margin-bottom: 1.25em;
+        }
+
+        .references .ascii {
+            margin-bottom: 0.25em;
+        }
+
+        /* index */
+        .index ul {
+            margin: 0 0 0 1em;
+            padding: 0;
+            list-style: none;
+        }
+
+        .index ul ul {
+            margin: 0;
+        }
+
+        .index li {
+            margin: 0;
+            text-indent: -2em;
+            padding-left: 2em;
+            padding-bottom: 5px;
+        }
+
+        .indexIndex {
+            margin: 0.5em 0 1em;
+        }
+
+        .index a {
+            font-weight: 700;
+        }
+
+        /* make the index two-column on all but the smallest screens */
+        @media (min-width: 600px) {
+            .index ul {
+                -moz-column-count: 2;
+                -moz-column-gap: 20px;
+            }
+
+            .index ul ul {
+                -moz-column-count: 1;
+                -moz-column-gap: 0;
+            }
+        }
+
+        /* authors */
+        address.vcard {
+            font-style: normal;
+            margin: 1em 0;
+        }
+
+        address.vcard .nameRole {
+            font-weight: 700;
+            margin-left: 0;
+        }
+
+        address.vcard .label {
+            font-family: "Noto Sans", Arial, Helvetica, sans-serif;
+            margin: 0.5em 0;
+        }
+
+        address.vcard .type {
+            display: none;
+        }
+
+        .alternative-contact {
+            margin: 1.5em 0 1em;
+        }
+
+        hr.addr {
+            border-top: 1px dashed;
+            margin: 0;
+            color: #ddd;
+            max-width: calc(100% - 16px);
+        }
+
+        /* temporary notes */
+        .rfcEditorRemove::before {
+            position: absolute;
+            top: 0.2em;
+            right: 0.2em;
+            padding: 0.2em;
+            content: "The RFC Editor will remove this note";
+            color: #9e2a00;
+            /* Arlen: WCAG 2019 */
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+        }
+
+        .rfcEditorRemove {
+            position: relative;
+            padding-top: 1.8em;
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            border-radius: 3px;
+        }
+
+        .cref {
+            background-color: #ffd;
+            /* Arlen: WCAG 2019 */
+            padding: 2px 4px;
+        }
+
+        .crefSource {
+            font-style: italic;
+        }
+
+        /* alternative layout for smaller screens */
+        @media screen and (max-width: 1023px) {
+            body {
+                padding-top: 2em;
+            }
+
+            #title {
+                padding: 1em 0;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-top: -18px;
+                /* provide offset for in-page anchors */
+                padding-top: 38px;
+            }
+
+            #identifiers dd {
+                max-width: 60%;
+            }
+
+            #toc {
+                position: fixed;
+                z-index: 2;
+                top: 0;
+                right: 0;
+                padding: 0;
+                margin: 0;
+                background-color: inherit;
+                border-bottom: 1px solid #ccc;
+            }
+
+            #toc h2 {
+                margin: -1px 0 0 0;
+                padding: 4px 0 4px 6px;
+                padding-right: 1em;
+                min-width: 190px;
+                font-size: 1.1em;
+                text-align: right;
+                background-color: #444;
+                color: white;
+                cursor: pointer;
+            }
+
+            #toc h2::before {
+                /* css hamburger */
+                float: right;
+                position: relative;
+                width: 1em;
+                height: 1px;
+                left: -164px;
+                margin: 6px 0 0 0;
+                background: white none repeat scroll 0 0;
+                box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+                content: "";
+            }
+
+            #toc nav {
+                display: none;
+                padding: 0.5em 1em 1em;
+                overflow: auto;
+                height: calc(100vh - 48px);
+                border-left: 1px solid #ddd;
+            }
+        }
+
+        /* alternative layout for wide screens */
+        @media screen and (min-width: 1024px) {
+            body {
+                max-width: 724px;
+                margin: 42px auto;
+                padding-left: 1.5em;
+                padding-right: 29em;
+            }
+
+            #toc {
+                position: fixed;
+                top: 42px;
+                right: 42px;
+                width: 25%;
+                margin: 0;
+                padding: 0 1em;
+                z-index: 1;
+            }
+
+            #toc h2 {
+                border-top: none;
+                border-bottom: 1px solid #ddd;
+                font-size: 1em;
+                font-weight: normal;
+                margin: 0;
+                padding: 0.25em 1em 1em 0;
+            }
+
+            #toc nav {
+                display: block;
+                height: calc(90vh - 84px);
+                bottom: 0;
+                padding: 0.5em 0 0;
+                overflow: auto;
+            }
+
+            img {
+                /* future proofing */
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        /* pagination */
+        @media print {
+            body {
+
+                width: 100%;
+            }
+
+            p {
+                orphans: 3;
+                widows: 3;
+            }
+
+            #n-copyright-notice {
+                border-bottom: none;
+            }
+
+            #toc,
+            #n-introduction {
+                page-break-before: always;
+            }
+
+            #toc {
+                border-top: none;
+                padding-top: 0;
+            }
+
+            figure,
+            pre {
+                page-break-inside: avoid;
+            }
+
+            figure {
+                overflow: scroll;
+            }
+
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                page-break-after: avoid;
+            }
+
+            h2+*,
+            h3+*,
+            h4+*,
+            h5+*,
+            h6+* {
+                page-break-before: avoid;
+            }
+
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-size: 10pt;
+            }
+
+            table {
+                border: 1px solid #ddd;
+            }
+
+            td {
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        /* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+        /*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+        @page :first {
+            padding-top: 0;
+
+            @top-left {
+                content: normal;
+                border: none;
+            }
+
+            @top-center {
+                content: normal;
+                border: none;
+            }
+
+            @top-right {
+                content: normal;
+                border: none;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin-bottom: 45mm;
+            padding-top: 20px;
+            /* The follwing is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+            /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+        }
+
+        /* Changes introduced to fix issues found during implementation */
+        /* Make sure links are clickable even if overlapped by following H* */
+        a {
+            z-index: 2;
+        }
+
+        /* Separate body from document info even without intervening H1 */
+        section {
+            clear: both;
+        }
+
+
+        /* Top align author divs, to avoid names without organization dropping level with org names */
+        .author {
+            vertical-align: top;
+        }
+
+        /* Leave room in document info to show Internet-Draft on one line */
+        #identifiers dt {
+            width: 8em;
+        }
+
+        /* Don't waste quite as much whitespace between label and value in doc info */
+        #identifiers dd {
+            margin-left: 1em;
+        }
+
+        /* Give floating toc a background color (needed when it's a div inside section */
+        #toc {
+            background-color: white;
+        }
+
+        /* Make the collapsed ToC header render white on gray also when it's a link */
+        @media screen and (max-width: 1023px) {
+
+            #toc h2 a,
+            #toc h2 a:link,
+            #toc h2 a:focus,
+            #toc h2 a:hover,
+            #toc a.toplink,
+            #toc a.toplink:hover {
+                color: white;
+                background-color: #444;
+                text-decoration: none;
+            }
+        }
+
+        /* Give the bottom of the ToC some whitespace */
+        @media screen and (min-width: 1024px) {
+            #toc {
+                padding: 0 0 1em 1em;
+            }
+        }
+
+        /* Style section numbers with more space between number and title */
+        .section-number {
+            padding-right: 0.5em;
+        }
+
+        /* prevent monospace from becoming overly large */
+        tt,
+        code,
+        pre,
+        code {
+            font-size: 95%;
+        }
+
+        /* Fix the height/width aspect for ascii art*/
+        pre.sourcecode,
+        .art-text pre {
+            line-height: 1.12;
+        }
+
+
+        /* Add styling for a link in the ToC that points to the top of the document */
+        a.toplink {
+            float: right;
+            margin-right: 0.5em;
+        }
+
+        /* Fix the dl styling to match the RFC 7992 attributes */
+        dl>dt,
+        dl.dlParallel>dt {
+            float: left;
+            margin-right: 1em;
+        }
+
+        dl.dlNewline>dt {
+            float: none;
+        }
+
+        /* Provide styling for table cell text alignment */
+        table td.text-left,
+        table th.text-left {
+            text-align: left;
+        }
+
+        table td.text-center,
+        table th.text-center {
+            text-align: center;
+        }
+
+        table td.text-right,
+        table th.text-right {
+            text-align: right;
+        }
+
+        /* Make the alternative author contact informatio look less like just another
+   author, and group it closer with the primary author contact information */
+        .alternative-contact {
+            margin: 0.5em 0 0.25em 0;
+        }
+
+        address .non-ascii {
+            margin: 0 0 0 2em;
+        }
+
+        /* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+        table {
+            width: auto;
+        }
+
+        /* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+        .references dd {
+            overflow: visible;
+        }
+
+        /* Control caption placement */
+        caption {
+            caption-side: bottom;
+        }
+
+        /* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+        address.vcard {
+            max-width: 30em;
+            margin-right: auto;
+        }
+
+        /* For address alignment dependent on LTR or RTL scripts */
+        address div.left {
+            text-align: left;
+        }
+
+        address div.right {
+            text-align: right;
+        }
+
+        /* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+        table.right {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        table.center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table.left {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Give the table caption label the same styling as the figcaption */
+        caption a[href] {
+            color: #222;
+        }
+
+        @media print {
+            .toplink {
+                display: none;
+            }
+
+            /* avoid overwriting the top border line with the ToC header */
+            #toc {
+                padding-top: 1px;
+            }
+
+            /* Avoid page breaks inside dl and author address entries */
+            .vcard {
+                page-break-inside: avoid;
+            }
+
+        }
+
+        /* Tweak the bcp14 keyword presentation */
+        .bcp14 {
+            font-variant: small-caps;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* Tweak the invisible space above H* in order not to overlay links in text above */
+        h2 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 31px;
+        }
+
+        h3 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        h4 {
+            margin-top: -18px;
+            /* provide offset for in-page anchors */
+            padding-top: 24px;
+        }
+
+        /* Float artwork pilcrow to the right */
+        @media screen {
+            .artwork a.pilcrow {
+                display: block;
+                line-height: 0.7;
+                margin-top: 0.15em;
+            }
+        }
+
+        /* Make pilcrows on dd visible */
+        @media screen {
+            dd:hover>a.pilcrow {
+                visibility: visible;
+            }
+        }
+
+        /* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+        .alignLeft.art-text,
+        .alignCenter.art-text,
+        .alignRight.art-text {
+            margin-bottom: 0;
+        }
+
+        .alignLeft,
+        .alignCenter,
+        .alignRight {
+            margin: 1em 0 0 0;
+        }
+
+        /* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+        @media print {
+            a.pilcrow {
+                display: none;
+            }
+        }
+
+        /* Styling for the external metadata */
+        div#external-metadata {
+            background-color: #eee;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+            display: none;
+        }
+
+        div#internal-metadata {
+            padding: 0.5em;
+            /* to match the external-metadata padding */
+        }
+
+        /* Styling for title RFC Number */
+        h1#rfcnum {
+            clear: both;
+            margin: 0 0 -1em;
+            padding: 1em 0 0 0;
+        }
+
+        /* Make .olPercent look the same as <ol><li> */
+        dl.olPercent>dd {
+            margin-bottom: 0.25em;
+            min-height: initial;
+        }
+
+        /* Give aside some styling to set it apart */
+        aside {
+            border-left: 1px solid #ddd;
+            margin: 1em 0 1em 2em;
+            padding: 0.2em 2em;
+        }
+
+        aside>dl,
+        aside>ol,
+        aside>ul,
+        aside>table,
+        aside>p {
+            margin-bottom: 0.5em;
+        }
+
+        /* Additional page break settings */
+        @media print {
+
+            figcaption,
+            table caption {
+                page-break-before: avoid;
+            }
+        }
+
+        /* Font size adjustments for print */
+        @media print {
+            body {
+                font-size: 10pt;
+                line-height: normal;
+                max-width: 96%;
+            }
+
+            h1 {
+                font-size: 1.72em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2*1.2 */
+            h2 {
+                font-size: 1.44em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2*1.2 */
+            h3 {
+                font-size: 1.2em;
+                padding-top: 1.5em;
+            }
+
+            /* 1*1.2 */
+            h4 {
+                font-size: 1em;
+                padding-top: 1.5em;
+            }
+
+            h5,
+            h6 {
+                font-size: 1em;
+                margin: initial;
+                padding: 0.5em 0 0.3em;
+            }
+        }
+
+        /* Sourcecode margin in print, when there's no pilcrow */
+        @media print {
+
+            .artwork,
+            .sourcecode {
+                margin-bottom: 1em;
+            }
+        }
+
+        /* Avoid narrow tables forcing too narrow table captions, which may render badly */
+        table {
+            min-width: 20em;
+        }
+
+        /* ol type a */
+        ol.type-a {
+            list-style-type: lower-alpha;
+        }
+
+        ol.type-A {
+            list-style-type: upper-alpha;
+        }
+
+        ol.type-i {
+            list-style-type: lower-roman;
+        }
+
+        ol.type-I {
+            list-style-type: lower-roman;
+        }
+
+        /* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background sligthtly */
+        table {
+            border: 1px solid #ddd;
+        }
+
+        td {
+            border-top: 1px solid #ddd;
+        }
+
+        tr:nth-child(2n+1)>td {
+            background-color: #f8f8f8;
+        }
+
+        /* Use style rules to govern display of the TOC. */
+        @media screen and (max-width: 1023px) {
+            #toc nav {
+                display: none;
+            }
+
+            #toc.active nav {
+                display: block;
+            }
+        }
+
+        /* Add support for keepWithNext */
+        .keepWithNext {
+            break-after: avoid-page;
+            break-after: avoid-page;
+        }
+
+        /* Add support for keepWithPrevious */
+        .keepWithPrevious {
+            break-before: avoid-page;
+        }
+
+        /* Change the approach to avoiding breaks inside artwork etc. */
+        figure,
+        pre,
+        table,
+        .artwork,
+        .sourcecode {
+            break-before: avoid-page;
+            break-after: auto;
+        }
+
+        /* Avoid breaks between <dt> and <dd> */
+        dl {
+            break-before: auto;
+            break-inside: auto;
+        }
+
+        dt {
+            break-before: auto;
+            break-after: avoid-page;
+        }
+
+        dd {
+            break-before: avoid-page;
+            break-after: auto;
+            orphans: 3;
+            widows: 3
+        }
+
+        span.break,
+        dd.break {
+            margin-bottom: 0;
+            min-height: 0;
+            break-before: auto;
+            break-inside: auto;
+            break-after: auto;
+        }
+
+        /* Undo break-before ToC */
+        @media print {
+            #toc {
+                break-before: auto;
+            }
+        }
+
+        /* Text in compact lists should not get extra bottim margin space,
+   since that would makes the list not compact */
+        ul.compact p,
+        .ulCompact p,
+        ol.compact p,
+        .olCompact p {
+            margin: 0;
+        }
+
+        /* But the list as a whole needs the extra space at the end */
+        section ul.compact,
+        section .ulCompact,
+        section ol.compact,
+        section .olCompact {
+            margin-bottom: 1em;
+            /* same as p not within ul.compact etc. */
+        }
+
+        /* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+        tt,
+        code {
+            background-color: transparent;
+        }
+
+        p tt,
+        p code,
+        li tt,
+        li code {
+            background-color: #f8f8f8;
+        }
+
+        /* Tweak the pre margin -- 0px doesn't come out well */
+        pre {
+            margin-top: 0.5px;
+        }
+
+        /* Tweak the comact list text */
+        ul.compact,
+        .ulCompact,
+        ol.compact,
+        .olCompact,
+        dl.compact,
+        .dlCompact {
+            line-height: normal;
+        }
+
+        /* Don't add top margin for nested lists */
+        li>ul,
+        li>ol,
+        li>dl,
+        dd>ul,
+        dd>ol,
+        dd>dl,
+        dl>dd>dl {
+            margin-top: initial;
+        }
+
+        /* Elements that should not be rendered on the same line as a <dt> */
+        /* This should match the element list in writer.text.TextWriter.render_dl() */
+        dd>div.artwork:first-child,
+        dd>aside:first-child,
+        dd>figure:first-child,
+        dd>ol:first-child,
+        dd>div:first-child>pre.sourcecode,
+        dd>table:first-child,
+        dd>ul:first-child {
+            clear: left;
+        }
+
+        /* fix for weird browser behaviour when <dd/> is empty */
+        dt+dd:empty::before {
+            content: "\00a0";
+        }
+
+        /* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+        li>p {
+            margin-bottom: 0.5em
+        }
+
+        /* Don't let p margin spill out from inside list items */
+        li>p:last-of-type {
+            margin-bottom: 0;
+        }
+    </style>
+    <link href="https://www.rfc-editor.org/rfc/rfc-local.css" rel="stylesheet" type="text/css">
+    <link href="https://dx.doi.org/10.17487/rfc9126" rel="alternate">
+    <link href="urn:issn:2070-1721" rel="alternate">
+    <link href="https://datatracker.ietf.org/doc/draft-ietf-oauth-par-10" rel="prev">
+</head>
+
+<body>
+    <script src="https://www.rfc-editor.org/js/metadata.min.js"></script>
+    <table class="ears">
+        <thead>
+            <tr>
+                <td class="left">RFC 9126</td>
+                <td class="center">OAuth PAR</td>
+                <td class="right">2021年9月</td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td class="left">Lodderstedt, et al.</td>
+                <td class="center">標準化過程</td>
+                <td class="right">[ページ]</td>
+            </tr>
+        </tfoot>
+    </table>
+    <div id="external-metadata" class="document-information"></div>
+    <div id="internal-metadata" class="document-information">
+        <dl id="identifiers">
+            <dt class="label-stream">ストリーム:</dt>
+            <dd class="stream">Internet Engineering Task Force (IETF)</dd>
+            <dt class="label-rfc">RFC:</dt>
+            <dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc9126" class="eref">9126</a></dd>
+            <dt class="label-category">カテゴリ:</dt>
+            <dd class="category">標準化過程</dd>
+            <dt class="label-published">公開:</dt>
+            <dd class="published">
+                <time datetime="2021-09" class="published">2021年9月</time>
+            </dd>
+            <dt class="label-issn">ISSN:</dt>
+            <dd class="issn">2070-1721</dd>
+            <dt class="label-authors">著者:</dt>
+            <dd class="authors">
+                <div class="author">
+                    <div class="author-name">T. Lodderstedt</div>
+                    <div class="org">yes.com</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">B. Campbell</div>
+                    <div class="org">Ping Identity</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">N. Sakimura</div>
+                    <div class="org">NAT.Consulting</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">D. Tonge</div>
+                    <div class="org">Moneyhub Financial Technology</div>
+                </div>
+                <div class="author">
+                    <div class="author-name">F. Skokan</div>
+                    <div class="org">Auth0</div>
+                </div>
+            </dd>
+        </dl>
+    </div>
+    <h1 id="rfcnum">RFC 9126</h1>
+    <h1 id="title">OAuth 2.0 プッシュ型認可リクエスト</h1>
+    <section id="section-abstract">
+        <h2 id="abstract"><a href="#abstract" class="selfRef">概要</a></h2>
+        <p id="section-abstract-1">本文書はプッシュ型認可リクエスト（PAR）エンドポイントを定義する。これにより、
+            クライアントは OAuth 2.0 認可リクエストのペイロードを、直接リクエストを通じて
+            認可サーバーへプッシュでき、後続の認可エンドポイントへの呼び出しで
+            そのデータへの参照として使用されるリクエスト URI が
+            クライアントに提供される。<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+    </section>
+    <div id="status-of-memo">
+        <section id="section-boilerplate.1">
+            <h2 id="name-status-of-this-memo">
+                <a href="#name-status-of-this-memo" class="section-name selfRef">このメモの位置付け</a>
+            </h2>
+            <p id="section-boilerplate.1-1">
+                これはインターネット標準化過程文書である。<a href="#section-boilerplate.1-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-boilerplate.1-2">
+                本文書は Internet Engineering Task Force
+                (IETF) の成果物である。これは IETF コミュニティの合意を
+                表すものである。本文書は公開レビューを受け、
+                Internet Engineering Steering Group (IESG) により
+                発行が承認されている。インターネット標準に関する
+                詳細情報は RFC 7841 の Section 2 で入手できる。<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.1-3">
+                本文書の現在の状態、正誤表、および
+                フィードバックの提供方法に関する情報は、
+                <span><a
+                        href="https://www.rfc-editor.org/info/rfc9126">https://www.rfc-editor.org/info/rfc9126</a></span>
+                で入手できる。<a href="#section-boilerplate.1-3" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="copyright">
+        <section id="section-boilerplate.2">
+            <h2 id="name-copyright-notice">
+                <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+            </h2>
+            <p id="section-boilerplate.2-1">
+                Copyright (c) 2021 IETF Trust and the persons identified as the
+                document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.2-2">
+                This document is subject to BCP 78 and the IETF Trust's Legal
+                Provisions Relating to IETF Documents
+                (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>)
+                in effect on the date of
+                publication of this document. Please review these documents
+                carefully, as they describe your rights and restrictions with
+                respect to this document. Code Components extracted from this
+                document must include Simplified BSD License text as described in
+                Section 4.e of the Trust Legal Provisions and are provided without
+                warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2"
+                    class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="toc">
+        <section id="section-toc.1">
+            <a href="#" onclick="scroll(0,0)" class="toplink">▲</a>
+            <h2 id="name-table-of-contents">
+                <a href="#name-table-of-contents" class="section-name selfRef">目次</a>
+            </h2>
+            <nav class="toc">
+                <ul class="toc ulEmpty ulBare compact">
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.1">
+                        <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="xref">1</a>. <a
+                                href="#name-introduction" class="xref">序論</a></p>
+                        <ul class="ulEmpty ulBare toc compact">
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.1.2.1">
+                                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1"
+                                        class="xref">1.1</a>. <a href="#name-introductory-example" class="xref">導入例</a>
+                                </p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.1.2.2">
+                                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2"
+                                        class="xref">1.2</a>. <a href="#name-conventions-and-terminology"
+                                        class="xref">規約と用語</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.2">
+                        <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>. <a
+                                href="#name-pushed-authorization-reques" class="xref">プッシュ型認可リクエスト
+                                エンドポイント</a></p>
+                        <ul class="ulEmpty ulBare toc compact">
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.2.2.1">
+                                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>. <a
+                                        href="#name-request" class="xref">リクエスト</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.2.2.2">
+                                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>. <a
+                                        href="#name-successful-response" class="xref">成功レスポンス</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.2.2.3">
+                                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="xref">2.3</a>. <a
+                                        href="#name-error-response" class="xref">エラーレスポンス</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.2.2.4">
+                                <p id="section-toc.1-1.2.2.4.1"><a href="#section-2.4" class="xref">2.4</a>. <a
+                                        href="#name-management-of-client-redire" class="xref">クライアントの
+                                        リダイレクト URI の管理</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.3">
+                        <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>. <a
+                                href="#name-the-request-request-paramet" class="xref">「request」リクエスト
+                                パラメーター</a></p>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.4">
+                        <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>. <a
+                                href="#name-authorization-request" class="xref">認可リクエスト</a></p>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.5">
+                        <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>. <a
+                                href="#name-authorization-server-metada" class="xref">認可サーバーメタデータ</a>
+                        </p>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.6">
+                        <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>. <a
+                                href="#name-client-metadata" class="xref">クライアントメタデータ</a></p>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.7">
+                        <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>. <a
+                                href="#name-security-considerations" class="xref">セキュリティ上の考慮事項</a></p>
+                        <ul class="ulEmpty ulBare toc compact">
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.7.2.1">
+                                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>. <a
+                                        href="#name-request-uri-guessing" class="xref">リクエスト URI の推測</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.7.2.2">
+                                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>. <a
+                                        href="#name-open-redirection" class="xref">オープンリダイレクト</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.7.2.3">
+                                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="xref">7.3</a>. <a
+                                        href="#name-request-object-replay" class="xref">Request Object のリプレイ</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.7.2.4">
+                                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="xref">7.4</a>. <a
+                                        href="#name-client-policy-change" class="xref">クライアントポリシーの変更</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.7.2.5">
+                                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="xref">7.5</a>. <a
+                                        href="#name-request-uri-swapping" class="xref">リクエスト URI のすり替え</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.8">
+                        <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>. <a
+                                href="#name-privacy-considerations" class="xref">プライバシー上の考慮事項</a></p>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.9">
+                        <p id="section-toc.1-1.9.1"><a href="#section-9" class="xref">9</a>. <a
+                                href="#name-iana-considerations" class="xref">IANA に関する考慮事項</a></p>
+                        <ul class="ulEmpty ulBare toc compact">
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.9.2.1">
+                                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="xref">9.1</a>. <a
+                                        href="#name-oauth-authorization-server-" class="xref">OAuth 認可サーバー
+                                        メタデータ</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.9.2.2">
+                                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="xref">9.2</a>. <a
+                                        href="#name-oauth-dynamic-client-regist" class="xref">OAuth 動的クライアント
+                                        登録メタデータ</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.9.2.3">
+                                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="xref">9.3</a>. <a
+                                        href="#name-oauth-uri-registration" class="xref">OAuth URI 登録</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.10">
+                        <p id="section-toc.1-1.10.1"><a href="#section-10" class="xref">10</a>. <a
+                                href="#name-references" class="xref">参考文献</a></p>
+                        <ul class="ulEmpty ulBare toc compact">
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.10.2.1">
+                                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="xref">10.1</a>. <a
+                                        href="#name-normative-references" class="xref">規定参考文献</a></p>
+                            </li>
+                            <li class="ulEmpty ulBare toc compact" id="section-toc.1-1.10.2.2">
+                                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="xref">10.2</a>. <a
+                                        href="#name-informative-references" class="xref">参考情報文献</a></p>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.11">
+                        <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="xref"></a><a
+                                href="#name-acknowledgements" class="xref">謝辞</a></p>
+                    </li>
+                    <li class="toc ulEmpty ulBare compact" id="section-toc.1-1.12">
+                        <p id="section-toc.1-1.12.1"><a href="#appendix-B" class="xref"></a><a
+                                href="#name-authors-addresses" class="xref">著者の連絡先</a></p>
+                    </li>
+                </ul>
+            </nav>
+        </section>
+    </div>
+    <div id="Introduction">
+        <section id="section-1">
+            <h2 id="name-introduction">
+                <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction"
+                    class="section-name selfRef">序論</a>
+            </h2>
+            <p id="section-1-1">本文書は、OAuth <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> クライアントが
+                認可リクエストのペイロードを認可サーバーへ直接
+                プッシュできるようにする、プッシュ型認可リクエスト（PAR）エンドポイントを定義する。
+                交換としてリクエスト URI 値が受け取られ、その値は、後続のユーザーエージェント経由での
+                認可エンドポイントへの呼び出しにおいて、認可リクエストのペイロードデータへの参照として
+                使用される。<a href="#section-1-1" class="pilcrow">¶</a></p>
+            <p id="section-1-2">OAuth <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> では、認可
+                リクエストパラメーターは通常、ユーザーエージェントでのリダイレクトを通じて URI クエリ
+                パラメーターとして送信される。これは単純である一方、次のような課題も生じる。<a href="#section-1-2" class="pilcrow">¶</a></p>
+            <ul class="normal">
+                <li class="normal" id="section-1-3.1">暗号学的な完全性保護および真正性保護が存在しない。
+                    たとえば、攻撃者は、要求されるアクセス範囲を変更したり、scope 値を変更することで
+                    支払いトランザクションのコンテキストをすり替えたりできる。クライアントやユーザーが
+                    そのような変更の一部を検出できるようにするプロトコル機能は存在するが、プロセスの早期に
+                    変更を防止する方が、より堅牢な解決策である。<a href="#section-1-3.1" class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-1-3.2">リクエストパラメーターの機密性を保証する仕組みがない。
+                    認可エンドポイントには HTTPS が要求されるものの、リクエストデータはユーザーエージェントを
+                    平文で通過し、クエリ文字列データが Web サーバーログやリファラー経由で他のサイトへ
+                    意図せず漏えいする可能性がある。認可リクエストで個人識別情報やその他の規制対象データが
+                    送信される場合（アイデンティティ、オープンバンキング、および類似のシナリオでは十分に
+                    あり得る）、そのような漏えいの影響は重大になり得る。<a href="#section-1-3.2" class="pilcrow">¶</a>
+                </li>
+                <li class="normal" id="section-1-3.3">認可リクエスト URL は、特にきめ細かい認可データを必要とする
+                    シナリオでは非常に大きくなる可能性があり、リクエスト処理でエラーを引き起こすことがある。<a href="#section-1-3.3" class="pilcrow">¶</a>
+                </li>
+            </ul>
+            <p id="section-1-4">JWT-Secured Authorization Request（JAR）<span>[<a href="#RFC9101"
+                        class="xref">RFC9101</a>]</span> は、OAuth クライアントが認可リクエストパラメーターを
+                Request Object でラップできるようにすることで、セキュリティ上の課題に対する解決策を提供する。
+                Request Object は、署名され、任意で暗号化された JSON Web Token（JWT）
+                <span>[<a href="#RFC7519" class="xref">RFC7519</a>]</span> である。
+
+                サイズ制限に対処するため、JAR は <code>request_uri</code> パラメーターを導入している。
+                これにより、クライアントは Request Object そのものではなく、Request Object への参照を
+                送信できる。<a href="#section-1-4" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-5">本文書は、認可リクエストのペイロードを認可サーバーへ直接プッシュし、
+                後続の認可リクエストで認可サーバーにおいて使用可能な <code>request_uri</code> 値と
+                交換するための相互運用可能な方法を提供することにより、JAR を補完する。<a href="#section-1-5" class="pilcrow">¶</a></p>
+            <p id="section-1-6">PAR は、機密性があり完全性が保護された認可リクエストを行うための単純な手段を
+                クライアントに提供することで、OAuth のセキュリティを促進する。さらに高いセキュリティレベル、
+                特に暗号学的に確認された否認防止を必要とするクライアントは、<span>[<a href="#RFC9101" class="xref">RFC9101</a>]</span>
+
+                で定義される JWT ベースの Request Object を PAR と併用できる。<a href="#section-1-6" class="pilcrow">¶</a>
+            </p>
+            <p id="section-1-7">PAR により、認可サーバーは、ユーザー操作が発生する前にクライアントを認証できる。
+                認可プロセス中にクライアントの身元に対する信頼度が高まることで、認可サーバーは、
+                プロセスのかなり早い段階で不正なリクエストを拒否できるようになり、クライアントのなりすましや、
+                その他の方法による認可リクエストの改ざんまたは悪用の試みを防止できる。<a href="#section-1-7" class="pilcrow">¶</a></p>
+            <p id="section-1-8"><span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-3.1" class="relref">[<a
+                            href="#RFC6749" class="xref">RFC6749</a>] の Section 3.1</a></span> および
+                <span>[<a href="#OIDC" class="xref">OIDC</a>]</span> の Section 3.1.2.1 で説明されているように、
+                ユーザーエージェント経由で認可エンドポイントへ HTTP <code>POST</code> リクエストを行うことも、
+                上記のリクエストサイズ制限に対処するために使用できることに注意する。しかし、それは
+                <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> において任意にすぎず、サポートされている場合でも、
+                従来型の Web アプリケーションでは実行可能な選択肢である一方、インストール型モバイル
+                アプリケーションで使用することは極めて困難である。<span>[<a href="#RFC8252" class="xref">RFC8252</a>]</span>
+                で説明されているように、それらのアプリは、システムブラウザーで認可リクエスト URI を開くために、
+                プラットフォーム固有の API を使用する。しかし、モバイルアプリがブラウザーを起動すると、
+                結果として生じる最初のリクエストは <code>GET</code> メソッドの使用に制約される。認可リクエストに
+                <code>POST</code> を使用するには、アプリがまず、サイズの大きい認可リクエストペイロードを何らかの方法で
+                伝えつつ、<code>GET</code> によってアプリが制御する URI をブラウザーに開かせ、その結果のレスポンスに、
+                認可サーバーへクロスサイトフォーム <code>POST</code> を開始するためのコンテンツとスクリプトを
+                含める必要がある。PAR は、上記のように使用がより単純であり、追加のセキュリティ上の利点を持つ。<a href="#section-1-8" class="pilcrow">¶</a>
+            </p>
+            <div id="introductory-example">
+                <section id="section-1.1">
+                    <h3 id="name-introductory-example">
+                        <a href="#section-1.1" class="section-number selfRef">1.1. </a><a
+                            href="#name-introductory-example" class="section-name selfRef">導入例</a>
+                    </h3>
+                    <p id="section-1.1-1">従来型の OAuth 2.0 では、クライアントは通常、ユーザーエージェントに
+                        次のような HTTP リクエストを認可サーバーの認可エンドポイントへ行わせることにより、
+                        認可リクエストを開始する（追加の改行とインデントは表示目的のみ）。<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+                    <div id="section-1.1-2">
+                        <pre class="sourcecode lang-http-message"> GET /authorize?response_type=code
+  &amp;client_id=CLIENT1234&amp;state=duk681S8n00GsJpe7n9boxdzen
+  &amp;redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb HTTP/1.1
+ Host: as.example.com
+</pre><a href="#section-1.1-2" class="pilcrow">¶</a>
+                    </div>
+                    <p id="section-1.1-3">そのようなリクエストは、代わりにクライアントから PAR エンドポイントへの
+                        <code>POST</code> リクエストによって、認可サーバーへ直接プッシュできる。次の例に示す
+                        （追加の改行とスペースは表示目的のみ）。
+                        リクエストは認可サーバーへ直接行われるため、クライアントは認証できる
+                        （たとえば、ここに示すように JWT クライアントアサーションベースの認証を使用する）。<a href="#section-1.1-3" class="pilcrow">¶</a>
+                    </p>
+                    <div id="section-1.1-4">
+                        <pre class="sourcecode lang-http-message"> POST /as/par HTTP/1.1
+ Host: as.example.com
+ Content-Type: application/x-www-form-urlencoded
+
+ &amp;response_type=code
+ &amp;client_id=CLIENT1234&amp;state=duk681S8n00GsJpe7n9boxdzen
+ &amp;redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb
+ &amp;client_assertion_type=
+  urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer
+ &amp;client_assertion=eyJraWQiOiI0MiIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJDTE
+  lFTlQxMjM0Iiwic3ViIjoiQ0xJRU5UMTIzNCIsImF1ZCI6Imh0dHBzOi8vc2VydmVyL
+  mV4YW1wbGUuY29tIiwiZXhwIjoxNjI1ODY4ODc4fQ.Igw8QrpAWRNPDGoWGRmJumLBM
+  wbLjeIYwqWUu-ywgvvufl_0sQJftNs3bzjIrP0BV9rRG-3eI1Ksh0kQ1CwvzA
+
+</pre><a href="#section-1.1-4" class="pilcrow">¶</a>
+                    </div>
+                    <p id="section-1.1-5">認可サーバーは、リクエスト URI で応答する。<a href="#section-1.1-5" class="pilcrow">¶</a></p>
+                    <div id="section-1.1-6">
+                        <pre class="sourcecode lang-http-message"> HTTP/1.1 201 Created
+ Cache-Control: no-cache, no-store
+ Content-Type: application/json
+
+ {
+   "request_uri": "urn:example:bwc4JK-ESC0w8acc191e-Y1LTC2",
+   "expires_in": 90
+ }
+</pre><a href="#section-1.1-6" class="pilcrow">¶</a>
+                    </div>
+                    <p id="section-1.1-7">クライアントは、リクエスト URI 値を使用して後続の認可リクエストを
+                        作成し、ユーザーエージェントに次のような HTTP リクエストを認可サーバーの
+                        認可エンドポイントへ行わせる（追加の改行とインデントは表示目的のみ）。<a href="#section-1.1-7" class="pilcrow">¶</a></p>
+                    <div id="section-1.1-8">
+                        <pre class="sourcecode lang-http-message"> GET /authorize?client_id=CLIENT1234
+  &amp;request_uri=urn%3Aexample%3Abwc4JK-ESC0w8acc191e-Y1LTC2 HTTP/1.1
+ Host: as.example.com
+</pre><a href="#section-1.1-8" class="pilcrow">¶</a>
+                    </div>
+                </section>
+            </div>
+            <div id="conventions-and-terminology">
+                <section id="section-1.2">
+                    <h3 id="name-conventions-and-terminology">
+                        <a href="#section-1.2" class="section-number selfRef">1.2. </a><a
+                            href="#name-conventions-and-terminology" class="section-name selfRef">規約と
+                            用語</a>
+                    </h3>
+                    <p id="section-1.2-1">
+                        本文書におけるキーワード「<span class="bcp14">MUST</span>」、「<span class="bcp14">MUST NOT</span>」、「<span
+                            class="bcp14">REQUIRED</span>」、「<span class="bcp14">SHALL</span>」、「<span class="bcp14">SHALL
+                            NOT</span>」、「<span class="bcp14">SHOULD</span>」、「<span class="bcp14">SHOULD
+                            NOT</span>」、「<span class="bcp14">RECOMMENDED</span>」、「<span class="bcp14">NOT
+                            RECOMMENDED</span>」、
+                        「<span class="bcp14">MAY</span>」、および「<span class="bcp14">OPTIONAL</span>」は、
+                        ここに示すようにすべて大文字で現れる場合に限り、
+                        BCP 14 <span>[<a href="#RFC2119" class="xref">RFC2119</a>]</span> <span>[<a href="#RFC8174"
+                                class="xref">RFC8174</a>]</span>
+                        で説明されるとおりに解釈される。<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+                    <p id="section-1.2-2">本仕様は、「The OAuth 2.0 Authorization Framework」<span>[<a href="#RFC6749"
+                                class="xref">RFC6749</a>]</span> で定義される
+                        「access token」、「authorization server」、「authorization endpoint」、
+                        「authorization request」、「token endpoint」、および「client」という用語を使用する。<a href="#section-1.2-2"
+                            class="pilcrow">¶</a></p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="pushed-authorization-request-endpoint">
+        <section id="section-2">
+            <h2 id="name-pushed-authorization-reques">
+                <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-pushed-authorization-reques"
+                    class="section-name selfRef">プッシュ型認可リクエストエンドポイント</a>
+            </h2>
+            <p id="section-2-1">プッシュ型認可リクエストエンドポイントは、認可サーバー上の HTTP API であり、
+                HTTP リクエストメッセージボディ内のパラメーターを <code>application/x-www-form-urlencoded</code>
+                形式で含む HTTP <code>POST</code> リクエストを受け付ける。この形式の文字エンコーディングは、
+                <span><a href="https://www.rfc-editor.org/rfc/rfc6749#appendix-B" class="relref">[<a href="#RFC6749"
+                            class="xref">RFC6749</a>] の Appendix
+                        B</a></span> で説明されているように UTF-8 である。PAR エンドポイント URL は
+                「https」スキームを使用<span class="bcp14">MUST</span> する。<a href="#section-2-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-2-2">PAR をサポートする認可サーバーは、<a href="#as_metadata" class="xref">Section 5</a> で定義される
+                <code>pushed_authorization_request_endpoint</code> パラメーターを使用して、認可サーバーメタデータ文書
+                <span>[<a href="#RFC8414" class="xref">RFC8414</a>]</span> にプッシュ型認可リクエストエンドポイントの URL を
+                含める<span class="bcp14">SHOULD</span> である。<a href="#section-2-2" class="pilcrow">¶</a>
+            </p>
+            <p id="section-2-3">このエンドポイントは、<span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> で認可エンドポイント向けに定義された
+                認可リクエストパラメーター、および認可エンドポイント向けに定義された適用可能なすべての拡張を
+                受け付ける。そのような拡張の例には、Proof Key for Code Exchange（PKCE）
+                <span>[<a href="#RFC7636" class="xref">RFC7636</a>]</span>、Resource
+                Indicators <span>[<a href="#RFC8707" class="xref">RFC8707</a>]</span>、および OpenID Connect（OIDC）
+                <span>[<a href="#OIDC" class="xref">OIDC</a>]</span> が含まれる。このエンドポイントは、
+                <span>[<a href="#RFC9101" class="xref">RFC9101</a>]</span> および本文書の
+                <a href="#request_parameter" class="xref">Section 3</a> に従って、認可リクエストパラメーターの集合を Request Object として送信することも
+                サポート<span class="bcp14">MAY</span> する。<a href="#section-2-3" class="pilcrow">¶</a>
+            </p>
+            <p id="section-2-4">トークンエンドポイントリクエストについて <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span>
+                で定義されているクライアント認証の規則は、適用可能な
+                認証方式を含めて、PAR エンドポイントにも適用される。該当する場合、<code>token_endpoint_auth_method</code>
+                クライアントメタデータパラメーター <span>[<a href="#RFC7591" class="xref">RFC7591</a>]</span> は、PAR
+                エンドポイントへのリクエストを含め、認可サーバーへ
+                直接リクエストを行う際にクライアントが使用する登録済み認証方式を示す。同様に、
+                <code>token_endpoint_auth_methods_supported</code> 認可サーバーメタデータ
+                <span>[<a href="#RFC8414" class="xref">RFC8414</a>]</span> パラメーターは、PAR エンドポイントへの
+                リクエストを含め、クライアントからの直接リクエストを受け付ける際に認可サーバーがサポートする
+                クライアント認証方式を列挙する。<a href="#section-2-4" class="pilcrow">¶</a>
+            </p>
+            <p id="section-2-5">歴史的な理由により、JWT クライアントアサーションベースの認証（<span><a
+                        href="https://www.rfc-editor.org/rfc/rfc7523#section-2.2" class="relref">[<a href="#RFC7523"
+                            class="xref">RFC7523</a>] の Section 2.2</a></span> で定義され、
+                <span>[<a href="#OIDC" class="xref">OIDC</a>]</span> の Section 9 に従う <code>private_key_jwt</code> または
+                <code>client_secret_jwt</code> 認証方式名を用いるもの）を使用する場合、用いるべき適切な audience
+                値に関して曖昧さが生じる可能性がある。その曖昧さに対処するため、<span>[<a href="#RFC8414" class="xref">RFC8414</a>]</span> に
+                従う認可サーバーの issuer 識別子 URL を audience の値として使用<span class="bcp14">SHOULD</span> する。相互運用性を促進するため、認可サーバーは、その
+                issuer 識別子、
+                トークンエンドポイント URL、またはプッシュ型認可リクエストエンドポイント URL を、意図された audience として
+                自身を識別する値として受け付け<span class="bcp14">MUST</span> る。<a href="#section-2-5" class="pilcrow">¶</a>
+            </p>
+            <div id="request">
+                <section id="section-2.1">
+                    <h3 id="name-request">
+                        <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-request"
+                            class="section-name selfRef">リクエスト</a>
+                    </h3>
+                    <p id="section-2.1-1">クライアントは、認可リクエストを構成するパラメーターを PAR エンドポイントへ直接
+                        送信する。典型的なパラメーター集合には、次の例に示すように、<code>client_id</code>、
+                        <code>response_type</code>、<code>redirect_uri</code>、<code>scope</code>、<code>state</code>、
+                        <code>code_challenge</code>、および <code>code_challenge_method</code> が含まれることがある。
+                        ただし、プッシュ型認可リクエストは、<span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> で定義されたもの、および
+                        すべての適用可能な拡張を含め、認可エンドポイントで使用可能な任意のパラメーターで構成できる。
+                        <code>request_uri</code> 認可リクエストパラメーターは例外であり、提供されては
+                        <span class="bcp14">MUST NOT</span> ならない。<a href="#section-2.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.1-2">リクエストには、対象クライアントに応じて、クライアント認証に必要な追加
+                        パラメーター（例：<code>client_secret</code>、または
+                        <code>client_assertion</code> と <code>client_assertion_type</code>）も含まれる。
+                        そのようなパラメーターはトークンエンドポイントでの使用向けに定義・登録されているが、
+                        クライアント認証にのみ適用される。プッシュ型認可リクエストに存在する場合、それらは
+                        クライアント認証のためにのみ依拠され、認可リクエスト自体には関係しない。クライアント認証に
+                        関連しないトークンエンドポイントパラメーターは、プッシュ型認可リクエストにおいて定義された
+                        意味を持たない。<code>client_id</code> パラメーターは、認可リクエストとトークンエンドポイントへの
+                        リクエストの両方において同じ意味で定義されている。必須の認可リクエストパラメーターとして、
+                        プッシュ型認可リクエストでも同様に必須である。<a href="#section-2.1-2" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.1-3">クライアントは、<span><a href="https://www.rfc-editor.org/rfc/rfc6749#appendix-B"
+                                class="relref">[<a href="#RFC6749" class="xref">RFC6749</a>] の Appendix B</a></span>
+                        で説明されているように、UTF-8 の文字エンコーディングを使用して、
+                        <code>x-www-form-urlencoded</code> 形式のパラメーターで HTTP <code>POST</code> リクエストの
+                        メッセージボディを構築する。該当する場合、クライアントはトークンエンドポイントリクエストと
+                        同じ規則を使用して、自身の認証資格情報をリクエストヘッダーまたはリクエストボディに追加する。<a href="#section-2.1-3" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.1-4">これは次の例で示される（メッセージボディ内の追加の改行は表示目的のみ）。<a href="#section-2.1-4"
+                            class="pilcrow">¶</a></p>
+                    <div id="section-2.1-5">
+                        <pre class="sourcecode lang-http-message"> POST /as/par HTTP/1.1
+ Host: as.example.com
+ Content-Type: application/x-www-form-urlencoded
+
+ response_type=code&amp;state=af0ifjsldkj&amp;client_id=s6BhdRkqt3
+ &amp;redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb
+ &amp;code_challenge=K2-ltc83acc4h0c9w6ESC_rEMTJ3bww-uCHaoeK1t8U
+ &amp;code_challenge_method=S256&amp;scope=account-information
+ &amp;client_assertion_type=
+  urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer
+ &amp;client_assertion=eyJraWQiOiJrMmJkYyIsImFsZyI6IlJTMjU2In0.eyJpc3Mi
+  OiJzNkJoZFJrcXQzIiwic3ViIjoiczZCaGRSa3F0MyIsImF1ZCI6Imh0dHBzOi8vc
+  2VydmVyLmV4YW1wbGUuY29tIiwiZXhwIjoxNjI1ODY5Njc3fQ.te4IdnP_DK4hWrh
+  TWA6fyhy3fxlAQZAhfA4lmzRdpoP5uZb-E90R5YxzN1YDA8mnVdpgj_Bx1lG5r6se
+  f5TlckApA3hahhC804dcqlE4naEmLISmN1pds2WxTMOUzZY8aKKSDzNTDqhyTgE-K
+  dTb3RafRj7tdZb09zWs7c_moOvfVcQIoy5zz1BvLQKW1Y8JsYvdpu2AvpxRPbcP8W
+  yeW9B6PL6_fy3pXYKG3e-qUcvPa9kan-mo9EoSgt-YTDQjK1nZMdXIqTluK9caVJE
+  RWW0fD1Y11_tlOcJn-ya7v7d8YmFyJpkhZfm8x1FoeH0djEicXTixEkdRuzsgUCm6
+  GQ
+</pre><a href="#section-2.1-5" class="pilcrow">¶</a>
+                    </div>
+                    <p id="section-2.1-6">認可サーバーは、リクエストを次のように処理<span class="bcp14">MUST</span> する。<a
+                            href="#section-2.1-6" class="pilcrow">¶</a></p>
+                    <ol start="1" type="1" class="normal type-1" id="section-2.1-7">
+                        <li id="section-2.1-7.1">トークンエンドポイントでの場合と同じ方法でクライアントを認証する
+                            （<span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-2.3" class="relref">[<a
+                                        href="#RFC6749" class="xref">RFC6749</a>] の Section
+                                    2.3</a></span>）。<a href="#section-2.1-7.1" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-2.1-7.2"><code>request_uri</code> 認可リクエストパラメーターが提供されている場合、
+                            リクエストを拒否する。<a href="#section-2.1-7.2" class="pilcrow">¶</a>
+                        </li>
+                        <li id="section-2.1-7.3">プッシュされたリクエストを、認可エンドポイントへ送信された
+                            認可リクエストと同様に検証する。たとえば、認可サーバーは、リダイレクト URI が
+                            クライアントに設定されたリダイレクト URI のいずれかと一致するかを確認し、また
+                            クライアントがアクセスを要求している scope について認可されているかも確認する。
+                            この検証により、認可サーバーは不正または詐欺的なリクエストを早期に拒否できる。
+                            認可サーバーは、プッシュされたリクエストを処理する際に実行できない検証ステップを
+                            省略<span class="bcp14">MAY</span> する。ただし、そのような確認は、認可エンドポイントで認可リクエストを
+                            処理する際に実行<span class="bcp14">MUST</span> される。<a href="#section-2.1-7.3" class="pilcrow">¶</a>
+                        </li>
+                    </ol>
+                    <p id="section-2.1-8">認可サーバーは、認証資格情報を持つクライアントに対して、各プッシュ型
+                        認可リクエストで認可リクエストごとのリダイレクト URI を確立することを許可
+                        <span class="bcp14">MAY</span> する。<a href="#redirect_uri_mgmt" class="xref">Section 2.4</a>
+                        でより詳しく説明するように、これは、<span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> とは異なり、本仕様が、実際の
+                        認可リクエストが実行される前にクライアントを認証し、クライアントリクエストを検証する能力を
+                        認可サーバーに与えるため可能である。<a href="#section-2.1-8" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="par-response">
+                <section id="section-2.2">
+                    <h3 id="name-successful-response">
+                        <a href="#section-2.2" class="section-number selfRef">2.2. </a><a
+                            href="#name-successful-response" class="section-name selfRef">成功レスポンス</a>
+                    </h3>
+                    <p id="section-2.2-1">検証が成功した場合、サーバーはリクエスト URI を生成し、それを
+                        <code>201</code> HTTP ステータスコード付きのレスポンスで提供<span class="bcp14">MUST</span> する。
+                        HTTP レスポンスのメッセージボディには、<span>[<a href="#RFC8259" class="xref">RFC8259</a>]</span> で定義される
+                        <code>application/json</code> メディアタイプを使用して、次のパラメーターがトップレベルメンバーとして
+                        含まれる。<a href="#section-2.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <span class="break"></span>
+                    <dl class="dlNewline" id="section-2.2-2">
+                        <dt id="section-2.2-2.1">request_uri</dt>
+                        <dd style="margin-left: 1.5em" id="section-2.2-2.2">投稿された認可リクエストに対応する
+                            リクエスト URI。この URI は、後続の認可リクエストにおいてそれぞれのリクエストデータへの
+                            単回使用の参照である。認可プロセスが認可リクエストデータを取得する方法は
+                            認可サーバーの裁量に委ねられ、本仕様の範囲外である。この URI を介して認可リクエストデータを
+                            他の当事者に利用可能にする必要はない。<a href="#section-2.2-2.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-2.2-2.3">expires_in</dt>
+                        <dd style="margin-left: 1.5em" id="section-2.2-2.4"> リクエスト URI の有効期間を秒単位の
+                            正の整数として表す JSON 数値。リクエスト URI の有効期間は認可サーバーの裁量に委ねられるが、
+                            通常は比較的短い（例：5 秒から 600 秒の間）。<a href="#section-2.2-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <p id="section-2.2-3"><code>request_uri</code> 値の形式は認可サーバーの裁量に委ねられるが、
+                        有効な値を予測または推測することが計算上不可能となるよう、暗号学的に強い疑似乱数
+                        アルゴリズムを使用して生成された部分を含め<span class="bcp14">MUST</span> る（詳細については
+                        <span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-10.10" class="relref">[<a
+                                    href="#RFC6749" class="xref">RFC6749</a>] の Section
+                                10.10</a></span> を参照）。認可サーバーは、<code>&lt;reference-value&gt;</code> を
+                        それぞれの認可リクエストデータを参照する URI のランダム部分として、
+                        <code>urn:ietf:params:oauth:request_uri:&lt;reference-value&gt;</code> の形式を使用して
+                        <code>request_uri</code> 値を構築<span class="bcp14">MAY</span> する。<a href="#section-2.2-3"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.2-4"><code>request_uri</code> 値は、認可リクエストを投稿したクライアントに
+                        バインドされ<span class="bcp14">MUST</span> る。<a href="#section-2.2-4" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.2-5">以下は、そのようなレスポンスの例である。<a href="#section-2.2-5" class="pilcrow">¶</a></p>
+                    <div id="section-2.2-6">
+                        <pre class="sourcecode lang-http-message"> HTTP/1.1 201 Created
+ Content-Type: application/json
+ Cache-Control: no-cache, no-store
+
+ {
+  "request_uri":
+    "urn:ietf:params:oauth:request_uri:6esc_11ACC5bwc014ltc14eY22c",
+  "expires_in": 60
+ }
+</pre><a href="#section-2.2-6" class="pilcrow">¶</a>
+                    </div>
+                </section>
+            </div>
+            <div id="error_response">
+                <section id="section-2.3">
+                    <h3 id="name-error-response">
+                        <a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-error-response"
+                            class="section-name selfRef">エラーレスポンス</a>
+                    </h3>
+                    <p id="section-2.3-1">認可サーバーは、<span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-5.2"
+                                class="relref">[<a href="#RFC6749" class="xref">RFC6749</a>] の Section 5.2</a>
+                        </span> でトークンエンドポイントからのエラーレスポンスについて規定されているものと同じ形式で、
+                        そこにある適切なエラーコード、または <span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2.1"
+                                class="relref">[<a href="#RFC6749" class="xref">RFC6749</a>] の Section
+                                4.1.2.1</a></span> のエラーコードを使用して、
+                        エラーレスポンスを返す。<span><a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.1.2.1"
+                                class="relref">[<a href="#RFC6749" class="xref">RFC6749</a>] の Section
+                                4.1.2.1</a></span> が、要求元クライアントへエラーを伴う自動リダイレクトを禁止し、
+                        したがってエラーコードを定義していない場合（たとえば、リクエストが欠落した、無効な、または
+                        一致しないリダイレクト URI によって失敗する場合）、<code>invalid_request</code> エラーコードを
+                        既定のエラーコードとして使用できる。プッシュされた認可リクエストの初期処理に OAuth 拡張が
+                        関与する場合、その拡張で定義されたエラーコードも使用できる。プッシュされた認可リクエストの
+                        初期処理にはリソース所有者との対話が含まれないため、<span>[<a href="#OIDC" class="xref">OIDC</a>]</span> で定義される
+                        <code>consent_required</code> など、ユーザー操作に
+                        関連するエラーコードは決して返されない。<a href="#section-2.3-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.3-2">認可サーバーまたはクライアントポリシー（<span>[<a href="#RFC9101" class="xref">RFC9101</a>], <a
+                                href="https://www.rfc-editor.org/rfc/rfc9101#section-10.5" class="relref">Section
+                                10.5</a></span> を参照）のいずれかによって、クライアントが署名済み
+                        Request Object を使用する必要がある場合、認可サーバーは <a href="#request_parameter" class="xref">Section 3</a>
+                        で与えられた定義に準拠するリクエストのみを
+                        受け付け<span class="bcp14">MUST</span>、その他のリクエストを HTTP ステータスコード 400 およびエラーコード
+                        <code>invalid_request</code> で拒否<span class="bcp14">MUST</span> する。<a href="#section-2.3-2"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.3-3">上記に加えて、PAR エンドポイントは次の HTTP ステータスコードも使用できる。<a href="#section-2.3-3"
+                            class="pilcrow">¶</a></p>
+                    <span class="break"></span>
+                    <dl class="dlParallel" id="section-2.3-4">
+                        <dt id="section-2.3-4.1">405:</dt>
+                        <dd style="margin-left: 3.0em" id="section-2.3-4.2"> リクエストが
+                            <code>POST</code> メソッドを使用していない場合、認可サーバーは HTTP 405（Method Not
+                            Allowed）ステータスコードで応答する。<a href="#section-2.3-4.2" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-2.3-4.3">413:</dt>
+                        <dd style="margin-left: 3.0em" id="section-2.3-4.4"> リクエストサイズが認可サーバーの許容する
+                            上限を超えている場合、認可サーバーは HTTP 413（Payload Too Large）ステータスコードで応答する。<a href="#section-2.3-4.4"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-2.3-4.5">429:</dt>
+                        <dd style="margin-left: 3.0em" id="section-2.3-4.6"> 特定の期間におけるクライアントからの
+                            リクエスト数が、認可サーバーの許可する数を超えている場合、認可サーバーは HTTP 429
+                            （Too Many Requests）ステータスコードで応答する。<a href="#section-2.3-4.6" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <p id="section-2.3-5">以下は、PAR エンドポイントからのエラーレスポンスの例である。<a href="#section-2.3-5" class="pilcrow">¶</a>
+                    </p>
+                    <div id="section-2.3-6">
+                        <pre class="sourcecode lang-http-message"> HTTP/1.1 400 Bad Request
+ Content-Type: application/json
+ Cache-Control: no-cache, no-store
+
+ {
+   "error": "invalid_request",
+   "error_description":
+     "The redirect_uri is not valid for the given client"
+ }
+</pre><a href="#section-2.3-6" class="pilcrow">¶</a>
+                    </div>
+                </section>
+            </div>
+            <div id="redirect_uri_mgmt">
+                <section id="section-2.4">
+                    <h3 id="name-management-of-client-redire">
+                        <a href="#section-2.4" class="section-number selfRef">2.4. </a><a
+                            href="#name-management-of-client-redire" class="section-name selfRef">クライアントの
+                            リダイレクト URI の管理</a>
+                    </h3>
+                    <p id="section-2.4-1">OAuth 2.0 <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span> では、
+                        一定の状況においてクライアントが未登録の <code>redirect_uri</code> 値を使用すること、
+                        または認可サーバーが認可エンドポイントでクライアントから提示された <code>redirect_uri</code> 値に
+                        独自のマッチング意味論を適用することを許している。しかし、OAuth security BCP <span>[<a href="#I-D.ietf-oauth-security-topics"
+                                class="xref">OAUTH-SECURITY-TOPICS</a>]</span> および
+                        OAuth 2.1 仕様 <span>[<a href="#I-D.ietf-oauth-v2-1" class="xref">OAUTH-V2</a>]</span> は、認可サーバーが
+                        <code>redirect_uri</code> パラメーターを、
+                        特定のクライアントに対して事前に確立されたリダイレクト URI の集合と完全一致させることを
+                        要求している。これは、クライアントなりすましの試みを早期に検出する手段であり、
+                        トークン漏えいとオープンリダイレクトを防止する。一方で、リダイレクト URI は通常
+                        クライアントポリシーの中で最も変動しやすい部分であるため、クライアント管理がより煩雑に
+                        なり得るという欠点がある。<a href="#section-2.4-1" class="pilcrow">¶</a>
+                    </p>
+                    <p id="section-2.4-2">PAR を使用しており、認可サーバーとの間に認証資格情報を確立している
+                        クライアントについては、完全一致要件を緩和<span class="bcp14">MAY</span> できる。
+                        これは、従来型の認可リクエストとは異なり、認可サーバーが認可プロセスの開始前に
+                        クライアントを認証し、したがって正当なクライアントとやり取りしていることを保証するため
+                        可能である。認可サーバーは、そのようなクライアントに対して、認可サーバーに事前登録されていない
+                        <code>redirect_uri</code> 値を指定することを許可<span class="bcp14">MAY</span>
+                        する。これにより、クライアントは（たとえば実行時に認可サーバーごとに
+                        異なる <code>redirect_uri</code> 値を生成するなど）より柔軟になり、クライアント管理を簡素化できる。
+                        供給された <code>redirect_uri</code> 値に制限を適用するかどうかは認可サーバーの裁量に委ねられる。
+                        たとえば、認可サーバーは特定の URI プレフィックスを要求<span class="bcp14">MAY</span> する、または
+                        実行時にクエリパラメーターのみが変化することを許可<span class="bcp14">MAY</span> する。<a href="#section-2.4-2"
+                            class="pilcrow">¶</a>
+                    </p>
+                    <aside id="section-2.4-3">
+                        <p id="section-2.4-3.1">注記: トランザクション固有のリダイレクト URI を設定する能力は、
+                            クライアント ID と対応する資格情報およびポリシーが、たとえばクライアント権限を含む
+                            クライアント証明書を通じて、信頼できる第三者によって管理される状況でも有用である。
+                            そのような外部管理されたクライアントは、追加の登録ステップを必要とせずに、それぞれの
+                            第三者を信頼する認可サーバーとやり取りできる。<a href="#section-2.4-3.1" class="pilcrow">¶</a></p>
+                    </aside>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="request_parameter">
+        <section id="section-3">
+            <h2 id="name-the-request-request-paramet">
+                <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-the-request-request-paramet"
+                    class="section-name selfRef">「request」リクエストパラメーター</a>
+            </h2>
+            <p id="section-3-1">クライアントは、JAR <span>[<a href="#RFC9101" class="xref">RFC9101</a>]</span> で
+                定義される <code>request</code> パラメーターを使用して、Request Object JWT を認可サーバーへ
+                プッシュ<span class="bcp14">MAY</span> できる。JAR <span>[<a href="#RFC9101" class="xref">RFC9101</a>]</span>
+                で定義される Request Object の処理、署名、および暗号化に関する規則が適用される。
+                対象のクライアント認証方式によって要求されるリクエストパラメーターは、
+                <code>application/x-www-form-urlencoded</code> リクエストに直接含まれ、フォームボディ内で
+                <code>request</code> 以外の唯一のパラメーターとなる（例：相互 TLS クライアント認証
+                <span>[<a href="#RFC8705" class="xref">RFC8705</a>]</span> は
+                <code>client_id</code> HTTP リクエストパラメーターを使用し、JWT アサーションベースの
+                クライアント認証 <span>[<a href="#RFC7523" class="xref">RFC7523</a>]</span> は <code>client_assertion</code> と
+                <code>client_assertion_type</code> を使用する）。その他すべてのリクエストパラメーター、すなわち
+                認可リクエスト自体に関係するものは、認可リクエストを表す JWT のクレームとして現れ
+                <span class="bcp14">MUST</span> る。<a href="#section-3-1" class="pilcrow">¶</a>
+            </p>
+            <p id="section-3-2">以下は、<a href="#request" class="xref">Section 2.1</a> の例と同じ認可リクエストペイロードを持つ、署名済み Request
+                Object を使用したプッシュ型認可リクエストの例である。クライアントは JWT クライアント
+                アサーションベースの認証 <span>[<a href="#RFC7523" class="xref">RFC7523</a>]</span> によって
+                認証される（追加の改行とスペースは表示目的のみ）。<a href="#section-3-2" class="pilcrow">¶</a></p>
+            <div id="section-3-3">
+                <pre class="sourcecode lang-http-message"> POST /as/par HTTP/1.1
+ Host: as.example.com
+ Content-Type: application/x-www-form-urlencoded
+
+ client_assertion_type=
+  urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer
+ &amp;client_assertion=eyJraWQiOiJrMmJkYyIsImFsZyI6IlJTMjU2In0.eyJpc3Mi
+  OiJzNkJoZFJrcXQzIiwic3ViIjoiczZCaGRSa3F0MyIsImF1ZCI6Imh0dHBzOi8vc
+  2VydmVyLmV4YW1wbGUuY29tIiwiZXhwIjoxNjI1ODY5Njc3fQ.te4IdnP_DK4hWrh
+  TWA6fyhy3fxlAQZAhfA4lmzRdpoP5uZb-E90R5YxzN1YDA8mnVdpgj_Bx1lG5r6se
+  f5TlckApA3hahhC804dcqlE4naEmLISmN1pds2WxTMOUzZY8aKKSDzNTDqhyTgE-K
+  dTb3RafRj7tdZb09zWs7c_moOvfVcQIoy5zz1BvLQKW1Y8JsYvdpu2AvpxRPbcP8W
+  yeW9B6PL6_fy3pXYKG3e-qUcvPa9kan-mo9EoSgt-YTDQjK1nZMdXIqTluK9caVJE
+  RWW0fD1Y11_tlOcJn-ya7v7d8YmFyJpkhZfm8x1FoeH0djEicXTixEkdRuzsgUCm6
+  GQ
+ &amp;request=eyJraWQiOiJrMmJkYyIsImFsZyI6IlJTMjU2In0.eyJpc3MiOiJzNkJoZ
+  FJrcXQzIiwiYXVkIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20iLCJleHAiOj
+  E2MjU4Njk2NzcsInJlc3BvbnNlX3R5cGUiOiJjb2RlIiwiY2xpZW50X2lkIjoiczZ
+  CaGRSa3F0MyIsInJlZGlyZWN0X3VyaSI6Imh0dHBzOi8vY2xpZW50LmV4YW1wbGUu
+  b3JnL2NiIiwic2NvcGUiOiJhY2NvdW50LWluZm9ybWF0aW9uIiwic3RhdGUiOiJhZ
+  jBpZmpzbGRraiIsImNvZGVfY2hhbGxlbmdlIjoiSzItbHRjODNhY2M0aDBjOXc2RV
+  NDX3JFTVRKM2J3dy11Q0hhb2VLMXQ4VSIsImNvZGVfY2hhbGxlbmdlX21ldGhvZCI
+  6IlMyNTYifQ.l9R3RC9bFBHry_8acObQjEf4fX5yfJkWUPfak3J3iiBm0aaQznPw5
+  BZ0B3VQZ9_KYdPt5bTkaflS5fSDklM3_7my9MyOSKFYmf46INk6ju_qUuC2crkOQX
+  ZWYJB-0bnYEbdHpUjazFSUvN49cEGstNQeE-dKDWHNgEojgcuNA_pjKfL9VYp1dEA
+  6-WjXZ_OlJ7R_mBWpjFAzc0UkQwqX5hfOJoGTqB2tE4a4aB2z8iYlUJp0DeeYp_hP
+  N6svtmdvte73p5bLGDFpRIlmrBQIAQuxiS0skORpXlS0cBcgHimXVnXOJG7E-A_lS
+  _5y54dVLQPA1jKYx-fxbYSG7dp2fw
+ &amp;client_id=s6BhdRkqt3
+</pre><a href="#section-3-3" class="pilcrow">¶</a>
+            </div>
+            <p id="section-3-4">認可サーバーは、<a href="#request" class="xref">Section 2.1</a> で定義された
+                処理規則に加えて、次の手順を実行<span class="bcp14">MUST</span> する。<a href="#section-3-4" class="pilcrow">¶</a></p>
+            <ol start="1" type="1" class="normal type-1" id="section-3-5">
+                <li id="section-3-5.1">該当する場合、JAR <span>[<a href="#RFC9101" class="xref">RFC9101</a>], <a
+                            href="https://www.rfc-editor.org/rfc/rfc9101#section-6.1" class="relref">Section
+                            6.1</a></span> で規定されるように Request Object を復号する。<a href="#section-3-5.1" class="pilcrow">¶</a>
+                </li>
+                <li id="section-3-5.2">JAR <span>[<a href="#RFC9101" class="xref">RFC9101</a>], <a
+                            href="https://www.rfc-editor.org/rfc/rfc9101#section-6.2" class="relref">Section
+                            6.2</a></span> で規定されるように Request Object の署名を検証する。<a href="#section-3-5.2"
+                        class="pilcrow">¶</a>
+                </li>
+                <li id="section-3-5.3">クライアントが認可サーバーとの間に認証資格情報を確立している場合、
+                    認証された <code>client_id</code> が Request Object 内の <code>client_id</code> クレームと
+                    一致しなければ、リクエストを拒否する。さらに、<code>iss</code> クレームが
+                    <code>client_id</code> と一致することを要求するかどうかは、認可サーバーの裁量に委ねられる。<a href="#section-3-5.3"
+                        class="pilcrow">¶</a>
+                </li>
+            </ol>
+            <p id="section-3-6">JSON Web Key（JWK）形式 <span>[<a href="#RFC7517" class="xref">RFC7517</a>]</span> で表現された次の
+                RSA 鍵ペアは、
+                上記の例における Request Object の署名を検証または再作成するために使用できる
+                （値内の追加の改行とインデントは表示目的のみ）。<a href="#section-3-6" class="pilcrow">¶</a></p>
+            <div id="section-3-7">
+                <pre class="sourcecode lang-json"> {
+   "kty": "RSA",
+   "kid":"k2bdc",
+   "n": "y9Lqv4fCp6Ei-u2-ZCKq83YvbFEk6JMs_pSj76eMkddWRuWX2aBKGHAtKlE
+         5P7_vn__PCKZWePt3vGkB6ePgzAFu08NmKemwE5bQI0e6kIChtt_6KzT5Oa
+         aXDFI6qCLJmk51Cc4VYFaxgqevMncYrzaW_50mZ1yGSFIQzLYP8bijAHGVj
+         dEFgZaZEN9lsn_GdWLaJpHrB3ROlS50E45wxrlg9xMncVb8qDPuXZarvghL
+         L0HzOuYRadBJVoWZowDNTpKpk2RklZ7QaBO7XDv3uR7s_sf2g-bAjSYxYUG
+         sqkNA9b3xVW53am_UZZ3tZbFTIh557JICWKHlWj5uzeJXaw",
+   "e": "AQAB",
+   "d": "LNwG_pCKrwowALpCpRdcOKlSVqylSurZhE6CpkRiE9cpDgGKIkO9CxPlXOL
+         zjqxXuQc8MdMqRQZTnAwgd7HH0B6gncrruV3NewI-XQV0ckldTjqNfOTz1V
+         Rs-jE-57KAXI3YBIhu-_0YpIDzdk_wBuAk661Svn0GsPQe7m9DoxdzenQu9
+         O_soewUhlPzRrTH0EeIqYI715rwI3TYaSzoWBmEPD2fICyj18FF0MPy_SQz
+         k3noVUUIzfzLnnJiWy_p63QBCMqjRoSHHdMnI4z9iVpIwJWQ3jO5n_2lC2-
+         cSgwjmKsFzDBbQNJc7qMG1N6EssJUwgGJxz1eAUFf0w4YAQ",
+   "qi": "J-mG0swR4FTy3atrcQ7dd0hhYn1E9QndN-
+         -sDG4EQO0RnFj6wIefCvwIc4
+         7hCtVeFnCTPYJNc_JyV-mU-9vlzS5GSNuyR5qdpsMZXUMpEvQcwKt23ffPZ
+         YGaqfKyEesmf_Wi8fFcE68H9REQjnniKrXm7w2-IuG_IrVJA9Ox-uU",
+   "q": "4hlMYAGa0dvogdK1jnxQ7J_Lqpqi99e-AeoFvoYpMPhthChTzwFZO9lQmUo
+         BpMqVQTws_s7vWGmt7ZAB3ywkurf0pV7BD0fweJiUzrWk4KJjxtmP_auuxr
+         jvm3s2FUGn6f0wRY9Z8Hj9A7C72DnYCjuZiJQMYCWDsZ8-d-L1a-s",
+   "p": "5sd9Er3I2FFT9R-gy84_oakEyCmgw036B_nfYEEOCwpSvi2z7UcIVK3bSEL
+         5WCW6BNgB3HDWhq8aYPirwQnqm0K9mX1E-4xM10WWZ-rP3XjYpQeS0Snru5
+         LFVWsAzi-FX7BOqBibSAXLdEGXcXa44l08iec_bPD3xduq5V_1YoE",
+   "dq": "Nz2PF3XM6bEc4XsluKZO70ErdYdKgdtIJReUR7Rno_tOZpejwlPGBYVW19
+         zpAeYtCT82jxroB2XqhLxGeMxEPQpsz2qTKLSe4BgHY2ml2uxSDGdjcsrbb
+         NoKUKaN1CuyZszhWl1n0AT_bENl4bJgQj_Fh0UEsQj5YBBUJt5gr_k",
+   "dp": "Zc877jirkkLOtyTs2vxyNe9KnMNAmOidlUc2tE_-0gAL4Lpo1hSwKCtKwe
+         ZJ-gkqt1hT-dwNx_0Xtg_-NXsadMRMwJnzBMYwYAfjApUkfqABc0yUCJJl3
+         KozRCugf1WXkU9GZAH2_x8PUopdNUEa70ISowPRh04HANKX4fkjWAE"
+  }
+</pre><a href="#section-3-7" class="pilcrow">¶</a>
+            </div>
+        </section>
+    </div>
+    <div id="authorization-request">
+        <section id="section-4">
+            <h2 id="name-authorization-request">
+                <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-authorization-request"
+                    class="section-name selfRef">認可リクエスト</a>
+            </h2>
+            <p id="section-4-1">クライアントは、認可サーバーから返された <code>request_uri</code> 値を使用して、
+                <span>[<a href="#RFC9101" class="xref">RFC9101</a>]</span> で定義される認可リクエストを構築する。これは、クライアントが
+                ユーザーエージェントに次の HTTP リクエストを行わせる次の例に示される
+                （追加の改行とインデントは表示目的のみ）。<a href="#section-4-1" class="pilcrow">¶</a>
+            </p>
+            <div id="section-4-2">
+                <pre class="sourcecode lang-http-message"> GET /authorize?client_id=s6BhdRkqt3&amp;request_uri=urn%3Aietf%3Aparams
+  %3Aoauth%3Arequest_uri%3A6esc_11ACC5bwc014ltc14eY22c HTTP/1.1
+ Host: as.example.com
+</pre><a href="#section-4-2" class="pilcrow">¶</a>
+            </div>
+            <p id="section-4-3"><code>code_challenge</code> パラメーター値など、認可リクエスト内容の一部は
+                特定の認可リクエストに固有であるため、クライアントは <code>request_uri</code> 値を一度だけ使用
+                <span class="bcp14">MUST</span> する。認可サーバーは <code>request_uri</code> 値を単回使用として扱う
+                <span class="bcp14">SHOULD</span> であるが、ユーザーがユーザーエージェントをリロード/更新したことによる
+                重複リクエストを許可<span class="bcp14">MAY</span> する。期限切れの <code>request_uri</code> は無効として拒否され
+                <span class="bcp14">MUST</span> る。<a href="#section-4-3" class="pilcrow">¶</a>
+            </p>
+            <p id="section-4-4">認可サーバーは、プッシュされたリクエストから生じる認可リクエストを、
+                他の認可リクエストと同様に検証<span class="bcp14">MUST</span> する。認可サーバーは、
+                リクエストがプッシュされたリクエストであったこと、およびそのリクエストまたは認可サーバーの
+                ポリシーが、省略されたステップの結果に影響するように変更されていないことを検証できる場合、
+                リクエストがプッシュされた際に実行した検証ステップを省略
+                <span class="bcp14">MAY</span> する。<a href="#section-4-4" class="pilcrow">¶</a>
+            </p>
+            <p id="section-4-5">認可サーバーポリシーは、グローバルに、またはクライアントごとに、クライアントが
+                認可リクエストデータを渡す唯一の手段として PAR を使用することを定め<span class="bcp14">MAY</span> る。
+                この場合、認可サーバーは、PAR エンドポイントから取得した値を持つ <code>request_uri</code>
+                パラメーターを含まない認可エンドポイントへのリクエストの処理を、<code>invalid_request</code>
+                エラーコードを使用して拒否する。<a href="#section-4-5" class="pilcrow">¶</a></p>
+            <aside id="section-4-6">
+                <p id="section-4-6.1">注記: 認可サーバーおよびクライアントは、望ましい挙動を示すために、
+                    <a href="#as_metadata" class="xref">5</a> および <a href="#c_metadata" class="xref">6</a>
+                    節で定義されるメタデータを使用<span class="bcp14">MAY</span> する。<a href="#section-4-6.1" class="pilcrow">¶</a>
+                </p>
+            </aside>
+        </section>
+    </div>
+    <div id="as_metadata">
+        <section id="section-5">
+            <h2 id="name-authorization-server-metada">
+                <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-authorization-server-metada"
+                    class="section-name selfRef">認可サーバーメタデータ</a>
+            </h2>
+            <p id="section-5-1">PAR に関するサーバーの機能とポリシーを通知するため、次の認可サーバーメタデータ
+                パラメーター <span>[<a href="#RFC8414" class="xref">RFC8414</a>]</span> が導入される。<a href="#section-5-1"
+                    class="pilcrow">¶</a></p>
+            <span class="break"></span>
+            <dl class="dlNewline" id="section-5-2">
+                <dt id="section-5-2.1">pushed_authorization_request_endpoint</dt>
+                <dd style="margin-left: 1.5em" id="section-5-2.2">クライアントが、認可サーバーで使用可能な
+                    <code>request_uri</code> 値と交換するために認可リクエストを投稿できる、プッシュ型認可リクエスト
+                    エンドポイントの URL。<a href="#section-5-2.2" class="pilcrow">¶</a>
+                </dd>
+                <dd class="break"></dd>
+                <dt id="section-5-2.3">require_pushed_authorization_requests</dt>
+                <dd style="margin-left: 1.5em" id="section-5-2.4">認可サーバーが PAR 経由でのみ認可リクエストデータを
+                    受け付けるかどうかを示す Boolean パラメーター。省略された場合、既定値は
+                    <code>false</code> である。<a href="#section-5-2.4" class="pilcrow">¶</a>
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+            <p id="section-5-3"><code>pushed_authorization_request_endpoint</code> が存在することは、クライアントが
+                PAR フローを使用できると判断するのに十分であることに注意する。PAR エンドポイントから取得された
+                <code>request_uri</code> 値は、<code>request_uri_parameter_supported</code> や
+                <code>require_request_uri_registration</code> <span>[<a href="#OIDC.Disco"
+                        class="xref">OIDC.Disco</a>]</span> など他の認可サーバーメタデータにかかわらず、
+                認可エンドポイントで使用可能である。<a href="#section-5-3" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="c_metadata">
+        <section id="section-6">
+            <h2 id="name-client-metadata">
+                <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-client-metadata"
+                    class="section-name selfRef">クライアントメタデータ</a>
+            </h2>
+            <p id="section-6-1">Dynamic Client Registration Protocol <span>[<a href="#RFC7591"
+                        class="xref">RFC7591</a>]</span> は、OAuth 2.0 クライアントメタデータを認可サーバーへ
+                動的に登録するための API を定義している。<span>[<a href="#RFC7591" class="xref">RFC7591</a>]</span>
+                で定義されるメタデータ、およびそれに対する登録済み拡張は、
+                Dynamic Client Registration Protocol が使用されていない場合であっても、認可サーバー実装にとって
+                有用なクライアントの一般的なデータモデルも暗黙に示す。そのような実装では通常、クライアント設定を
+                管理するために何らかのユーザーインターフェイスが利用可能である。次のクライアントメタデータ
+                パラメーターは、対象クライアントに対してプッシュ型認可リクエストが要求されるかどうかを示すため、
+                本文書によって導入される。<a href="#section-6-1" class="pilcrow">¶</a></p>
+            <span class="break"></span>
+            <dl class="dlNewline" id="section-6-2">
+                <dt id="section-6-2.1">require_pushed_authorization_requests</dt>
+                <dd style="margin-left: 1.5em" id="section-6-2.2">クライアントが認可リクエストを開始するために
+                    使用を許可される唯一の手段が PAR であるかどうかを示す Boolean パラメーター。
+                    省略された場合、既定値は <code>false</code> である。<a href="#section-6-2.2" class="pilcrow">¶</a>
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+        </section>
+    </div>
+    <div id="security-considerations">
+        <section id="section-7">
+            <h2 id="name-security-considerations">
+                <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations"
+                    class="section-name selfRef">セキュリティ上の考慮事項</a>
+            </h2>
+            <div id="request-uri-guessing">
+                <section id="section-7.1">
+                    <h3 id="name-request-uri-guessing">
+                        <a href="#section-7.1" class="section-number selfRef">7.1. </a><a
+                            href="#name-request-uri-guessing" class="section-name selfRef">リクエスト URI の推測</a>
+                    </h3>
+                    <p id="section-7.1-1">攻撃者は、有効なリクエスト URI 値を推測してリプレイし、
+                        対応するクライアントになりすまそうとする可能性がある。
+
+                        認可サーバーは、リクエスト URI のエントロピーに関する JAR <span>[<a href="#RFC9101" class="xref">RFC9101</a>], <a
+                                href="https://www.rfc-editor.org/rfc/rfc9101#section-10.2" class="relref">Section
+                                10.2</a></span> の条項 (d) で示される考慮事項を考慮に入れ
+                        <span class="bcp14">MUST</span> る。<a href="#section-7.1-1" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="open-redirection">
+                <section id="section-7.2">
+                    <h3 id="name-open-redirection">
+                        <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-open-redirection"
+                            class="section-name selfRef">オープンリダイレクト</a>
+                    </h3>
+                    <p id="section-7.2-1">攻撃者は、認可コードを取得したり、ユーザーに対して他の攻撃を開始したり
+                        するために、自身の制御下にあるサイトを指すリダイレクト URI を登録しようとする可能性がある。
+                        認可サーバーは、認証済みクライアントからのプッシュ型認可リクエストにおける新しい
+                        リダイレクト URI のみを受け付け<span class="bcp14">MUST</span> る。<a href="#section-7.2-1"
+                            class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="request-object-replay">
+                <section id="section-7.3">
+                    <h3 id="name-request-object-replay">
+                        <a href="#section-7.3" class="section-number selfRef">7.3. </a><a
+                            href="#name-request-object-replay" class="section-name selfRef">Request Object のリプレイ</a>
+                    </h3>
+                    <p id="section-7.3-1">攻撃者は、正当な認可リクエストから取得したリクエスト URI をリプレイする
+                        可能性がある。そのような攻撃に対処するため、認可サーバーはリクエスト URI を単回使用にする
+                        <span class="bcp14">SHOULD</span> である。<a href="#section-7.3-1" class="pilcrow">¶</a>
+                    </p>
+                </section>
+            </div>
+            <div id="client-policy-change">
+                <section id="section-7.4">
+                    <h3 id="name-client-policy-change">
+                        <a href="#section-7.4" class="section-number selfRef">7.4. </a><a
+                            href="#name-client-policy-change" class="section-name selfRef">クライアントポリシーの変更</a>
+                    </h3>
+                    <p id="section-7.4-1">Request Object の保存と、特定の Request Object を使用する認可リクエストとの
+                        間に、クライアントポリシーが変更される可能性がある。したがって、認可リクエストを処理する際に、
+                        認可サーバーが request パラメーターをクライアントポリシーに照らして確認することが推奨される。<a href="#section-7.4-1"
+                            class="pilcrow">¶</a></p>
+                </section>
+            </div>
+            <div id="request-uri-swapping">
+                <section id="section-7.5">
+                    <h3 id="name-request-uri-swapping">
+                        <a href="#section-7.5" class="section-number selfRef">7.5. </a><a
+                            href="#name-request-uri-swapping" class="section-name selfRef">リクエスト URI のすり替え</a>
+                    </h3>
+                    <p id="section-7.5-1">攻撃者は、あるリクエストからリクエスト URI を取得し、それを別の認可リクエストに
+                        差し替える可能性がある。たとえば OpenID Connect の文脈では、攻撃者は高い認証保証レベルを
+                        求めるリクエスト URI を、より低い保証レベルを要求するものに置き換える可能性がある。
+                        クライアントは、この攻撃を防止するために、PKCE <span>[<a href="#RFC7636" class="xref">RFC7636</a>]</span>、
+                        一意な <code>state</code> パラメーター <span>[<a href="#RFC6749" class="xref">RFC6749</a>]</span>、
+                        または OIDC の「nonce」パラメーター <span>[<a href="#OIDC" class="xref">OIDC</a>]</span> を、
+                        プッシュされた Request Object 内で使用<span class="bcp14">SHOULD</span> する。<a href="#section-7.5-1"
+                            class="pilcrow">¶</a></p>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="privacy-considerations">
+        <section id="section-8">
+            <h2 id="name-privacy-considerations">
+                <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-privacy-considerations"
+                    class="section-name selfRef">プライバシー上の考慮事項</a>
+            </h2>
+            <p id="section-8-1">OAuth 2.0 は複雑で柔軟なフレームワークであり、二つの他のエンティティ間で
+                データアクセスに対するユーザー認可を一つのエンティティが仲介するという性質そのものにより、
+                広範なプライバシー上の影響を持つ。OAuth 全体のプライバシー上の考慮事項は本文書の範囲外であり、
+                本文書は、より大きなフレームワークにおける一つのメッセージシーケンスを開始する代替方法のみを
+                定義する。しかし、PAR を使用すると、認可リクエストデータが、ユーザーエージェントを平文で通過する
+                URL のクエリコンポーネントではなく、HTTP リクエストのメッセージボディ内で、安全な接続を介して
+                クライアントと認可サーバーの間で直接渡されるため、意図しない情報開示の可能性が低減され、
+                プライバシーが改善される可能性がある。<a href="#section-8-1" class="pilcrow">¶</a></p>
+        </section>
+    </div>
+    <div id="iana_considerations">
+        <section id="section-9">
+            <h2 id="name-iana-considerations">
+                <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-iana-considerations"
+                    class="section-name selfRef">IANA に関する考慮事項</a>
+            </h2>
+            <div id="oauth-authorization-server-metadata">
+                <section id="section-9.1">
+                    <h3 id="name-oauth-authorization-server-">
+                        <a href="#section-9.1" class="section-number selfRef">9.1. </a><a
+                            href="#name-oauth-authorization-server-" class="section-name selfRef">OAuth 認可
+                            サーバーメタデータ</a>
+                    </h3>
+                    <p id="section-9.1-1">IANA は、<span>[<a href="#RFC8414" class="xref">RFC8414</a>]</span> によって確立された
+                        <span>[<a href="#IANA.OAuth.Parameters" class="xref">IANA.OAuth.Parameters</a>]</span> の
+                        IANA「OAuth Authorization
+                        Server Metadata」レジストリに、次の値を登録した。<a href="#section-9.1-1" class="pilcrow">¶</a>
+                    </p>
+                    <span class="break"></span>
+                    <dl class="dlParallel dlCompact" id="section-9.1-2">
+                        <dt id="section-9.1-2.1">メタデータ名:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-2.2">
+                            <code>pushed_authorization_request_endpoint</code><a href="#section-9.1-2.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-2.3">メタデータ説明:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-2.4">認可サーバーのプッシュ型
+                            認可リクエストエンドポイントの URL。<a href="#section-9.1-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-2.6">IESG<a href="#section-9.1-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-2.7">仕様文書:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-2.8">
+                            RFC 9126 の <a href="#as_metadata" class="xref">Section 5</a><a href="#section-9.1-2.8"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                    <span class="break"></span>
+                    <dl class="dlParallel dlCompact" id="section-9.1-3">
+                        <dt id="section-9.1-3.1">メタデータ名:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-3.2">
+                            <code>require_pushed_authorization_requests</code><a href="#section-9.1-3.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-3.3">メタデータ説明:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-3.4">認可サーバーが PAR 経由でのみ認可リクエストを
+                            受け付けるかどうかを示す。<a href="#section-9.1-3.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-3.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-3.6">IESG<a href="#section-9.1-3.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.1-3.7">仕様文書:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.1-3.8">
+                            RFC 9126 の <a href="#as_metadata" class="xref">Section 5</a><a href="#section-9.1-3.8"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="oauth-dynamic-client-registration-metadata">
+                <section id="section-9.2">
+                    <h3 id="name-oauth-dynamic-client-regist">
+                        <a href="#section-9.2" class="section-number selfRef">9.2. </a><a
+                            href="#name-oauth-dynamic-client-regist" class="section-name selfRef">OAuth 動的クライアント
+                            登録メタデータ</a>
+                    </h3>
+                    <p id="section-9.2-1">IANA は、<span>[<a href="#RFC7591" class="xref">RFC7591</a>]</span> によって確立された
+                        <span>[<a href="#IANA.OAuth.Parameters" class="xref">IANA.OAuth.Parameters</a>]</span> の
+                        IANA「OAuth Dynamic Client
+                        Registration Metadata」レジストリに、次の値を登録した。<a href="#section-9.2-1" class="pilcrow">¶</a>
+                    </p>
+                    <span class="break"></span>
+                    <dl class="dlParallel dlCompact" id="section-9.2-2">
+                        <dt id="section-9.2-2.1">クライアントメタデータ名:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.2-2.2">
+                            <code>require_pushed_authorization_requests</code><a href="#section-9.2-2.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.2-2.3">クライアントメタデータ説明:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.2-2.4">クライアントが認可リクエストの開始に
+                            PAR を使用することを要求されるかどうかを示す。<a href="#section-9.2-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.2-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.2-2.6">IESG<a href="#section-9.2-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.2-2.7">仕様文書:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.2-2.8">
+                            RFC 9126 の <a href="#c_metadata" class="xref">Section 6</a><a href="#section-9.2-2.8"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+            <div id="oauth-uri-registration">
+                <section id="section-9.3">
+                    <h3 id="name-oauth-uri-registration">
+                        <a href="#section-9.3" class="section-number selfRef">9.3. </a><a
+                            href="#name-oauth-uri-registration" class="section-name selfRef">OAuth URI 登録</a>
+                    </h3>
+                    <p id="section-9.3-1">IANA は、<span>[<a href="#RFC6755" class="xref">RFC6755</a>]</span> によって
+                        確立された <span>[<a href="#IANA.OAuth.Parameters" class="xref">IANA.OAuth.Parameters</a>]</span> の
+                        「OAuth URI」レジストリに、次の値を登録した。<a href="#section-9.3-1" class="pilcrow">¶</a>
+                    </p>
+                    <span class="break"></span>
+                    <dl class="dlParallel dlCompact" id="section-9.3-2">
+                        <dt id="section-9.3-2.1">URN:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.3-2.2">
+                            <code>urn:ietf:params:oauth:request_uri:</code><a href="#section-9.3-2.2"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.3-2.3">一般名:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.3-2.4">OAuth Request
+                            URI の URN サブ名前空間。<a href="#section-9.3-2.4" class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.3-2.5">変更管理者:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.3-2.6">IESG<a href="#section-9.3-2.6"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                        <dt id="section-9.3-2.7">仕様文書:</dt>
+                        <dd style="margin-left: 1.5em" id="section-9.3-2.8">
+                            RFC 9126 の <a href="#par-response" class="xref">Section 2.2</a><a href="#section-9.3-2.8"
+                                class="pilcrow">¶</a>
+                        </dd>
+                        <dd class="break"></dd>
+                    </dl>
+                </section>
+            </div>
+        </section>
+    </div>
+    <section id="section-10">
+        <h2 id="name-references">
+            <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-references"
+                class="section-name selfRef">参考文献</a>
+        </h2>
+        <section id="section-10.1">
+            <h3 id="name-normative-references">
+                <a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-normative-references"
+                    class="section-name selfRef">規定参考文献</a>
+            </h3>
+            <dl class="references">
+                <dt id="RFC2119">[RFC2119]</dt>
+                <dd>
+                    <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"RFC で要件レベルを
+                        示すために使用するキーワード"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC
+                        2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03"
+                        class="refDate">1997年3月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC6749">[RFC6749]</dt>
+                <dd>
+                    <span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"OAuth 2.0 認可
+                        フレームワーク"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC6749</span>, <time datetime="2012-10" class="refDate">2012年10月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6749">https://www.rfc-editor.org/info/rfc6749</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8174">[RFC8174]</dt>
+                <dd>
+                    <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"RFC 2119 キーワードにおける
+                        大文字と小文字の曖昧さ"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC
+                        8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05"
+                        class="refDate">2017年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8259">[RFC8259]</dt>
+                <dd>
+                    <span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"JavaScript Object Notation
+                        (JSON) データ交換形式"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC
+                        8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12"
+                        class="refDate">2017年12月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8259">https://www.rfc-editor.org/info/rfc8259</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8414">[RFC8414]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span
+                        class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 認可サーバー
+                        メタデータ"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">2018年6月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8414">https://www.rfc-editor.org/info/rfc8414</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC9101">[RFC9101]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Bradley, J.</span>, and <span
+                        class="refAuthor">M. Jones</span>, <span class="refTitle">"OAuth 2.0 認可
+                        フレームワーク: JWT-Secured Authorization Request (JAR)"</span>, <span class="seriesInfo">RFC
+                        9101</span>, <span class="seriesInfo">DOI 10.17487/RFC9101</span>, <time datetime="2021-08"
+                        class="refDate">2021年8月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc9101">https://www.rfc-editor.org/info/rfc9101</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+        </section>
+        <section id="section-10.2">
+            <h3 id="name-informative-references">
+                <a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-informative-references"
+                    class="section-name selfRef">参考情報文献</a>
+            </h3>
+            <dl class="references">
+                <dt id="IANA.OAuth.Parameters">[IANA.OAuth.Parameters]</dt>
+                <dd>
+                    <span class="refAuthor">IANA</span>, <span class="refTitle">"OAuth Parameters"</span>, <span>&lt;<a
+                            href="http://www.iana.org/assignments/oauth-parameters">http://www.iana.org/assignments/oauth-parameters</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="I-D.ietf-oauth-security-topics">[OAUTH-SECURITY-TOPICS]</dt>
+                <dd>
+                    <span class="refAuthor">Lodderstedt, T.</span>, <span class="refAuthor">Bradley, J.</span>, <span
+                        class="refAuthor">Labunets, A.</span>, and <span class="refAuthor">D. Fett</span>, <span
+                        class="refTitle">"OAuth 2.0 Security Best Current Practice"</span>, <span
+                        class="refContent">作業中</span>, <span class="seriesInfo">Internet-Draft,
+                        draft-ietf-oauth-security-topics-18</span>, <time datetime="2021-04-13"
+                        class="refDate">2021年4月13日</time>, <span>&lt;<a
+                            href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-18">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-18</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="I-D.ietf-oauth-v2-1">[OAUTH-V2]</dt>
+                <dd>
+                    <span class="refAuthor">Hardt, D.</span>, <span class="refAuthor">Parecki, A.</span>, and <span
+                        class="refAuthor">T. Lodderstedt</span>, <span class="refTitle">"OAuth 2.1 認可
+                        フレームワーク"</span>, <span class="refContent">作業中</span>, <span class="seriesInfo">Internet-Draft,
+                        draft-ietf-oauth-v2-1-03</span>, <time datetime="2021-09-08" class="refDate">2021年9月8日</time>,
+                    <span>&lt;<a
+                            href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-03">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-03</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="OIDC">[OIDC]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Bradley, J.</span>, <span
+                        class="refAuthor">Jones, M.</span>, <span class="refAuthor">de Medeiros, B.</span>, and <span
+                        class="refAuthor">C. Mortimore</span>, <span class="refTitle">"OpenID Connect Core 1.0
+                        incorporating errata set 1"</span>, <time datetime="2014-11" class="refDate">2014年11月</time>,
+                    <span>&lt;<a
+                            href="http://openid.net/specs/openid-connect-core-1_0.html">http://openid.net/specs/openid-connect-core-1_0.html</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="OIDC.Disco">[OIDC.Disco]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Bradley, J.</span>, <span
+                        class="refAuthor">Jones, M.</span>, and <span class="refAuthor">E. Jay</span>, <span
+                        class="refTitle">"OpenID Connect Discovery 1.0 incorporating errata set 1"</span>, <time
+                        datetime="2014-11" class="refDate">2014年11月</time>, <span>&lt;<a
+                            href="http://openid.net/specs/openid-connect-discovery-1_0.html">http://openid.net/specs/openid-connect-discovery-1_0.html</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC6755">[RFC6755]</dt>
+                <dd>
+                    <span class="refAuthor">Campbell, B.</span> and <span class="refAuthor">H. Tschofenig</span>, <span
+                        class="refTitle">"OAuth のための IETF URN サブ名前空間"</span>, <span class="seriesInfo">RFC
+                        6755</span>, <span class="seriesInfo">DOI 10.17487/RFC6755</span>, <time datetime="2012-10"
+                        class="refDate">2012年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc6755">https://www.rfc-editor.org/info/rfc6755</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7517">[RFC7517]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refTitle">"JSON Web Key (JWK)"</span>, <span
+                        class="seriesInfo">RFC 7517</span>, <span class="seriesInfo">DOI 10.17487/RFC7517</span>, <time
+                        datetime="2015-05" class="refDate">2015年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7517">https://www.rfc-editor.org/info/rfc7517</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7519">[RFC7519]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span
+                        class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>,
+                    <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI 10.17487/RFC7519</span>,
+                    <time datetime="2015-05" class="refDate">2015年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7523">[RFC7523]</dt>
+                <dd>
+                    <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Campbell, B.</span>, and <span
+                        class="refAuthor">C. Mortimore</span>, <span class="refTitle">"OAuth 2.0 クライアント認証および
+                        認可グラントのための JSON Web Token (JWT) プロファイル"</span>, <span class="seriesInfo">RFC
+                        7523</span>, <span class="seriesInfo">DOI 10.17487/RFC7523</span>, <time datetime="2015-05"
+                        class="refDate">2015年5月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7523">https://www.rfc-editor.org/info/rfc7523</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7591">[RFC7591]</dt>
+                <dd>
+                    <span class="refAuthor">Richer, J., Ed.</span>, <span class="refAuthor">Jones, M.</span>, <span
+                        class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Machulak, M.</span>, and <span
+                        class="refAuthor">P. Hunt</span>, <span class="refTitle">"OAuth 2.0 動的クライアント登録
+                        プロトコル"</span>, <span class="seriesInfo">RFC 7591</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC7591</span>, <time datetime="2015-07" class="refDate">2015年7月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7591">https://www.rfc-editor.org/info/rfc7591</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC7636">[RFC7636]</dt>
+                <dd>
+                    <span class="refAuthor">Sakimura, N., Ed.</span>, <span class="refAuthor">Bradley, J.</span>, and
+                    <span class="refAuthor">N. Agarwal</span>, <span class="refTitle">"OAuth パブリッククライアントによる
+                        Proof Key for Code Exchange"</span>, <span class="seriesInfo">RFC 7636</span>, <span
+                        class="seriesInfo">DOI 10.17487/RFC7636</span>, <time datetime="2015-09"
+                        class="refDate">2015年9月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc7636">https://www.rfc-editor.org/info/rfc7636</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8252">[RFC8252]</dt>
+                <dd>
+                    <span class="refAuthor">Denniss, W.</span> and <span class="refAuthor">J. Bradley</span>, <span
+                        class="refTitle">"ネイティブアプリのための OAuth 2.0"</span>, <span class="seriesInfo">BCP 212</span>,
+                    <span class="seriesInfo">RFC 8252</span>, <span class="seriesInfo">DOI 10.17487/RFC8252</span>,
+                    <time datetime="2017-10" class="refDate">2017年10月</time>, <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8252">https://www.rfc-editor.org/info/rfc8252</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8705">[RFC8705]</dt>
+                <dd>
+                    <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, <span
+                        class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">T. Lodderstedt</span>, <span
+                        class="refTitle">"OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access
+                        Tokens"</span>, <span class="seriesInfo">RFC 8705</span>, <span class="seriesInfo">DOI
+                        10.17487/RFC8705</span>, <time datetime="2020-02" class="refDate">2020年2月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8705">https://www.rfc-editor.org/info/rfc8705</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+                <dt id="RFC8707">[RFC8707]</dt>
+                <dd>
+                    <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, and <span
+                        class="refAuthor">H. Tschofenig</span>, <span class="refTitle">"OAuth
+                        2.0 のための Resource Indicators"</span>, <span class="seriesInfo">RFC 8707</span>, <span
+                        class="seriesInfo">DOI
+                        10.17487/RFC8707</span>, <time datetime="2020-02" class="refDate">2020年2月</time>,
+                    <span>&lt;<a
+                            href="https://www.rfc-editor.org/info/rfc8707">https://www.rfc-editor.org/info/rfc8707</a>&gt;</span>.
+                </dd>
+                <dd class="break"></dd>
+            </dl>
+        </section>
+    </section>
+    <div id="Acknowledgements">
+        <section id="appendix-A">
+            <h2 id="name-acknowledgements">
+                <a href="#name-acknowledgements" class="section-name selfRef">謝辞</a>
+            </h2>
+            <p id="appendix-A-1">本仕様は、OpenID Foundation の Financial-grade API Working Group で実施された
+                <a href="https://bitbucket.org/openid/fapi/src/master/Financial_API_Pushed_Request_Object.md">Pushed
+                    Request Object</a>
+                に関する作業に基づいている。WG のメンバーによる貴重な貢献に感謝する。<a href="#appendix-A-1" class="pilcrow">¶</a>
+            </p>
+            <p id="appendix-A-2">本文書に対して貴重なフィードバックを提供してくれた
+                <span class="contact-name">Vladimir Dzhuvinov</span>,
+                <span class="contact-name">Aaron Parecki</span>,
+                <span class="contact-name">Justin Richer</span>,
+                <span class="contact-name">Sascha Preibisch</span>,
+                <span class="contact-name">Daniel Fett</span>,
+                <span class="contact-name">Michael B. Jones</span>,
+                <span class="contact-name">Annabelle Backman</span>,
+                <span class="contact-name">Joseph Heenan</span>,
+                <span class="contact-name">Sean Glencross</span>,
+                <span class="contact-name">Maggie Hung</span>,
+                <span class="contact-name">Neil Madden</span>,
+                <span class="contact-name">Karsten Meyer zu Selhausen</span>,
+                <span class="contact-name">Roman Danyliw</span>,
+                <span class="contact-name">Meral Shirazipour</span>,
+                および
+                <span class="contact-name">Takahiko Kawasaki</span>
+                に感謝する。<a href="#appendix-A-2" class="pilcrow">¶</a>
+            </p>
+        </section>
+    </div>
+    <div id="authors-addresses">
+        <section id="appendix-B">
+            <h2 id="name-authors-addresses">
+                <a href="#name-authors-addresses" class="section-name selfRef">著者の連絡先</a>
+            </h2>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Torsten Lodderstedt</span></div>
+                <div dir="auto" class="left"><span class="org">yes.com</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:torsten@lodderstedt.net" class="email">torsten@lodderstedt.net</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Brian Campbell</span></div>
+                <div dir="auto" class="left"><span class="org">Ping Identity</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:bcampbell@pingidentity.com" class="email">bcampbell@pingidentity.com</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Nat Sakimura</span></div>
+                <div dir="auto" class="left"><span class="org">NAT.Consulting</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:nat@sakimura.org" class="email">nat@sakimura.org</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Dave Tonge</span></div>
+                <div dir="auto" class="left"><span class="org">Moneyhub Financial Technology</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:dave@tonge.org" class="email">dave@tonge.org</a>
+                </div>
+            </address>
+            <address class="vcard">
+                <div dir="auto" class="left"><span class="fn nameRole">Filip Skokan</span></div>
+                <div dir="auto" class="left"><span class="org">Auth0</span></div>
+                <div class="email">
+                    <span>Email:</span>
+                    <a href="mailto:panva.ip@gmail.com" class="email">panva.ip@gmail.com</a>
+                </div>
+            </address>
+        </section>
+    </div>
+    <script>const toc = document.getElementById("toc");
+        toc.querySelector("h2").addEventListener("click", e => {
+            toc.classList.toggle("active");
+        });
+        toc.querySelector("nav").addEventListener("click", e => {
+            toc.classList.remove("active");
+        });
+    </script>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
+</body>
+
+</html>
