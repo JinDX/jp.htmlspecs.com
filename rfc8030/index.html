@@ -1,0 +1,1739 @@
+<pre>インターネット技術タスクフォース（IETF）                  M. Thomson
+Request for Comments: 8030                                       Mozilla
+カテゴリ: 標準化過程                                      E. Damaggio
+ISSN: 2070-1721                                           B. Raymor, Ed.
+                                                               Microsoft
+                                                            2016年12月
+
+
+                 <span class="h1">HTTP Pushを用いた汎用イベント配信</span>
+
+概要
+
+   この文書は、ユーザーエージェントにリアルタイムイベントを配信するための
+   簡単なプロトコルを記述する。この仕組みはHTTP/2サーバープッシュを使用する。
+
+このメモの位置付け
+
+   これはインターネット標準化過程の文書である。
+
+   この文書はインターネット技術タスクフォース（IETF）の成果物である。
+   これはIETFコミュニティの合意を表すものである。公開レビューを受けており、
+   インターネット技術運営グループ（IESG）によって公開が承認されている。
+   インターネット標準に関する詳細情報は、<a href="./rfc7841#section-2">RFC 7841の第&nbsp;2節</a>で
+   入手できる。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に関する情報は、
+   <a href="http://www.rfc-editor.org/info/rfc8030">http://www.rfc-editor.org/info/rfc8030</a>で入手できる。
+
+Copyright Notice
+
+   Copyright (c) 2016 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに  . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-3">3</a>
+     <a href="#section-1.1">1.1</a>.  規約と用語  . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+   <a href="#section-2">2</a>.  概要  . . . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-6">6</a>
+     <a href="#section-2.1">2.1</a>.  HTTPリソース  . . . . . . . . . . . . . . . . . . . . .   <a href="#page-7">7</a>
+   <a href="#section-3">3</a>.  プッシュサービスへの接続  . . . . . . . . . . . . . . . .   <a href="#page-8">8</a>
+   <a href="#section-4">4</a>.  プッシュメッセージの購読  . . . . . . . . . . . . . . . .   <a href="#page-8">8</a>
+     <a href="#section-4.1">4.1</a>.  購読を集合へまとめる  . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
+   <a href="#section-5">5</a>.  プッシュメッセージ配信の要求  . . . . . . . . . . . . .  <a href="#page-10">10</a>
+     <a href="#section-5.1">5.1</a>.  プッシュメッセージ受領確認の要求  . . . . . . . . .  <a href="#page-10">10</a>
+     <a href="#section-5.2">5.2</a>.  プッシュメッセージのTime-To-Live  . . . . . . . . .  <a href="#page-11">11</a>
+     <a href="#section-5.3">5.3</a>.  プッシュメッセージの緊急度  . . . . . . . . . . . .  <a href="#page-13">13</a>
+     <a href="#section-5.4">5.4</a>.  プッシュメッセージの置換  . . . . . . . . . . . . .  <a href="#page-14">14</a>
+   <a href="#section-6">6</a>.  購読に対するプッシュメッセージの受信  . . . . . . . .  <a href="#page-15">15</a>
+     <a href="#section-6.1">6.1</a>.  購読集合に対するプッシュメッセージの受信  . . . .  <a href="#page-17">17</a>
+     <a href="#section-6.2">6.2</a>.  プッシュメッセージの確認応答  . . . . . . . . . .  <a href="#page-18">18</a>
+     <a href="#section-6.3">6.3</a>.  プッシュメッセージ受領確認の受信  . . . . . . . .  <a href="#page-19">19</a>
+   <a href="#section-7">7</a>.  運用上の考慮事項  . . . . . . . . . . . . . . . . . . .  <a href="#page-20">20</a>
+     <a href="#section-7.1">7.1</a>.  負荷管理  . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-20">20</a>
+     <a href="#section-7.2">7.2</a>.  プッシュメッセージの失効  . . . . . . . . . . . . .  <a href="#page-20">20</a>
+     <a href="#section-7.3">7.3</a>.  購読の失効  . . . . . . . . . . . . . . . . . . . . .  <a href="#page-21">21</a>
+       <a href="#section-7.3.1">7.3.1</a>.  購読集合の失効  . . . . . . . . . . . . . . . . .  <a href="#page-21">21</a>
+     <a href="#section-7.4">7.4</a>.  アプリケーションの信頼性への影響  . . . . . . . .  <a href="#page-22">22</a>
+     <a href="#section-7.5">7.5</a>.  購読集合と並行HTTP/2ストリーム  . . . . . . . . .  <a href="#page-22">22</a>
+   <a href="#section-8">8</a>.  セキュリティ上の考慮事項  . . . . . . . . . . . . . .  <a href="#page-22">22</a>
+     <a href="#section-8.1">8.1</a>.  プッシュサービスアクセスからの機密性  . . . . . .  <a href="#page-23">23</a>
+     <a href="#section-8.2">8.2</a>.  プライバシー上の考慮事項  . . . . . . . . . . . .  <a href="#page-23">23</a>
+     <a href="#section-8.3">8.3</a>.  認可  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-24">24</a>
+     <a href="#section-8.4">8.4</a>.  サービス拒否に関する考慮事項  . . . . . . . . . .  <a href="#page-25">25</a>
+     <a href="#section-8.5">8.5</a>.  ログ記録のリスク  . . . . . . . . . . . . . . . . .  <a href="#page-25">25</a>
+   <a href="#section-9">9</a>.  IANAに関する考慮事項  . . . . . . . . . . . . . . . . .  <a href="#page-26">26</a>
+     <a href="#section-9.1">9.1</a>.  ヘッダーフィールド登録  . . . . . . . . . . . . .  <a href="#page-26">26</a>
+     <a href="#section-9.2">9.2</a>.  リンク関係URN  . . . . . . . . . . . . . . . . . .  <a href="#page-26">26</a>
+     <a href="#section-9.3">9.3</a>.  サービス名およびポート番号登録  . . . . . . . . .  <a href="#page-28">28</a>
+   <a href="#section-10">10</a>. 参考文献  . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-28">28</a>
+     <a href="#section-10.1">10.1</a>.  規範的参考文献  . . . . . . . . . . . . . . . . .  <a href="#page-28">28</a>
+     <a href="#section-10.2">10.2</a>.  参考情報  . . . . . . . . . . . . . . . . . . . .  <a href="#page-30">30</a>
+   謝辞  . . . . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-31">31</a>
+   著者の連絡先  . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-31">31</a>
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   モバイル機器や組み込み機器上の多くのアプリケーションでは、着信や
+   メッセージなどのリアルタイムイベントを適時に配信（または
+   「プッシュ」）できるよう、ネットワーク通信への継続的なアクセスを
+   必要とする。これらの機器は通常、利用可能な電力が限られているため、
+   アプリケーション要件を満たすより効率的な方法を見つけることは、
+   アプリケーションエコシステムに大きな利益をもたらす。
+
+   電力使用量への大きな寄与要因の1つは無線である。無線通信は、
+   無線機器のエネルギー予算の大きな部分を消費する。
+
+   複数のアプリケーションからの永続的な接続またはセッションを
+   調整せずに使用すると、各独立したセッションがそれぞれ独自の
+   オーバーヘッドを生じ得るため、機器の無線の不必要な使用につながる。
+   特に、ミドルボックスがセッションを早期にタイムアウトしないように
+   するためのkeep-aliveトラフィックは、大きな浪費をもたらし得る。
+   イベントは比較的まれであるため、長期的には保守用トラフィックが
+   支配的になりがちである。
+
+   すべてのリアルタイムイベントを単一のセッションに統合することで、
+   ネットワークおよび無線リソースをより効率的に使用できる。単一の
+   サービスがすべてのイベントを統合し、それらのイベントが到着すると
+   アプリケーションへ配信する。これには1つのセッションだけが必要で、
+   重複するオーバーヘッドコストを回避できる。
+
+   W3C Push API [<a href="#ref-API" title="&quot;Push API&quot;">API</a>]は、Webアプリケーションから
+   統合されたプッシュサービスを使用できるようにするAPIを記述している。
+   この文書は、その作業を拡張し、次のことに使用できるプロトコルを
+   記述する。
+
+   o  ユーザーエージェントへのプッシュメッセージ配信を要求すること、
+
+   o  新しいプッシュメッセージ配信購読を作成すること、および
+
+   o  新しいプッシュメッセージを監視すること。
+
+   標準化されたイベント配信方法は、アプリケーションサーバーが
+   複数のプッシュサービスを使用する必要がある場合があるW3C Push APIに
+   とって特に重要である。購読、管理、および監視機能は現在、独自
+   プロトコルによって実現されている。これらは十分ではあるが、
+   標準化がもたらす利点はいずれも提供しない。
+
+   この文書は、プッシュサービスがどのように発見されるかを意図的に
+   記述しない。プッシュサービスの発見は、そもそも必要であることが
+   判明した場合、将来の取り組みに委ねられる。ユーザーエージェントは、
+   プッシュサービスのURLで構成されることが期待される。
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  規約と用語</span>
+
+   この文書におけるキーワード"MUST"、"MUST NOT"、"REQUIRED"、"SHALL"、
+   "SHALL NOT"、"SHOULD"、"SHOULD NOT"、"RECOMMENDED"、"MAY"、
+   および"OPTIONAL"は、[<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>]で記述されているように解釈される。
+
+   この文書は、次の用語を定義する。
+
+   application:  プッシュメッセージの送信者と最終的な利用者の両方。
+      多くのアプリケーションは、ユーザーエージェント上で動作する
+      コンポーネントと、サーバー上で動作する他のコンポーネントを持つ。
+
+   application server:  通常サーバー上で動作し、プッシュメッセージの
+      配信を要求するアプリケーションのコンポーネント。
+
+   push message subscription:  ユーザーエージェントとプッシュサービスの
+      間で確立され、アプリケーションサーバーと共有されるメッセージ
+      配信コンテキスト。すべてのプッシュメッセージは、プッシュ
+      メッセージ購読に関連付けられる。
+
+   push message subscription set:  複数のプッシュメッセージ購読を集合に
+      まとめる、ユーザーエージェントとプッシュサービスの間で確立
+      されるメッセージ配信コンテキスト。
+
+   push message:  アプリケーションサーバーからプッシュサービスを介して
+      ユーザーエージェントへ送信されるメッセージ。
+
+   push message receipt:  プッシュサービスからアプリケーションサーバーへ
+      送信されるメッセージ配信確認。
+
+   push service:  ユーザーエージェントへプッシュメッセージを配信する
+      サービス。
+
+   user agent:  プッシュメッセージの受信者である機器およびソフトウェア。
+
+   この文書の例では、HTTP/1.1メッセージ形式[<a href="./rfc7230" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;">RFC7230</a>]を使用する。
+   多くの交換はHTTP/1.1を使用して完了できる。
+
+   o  プッシュメッセージの購読（<a href="#section-4">Section 4</a>）
+
+   o  プッシュメッセージ配信の要求（<a href="#section-5">Section 5</a>）
+
+   o  プッシュメッセージの置換（<a href="#section-5.4">Section 5.4</a>）
+
+   o  プッシュメッセージの確認応答（<a href="#section-6.2">Section 6.2</a>）
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   例がHTTP/2サーバープッシュに依存する場合は、[<a href="./rfc7540" title="&quot;Hypertext Transfer Protocol Version 2 (HTTP/2)&quot;">RFC7540</a>]のより詳細な
+   フレーム形式が使用される。
+
+   o  購読に対するプッシュメッセージの受信（<a href="#section-6">Section 6</a>）
+
+   o  購読集合に対するプッシュメッセージの受信（<a href="#section-6.1">Section 6.1</a>）
+
+   o  プッシュメッセージ受領確認の受信（<a href="#section-6.3">Section 6.3</a>）
+
+   すべての例では、登録済みポート（1001）ではなく、デフォルトポート
+   （443）上のHTTPSを使用する。プッシュサービスの展開では、ユーザー
+   エージェントがサービスに到達できる可能性を最大化するために、この
+   構成を好む場合がある。プッシュサービスは、到達性を犠牲にすることなく
+   標準化されたHTTPSポートの利点を得るため、HTTP代替サービスを使用して
+   ユーザーエージェントを登録済みポート（1001）へリダイレクトしてもよい
+   （<a href="#section-3">Section 3</a>参照）。これは、ユーザーエージェントからプッシュサービス
+   への要求にAlt-Usedヘッダーフィールド[<a href="./rfc7838" title="&quot;HTTP Alternative Services&quot;">RFC7838</a>]が含まれることを通じて
+   例に現れるだけである。
+
+   このプロトコルは必須のシステムを定義しないため、例にはプッシュ
+   メッセージの暗号化やアプリケーションサーバー認証の具体的な方法は
+   含まれない。Voluntary Application Server Identification [<a href="#ref-VAPID" title="&quot;Voluntary Application Server Identification for Web Push&quot;">VAPID</a>]および
+   Message Encryption for WebPush [<a href="#ref-ENCRYPT" title="&quot;Message Encryption for Web Push&quot;">ENCRYPT</a>]の例は、W3C Push API [<a href="#ref-API" title="&quot;Push API&quot;">API</a>]が
+   その要件のために採用したアプローチを示している。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  概要</span>
+
+   プッシュサービスの一般的なモデルには、3つの基本的なアクターが
+   含まれる。ユーザーエージェント、プッシュサービス、および
+   アプリケーション（サーバー）である。
+
+    +-------+           +--------------+       +-------------+
+    |  UA   |           | Push Service |       | Application |
+    +-------+           +--------------+       |   Server    |
+        |                      |               +-------------+
+        |      Subscribe       |                      |
+        |---------------------&gt;|                      |
+        |       Monitor        |                      |
+        |&lt;====================&gt;|                      |
+        |                      |                      |
+        |          Distribute Push Resource           |
+        |--------------------------------------------&gt;|
+        |                      |                      |
+        :                      :                      :
+        |                      |     Push Message     |
+        |    Push Message      |&lt;---------------------|
+        |&lt;---------------------|                      |
+        |                      |                      |
+
+                      図1: WebPushアーキテクチャ
+
+   プロセスの最初に、新しいメッセージ購読がユーザーエージェントに
+   よって作成され、その後そのアプリケーションサーバーへ配布される。
+   この購読は、アクター間の将来のすべての相互作用の基礎である。
+   購読は、アプリケーションサーバーがプッシュサービスへメッセージを
+   送信し、ユーザーエージェントへ配信させるために使用される。
+   ユーザーエージェントは、その購読を使用して、受信メッセージが
+   ないかプッシュサービスを監視する。
+
+   認可に対するより多くの制御を提供するため、メッセージ購読は
+   異なる能力を持つ2つのリソースとしてモデル化される。
+
+   o  購読リソースは、購読からメッセージを受信し、購読を削除するために
+      使用される。これはユーザーエージェントに対して非公開である。
+
+   o  プッシュリソースは、購読へメッセージを送信するために使用される。
+      これは公開され、ユーザーエージェントからそのアプリケーション
+      サーバーと共有される。
+
+   各アプリケーションに一意の購読が配布されることが期待されるが、
+   このプロトコルには本質的な濃度制約はない。複数の購読が同じ
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   アプリケーションのために作成されることも、複数のアプリケーションが
+   同じ購読を使用することもできる。ただし、購読の共有にはセキュリティ
+   およびプライバシー上の影響があることに注意する。
+
+   購読には限られた存続期間がある。また、プッシュサービスまたは
+   ユーザーエージェントのいずれかによって、いつでも終了され得る。
+   ユーザーエージェントおよびアプリケーションサーバーは、購読状態の
+   変更を管理する準備をしておかなければならない。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  HTTPリソース</span>
+
+   このプロトコルは、HTTPリソース[<a href="./rfc7230" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;">RFC7230</a>]およびリンク関係
+   [<a href="./rfc5988" title="&quot;Web Linking&quot;">RFC5988</a>]を使用する。次のリソースが定義される。
+
+   push service:  このリソースは、プッシュメッセージ購読（<a href="#section-4">Section 4</a>）を
+      作成するために使用される。プッシュサービスのURLはユーザー
+      エージェントに構成される。
+
+   push message subscription:  このリソースは、メッセージ購読に対する
+      読み取りおよび削除アクセスを提供する。ユーザーエージェントは、
+      プッシュメッセージ購読を使用してプッシュメッセージ（<a href="#section-6">Section 6</a>）を
+      受信する。すべてのプッシュメッセージ購読には、厳密に1つの
+      関連するプッシュリソースがある。
+
+   push message subscription set:  このリソースは、プッシュメッセージ
+      購読の集合に対する読み取りおよび削除アクセスを提供する。
+      ユーザーエージェントは、集合内のすべてのプッシュメッセージ
+      購読についてプッシュメッセージ（<a href="#section-6.1">Section 6.1</a>）を受信する。
+      型"urn:ietf:params:push:set"のリンク関係は、プッシュメッセージ
+      購読集合を識別する。
+
+   push:  アプリケーションサーバーは、プッシュリソースを使用して
+      プッシュメッセージの配信（<a href="#section-5">Section 5</a>）を要求する。
+      型"urn:ietf:params:push"のリンク関係は、プッシュリソースを識別する。
+
+   push message:  プッシュサービスは、配信のために受け入れられた
+      プッシュメッセージ（<a href="#section-5">Section 5</a>）を識別するためにプッシュ
+      メッセージリソースを作成する。プッシュメッセージリソースは、
+      ユーザーエージェントがプッシュメッセージの受信（<a href="#section-6.2">Section 6.2</a>）を
+      確認応答するためにも削除される。
+
+   receipt subscription:  アプリケーションサーバーは、受領確認購読を
+      使用してプッシュメッセージの配信確認（<a href="#section-5.1">Section 5.1</a>）を受信する。
+      型"urn:ietf:params:push:receipt"のリンク関係は、受領確認購読を
+      識別する。
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  プッシュサービスへの接続</span>
+
+   プッシュサービスは、[<a href="./rfc7525" title="&quot;Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)&quot;">RFC7525</a>]の推奨事項に従い、Transport Layer Security
+   （TLS）[<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>]上のHTTPを使用しなければならない（MUST）。
+   プッシュサービスはHTTPSと同じデフォルトポート番号（443/TCP）を
+   共有するが、HTTP代替サービス[<a href="./rfc7838" title="&quot;HTTP Alternative Services&quot;">RFC7838</a>]を使用してIANA割り当て済み
+   TCPシステムポート（1001）を広告してもよい（MAY）。
+
+   デフォルトポート（443）は広い到達性特性を提供する一方で、最も多くは
+   Webブラウジングのシナリオで使用され、ミドルボックスで構成された他の
+   ポートよりも短いアイドルタイムアウトを持つ。WebPushシナリオでは、
+   これはバッテリー駆動機器で接続を維持するための不必要な無線通信に
+   つながる。
+
+   代替ポート（1001）を広告することで、ミドルボックスは、データ交換が
+   まれであるという期待のもと、プッシュシナリオに固有の接続の
+   アイドルタイムアウトを最適化できる。
+
+   ミドルボックスは[<a href="./rfc5382" title="&quot;NAT Behavioral Requirements for TCP&quot;">RFC5382</a>]のREQ-5に従うべきであり（SHOULD）、そこでは
+   「'established connection idle-timeout'の値は2時間4分未満であっては
+   ならない（MUST NOT）」と述べられている。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  プッシュメッセージの購読</span>
+
+   ユーザーエージェントは、新しい購読を作成するために、構成された
+   プッシュサービスリソースへPOST要求を送信する。
+
+   POST /subscribe HTTP/1.1
+   Host: push.example.net
+
+   201（Created）応答は、プッシュ購読が作成されたことを示す。
+   要求への応答として作成されたプッシュメッセージ購読リソースのURIは、
+   Locationヘッダーフィールドで返されなければならない（MUST）。
+
+   プッシュサービスは、プッシュメッセージ購読に対応するプッシュ
+   リソースのURIを、型"urn:ietf:params:push"のリンク関係で提供
+   しなければならない（MUST）。
+
+   プッシュURIをアプリケーションサーバーへ配布するためには、
+   アプリケーション固有の方法が使用される。このURIが認可されていない
+   受信者に開示されないことを確実にするため、機密性保護および
+   アプリケーションサーバー認証が使用されなければならない（MUST）
+   （<a href="#section-8.3">Section 8.3</a>）。
+
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   HTTP/1.1 201 Created
+   Date: Thu, 11 Dec 2014 23:56:52 GMT
+   Link: &lt;/push/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV&gt;;
+           rel="urn:ietf:params:push"
+   Link: &lt;/subscription-set/4UXwi2Rd7jGS7gp5cuutF8ZldnEuvbOy&gt;;
+           rel="urn:ietf:params:push:set"
+   Location: https://push.example.net/subscription/LBhhw0OohO-Wl4Oi971UG
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  購読を集合へまとめる</span>
+
+   複数のプッシュメッセージ購読を購読集合へまとめることは、プッシュ
+   サービスおよびユーザーエージェントにとって大きな効率改善を表し得る。
+   プッシュサービスは、型"urn:ietf:params:push:set"のリンク関係で、
+   購読集合リソースのURIを提供してもよい（MAY）。
+
+   購読集合がプッシュメッセージ購読応答で返された場合、ユーザー
+   エージェントは、新しいプッシュメッセージ購読を作成する後続の要求に、
+   型"urn:ietf:params:push:set"のリンク関係でこの購読集合を含める
+   べきである（SHOULD）。
+
+   ユーザーエージェントは、購読の存続期間にわたって集約された方法で
+   プッシュメッセージを受信できない場合、その購読集合を省略してもよい
+   （MAY）。これは、ユーザーエージェントが他のプッシュメッセージ受信者を
+   代理して購読を監視している場合に必要となることがある。
+
+   POST /subscribe HTTP/1.1
+   Host: push.example.net
+   Link: &lt;/subscription-set/4UXwi2Rd7jGS7gp5cuutF8ZldnEuvbOy&gt;;
+           rel="urn:ietf:params:push:set"
+
+   プッシュサービスは、その応答で同じ購読集合を返すべきである
+   （SHOULD）が、ユーザーエージェントが提供したものを再利用できない場合は
+   新しい購読集合を返してもよい（MAY）。
+
+   HTTP/1.1 201 Created
+   Date: Thu, 11 Dec 2014 23:56:52 GMT
+   Link: &lt;/push/YBJNBIMwwA_Ag8EtD47J4A&gt;;
+           rel="urn:ietf:params:push"
+   Link: &lt;/subscription-set/4UXwi2Rd7jGS7gp5cuutF8ZldnEuvbOy&gt;;
+           rel="urn:ietf:params:push:set"
+   Location: https://push.example.net/subscription/i-nQ3A9Zm4kgSWg8_ZijV
+
+   プッシュサービスは、無効な購読集合を含む要求に対して400
+   （Bad Request）状態コードを返さなければならない（MUST）。プッシュ
+   サービスは、購読集合を省略した要求を拒否するために429
+   （Too Many Requests）状態コード[<a href="./rfc6585" title="&quot;Additional HTTP Status Codes&quot;">RFC6585</a>]を返してもよい（MAY）。
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                    [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   プッシュサービスが要求が同じユーザーエージェントに由来することを
+   検出する方法は実装固有であるが、TLS接続、送信元IPアドレス、および
+   ポートなどの周辺情報を考慮に入れることができる。実装者は、一部の
+   ヒューリスティックが誤検出を生じ、その結果、要求が誤って拒否される
+   可能性があることに留意する。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  プッシュメッセージ配信の要求</span>
+
+   アプリケーションサーバーは、ユーザーエージェントによって
+   アプリケーションサーバーへ配布されたプッシュリソースへHTTP POST要求を
+   送信することで、プッシュメッセージの配信を要求する。プッシュ
+   メッセージの内容は要求の本文に含まれる。
+
+   POST /push/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV HTTP/1.1
+   Host: push.example.net
+   TTL: 15
+   Content-Type: text/plain;charset=utf8
+   Content-Length: 36
+
+   iChYuI3jMzt3ir20P8r_jgRR-dSuN182x7iB
+
+   201（Created）応答は、プッシュメッセージが受け入れられたことを示す。
+   要求への応答として作成されたプッシュメッセージリソースのURIは、
+   Locationヘッダーフィールドで返されなければならない（MUST）。
+   これは、メッセージがユーザーエージェントへ配信されたことを示す
+   ものではない。
+
+   HTTP/1.1 201 Created
+   Date: Thu, 11 Dec 2014 23:56:55 GMT
+   Location: https://push.example.net/message/qDIYHNcfAIPP_5ITvURr-d6BGt
+
+<span class="h3"><a class="selflink" id="section-5.1" href="#section-5.1">5.1</a>.  プッシュメッセージ受領確認の要求</span>
+
+   アプリケーションサーバーは、プッシュメッセージが配信され、
+   その後ユーザーエージェントによって確認応答されたときにプッシュ
+   サービスから確認を要求するために、"respond-async"設定を持つ
+   Preferヘッダーフィールド[<a href="./rfc7240" title="&quot;Prefer Header for HTTP&quot;">RFC7240</a>]を含めることができる。プッシュ
+   サービスは、配信確認をサポートしなければならない（MUST）。
+
+   POST /push/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV HTTP/1.1
+   Host: push.example.net
+   Prefer: respond-async
+   TTL: 15
+   Content-Type: text/plain;charset=utf8
+   Content-Length: 36
+
+   iChYuI3jMzt3ir20P8r_jgRR-dSuN182x7iB
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   プッシュサービスが確認付き配信のためにメッセージを受け入れる場合、
+   202（Accepted）応答を返さなければならない（MUST）。要求への応答として
+   作成されたプッシュメッセージリソースのURIは、Locationヘッダー
+   フィールドで返されなければならない（MUST）。プッシュサービスはまた、
+   型"urn:ietf:params:push:receipt"のリンク関係で、受領確認購読
+   リソースのURIを提供しなければならない（MUST）。
+
+   HTTP/1.1 202 Accepted
+   Date: Thu, 11 Dec 2014 23:56:55 GMT
+   Link: &lt;/receipt-subscription/3ZtI4YVNBnUUZhuoChl6omUvG4ZM&gt;;
+           rel="urn:ietf:params:push:receipt"
+   Location: https://push.example.net/message/qDIYHNcfAIPP_5ITvURr-d6BGt
+
+   同じオリジン[<a href="./rfc6454" title="&quot;The Web Origin Concept&quot;">RFC6454</a>]への後続の受領確認要求では、アプリケーション
+   サーバーは、返された受領確認購読を型"urn:ietf:params:push:receipt"の
+   リンク関係に含めるべきである（SHOULD）。これにより、プッシュサービスに
+   受領確認を集約する選択肢が与えられる。プッシュサービスは、その応答で
+   同じ受領確認購読を返すべきである（SHOULD）が、アプリケーション
+   サーバーが提供したものを再利用できない場合は、新しい受領確認購読を
+   返してもよい（MAY）。
+
+   アプリケーションサーバーは、受領確認購読の存続期間にわたって集約された
+   方法で受領確認を受信できない場合、その受領確認購読を省略してもよい
+   （MAY）。これは、アプリケーションサーバーが他のプッシュメッセージ
+   送信者を代理して受領確認購読を監視している場合に必要となることがある。
+
+   プッシュサービスは、無効な受領確認購読を含む要求に対して400
+   （Bad Request）状態コードを返さなければならない（MUST）。プッシュ
+   サービスが、維持する受領確認購読の数を制限したい場合、受領確認購読を
+   省略した受領確認要求を拒否するために429（Too Many Requests）状態
+   コード[<a href="./rfc6585" title="&quot;Additional HTTP Status Codes&quot;">RFC6585</a>]を返してもよい（MAY）。
+
+<span class="h3"><a class="selflink" id="section-5.2" href="#section-5.2">5.2</a>.  プッシュメッセージのTime-To-Live</span>
+
+   プッシュサービスは、一定期間プッシュメッセージを保存することで、
+   プッシュメッセージ配信の信頼性を大幅に向上させることができる。
+   ユーザーエージェントは多くの場合断続的にしか接続されないため、
+   プッシュサービスに短期メッセージ保存があることから利益を得る。
+
+   配信の遅延は、ユーザーエージェントとの通信をまとめるためにも
+   使用でき、それにより無線リソースを節約できる。
+
+   一部のプッシュメッセージは、一定の時間が経過すると有用でなくなる。
+   関連性を失った後にメッセージを配信することは無駄である。たとえば、
+   プッシュメッセージに通話通知が含まれる場合、発信者が通話を断念した後に
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   メッセージを受信しても価値はない。ユーザーエージェント上の
+   アプリケーションは、無用な警告を生成しないよう、そのメッセージを
+   抑制せざるを得ない。
+
+   アプリケーションサーバーは、プッシュメッセージ配信の要求にTTL
+   （Time-To-Live）ヘッダーフィールドを含めなければならない（MUST）。
+   TTLヘッダーフィールドは、プッシュメッセージがプッシュサービスに
+   よって保持される期間を秒単位で示唆する値を含む。
+
+   TTL規則は、秒単位の時間を表す非負整数を指定する。TTL値を解析し
+   バイナリ形式へ変換する受信者は、少なくとも31ビットの非負整数範囲を
+   持つ算術型を使用すべきである（SHOULD）。受信者が表現可能な最大整数を
+   超えるTTL値を受信した場合、または後続の計算でオーバーフローが
+   発生した場合、その値を2147483648（2^31）とみなさなければならない
+   （MUST）。
+
+   TTL = 1*DIGIT
+
+   プッシュサービスは、TTLヘッダーフィールドを省略した要求への応答として
+   400（Bad Request）状態コードを返さなければならない（MUST）。
+
+   プッシュサービスは、要求された期間より短い期間だけプッシュメッセージを
+   保持してもよい（MAY）。これは、実際のTTLを示すTTLヘッダーフィールドを
+   応答で返すことによって示される。このTTL値は、アプリケーション
+   サーバーが提供した値以下でなければならない（MUST）。
+
+   TTL期間が経過すると、プッシュサービスは、プッシュメッセージを
+   ユーザーエージェントへ配信しようとしてはならない（MUST NOT）。
+   プッシュサービスは、処理における時間計算の誤差を考慮してTTL値を
+   調整することがある。たとえば、サーバークラスター内でプッシュ
+   メッセージを配布すると、クロックスキューや伝播遅延により誤差が
+   生じることがある。
+
+   プッシュサービスは、アプリケーションサーバーがプッシュサービスへ
+   プッシュメッセージを送信する際に費やした時間、またはユーザー
+   エージェントへプッシュメッセージを送信する際に発生した遅延を
+   考慮する義務はない。アプリケーションサーバーは、TTLヘッダー
+   フィールド値を選択する際に、転送遅延を考慮する必要がある。
+
+   TTLがゼロのプッシュメッセージは、ユーザーエージェントがメッセージを
+   受信可能である場合、直ちに配信される。配信後、プッシュサービスは、
+   TTLがゼロのプッシュメッセージを直ちに削除することを許可される。
+   これは、ユーザーエージェントがプッシュメッセージリソースに対して
+   HTTP DELETEを実行してメッセージの受信を確認応答する前に発生し得る。
+   したがって、アプリケーションサーバーは、TTLがゼロのプッシュ
+   メッセージについて確認応答受領確認を受信することに依存できない。
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   ユーザーエージェントが利用できない場合、TTLがゼロのプッシュ
+   メッセージは失効し、決して配信されない。
+
+<span class="h3"><a class="selflink" id="section-5.3" href="#section-5.3">5.3</a>.  プッシュメッセージの緊急度</span>
+
+   バッテリー駆動の機器では、長時間休止状態を維持することがしばしば
+   重要である。特に無線通信は大きな電力を消費し、機器が動作できる
+   時間の長さを制限する。
+
+   些細なメッセージを受信するためにリソースを消費することを避けるには、
+   アプリケーションサーバーがメッセージの緊急度を伝達でき、またユーザー
+   エージェントが、特定の緊急度のメッセージだけをプッシュサーバーが
+   転送するよう要求できると有用である。
+
+   アプリケーションサーバーは、プッシュメッセージ配信の要求にUrgency
+   ヘッダーフィールドを含めてもよい（MAY）。このヘッダーフィールドは
+   メッセージの緊急度を示す。プッシュサービスは、Urgencyヘッダー
+   フィールドをユーザーエージェントへ転送してはならない（MUST NOT）。
+   Urgencyヘッダーフィールドのないプッシュメッセージは、値"normal"を
+   既定値とする。
+
+   ユーザーエージェントは、プッシュメッセージを監視する際に、
+   受信を希望するプッシュメッセージの最低緊急度を示すため、Urgency
+   ヘッダーフィールドを含めてもよい（MAY）。プッシュサービスは、
+   ユーザーエージェントが監視要求で示した値より低い緊急度のプッシュ
+   メッセージを配信してはならない（MUST NOT）。メッセージを監視する際に
+   Urgencyヘッダーフィールドを含めないユーザーエージェントには、
+   あらゆる緊急度のプッシュメッセージが配信される。
+
+   Urgencyヘッダーフィールドの文法は次のとおりである。
+
+   Urgency = urgency-option
+   urgency-option = ("very-low" / "low" / "normal" / "high")
+
+   緊急度の低い順に示す。
+
+   +----------+-----------------------------+--------------------------+
+   | Urgency  | 機器の状態                  | アプリケーション例       |
+   |          |                             | シナリオ                 |
+   +----------+-----------------------------+--------------------------+
+   | very-low | 電源接続中かつWi-Fi接続中   | 広告                     |
+   | low      | 電源接続中またはWi-Fi接続中 | トピック更新             |
+   | normal   | 電源接続中でもWi-Fiでもない | チャットまたはカレンダー |
+   |          |                             | メッセージ               |
+   | high     | バッテリー残量低下          | 着信電話または           |
+   |          |                             | 時間依存の警告           |
+   +----------+-----------------------------+--------------------------+
+
+                   表1: 例示的なUrgency値
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   要求には、Urgencyヘッダーフィールドの複数の値を含めてはならない
+   （MUST NOT）。そうでない場合、プッシュサービスは400（Bad Request）
+   状態コードを返さなければならない（MUST）。
+
+<span class="h3"><a class="selflink" id="section-5.4" href="#section-5.4">5.4</a>.  プッシュメッセージの置換</span>
+
+   プッシュサービスによって保存されたプッシュメッセージは、新しい内容で
+   置き換えることができる。プッシュメッセージが送信されている間に
+   ユーザーエージェントがオフラインである場合、プッシュメッセージを
+   更新することで、古くなったメッセージや冗長なメッセージがユーザー
+   エージェントへ送信される状況を避けられる。
+
+   トピックが割り当てられたプッシュメッセージだけが置き換えられる。
+   トピックを持つプッシュメッセージは、同一トピックを持つ未処理の
+   プッシュメッセージを置き換える。
+
+   プッシュメッセージトピックは、Topicヘッダーフィールドで運ばれる
+   文字列である。トピックは、同じ購読へ送信されたプッシュメッセージを
+   関連付けるために使用され、それ以外の意味を伝えない。
+
+   Topicヘッダーフィールドの文法は、[<a href="./rfc7230" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;">RFC7230</a>]で定義された"token"規則を
+   使用する。
+
+   Topic = token
+
+   このプロトコルで使用する場合、Topicヘッダーフィールドは、URLおよび
+   ファイル名に安全なBase64アルファベット[<a href="./rfc4648" title="&quot;The Base16, Base32, and Base64 Data Encodings&quot;">RFC4648</a>]から最大32文字に
+   制限されなければならない（MUST）。これらの制約を満たさないTopic
+   ヘッダーフィールドを持つ要求を受信したプッシュサービスは、
+   アプリケーションサーバーに対して400（Bad Request）状態コードを
+   返さなければならない（MUST）。
+
+   プッシュメッセージ置換要求は、新しいプッシュメッセージリソースを
+   作成すると同時に、一致するトピックを持つ既存のメッセージリソースを
+   削除する。削除されたプッシュメッセージの配信が試みられていた場合、
+   プッシュメッセージが置き換えられた後に確認応答がプッシュサービスへ
+   到着することがある。そのような削除済みメッセージに対する配信受領確認は
+   抑制されるべきである（SHOULD）。
+
+   置換要求はまた、一致するトピックの前のメッセージに関連付けられた
+   保存済みTTL、Urgency、および任意の受領確認購読も置き換える。
+
+   同じ購読への未処理メッセージと共有されていないトピックを持つプッシュ
+   メッセージは、通常どおり保存または配信される。
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 14]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-15" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   たとえば、次のメッセージは既存のメッセージを置き換える原因となり得る。
+
+   POST /push/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV HTTP/1.1
+   Host: push.example.net
+   TTL: 600
+   Topic: upd
+   Content-Type: text/plain;charset=utf8
+   Content-Length: 36
+
+   ZuHSZPKa2b1jtOKLGpWrcrn8cNqt0iVQyroF
+
+   プッシュサービスが"upd"というトピックを持つ未処理のプッシュ
+   メッセージを識別した場合、そのメッセージリソースは削除される。
+   201（Created）応答は、プッシュメッセージ置換が受け入れられたことを
+   示す。要求への応答として作成された新しいプッシュメッセージ
+   リソースのURIは、Locationヘッダーフィールドに含まれる。
+
+   HTTP/1.1 201 Created
+   Date: Thu, 11 Dec 2014 23:57:02 GMT
+   Location: https://push.example.net/message/qDIYHNcfAIPP_5ITvURr-d6BGt
+
+   Topicヘッダーフィールドの値は、ユーザーエージェントへ転送しては
+   ならない（MUST NOT）。その値は暗号化も認証もされない。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  購読に対するプッシュメッセージの受信</span>
+
+   ユーザーエージェントは、プッシュメッセージ購読リソースへGET要求を
+   行うことで、新しいプッシュメッセージの配信を要求する。プッシュ
+   サービスはこの要求に応答しない。代わりに、アプリケーションサーバーから
+   送信されたプッシュメッセージの内容をHTTP/2サーバープッシュ[<a href="./rfc7540" title="&quot;Hypertext Transfer Protocol Version 2 (HTTP/2)&quot;">RFC7540</a>]を
+   使用して送信する。
+
+   ユーザーエージェントは、その要求にUrgencyヘッダーフィールドを含めても
+   よい（MAY）。プッシュサービスは、表1（例示的なUrgency値）で定義
+   されるように、そのヘッダーフィールドの値より低い緊急度のメッセージを
+   配信してはならない（MUST NOT）。
+
+   各プッシュメッセージは、PUSH_PROMISEで送信される合成GET要求への応答
+   としてプッシュされる。このGET要求は、アプリケーションサーバーが
+   メッセージ配信を要求したときにプッシュサービスによって作成された
+   プッシュメッセージリソースに対して行われる。応答ヘッダーは、
+   型"urn:ietf:params:push"のリンク関係で、プッシュメッセージ購読に
+   対応するプッシュリソースのURIを提供すべきである（SHOULD）。応答本文は、
+   アプリケーションサーバーがプッシュリソースへ送信した最新の要求の
+   エンティティ本文である。
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 15]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-16" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   次の例の要求はHTTP/2上で行われる。
+
+   HEADERS      [stream 7] +END_STREAM +END_HEADERS
+     :method        = GET
+     :path          = /subscription/LBhhw0OohO-Wl4Oi971UG
+     :authority     = push.example.net
+
+   プッシュサービスは、要求が未完了のまま残ることを許可する。アプリケーション
+   サーバーからプッシュメッセージが送信されると、初期要求に関連付けて
+   サーバープッシュが生成される。サーバープッシュの応答にはプッシュ
+   メッセージが含まれる。
+
+   PUSH_PROMISE [stream 7; promised stream 4] +END_HEADERS
+     :method        = GET
+     :path          = /message/qDIYHNcfAIPP_5ITvURr-d6BGt
+     :authority     = push.example.net
+
+   HEADERS      [stream 4] +END_HEADERS
+     :status        = 200
+     date           = Thu, 11 Dec 2014 23:56:56 GMT
+     last-modified  = Thu, 11 Dec 2014 23:56:55 GMT
+     cache-control  = private
+     link           = &lt;/push/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV&gt;;
+                       rel="urn:ietf:params:push"
+     content-type   = text/plain;charset=utf8
+     content-length = 36
+
+   DATA         [stream 4] +END_STREAM
+     iChYuI3jMzt3ir20P8r_jgRR-dSuN182x7iB
+
+   HEADERS      [stream 7] +END_STREAM +END_HEADERS
+     :status        = 200
+
+   ユーザーエージェントは、"wait"設定を"0"に設定したPreferヘッダー
+   フィールド[<a href="./rfc7240" title="&quot;Prefer Header for HTTP&quot;">RFC7240</a>]を含めることで、プッシュメッセージ購読リソースの
+   内容を直ちに要求することもできる。この要求への応答として、プッシュ
+   サービスは、まだ配信されていないすべてのプッシュメッセージに対して
+   サーバープッシュを生成しなければならない（MUST）。
+
+   関連するサーバープッシュを伴わない204（No Content）状態コードは、
+   現在利用可能なメッセージがないことを示す。これは、プッシュメッセージが
+   失効したためである可能性がある。
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 16]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-17" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  購読集合に対するプッシュメッセージの受信</span>
+
+   購読に対するプッシュメッセージの受信と、購読集合に対する受信との間には
+   小さな違いがある。購読集合が利用可能である場合、ユーザーエージェントは、
+   個々のプッシュメッセージ購読ではなく、購読集合を使用してプッシュ
+   メッセージを監視すべきである（SHOULD）。
+
+   ユーザーエージェントは、プッシュメッセージ購読集合リソースへGET要求を
+   行うことで、プッシュメッセージ購読の集合に対する新しいプッシュ
+   メッセージの配信を要求する。プッシュサービスはこの要求に応答しない。
+   代わりに、アプリケーションサーバーから送信されたプッシュメッセージの
+   内容をHTTP/2サーバープッシュ[<a href="./rfc7540" title="&quot;Hypertext Transfer Protocol Version 2 (HTTP/2)&quot;">RFC7540</a>]を使用して送信する。
+
+   ユーザーエージェントは、その要求にUrgencyヘッダーフィールドを含めても
+   よい（MAY）。プッシュサービスは、表1（例示的なUrgency値）で定義
+   されるように、そのヘッダーフィールドの値より低い緊急度のメッセージを
+   配信してはならない（MUST NOT）。
+
+   各プッシュメッセージは、PUSH_PROMISEで送信される合成GET要求への応答
+   としてプッシュされる。このGET要求は、アプリケーションサーバーが
+   メッセージ配信を要求したときにプッシュサービスによって作成された
+   プッシュメッセージリソースに対して行われる。合成要求は、
+   型"urn:ietf:params:push"のリンク関係で、プッシュメッセージ購読に
+   対応するプッシュリソースのURIを提供しなければならない（MUST）。
+   これにより、ユーザーエージェントはメッセージの発信元を区別できる。
+   応答本文は、アプリケーションサーバーによってプッシュリソースへ送信された
+   最新の要求のエンティティ本文である。
+
+   次の例の要求はHTTP/2上で行われる。
+
+   HEADERS      [stream 7] +END_STREAM +END_HEADERS
+     :method        = GET
+     :path          = /subscription-set/4UXwi2Rd7jGS7gp5cuutF8ZldnEuvbOy
+     :authority     = push.example.net
+
+   プッシュサービスは、要求が未完了のまま残ることを許可する。アプリケーション
+   サーバーからプッシュメッセージが送信されると、初期要求に関連付けて
+   サーバープッシュが生成される。サーバープッシュの応答にはプッシュ
+   メッセージが含まれる。
+
+   PUSH_PROMISE [stream 7; promised stream 4] +END_HEADERS
+     :method        = GET
+     :path          = /message/qDIYHNcfAIPP_5ITvURr-d6BGt
+     :authority     = push.example.net
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 17]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-18" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   HEADERS      [stream 4] +END_HEADERS
+     :status        = 200
+     date           = Thu, 11 Dec 2014 23:56:56 GMT
+     last-modified  = Thu, 11 Dec 2014 23:56:55 GMT
+     link           = &lt;/push/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV&gt;;
+                       rel="urn:ietf:params:push"
+     cache-control  = private
+     content-type   = text/plain;charset=utf8
+     content-length = 36
+
+   DATA         [stream 4] +END_STREAM
+     iChYuI3jMzt3ir20P8r_jgRR-dSuN182x7iB
+
+   HEADERS      [stream 7] +END_STREAM +END_HEADERS
+     :status        = 200
+
+   ユーザーエージェントは、"wait"設定を"0"に設定したPreferヘッダー
+   フィールド[<a href="./rfc7240" title="&quot;Prefer Header for HTTP&quot;">RFC7240</a>]を含めることで、プッシュメッセージ購読集合
+   リソースの内容を直ちに要求できる。この要求への応答として、プッシュ
+   サービスは、まだ配信されていないすべてのプッシュメッセージに対して
+   サーバープッシュを生成しなければならない（MUST）。
+
+   関連するサーバープッシュを伴わない204（No Content）状態コードは、
+   現在利用可能なメッセージがないことを示す。これは、プッシュメッセージが
+   失効したためである可能性がある。
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  プッシュメッセージの確認応答</span>
+
+   プッシュメッセージが少なくとも1回はユーザーエージェントへ適切に
+   配信されることを確実にするため、ユーザーエージェントは、プッシュ
+   メッセージリソースに対してHTTP DELETEを実行して、メッセージの受信を
+   確認応答しなければならない（MUST）。
+
+   DELETE /message/qDIYHNcfAIPP_5ITvURr-d6BGt HTTP/1.1
+   Host: push.example.net
+
+   プッシュサービスが確認応答を受信し、アプリケーションが配信受領確認を
+   要求していた場合、プッシュサービスは受領確認購読を監視している
+   アプリケーションサーバーへ204（No Content）応答を返さなければ
+   ならない（MUST）。
+
+   プッシュサービスが合理的な時間内に確認応答を受信しない場合、その
+   メッセージはまだ配信されていないとみなされる。プッシュサービスは、
+   広告された失効までメッセージの配信を再試行し続けるべきである
+   （SHOULD）。
+
+   プッシュサービスは、応答しないユーザーエージェントや運用上の制約
+   などのシナリオにより、広告された失効の前にメッセージの配信再試行を
+   停止してもよい（MAY）。アプリケーションが
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 18]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-19" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   配信受領確認を要求していた場合、プッシュサービスは受領確認購読を
+   監視しているアプリケーションサーバーへ410（Gone）応答を返さなければ
+   ならない（MUST）。
+
+<span class="h3"><a class="selflink" id="section-6.3" href="#section-6.3">6.3</a>.  プッシュメッセージ受領確認の受信</span>
+
+   アプリケーションサーバーは、受領確認購読リソースへHTTP GET要求を
+   行うことで、プッシュサービスから受領確認の配信を要求する。プッシュ
+   サービスはこの要求に応答しない。代わりに、ユーザーエージェントにより
+   メッセージが確認応答されたとき（<a href="#section-6.2">Section 6.2</a>）に、HTTP/2サーバー
+   プッシュ[<a href="./rfc7540" title="&quot;Hypertext Transfer Protocol Version 2 (HTTP/2)&quot;">RFC7540</a>]を使用してプッシュ受領確認を送信する。
+
+   各受領確認は、PUSH_PROMISEで送信される合成GET要求への応答として
+   プッシュされる。このGET要求は、アプリケーションサーバーがメッセージ
+   配信を要求したときにプッシュサービスによって作成された同じプッシュ
+   メッセージリソースに対して行われる。応答には、メッセージ配信の結果を
+   示す状態コードが含まれ、データは運ばない。
+
+   次の例の要求はHTTP/2上で行われる。
+
+   HEADERS      [stream 13] +END_STREAM +END_HEADERS
+     :method        = GET
+     :path          = /receipt-subscription/3ZtI4YVNBnUUZhuoChl6omUvG4ZM
+     :authority     = push.example.net
+
+   プッシュサービスは、要求が未完了のまま残ることを許可する。ユーザー
+   エージェントがメッセージを確認応答すると、プッシュサービスは配信
+   受領確認をアプリケーションサーバーへプッシュする。204（No Content）
+   状態コードは、メッセージが配信され、確認応答されたことを確認する。
+
+   PUSH_PROMISE [stream 13; promised stream 82] +END_HEADERS
+     :method        = GET
+     :path          = /message/qDIYHNcfAIPP_5ITvURr-d6BGt
+     :authority     = push.example.net
+
+   HEADERS      [stream 82] +END_STREAM
+                           +END_HEADERS
+     :status        = 204
+     date           = Thu, 11 Dec 2014 23:56:56 GMT
+
+   ユーザーエージェントがプッシュメッセージの受信を確認応答せず、
+   プッシュサービスが広告された失効の前にメッセージの配信再試行を
+   停止した場合、プッシュサービスは410（Gone）状態コードを持つ失敗応答を
+   プッシュしなければならない（MUST）。
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 19]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-20" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  運用上の考慮事項</span>
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  負荷管理</span>
+
+   プッシュサービスは、非常に多数の開いたTCP接続を維持しなければ
+   ならない可能性が高い。これらの接続を効果的に管理するには、接続を
+   サーバーインスタンス間で移動できることに依存する場合がある。
+
+   ユーザーエージェントは、307（Temporary Redirect）状態コード[<a href="./rfc7231" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content&quot;">RFC7231</a>]を
+   サポートしなければならない（MUST）。これは、新しい購読が要求された
+   時点で、プッシュサービスが負荷を再分配するために使用できる。
+
+   負荷を再分配したいサーバーは、HTTP代替サービス[<a href="./rfc7838" title="&quot;HTTP Alternative Services&quot;">RFC7838</a>]を使用して
+   これを行うことができる。HTTP代替サービスは、各種リソースの同じURIを
+   維持しながら負荷を再分配できるようにする。ユーザーエージェントは、
+   代替接続を確立した後にGOAWAYフレームを使用することで、円滑な移行を
+   確保できる。
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  プッシュメッセージの失効</span>
+
+   TTLヘッダーフィールドに基づくプッシュメッセージの保存は、プッシュ
+   サービスにとって潜在的に大きな量のストレージを構成する。プッシュ
+   サービスは、メッセージを無期限に保存する義務はない。プッシュサービスは、
+   TTLヘッダーフィールド（<a href="#section-5.2">Section 5.2</a>）を使用して、メッセージをどのくらい
+   保持するつもりかをアプリケーションサーバーに示すことができる。
+
+   プッシュメッセージを能動的に監視していないユーザーエージェントは、
+   その期間中に失効したメッセージを受信しない。
+
+   保存され、まだユーザーエージェントへ配信されていないプッシュ
+   メッセージは、ユーザーエージェントが監視を再開すると配信される。
+   保存されたプッシュメッセージには、アプリケーションサーバーによって
+   配信が要求された時刻を示すLast-Modifiedヘッダーフィールド
+   （<a href="./rfc7232#section-2.2">[RFC7232]のSection&nbsp;2.2</a>）を含めるべきである（SHOULD）。
+
+   失効したメッセージだけを持つプッシュメッセージ購読リソースへのGET要求は、
+   プッシュメッセージが一度も送信されなかったかのような応答をもたらす。
+
+   プッシュサービスは、過負荷を避けるために保存されるプッシュメッセージの
+   サイズおよび数を制限する必要がある場合がある。メッセージのサイズを
+   制限するため、プッシュサービスは、大きすぎるエンティティ本文を含む
+   要求に応答して413（Payload Too Large）状態コード[<a href="./rfc7231" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content&quot;">RFC7231</a>]を返しても
+   よい（MAY）。プッシュサービスは、4096バイト以下のサイズのエンティティ
+   本文に対する応答で413状態コードを返してはならない（MUST NOT）。
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 20]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-21" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   保存されるプッシュメッセージの数を制限するため、プッシュサービスは、
+   アプリケーションサーバーがプッシュメッセージ配信要求で提案したものより
+   短いTime-To-Liveで応答してもよい（MAY）（<a href="#section-5.2">Section 5.2</a>）。メッセージが
+   受け入れられた後、プッシュサービスは、広告されたTime-To-Liveの前に
+   後からメッセージを失効させてもよい（MAY）。アプリケーションサーバーが
+   配信受領確認を要求していた場合、プッシュサービスは失敗応答
+   （<a href="#section-6.2">Section 6.2</a>）を返さなければならない（MUST）。
+
+<span class="h3"><a class="selflink" id="section-7.3" href="#section-7.3">7.3</a>.  購読の失効</span>
+
+   場合によっては、購読を更新できるように終了する必要がある。これは、
+   プッシュメッセージ購読と受領確認購読の両方に適用される。
+
+   プッシュサービスは、いつでも購読を失効させてもよい（MAY）。
+   ユーザーエージェントから失効したプッシュメッセージ購読リソース
+   （<a href="#section-6">Section 6</a>）への未処理要求、またはアプリケーションサーバーから
+   失効した受領確認購読リソース（<a href="#section-6.3">Section 6.3</a>）への未処理要求がある場合、
+   これは404（Not Found）状態コードを返すことで通知されなければならない
+   （MUST）。
+
+   アプリケーションサーバーが失効したプッシュメッセージ購読へプッシュ
+   メッセージを送信しようとした場合、プッシュサービスは404（Not Found）
+   状態コードを返さなければならない（MUST）。
+
+   ユーザーエージェントは、対応するURIへDELETE要求を送信することで、
+   そのプッシュメッセージ購読を削除できる。アプリケーションサーバーは、
+   対応するURIへDELETE要求を送信することで、その受領確認購読を削除できる。
+
+<span class="h4"><a class="selflink" id="section-7.3.1" href="#section-7.3.1">7.3.1</a>.  購読集合の失効</span>
+
+   プッシュサービスは、いつでも購読集合を失効させてもよく（MAY）、
+   またその集合内のすべてのプッシュメッセージ購読も失効させなければ
+   ならない（MUST）。ユーザーエージェントがプッシュ購読集合
+   （<a href="#section-6.1">Section 6.1</a>）に対する未処理要求を持つ場合、これは404（Not Found）
+   状態コードを返すことで通知されなければならない（MUST）。
+
+   ユーザーエージェントは、購読集合URIへDELETE要求を送信することで、
+   購読集合の削除を要求できる。これにより、集合内のすべてのプッシュ
+   メッセージ購読も削除されなければならない（MUST）。
+
+   購読集合のメンバーである特定のプッシュメッセージ購読が失効または
+   削除された場合、それはその購読集合からも削除されなければならない
+   （MUST）。
+
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 21]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-22" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-7.4" href="#section-7.4">7.4</a>.  アプリケーションの信頼性への影響</span>
+
+   断続的なネットワーク接続や機器上で失敗するアプリケーションに対する
+   信頼性のある配信をサポートしないプッシュサービスは、機器に対して
+   アプリケーションサーバーへ直接受信を確認応答することを強制し、
+   個々のアプリケーションサーバーへの（通常はセキュアな）接続を確立し
+   維持するために、追加の電力消費を生じさせる。
+
+   プッシュメッセージにアプリケーション状態に不可欠な情報が含まれる場合、
+   プッシュメッセージの信頼性は重要になり得る。状態の修復は、特に通信能力が
+   限られた機器では高コストになり得る。プッシュメッセージが正しく受信された
+   ことを知ることで、再送、ポーリング、および状態の再同期を避けられる。
+
+   プッシュメッセージ配信受領確認が利用できることにより、プッシュサービスが
+   重要なメッセージを配信できない場合に備えて、アプリケーション開発者が
+   代替のメッセージ配信機構を作成しようとする誘惑を防ぐことができる。
+   これらの欠点を補うためにポーリング機構やバックアップメッセージング
+   チャネルを設定すると、プッシュサービスが提供する利点のほぼすべてが
+   打ち消される。
+
+   ただし、一過性のメッセージ（例: 着信通話）や、すぐに置き換えられる
+   メッセージ（例: 現在の未読メール数）については、信頼性は必要でない
+   場合がある。
+
+<span class="h3"><a class="selflink" id="section-7.5" href="#section-7.5">7.5</a>.  購読集合と並行HTTP/2ストリーム</span>
+
+   プッシュサービスがユーザーエージェントにプッシュメッセージ購読集合の
+   使用を要求する場合、HTTP/2 SETTINGSフレーム[<a href="./rfc7540" title="&quot;Hypertext Transfer Protocol Version 2 (HTTP/2)&quot;">RFC7540</a>]内の
+   SETTINGS_MAX_CONCURRENT_STREAMSパラメーターによって、並行してアクティブな
+   ストリームの数を制限してもよい（MAY）。ユーザーエージェントは、
+   プッシュメッセージ購読を管理するための1つの並行ストリームと、
+   プッシュサービスによって返される各購読集合につき1つの並行ストリームに
+   制限されてもよい（MAY）。これにより、ユーザーエージェントはプッシュ
+   サービスへの購読要求を直列化することを強制される可能性がある。
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  セキュリティ上の考慮事項</span>
+
+   このプロトコルは、[<a href="./rfc7525" title="&quot;Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)&quot;">RFC7525</a>]の推奨事項に従い、Transport Layer Security
+   （TLS）[<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>]上のHTTPを使用しなければならない（MUST）。これには、
+   ユーザーエージェントとプッシュサービスの間の通信、および
+   アプリケーションサーバーとプッシュサービスの間の通信が含まれる。
+   したがって、すべてのURIは"https"スキームを使用する。これにより、
+   外部の当事者から購読およびプッシュメッセージを保護するための
+   機密性と完全性保護が提供される。
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 22]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-23" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-8.1" href="#section-8.1">8.1</a>.  プッシュサービスアクセスからの機密性</span>
+
+   TLSによって提供される保護は、プッシュサービスから内容を保護しない。
+   追加の保護策がない場合、プッシュサービスはメッセージ内容を検査し、
+   変更できる。
+
+   このプロトコルを使用するアプリケーションは、エンドツーエンドの
+   機密性、完全性、およびデータ発信元認証を提供する機構を使用しなければ
+   ならない（MUST）。プッシュメッセージを送信するアプリケーションサーバーと、
+   それを受信するユーザーエージェント上のアプリケーションは、しばしば
+   同じアプリケーションの異なるインスタンスにすぎないため、適切な
+   セキュリティコンテキストを確立するための標準化されたプロトコルは
+   必要ない。ユーザーエージェントからそのアプリケーションサーバーへの
+   購読情報の配布も、鍵合意のための便利な媒体を提供する。
+
+   この要件のため、W3C Push API [<a href="#ref-API" title="&quot;Push API&quot;">API</a>]は、プッシュサービスから
+   メッセージ内容を保護するために、Message Encryption for WebPush
+   [<a href="#ref-ENCRYPT" title="&quot;Message Encryption for Web Push&quot;">ENCRYPT</a>]を採用している。他のシナリオは、同様のポリシーによって
+   対処できる。
+
+   Topicヘッダーフィールドは、同じ主題のプッシュメッセージについて
+   より細かな相関を可能にする情報を公開する。これは、プッシュサービスに
+   よるプッシュメッセージのトラフィック分析を支援するために使用される
+   可能性がある。
+
+<span class="h3"><a class="selflink" id="section-8.2" href="#section-8.2">8.2</a>.  プライバシー上の考慮事項</span>
+
+   プッシュメッセージの機密性は、誰が通信しているか、またいつ通信しているかの
+   身元が保護されることを保証しない。ただし、公開される情報量は制限できる。
+
+   プッシュリソースに提供されるURIは、特定のユーザーエージェントに関する
+   通信を相関させる根拠を一切提供してはならない（MUST NOT）。任意の2つの
+   プッシュリソースURIを、その内容だけに基づいて相関させることが可能で
+   あってはならない（MUST NOT）。これにより、ユーザーエージェントは、
+   異なるアプリケーション間または時間をまたいだ相関を制御できる。
+   もちろん、これはユーザーエージェントが公開する可能性のある他の情報を
+   使用した相関を防ぐものではない。
+
+   同様に、プッシュメッセージを識別するためにプッシュサービスが提供するURIは、
+   購読間の相関を可能にする情報を一切提供してはならない（MUST NOT）。
+   同じ購読に対するプッシュメッセージURIは、関連付けられた購読または
+   その購読に対する他のプッシュメッセージとの相関を可能にする情報を
+   含んでもよい（MAY）。
+
+   ユーザー情報および機器情報は、プッシュURIまたはプッシュメッセージURIを
+   通じて公開されてはならない（MUST NOT）。
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 23]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-24" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   加えて、同じユーザーエージェントによって確立されたプッシュURIまたは
+   同じ購読に対するプッシュメッセージURIは、それらをユーザーエージェントと
+   相関させることを可能にする情報を一切含んではならない（MUST NOT）。
+
+   注:  これは、結果として得られる匿名性集合（<a href="./rfc6973#section-6.1.1">[RFC6973], Section&nbsp;6.1.1</a>）が
+      十分に大きい限り、完全である必要はない。プッシュURIは必然的に
+      プッシュサービスまたは単一のサーバーインスタンスを識別する。
+      トラフィック分析を使用して購読を相関させることも可能である。
+
+   ユーザーエージェントは、いつでも新しい識別子を持つ新しい購読を
+   作成できなければならない（MUST）。
+
+<span class="h3"><a class="selflink" id="section-8.3" href="#section-8.3">8.3</a>.  認可</span>
+
+   このプロトコルは、ユーザーエージェントが購読を作成することを許可されて
+   いるかどうか、またはプッシュメッセージをユーザーエージェントへ配信
+   できるかどうかを、プッシュサービスがどのように確立するかを定義しない。
+   プッシュサービスは、利用可能な任意のHTTP互換認可方法に基づいて要求を
+   認可することを選択してもよく（MAY）、これにはセキュリティレベルが異なる
+   複数の選択肢（実験的な選択肢を含む）がある。認可プロセスおよび関連する
+   任意の資格情報は、プッシュサービスのURIとともにユーザーエージェントに
+   構成されることが期待される。
+
+   認可は、プッシュメッセージ購読、プッシュ、および受領確認購読リソースの
+   capability URLを使用して管理される（[<a href="#ref-CAP-URI" title="&quot;Good Practices for Capability URLs&quot;">CAP-URI</a>]）。
+   capability URLは、URLの知識だけに基づいてリソースへのアクセスを付与する。
+
+   capability URLは、その「容易な onward sharing」および「容易なクライアント
+   API」という特性のために使用される。これらの特性により、プッシュサービスと
+   アプリケーションサーバーの間で、事前に取り決められた関係や追加の
+   プロトコルに依存することを避けられる。
+
+   capability URLはベアラートークンとして機能する。プッシュメッセージ購読URIを
+   知っていることは、プッシュメッセージを受信する、または購読を削除する
+   いずれかの認可を意味する。プッシュURIを知っていることは、プッシュ
+   メッセージを送信する認可を意味する。プッシュメッセージURIを知っている
+   ことは、その特定のメッセージを読み取り、確認応答することを可能にする。
+   受領確認購読URIを知っていることは、プッシュ受領確認を受信する認可を
+   意味する。
+
+   パスコンポーネントに大量のランダムエントロピー（少なくとも120ビット）を
+   符号化することで、有効なcapability URLを推測して成功することが困難になる。
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 24]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-25" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h3"><a class="selflink" id="section-8.4" href="#section-8.4">8.4</a>.  サービス拒否に関する考慮事項</span>
+
+   ユーザーエージェントは、有効なプッシュメッセージの発信元を、
+   プッシュURIの配布を認可されたアプリケーションサーバーに制限することで
+   制御できる。プッシュURIを推測困難にすることで、プッシュURIを受け取った
+   アプリケーションサーバーだけがそれを使用できることが確保される。
+
+   ユーザーエージェントによって正常に認証されないプッシュメッセージは
+   配信されないが、これはサービス拒否リスクを生じ得る。比較的少量の
+   プッシュメッセージであっても、バッテリー駆動機器の電力を使い果たす
+   原因となり得る。
+
+   この場合に対処するため、W3C Push API [<a href="#ref-API" title="&quot;Push API&quot;">API</a>]はVoluntary
+   Application Server Identification [<a href="#ref-VAPID" title="&quot;Voluntary Application Server Identification for Web Push&quot;">VAPID</a>]を採用している。これは、
+   ユーザーエージェントが購読を特定のアプリケーションサーバーに制限できる
+   ようにする。これにより、プッシュサービスはユーザーエージェントへ接触せずに
+   不要なメッセージを識別して拒否できる。
+
+   有効なプッシュURIを持つ悪意のあるアプリケーションは、プッシュサービスの
+   より大きなリソースを使用して、ユーザーエージェントに対するサービス拒否
+   攻撃を行う可能性がある。プッシュサービスは、個々のユーザーエージェントへ
+   プッシュメッセージが送信される速度を制限すべきである（SHOULD）。
+
+   プッシュサービスは、アプリケーションサーバーがプッシュリソースへの
+   プッシュメッセージ配信に関するレート制限を超えた場合、429
+   （Too Many Requests）状態コード[<a href="./rfc6585" title="&quot;Additional HTTP Status Codes&quot;">RFC6585</a>]を返してもよい（MAY）。
+   プッシュサービスはまた、アプリケーションサーバーがプッシュリソースへ
+   別の要求を行う前に待機するよう求められる時間を示すため、Retry-After
+   ヘッダー[<a href="./rfc7231" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content&quot;">RFC7231</a>]を含めるべきである（SHOULD）。
+
+   プッシュサービスまたはユーザーエージェントは、あまりにも多くの
+   プッシュメッセージを受信する購読（<a href="#section-7.3">Section 7.3</a>）を終了してもよい
+   （MAY）。
+
+   プッシュサービスは、ユーザーエージェントに対してサービスを拒否することも
+   できる。意図的なメッセージ配信失敗は、一時的なネットワークエラー、
+   ユーザーエージェントの利用可能性の中断、または実際のサービス停止に
+   起因し得る障害と区別することが困難である。
+
+<span class="h3"><a class="selflink" id="section-8.5" href="#section-8.5">8.5</a>.  ログ記録のリスク</span>
+
+   サーバー要求ログは、購読関連URIまたは同じユーザーエージェントに対する
+   購読関連URI間の関係を明らかにする可能性がある。ログ保持の制限および
+   強力なアクセス制御機構により、URIが認可されていない実体へ明らかに
+   されないことを確保できる。
+
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 25]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-26" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+<span class="h2"><a class="selflink" id="section-9" href="#section-9">9</a>.  IANAに関する考慮事項</span>
+
+   このプロトコルは、<a href="#section-9.1">Section 9.1</a>で新しいHTTPヘッダーフィールドを定義する。
+   新しいリンク関係型は、<a href="#section-9.2">Section 9.2</a>で定義されるURNを使用して識別される。
+   ポート登録は<a href="#section-9.3">Section 9.3</a>で定義される。
+
+<span class="h3"><a class="selflink" id="section-9.1" href="#section-9.1">9.1</a>.  ヘッダーフィールド登録</span>
+
+   HTTPヘッダーフィールドは、&lt;<a href="https://www.iana.org/assignments/message-headers/">https://www.iana.org/assignments/message-</a>
+   <a href="https://www.iana.org/assignments/message-headers/">headers/</a>&gt;で維持されている"Message Headers"レジストリ内に登録される。
+
+   この文書は次のHTTPヘッダーフィールドを定義し、次のエントリーが
+   "Permanent Message Header Field Names"レジストリ（[<a href="./rfc3864" title="&quot;Registration Procedures for Message Header Fields&quot;">RFC3864</a>]）に
+   追加された。
+
+   +-------------------+----------+----------+--------------+
+   | Header Field Name | Protocol | Status   | Reference    |
+   +-------------------+----------+----------+--------------+
+   | TTL               | http     | standard | <a href="#section-5.2">Section 5.2</a>  |
+   | Urgency           | http     | standard | <a href="#section-5.3">Section 5.3</a>  |
+   | Topic             | http     | standard | <a href="#section-5.4">Section 5.4</a>  |
+   +-------------------+----------+----------+--------------+
+
+   変更管理者は次のとおりである。"IETF (iesg@ietf.org) - Internet
+   Engineering Task Force"。
+
+<span class="h3"><a class="selflink" id="section-9.2" href="#section-9.2">9.2</a>.  リンク関係URN</span>
+
+   この文書は、リンク関係型を識別するために使用するURNを登録する。
+   これらは、<a href="./rfc3553#section-4">[RFC3553]のSection&nbsp;4</a>の手順に従って新しい"Web Push
+   Identifiers"レジストリへ追加された。対応する"push"サブ名前空間は、
+   "IETF URN Sub-namespace for Registered Protocol Parameter Identifiers"
+   レジストリへ登録された。
+
+   "Web Push Identifiers"レジストリは、IETF Reviewポリシー[<a href="./rfc5226" title="">RFC5226</a>]の下で
+   運用される。
+
+   レジストリ名:  Web Push Identifiers
+
+   URN Prefix:  urn:ietf:params:push
+
+   仕様:  <a href="./rfc8030">RFC 8030</a>（この文書）
+
+   リポジトリ:  <a href="http://www.iana.org/assignments/webpush-parameters/">http://www.iana.org/assignments/webpush-parameters/</a>
+
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 26]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-27" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   Index Value:  このレジストリ内の値は、接頭辞"urn:ietf:params:push"で
+      始まるURNまたはURN接頭辞である。各値は独立して登録される。
+
+   "Web Push Identifiers"レジストリへの登録には、次の情報が含まれる。
+
+   URN:  完全なURNまたはURN接頭辞。
+
+   Description:  概要説明。
+
+   Contact:  登録を行う人物またはグループのメール。
+
+   Index Value:  [<a href="./rfc3553" title="&quot;An IETF URN Sub-namespace for Registered Protocol Parameters&quot;">RFC3553</a>]で記述されているとおり。
+
+   Reference:  URNまたはURN接頭辞の意味を記述する仕様への参照。
+
+      登録されるURN接頭辞には、URNがどのように構築されるかの説明が
+      含まれる。これは特定のURNには適用されない。
+
+   これらの値は、"Web Push Identifiers"レジストリの初期内容として
+   登録される。
+
+   URN:  urn:ietf:params:push
+
+   Description:  このリンク関係型は、プッシュメッセージを送信するための
+      リソースを識別するために使用される。
+
+   Contact:  IETFのWEBPUSH WG（webpush@ietf.org）
+
+   Reference:  <a href="./rfc8030">RFC 8030</a>（この文書）
+
+   URN:  urn:ietf:params:push:set
+
+   Description:  このリンク関係型は、プッシュメッセージ購読の集合を
+      識別するために使用される。
+
+   Contact:  IETFのWEBPUSH WG（webpush@ietf.org）
+
+   Reference:  <a href="./rfc8030">RFC 8030</a>（この文書）
+
+   URN:  urn:ietf:params:push:receipt
+
+   Description:  このリンク関係型は、プッシュメッセージの配信確認を
+      受信するためのリソースを識別するために使用される。
+
+   Contact:  IETFのWEBPUSH WG（webpush@ietf.org）
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 27]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-28" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   Reference:  <a href="./rfc8030">RFC 8030</a>（この文書）
+
+<span class="h3"><a class="selflink" id="section-9.3" href="#section-9.3">9.3</a>.  サービス名およびポート番号登録</span>
+
+   サービス名およびポート番号は、&lt;<a href="https://www.iana.org/assignments/service-names-port-numbers/">https://www.iana.org/assignments/service-names-port-numbers/</a>&gt;で
+   維持されている"Service Name and Transport Protocol Port Number Registry"内に
+   登録される。
+
+   [<a href="./rfc6335" title="&quot;Internet Assigned Numbers Authority (IANA) Procedures for the Management of the Service Name and Transport Protocol Port Number Registry&quot;">RFC6335</a>]に従い、IANAはシステムポート番号1001およびサービス名
+   "webpush"を割り当てた。
+
+   Service Name:
+      webpush
+
+   Port Number:
+      1001
+
+   Transport Protocol:
+      tcp
+
+   Description:
+      HTTP Web Push
+
+   Assignee:
+      The IESG (iesg@ietf.org)
+
+   Contact:
+      The IETF Chair (chair@ietf.org)
+
+   Reference:
+      <a href="./rfc8030">RFC 8030</a>（この文書）
+
+<span class="h2"><a class="selflink" id="section-10" href="#section-10">10</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-10.1" href="#section-10.1">10.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-CAP-URI">CAP-URI</a>]  Tennison, J., "Good Practices for Capability URLs", W3C
+              First Public Working Draft capability-urls, February 2014,
+              &lt;<a href="http://www.w3.org/TR/capability-urls/">http://www.w3.org/TR/capability-urls/</a>&gt;.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>,
+              DOI 10.17487/RFC2119, March 1997,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc2119">http://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+   [<a id="ref-RFC2818">RFC2818</a>]  Rescorla, E., "HTTP Over TLS", <a href="./rfc2818">RFC 2818</a>,
+              DOI 10.17487/RFC2818, May 2000,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc2818">http://www.rfc-editor.org/info/rfc2818</a>&gt;.
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 28]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-29" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   [<a id="ref-RFC3553">RFC3553</a>]  Mealling, M., Masinter, L., Hardie, T., and G. Klyne, "An
+              IETF URN Sub-namespace for Registered Protocol
+              Parameters", <a href="https://www.rfc-editor.org/bcp/bcp73">BCP 73</a>, <a href="./rfc3553">RFC 3553</a>, DOI 10.17487/RFC3553, June
+              2003, &lt;<a href="http://www.rfc-editor.org/info/rfc3553">http://www.rfc-editor.org/info/rfc3553</a>&gt;.
+
+   [<a id="ref-RFC3864">RFC3864</a>]  Klyne, G., Nottingham, M., and J. Mogul, "Registration
+              Procedures for Message Header Fields", <a href="https://www.rfc-editor.org/bcp/bcp90">BCP 90</a>, <a href="./rfc3864">RFC 3864</a>,
+              DOI 10.17487/RFC3864, September 2004,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc3864">http://www.rfc-editor.org/info/rfc3864</a>&gt;.
+
+   [<a id="ref-RFC4648">RFC4648</a>]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", <a href="./rfc4648">RFC 4648</a>, DOI 10.17487/RFC4648, October 2006,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc4648">http://www.rfc-editor.org/info/rfc4648</a>&gt;.
+
+   [<a id="ref-RFC5226">RFC5226</a>]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
+              IANA Considerations Section in RFCs", <a href="https://www.rfc-editor.org/bcp/bcp26">BCP 26</a>, <a href="./rfc5226">RFC 5226</a>,
+              DOI 10.17487/RFC5226, May 2008,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5226">http://www.rfc-editor.org/info/rfc5226</a>&gt;.
+
+   [<a id="ref-RFC5382">RFC5382</a>]  Guha, S., Ed., Biswas, K., Ford, B., Sivakumar, S., and P.
+              Srisuresh, "NAT Behavioral Requirements for TCP", <a href="https://www.rfc-editor.org/bcp/bcp142">BCP 142</a>,
+              <a href="./rfc5382">RFC 5382</a>, DOI 10.17487/RFC5382, October 2008,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5382">http://www.rfc-editor.org/info/rfc5382</a>&gt;.
+
+   [<a id="ref-RFC5988">RFC5988</a>]  Nottingham, M., "Web Linking", <a href="./rfc5988">RFC 5988</a>,
+              DOI 10.17487/RFC5988, October 2010,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc5988">http://www.rfc-editor.org/info/rfc5988</a>&gt;.
+
+   [<a id="ref-RFC6335">RFC6335</a>]  Cotton, M., Eggert, L., Touch, J., Westerlund, M., and S.
+              Cheshire, "Internet Assigned Numbers Authority (IANA)
+              Procedures for the Management of the Service Name and
+              Transport Protocol Port Number Registry", <a href="https://www.rfc-editor.org/bcp/bcp165">BCP 165</a>,
+              <a href="./rfc6335">RFC 6335</a>, DOI 10.17487/RFC6335, August 2011,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6335">http://www.rfc-editor.org/info/rfc6335</a>&gt;.
+
+   [<a id="ref-RFC6454">RFC6454</a>]  Barth, A., "The Web Origin Concept", <a href="./rfc6454">RFC 6454</a>,
+              DOI 10.17487/RFC6454, December 2011,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6454">http://www.rfc-editor.org/info/rfc6454</a>&gt;.
+
+   [<a id="ref-RFC6585">RFC6585</a>]  Nottingham, M. and R. Fielding, "Additional HTTP Status
+              Codes", <a href="./rfc6585">RFC 6585</a>, DOI 10.17487/RFC6585, April 2012,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6585">http://www.rfc-editor.org/info/rfc6585</a>&gt;.
+
+   [<a id="ref-RFC7230">RFC7230</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Message Syntax and Routing",
+              <a href="./rfc7230">RFC 7230</a>, DOI 10.17487/RFC7230, June 2014,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7230">http://www.rfc-editor.org/info/rfc7230</a>&gt;.
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 29]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-30" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+   [<a id="ref-RFC7231">RFC7231</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Semantics and Content", <a href="./rfc7231">RFC 7231</a>,
+              DOI 10.17487/RFC7231, June 2014,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7231">http://www.rfc-editor.org/info/rfc7231</a>&gt;.
+
+   [<a id="ref-RFC7232">RFC7232</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Conditional Requests", <a href="./rfc7232">RFC 7232</a>,
+              DOI 10.17487/RFC7232, June 2014,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7232">http://www.rfc-editor.org/info/rfc7232</a>&gt;.
+
+   [<a id="ref-RFC7240">RFC7240</a>]  Snell, J., "Prefer Header for HTTP", <a href="./rfc7240">RFC 7240</a>,
+              DOI 10.17487/RFC7240, June 2014,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7240">http://www.rfc-editor.org/info/rfc7240</a>&gt;.
+
+   [<a id="ref-RFC7525">RFC7525</a>]  Sheffer, Y., Holz, R., and P. Saint-Andre,
+              "Recommendations for Secure Use of Transport Layer
+              Security (TLS) and Datagram Transport Layer Security
+              (DTLS)", <a href="https://www.rfc-editor.org/bcp/bcp195">BCP 195</a>, <a href="./rfc7525">RFC 7525</a>, DOI 10.17487/RFC7525, May
+              2015, &lt;<a href="http://www.rfc-editor.org/info/rfc7525">http://www.rfc-editor.org/info/rfc7525</a>&gt;.
+
+   [<a id="ref-RFC7540">RFC7540</a>]  Belshe, M., Peon, R., and M. Thomson, Ed., "Hypertext
+              Transfer Protocol Version 2 (HTTP/2)", <a href="./rfc7540">RFC 7540</a>,
+              DOI 10.17487/RFC7540, May 2015,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc7540">http://www.rfc-editor.org/info/rfc7540</a>&gt;.
+
+   [<a id="ref-RFC7838">RFC7838</a>]  Nottingham, M., McManus, P., and J. Reschke, "HTTP
+              Alternative Services", <a href="./rfc7838">RFC 7838</a>, DOI 10.17487/RFC7838,
+              April 2016, &lt;<a href="http://www.rfc-editor.org/info/rfc7838">http://www.rfc-editor.org/info/rfc7838</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-10.2" href="#section-10.2">10.2</a>.  参考情報</span>
+
+   [<a id="ref-API">API</a>]      Beverloo, P., Thomson, M., van Ouwerkerk, M., Sullivan,
+              B., and E. Fullea, "Push API", W3C Editor's Draft push-
+              api, November 2016, &lt;<a href="https://w3c.github.io/push-api/">https://w3c.github.io/push-api/</a>&gt;.
+
+   [<a id="ref-ENCRYPT">ENCRYPT</a>]  Thomson, M., <a style="text-decoration: none" href='https://www.google.com/search?sitesearch=datatracker.ietf.org%2Fdoc%2Fhtml%2F&amp;q=inurl:draft-+%22Message+Encryption+for+Web+Push%22'>"Message Encryption for Web Push"</a>, Work in
+              Progress, <a href="./draft-ietf-webpush-encryption-06">draft-ietf-webpush-encryption-06</a>, October 2016.
+
+   [<a id="ref-RFC6973">RFC6973</a>]  Cooper, A., Tschofenig, H., Aboba, B., Peterson, J.,
+              Morris, J., Hansen, M., and R. Smith, "Privacy
+              Considerations for Internet Protocols", <a href="./rfc6973">RFC 6973</a>,
+              DOI 10.17487/RFC6973, July 2013,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc6973">http://www.rfc-editor.org/info/rfc6973</a>&gt;.
+
+   [<a id="ref-VAPID">VAPID</a>]    Thomson, M. and P. Beverloo, "Voluntary Application Server
+              Identification for Web Push", Work in Progress,
+              <a href="./draft-ietf-webpush-vapid-01">draft-ietf-webpush-vapid-01</a>, June 2016.
+
+
+
+
+<span class="grey">Thomson, et al.              標準化過程                   [Page 30]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-31" ></span>
+<span class="grey"><a href="./rfc8030">RFC 8030</a>                      HTTP Web Push                2016年12月</span>
+
+
+謝辞
+
+   この文書への重要な技術的入力は、Ben Bangert、Peter Beverloo、
+   Kit Cambridge、JR Conlin、Lucas Jenss、Matthew Kaufman、
+   Costin Manolache、Mark Nottingham、Idel Pivnitskiy、Robert Sparks、
+   Darshak Thakore、および多くの他の人々によって提供された。
+
+著者の連絡先
+
+   Martin Thomson
+   Mozilla
+   331 E Evelyn Street
+   Mountain View, CA  94041
+   United States of America
+
+   Email: martin.thomson@gmail.com
+
+
+   Elio Damaggio
+   Microsoft
+   One Microsoft Way
+   Redmond, WA  98052
+   United States of America
+
+   Email: elioda@microsoft.com
+
+
+   Brian Raymor (editor)
+   Microsoft
+   One Microsoft Way
+   Redmond, WA  98052
+   United States of America
+
+   Email: brian.raymor@microsoft.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Thomson, et al.              標準化過程                   [Page 31]
+</pre>
