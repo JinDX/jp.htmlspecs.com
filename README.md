@@ -439,7 +439,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Test Utils](https://jp.htmlspecs.com/testutils/)（[Source](https://testutils.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Console](https://jp.htmlspecs.com/console/)（[Source](https://console.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [WebDriver](https://jp.htmlspecs.com/webdriver2/)（[Source](https://www.w3.org/TR/2026/WD-webdriver2-20260528/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [WebDriver BiDi](https://jp.htmlspecs.com/webdriver-bidi/)（[Source](https://www.w3.org/TR/2026/WD-webdriver-bidi-20260622/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [WebDriver BiDi](https://jp.htmlspecs.com/webdriver-bidi/)（[Source](https://www.w3.org/TR/2026/WD-webdriver-bidi-20260629/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ## CSS
 - [CSS current work](https://jp.htmlspecs.com/css/)（[Source](https://www.w3.org/Style/CSS/current-work)）
