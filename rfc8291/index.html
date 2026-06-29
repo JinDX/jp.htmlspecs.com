@@ -1,0 +1,738 @@
+<pre>Internet Engineering Task Force (IETF)                        M. Thomson
+Request for Comments: 8291                                       Mozilla
+Category: Standards Track                                  2017年11月
+ISSN: 2070-1721
+
+
+                    <span class="h1">Web Push のためのメッセージ暗号化</span>
+
+概要
+
+   この文書は、Web Push プロトコルのためのメッセージ暗号化方式を
+   説明する。この方式は、アプリケーションサーバーからユーザーエージェントへ
+   送信されるメッセージに対して、機密性と完全性を提供する。
+
+このメモの位置付け
+
+   これは Internet Standards Track 文書である。
+
+   この文書は、Internet Engineering Task Force
+   (IETF) の成果物である。これは IETF コミュニティの総意を
+   表すものである。公開レビューを受けており、Internet Engineering
+   Steering Group (IESG) によって公開が承認されている。
+   Internet Standards に関する詳細情報は、
+   <a href="./rfc7841#section-2">RFC 7841 の Section&nbsp;2</a> で入手できる。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に
+   関する情報は、次で入手できる。
+   <a href="https://www.rfc-editor.org/info/rfc8291">https://www.rfc-editor.org/info/rfc8291</a>.
+
+Copyright Notice
+
+   Copyright (c) 2017 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+目次
+
+   <a href="#section-1">1</a>. はじめに ....................................................<a href="#page-2">2</a>
+      <a href="#section-1.1">1.1</a>. 表記上の規約 .............................................<a href="#page-3">3</a>
+   <a href="#section-2">2</a>. プッシュメッセージ暗号化の概要 ..............................<a href="#page-3">3</a>
+      <a href="#section-2.1">2.1</a>. 鍵およびシークレットの配布 ..............................<a href="#page-4">4</a>
+   <a href="#section-3">3</a>. プッシュメッセージ暗号化 ....................................<a href="#page-4">4</a>
+      <a href="#section-3.1">3.1</a>. Diffie-Hellman 鍵共有 ....................................<a href="#page-5">5</a>
+      <a href="#section-3.2">3.2</a>. プッシュメッセージ認証 ...................................<a href="#page-5">5</a>
+      <a href="#section-3.3">3.3</a>. 共有シークレットと認証シークレットの結合 ................<a href="#page-5">5</a>
+      <a href="#section-3.4">3.4</a>. 暗号化の要約 .............................................<a href="#page-6">6</a>
+   <a href="#section-4">4</a>. "aes128gcm" コンテンツコーディングの使用制限 .................<a href="#page-7">7</a>
+   <a href="#section-5">5</a>. プッシュメッセージ暗号化の例 ................................<a href="#page-8">8</a>
+   <a href="#section-6">6</a>. IANA に関する考慮事項 .......................................<a href="#page-8">8</a>
+   <a href="#section-7">7</a>. セキュリティに関する考慮事項 ...............................<a href="#page-8">8</a>
+   <a href="#section-8">8</a>. 参考文献 ...................................................<a href="#page-10">10</a>
+      <a href="#section-8.1">8.1</a>. 規範的参考文献 .........................................<a href="#page-10">10</a>
+      <a href="#section-8.2">8.2</a>. 参考情報 ...............................................<a href="#page-11">11</a>
+   <a href="#appendix-A">Appendix A</a>.  暗号化の中間値 ..................................<a href="#page-12">12</a>
+   著者の住所 ..................................................<a href="#page-13">13</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   Web Push プロトコル [<a href="./rfc8030" title="&quot;HTTP Push を使用した汎用イベント配信&quot;">RFC8030</a>] は、必要上、仲介されるプロトコルで
+   ある。アプリケーションサーバーからのメッセージは、図 1 に示す
+   ように、プッシュサービスを介してユーザーエージェント (UA) に
+   配信される。
+
+    +-------+           +--------------+       +-------------+
+    |  UA   |           | Push Service |       | Application |
+    +-------+           +--------------+       +-------------+
+        |                      |                      |
+        |        Setup         |                      |
+        |&lt;====================&gt;|                      |
+        |           Provide Subscription              |
+        |--------------------------------------------&gt;|
+        |                      |                      |
+        :                      :                      :
+        |                      |     Push Message     |
+        |    Push Message      |&lt;---------------------|
+        |&lt;---------------------|                      |
+        |                      |                      |
+
+                                  図 1
+
+   この文書は、このプロトコルを使用して送信されるメッセージを、
+   プッシュサービスによる検査、変更、および偽造から保護する方法を
+   説明する。
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+   Web Push メッセージは HTTP メッセージ [<a href="./rfc7230" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;">RFC7230</a>] のペイロードで
+   ある。これらのメッセージは、暗号化コンテンツコーディング
+   [<a href="./rfc8188" title="&quot;Encrypted Content-Encoding for HTTP&quot;">RFC8188</a>] を使用して暗号化される。この文書は、このコンテンツ
+   コーディングをどのように適用するかを説明し、推奨される鍵管理
+   方式を説明する。
+
+   同じユーザーエージェント上で Web Push を使用する複数のユーザーは、
+   多くの場合、プッシュ機能を集約する中央エージェントを共有する。
+   このエージェントは、プッシュメッセージングを使用する
+   アプリケーションに対して、この暗号化方式の使用を強制できる。
+   適切に暗号化されたメッセージのみを配信するエージェントは、
+   メッセージのエンドツーエンド保護を強く促進する。
+
+   Push API [<a href="#ref-API" title="&quot;Push API&quot;">API</a>] を実装する Web ブラウザーは、適切に暗号化された
+   メッセージのみを転送することで、暗号化の使用を強制できる。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  表記上の規約</span>
+
+   この文書におけるキーワード "MUST", "MUST NOT", "REQUIRED", "SHALL",
+   "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+   "MAY", および "OPTIONAL" は、ここで示すようにすべて大文字で
+   出現する場合に限り、<a href="https://www.rfc-editor.org/bcp/bcp14">BCP</a> <a href="https://www.rfc-editor.org/bcp/bcp14">14</a> [<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] [<a href="./rfc8174" title="&quot;Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words&quot;">RFC8174</a>] に記述されている
+   ように解釈される。
+
+   この文書は [<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] の用語、主に "user agent"、
+   "push service"、および "application server" を使用する。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  プッシュメッセージ暗号化の概要</span>
+
+   プッシュメッセージの暗号化では、P-256 曲線 [<a href="#ref-FIPS186" title="&quot;Digital Signature Standard (DSS)&quot;">FIPS186</a>] 上の
+   楕円曲線 Diffie-Hellman (ECDH) [<a href="#ref-ECDH" title="&quot;SEC 1: Elliptic Curve Cryptography&quot;">ECDH</a>] を使用して共有
+   シークレットを確立し (<a href="#section-3.1">Section 3.1</a> を参照)、認証用の対称
+   シークレットを使用する (<a href="#section-3.2">Section 3.2</a> を参照)。
+
+   ユーザーエージェントは、作成する各サブスクリプションに関連付ける
+   ECDH 鍵ペアと認証シークレットを生成する。ECDH 公開鍵と認証
+   シークレットは、プッシュサブスクリプションの他の詳細とともに
+   アプリケーションサーバーへ送信される。
+
+   メッセージを送信する際、アプリケーションサーバーは ECDH 鍵ペアと
+   ランダムな salt を生成する。ECDH 公開鍵は暗号化コンテンツ
+   コーディングヘッダーの "keyid" パラメーターにエンコードされ、
+   salt は同じヘッダーの "salt" パラメーターにエンコードされる
+   (<a href="./rfc8188#section-2.1">[RFC8188] の Section&nbsp;2.1</a> を参照)。ECDH 鍵ペアは、
+   メッセージの暗号化後に破棄できる。
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+   プッシュメッセージの内容は、コンテンツ暗号化鍵と nonce を使用して
+   暗号化または復号される。これらの値は、<a href="#section-3">Section 3</a> で説明される
+   プロセスへの入力として "keyid" と "salt" を取ることによって導出
+   される。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  鍵およびシークレットの配布</span>
+
+   サブスクリプションを使用するアプリケーションは、サブスクリプション
+   公開鍵と認証シークレットを、認可されたアプリケーションサーバーへ
+   配布する。これは、プッシュサブスクリプション URI など、
+   ユーザーエージェントによって提供される他のサブスクリプション情報と
+   ともに送信される場合がある。
+
+   アプリケーションは、この目的のために、認証済みで機密性が保護された
+   通信媒体を使用しなければならない (MUST)。[<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] で説明されて
+   いる理由に加えて、この使用により、認証シークレットが認可されて
+   いないエンティティへ漏えいしないことが保証される。漏えいした場合、
+   それらのエンティティは、ユーザーエージェントによって受け入れられる
+   プッシュメッセージを生成できるようになる。
+
+   プッシュメッセージングを使用するほとんどのアプリケーションには、
+   サブスクリプションデータの配布に使用できる、アプリケーション
+   サーバーとの既存の関係がある。HTTPS [<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>] など、十分な
+   機密性および完全性保護を提供する認証済み通信機構で十分である。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  プッシュメッセージ暗号化</span>
+
+   プッシュメッセージ暗号化は 4 つの段階で行われる。
+
+   o  ECDH [<a href="#ref-ECDH" title="&quot;SEC 1: Elliptic Curve Cryptography&quot;">ECDH</a>] を使用して共有シークレットが導出される (この
+      文書の <a href="#section-3.1">Section 3.1</a> を参照)。
+
+   o  次に、その共有シークレットを認証シークレットと結合して、
+      [<a href="./rfc8188" title="&quot;Encrypted Content-Encoding for HTTP&quot;">RFC8188</a>] で使用される入力鍵材料 (IKM) を生成する (この
+      文書の <a href="#section-3.3">Section 3.3</a> を参照)。
+
+   o  [<a href="./rfc8188" title="&quot;Encrypted Content-Encoding for HTTP&quot;">RFC8188</a>] のプロセスを使用して、コンテンツ暗号化鍵と nonce が
+      導出される。
+
+   o  暗号化または復号は [<a href="./rfc8188" title="&quot;Encrypted Content-Encoding for HTTP&quot;">RFC8188</a>] に従う。
+
+   鍵導出プロセスは <a href="#section-3.4">Section 3.4</a> に要約されている。
+   暗号化コンテンツコーディングの使用制限は <a href="#section-4">Section 4</a> で説明
+   される。
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  Diffie-Hellman 鍵共有</span>
+
+   ユーザーエージェントがアプリケーションのために生成する新しい各
+   サブスクリプションについて、ユーザーエージェントは ECDH [<a href="#ref-ECDH" title="&quot;SEC 1: Elliptic Curve Cryptography&quot;">ECDH</a>] で
+   使用する P-256 [<a href="#ref-FIPS186" title="&quot;Digital Signature Standard (DSS)&quot;">FIPS186</a>] 鍵ペアも生成する。
+
+   プッシュメッセージを送信する際、アプリケーションサーバーも同じ
+   P-256 曲線上で新しい ECDH 鍵ペアを生成する。
+
+   アプリケーションサーバーの ECDH 公開鍵は、暗号化コンテンツ
+   コーディングヘッダーの "keyid" パラメーターとして含められる
+   (<a href="./rfc8188#section-2.1">[RFC8188] の Section&nbsp;2.1</a> を参照)。
+
+   アプリケーションサーバーは、自身の ECDH 秘密鍵と、ユーザー
+   エージェントによって提供された公開鍵を、[<a href="#ref-ECDH" title="&quot;SEC 1: Elliptic Curve Cryptography&quot;">ECDH</a>] で説明される
+   プロセスを使用して結合する。プッシュメッセージを受信すると、
+   ユーザーエージェントは、同じ方法で、自身の秘密鍵と、
+   "keyid" パラメーター内でアプリケーションサーバーによって提供された
+   公開鍵を結合する。これらの操作により、ECDH 共有シークレットとして
+   同じ値が生成される。
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  プッシュメッセージ認証</span>
+
+   プッシュメッセージが正しく認証されることを保証するために、
+   ユーザーエージェントによって生成される情報へ、対称認証
+   シークレットが追加される。認証シークレットは、<a href="#section-3.3">Section 3.3</a> で
+   説明される鍵導出プロセスに混合される。
+
+   ユーザーエージェントは、プッシュメッセージの認証に使用される、
+   推測困難な 16 オクテットの列を生成して提供しなければならない
+   (MUST)。これは、暗号学的に強い乱数生成器 [<a href="./rfc4086" title="&quot;Randomness Requirements for Security&quot;">RFC4086</a>] によって
+   生成されるべきである (SHOULD)。
+
+<span class="h3"><a class="selflink" id="section-3.3" href="#section-3.3">3.3</a>.  共有シークレットと認証シークレットの結合</span>
+
+   ECDH によって生成された共有シークレットは、HMAC ベースの鍵導出
+   関数 (HKDF) [<a href="./rfc5869" title="&quot;HMAC-based Extract-and-Expand Key Derivation Function (HKDF)&quot;">RFC5869</a>] を使用して認証シークレットと結合される。
+   これにより、[<a href="./rfc8188" title="&quot;Encrypted Content-Encoding for HTTP&quot;">RFC8188</a>] で使用される入力鍵材料が生成される。
+
+   HKDF 関数は、以下の入力とともに SHA-256 ハッシュアルゴリズム
+   [<a href="#ref-FIPS180-4">FIPS180-4</a>] を使用する。
+
+   salt: 認証シークレット
+
+   IKM:  ECDH を使用して導出された共有シークレット
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+   info: ASCII エンコードされた文字列 "WebPush: info"
+         (この文字列は NUL 終端されない)、ゼロオクテット、
+         ユーザーエージェントの ECDH 公開鍵、およびアプリケーション
+         サーバーの ECDH 公開鍵を連結したもの (両方の ECDH 公開鍵は
+         [<a href="#ref-X9.62" title="&quot;Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)&quot;">X9.62</a>] で定義される非圧縮点形式である)。すなわち:
+
+   key_info = "WebPush: info" || 0x00 || ua_public || as_public
+
+   L:    32 オクテット (すなわち、出力は基礎となる SHA-256 HMAC 関数
+         出力の長さである)
+
+<span class="h3"><a class="selflink" id="section-3.4" href="#section-3.4">3.4</a>.  暗号化の要約</span>
+
+   これにより、以下のシーケンスを使用して、最終的なコンテンツ暗号化鍵と
+   nonce が生成される。ここでは、HKDF を SHA-256 を伴う HMAC を使用する
+   個別の離散的なステップに展開した疑似コードとして示す。
+
+      -- ユーザーエージェントの場合:
+      ecdh_secret = ECDH(ua_private, as_public)
+      auth_secret = random(16)
+      salt = &lt;from content coding header&gt;
+
+      -- アプリケーションサーバーの場合:
+      ecdh_secret = ECDH(as_private, ua_public)
+      auth_secret = &lt;from user agent&gt;
+      salt = random(16)
+
+      -- 両者共通:
+
+      ## HKDF を使用して ECDH シークレットと認証シークレットを結合する
+      # HKDF-Extract(salt=auth_secret, IKM=ecdh_secret)
+      PRK_key = HMAC-SHA-256(auth_secret, ecdh_secret)
+      # HKDF-Expand(PRK_key, key_info, L_key=32)
+      key_info = "WebPush: info" || 0x00 || ua_public || as_public
+      IKM = HMAC-SHA-256(PRK_key, key_info || 0x01)
+
+      ## <a href="./rfc8188">RFC 8188</a> からの HKDF 計算
+      # HKDF-Extract(salt, IKM)
+      PRK = HMAC-SHA-256(salt, IKM)
+      # HKDF-Expand(PRK, cek_info, L_cek=16)
+      cek_info = "Content-Encoding: aes128gcm" || 0x00
+      CEK = HMAC-SHA-256(PRK, cek_info || 0x01)[0..15]
+      # HKDF-Expand(PRK, nonce_info, L_nonce=12)
+      nonce_info = "Content-Encoding: nonce" || 0x00
+      NONCE = HMAC-SHA-256(PRK, nonce_info || 0x01)[0..11]
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+   なお、プッシュメッセージは単一のレコードのみを含み (<a href="#section-4">Section 4</a> を
+   参照)、最初のレコードのシーケンス番号はゼロであるため、これは
+   最終 nonce とレコードシーケンス番号との排他的 OR を省略している。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  "aes128gcm" コンテンツコーディングの使用制限</span>
+
+   アプリケーションサーバーは、プッシュメッセージを単一のレコードで
+   暗号化しなければならない (MUST)。これにより、単一レコードを扱う
+   最小限の受信側実装が可能になる。アプリケーションサーバーは、
+   "aes128gcm" コンテンツコーディングヘッダーの "rs" パラメーターを、
+   平文、パディング区切り文字 (1 オクテット)、任意のパディング、
+   および認証タグ (16 オクテット) の長さの合計よりも大きいサイズに
+   設定しなければならない (MUST)。
+
+   プッシュメッセージは、暗号化コンテンツコーディングヘッダーの
+   "keyid" パラメーターに、アプリケーションサーバーの ECDH 公開鍵を
+   含めなければならない (MUST)。[<a href="#ref-X9.62" title="&quot;Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)&quot;">X9.62</a>] で定義される非圧縮点形式
+   (すなわち、0x04 オクテットで始まる 65 オクテット列) が、
+   "keyid" 全体を構成する。これは、"keyid" パラメーターが
+   [<a href="./rfc8188" title="&quot;Encrypted Content-Encoding for HTTP&quot;">RFC8188</a>] で推奨されている有効な UTF-8 にならないことを意味する点に
+   注意すること。
+
+   プッシュサービスは、4096 オクテットを超えるペイロード本体を
+   サポートする必要はない (<a href="./rfc8030#section-7.2">[RFC8030] の Section&nbsp;7.2</a> を参照)。
+   ヘッダー (86 オクテット)、パディング (最小 1 オクテット)、および
+   AEAD_AES_128_GCM の展開分 (16 オクテット) を除くと、これは最大でも
+   3993 オクテットの平文に相当する。
+
+   アプリケーションサーバーは、プッシュメッセージに他のコンテンツ
+   エンコーディングを使用してはならない (MUST NOT)。特に、圧縮を行う
+   コンテンツエンコーディングは、プッシュメッセージ内容の漏えいを
+   引き起こす可能性がある。したがって、Content-Encoding ヘッダー
+   フィールドは正確に 1 つの値、すなわち "aes128gcm" を持つ。
+   複数の "aes128gcm" 値は許可されない。
+
+   ユーザーエージェントは、複数のレコードをサポートする必要はない。
+   ユーザーエージェントは "rs" パラメーターを無視してもよい (MAY)。
+   レコードサイズが検査されない場合、すべての有効な場合について、
+   復号は高い確率で失敗する。パディング区切りオクテットは検査され
+   なければならず (MUST)、0x02 以外の値はメッセージを破棄させなければ
+   ならない (MUST)。
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  プッシュメッセージ暗号化の例</span>
+
+   以下の例は、プッシュサービスへ送信されるプッシュメッセージを示す。
+
+   POST /push/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV HTTP/1.1
+   Host: push.example.net
+   TTL: 10
+   Content-Length: 145
+   Content-Encoding: aes128gcm
+
+   DGv6ra1nlYgDCS1FRnbzlwAAEABBBP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27ml
+   mlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A_yl95bQpu6cVPT
+   pK4Mqgkf1CXztLVBSt2Ks3oZwbuwXPXLWyouBWLVWGNWQexSgSxsj_Qulcy4a-fN
+
+   この例は、ASCII エンコードされた文字列 "When I grow up, I want
+   to be a watermelon" を示している。コンテンツ本体は、提示上の制約を
+   満たすため、ここでは行折り返しと URL セーフな base64url [<a href="./rfc4648" title="&quot;The Base16, Base32, and Base64 Data Encodings&quot;">RFC4648</a>]
+   エンコーディングで示されている。
+
+   使用される鍵は、base64url を使用してエンコードされた非圧縮形式
+   [<a href="#ref-X9.62" title="&quot;Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)&quot;">X9.62</a>] で以下に示す。
+
+      Authentication Secret: BTBZMqHH6r4Tts7J_aSIgg
+      Receiver:
+         private key: q1dXpw3UpT5VOmu_cf_v6ih07Aems3njxI-JWgLcM94
+         public key: BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcx
+                     aOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4
+      Sender:
+         private key: yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw
+         public key: BP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIg
+                     Dll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A8
+
+   この例の中間値は <a href="#appendix-A">Appendix A</a> に含まれている。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  IANA に関する考慮事項</span>
+
+   この文書は IANA の措置を必要としない。
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  セキュリティに関する考慮事項</span>
+
+   [<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] のプライバシーおよびセキュリティに関する考慮事項は、
+   すべてこの機構の使用に適用される。
+
+   [<a href="./rfc8188" title="&quot;Encrypted Content-Encoding for HTTP&quot;">RFC8188</a>] の Security Considerations セクションは、コンテンツ
+   コーディングの制限を説明している。特に、HTTP ヘッダーフィールドは
+   コンテンツコーディング方式によって保護されない。ユーザー
+   エージェントは、HTTP ヘッダーフィールドがプッシュサービスから
+   来たものと見なさなければならない (MUST)。
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+   ヘッダーフィールドは HTTP レスポンスを正しく処理するために必要な
+   場合があるものの、プロトコルの正しい動作には必要ない。ヘッダー
+   フィールドからの情報を使用してプッシュメッセージの処理を変更する
+   ユーザーエージェント上のアプリケーションは、プッシュサービスに
+   よる攻撃のリスクにさらされる。
+
+   通信のタイミングと長さは、プッシュサービスから隠すことはできない。
+   外部の観測者には個々のメッセージが互いに混在して見える場合があるが、
+   プッシュサービスには、どのアプリケーションサーバーがどのユーザー
+   エージェントと通信しているか、および使用されるサブスクリプションが
+   見える。さらに、コンテンツコーディング方式によって提供される
+   パディングを使用して長さを隠さない限り、メッセージの長さが明らかに
+   なる可能性がある。
+
+   ユーザーエージェントおよびアプリケーションは、受け取った公開鍵が
+   P-256 曲線上にあることを検証しなければならない (MUST)。公開鍵の
+   検証を怠ると、攻撃者が秘密鍵を抽出できる可能性がある。適切な
+   検証手順は [<a href="#ref-X9.62" title="&quot;Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)&quot;">X9.62</a>] の Section 4.3.7、および別の方法として
+   [<a href="#ref-KEYAGREEMENT">KEYAGREEMENT</a>] の Section 5.6.2.3 で定義されている。このプロセスは
+   3 つのステップで構成される。
+
+   1.  Y が無限遠点 (O) ではないことを検証する。
+
+   2.  Y = (x, y) について、両方の整数が正しい区間内にあることを
+       検証する。
+
+   3.  (x, y) が楕円曲線方程式の正しい解であることを確認する。
+
+   これらの曲線について、実装者は正しい部分群への所属を検証する
+   必要はない。
+
+   この暗号化方式を置き換える必要が生じた場合、新しいコンテンツ
+   コーディング方式を定義できる。新しい方式の段階的な展開を管理する
+   ために、ユーザーエージェントは、それがサポートするコンテンツ
+   コーディング方式に関する情報を公開できる。Push API [<a href="#ref-API" title="&quot;Push API&quot;">API</a>] の
+   "supportedContentEncodings" パラメーターは、これを行う方法の一例で
+   ある。
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                    [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+<span class="h2"><a class="selflink" id="section-8" href="#section-8">8</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-8.1" href="#section-8.1">8.1</a>.  規範的参考文献</span>
+
+   [<a id="ref-ECDH">ECDH</a>]     SECG, "SEC 1: Elliptic Curve Cryptography", Version 2.0,
+              May 2009, &lt;<a href="http://www.secg.org/">http://www.secg.org/</a>&gt;.
+
+   [<a id="ref-FIPS180-4">FIPS180-4</a>]
+              National Institute of Standards and Technology (NIST),
+              "Secure Hash Standard (SHS)", FIPS PUB 180-4,
+              DOI 10.6028/NIST.FIPS.180-4, August 2015.
+
+   [<a id="ref-FIPS186">FIPS186</a>]  National Institute of Standards and Technology (NIST),
+              "Digital Signature Standard (DSS)", FIPS PUB 186-4,
+              DOI 10.6028/NIST.FIPS.186-4, July 2013.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>,
+              DOI 10.17487/RFC2119, March 1997,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+   [<a id="ref-RFC4086">RFC4086</a>]  Eastlake 3rd, D., Schiller, J., and S. Crocker,
+              "Randomness Requirements for Security", <a href="https://www.rfc-editor.org/bcp/bcp106">BCP 106</a>, <a href="./rfc4086">RFC 4086</a>,
+              DOI 10.17487/RFC4086, June 2005,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc4086">https://www.rfc-editor.org/info/rfc4086</a>&gt;.
+
+   [<a id="ref-RFC5869">RFC5869</a>]  Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
+              Key Derivation Function (HKDF)", <a href="./rfc5869">RFC 5869</a>,
+              DOI 10.17487/RFC5869, May 2010,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc5869">https://www.rfc-editor.org/info/rfc5869</a>&gt;.
+
+   [<a id="ref-RFC8030">RFC8030</a>]  Thomson, M., Damaggio, E., and B. Raymor, Ed., "Generic
+              Event Delivery Using HTTP Push", <a href="./rfc8030">RFC 8030</a>,
+              DOI 10.17487/RFC8030, December 2016,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc8030">https://www.rfc-editor.org/info/rfc8030</a>&gt;.
+
+   [<a id="ref-RFC8174">RFC8174</a>]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in <a href="./rfc2119">RFC</a>
+              <a href="./rfc2119">2119</a> Key Words", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc8174">RFC 8174</a>, DOI 10.17487/RFC8174,
+              May 2017, &lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;.
+
+   [<a id="ref-RFC8188">RFC8188</a>]  Thomson, M., "Encrypted Content-Encoding for HTTP",
+              <a href="./rfc8188">RFC 8188</a>, DOI 10.17487/RFC8188, June 2017,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc8188">https://www.rfc-editor.org/info/rfc8188</a>&gt;.
+
+   [<a id="ref-X9.62">X9.62</a>]    ANSI, "Public Key Cryptography for the Financial Services
+              Industry: the Elliptic Curve Digital Signature Algorithm
+              (ECDSA)", ANSI X9.62, 2005.
+
+
+
+
+<span class="grey">Thomson                      Standards Track                   [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+<span class="h3"><a class="selflink" id="section-8.2" href="#section-8.2">8.2</a>.  参考情報</span>
+
+   [<a id="ref-API">API</a>]      Beverloo, P., Thomson, M., van Ouwerkerk, M., Sullivan,
+              B., and E. Fullea, "Push API", October 2017,
+              &lt;<a href="https://www.w3.org/TR/push-api/">https://www.w3.org/TR/push-api/</a>&gt;.
+
+   [<a id="ref-KEYAGREEMENT">KEYAGREEMENT</a>]
+              Barker, E., Chen, L., Roginsky, A., and M. Smid,
+              "Recommendation for Pair-Wise Key Establishment Schemes
+              Using Discrete Logarithm Cryptography", NIST Special
+              Publication 800-56A, Revision 2,
+              DOI 10.6028/NIST.SP.800-56Ar2, May 2013.
+
+   [<a id="ref-RFC2818">RFC2818</a>]  Rescorla, E., "HTTP Over TLS", <a href="./rfc2818">RFC 2818</a>,
+              DOI 10.17487/RFC2818, May 2000,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2818">https://www.rfc-editor.org/info/rfc2818</a>&gt;.
+
+   [<a id="ref-RFC4648">RFC4648</a>]  Josefsson, S., "The Base16, Base32, and Base64 Data
+              Encodings", <a href="./rfc4648">RFC 4648</a>, DOI 10.17487/RFC4648, October 2006,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc4648">https://www.rfc-editor.org/info/rfc4648</a>&gt;.
+
+   [<a id="ref-RFC7230">RFC7230</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Message Syntax and Routing",
+              <a href="./rfc7230">RFC 7230</a>, DOI 10.17487/RFC7230, June 2014,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7230">https://www.rfc-editor.org/info/rfc7230</a>&gt;.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                   [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">Appendix A</a>.  暗号化の中間値</span>
+
+   <a href="#section-5">Section 5</a> の例について計算された中間値をここに示す。これらの例の
+   base64url 値には、削除可能な空白が含まれている。
+
+   以下は計算への入力である。
+
+   Plaintext:  V2hlbiBJIGdyb3cgdXAsIEkgd2FudCB0byBiZSBhIHdhdGVybWVsb24
+
+   Application server public key (as_public):
+      BP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIg
+      Dll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A8
+
+   Application server private key (as_private):
+      yfWPiYE-n46HLnH0KqZOF1fJJU3MYrct3AELtAQ-oRw
+
+   User agent public key (ua_public):  BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-
+      JvLexhqUzORcx aOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4
+
+   User agent private key (ua_private):
+      q1dXpw3UpT5VOmu_cf_v6ih07Aems3njxI-JWgLcM94
+
+   Salt:  DGv6ra1nlYgDCS1FRnbzlw
+
+   Authentication secret (auth_secret):  BTBZMqHH6r4Tts7J_aSIgg
+
+   秘密鍵のうち 1 つだけを知っていればよい点に注意すること。
+   アプリケーションサーバーは salt 値をランダムに生成するが、
+   salt は受信側への入力である。
+
+   これにより、以下の中間値が生成される。
+
+   Shared ECDH secret (ecdh_secret):
+      kyrL1jIIOHEzg3sM2ZWRHDRB62YACZhhSlknJ672kSs
+
+   Pseudorandom key (PRK) for key combining (PRK_key):
+      Snr3JMxaHVDXHWJn5wdC52WjpCtd2EIEGBykDcZW32k
+
+   Info for key combining (key_info):  V2ViUHVzaDogaW5mbwAEJXGyvs3942BVG
+      q8e0PTNNmwR zr5VX4m8t7GGpTM5FzFo7OLr4BhZe9MEebhuPI-OztV3
+      ylkYfpJGmQ22ggCLDgT-M_SrDepxkU21WCP3O1SUj0Ew
+      bZIHMtu5pZpTKGSCIA5Zent7wmC6HCJ5mFgJkuk5cwAv MBKiiujwa7t45ewP
+
+   Input keying material for content encryption key derivation (IKM):
+      S4lYMb_L0FxCeq0WhDx813KgSYqU26kOyzWUdsXYyrg
+
+
+
+
+
+<span class="grey">Thomson                      Standards Track                   [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc8291">RFC 8291</a>                   Web Push 暗号化                  2017年11月</span>
+
+
+   PRK for content encryption (PRK):
+      09_eUZGrsvxChDCGRCdkLiDXrReGOEVeSCdCcPBSJSc
+
+   Info for content encryption key derivation (cek_info):
+      Q29udGVudC1FbmNvZGluZzogYWVzMTI4Z2NtAA
+
+   Content encryption key (CEK):  oIhVW04MRdy2XN9CiKLxTg
+
+   Info for content encryption nonce derivation (nonce_info):
+      Q29udGVudC1FbmNvZGluZzogbm9uY2UA
+
+   Nonce (NONCE):  4h_95klXJ5E_qnoN
+
+   salt、4096 のレコードサイズ、およびアプリケーションサーバー公開鍵は、
+   以下の 86 オクテットのヘッダーを生成する。
+
+   DGv6ra1nlYgDCS1FRnbzlwAAEABBBP4z 9KsN6nGRTbVYI_c7VJSPQTBtkgcy27ml
+   mlMoZIIgDll6e3vCYLocInmYWAmS6Tlz AC8wEqKK6PBru3jl7A8
+
+   プッシュメッセージの平文には、パディング区切りオクテット (0x02) が
+   追加され、以下が生成される。
+
+   V2hlbiBJIGdyb3cgdXAsIEkgd2FudCB0 byBiZSBhIHdhdGVybWVsb24C
+
+   その後、平文は AES-GCM で暗号化され、以下の ciphertext を出力する。
+
+   8pfeW0KbunFT06SuDKoJH9Ql87S1QUrd irN6GcG7sFz1y1sqLgVi1VhjVkHsUoEs
+   bI_0LpXMuGvnzQ
+
+   ヘッダーと ciphertext が連結され、<a href="#section-5">Section 5</a> に示す結果を
+   生成する。
+
+著者の住所
+
+   Martin Thomson
+   Mozilla
+
+   Email: martin.thomson@gmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+Thomson                      Standards Track                   [Page 13]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
