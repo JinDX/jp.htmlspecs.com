@@ -103,6 +103,9 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### MiniApp・ミニアプリ・クロスプラットフォームアプリ
 - [MiniApp Manifest](https://jp.htmlspecs.com/miniapp-manifest/)（[Source](https://www.w3.org/TR/2025/WD-miniapp-manifest-20250128/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MiniApp Packaging](https://jp.htmlspecs.com/miniapp-packaging/)（[Source](https://www.w3.org/TR/2025/WD-miniapp-packaging-20250128/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MiniApp Lifecycle](https://jp.htmlspecs.com/miniapp-lifecycle/)（[Source](https://www.w3.org/TR/2023/WD-miniapp-lifecycle-20230529/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MiniApp Standardization White Paper version 2](https://jp.htmlspecs.com/mini-app-white-paper/)（[Source](https://www.w3.org/TR/2022/DNOTE-mini-app-white-paper-20220701/) ![Note Draft](https://img.shields.io/badge/DNOTE-ffcc00)）
 
 ### ネットワーク・転送・リアルタイム通信
 - [Fetch](https://jp.htmlspecs.com/fetch/)（[Source](https://fetch.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
@@ -123,6 +126,9 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### オフライン・バックグラウンド・通知
 - [Web Background Synchronization](https://jp.htmlspecs.com/background-sync/)（[Source](https://wicg.github.io/background-sync/spec/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Push API](https://jp.htmlspecs.com/push-api/)（[Source](https://www.w3.org/TR/2025/WD-push-api-20251201/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Generic Event Delivery Using HTTP Push](https://jp.htmlspecs.com/rfc8030/)（[Source](https://www.rfc-editor.org/rfc/rfc8030.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [Message Encryption for Web Push](https://jp.htmlspecs.com/rfc8291/)（[Source](https://www.rfc-editor.org/rfc/rfc8291.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [Voluntary Application Server Identification (VAPID) for Web Push](https://jp.htmlspecs.com/rfc8292/)（[Source](https://www.rfc-editor.org/rfc/rfc8292.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Background Fetch](https://jp.htmlspecs.com/background-fetch/)（[Source](https://wicg.github.io/background-fetch/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Periodic Background Sync](https://jp.htmlspecs.com/periodic-background-sync/)（[Source](https://wicg.github.io/periodic-background-sync/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Content Index](https://jp.htmlspecs.com/content-index/)（[Source](https://wicg.github.io/content-index/spec/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
@@ -189,6 +195,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web of Things (WoT) Thing Description 2.0](https://jp.htmlspecs.com/wot-thing-description-2.0/)（[Source](https://www.w3.org/TR/2025/WD-wot-thing-description-2.0-20251104/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web of Things (WoT) Use Cases and Requirements](https://jp.htmlspecs.com/wot-usecases/)（[Source](https://www.w3.org/TR/2026/NOTE-wot-usecases-20260205/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Web of Things (WoT) Scripting API](https://jp.htmlspecs.com/wot-scripting-api/)（[Source](https://www.w3.org/TR/2023/NOTE-wot-scripting-api-20231003/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
+- [Web of Things (WoT) Architecture 1.1](https://jp.htmlspecs.com/wot-architecture11/)（[Source](https://www.w3.org/TR/2023/REC-wot-architecture11-20231205/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [Web of Things (WoT) Discovery](https://jp.htmlspecs.com/wot-discovery/)（[Source](https://www.w3.org/TR/2023/REC-wot-discovery-20231205/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 
 ### ウィンドウ・画面・システム統合
 - [Screen Orientation](https://jp.htmlspecs.com/screen-orientation/)（[Source](https://www.w3.org/TR/2025/WD-screen-orientation-20251021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
