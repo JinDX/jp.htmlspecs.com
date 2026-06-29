@@ -1,0 +1,779 @@
+<pre>Internet Engineering Task Force (IETF)                        M. Thomson
+Request for Comments: 8292                                       Mozilla
+Category: Standards Track                                    P. Beverloo
+ISSN: 2070-1721                                                   Google
+                                                           November 2017
+
+
+    <span class="h1">Web Pushのための自発的アプリケーションサーバー識別（VAPID）</span>
+
+概要
+
+   アプリケーションサーバーは、この文書で説明するVoluntary Application
+   Server Identification（VAPID）方式を使用して、プッシュサービスに対し
+   て自発的に自身を識別できる。「vapid」認証方式により、クライアントは、
+   自身が行うリクエストにおいて、署名付きトークンに自身の識別情報を含
+   めることができる。その署名は、同じアプリケーションサーバーによって行
+   われたリクエストを単一の主体に帰属させるために、プッシュサービスに
+   よって使用できる。この識別情報により、プッシュサービスの運用者はア
+   プリケーションサーバーの運用者に連絡できる場合がある。この署名は、
+   プッシュメッセージサブスクリプションの使用を単一のアプリケーション
+   サーバーに制限するために使用できる。
+
+このメモの位置付け
+
+   これはインターネット標準化過程の文書である。
+
+   この文書はInternet Engineering Task Force（IETF）の成果物である。
+   これはIETFコミュニティの合意を表している。公開レビューを受け、
+   Internet Engineering Steering Group（IESG）によって公開が承認され
+   ている。インターネット標準に関する詳細情報は、
+   <a href="./rfc7841#section-2">RFC 7841のSection&nbsp;2</a>で入手できる。
+
+   この文書の現在の状態、正誤表、およびフィードバックの提供方法に関す
+   る情報は、
+   <a href="https://www.rfc-editor.org/info/rfc8292">https://www.rfc-editor.org/info/rfc8292</a>で入手できる。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 1]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+Copyright Notice
+
+   Copyright (c) 2017 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+目次
+
+   <a href="#section-1">1</a>. はじめに ....................................................<a href="#page-3">3</a>
+      <a href="#section-1.1">1.1</a>. 自発的識別 ...........................................<a href="#page-3">3</a>
+      <a href="#section-1.2">1.2</a>. 表記上の規約 .....................................<a href="#page-4">4</a>
+   <a href="#section-2">2</a>. アプリケーションサーバーの自己識別 ..........................<a href="#page-4">4</a>
+      <a href="#section-2.1">2.1</a>. アプリケーションサーバーの連絡先情報 .....................<a href="#page-5">5</a>
+      <a href="#section-2.2">2.2</a>. 追加クレーム ..........................................<a href="#page-5">5</a>
+      <a href="#section-2.3">2.3</a>. 暗号学的アジリティ ......................................<a href="#page-5">5</a>
+      <a href="#section-2.4">2.4</a>. 例 ....................................................<a href="#page-5">5</a>
+   <a href="#section-3">3</a>. VAPID認証方式 .....................................<a href="#page-6">6</a>
+      <a href="#section-3.1">3.1</a>. トークンパラメーター（"t"） ..............................<a href="#page-7">7</a>
+      <a href="#section-3.2">3.2</a>. 公開鍵パラメーター（"k"） .................................<a href="#page-7">7</a>
+   <a href="#section-4">4</a>. サブスクリプション制限 ........................................<a href="#page-7">7</a>
+      <a href="#section-4.1">4.1</a>. 制限付きプッシュメッセージサブスクリプションの作成 ............<a href="#page-8">8</a>
+      <a href="#section-4.2">4.2</a>. 制限付きサブスクリプションの使用 .............................<a href="#page-9">9</a>
+   <a href="#section-5">5</a>. セキュリティに関する考慮事項 .........................................<a href="#page-9">9</a>
+   <a href="#section-6">6</a>. IANAに関する考慮事項 ............................................<a href="#page-10">10</a>
+      <a href="#section-6.1">6.1</a>. VAPID認証方式の登録 ..................<a href="#page-10">10</a>
+      <a href="#section-6.2">6.2</a>. VAPID認証方式パラメーター ....................<a href="#page-10">10</a>
+      <a href="#section-6.3">6.3</a>. application/webpush-options+jsonメディア型登録 ..11
+   <a href="#section-7">7</a>. 参照文献 .....................................................<a href="#page-12">12</a>
+      <a href="#section-7.1">7.1</a>. 規範的参照文献 ......................................<a href="#page-12">12</a>
+      <a href="#section-7.2">7.2</a>. 参考参照文献 ....................................<a href="#page-14">14</a>
+   謝辞 ..................................................<a href="#page-14">14</a>
+   著者の連絡先 ................................................<a href="#page-14">14</a>
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 2]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   Web Pushプロトコル [<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] は、アプリケーションサーバーが、プッシュサービスに
+   プッシュメッセージをユーザーエージェントへ配送するよう要求できる仕組
+   みを説明している。
+
+   想定される配備アーキテクチャの結果として、アプリケーションサーバーが
+   プッシュメッセージの配送を要求する前に、プッシュサービスに認識される
+   ための基盤は存在しない。プッシュサービスがアプリケーションサーバーを
+   認証できることを要求すると、プッシュサービスの最終的な利用者である
+   ユーザーエージェントとアプリケーションサーバーとの相互作用に、望まれ
+   ない制約が課される。その制約はまた、このプロトコルが提供するプライバ
+   シー保護の性質を低下させる。これらの理由により、[<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] は
+   アプリケーションサーバー認証のための必須システムを定義していない。
+
+   [<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] の設計に伴う不幸な結果として、プッシュサービスはサービス
+   拒否攻撃のリスクによりさらされる。アプリケーションサーバーからのリク
+   エストは、ユーザーエージェントに間接的に帰属させることができるが、こ
+   れは常に効率的であるわけでも、十分であるわけでもない。アプリケーショ
+   ンサーバーに関するより多くの情報をプッシュサービスへ直接提供すること
+   で、プッシュサービスは正当なリクエストと偽のリクエストをより適切に区
+   別できる。
+
+   さらに、[<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] の設計は、プッシュメッセージサブスクリプション
+   URIの秘匿性を維持することに依存している。プッシュメッセージサブスク
+   リプションURIを所有する任意のアプリケーションサーバーは、ユーザーエー
+   ジェントへメッセージを送信できる。サブスクリプションの使用を単一のア
+   プリケーションサーバーに限定できれば、プッシュメッセージサブスクリプ
+   ションURIが権限のない第三者に知られた場合の影響を低減できる。
+
+<span class="h3"><a class="selflink" id="section-1.1" href="#section-1.1">1.1</a>.  自発的識別</span>
+
+   この文書は、アプリケーションサーバーが自身に関する情報をプッシュサー
+   ビスに自発的に提供できるシステムを説明する。最低限、これはアプリケー
+   ションサーバーに安定した識別子を提供するが、メールアドレスなどの連絡
+   先情報も含めることができる。
+
+   一貫した識別子は、プッシュサービスがアプリケーションサーバーに対する
+   振る舞い上の期待を確立するために使用できる。確立された規範からの重大
+   な逸脱は、例外処理手順を起動するために使用できる。
+
+
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 3]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   自発的に提供された連絡先情報は、例外的な状況の場合にアプリケーション
+   サーバー運用者へ連絡するために使用できる。
+
+   プッシュサービス配備の経験から、ソフトウェアエラーまたは通常とは異な
+   る状況によって、プッシュメッセージ量が大幅に増加することがあると示さ
+   れている。アプリケーションサーバーの運用者に連絡することは、有益であ
+   ることが証明されている。
+
+   利用可能な連絡先情報がない場合であっても、十分に確立された評判を持つ
+   アプリケーションサーバーは、プッシュメッセージを破棄するかどうかを選
+   択する際に、識別されていないアプリケーションサーバーより優先される場
+   合がある。
+
+<span class="h3"><a class="selflink" id="section-1.2" href="#section-1.2">1.2</a>.  表記上の規約</span>
+
+   この文書におけるキーワード「MUST」、「MUST NOT」、「REQUIRED」、「SHALL」
+   、「SHALL NOT」、「SHOULD」、「SHOULD NOT」、「RECOMMENDED」、「NOT
+   RECOMMENDED」、「MAY」、「OPTIONAL」は、ここに示すようにすべて大文字で
+   出現する場合に限り、<a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a> [<a href="./rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>] [<a href="./rfc8174" title="&quot;Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words&quot;">RFC8174</a>] で説明されている
+   とおりに解釈される。
+
+   「push message」、「push service」、「push message subscription」
+   、「application server」、「user agent」という用語は、[<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] で定義
+   されている意味で使用する。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  アプリケーションサーバーの自己識別</span>
+
+   自己識別を希望するアプリケーションサーバーは、署名鍵ペアを生成し、維
+   持する。この鍵ペアは、P-256曲線上のElliptic Curve Digital Signature
+   Algorithm（ECDSA）[<a href="#ref-FIPS186" title="&quot;Digital Signature Standard (DSS)&quot;">FIPS186</a>] で使用可能でなければならない（MUST）。プッ
+   シュメッセージ送信時にこの鍵を使用することで、複数のメッセージにわた
+   って一貫したアプリケーションサーバーの識別子が確立される。
+
+   プッシュメッセージの配送を要求するとき、アプリケーションは、その署名
+   鍵を使用して署名されたJSON Web Token（JWT）[<a href="./rfc7519" title="&quot;JSON Web Token (JWT)&quot;">RFC7519</a>] を含める。このトー
+   クンは、次のような多数のクレームを含む。
+
+   o  トークン内の「aud」（Audience）クレームは、プッシュリソースURLの
+      オリジン（<a href="./rfc6454#section-6.1">[RFC6454]のSection&nbsp;6.1</a>）のUnicodeシリアル化を含まなけれ
+      ばならない（MUST）。これにより、トークンは特定のプッシュサービス
+      に結び付けられ、同じオリジンを共有するすべてのプッシュリソースURL
+      に対してトークンを再利用できることが保証される。
+
+   o  「exp」（Expiry）クレームは、トークンが失効する時刻とともに含めな
+      ければならない（MUST）。これにより、トークンが有効である期間が制限
+      される。「exp」クレームは、リクエスト時刻から24時間を超えてはなら
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 4]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+      ない（MUST NOT）。これを24時間に制限することで、再利用の必要性と、
+      有効なトークンの窃取に伴う潜在的なコストおよび可能性との均衡を取
+      る。
+
+   このJWTは、「vapid」の認証方式を使用してAuthorizationヘッダーフィー
+   ルドに含められる。JWT署名またはそのクレームが無効である場合、プッシュ
+   サービスは、403（Forbidden）ステータスコード [<a href="./rfc7231" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content&quot;">RFC7231</a>] でリクエスト
+   を拒否してもよい（MAY）。プッシュサービスは、無効なトークンからの情
+   報を使用してはならない（MUST NOT）。
+
+   JWTはJSON Web Signature（JWS）[<a href="./rfc7515" title="&quot;JSON Web Signature (JWS)&quot;">RFC7515</a>] を使用しなければならない（MUST）。
+   署名は、"ES256" [<a href="./rfc7518" title="&quot;JSON Web Algorithms (JWA)&quot;">RFC7518</a>] として識別されるNIST P-256曲線上のECDSA
+   [<a href="#ref-FIPS186" title="&quot;Digital Signature Standard (DSS)&quot;">FIPS186</a>] を使用しなければならない（MUST）。
+
+<span class="h3"><a class="selflink" id="section-2.1" href="#section-2.1">2.1</a>.  アプリケーションサーバーの連絡先情報</span>
+
+   アプリケーションサーバーが連絡先詳細を提供したい場合、JWTに「sub」
+   （Subject）クレームを含めてもよい（MAY）。「sub」クレームは、"mailto:"
+   （email）[<a href="./rfc6068" title="&quot;The 'mailto' URI Scheme&quot;">RFC6068</a>] または"https:" [<a href="./rfc2818" title="&quot;HTTP Over TLS&quot;">RFC2818</a>] URIのいずれかとして、アプリ
+   ケーションサーバーの連絡先URIを含めるべきである（SHOULD）。
+
+<span class="h3"><a class="selflink" id="section-2.2" href="#section-2.2">2.2</a>.  追加クレーム</span>
+
+   アプリケーションサーバーは、公開名または私的名を使用して追加クレーム
+   を含めてもよい（MAY）（[<a href="./rfc7519" title="&quot;JSON Web Token (JWT)&quot;">RFC7519</a>] のSections <a href="#section-4.2">4.2</a>および<a href="#section-4.3">4.3</a>を参照）。JWT
+   はヘッダーフィールド内にあるため、追加クレームのサイズは可能な限り小
+   さく保つべきである（SHOULD）。
+
+<span class="h3"><a class="selflink" id="section-2.3" href="#section-2.3">2.3</a>.  暗号学的アジリティ</span>
+
+   「vapid」HTTP認証方式（<a href="#section-3">Section 3</a>）は、この文書で定義するJWTの特
+   定のプロファイルを識別するために使用される。署名アルゴリズムまたはそ
+   の他のパラメーターを更新するには、別の認証方式が必要となる。これによ
+   り、新しいパラメーター交渉機構を定義するのではなく、認証方式を交渉す
+   る既存の機構を使用できることが保証される。
+
+<span class="h3"><a class="selflink" id="section-2.4" href="#section-2.4">2.4</a>.  例</span>
+
+   アプリケーションサーバーは、[<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] で説明されているように、プッ
+   シュメッセージの配送を要求する。アプリケーションサーバーが自己識別を
+   希望する場合、「vapid」認証方式を使用する資格情報を含むAuthorization
+   ヘッダーフィールドを含める。
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 5]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   POST /p/JzLQ3raZJfFBR0aqvOMsLrt54w4rJUsV HTTP/1.1
+   Host: push.example.net
+   TTL: 30
+   Content-Length: 136
+   Content-Encoding: aes128gcm
+   Authorization: vapid
+      t=eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL3
+        B1c2guZXhhbXBsZS5uZXQiLCJleHAiOjE0NTM1MjM3NjgsInN1YiI6Im1ha
+        Wx0bzpwdXNoQGV4YW1wbGUuY29tIn0.i3CYb7t4xfxCDquptFOepC9GAu_H
+        LGkMlMuCGSK2rpiUfnK9ojFwDXb1JrErtmysazNjjvW2L9OkSSHzvoD1oA,
+      k=BA1Hxzyi1RUM1b5wjxsn7nGxAszw2u61m164i3MrAIxHF6YK5h4SDYic-dR
+        uU_RCPCfA5aq9ojSwk5Y2EmClBPs
+   { encrypted push message }
+
+            Figure 1: JWTによるプッシュメッセージ配送の要求
+
+   この文書の例示ヘッダーフィールドには、書式上の制約を満たすために余分
+   な改行が含まれていることに注意。
+
+   Authorizationヘッダーフィールドの「t」パラメーターはJWTを含み、「k」
+   パラメーターはそのトークンに署名したbase64urlエンコード鍵を含む。JWT
+   入力値と、署名鍵に対応するJSON Web Key（JWK）[<a href="./rfc7517" title="&quot;JSON Web Key (JWK)&quot;">RFC7517</a>] を、可読性のた
+   めに空白を追加してFigure 2に示す。このJWTは2016-01-23T04:36:08Zまで
+   有効である。
+
+   JWT header = { "typ": "JWT", "alg": "ES256" }
+   JWT body = { "aud": "https://push.example.net",
+                "exp": 1453523768,
+                "sub": "mailto:push@example.com" }
+   JWK = { "crv":"P-256",
+           "kty":"EC",
+           "x":"DUfHPKLVFQzVvnCPGyfucbECzPDa7rWbXriLcysAjEc",
+           "y":"F6YK5h4SDYic-dRuU_RCPCfA5aq9ojSwk5Y2EmClBPs" }
+
+                     Figure 2: デコードされた例の値
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.  VAPID認証方式</span>
+
+   この文書は、"vapid"という名前の新しいHTTP認証方式 [<a href="./rfc7235" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Authentication&quot;">RFC7235</a>] を定義
+   する。この認証方式は、<a href="#section-2">Section 2</a>で説明されている署名付きJWTと、そのJWT
+   に署名した鍵を運ぶ。
+
+   この認証方式は、オリジンサーバー認証専用である。したがって、この認証
+   方式はProxy-AuthenticateまたはProxy-Authorizationヘッダーフィールドと
+   ともに使用してはならない（MUST NOT）。
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 6]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   「vapid」認証方式に対するチャレンジは、"auth-scheme"生成規則のみを含
+   む。現在、パラメーターは定義されていない。
+
+   この認証方式には、「t」と「k」の2つのパラメーターが定義されている。
+   「vapid」認証資格情報に対する未知または未サポートのすべてのパラメー
+   ターは無視しなければならない（MUST）。この認証方式では、「realm」パラ
+   メーターは無視される。
+
+   この認証方式は、Web Pushプロトコル [<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] を使用する際に、アプリ
+   ケーションサーバーによって使用されることを意図している。
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  トークンパラメーター（"t"）</span>
+
+   「vapid」認証方式の「t」パラメーターは、<a href="#section-2">Section 2</a>で説明されている
+   JWTを運ぶ。
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  公開鍵パラメーター（"k"）</span>
+
+   プッシュサービスがJWTを検証できるようにするには、アプリケーションサー
+   バーの公開鍵を知る必要がある。この情報を運ぶために、「vapid」認証方式
+   の「k」パラメーターが定義されている。
+
+   「k」パラメーターには、base64urlエンコード [<a href="./rfc7515" title="&quot;JSON Web Signature (JWS)&quot;">RFC7515</a>] を使用してエンコード
+   された、非圧縮形式 [<a href="#ref-X9.62" title="&quot;Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)&quot;">X9.62</a>] のECDSA公開鍵 [<a href="#ref-FIPS186" title="&quot;Digital Signature Standard (DSS)&quot;">FIPS186</a>] が含まれる。
+
+   注記:  X9.62エンコードは、2つの理由からJWK [<a href="./rfc7517" title="&quot;JSON Web Key (JWK)&quot;">RFC7517</a>] よりも使用される。
+      JWKには正準形式がないため、X9.62エンコードは、プッシュサービスが
+      異なるソースからの鍵を比較する処理を容易にする。第二に、X9.62エン
+      コードはかなり小さい。
+
+   一部の楕円曲線実装では、同じP-256鍵を署名と鍵交換の両方に使用できる。
+   アプリケーションサーバーは、認証トークンの署名と鍵交換 [<a href="./rfc8291" title="&quot;Message Encryption for Web Push&quot;">RFC8291</a>] に
+   異なる秘密鍵を選択しなければならない（MUST）。プッシュサービスは、す
+   べてのプッシュメッセージについていずれかのパラメーターを確認する義務
+   はないが、これらのパラメーターが同一の値を持つプッシュメッセージは、
+   400（Bad Request）ステータスコードで拒否すべきである（SHOULD）。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  サブスクリプション制限</span>
+
+   アプリケーションサーバーの公開鍵は、そのサーバーの安定した識別子とし
+   て機能する。この鍵は、プッシュメッセージサブスクリプションを特定のア
+   プリケーションサーバーに制限するために使用できる。
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 7]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   サブスクリプション制限は、プッシュメッセージの配送を要求するときに、
+   アプリケーションサーバーが署名付きトークンを提供することを要求するこ
+   とで、エンドポイントの秘匿性への依存を低減する。これは、プッシュメッ
+   セージサブスクリプションの詳細が漏えいすることに対して、追加の保護レ
+   ベルを提供する。
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  制限付きプッシュメッセージサブスクリプションの作成</span>
+
+   制限付きサブスクリプションを作成したいユーザーエージェントは、プッシュ
+   メッセージサブスクリプションの作成を要求するときに、アプリケーション
+   サーバーの公開鍵を含める。これにより、結果として得られるサブスクリプ
+   ションの使用は、対応する秘密鍵で署名された有効なJWTを提供できるアプリ
+   ケーションサーバーに制限される。
+
+   その後、ユーザーエージェントは、プッシュメッセージサブスクリプション
+   を作成するリクエストに公開鍵を追加する。プッシュメッセージサブスクリ
+   プションリクエストは、本文を含むよう拡張される。リクエストの本文は、
+   [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] で説明されているJSONオブジェクトである。ユーザーエージェ
+   ントは、このJSONオブジェクトに「vapid」メンバーを追加し、そのメンバー
+   はP-256曲線上の公開鍵を含む。この公開鍵は、非圧縮形式 [<a href="#ref-X9.62" title="&quot;Public Key Cryptography for the Financial Services Industry: the Elliptic Curve Digital Signature Algorithm (ECDSA)&quot;">X9.62</a>] で
+   エンコードされ、base64urlエンコード [<a href="./rfc7515" title="&quot;JSON Web Signature (JWS)&quot;">RFC7515</a>] される。本文のメディア
+   型は"application/webpush-options+json"に設定される（このメディア型の
+   登録については<a href="#section-6.3">Section 6.3</a>を参照）。
+
+   プッシュサービスは、異なるメディア型を使用するリクエストの本文を無視
+   しなければならない（MUST）。"application/webpush-options+json"メディア
+   型については、プッシュサービスは、このオブジェクト上の理解しない任意
+   のメンバーを無視しなければならない（MUST）。
+
+   Figure 3の例は、Figure 1で使用した鍵への制限を示している。書式上の制
+   約を満たすために、余分な空白が追加されている。
+
+   POST /subscribe/ HTTP/1.1
+   Host: push.example.net
+   Content-Type: application/webpush-options+json
+   Content-Length: 104
+   { "vapid": "BA1Hxzyi1RUM1b5wjxsn7nGxAszw2u61m164i3MrAIxH
+               F6YK5h4SDYic-dRuU_RCPCfA5aq9ojSwk5Y2EmClBPs" }
+
+                    Figure 3: 例示サブスクライブリクエスト
+
+   アプリケーションはPush API [<a href="#ref-API" title="&quot;Push API&quot;">API</a>] を使用して、ユーザーエージェント
+   に公開鍵を提供することがある。
+
+
+
+
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 8]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  制限付きサブスクリプションの使用</span>
+
+   プッシュメッセージサブスクリプションがアプリケーションサーバーに制限
+   されている場合、プッシュメッセージ配送のリクエストは、サブスクリプシ
+   ョン作成時に使用された公開鍵に対応する秘密鍵で署名されたJWTを含まなけ
+   ればならない（MUST）。
+
+   制限付きプッシュメッセージサブスクリプションに送信されたメッセージが
+   「vapid」認証を含まない、または無効な「vapid」認証を含む場合、プッシュ
+   サービスはそのメッセージを拒否しなければならない（MUST）。認証がない
+   場合は401（Unauthorized）ステータスコードが使用されることがあり、認証
+   が無効である場合は403（Forbidden）ステータスコードが使用されることが
+   ある。
+
+   次の場合、「vapid」認証は無効である。
+
+   o  認証トークンまたは公開鍵のいずれかがリクエストに含まれていない。
+
+   o  JWT上の署名を、含まれる公開鍵を使用して正常に検証できない。
+
+   o  現在時刻が「exp」（Expiry）クレームで識別される時刻より後である、
+      または失効時刻の24時間より前である。
+
+   o  プッシュリソースのオリジンが「aud」（Audience）クレームに含まれて
+      いない。
+
+   o  JWTの署名に使用された公開鍵が、プッシュメッセージサブスクリプショ
+      ン作成時に含められたものと一致しない。
+
+   プッシュサービスは、プッシュメッセージを配送するとき、JWTまたは公開鍵
+   をユーザーエージェントに転送してはならない（MUST NOT）。
+
+   署名鍵を置き換える必要があるアプリケーションサーバーは、更新された鍵
+   に制限される新しいサブスクリプションの作成を、ユーザーエージェントに
+   要求する必要がある。アプリケーションサーバーは、サブスクリプション作
+   成を要求したときに使用された鍵を記憶する必要がある。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  セキュリティに関する考慮事項</span>
+
+   攻撃者が有効なJWTを取得できる場合、この認証方式はリプレイ攻撃に対し
+   て脆弱である。[<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] で要求されるようにHTTPSを使用してリクエストを
+   送信することで、機密性が提供される。さらに、再利用可能なトークンを再
+   利用できる期間に狭い制限を適用することで、盗まれたトークンの攻撃者に
+   とっての潜在的価値を制限し、トークンの窃取を困難にできる。
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                    [Page 9]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   アプリケーションサーバーは、偽の連絡先情報を提供する場合がある。アプ
+   リケーションサーバーは、その主張を裏付ける証拠なしに、自身のメールア
+   ドレスまたは連絡先URIを主張する。プッシュサービス運用者は、検証されて
+   いない連絡先情報の存在を、セキュリティ上重要な意思決定プロセスへの入
+   力として使用することはできない。
+
+   JWT上の署名の検証には、少なくない量の計算が必要となる。サービス拒否
+   攻撃の状況下で正当なリクエストを識別するために使用される可能性がある
+   ものとしては、これは理想的ではない。そのため、アプリケーションサーバー
+   には、トークンを再利用することが推奨される。これにより、プッシュサー
+   ビスは署名検証の結果をキャッシュできる。
+
+   署名鍵を変更するアプリケーションサーバーは、異なる鍵の下で送信するプッ
+   シュメッセージ間のリンク可能性を壊す。アプリケーションサーバーに対し
+   て一貫した識別子に依存するプッシュサービスは、新しい鍵で行われたリク
+   エストを異なるように分類する場合がある。新しい署名鍵への段階的な移行
+   により、新しい鍵を使用するリクエストが濫用として分類される可能性を低
+   減できる。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  IANAに関する考慮事項</span>
+
+   この文書は、新しい認証方式、その方式のパラメーター用レジストリ、およ
+   びプッシュオプション用メディア型を登録する。
+
+<span class="h3"><a class="selflink" id="section-6.1" href="#section-6.1">6.1</a>.  VAPID認証方式の登録</span>
+
+   この文書は、[<a href="./rfc7235" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Authentication&quot;">RFC7235</a>] によって確立された「Hypertext Transfer Protocol
+   (HTTP) Authentication Scheme Registry」に「vapid」認証方式を登録する。
+
+   Authentication Scheme Name:  vapid
+
+   Pointer to specification text:  この文書の<a href="#section-3">Section 3</a>
+
+<span class="h3"><a class="selflink" id="section-6.2" href="#section-6.2">6.2</a>.  VAPID認証方式パラメーター</span>
+
+   この文書は、「vapid」認証方式のパラメーター用に「VAPID Authentication
+   Scheme Parameters」レジストリを作成する。これらのパラメーターは、リ
+   クエスト（Authorizationヘッダーフィールド内）およびチャレンジ
+   （WWW-Authenticateヘッダーフィールド内）で使用するために定義される。
+   このレジストリは「Web Push Parameters」グループ配下にある。このレジス
+   トリは「Specification Required」ポリシー [<a href="./rfc8126" title="">RFC8126</a>] で運用される。
+
+
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                   [Page 10]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   登録には、次の情報を含めなければならない（MUST）。
+
+   Parameter Name:  パラメーターの名前。これは「token」文法 [<a href="./rfc7230" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;">RFC7230</a>] に
+      適合する。
+
+   Purpose (optional):  パラメーターの目的を識別する短いテキスト。
+
+   Header Field(s):  パラメーターを使用できるヘッダーフィールド。
+
+   Specification:  パラメーターの形式および意味論を定義する仕様へのリン
+      ク。
+
+   このレジストリは当初、次のエントリーを含む。
+
+   +-------------+------------------+---------------+------------------+
+   | Parameter   | Purpose          | Header        | Specification    |
+   | Name        |                  | Field(s)      |                  |
+   +-------------+------------------+---------------+------------------+
+   | t           | JWT              | Authorization | [<a href="./rfc8292">RFC8292</a>],       |
+   |             | authentication   |               | <a href="#section-3.1">Section 3.1</a>      |
+   |             | token            |               |                  |
+   |             |                  |               |                  |
+   | k           | signing key      | Authorization | [<a href="./rfc8292">RFC8292</a>],       |
+   |             |                  |               | <a href="#section-3.2">Section 3.2</a>      |
+   +-------------+------------------+---------------+------------------+
+
+<span class="h3"><a class="selflink" id="section-6.3" href="#section-6.3">6.3</a>.  application/webpush-options+jsonメディア型登録</span>
+
+   この文書は、[<a href="./rfc6838" title="&quot;Media Type Specifications and Registration Procedures&quot;">RFC6838</a>] で説明されているプロセスに従って、
+   "application/webpush-options+json"メディア型を「Media Types」レジスト
+   リに登録する。
+
+   Type name:  application
+
+   Subtype name:  webpush-options+json
+
+   Required parameters:  なし
+
+   Optional parameters:  なし
+
+   Encoding considerations:  binary（JSONはUTF-8でエンコードされたテキスト）
+
+   Security considerations:  JSONに固有のセキュリティに関する考慮事項につ
+      いては [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] を参照。
+
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                   [Page 11]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   Interoperability considerations:  JSONに固有の相互運用性に関する考慮事項
+      については [<a href="./rfc7159" title="&quot;The JavaScript Object Notation (JSON) Data Interchange Format&quot;">RFC7159</a>] を参照。
+
+   Published specification:  [<a href="./rfc8292">RFC8292</a>]
+
+   Applications that use this media type:  Web Pushプロトコル [<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] を介し
+      たWebブラウザー。
+
+   Fragment identifier considerations:  なし
+
+   Additional information:
+
+      Deprecated alias names for this type:  n/a
+
+      Magic number(s):  n/a
+
+      File extension(s):  .json
+
+      Macintosh file type code(s):  TEXT
+
+   Person &amp; email address to contact for further information:  Martin
+      Thomson (martin.thomson@gmail.com)
+
+   Intended usage:  LIMITED USE
+
+   Restrictions on usage:  Web Pushプロトコル [<a href="./rfc8030" title="&quot;Generic Event Delivery Using HTTP Push&quot;">RFC8030</a>] での使用に限定。
+
+   Author:  [<a href="./rfc8292">RFC8292</a>] の「Authors' Addresses」セクションを参照。
+
+   Change controller:  Internet Engineering Task Force
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  参照文献</span>
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  規範的参照文献</span>
+
+   [<a id="ref-FIPS186">FIPS186</a>]  National Institute of Standards and Technology (NIST),
+              "Digital Signature Standard (DSS)", FIPS PUB 186-4,
+              DOI 10.6028/NIST.FIPS.186-4, July 2013.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc2119">RFC 2119</a>,
+              DOI 10.17487/RFC2119, March 1997,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+   [<a id="ref-RFC2818">RFC2818</a>]  Rescorla, E., "HTTP Over TLS", <a href="./rfc2818">RFC 2818</a>,
+              DOI 10.17487/RFC2818, May 2000,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2818">https://www.rfc-editor.org/info/rfc2818</a>&gt;.
+
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                   [Page 12]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   [<a id="ref-RFC6068">RFC6068</a>]  Duerst, M., Masinter, L., and J. Zawinski, "The 'mailto'
+              URI Scheme", <a href="./rfc6068">RFC 6068</a>, DOI 10.17487/RFC6068, October 2010,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc6068">https://www.rfc-editor.org/info/rfc6068</a>&gt;.
+
+   [<a id="ref-RFC6454">RFC6454</a>]  Barth, A., "The Web Origin Concept", <a href="./rfc6454">RFC 6454</a>,
+              DOI 10.17487/RFC6454, December 2011,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc6454">https://www.rfc-editor.org/info/rfc6454</a>&gt;.
+
+   [<a id="ref-RFC6838">RFC6838</a>]  Freed, N., Klensin, J., and T. Hansen, "Media Type
+              Specifications and Registration Procedures", <a href="https://www.rfc-editor.org/bcp/bcp13">BCP 13</a>,
+              <a href="./rfc6838">RFC 6838</a>, DOI 10.17487/RFC6838, January 2013,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc6838">https://www.rfc-editor.org/info/rfc6838</a>&gt;.
+
+   [<a id="ref-RFC7159">RFC7159</a>]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", <a href="./rfc7159">RFC 7159</a>, DOI 10.17487/RFC7159, March
+              2014, &lt;<a href="https://www.rfc-editor.org/info/rfc7159">https://www.rfc-editor.org/info/rfc7159</a>&gt;.
+
+   [<a id="ref-RFC7230">RFC7230</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Message Syntax and Routing",
+              <a href="./rfc7230">RFC 7230</a>, DOI 10.17487/RFC7230, June 2014,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7230">https://www.rfc-editor.org/info/rfc7230</a>&gt;.
+
+   [<a id="ref-RFC7231">RFC7231</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Semantics and Content", <a href="./rfc7231">RFC 7231</a>,
+              DOI 10.17487/RFC7231, June 2014,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7231">https://www.rfc-editor.org/info/rfc7231</a>&gt;.
+
+   [<a id="ref-RFC7235">RFC7235</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Authentication", <a href="./rfc7235">RFC 7235</a>,
+              DOI 10.17487/RFC7235, June 2014,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7235">https://www.rfc-editor.org/info/rfc7235</a>&gt;.
+
+   [<a id="ref-RFC7515">RFC7515</a>]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", <a href="./rfc7515">RFC 7515</a>, DOI 10.17487/RFC7515, May
+              2015, &lt;<a href="https://www.rfc-editor.org/info/rfc7515">https://www.rfc-editor.org/info/rfc7515</a>&gt;.
+
+   [<a id="ref-RFC7518">RFC7518</a>]  Jones, M., "JSON Web Algorithms (JWA)", <a href="./rfc7518">RFC 7518</a>,
+              DOI 10.17487/RFC7518, May 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7518">https://www.rfc-editor.org/info/rfc7518</a>&gt;.
+
+   [<a id="ref-RFC7519">RFC7519</a>]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
+              (JWT)", <a href="./rfc7519">RFC 7519</a>, DOI 10.17487/RFC7519, May 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;.
+
+   [<a id="ref-RFC8030">RFC8030</a>]  Thomson, M., Damaggio, E., and B. Raymor, Ed., "Generic
+              Event Delivery Using HTTP Push", <a href="./rfc8030">RFC 8030</a>,
+              DOI 10.17487/RFC8030, December 2016,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc8030">https://www.rfc-editor.org/info/rfc8030</a>&gt;.
+
+
+
+<span class="grey">Thomson &amp; Beverloo           Standards Track                   [Page 13]</span></pre>
+<hr class='noprint' /><!--NewPage-->
+<pre class='newpage'><span id="page-14" ></span>
+<span class="grey"><a href="./rfc8292">RFC 8292</a>                   Web PushのためのVAPID          November 2017</span>
+
+
+   [<a id="ref-RFC8126">RFC8126</a>]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", <a href="https://www.rfc-editor.org/bcp/bcp26">BCP 26</a>,
+              <a href="./rfc8126">RFC 8126</a>, DOI 10.17487/RFC8126, June 2017,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc8126">https://www.rfc-editor.org/info/rfc8126</a>&gt;.
+
+   [<a id="ref-RFC8174">RFC8174</a>]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in <a href="./rfc2119">RFC</a>
+              <a href="./rfc2119">2119</a> Key Words", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="./rfc8174">RFC 8174</a>, DOI 10.17487/RFC8174,
+              May 2017, &lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;.
+
+   [<a id="ref-RFC8291">RFC8291</a>]  Thomson, M., "Message Encryption for Web Push", <a href="./rfc8291">RFC 8291</a>,
+              DOI 10.17487/RFC8291, November 2017,
+              &lt;<a href="http://www.rfc-editor.org/info/rfc8291">http://www.rfc-editor.org/info/rfc8291</a>&gt;.
+
+   [<a id="ref-X9.62">X9.62</a>]    ANSI, "Public Key Cryptography for the Financial Services
+              Industry: the Elliptic Curve Digital Signature Algorithm
+              (ECDSA)", ANSI X9.62, 2005.
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  参考参照文献</span>
+
+   [<a id="ref-API">API</a>]      Beverloo, P., Thomson, M., van Ouwerkerk, M., Sullivan,
+              B., and E. Fullea, "Push API", October 2017,
+              &lt;<a href="https://www.w3.org/TR/push-api/">https://www.w3.org/TR/push-api/</a>&gt;.
+
+   [<a id="ref-RFC7517">RFC7517</a>]  Jones, M., "JSON Web Key (JWK)", <a href="./rfc7517">RFC 7517</a>,
+              DOI 10.17487/RFC7517, May 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7517">https://www.rfc-editor.org/info/rfc7517</a>&gt;.
+
+謝辞
+
+   この文書は、Benjamin Bangert、JR Conlin、Chris Karlof、Costin
+   Manolache、Adam Roach、およびその他の貢献がなければ、現在よりはるかに
+   悪いものになっていただろう。
+
+著者の連絡先
+
+   Martin Thomson
+   Mozilla
+
+   Email: martin.thomson@gmail.com
+
+
+   Peter Beverloo
+   Google
+
+   Email: beverloo@google.com
+
+
+
+
+
+
+Thomson &amp; Beverloo           Standards Track                   [Page 14]
+</pre>
+<script src="https://htmlspecs.com/dropdown.js"></script>
