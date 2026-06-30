@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<title>Save Data API</title>
+<script class='remove' src='https://www.w3.org/Tools/respec/respec-w3c-common'></script>
+<script>
+
+    var respecConfig = {
+        specStatus: "CG-DRAFT",
+        shortName: "savedata-api",
+        format: "markdown",
+        subtitle: "Living Document",
+        github: "https://github.com/WICG/savedata/",
+        editors: [
+            {
+                name: "Yoav Weiss",
+                company: "Google",
+                companyURL: "http://google.com",
+            },
+            {
+                name: "Ilya Grigorik",
+                company: "Google",
+                companyURL: "http://google.com",
+            },
+        ],
+        wg: "Web Incubator Community Group",
+        wgURI: "https://wicg.io",
+        caniuse: "",
+        localBiblio: {
+            "CLIENT-HINTS": {
+                title: "HTTP Client Hints",
+                href: "https://tools.ietf.org/html/draft-ietf-httpbis-client-hints-07",
+                status: "Internet-Draft",
+                publisher: "IETF",
+            },
+            "STRUCTURED-HEADERS": {
+                title: "Structured Headers for HTTP",
+                href: "https://tools.ietf.org/html/draft-ietf-httpbis-header-structure-11",
+                status: "Internet-Draft",
+                publisher: "IETF",
+            }
+        },
+    };
+</script>
+
+<section id='abstract'>
+    <cite>Save Data API</cite> は、データ節約に関するユーザーの設定についての情報に Web アプリケーションが
+    アクセスできるようにします。
+</section>
+
+<section id='sotd'></section>
+
+## 要件とユースケース
+
+この文書は、特定の要件に対応する API を記述します。その要件とは、JS API と Client Hint の両方を通じて、
+データ節約に関するユーザーの設定を伝達することです。
+
+**ユースケースの例:**
+
+* 主な目的がメディアのストリーミングである Web アプリケーションは、ユーザーがデータ通信費の削減に
+関心を持っている場合、高度に圧縮されたメディアコンテンツを提供できます。
+* 背景動画をユーザーに提示する Web アプリケーションは、ユーザーの設定に基づいて、代わりに背景画像を
+使用することを選択できます。
+
+
+## <dfn>NavigatorNetworkInformation</dfn> インターフェイス
+
+<code><dfn data-cite="netinfo#networkinformation-interface">NetworkInformation</dfn></code> インターフェイスは、
+<a>NetworkInformationSaveData</a> をミックスインすることで <a>saveData</a> へのアクセスを公開します。
+
+<pre class="idl">
+  interface mixin NetworkInformationSaveData {
+    [SameObject] readonly attribute boolean saveData;
+  };
+
+  NetworkInformation includes NetworkInformationSaveData;
+</pre>
+
+### <dfn>saveData</dfn> 属性
+
+<a>saveData</a> 属性は、取得時に、ユーザーがユーザーエージェントに対してデータ使用量を削減するモードを
+要求している場合は `true` を返し、それ以外の場合は `false` を返します。
+
+<p class="note">ユーザーエージェントによって利用可能にされている場合、ユーザーは、高いデータ転送コスト、
+    低速な接続速度、またはその他の理由により、そのような設定を有効にすることがあります。</p>
+
+#### <code><dfn>Save-Data</dfn></code> リクエストヘッダーフィールド
+
+<a>SaveData</a> リクエストヘッダーは Client Hint [[CLIENT-HINTS]] です。このヘッダーの値は、
+ユーザーエージェントがデータ使用量の削減を優先することを示す `token` を含む `sh-list`
+[[STRUCTURED-HEADERS]] です。
+
+<pre class="nohighlight">
+    Save-Data = sh-list
+  </pre>
+
+この仕様は "`on`" `token` 値を定義します。これは、データ使用量削減モードへの明示的なユーザーの
+オプトインを示すシグナルとして使用されます（すなわち <a>saveData</a> の値が `true` の場合）。また、
+オリジンに伝達されると、その設定を尊重した代替コンテンツ、たとえばより小さな画像および動画リソース、
+代替マークアップなどを配信できるようにします。
+
+リスト内に複数の競合するトークンがある場合、最後のトークンが優先されます。
+
+<div class="issue">
+    TODO: <a href="https://fetch.spec.whatwg.org/#fetching">Fetch#fetching アルゴリズム</a>を更新し、
+    Save-Data ヘッダーを追加するシグナルとして `connection.saveData` を使用するようにする。
+</div>
+</section>
+
+
+<section data-link-for="NetworkInformation">
+### ユーザー設定の変更の処理
+
+    ユーザーの <a>saveData</a> 設定が変更された場合、ユーザーエージェントは <dfn>ユーザー設定を更新する
+        手順</dfn>を実行しなければなりません（MUST）。
+
+    1. <var>new-saveData</var> を現在の <a>saveData</a> 設定とする。
+    1. <var>new-saveData</var> が `connection.saveData` の値と等しくない場合:
+    1. <a data-cite="HTML#networking-task-source">ネットワーキングタスクソース</a>を使用して、次を実行するための<a
+        data-cite="HTML#queue-a-task">タスクをキューに入れる</a>:
+    1. `connection.saveData` を <var>new-saveData</var> に設定する。
+    1. `NetworkInformation` オブジェクトで `change` という名前の<a data-cite="DOM#concept-event-fire">イベントを発火する</a>。
+</section>
+
+<section>
+## プライバシーに関する考慮事項
+
+    この仕様は、ユーザーの設定に関する情報を公開します。これはユーザーについての少量の情報であり、
+    アクティブなフィンガープリンティングのベクトルとして使用される可能性があります。
+    この仕様を実装するユーザーエージェントは、そのことを認識し、特定の状況でこの機能を有効にするかどうかを
+    判断する際に、それを考慮する必要があります。
+
+    たとえば、ユーザーがプライベートブラウジングモードにいる場合、ユーザーエージェントはユーザーの設定を
+    省略したり、偽ったりすることを決定することがあります。
+
+</section>
+
+<section id="iana-considerations">
+## IANA に関する考慮事項
+
+    次の 3 つの HTTP リクエストヘッダーフィールドは、HTTP/1.1 [[RFC7231]] によって示されるガイドラインを
+    考慮に入れたうえで、メッセージヘッダーフィールドの恒久的レジストリに追加されるべきです
+    （[[RFC3864]] を参照）。
+
+    <section id="registration-save-data">
+        ### `Save-Data` リクエストヘッダーフィールド登録
+
+        * ヘッダーフィールド名: Save-Data
+        * 適用可能なプロトコル: Hypertext Transfer Protocol (HTTP)
+        * ステータス: 標準
+        * 著者/変更管理者: W3C
+        * 仕様文書: W3C TR https://www.w3.org/TR/netinfo/
+
+    </section>
+
+</section>
+
+<section id="policy-controlled-features">
+## ポリシー制御機能
+
+    この文書は、[=policy-controlled client hints features=] を次の [=policy-controlled
+    features=] で拡張します:
+    * `ch-save-data`。これはデフォルトの許可リストとして `*` を持ちます
+
+</section>
+
+<section id="conformance">
+    この仕様への適合を主張できる製品クラスは 1 つだけです。それは
+    <dfn>ユーザーエージェント</dfn>です。
+</section>
+
+<section class="appendix">
+## 謝辞
+    この文書は、[[HTML]] 仕様のライセンスで許可されるとおり、
+    その仕様からのテキストを再利用しています。
+</section>
+<script src="https://htmlspecs.com/dropdown.js"></script>
