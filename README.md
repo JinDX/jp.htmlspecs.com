@@ -306,6 +306,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### パフォーマンスタイムライン・指標・観測
 - [Performance Timeline](https://jp.htmlspecs.com/performance-timeline/)（[Source](https://www.w3.org/TR/2025/CRD-performance-timeline-20250521/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [CPU Performance API](https://jp.htmlspecs.com/cpu-performance/)（[Source](https://wicg.github.io/cpu-performance/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Timing Entry Names Registry](https://jp.htmlspecs.com/timing-entrytypes-registry/)（[Source](https://www.w3.org/TR/2019/WD-timing-entrytypes-registry-20190723/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Compute Pressure API](https://jp.htmlspecs.com/compute-pressure/)（[Source](https://www.w3.org/TR/2026/CRD-compute-pressure-20260514/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [High Resolution Time](https://jp.htmlspecs.com/hr-time-3/)（[Source](https://www.w3.org/TR/2026/WD-hr-time-3-20260324/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
