@@ -75,7 +75,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [RDF 1.2 XML Syntax](https://jp.htmlspecs.com/rdf12-xml/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-xml-20260618/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SPARQL 1.2 Query Language](https://jp.htmlspecs.com/sparql12-query/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-query-20260625/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SPARQL 1.2 Protocol](https://jp.htmlspecs.com/sparql12-protocol/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-protocol-20260426/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [SHACL 1.2 Core](https://jp.htmlspecs.com/shacl12-core/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-core-20260622/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [SHACL 1.2 Core](https://jp.htmlspecs.com/shacl12-core/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-core-20260630/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Data Catalog Vocabulary (DCAT) - Version 3](https://jp.htmlspecs.com/vocab-dcat-3/)（[Source](https://www.w3.org/TR/2024/REC-vocab-dcat-3-20240822/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [ODRL Information Model 2.2](https://jp.htmlspecs.com/odrl-model/)（[Source](https://www.w3.org/TR/2018/REC-odrl-model-20180215/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [ODRL Vocabulary & Expression 2.2](https://jp.htmlspecs.com/odrl-vocab/)（[Source](https://www.w3.org/TR/2018/REC-odrl-vocab-20180215/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
