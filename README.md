@@ -39,6 +39,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### データ形式・セマンティック Web・API 記述
 - [The JavaScript Object Notation (JSON) Data Interchange Format](https://jp.htmlspecs.com/json/)（[Source](https://www.rfc-editor.org/rfc/rfc8259.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [YAML Ain’t Markup Language (YAML™) revision 1.2.2](https://jp.htmlspecs.com/yaml/)（[Source](https://yaml.org/spec/1.2.2/)）
+- [YAML Media Type](https://jp.htmlspecs.com/yaml-media-type/)（[Source](https://www.rfc-editor.org/rfc/rfc9512.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [JSON-LD 1.1](https://jp.htmlspecs.com/json-ld11/)（[Source](https://www.w3.org/TR/2020/REC-json-ld11-20200716/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [JSON-LD 1.1 Processing Algorithms and API](https://jp.htmlspecs.com/json-ld11-api/)（[Source](https://www.w3.org/TR/2020/REC-json-ld11-api-20200716/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [JSON-LD 1.1 Framing](https://jp.htmlspecs.com/json-ld11-framing/)（[Source](https://www.w3.org/TR/2020/REC-json-ld11-framing-20200716/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
