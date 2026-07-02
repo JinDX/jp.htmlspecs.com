@@ -249,7 +249,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [MediaStream Recording](https://jp.htmlspecs.com/mediastream-recording/)（[Source](https://www.w3.org/TR/2026/WD-mediastream-recording-20260316/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Capabilities](https://jp.htmlspecs.com/media-capabilities/)（[Source](https://www.w3.org/TR/2026/WD-media-capabilities-20260609/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [MediaStream Image Capture](https://jp.htmlspecs.com/image-capture/)（[Source](https://www.w3.org/TR/2025/WD-image-capture-20250423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Encrypted Media Extensions](https://jp.htmlspecs.com/encrypted-media-2/)（[Source](https://www.w3.org/TR/2026/WD-encrypted-media-2-20260624/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Encrypted Media Extensions](https://jp.htmlspecs.com/encrypted-media-2/)（[Source](https://www.w3.org/TR/2026/WD-encrypted-media-2-20260702/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Remote Playback](https://jp.htmlspecs.com/remote-playback/)（[Source](https://www.w3.org/TR/2024/CRD-remote-playback-20240430/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Open Screen Application Protocol](https://jp.htmlspecs.com/openscreen-application/)（[Source](https://www.w3.org/TR/2026/WD-openscreen-application-20260210/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Open Screen Network Protocol](https://jp.htmlspecs.com/openscreen-network/)（[Source](https://www.w3.org/TR/2026/WD-openscreen-network-20260210/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
