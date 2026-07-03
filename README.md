@@ -415,7 +415,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Payment Method Manifest](https://jp.htmlspecs.com/payment-method-manifest/)（[Source](https://www.w3.org/TR/2017/WD-payment-method-manifest-20171212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Payment Method Identifiers](https://jp.htmlspecs.com/payment-method-id/)（[Source](https://www.w3.org/TR/2022/REC-payment-method-id-20220908/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Digital Goods API](https://jp.htmlspecs.com/digital-goods/)（[Source](https://wicg.github.io/digital-goods/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260604/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Secure Payment Confirmation](https://jp.htmlspecs.com/secure-payment-confirmation/)（[Source](https://www.w3.org/TR/2026/CRD-secure-payment-confirmation-20260702/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
 ### アクセシビリティ
 - [Web Content Accessibility Guidelines (WCAG) 2.2](https://jp.htmlspecs.com/WCAG22/)（[Source](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
