@@ -1,0 +1,1473 @@
+<!doctype html>
+<html lang="ja-JP">
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <title>Threat Model for the Web</title>
+    <meta content="NOTE-WD" name="w3c-status">
+    <!-- <meta content="Bikeshed version d113b2e81, updated Tue Jun 9 14:57:55 2026 -0700" name="generator"> -->
+    <link href="https://www.w3.org/TR/threat-model-web/" rel="canonical">
+    <!-- <meta content="08138c77ce096b8f53d163341195c56f7fa02943" name="revision"> -->
+    <meta content="dark light" name="color-scheme">
+    <style>
+        /* Boilerplate: style-autolinks */
+        .css.css,
+        .property.property,
+        .descriptor.descriptor {
+            color: var(--a-normal-text);
+            font-size: inherit;
+            font-family: inherit;
+        }
+
+        .css::before,
+        .property::before,
+        .descriptor::before {
+            content: "‘";
+        }
+
+        .css::after,
+        .property::after,
+        .descriptor::after {
+            content: "’";
+        }
+
+        .property,
+        .descriptor {
+            /* Don't wrap property and descriptor names */
+            white-space: nowrap;
+        }
+
+        .type {
+            /* CSS value <type> */
+            font-style: italic;
+        }
+
+        pre .property::before,
+        pre .property::after {
+            content: "";
+        }
+
+        [data-link-type="property"]::before,
+        [data-link-type="propdesc"]::before,
+        [data-link-type="descriptor"]::before,
+        [data-link-type="value"]::before,
+        [data-link-type="function"]::before,
+        [data-link-type="at-rule"]::before,
+        [data-link-type="selector"]::before,
+        [data-link-type="maybe"]::before {
+            content: "‘";
+        }
+
+        [data-link-type="property"]::after,
+        [data-link-type="propdesc"]::after,
+        [data-link-type="descriptor"]::after,
+        [data-link-type="value"]::after,
+        [data-link-type="function"]::after,
+        [data-link-type="at-rule"]::after,
+        [data-link-type="selector"]::after,
+        [data-link-type="maybe"]::after {
+            content: "’";
+        }
+
+        [data-link-type].production::before,
+        [data-link-type].production::after,
+        .prod [data-link-type]::before,
+        .prod [data-link-type]::after {
+            content: "";
+        }
+
+        [data-link-type=element],
+        [data-link-type=element-attr] {
+            font-family: Menlo, Consolas, "DejaVu Sans Mono", monospace;
+            font-size: .9em;
+        }
+
+        [data-link-type=element]::before {
+            content: "<"
+        }
+
+        [data-link-type=element]::after {
+            content: ">"
+        }
+
+        [data-link-type=biblio] {
+            white-space: pre;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --selflink-text: black;
+                --selflink-bg: silver;
+                --selflink-hover-text: white;
+            }
+        }
+    </style>
+    <style>
+        /* Boilerplate: style-colors */
+        /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
+        :root {
+            color-scheme: light dark;
+
+            --text: black;
+            --bg: white;
+
+            --unofficial-watermark: url(https://www.w3.org/StyleSheets/TR/2016/logos/UD-watermark);
+
+            --logo-bg: #1a5e9a;
+            --logo-active-bg: #c00;
+            --logo-text: white;
+
+            --tocnav-normal-text: #707070;
+            --tocnav-normal-bg: var(--bg);
+            --tocnav-hover-text: var(--tocnav-normal-text);
+            --tocnav-hover-bg: #f8f8f8;
+            --tocnav-active-text: #c00;
+            --tocnav-active-bg: var(--tocnav-normal-bg);
+
+            --tocsidebar-text: var(--text);
+            --tocsidebar-bg: #f7f8f9;
+            --tocsidebar-shadow: rgba(0, 0, 0, .1);
+            --tocsidebar-heading-text: hsla(203, 20%, 40%, .7);
+
+            --toclink-text: var(--text);
+            --toclink-underline: #3980b5;
+            --toclink-visited-text: var(--toclink-text);
+            --toclink-visited-underline: #054572;
+
+            --heading-text: #005a9c;
+
+            --hr-text: var(--text);
+
+            --algo-border: #def;
+
+            --del-text: red;
+            --del-bg: transparent;
+            --ins-text: #080;
+            --ins-bg: transparent;
+
+            --a-normal-text: #034575;
+            --a-normal-underline: #bbb;
+            --a-visited-text: var(--a-normal-text);
+            --a-visited-underline: #707070;
+            --a-hover-bg: rgba(75%, 75%, 75%, .25);
+            --a-active-text: #c00;
+            --a-active-underline: #c00;
+
+            --blockquote-border: silver;
+            --blockquote-bg: transparent;
+            --blockquote-text: currentcolor;
+
+            --issue-border: #e05252;
+            --issue-bg: #fbe9e9;
+            --issue-text: var(--text);
+            --issueheading-text: #831616;
+
+            --example-border: #e0cb52;
+            --example-bg: #fcfaee;
+            --example-text: var(--text);
+            --exampleheading-text: #574b0f;
+
+            --note-border: #52e052;
+            --note-bg: #e9fbe9;
+            --note-text: var(--text);
+            --noteheading-text: hsl(120, 70%, 30%);
+            --notesummary-underline: silver;
+
+            --assertion-border: #aaa;
+            --assertion-bg: #eee;
+            --assertion-text: black;
+
+            --advisement-border: orange;
+            --advisement-bg: #fec;
+            --advisement-text: var(--text);
+            --advisementheading-text: #b35f00;
+
+            --warning-border: red;
+            --warning-bg: hsla(40, 100%, 50%, 0.95);
+            --warning-text: var(--text);
+
+            --amendment-border: #330099;
+            --amendment-bg: #F5F0FF;
+            --amendment-text: var(--text);
+            --amendmentheading-text: #220066;
+
+            --def-border: #8ccbf2;
+            --def-bg: #def;
+            --def-text: var(--text);
+            --defrow-border: #bbd7e9;
+
+            --datacell-border: silver;
+
+            --indexinfo-text: #707070;
+
+            --indextable-hover-text: black;
+            --indextable-hover-bg: #f7f8f9;
+
+            --outdatedspec-bg: rgba(0, 0, 0, .5);
+            --outdatedspec-text: black;
+            --outdated-bg: maroon;
+            --outdated-text: white;
+            --outdated-shadow: red;
+
+            --editedrec-bg: darkorange;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text: #ddd;
+                --bg: black;
+
+                --unofficial-watermark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cg fill='%23100808' transform='translate(200 200) rotate(-45) translate(-200 -200)' stroke='%23100808' stroke-width='3'%3E%3Ctext x='50%25' y='220' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EUNOFFICIAL%3C/text%3E%3Ctext x='50%25' y='305' style='font: bold 70px sans-serif; text-anchor: middle; letter-spacing: 6px;'%3EDRAFT%3C/text%3E%3C/g%3E%3C/svg%3E");
+
+                --logo-bg: #1a5e9a;
+                --logo-active-bg: #c00;
+                --logo-text: white;
+
+                --tocnav-normal-text: #999;
+                --tocnav-normal-bg: var(--bg);
+                --tocnav-hover-text: var(--tocnav-normal-text);
+                --tocnav-hover-bg: #080808;
+                --tocnav-active-text: #f44;
+                --tocnav-active-bg: var(--tocnav-normal-bg);
+
+                --tocsidebar-text: var(--text);
+                --tocsidebar-bg: #080808;
+                --tocsidebar-shadow: rgba(255, 255, 255, .1);
+                --tocsidebar-heading-text: hsla(203, 20%, 40%, .7);
+
+                --toclink-text: var(--text);
+                --toclink-underline: #6af;
+                --toclink-visited-text: var(--toclink-text);
+                --toclink-visited-underline: #054572;
+
+                --heading-text: #8af;
+
+                --hr-text: var(--text);
+
+                --algo-border: #456;
+
+                --del-text: #f44;
+                --del-bg: transparent;
+                --ins-text: #4a4;
+                --ins-bg: transparent;
+
+                --a-normal-text: #6af;
+                --a-normal-underline: #555;
+                --a-visited-text: var(--a-normal-text);
+                --a-visited-underline: var(--a-normal-underline);
+                --a-hover-bg: rgba(25%, 25%, 25%, .2);
+                --a-active-text: #f44;
+                --a-active-underline: var(--a-active-text);
+
+                --borderedblock-bg: rgba(255, 255, 255, .05);
+
+                --blockquote-border: silver;
+                --blockquote-bg: var(--borderedblock-bg);
+                --blockquote-text: currentcolor;
+
+                --issue-border: #e05252;
+                --issue-bg: var(--borderedblock-bg);
+                --issue-text: var(--text);
+                --issueheading-text: hsl(0deg, 70%, 70%);
+
+                --example-border: hsl(50deg, 90%, 60%);
+                --example-bg: var(--borderedblock-bg);
+                --example-text: var(--text);
+                --exampleheading-text: hsl(50deg, 70%, 70%);
+
+                --note-border: hsl(120deg, 100%, 35%);
+                --note-bg: var(--borderedblock-bg);
+                --note-text: var(--text);
+                --noteheading-text: hsl(120, 70%, 70%);
+                --notesummary-underline: silver;
+
+                --assertion-border: #444;
+                --assertion-bg: var(--borderedblock-bg);
+                --assertion-text: var(--text);
+
+                --advisement-border: orange;
+                --advisement-bg: #222218;
+                --advisement-text: var(--text);
+                --advisementheading-text: #f84;
+
+                --warning-border: red;
+                --warning-bg: hsla(40, 100%, 20%, 0.95);
+                --warning-text: var(--text);
+
+                --amendment-border: #330099;
+                --amendment-bg: #080010;
+                --amendment-text: var(--text);
+                --amendmentheading-text: #cc00ff;
+
+                --def-border: #8ccbf2;
+                --def-bg: #080818;
+                --def-text: var(--text);
+                --defrow-border: #136;
+
+                --datacell-border: silver;
+
+                --indexinfo-text: #aaa;
+
+                --indextable-hover-text: var(--text);
+                --indextable-hover-bg: #181818;
+
+                --outdatedspec-bg: rgba(255, 255, 255, .5);
+                --outdatedspec-text: black;
+                --outdated-bg: maroon;
+                --outdated-text: white;
+                --outdated-shadow: red;
+
+                --editedrec-bg: darkorange;
+            }
+
+            /* In case a transparent-bg image doesn't expect to be on a dark bg,
+       which is quite common in practice... */
+            img {
+                background: white;
+            }
+        }
+    </style>
+    <style>
+        /* Boilerplate: style-counters */
+        body {
+            counter-reset: example figure issue table;
+        }
+
+        .issue {
+            counter-increment: issue;
+        }
+
+        .issue:not(.no-marker)::before {
+            content: "Issue " counter(issue);
+        }
+
+        .example {
+            counter-increment: example;
+        }
+
+        .example:not(.no-marker)::before {
+            content: "Example " counter(example);
+        }
+
+        .invalid.example:not(.no-marker)::before,
+        .illegal.example:not(.no-marker)::before {
+            content: "Invalid Example " counter(example);
+        }
+
+        figcaption {
+            counter-increment: figure;
+        }
+
+        figcaption:not(.no-marker)::before {
+            content: "Figure " counter(figure) " ";
+        }
+
+        figure.table figcaption {
+            counter-increment: table;
+        }
+
+        figure.table figcaption:not(.no-marker)::before {
+            content: "Table " counter(table) " ";
+        }
+    </style>
+    <style>
+        /* Boilerplate: style-issues */
+        a[href].issue-return {
+            float: right;
+            float: inline-end;
+            color: var(--issueheading-text);
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+    <style>
+        /* Boilerplate: style-md-lists */
+        /* This is a weird hack for me not yet following the commonmark spec
+   regarding paragraph and lists. */
+        [data-md]> :first-child {
+            margin-top: 0;
+        }
+
+        [data-md]> :last-child {
+            margin-bottom: 0;
+        }
+    </style>
+    <style>
+        /* Boilerplate: style-selflinks */
+        :root {
+            --selflink-text: white;
+            --selflink-bg: gray;
+            --selflink-hover-text: black;
+        }
+
+        .heading,
+        .issue,
+        .note,
+        .example,
+        li,
+        dt {
+            position: relative;
+        }
+
+        a.self-link {
+            position: absolute;
+            top: 0;
+            left: calc(-1 * (3.5rem - 26px));
+            width: calc(3.5rem - 26px);
+            height: 2em;
+            text-align: center;
+            border: none;
+            transition: opacity .2s;
+            opacity: .5;
+        }
+
+        a.self-link:hover {
+            opacity: 1;
+        }
+
+        .heading>a.self-link {
+            font-size: 83%;
+        }
+
+        .example>a.self-link,
+        .note>a.self-link,
+        .issue>a.self-link {
+            /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+            left: auto;
+            right: 0;
+        }
+
+        li>a.self-link {
+            left: calc(-1 * (3.5rem - 26px) - 2em);
+        }
+
+        dfn>a.self-link {
+            top: auto;
+            left: auto;
+            opacity: 0;
+            width: 1.5em;
+            height: 1.5em;
+            background: var(--selflink-bg);
+            color: var(--selflink-text);
+            font-style: normal;
+            transition: opacity .2s, background-color .2s, color .2s;
+        }
+
+        dfn:hover>a.self-link {
+            opacity: 1;
+        }
+
+        dfn>a.self-link:hover {
+            color: var(--selflink-hover-text);
+        }
+
+        a.self-link::before {
+            content: "¶";
+        }
+
+        .heading>a.self-link::before {
+            content: "§";
+        }
+
+        dfn>a.self-link::before {
+            content: "#";
+        }
+    </style>
+    <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-DNOTE" rel="stylesheet">
+    <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet"
+        type="text/css">
+
+<body class="h-entry">
+    <div class="head">
+        <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/">
+                <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72">
+            </a>
+        </p>
+        <h1 class="no-ref p-name" id="title">Webの脅威モデル</h1>
+        <p id="w3c-state"><a href="https://www.w3.org/standards/types/#DNOTE">W3Cグループノート草案</a>,
+            <time class="dt-updated" datetime="2026-06-17">2026年6月17日</time>
+        </p>
+        <details open>
+            <summary>この文書についての詳細</summary>
+            <div data-fill-with="spec-metadata">
+                <dl>
+                    <dt>このバージョン:
+                    <dd><a class="u-url"
+                            href="https://www.w3.org/TR/2026/DNOTE-threat-model-web-20260617/">https://www.w3.org/TR/2026/DNOTE-threat-model-web-20260617/</a>
+                    <dt>最新公開バージョン:
+                    <dd><a href="https://www.w3.org/TR/threat-model-web/">https://www.w3.org/TR/threat-model-web/</a>
+                    <dt>編集者草案:
+                    <dd><a href="https://w3c.github.io/threat-model-web/">https://w3c.github.io/threat-model-web/</a>
+                    <dt>以前のバージョン:
+                    <dd><a href="https://www.w3.org/TR/2026/DNOTE-threat-model-web-20260612/"
+                            rel="prev">https://www.w3.org/TR/2026/DNOTE-threat-model-web-20260612/</a>
+                    <dt>履歴:
+                    <dd><a class="u-url"
+                            href="https://www.w3.org/standards/history/threat-model-web/">https://www.w3.org/standards/history/threat-model-web/</a>
+                    <dt>フィードバック:
+                    <dd><span><a
+                                href="mailto:public-security@w3.org?subject=%5Bthreat-model-web%5D%20YOUR%20TOPIC%20HERE">public-security@w3.org</a>
+                            に件名行「<kbd>[threat-model-web] <i data-lt>… メッセージのトピック …</i></kbd>」を付けて送信（<a
+                                href="https://lists.w3.org/Archives/Public/public-security/"
+                                rel="discussion">アーカイブ</a>）</span>
+                    <dd><a href="https://github.com/w3c/threat-model-web/issues">GitHub</a>
+                    <dt class="editor">編集者:
+                    <dd class="editor h-card p-author vcard" data-editor-id="38211"><a class="email fn p-name u-email"
+                            href="mailto:simone@w3.org">Simone Onofri</a> (<a class="org p-org"
+                            href="https://w3.org/">W3C</a>)
+                    <dd class="editor h-card p-author vcard" data-editor-id="97261"><a class="email fn p-name u-email"
+                            href="mailto:joe@legreq.com">Joe Andrieu</a> (<a class="org p-org"
+                            href="https://legreq.com">Legendary Requirements</a>)
+                    <dd class="editor h-card p-author vcard" data-editor-id="171320"><a class="email fn p-name u-email"
+                            href="mailto:gcorti@fbk.eu">Giovanni Corti</a> (<a class="org p-org"
+                            href="https://fbk.eu">FBK</a>)
+                </dl>
+            </div>
+        </details>
+        <div data-fill-with="warning"></div>
+        <p class="copyright" data-fill-with="copyright"><a href="https://www.w3.org/policies/#copyright">Copyright</a> ©
+            2026 <a href="https://www.w3.org/">World Wide Web Consortium</a>. <abbr
+                title="World Wide Web Consortium">W3C</abbr><sup>®</sup> <a
+                href="https://www.w3.org/policies/#Legal_Disclaimer">liability</a>, <a
+                href="https://www.w3.org/policies/#W3C_Trademarks">trademark</a> and <a
+                href="https://www.w3.org/copyright/software-license/" rel="license"
+                title="W3C Software and Document License">permissive document license</a> rules apply.
+        </p>
+        <hr title="Separator for header">
+    </div>
+    <div class="p-summary" data-fill-with="abstract">
+        <h2 class="heading no-num no-ref no-toc settled" id="abstract"><span class="content">概要</span></h2>
+        <p>本書はWebの脅威モデルについて説明し、Webセキュリティモデルを含む。また、Webプラットフォーム全体では
+            まだ達成されていないものの、新規および変更された仕様のレビューには引き続き適用される目標を含む場合がある。</p>
+    </div>
+    <h2 class="heading no-num no-ref no-toc settled" id="sotd"><span class="content">この文書のステータス</span></h2>
+    <div data-fill-with="status">
+        <p></p>
+        <p><em>このセクションでは、この文書の公開時点におけるステータスについて説明する。現在のW3C
+                公開文書の一覧およびこの技術報告書の最新版は、<a href="https://www.w3.org/TR/">W3C標準および草案インデックス</a>で確認できる。</em></p>
+        <p>このグループノート草案はSecurity Interest Groupによって承認されているが、W3C自体およびその
+            メンバーによって承認されているものではない。</p>
+        <p>この仕様に関するフィードバックを提供するには、GitHubの使用が推奨される。課題を提出するための
+            GitHubアカウントは無料で作成できる。提出された課題の一覧、および過去のメーリングリスト<a href="mailto:public-security@w3.org"
+                id="public-name">public-security@w3.org</a>（<a
+                href="https://lists.w3.org/Archives/Public/public-security/">アーカイブ</a>）での議論のアーカイブは公開されている。</p>
+        <p>この文書は、<a href="https://www.w3.org/groups/ig/security">Security Interest
+                Group</a>により、<a
+                href="https://www.w3.org/policies/process/20250818/#recs-and-notes">ノートトラック</a>を用いてグループノート草案として公開された。
+        </p>
+        <p>グループ草案ノートは、<abbr title="World Wide Web Consortium">W3C</abbr>およびそのメンバーによって承認されていない。</p>
+        <p>これは草案文書であり、いつでも他の文書によって更新、置換、または廃止される可能性がある。この文書を
+            作業中のもの以外として引用することは適切ではない。</p>
+        <p data-deliverer="49310"> <a href="https://www.w3.org/policies/patent-policy/"><abbr
+                    title="World Wide Web Consortium">W3C</abbr>特許方針</a>は、この文書に対していかなるライセンス
+            要件またはコミットメントも伴わない。</p>
+        <p>この文書は、<a href="https://www.w3.org/policies/process/20250818/" id="w3c_process_revision">2025年8月18日の<abbr
+                    title="World Wide Web Consortium">W3C</abbr>プロセス
+                文書</a>に準拠する。
+
+
+        </p>
+    </div>
+    <div data-fill-with="at-risk"></div>
+    <nav data-fill-with="table-of-contents" id="toc">
+        <h2 class="no-num no-ref no-toc" id="contents">目次</h2>
+        <ol class="toc">
+            <li>
+                <a href="#what-are-we-building"><span class="secno">1</span> <span class="content">何を
+                        構築しているのか？</span></a>
+                <ol class="toc">
+                    <li>
+                        <a href="#high-level-web-threat-model"><span class="secno">1.1</span> <span
+                                class="content">高レベルWeb脅威モデル</span></a>
+                        <ol class="toc">
+                            <li><a href="#element-dictionary"><span class="secno">1.1.1</span> <span
+                                        class="content">要素辞書</span></a>
+                            <li><a href="#trust-boundaries"><span class="secno">1.1.2</span> <span class="content">信頼
+                                        境界</span></a>
+                            <li><a href="#relationship-to-the-web-browser-threat-model"><span class="secno">1.1.3</span>
+                                    <span class="content">Webブラウザー脅威モデルとの関係</span></a>
+                        </ol>
+                    <li>
+                        <a href="#web-browser-threat-model"><span class="secno">1.2</span> <span class="content">Web
+                                ブラウザー脅威モデル</span></a>
+                        <ol class="toc">
+                            <li><a href="#privileged-browser-process"><span class="secno">1.2.1</span> <span
+                                        class="content">特権ブラウザープロセス</span></a>
+                            <li><a href="#sandboxed-web-content-execution-and-rendering"><span
+                                        class="secno">1.2.2</span> <span class="content">サンドボックス化されたWebコンテンツの実行
+                                        とレンダリング</span></a>
+                            <li><a href="#network-and-storage"><span class="secno">1.2.3</span> <span
+                                        class="content">ネットワークとストレージ</span></a>
+                            <li><a href="#graphics-media-and-helper"><span class="secno">1.2.4</span> <span
+                                        class="content">グラフィックス、メディア、およびヘルパー</span></a>
+                            <li>
+                                <a href="#element-dictionary①"><span class="secno">1.2.5</span> <span
+                                        class="content">要素辞書</span></a>
+                                <ol class="toc">
+                                    <li><a href="#external-entities"><span class="secno">1.2.5.1</span> <span
+                                                class="content">外部エンティティ</span></a>
+                                    <li><a href="#threat-boundaries"><span class="secno">1.2.5.2</span> <span
+                                                class="content">脅威境界</span></a>
+                                    <li><a href="#processes"><span class="secno">1.2.5.3</span> <span
+                                                class="content">プロセス</span></a>
+                                    <li><a href="#data-stores"><span class="secno">1.2.5.4</span> <span
+                                                class="content">データストア</span></a>
+                                    <li><a href="#flows"><span class="secno">1.2.5.5</span> <span
+                                                class="content">フロー</span></a>
+                                </ol>
+                        </ol>
+                    <li><a href="#assumptions-and-external-dependencies"><span class="secno">1.3</span> <span
+                                class="content">前提と外部依存関係</span></a>
+                    <li><a href="#entry-points-and-attack-surface"><span class="secno">1.4</span> <span
+                                class="content">エントリーポイントと攻撃対象領域</span></a>
+                    <li><a href="#security-properties-assets-and-invariants"><span class="secno">1.5</span> <span
+                                class="content">セキュリティ特性、資産、および不変条件</span></a>
+                </ol>
+            <li>
+                <a href="#what-can-go-wrong"><span class="secno">2</span> <span class="content">何が問題に
+                        なり得るか？</span></a>
+                <ol class="toc">
+                    <li><a href="#threat-analysis-method"><span class="secno">2.1</span> <span class="content">脅威
+                                分析手法</span></a>
+                    <li><a href="#threat-sources"><span class="secno">2.2</span> <span class="content">脅威
+                                源</span></a>
+                    <li><a href="#high-level-threat-index"><span class="secno">2.3</span> <span
+                                class="content">高レベル脅威インデックス</span></a>
+                </ol>
+            <li>
+                <a href="#what-are-we-going-to-do-about-it"><span class="secno">3</span> <span class="content">それに対して
+                        何をするのか？</span></a>
+                <ol class="toc">
+                    <li><a href="#security-features-and-controls"><span class="secno">3.1</span> <span
+                                class="content">セキュリティ機能と制御</span></a>
+                </ol>
+            <li><a href="#did-we-do-a-good-enough-job"><span class="secno">4</span> <span class="content">十分な
+                        対応ができたか？</span></a>
+            <li><a href="#acknowledgment"><span class="secno">5</span> <span class="content">謝辞</span></a>
+            <li>
+                <a href="#references"><span class="secno"></span> <span class="content">参考文献</span></a>
+                <ol class="toc">
+                    <li><a href="#informative"><span class="secno"></span> <span class="content">非規範的
+                                参考文献</span></a>
+                </ol>
+        </ol>
+    </nav>
+    <main>
+        <h2 class="heading settled" data-level="1" id="what-are-we-building"><span class="secno">1. </span><span
+                class="content">私たちは何を構築しているのか？</span><a class="self-link" href="#what-are-we-building"></a></h2>
+        <p>Webプラットフォームは、Webを可能にするオープンでロイヤリティフリーな技術の集合である。ユーザーは、
+            Webブラウザーやユーザーに代わって動作する別のエージェントなどのユーザーエージェントを通じてWebサイトとやり取りする。</p>
+        <p>Webサイトには、一連のファイル形式、すなわちフォント、画像、マルチメディアなどの受動的コンテンツと、
+            HTML、JavaScript、WebAssemblyなどの能動的コンテンツが含まれる。これらはサーバーからユーザーの
+            デバイスへ送信され、Webブラウザーによって解釈される。受動的コンテンツはデコードされてレンダリングされる。
+            能動的コンテンツは、そのオリジンの権限で実行され、Webの主要な攻撃対象領域を構成する。この区別は
+            有用だが、絶対的ではない。たとえば、注入されたCSSも、セレクターのマッチングやリソース読み込みを用いて
+            ページ状態を推測または漏えいする場合には、攻撃対象領域になり得る <a data-link-type="biblio" href="#biblio-xsleaks-css-injection"
+                title="CSS Injection">[xsleaks-css-injection]</a>。</p>
+        <p>したがって、Webサイトは能動的な実行環境である。Webサーバーからのレスポンスには、実行可能な
+            スクリプト、ユーザーインターフェイス定義、サードパーティリソースへの参照、ユーザーエージェントに対して
+            ユーザー入力の読み取り、インターフェイスの更新、Web APIの呼び出し、ローカル状態の保存または取得、
+            基盤プラットフォームとのやり取り、リモートサービスとの通信を行わせる命令を含めることができる。これが、
+            この文脈においてWebブラウザーが重要な役割を担う理由である。Webブラウザーは、信頼されておらず
+            ネットワーク越しにアクセスされるWebサイトからのコードを、ユーザーのデバイス上で実行する。</p>
+        <p>この複雑さのため、本書はWebについて単一で網羅的な脅威モデルを定義しようとはしない。Webは階層化され、
+            進化し続けるエコシステムであるため、単一のモデルは、開発およびレビュー作業を導くには抽象的すぎるか、
+            あるいは読みやすく有用であり続けるには詳細すぎるものになる。これはShostackの脅威モデリングにおける
+            実践的な枠組みに従うものである。モデルとは、何が構築されているのか、何がうまくいかなくなり得るのかを
+            推論するために用いる抽象化であり、異なる忠実度のレベルで異なるモデルが有用になり得る <a data-link-type="biblio"
+                href="#biblio-shostack-threat-modeling"
+                title="Threat Modeling: Designing for Security">[shostack-threat-modeling]</a>。したがって、本書は
+            関連する脅威モデルの集合として機能する。</p>
+        <h3 class="heading settled" data-level="1.1" id="high-level-web-threat-model"><span class="secno">1.1.
+            </span><span class="content">高レベルWeb脅威モデル</span><a class="self-link"
+                href="#high-level-web-threat-model"></a></h3>
+        <p>高レベルWeb脅威モデルは、本書で最も抽象度の高いモデルである。ユーザーエージェントを単一のプロセスとして扱い、
+            非常に高いレベルで推論するために、主要な要素、フロー、境界のみを記述する。</p>
+        <figure id="dfd0-web-platform">
+
+            <img alt="Webプラットフォームの最小限のデータフロー図" height="720"
+                src="https://www.w3.org/TR/threat-model-web/images/high-level-web.svg" width="1120">
+
+            <figcaption>
+                高レベルWebプラットフォームモデル。
+            </figcaption>
+        </figure>
+        <h4 class="heading settled" data-level="1.1.1" id="element-dictionary"><span class="secno">1.1.1. </span><span
+                class="content">要素辞書</span><a class="self-link" href="#element-dictionary"></a></h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID
+                    <th>名前
+                    <th>型
+                    <th>説明
+            <tbody>
+                <tr>
+                    <td>E0
+                    <td>ユーザー
+                    <td>外部エンティティ
+                    <td>ユーザーエージェントを通じてWebとやり取りする人間のユーザー。
+                <tr>
+                    <td>E1
+                    <td>リモートWebオリジン
+                    <td>外部エンティティ
+                    <td>HTML、CSS、JavaScript、WebAssembly、メディア、API、IDエンドポイント、
+                        その他のWebリソースを提供するリモートオリジン。
+                <tr>
+                    <td>E2
+                    <td>ネットワークインフラストラクチャ
+                    <td>外部エンティティ
+                    <td>リモートコンテンツを取得するために用いられるローカルネットワーク、インターネットルーティング、
+                        名前解決、トランスポートプロトコル、その他のネットワークサービス。
+                <tr>
+                    <td>E3
+                    <td>オペレーティングシステム / デバイス / プラットフォーム
+                    <td>外部エンティティ
+                    <td>ファイルシステム、クリップボード、カメラ、マイク、GPU、センサー、認証器、
+                        ハードウェア支援機能、およびWebプラットフォーム境界の外側にあるその他のプラットフォームサービス。
+                <tr>
+                    <td>P0
+                    <td>ユーザーエージェント / Webブラウザー
+                    <td>プロセス
+                    <td>ユーザーに代わってWebコンテンツを取得、解釈、実行、仲介、保存、レンダリングし、
+                        表示するブラウザーまたはその他のユーザーエージェント。
+                <tr>
+                    <td>S0
+                    <td>ブラウザー管理状態
+                    <td>データストア
+                    <td>Cookie、キャッシュ、ストレージ、権限、サイト設定、セッション状態、プロファイルデータ、
+                        認証情報参照、およびユーザーエージェントによって制御または仲介されるその他の状態。
+                <tr>
+                    <td>F0
+                    <td>ユーザー操作
+                    <td>データフロー
+                    <td>ブラウザーUI、レンダリングされたコンテンツ、プロンプト、その他のユーザーエージェント面を通じた
+                        ユーザー入力および出力。
+                <tr>
+                    <td>F1
+                    <td>Webリクエスト / レスポンス
+                    <td>データフロー
+                    <td>通常HTTP(S)などのネットワークプロトコルを介して、ユーザーエージェントとリモートWebオリジンの間で
+                        交換されるリクエストおよびレスポンス。
+                <tr>
+                    <td>F2
+                    <td>サブリソースおよびサードパーティ読み込み
+                    <td>データフロー
+                    <td>Webコンテンツが、同一または異なるオリジンからスクリプト、フレーム、メディア、フォント、API、
+                        その他のリソースを取得するようユーザーエージェントに行わせること。
+                <tr>
+                    <td>F3
+                    <td>ブラウザー状態アクセス
+                    <td>データフロー
+                    <td>ユーザーエージェントとブラウザー管理状態の間の読み取りおよび書き込み。
+                <tr>
+                    <td>F4
+                    <td>仲介されたプラットフォームアクセス
+                    <td>データフロー
+                    <td>オペレーティングシステム、デバイス、センサー、認証器、ファイルシステム、
+                        クリップボード、グラフィックス、メディア、その他のプラットフォーム機能への、ブラウザーにより
+                        仲介されたアクセス。
+        </table>
+        <h4 class="heading settled" data-level="1.1.2" id="trust-boundaries"><span class="secno">1.1.2. </span><span
+                class="content">信頼境界</span><a class="self-link" href="#trust-boundaries"></a></h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID
+                    <th>名前
+                    <th>説明
+            <tbody>
+                <tr>
+                    <td>B0
+                    <td>ユーザーエージェント境界
+                    <td>ブラウザー制御の動作を、外部Webオリジン、ネットワーク、ユーザー、および基盤プラットフォームから分離する。
+                <tr>
+                    <td>B1
+                    <td>Webオリジン境界
+                    <td>相互に信頼しないオリジン同士を分離する。
+                <tr>
+                    <td>B2
+                    <td>ネットワーク境界
+                    <td>ユーザーエージェントおよびローカル環境を、リモートネットワークインフラストラクチャおよび
+                        リモートサービスから分離する。
+                <tr>
+                    <td>B3
+                    <td>ブラウザー状態境界
+                    <td>ブラウザー管理状態をWebコンテンツおよび外部アクターから分離する。
+                <tr>
+                    <td>B4
+                    <td>オペレーティングシステム / デバイス境界
+                    <td>Webプラットフォームの仲介を、低レベルのプラットフォームサービスおよび機能から分離する。
+        </table>
+        <h4 class="heading settled" data-level="1.1.3" id="relationship-to-the-web-browser-threat-model"><span
+                class="secno">1.1.3. </span><span class="content">Webブラウザー脅威モデルとの関係</span><a class="self-link"
+                href="#relationship-to-the-web-browser-threat-model"></a></h4>
+        <p>高レベル脅威モデルは、意図的にほとんどのブラウザー内部構造を視野の外に置く。これにより、レビューの対象が
+            Webプラットフォーム全体である場合、すなわちオリジンの役割、主要なアクター、ユーザー、Webコンテンツ、
+            ネットワーク、ブラウザー管理状態、基盤プラットフォームの間の信頼境界を扱う場合に有用になる。</p>
+        <p>設計またはレビューが、ある決定がどこで強制されるのか、どのブラウザーコンポーネントが状態を保持するのか、
+            権限がどのように仲介されるのか、信頼できないコンテンツがどのように隔離されるのか、あるいはWeb APIが
+            オペレーティングシステムによって公開される機能にどのように到達するのかに依存する場合、そのレベルでは
+            十分でなくなる。そのような場合には、ブラウザーを開いて見る必要がある。以下のWebブラウザー脅威モデルは、
+            その目的のためにP0を展開する。</p>
+        <h3 class="heading settled" data-level="1.2" id="web-browser-threat-model"><span class="secno">1.2. </span><span
+                class="content">Webブラウザー脅威モデル</span><a class="self-link" href="#web-browser-threat-model"></a></h3>
+        <p>Webブラウザー脅威モデルは、現代のWebブラウザーにおける反復的なアーキテクチャ上の役割を概説する。</p>
+        <figure id="threat-model">
+
+            <img alt="Webブラウザー脅威モデルのデータフロー図" height="5456" src="https://www.w3.org/TR/threat-model-web/images/DFD.svg"
+                width="3405">
+
+            <figcaption>Webブラウザー脅威モデル。</figcaption>
+        </figure>
+        <p>Minimalist Web Threat Modelのようにブラウザーを単一のコンポーネントとして扱うのではなく、この抽象化は、
+            現代のブラウザーが、異なる権限、状態への異なるアクセス、信頼できない入力への異なる露出を持つ複数の
+            プロセスに責任を分散する方法を捉える。また、オリジンベースおよびサイトベースの隔離戦略を含めて、
+            ブラウザーがWebセキュリティモデルをどのように強制するか、外部Webサーバーからの入力を処理する際に
+            自身をどのように保護するかも捉える <a data-link-type="biblio" href="#biblio-threat-modeling-guide"
+                title="Threat Modeling Guide">[threat-modeling-guide]</a>。</p>
+        <p>これら二つの関心事は関連しているが、同一ではない。コンテンツプロセスが隔離されるのは、Webコンテンツが
+            信頼できないからだけではなく、ブラウザーが同一オリジン隔離、およびブラウザーとOS/プラットフォームの分離を
+            保持しなければならないからでもある。実際には、実装が同じプロセスアーキテクチャを用いて両方を支える場合でも、
+            それらは別個の信頼境界である。</p>
+        <p>各Webブラウザーにおいて、実装の詳細は異なる。それでも共通の構造が見えてくる。</p>
+        <h4 class="heading settled" data-level="1.2.1" id="privileged-browser-process"><span class="secno">1.2.1.
+            </span><span class="content">特権ブラウザープロセス</span><a class="self-link" href="#privileged-browser-process"></a>
+        </h4>
+        <p>現代のブラウザーには、ブラウザーUI、ナビゲーション制御、プロセス管理、ポリシー強制、権限仲介、
+            機密性の高いローカルリソースへのアクセス仲介を担当する、高い権限を持つ制御コンポーネントが含まれる。
+            Chromiumはこれを<strong>Browser process</strong>と呼ぶ。WebKitは<strong>UI
+                process</strong>と呼ぶ。Firefoxは<strong>Parent process</strong>と呼ぶ <a data-link-type="biblio"
+                href="#biblio-chromium-multiprocess-architecture"
+                title="Chromium Multi-process Architecture">[chromium-multiprocess-architecture]</a> <a
+                data-link-type="biblio" href="#biblio-webkit2-architecture-overview"
+                title="WebKit2 architecture overview">[webkit2-architecture-overview]</a> <a data-link-type="biblio"
+                href="#biblio-firefox-process-model" title="Firefox Process Model">[firefox-process-model]</a>。</p>
+        <p>このコンポーネントは、ローカルブラウザーアーキテクチャにおける主要な信頼アンカーとして扱うべきである。
+            ブラウザー管理ポリシーが一般に強制される場所であり、ユーザーに見える仲介が通常発生する場所でもある。
+            脅威モデリングの目的において、これは重要である。なぜなら、ある決定のセキュリティ上の影響は、その決定が
+            どこで行われるかに一部依存するからである。特権ブラウザーコンポーネントで実行されるチェックは、
+            サンドボックス化されたコンテンツプロセスで実行されるチェックと同等ではない。</p>
+        <p><a href="#threat-model">Webブラウザー脅威モデル図</a>では、このプロセスを
+            <em>「Browser / UI / Parent Process」</em>と呼ぶ。
+        </p>
+        <h4 class="heading settled" data-level="1.2.2" id="sandboxed-web-content-execution-and-rendering"><span
+                class="secno">1.2.2. </span><span class="content">サンドボックス化されたWebコンテンツの実行とレンダリング</span><a
+                class="self-link" href="#sandboxed-web-content-execution-and-rendering"></a></h4>
+        <p>Webコンテンツは、Chromiumの<strong>Renderer processes</strong>、WebKitの
+            <strong>WebContent processes</strong>、Firefoxの<strong>Content processes</strong>のようなプロセス内で
+            実行される。これらはそれぞれ、信頼できない入力の管理において異なる役割を持つ <a data-link-type="biblio"
+                href="#biblio-chromium-multiprocess-architecture"
+                title="Chromium Multi-process Architecture">[chromium-multiprocess-architecture]</a> <a
+                data-link-type="biblio" href="#biblio-webkit2-architecture-overview"
+                title="WebKit2 architecture overview">[webkit2-architecture-overview]</a> <a data-link-type="biblio"
+                href="#biblio-firefox-process-model" title="Firefox Process Model">[firefox-process-model]</a>。
+        </p>
+        <p>これらの種類のプロセスは、信頼できないWebコンテンツにさらされる。そのため、信頼できない入力を解析、解釈、
+            計算することが想定される実行環境としてモデル化される。その価値は、侵害が不可能であると仮定することではなく、
+            侵害が発生した場合にその後の影響を制約することにある。これが、特権Webブラウザー仲介と
+            Webコンテンツ実行の分離が、Webブラウザーモデルにおける中心的な信頼境界の一つである理由である。
+            実装はまた、オリジンベースまたはサイトベースの隔離戦略を用いることで、通常利用時または侵害後に、
+            関係のないWebコンテンツが干渉できないようにする場合がある。ただし、正確な隔離単位はブラウザー固有である
+            <a data-link-type="biblio" href="#biblio-chromium-process-model-site-isolation"
+                title="Chromium Process Model and Site Isolation">[chromium-process-model-site-isolation]</a> <a
+                data-link-type="biblio" href="#biblio-webkit-site-isolation-notes"
+                title="WebKit Site Isolation notes">[webkit-site-isolation-notes]</a> <a data-link-type="biblio"
+                href="#biblio-firefox-process-model" title="Firefox Process Model">[firefox-process-model]</a>。
+        </p>
+        <p><a href="#threat-model">Webブラウザー脅威モデル図</a>では、このプロセスを
+            <em>「Content / Renderer / WebContent Process」</em>と呼ぶ。
+        </p>
+        <h4 class="heading settled" data-level="1.2.3" id="network-and-storage"><span class="secno">1.2.3. </span><span
+                class="content">ネットワークとストレージ</span><a class="self-link" href="#network-and-storage"></a></h4>
+        <p>現代のWebブラウザーはまた、ネットワーキングおよび永続状態管理を分離するか、少なくとも仲介する。
+            Chromiumでは、この役割は<strong>Network Service</strong>、プロファイルごとの
+            <code>NetworkContext</code>オブジェクト、および<code>StoragePartition</code>と関連する。WebKitでは、
+            <strong>Networking process</strong>がネットワークアクセス、ディスクキャッシュ、およびWeb StorageやIndexedDBなどの
+            ブラウザー管理の構造化サイトデータを扱う。Firefoxでは、ネットワーキングと永続状態は異なる形で分散されるが、
+            それでも両者の間には区別が存在する <a data-link-type="biblio" href="#biblio-chromium-process-model-site-isolation"
+                title="Chromium Process Model and Site Isolation">[chromium-process-model-site-isolation]</a> <a
+                data-link-type="biblio" href="#biblio-webkit-storage-documentation"
+                title="WebKit Storage documentation">[webkit-storage-documentation]</a> <a data-link-type="biblio"
+                href="#biblio-firefox-process-model" title="Firefox Process Model">[firefox-process-model]</a>。
+        </p>
+        <p>この層は重要である。なぜなら、Cookie、キャッシュ、分割された状態、サイトデータ境界が強制される場所であることが
+            多いからである。仕様がフェッチ、認証情報、ストレージアクセス、レスポンス処理に影響する場合、この層と
+            やり取りする可能性が高い。</p>
+        <p><a href="#threat-model">Webブラウザー脅威モデル図</a>では、これらをそれぞれ
+            <em>「Network / Socket / Networking Process」</em>および<em>「Data Store」</em>と呼ぶ。
+        </p>
+        <h4 class="heading settled" data-level="1.2.4" id="graphics-media-and-helper"><span class="secno">1.2.4.
+            </span><span class="content">グラフィックス、メディア、およびヘルパー</span><a class="self-link"
+                href="#graphics-media-and-helper"></a></h4>
+        <p>現代のWebブラウザーはまた、GPU、コーデック、その他のヘルパー機能を別プロセスへ分離する。これは、
+            メディアライブラリが一般的な攻撃対象領域であるためでもある。Chromiumは<strong>GPU process</strong>と
+            追加のヘルパープロセス群を分離する。Firefoxは<strong>GPU Process</strong>、<strong>RDD
+                Process</strong>、<strong>GMP Process</strong>、<strong>Utility Process</strong>、および
+            <strong>Network (Socket) Process</strong>を分離する。WebKitも関連機能のためのプロセスを分離する <a data-link-type="biblio"
+                href="#biblio-inside-browser-part-1"
+                title="Chrome &quot;Inside look at modern web browser&quot; - part 1">[inside-browser-part-1]</a> <a
+                data-link-type="biblio" href="#biblio-firefox-gecko-processes"
+                title="Firefox Gecko Processes">[firefox-gecko-processes]</a> <a data-link-type="biblio"
+                href="#biblio-webkit2-architecture-overview"
+                title="WebKit2 architecture overview">[webkit2-architecture-overview]</a>。
+        </p>
+        <p>脅威モデリングの観点から、これらのヘルパープロセスは重要である。なぜなら、それらは信頼できないコンテンツと
+            複雑な実装面との境界に位置するからである。これは一般的な実装パターンでもある。信頼できない実行や
+            クラッシュしやすい機能を特権制御経路から分離することで、不具合が発生した場合の影響を低減する。</p>
+        <p><a href="#threat-model">Webブラウザー脅威モデル図</a>では、このプロセスを
+            <em>「GPU / Compositor / Media helper Process」</em>と呼ぶ。
+        </p>
+        <h4 class="heading settled" data-level="1.2.5" id="element-dictionary①"><span class="secno">1.2.5. </span><span
+                class="content">要素辞書</span><a class="self-link" href="#element-dictionary①"></a></h4>
+        <h5 class="heading settled" data-level="1.2.5.1" id="external-entities"><span class="secno">1.2.5.1.
+            </span><span class="content">外部エンティティ</span><a class="self-link" href="#external-entities"></a>
+        </h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID
+                    <th>名前
+                    <th>型
+                    <th>説明
+            <tbody>
+                <tr>
+                    <td>E1
+                    <td>ユーザー
+                    <td>外部エンティティ
+                    <td>ブラウザーUI、プロンプト、タブ、レンダリングされたコンテンツとやり取りする人間の操作者。
+                <tr>
+                    <td>E2
+                    <td>リモートWebオリジン
+                    <td>外部エンティティ
+                    <td>HTML、CSS、JS、メディア、API、IDエンドポイント、その他のWebリソースを提供するリモートサーバー。
+                <tr>
+                    <td>E3
+                    <td>基盤ネットワークインフラストラクチャ
+                    <td>外部エンティティ
+                    <td>物理インフラストラクチャ、ネットワークプロトコル、ネットワークセグメンテーション、localhost。
+                <tr>
+                    <td>E4
+                    <td>オペレーティングシステム
+                    <td>外部エンティティ
+                    <td>ブラウザー製品境界の外側にある、ファイルシステム、クリップボード、カメラ、マイク、GPUドライバー、
+                        メディアコーデック、および関連するプラットフォームサービス。
+        </table>
+        <h5 class="heading settled" data-level="1.2.5.2" id="threat-boundaries"><span class="secno">1.2.5.2.
+            </span><span class="content">脅威境界</span><a class="self-link" href="#threat-boundaries"></a>
+        </h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID
+                    <th>名前
+                    <th>型
+                    <th>説明
+            <tbody>
+                <tr>
+                    <td>B1
+                    <td>Webブラウザー境界
+                    <td>脅威境界
+                    <td>ブラウザー制御の要素を外部エンティティおよびサービスから分離する。
+                <tr>
+                    <td>B1.1
+                    <td>特権ブラウザープロセス境界
+                    <td>脅威境界
+                    <td>特権ブラウザー仲介を、サンドボックス化されたコンテンツ実行から分離する。
+                <tr>
+                    <td>B1.2
+                    <td>サンドボックス化されたコンテンツ実行およびレンダリング境界
+                    <td>脅威境界
+                    <td>低い権限と隔離制約の下でWebコンテンツを実行する責任を持つ要素を、互いに分離する。
+                <tr>
+                    <td>B1.3
+                    <td>Webコンテンツ実行プロセス境界
+                    <td>脅威境界
+                    <td>Webコンテンツの実行を担当するプロセスを分離する。
+                <tr>
+                    <td>B1.4
+                    <td>ヘルパーサービス境界
+                    <td>脅威境界
+                    <td>ネットワーキング、GPU、メディア、または関連するユーティリティ機能などのヘルパー役割を持つ要素を、
+                        ブラウザーアーキテクチャの他の部分から分離する。
+                <tr>
+                    <td>B1.5
+                    <td>プロファイルおよびポリシー状態境界
+                    <td>脅威境界
+                    <td>ブラウザー管理のプロファイル、セッション、設定、および権限メタデータを、
+                        ブラウザーアーキテクチャの他の部分から分離する。
+                <tr>
+                    <td>B1.6
+                    <td>サイト状態境界
+                    <td>脅威境界
+                    <td>ブラウザー管理のCookie、HTTPキャッシュ、Web Storage、IndexedDB、および関連するサイトデータを、
+                        ブラウザーアーキテクチャの他の部分から分離する。
+                <tr>
+                    <td>B1.7
+                    <td>サンドボックス化された特権コンテンツ実行境界
+                    <td>脅威境界
+                    <td>内部ページまたは拡張機能のためのサンドボックス化された特権実行コンテキストを、
+                        ブラウザーアーキテクチャの他の部分から分離する。
+                <tr>
+                    <td>B1.8
+                    <td>ローカルネットワーク境界
+                    <td>脅威境界
+                    <td>ユーザーのデバイスを公共インターネットから分離する。
+                <tr>
+                    <td>B1.9
+                    <td>Web境界
+                    <td>脅威境界
+                    <td>ユーザーエージェントを信頼できないWebリソースから分離する。
+                <tr>
+                    <td>B1.10
+                    <td>Webオリジン境界
+                    <td>脅威境界
+                    <td>各Webオリジンを互いに分離する。
+        </table>
+        <h5 class="heading settled" data-level="1.2.5.3" id="processes"><span class="secno">1.2.5.3. </span><span
+                class="content">プロセス</span><a class="self-link" href="#processes"></a></h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID
+                    <th>名前
+                    <th>型
+                    <th>説明
+            <tbody>
+                <tr>
+                    <td>P1
+                    <td>Browser / UI / Parent
+                    <td>プロセス
+                    <td>ChromiumのBrowser process、WebKitのUI process、FirefoxのParent process。特権ブラウザーUI、
+                        ナビゲーション、ウィンドウ管理、プロセス選択、ポリシー強制、権限仲介、ネットワーキングアクセス、
+                        およびプロファイルデータ、Cookieおよびパスワードデータベース、オペレーティングシステム機能などの
+                        機密ローカルリソースへの仲介を調整する。
+                <tr>
+                    <td>P2
+                    <td>Content / Renderer / WebContent
+                    <td>プロセス
+                    <td>ChromiumのRenderer、WebKitのWebContent、FirefoxのContent processファミリー。HTML、CSS、
+                        フォント、画像、メディア、XML、SVG、プレーンテキストなどのWeb形式を解析してレンダリングし、
+                        DOM、スクリプト、ワーカー、JavaScriptエンジンを実行し、サンドボックス化およびオリジンまたは
+                        サイト隔離の制約の下で、制約されたWeb APIエントリーポイントをWebコンテンツに公開する。
+                <tr>
+                    <td>P3
+                    <td>Network / Socket / Networking
+                    <td>プロセス
+                    <td>ネットワーク仲介の役割。ChromiumではNetwork Serviceパターンに対応し、WebKitではNetworking
+                        processに対応し、FirefoxではSocket processおよび関連するブラウザー制御のネットワーキング責任に対応する。
+                        ブラウザー仲介のHTTP(S)、ソケット、キャッシュ関連ネットワークアクセス、および任意のインターネット上の
+                        場所からのリソース要求を扱う。
+                <tr>
+                    <td>P4
+                    <td>GPU / compositor / media helper(s)
+                    <td>プロセス
+                    <td>分離されている場合のGPU、コンポジター、コーデック、メディア、およびその他のヘルパー機能。
+                        レンダリングされたコンテンツを表示出力に変換し、信頼できない、または攻撃者が制御する入力を処理する
+                        複雑なグラフィックスまたはメディア実装面を隔離する。
+                <tr>
+                    <td>P5
+                    <td>特権拡張機能 / 内部コンテンツ
+                    <td>プロセス
+                    <td>内部ページまたは拡張機能のための、任意のブラウザー管理の特権実行コンテキスト。
+                        機能を追加し、ブラウザーまたはWebコンテンツとやり取りでき、インストールおよびユーザーまたは
+                        ブラウザー設定に応じて昇格された権限またはオリジンにスコープされた権限を受け取る場合がある
+                        ブラウザー拡張機能および内部コンテンツを対象とする。
+        </table>
+        <h5 class="heading settled" data-level="1.2.5.4" id="data-stores"><span class="secno">1.2.5.4. </span><span
+                class="content">データストア</span><a class="self-link" href="#data-stores"></a></h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID
+                    <th>名前
+                    <th>型
+                    <th>説明
+            <tbody>
+                <tr>
+                    <td>S1
+                    <td>プロファイル / セッション / ポリシーストア
+                    <td>データストア
+                    <td>設定、プロファイルデータ、閲覧履歴、セッション復元状態、保存された認証情報または
+                        パスワードデータベース参照、およびブラウザーによって制御される有効期間とアクセス規則を持つ
+                        ブラウザー管理設定。
+                <tr>
+                    <td>S2
+                    <td>権限 / ブラウザーメタデータ
+                    <td>データストア
+                    <td>Webコンテンツまたはブラウザー管理の特権コンテンツが、強力な機能を有効化したり機密機能に
+                        アクセスしたりできるかどうかを決定するために用いられる、サイト設定、許可、拡張機能権限、
+                        およびブラウザー制御の権限メタデータ。
+                <tr>
+                    <td>S3
+                    <td>Cookie + HTTPキャッシュ
+                    <td>データストア
+                    <td>ブラウザー管理のCookie jarおよびキャッシュされたレスポンス。Cookieは、セッション、
+                        パーソナライズ、状態管理を支援するために、該当するHTTPリクエストとともに送信され、
+                        オリジン、サイト、プロファイル、または分割規則によってスコープされる場合がある。
+                <tr>
+                    <td>S4
+                    <td>Web storage / IndexedDB / service-worker data
+                    <td>データストア
+                    <td>永続的およびセッションスコープのサイトデータ。通常はオリジンまたは分割にスコープされ、
+                        localStorage、sessionStorage、IndexedDB、service-worker data、および異なる有効期間と容量特性を
+                        持つ関連するブラウザー管理ストレージ機構を含む。
+        </table>
+        <h5 class="heading settled" data-level="1.2.5.5" id="flows"><span class="secno">1.2.5.5. </span><span
+                class="content">フロー</span><a class="self-link" href="#flows"></a></h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID
+                    <th>名前
+                    <th>型
+                    <th>説明
+            <tbody>
+                <tr>
+                    <td>F1
+                    <td>ユーザー操作
+                    <td>フロー
+                    <td>ユーザーと特権ブラウザーUIの間の入力および出力。
+                <tr>
+                    <td>F2
+                    <td>ナビゲーション / フレーム制御 / IPC
+                    <td>フロー
+                    <td>特権ブラウザーロジックとコンテンツ実行の間の制御フロー。
+                <tr>
+                    <td>F3
+                    <td>サブリソースフェッチ / ネットワーク仲介
+                    <td>フロー
+                    <td>コンテンツによって開始される、ブラウザー制御ネットワーキングへのアクセス経路。
+                <tr>
+                    <td>F4
+                    <td>HTTPS / DNS / リモートデータ
+                    <td>フロー
+                    <td>リモートオリジンとのリクエストおよびレスポンスの交換。
+                <tr>
+                    <td>F5
+                    <td>表示 / メディア / コンポジット
+                    <td>フロー
+                    <td>グラフィックスおよびメディアヘルパーへのレンダリングおよび表示経路。
+                <tr>
+                    <td>F6
+                    <td>プロファイル/セッションの読み書き
+                    <td>フロー
+                    <td>プロファイルスコープのブラウザー状態への特権アクセス経路。
+                <tr>
+                    <td>F7
+                    <td>権限 / ブラウザーポリシー
+                    <td>フロー
+                    <td>ブラウザー管理の権限およびポリシーの評価および強制経路。
+                <tr>
+                    <td>F8
+                    <td>Cookie / キャッシュ仲介
+                    <td>フロー
+                    <td>ブラウザー管理のCookieおよびキャッシュ状態へのアクセス経路。
+                <tr>
+                    <td>F9
+                    <td>Webストレージ経路
+                    <td>フロー
+                    <td>ブラウザー管理の永続サイトストレージへのアクセス経路。
+                <tr>
+                    <td>F10
+                    <td>仲介されたOSアクセス
+                    <td>フロー
+                    <td>ブラウザー制御コンポーネントからオペレーティングシステムまたはデバイスサービスへの仲介アクセス。
+        </table>
+        <p>表記はW3C Threat Modeling Guideに従う。<strong>E</strong>は外部エンティティ、
+            <strong>P</strong>はプロセス、<strong>F</strong>はフロー、<strong>S</strong>はデータストア、
+            <strong>C</strong>は脅威コンテナー、<strong>B</strong>は脅威境界を表す <a data-link-type="biblio"
+                href="#biblio-threat-modeling-guide" title="Threat Modeling Guide">[threat-modeling-guide]</a>。
+        </p>
+        <h3 class="heading settled" data-level="1.3" id="assumptions-and-external-dependencies"><span class="secno">1.3.
+            </span><span class="content">前提と外部依存関係</span><a class="self-link"
+                href="#assumptions-and-external-dependencies"></a></h3>
+        <p>システムモデルは、ブラウザーの直接制御の外側にあるが、ブラウザーのセキュリティ態勢に影響する
+            複数の外部システム、サービス、および責任に依存している。</p>
+        <ul>
+            <li data-md>
+                <p><strong>オペレーティングシステム（OS）</strong>: ブラウザーは、OSによって付与された権限、
+                    すなわちユーザー権限と同等の権限で実行される。ブラウザーのセキュリティ目標は、タブ、Webサイト、
+                    OSの間で正しく実現されなければならない。OSは、ブラウザーよりも直接的なネットワーク接続に対して
+                    より高いレベルのセキュリティを提供する。</p>
+            <li data-md>
+                <p><strong>ネットワーク/インターネット</strong>: ブラウザーの主要な機能は、インターネット上の任意の場所から
+                    命令およびコンテンツを要求することに関わる。これはTCP/IPのような基盤ネットワークプロトコルに依存しており、
+                    ブラウザーはそれをおそらく信頼している。インターネットの分散的な性質は、暗号化されていないデータが
+                    誰かに読まれている可能性が高いことを意味する。</p>
+            <li data-md>
+                <p><strong>Webサーバーとそのバックエンド</strong>: これらは、ブラウザーにとってコンテンツ、
+                    命令（スクリプト、HTML）、リソースの主要な供給源である。ブラウザーは制御を明け渡し、
+                    サーバーによって提供されたコマンドを実行しなければならない。Webサーバーはブラウザーのセキュリティを
+                    低下させることもできる。Webサイトは、データベース、外部ストレージ、企業データセンターとやり取りする。
+                    データはブラウザーコンテキストとこれらのバックエンドシステムの間を流れる。</p>
+            <li data-md>
+                <p><strong>サードパーティ/その他のオリジン</strong>: 現代のWebアプリケーションは、しばしば他のオリジンからの
+                    リソースやスクリプトを含み、それらも実行されなければならない。Webサイトは広告、分析、
+                    認証データベースについてサードパーティに依存する場合がある。</p>
+            <li data-md>
+                <p><strong>ネイティブアプリケーション</strong>: ユーザーのシステムにインストールされた他のアプリケーションは、
+                    潜在的にブラウザー資産へ直接アクセスできる（例: ファイルシステムまたはメモリ検査経由）。</p>
+            <li data-md>
+                <p><strong>暗号技術</strong>: 暗号プロトコルの使用および相互作用は、特定の入力ではないものの、
+                    考慮すべき脅威のカテゴリである。特に現在の歴史的時点においては、ポスト量子暗号への移行との関係で
+                    重要である。</p>
+            <li data-md>
+                <p><strong>外部コンポーネント/システム</strong>: コンポーネントまたはシステムへのあらゆる外部依存は、
+                    ブラウザーのセキュリティに影響を与える可能性がある。</p>
+        </ul>
+        <h3 class="heading settled" data-level="1.4" id="entry-points-and-attack-surface"><span class="secno">1.4.
+            </span><span class="content">エントリーポイントと攻撃対象領域</span><a class="self-link"
+                href="#entry-points-and-attack-surface"></a></h3>
+        <p>エントリーポイントは、システムモデル内のフローおよび境界に照らして読み取られる。それらは、攻撃者が
+            システムとやり取りしたり、システムにデータを供給したりできるインターフェイスまたは機構である。
+            Webブラウザーの場合、これらには次が含まれる。
+        </p>
+        <ul>
+            <li data-md>
+                <p><strong>ブラウザーUI</strong>: ユーザー入力が提供されるユーザーインターフェイスそのもの。
+                    Trusted UIも含まれる。</p>
+            <li data-md>
+                <p><strong>ネットワークインターフェイス</strong>: ブラウザーがネットワーク上で通信するために用いるポートおよび
+                    プロトコル（例: ソケット、RPC、HTTP/HTTPSポート）。</p>
+            <li data-md>
+                <p><strong>Webコンテンツ（HTML、CSS、フォント、スクリプト、メディア）</strong>: Webサーバーから配信される
+                    悪意あるコード、スクリプト、またはコンテンツ。ブラウザーはスクリプトを提示されると、信頼できないソースからの
+                    コードを実行する。攻撃者は、ブラウザーに悪意あるコンテンツをレンダリングさせることができる。
+                    具体的な脅威は、具体的なファイル形式に結び付けられる。</p>
+            <li data-md>
+                <p><strong>ユーザー入力フィールド</strong>: ユーザーがデータを入力できる任意の領域であり、悪意をもって
+                    操作される可能性がある（例: フォーム、URL）。</p>
+            <li data-md>
+                <p><strong>ブラウザー拡張機能</strong>: ブラウザーは、拡張機能がブラウザーおよびWebコンテンツと
+                    やり取りするためのインターフェイスを公開する。</p>
+            <li data-md>
+                <p><strong>Web API</strong>: 標準Web APIと、ブラウザーが公開する可能性のある新しい興味深いAPIの両方。</p>
+            <li data-md>
+                <p><strong>基盤プラットフォーム</strong>: オリジンが基盤プラットフォームへデータを送信できるようにする機能。</p>
+        </ul>
+        <h3 class="heading settled" data-level="1.5" id="security-properties-assets-and-invariants"><span
+                class="secno">1.5. </span><span class="content">セキュリティ特性、資産、および不変条件</span><a class="self-link"
+                href="#security-properties-assets-and-invariants"></a></h3>
+        <p>Webブラウザー脅威モデルを考慮する際に保護する必要があるセキュリティ関連の状態、リソース、および特性は、
+            多様であり、ユーザーのセキュリティとプライバシーにとって重要である。</p>
+        <ul>
+            <li data-md>
+                <p><strong>ユーザーデータ</strong>: 一般的なユーザーデータ、機密データ、および個人識別情報。</p>
+            <li data-md>
+                <p><strong>ユーザーデータプライバシー</strong>: 監視、相関、識別から、ユーザーが自身の私的な情報および
+                    活動を制御し保護する能力。これには、透明性または制御なしに、閲覧セッション内および閲覧セッション間で
+                    識別または相関を行うことを避けることが含まれる。</p>
+            <li data-md>
+                <p><strong>ユーザー認証情報</strong>: ログイン情報、ユーザー名、パスワード。</p>
+            <li data-md>
+                <p><strong>ユーザーCookieおよびセッション情報</strong>: Cookie、セッションID、セッション状態に保存されるデータ。
+                    これらは訪問をまたいでユーザーを認識するために用いられ得る。</p>
+            <li data-md>
+                <p><strong>ユーザーデバイス/コンピューター</strong>: ユーザーのマシンおよびそのリソース。ユーザーの
+                    ファイルシステムの機密性および完全性を含む。</p>
+            <li data-md>
+                <p><strong>ローカルストレージ</strong>: Cookie、localStorage、indexedDB、キャッシュ、履歴、パスワードを含む、
+                    ブラウザーによってローカルに保存されるデータ。</p>
+            <li data-md>
+                <p><strong>ユーザー閲覧履歴</strong>: 訪問したサイトに関する情報。</p>
+            <li data-md>
+                <p><strong>ユーザー環境情報</strong>: オペレーティングシステム構成、ブラウザー構成、ハードウェア機能。</p>
+            <li data-md>
+                <p><strong>ユーザーの活動と関心</strong>: 購買嗜好、個人的特徴、および過去の活動。</p>
+            <li data-md>
+                <p><strong>保護されたリソース</strong>: ユーザーがアクセスできるが、攻撃者によってアクセスされるべきではない
+                    あらゆるリソース。</p>
+            <li data-md>
+                <p><strong>プライベートネットワークリソース</strong>: ブラウザーがユーザーの明示的な要求なしにアクセスできる
+                    異なるネットワークリソース。</p>
+            <li data-md>
+                <p><strong>認証情報および暗号鍵</strong>: ブラウザーは暗号化および署名のための公開鍵および秘密鍵を管理する。</p>
+            <li data-md>
+                <p><strong>Webサイト上の機密情報</strong>: Webサイトに表示される、またはWebサイトでアクセス可能なデータ。</p>
+        </ul>
+        <p>以下の特性および不変条件は、脅威分析のための手がかりとして用いられる。</p>
+        <ul>
+            <li data-md>
+                <p>相互に信頼しないオリジンは、プラットフォームが明示的で制御された通信経路を定義しない限り、隔離されたままである。</p>
+            <li data-md>
+                <p>Webコンテンツは、ブラウザーにより仲介された機能を通じる場合を除き、オペレーティングシステムの権限を
+                    直接行使できない。</p>
+            <li data-md>
+                <p>ブラウザーにより仲介される権限は、ブラウザー制御のユーザー仲介、ポリシー、または設定を通じて付与される。</p>
+            <li data-md>
+                <p>ブラウザー管理状態は、関連するオリジン、サイト、プロファイル、分割、または権限境界に従ってスコープされる。</p>
+            <li data-md>
+                <p>ブラウザー仲介が必要な場合、セキュリティ上機密なユーザーの意図は、Web制御のUIだけから推測されない。</p>
+            <li data-md>
+                <p>ネットワーク、ストレージ、レンダリング、およびオペレーティングシステムアクセス経路は、システムモデルに
+                    示された境界を保持する。</p>
+        </ul>
+        <h2 class="heading settled" data-level="2" id="what-can-go-wrong"><span class="secno">2. </span><span
+                class="content">何が問題になり得るか？</span><a class="self-link" href="#what-can-go-wrong"></a></h2>
+        <div class="ednote">
+            編集者注: このセクションは未完成である。
+        </div>
+        <h3 class="heading settled" data-level="2.1" id="threat-analysis-method"><span class="secno">2.1. </span><span
+                class="content">脅威分析手法</span><a class="self-link" href="#threat-analysis-method"></a>
+        </h3>
+        <p>この脅威モデルは、システムモデル内の層、要素、フロー、ストア、境界を反復的にたどることで
+            Webプラットフォームを分析する。モデルの各関連部分について、分析は、どの特性が維持されることが期待されるか、
+            何がその特性を破り得るか、誰が影響を受け得るか、どのような害が生じ得るかを問う。脅威源および
+            高レベルの脅威ファミリーは手がかりとして用いられるが、分析は上記のモデルに基づいている。
+        </p>
+        <h3 class="heading settled" data-level="2.2" id="threat-sources"><span class="secno">2.2. </span><span
+                class="content">脅威源</span><a class="self-link" href="#threat-sources"></a></h3>
+        <ul>
+            <li data-md>
+                <p><strong>ブラウザー拡張機能</strong>: ブラウザー拡張機能は有用である一方、多数のセキュリティ脆弱性を
+                    持ち込む。悪意あるアクターは、フィッシング、キーロギング、スパイ行為、データ窃取、セッションハイジャックのような
+                    高度な攻撃にそれらを悪用する。特定のオリジンにアクセスする権限を得るには、それらがインストールされ、
+                    設定されている必要があり、これにより攻撃の複雑さが増す。</p>
+            <li data-md>
+                <p><strong>アプリケーション/Webサイト</strong>: Webサイトは侵害され、悪意あるものになり得る。同じWebサイト上の
+                    ユーザーセッションを侵害するための攻撃（例: Cookieの窃取、または任意のリクエストの生成 -
+                    Cross Site Request Forgery - CSRF、UI Redressing/Clickjacking）、同一オリジンを迂回して異なるWebサイトから
+                    情報を得る攻撃（すなわち<em>Cross-Site Leaks - XS
+                        Leaks</em>）、またはブラウザー自体を侵害する攻撃（例: ブラウザープロセス内で任意のコードを
+                    実行して、ブラウザー内のデータの制御を得たりユーザーデバイスを侵害したりする）など、さまざまな攻撃が
+                    行われ得る。攻撃者は既存のブラウザー機能を悪用する。</p>
+        </ul>
+        <h3 class="heading settled" data-level="2.3" id="high-level-threat-index"><span class="secno">2.3. </span><span
+                class="content">高レベル脅威インデックス</span><a class="self-link" href="#high-level-threat-index"></a>
+        </h3>
+        <p>これはWebプラットフォーム脅威モデルにとって顕著な脅威ファミリーのインデックスであり、網羅的な一覧ではない。</p>
+        <ul>
+            <li data-md>
+                <p><strong>追跡/プライバシー喪失</strong>: フィンガープリンティングは、ユーザーの知識または同意なしに
+                    ユーザーを識別する方法である。フィンガープリンティングはプライバシーとセキュリティの両方に関わり、
+                    二重の意義を持つ。一方では、攻撃者がユーザーを一意に識別するために用いられ得る（通常はプライバシーに
+                    関連するシナリオ）。すなわち、しばしばユーザーの知識または同意なしに、異なるサイトをまたいで
+                    ユーザープロファイルまたは履歴を作成できるようにする。他方では、デバイスの種類を識別するために
+                    用いられ得る（通常はセキュリティに関連するシナリオ。たとえば、その後のデバイス侵害のため）。
+                    仕様によって公開されるデータ、とりわけ基盤プラットフォームに関する情報や永続する状態は、
+                    フィンガープリンティングに寄与し得る。一部のAPIはフィンガープリンティング面を追加する可能性がある。</p>
+        </ul>
+        <h2 class="heading settled" data-level="3" id="what-are-we-going-to-do-about-it"><span class="secno">3.
+            </span><span class="content">それについて何をするのか？</span><a class="self-link"
+                href="#what-are-we-going-to-do-about-it"></a></h2>
+        <h3 class="heading settled" data-level="3.1" id="security-features-and-controls"><span class="secno">3.1.
+            </span><span class="content">セキュリティ機能と制御</span><a class="self-link"
+                href="#security-features-and-controls"></a></h3>
+        <div class="ednote">
+            編集者注: このセクションは未完成である。
+        </div>
+        <p>Webブラウザーは、先に特定された特性および不変条件を保持するのに役立つ、さまざまなセキュリティ機能および
+            保護機構を採用している。</p>
+        <ul>
+            <li data-md>
+                <p><strong>サンドボックス化</strong>: サンドボックス化は、レンダリングエンジンのようなコンポーネントを
+                    閉じ込め、オペレーティングシステムおよびユーザーファイルへのアクセスを制限するための主要な機構である。
+                    OS権限とサブプロセス権限の間の障壁として機能する。</p>
+            <li data-md>
+                <p><strong>同一オリジンポリシー（SOP）</strong>: あるオリジンから読み込まれた文書またはスクリプトが、
+                    別のオリジンのリソースとどのようにやり取りできるかを制限する、基本的なセキュリティ制御。</p>
+            <li data-md>
+                <p><strong>コンテンツセキュリティポリシー（CSP）</strong>: どの動的リソースを読み込めるかを指定することで、
+                    XSS、クリックジャッキング、その他のコード注入攻撃を防ぐためのセキュリティ標準。</p>
+            <li data-md>
+                <p><strong>HTTPS/SSL/TLS</strong>: ブラウザーとWebサーバーの間で安全かつ暗号化された通信を行うための
+                    プロトコルであり、転送中のデータ完全性および機密性を保証する。HTTP Strict Transport Security
+                    （HSTS）は関連している。</p>
+            <li data-md>
+                <p><strong>入力検証と出力エンコーディング</strong>: XSSのような注入攻撃を防ぐために、ユーザーが提供した
+                    データを扱ううえで重要な実践。</p>
+            <li data-md>
+                <p><strong>セキュリティヘッダー</strong>: コンテンツを安全に扱う方法をブラウザーに指示するHTTPヘッダー。</p>
+            <li data-md>
+                <p><strong>フィッシング対策およびマルウェア対策</strong>: Safe Browsingのような機能は、悪意あるWebサイトについて
+                    ユーザーに警告する。</p>
+            <li data-md>
+                <p><strong>混在コンテンツの処理</strong>: 安全な（HTTPS）ページが安全でない（HTTP）リソースを読み込む場合に、
+                    ブラウザーがそれをどのように扱うか。</p>
+            <li data-md>
+                <p><strong>レンダラー隔離</strong>: レンダリングエンジンのような複雑で誤りを起こしやすいコンポーネントを、
+                    ブラウザーカーネルから分離されたサンドボックス化プロセスまたは保護ドメインに配置するアーキテクチャ。
+                    ブラウザーカーネルは、機密性の高いOS、ネットワーク、ストレージのやり取りを扱う。</p>
+            <li data-md>
+                <p><strong>プロセス間通信（IPC）</strong>: 隔離されたブラウザーコンポーネント（例: カーネルとレンダラー）の間の
+                    通信のための安全なチャネル。</p>
+            <li data-md>
+                <p><strong>ダウンロードマネージャー</strong>: ファイルダウンロードを扱うコンポーネントであり、
+                    セキュリティチェックを含む場合がある。</p>
+            <li data-md>
+                <p><strong>データ最小化とプライバシー設定</strong>: 識別につながる可能性のある情報の露出を減らすための
+                    設計原則および構成。</p>
+            <li data-md>
+                <p><strong>Trusted UI</strong>: 機密性の高いユーザー操作が、Webコンテンツによって容易に偽装または操作できない
+                    ブラウザーインターフェイス内で行われるようにすること。</p>
+            <li data-md>
+                <p><strong>Permission API</strong>: 強力な機能を有効化する前に、明示的なユーザー権限を求めること。</p>
+            <li data-md>
+                <p><strong>一時的な有効化</strong>: ユーザーが最近ボタンを押した、マウスを動かした、メニューを使用した、
+                    またはその他のユーザー操作を行ったことを示すゲート、すなわちウィンドウ状態である。Web APIが
+                    ユーザー操作によってトリガーされた場合にのみ機能できることを保証する仕組みとして用いられることがある。
+                    たとえば、スクリプトは一時的な有効化を必要とするポップアップを任意に起動できない。UI要素の
+                    イベントハンドラーからトリガーされなければならない。</p>
+        </ul>
+        <h2 class="heading settled" data-level="4" id="did-we-do-a-good-enough-job"><span class="secno">4. </span><span
+                class="content">十分な仕事ができたか？</span><a class="self-link" href="#did-we-do-a-good-enough-job"></a></h2>
+        <div class="issue" id="issue-554ec5f2"><a class="self-link" href="#issue-554ec5f2"></a>
+            このセクションは今後執筆される。
+        </div>
+        <h2 class="heading settled" data-level="5" id="acknowledgment"><span class="secno">5. </span><span
+                class="content">謝辞</span><a class="self-link" href="#acknowledgment"></a></h2>
+        <p>複数の個人が本書に貢献した。編集者は特にAnna Weineに感謝する。</p>
+    </main>
+    <script src="https://www.w3.org/scripts/TR/2021/fixup.js"></script>
+    <h2 class="heading no-num no-ref settled" id="references"><span class="content">参考文献</span><a class="self-link"
+            href="#references"></a></h2>
+    <h3 class="heading no-num no-ref settled" id="informative"><span class="content">非規範的参考文献</span><a class="self-link"
+            href="#informative"></a></h3>
+    <dl>
+        <dt id="biblio-chromium-multiprocess-architecture">[CHROMIUM-MULTIPROCESS-ARCHITECTURE]
+        <dd><a href="https://www.chromium.org/developers/design-documents/multi-process-architecture/"><cite>Chromium
+                    マルチプロセスアーキテクチャ</cite></a>. URL: <a
+                href="https://www.chromium.org/developers/design-documents/multi-process-architecture/">https://www.chromium.org/developers/design-documents/multi-process-architecture/</a>
+        <dt id="biblio-chromium-process-model-site-isolation">[CHROMIUM-PROCESS-MODEL-SITE-ISOLATION]
+        <dd><a href="https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md"><cite>Chromium
+                    プロセスモデルとサイト隔離</cite></a>. URL: <a
+                href="https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md">https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md</a>
+        <dt id="biblio-firefox-gecko-processes">[FIREFOX-GECKO-PROCESSES]
+        <dd><a href="https://firefox-source-docs.mozilla.org/ipc/processes.html"><cite>Firefox Gecko
+                    プロセス</cite></a>. URL: <a
+                href="https://firefox-source-docs.mozilla.org/ipc/processes.html">https://firefox-source-docs.mozilla.org/ipc/processes.html</a>
+        <dt id="biblio-firefox-process-model">[FIREFOX-PROCESS-MODEL]
+        <dd><a href="https://firefox-source-docs.mozilla.org/dom/ipc/process_model.html"><cite>Firefoxプロセス
+                    モデル</cite></a>. URL: <a
+                href="https://firefox-source-docs.mozilla.org/dom/ipc/process_model.html">https://firefox-source-docs.mozilla.org/dom/ipc/process_model.html</a>
+        <dt id="biblio-inside-browser-part-1">[INSIDE-BROWSER-PART-1]
+        <dd><a href="https://developer.chrome.com/blog/inside-browser-part1"><cite>Chrome「現代のWebブラウザーの内部を見る」
+                    - パート1</cite></a>. URL: <a
+                href="https://developer.chrome.com/blog/inside-browser-part1">https://developer.chrome.com/blog/inside-browser-part1</a>
+        <dt id="biblio-shostack-threat-modeling">[SHOSTACK-THREAT-MODELING]
+        <dd>Adam Shostack. <a href="https://shostack.org/books/threat-modeling-book"><cite>脅威モデリング:
+                    セキュリティのための設計</cite></a>. 2014. URL: <a
+                href="https://shostack.org/books/threat-modeling-book">https://shostack.org/books/threat-modeling-book</a>
+        <dt id="biblio-threat-modeling-guide">[THREAT-MODELING-GUIDE]
+        <dd><a href="https://www.w3.org/TR/threat-modeling-guide/"><cite>脅威モデリングガイド</cite></a>. URL: <a
+                href="https://www.w3.org/TR/threat-modeling-guide/">https://www.w3.org/TR/threat-modeling-guide/</a>
+        <dt id="biblio-webkit-site-isolation-notes">[WEBKIT-SITE-ISOLATION-NOTES]
+        <dd><a href="https://docs.webkit.org/Deep%20Dive/SiteIsolation.html"><cite>WebKitサイト隔離
+                    ノート</cite></a>. URL: <a
+                href="https://docs.webkit.org/Deep%20Dive/SiteIsolation.html">https://docs.webkit.org/Deep%20Dive/SiteIsolation.html</a>
+        <dt id="biblio-webkit-storage-documentation">[WEBKIT-STORAGE-DOCUMENTATION]
+        <dd><a href="https://docs.webkit.org/Deep%20Dive/Architecture/Storage.html"><cite>WebKitストレージ
+                    文書</cite></a>. URL: <a
+                href="https://docs.webkit.org/Deep%20Dive/Architecture/Storage.html">https://docs.webkit.org/Deep%20Dive/Architecture/Storage.html</a>
+        <dt id="biblio-webkit2-architecture-overview">[WEBKIT2-ARCHITECTURE-OVERVIEW]
+        <dd><a href="https://docs.webkit.org/Deep%20Dive/Architecture/WebKit2.html"><cite>WebKit2アーキテクチャ
+                    概要</cite></a>. URL: <a
+                href="https://docs.webkit.org/Deep%20Dive/Architecture/WebKit2.html">https://docs.webkit.org/Deep%20Dive/Architecture/WebKit2.html</a>
+        <dt id="biblio-xsleaks-css-injection">[XSLEAKS-CSS-INJECTION]
+        <dd><a href="https://xsleaks.dev/docs/attacks/css-injection/"><cite>CSSインジェクション</cite></a>. URL: <a
+                href="https://xsleaks.dev/docs/attacks/css-injection/">https://xsleaks.dev/docs/attacks/css-injection/</a>
+    </dl>
+    <script src="https://htmlspecs.com/dropdown.js"></script>
