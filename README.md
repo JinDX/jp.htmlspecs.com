@@ -395,6 +395,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### OAuth・認可プロトコル
 - [The OAuth 2.0 Authorization Framework](https://jp.htmlspecs.com/oauth2/)（[Source](https://www.rfc-editor.org/rfc/rfc6749.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [The OAuth 2.1 Authorization Framework](https://jp.htmlspecs.com/oauth2-1/)（[Source](https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-15.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [OAuth 2.0 Pushed Authorization Requests](https://jp.htmlspecs.com/rfc9126/)（[Source](https://www.rfc-editor.org/rfc/rfc9126.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [OAuth 2.0 JWT-Secured Authorization Request (JAR)](https://jp.htmlspecs.com/rfc9101/)（[Source](https://www.rfc-editor.org/rfc/rfc9101.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [OAuth 2.0 Rich Authorization Requests](https://jp.htmlspecs.com/rfc9396/)（[Source](https://www.rfc-editor.org/rfc/rfc9396.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
