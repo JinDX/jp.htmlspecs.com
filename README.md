@@ -82,6 +82,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [SPARQL 1.2 Protocol](https://jp.htmlspecs.com/sparql12-protocol/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-protocol-20260426/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SHACL 1.2 Core](https://jp.htmlspecs.com/shacl12-core/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-core-20260630/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SHACL 1.2 Profiling](https://jp.htmlspecs.com/shacl12-profiling/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-profiling-20260702/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [SHACL 1.2 SPARQL Extensions](https://jp.htmlspecs.com/shacl12-sparql/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-sparql-20260630/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Data Catalog Vocabulary (DCAT) - Version 3](https://jp.htmlspecs.com/vocab-dcat-3/)（[Source](https://www.w3.org/TR/2024/REC-vocab-dcat-3-20240822/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Content Negotiation by Profile](https://jp.htmlspecs.com/dx-prof-conneg/)（[Source](https://www.w3.org/TR/2026/WD-dx-prof-conneg-20260703/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [ODRL Information Model 2.2](https://jp.htmlspecs.com/odrl-model/)（[Source](https://www.w3.org/TR/2018/REC-odrl-model-20180215/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
@@ -388,8 +389,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Verifiable Credentials Data Model v2.0](https://jp.htmlspecs.com/vc-data-model-2.0/)（[Source](https://www.w3.org/TR/2025/REC-vc-data-model-2.0-20250515/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Securing Verifiable Credentials using JOSE and COSE](https://jp.htmlspecs.com/vc-jose-cose/)（[Source](https://www.w3.org/TR/2025/REC-vc-jose-cose-20250515/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Verifiable Credential Data Integrity 1.1](https://jp.htmlspecs.com/vc-data-integrity-1.1/)（[Source](https://www.w3.org/TR/2026/WD-vc-data-integrity-1.1-20260416/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Verifiable Credential Rendering Methods v1.0](https://jp.htmlspecs.com/vc-render-method/)（[Source](https://www.w3.org/TR/2026/WD-vc-render-method-20260405/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Bitstring Status List v1.0](https://jp.htmlspecs.com/vc-bitstring-status-list/)（[Source](https://www.w3.org/TR/2025/REC-vc-bitstring-status-list-20250515/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [Verifiable Credential Rendering Methods v1.0](https://jp.htmlspecs.com/vc-render-method/)（[Source](https://www.w3.org/TR/2026/WD-vc-render-method-20260405/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Verifiable Credential Barcodes v1.0](https://jp.htmlspecs.com/vc-barcodes-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-barcodes-1.0-20260623/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Recognized Entities v1.0](https://jp.htmlspecs.com/vc-recognized-entities-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-recognized-entities-1.0-20260512/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
