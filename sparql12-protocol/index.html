@@ -6,6 +6,76 @@
     <!-- <meta name="generator" content="ReSpec 36.0.0"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <style>
+        .issue-label {
+            text-transform: initial
+        }
+
+        .warning>p:first-child {
+            margin-top: 0
+        }
+
+        .warning {
+            padding: .5em;
+            border-left-width: .5em;
+            border-left-style: solid
+        }
+
+        span.warning {
+            padding: .1em .5em .15em
+        }
+
+        .issue.closed span.issue-number {
+            text-decoration: line-through
+        }
+
+        .issue.closed span.issue-number::after {
+            content: " (Closed)";
+            font-size: smaller
+        }
+
+        .warning {
+            border-color: #f11;
+            border-color: var(--warning-border, #f11);
+            border-width: .2em;
+            border-style: solid;
+            background: #fbe9e9;
+            background: var(--warning-bg, #fbe9e9);
+            color: #000;
+            color: var(--text, #000)
+        }
+
+        .warning-title:before {
+            content: "⚠";
+            font-size: 1.3em;
+            float: left;
+            padding-right: .3em;
+            margin-top: -.3em
+        }
+
+        li.task-list-item {
+            list-style: none
+        }
+
+        input.task-list-item-checkbox {
+            margin: 0 .35em .25em -1.6em;
+            vertical-align: middle
+        }
+
+        .issue a.respec-gh-label {
+            padding: 5px;
+            margin: 0 2px 0 2px;
+            font-size: 10px;
+            text-transform: none;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 4px;
+            position: relative;
+            bottom: 2px;
+            border: none;
+            display: inline-block
+        }
+    </style>
+    <style>
         dfn {
             cursor: pointer
         }
@@ -188,6 +258,16 @@
             animation: pop .4s ease-in-out 0s 1
         }
 
+        @media (prefers-color-scheme:dark) {
+            #references :target {
+                background: color-mix(in srgb, #eaf3ff 15%, transparent)
+            }
+        }
+
+        body:has(input[name=color-scheme][value=dark]:checked) #references :target {
+            background: color-mix(in srgb, #eaf3ff 15%, transparent)
+        }
+
         cite .bibref {
             font-style: italic
         }
@@ -216,8 +296,7 @@
         }
 
         #issue-summary li {
-            list-style: none;
-            display: inline-block
+            list-style: none
         }
 
         details.respec-tests-details {
@@ -1198,7 +1277,7 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
   "copyrightStart": "2008",
   "github": "https://github.com/w3c/sparql-protocol",
   "wgPublicList": "public-rdf-star-wg",
-  "previousPublishDate": "2025-08-14",
+  "previousPublishDate": "2026-04-26",
   "prevRecURI": "https://www.w3.org/TR/2013/REC-sparql11-protocol-20130321",
   "prevRecShortname": "sparql11-protocol",
   "previousMaturity": "WD",
@@ -1237,10 +1316,10 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
   "lint": {
     "no-unused-dfns": false
   },
-  "gitRevision": "161a8636c7e6b5f85a1c087e49d3f71f4f0357d2",
-  "publishDate": "2026-04-26",
-  "publishISODate": "2026-04-26T00:00:00.000Z",
-  "generatedSubtitle": "W3C Working Draft 26 April 2026"
+  "gitRevision": "9647a21d4107be8f52a463f1829ca84422fecec9",
+  "publishDate": "2026-07-08",
+  "publishISODate": "2026-07-08T00:00:00.000Z",
+  "generatedSubtitle": "W3C Working Draft 08 July 2026"
 }</script>
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD">
 </head>
@@ -1252,14 +1331,14 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
             </a></p>
         <h1 id="title" class="title">SPARQL 1.2プロトコル</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C作業草案</a> <time class="dt-published"
-                datetime="2026-04-26">2026年4月26日</time></p>
+                datetime="2026-07-08">2026年7月8日</time></p>
         <details open="">
             <summary>この文書の詳細</summary>
             <dl>
                 <dt>このバージョン:</dt>
                 <dd>
                     <a class="u-url"
-                        href="https://www.w3.org/TR/2026/WD-sparql12-protocol-20260426/">https://www.w3.org/TR/2026/WD-sparql12-protocol-20260426/</a>
+                        href="https://www.w3.org/TR/2026/WD-sparql12-protocol-20260708/">https://www.w3.org/TR/2026/WD-sparql12-protocol-20260708/</a>
                 </dd>
                 <dt>最新公開バージョン:</dt>
                 <dd>
@@ -1764,14 +1843,32 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
                     href="#query-operation" aria-label="第2.2節へのパーマリンク"></a>
             </div>
 
-            <p><code>query</code>操作は、SPARQLクエリをサービスへ送信し、そのクエリの結果を受け取るために使用されます。
-                query操作は、HTTP GETまたはHTTP POSTメソッドのいずれかで呼び出されなければなりません。
-                この操作に対するクライアントリクエストは、SPARQLクエリ文字列を正確に1つ
-                （パラメーター名: <code>query</code>）含まなければならず、
-                また、バージョン（パラメーター名: <code>version</code>）、
-                0個以上のデフォルトグラフURI（パラメーター名: <code>default-graph-uri</code>）および名前付きグラフ
-                URI（パラメーター名: <code>named-graph-uri</code>）を含むことができます。
+            <p><code>query</code> 操作は、SPARQL クエリをサービスに送信し、そのクエリの結果を受け取るために
+                使用される。
+                query 操作は、HTTP GET または HTTP POST メソッドのいずれか
+                （または、SPARQL Protocol サービスがそのようなリクエストをサポートする場合は、HTTP QUERY メソッド [<cite><a class="bibref"
+                        data-link-type="biblio" href="#bib-rfc10008"
+                        title="The HTTP QUERY Method">RFC10008</a></cite>]）で呼び出されなければならない。
+                この操作に対するクライアントリクエストは、SPARQL クエリ文字列を正確に 1 つ
+                （パラメーター名: <code>query</code>）
+                含まなければならず、バージョン（パラメーター名: <code>version</code>）を
+                含んでもよく、
+                また 0 個以上のデフォルトグラフ URI（パラメーター名: <code>default-graph-uri</code>）および名前付きグラフ
+                URI（パラメーター名: <code>named-graph-uri</code>）を含んでもよい。
             </p>
+
+            <div class="note" role="note" id="note-http-query">
+                <div class="note-title marker" id="h-note"><span>注記</span></div>
+                <p class="">
+                    HTTP QUERY メソッド [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc10008"
+                            title="The HTTP QUERY Method">RFC10008</a></cite>] は、SPARQL クエリで使用できる。
+                    その使用は、SPARQL クエリで HTTP POST を使用するための既存の定義および指針と
+                    類似したものとすべきであり、他の SPARQL 固有の要件はない。
+                    以下の節で、HTTP POST を使用する SPARQL クエリリクエストが説明されている場合、HTTP QUERY も
+                    SPARQL 1.2 Protocol の必須ではないが許容される機能として
+                    考慮してよい。
+                </p>
+            </div>
 
             <p>
                 クエリリクエストへのレスポンスは、<a href="https://www.w3.org/TR/sparql12-query/#QueryForms"
@@ -1864,15 +1961,13 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
                         class="self-link" href="#query-via-get" aria-label="第2.2.1節へのパーマリンク"></a>
                 </div>
 
-                <p>プロトコル・クライアントは、HTTP GETメソッドを介してプロトコルリクエストを送信<em>may</em>できます。GETメソッドを使用する場合、
-                    クライアントはすべてのパラメーターをURL
-                    <a href="https://www.rfc-editor.org/rfc/rfc3986#section-2.1"
+                <p>プロトコルクライアントは、HTTP GET メソッドによってプロトコルリクエストを送信してもよい。GET
+                    メソッドを使用する場合、クライアントはすべてのパラメーターを URL <a href="https://www.rfc-editor.org/info/rfc3986/#section-2.1"
                         id="ref-for-index-term-percent-encode-1">パーセントエンコード</a>
-                    し、それらを上記で与えられた名前の<a href="https://www.rfc-editor.org/rfc/rfc3986#section-3.4"
+                    し、それらを上記で与えられた名前を持つ <a href="https://www.rfc-editor.org/info/rfc3986/#section-3.4"
                         id="ref-for-index-term-query-parameter-1">クエリパラメーター</a>文字列 [<cite><a class="bibref"
                             data-link-type="biblio" href="#bib-rfc3986"
-                            title="Uniform Resource Identifier (URI): Generic Syntax">RFC3986</a></cite>]
-                    として含めなければなりません。
+                            title="Uniform Resource Identifier (URI): Generic Syntax">RFC3986</a></cite>] として含めなければならない。
                 </p>
                 <p>HTTPクエリ文字列パラメーターは、アンパサンド
                     （<code>&amp;</code>）文字で区切られなければなりません。クライアントはクエリ文字列パラメーターを任意の順序で含めてもよいです。</p>
@@ -1887,7 +1982,7 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
 
                 <p>プロトコル・クライアントは、パラメーターをURLエンコードすることにより、HTTP POSTメソッドを介して
                     プロトコルリクエストを送信<em>may</em>できます。この方法を使用する場合、クライアントはすべてのパラメーターをURL
-                    <a href="https://www.rfc-editor.org/rfc/rfc3986#section-2.1"
+                    <a href="https://www.rfc-editor.org/info/rfc3986/#section-2.1"
                         id="ref-for-index-term-percent-encode-2">パーセントエンコード</a> [<cite><a class="bibref"
                             data-link-type="biblio" href="#bib-rfc3986"
                             title="Uniform Resource Identifier (URI): Generic Syntax">RFC3986</a></cite>] し、
@@ -2076,7 +2171,7 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
 
                 <p>プロトコル・クライアントは、パラメーターをURLエンコードすることにより、HTTP POSTメソッドを介して
                     更新プロトコルリクエストを送信<em>may</em>できます。この方法を使用する場合、クライアントはすべてのパラメーターをURL
-                    <a href="https://www.rfc-editor.org/rfc/rfc3986#" id="ref-for-index-term-percent-encode-0-1">パーセント
+                    <a href="https://www.rfc-editor.org/info/rfc3986/#" id="ref-for-index-term-percent-encode-0-1">パーセント
                         エンコード</a>し、上記で与えられた名前を用いて、
                     <code>application/x-www-form-urlencoded</code>メディア型を介してリクエスト本文内のパラメーターとして含めなければなりません。
                     パラメーターはアンパサンド（<code>&amp;</code>）文字で区切られなければなりません。クライアントは
@@ -2177,7 +2272,7 @@ DIV.subtoc	{ padding: 1em; border: solid black thin; margin: 1em 0;
             </div>
 
             <p>SPARQLクエリまたはSPARQL更新リクエスト文字列内の<code>BASE</code>キーワードは、
-                <cite><a data-matched-text="[[[RFC3986]]]" href="https://www.rfc-editor.org/rfc/rfc3986">Uniform
+                <cite><a data-matched-text="[[[RFC3986]]]" href="https://www.rfc-editor.org/info/rfc3986/">Uniform
                         Resource Identifier (URI): Generic
                         Syntax</a></cite>第5.1.1節「Base URI Embedded in Content」に従って相対IRIを解決するために使用される
                 基底IRIを定義します。SPARQLプロトコルはクエリURIを逆参照しないため、第5.1.3節は適用されません。
@@ -3139,7 +3234,7 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
                         href="https://www.unicode.org/reports/tr36/tr36-15.html">Unicode
                         Security Considerations</a></cite>
                 および<cite><a data-matched-text="[[[RFC3987]]]"
-                        href="https://www.rfc-editor.org/rfc/rfc3987">Internationalized Resource Identifiers
+                        href="https://www.rfc-editor.org/info/rfc3987/">Internationalized Resource Identifiers
                         (IRIs)</a></cite>第8節にあります。
             </p>
         </section>
@@ -3183,7 +3278,7 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
                     <code>query</code>操作または<code>update</code>操作のいずれかを実装<strong>must</strong>しなければなりません;
                 </li>
                 <li><code>query</code>操作と<code>update</code>操作の両方を実装することが<strong>may</strong>あります;</li>
-                <li><a href="https://www.rfc-editor.org/rfc/rfc2119#" id="ref-for-index-term-rfc2119-1">RFC2119</a>
+                <li><a href="https://www.rfc-editor.org/info/rfc2119/#" id="ref-for-index-term-rfc2119-1">RFC2119</a>
                     キーワード [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc2119"
                             title="RFCで要件レベルを示すために用いるキーワード">RFC2119</a></cite>] によって示される、
                     <a href="#policy">4. ポリシー上の
@@ -3286,49 +3381,49 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
             <ul class="index">
                 <li>
                     [<cite><a class="bibref" data-link-type="biblio"
-                            href="#bib-rdf12-concepts">RDF12-CONCEPTS</a></cite>] は次を定義します:
+                            href="#bib-rdf12-concepts">RDF12-CONCEPTS</a></cite>] は以下を定義している:
                     <ul>
                         <li>
                             <span class="index-term"
                                 data-href="https://www.w3.org/TR/rdf12-concepts/#defined-version-labels"
                                 id="index-term-rdf-1-2-concepts-and-abstract-data-model" tabindex="0"
-                                aria-haspopup="dialog">RDF 1.2 Concepts and Abstract Data Model</span>
+                                aria-haspopup="dialog">RDF 1.2 の概念および抽象データモデル</span>
                         </li>
                     </ul>
                 </li>
                 <li>
-                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc2119">RFC2119</a></cite>] は次を
-                    定義します:
+                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc2119">RFC2119</a></cite>] は以下を
+                    定義している:
                     <ul>
                         <li>
-                            <span class="index-term" data-href="https://www.rfc-editor.org/rfc/rfc2119#"
+                            <span class="index-term" data-href="https://www.rfc-editor.org/info/rfc2119/#"
                                 id="index-term-rfc2119" tabindex="0" aria-haspopup="dialog">RFC2119</span>
                         </li>
                     </ul>
                 </li>
                 <li>
-                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc3986">RFC3986</a></cite>] は次を
-                    定義します:
+                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc3986">RFC3986</a></cite>] は以下を
+                    定義している:
                     <ul>
                         <li>
-                            <span class="index-term" data-href="https://www.rfc-editor.org/rfc/rfc3986#section-2.1"
+                            <span class="index-term" data-href="https://www.rfc-editor.org/info/rfc3986/#section-2.1"
                                 id="index-term-percent-encode" tabindex="0" aria-haspopup="dialog">パーセントエンコード</span>
                         </li>
                         <li>
-                            <span class="index-term" data-href="https://www.rfc-editor.org/rfc/rfc3986#"
+                            <span class="index-term" data-href="https://www.rfc-editor.org/info/rfc3986/#"
                                 id="index-term-percent-encode-0" tabindex="0" aria-haspopup="dialog">パーセント
                                 エンコード</span>
                         </li>
                         <li>
-                            <span class="index-term" data-href="https://www.rfc-editor.org/rfc/rfc3986#section-3.4"
+                            <span class="index-term" data-href="https://www.rfc-editor.org/info/rfc3986/#section-3.4"
                                 id="index-term-query-parameter" tabindex="0" aria-haspopup="dialog">クエリ
                                 パラメーター</span>
                         </li>
                     </ul>
                 </li>
                 <li>
-                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc9110">RFC9110</a></cite>] は次を
-                    定義します:
+                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc9110">RFC9110</a></cite>] は以下を
+                    定義している:
                     <ul>
                         <li>
                             <span class="index-term"
@@ -3344,13 +3439,13 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
                         <li>
                             <span class="index-term" data-href="https://httpwg.org/specs/rfc9110.html#connections"
                                 id="index-term-section-3-3-connections-clients-and-servers" tabindex="0"
-                                aria-haspopup="dialog">第3.3節 接続、クライアント、およびサーバー</span>
+                                aria-haspopup="dialog">第 3.3 節 接続、クライアント、およびサーバー</span>
                         </li>
                     </ul>
                 </li>
                 <li>
                     [<cite><a class="bibref" data-link-type="biblio"
-                            href="#bib-sparql12-query">SPARQL12-QUERY</a></cite>] は次を定義します:
+                            href="#bib-sparql12-query">SPARQL12-QUERY</a></cite>] は以下を定義している:
                     <ul>
                         <li>
                             <span class="index-term" data-href="https://www.w3.org/TR/sparql12-query/#ask"
@@ -3375,24 +3470,24 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
                         <li>
                             <span class="index-term" data-href="https://www.w3.org/TR/sparql12-query/#rdfDataset"
                                 id="index-term-sparql-1-2-query-language" tabindex="0" aria-haspopup="dialog">SPARQL 1.2
-                                Query Language</span>
+                                クエリ言語</span>
                         </li>
                         <li>
                             <span class="index-term"
                                 data-href="https://www.w3.org/TR/sparql12-query/#syntaxVersionAnnouncement"
-                                id="index-term-version-directive" tabindex="0" aria-haspopup="dialog">version
-                                ディレクティブ</span>
+                                id="index-term-version-directive" tabindex="0" aria-haspopup="dialog">バージョン
+                                指令</span>
                         </li>
                     </ul>
                 </li>
                 <li>
                     [<cite><a class="bibref" data-link-type="biblio"
-                            href="#bib-sparql12-update">SPARQL12-UPDATE</a></cite>] は次を定義します:
+                            href="#bib-sparql12-update">SPARQL12-UPDATE</a></cite>] は以下を定義している:
                     <ul>
                         <li>
                             <span class="index-term" data-href="https://www.w3.org/TR/sparql12-update/#deleteInsert"
                                 id="index-term-delete-insert-operation" tabindex="0"
-                                aria-haspopup="dialog">DELETE/INSERT操作</span>
+                                aria-haspopup="dialog">DELETE/INSERT 操作</span>
                         </li>
                     </ul>
                 </li>
@@ -3416,68 +3511,69 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
             <dl class="bibliography">
                 <dt id="bib-rdf12-concepts">[RDF12-CONCEPTS]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/rdf12-concepts/"><cite>RDF 1.2 Concepts and Abstract Data
-                            Model</cite></a>. Andy Seaborne; Gregg Kellogg; Olaf Hartig; Pierre-Antoine Champin. W3C.
-                    2026年4月7日.
-                    W3C候補勧告. URL: <a
+                    <a href="https://www.w3.org/TR/rdf12-concepts/"><cite>RDF 1.2 の概念および抽象データ
+                            モデル</cite></a>. Andy Seaborne; Gregg Kellogg; Olaf Hartig; Pierre-Antoine Champin. W3C. 2026
+                    年 4 月
+                    7 日. W3C 候補勧告. URL: <a
                         href="https://www.w3.org/TR/rdf12-concepts/">https://www.w3.org/TR/rdf12-concepts/</a>
                 </dd>
                 <dt id="bib-rfc2119">[RFC2119]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/rfc/rfc2119"><cite>RFCで要件レベルを示すために用いる
-                            キーワード</cite></a>. S. Bradner. IETF. 1997年3月. Best Current Practice. URL: <a
-                        href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>
+                    <a href="https://www.rfc-editor.org/info/rfc2119/"><cite>RFC において要求
+                            レベルを示すために使用するキーワード</cite></a>. S. Bradner. IETF. 1997 年 3 月. Best Current Practice. URL: <a
+                        href="https://www.rfc-editor.org/info/rfc2119/">https://www.rfc-editor.org/info/rfc2119/</a>
                 </dd>
                 <dt id="bib-rfc3986">[RFC3986]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/rfc/rfc3986"><cite>Uniform Resource Identifier (URI): Generic
-                            Syntax</cite></a>. T. Berners-Lee; R. Fielding; L. Masinter. IETF. 2005年1月. Internet
-                    Standard. URL: <a
-                        href="https://www.rfc-editor.org/rfc/rfc3986">https://www.rfc-editor.org/rfc/rfc3986</a>
+                    <a href="https://www.rfc-editor.org/info/rfc3986/"><cite>Uniform Resource Identifier (URI): 汎用
+                            構文</cite></a>. T. Berners-Lee; R. Fielding; L. Masinter. IETF. 2005 年 1 月. インターネット
+                    標準. URL: <a
+                        href="https://www.rfc-editor.org/info/rfc3986/">https://www.rfc-editor.org/info/rfc3986/</a>
                 </dd>
                 <dt id="bib-rfc3987">[RFC3987]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/rfc/rfc3987"><cite>Internationalized Resource Identifiers
-                            (IRIs)</cite></a>. M. Duerst; M. Suignard. IETF. 2005年1月. Proposed Standard. URL: <a
-                        href="https://www.rfc-editor.org/rfc/rfc3987">https://www.rfc-editor.org/rfc/rfc3987</a>
+                    <a href="https://www.rfc-editor.org/info/rfc3987/"><cite>国際化リソース識別子
+                            (IRI)</cite></a>. M. Duerst; M. Suignard. IETF. 2005 年 1 月. 提案標準. URL: <a
+                        href="https://www.rfc-editor.org/info/rfc3987/">https://www.rfc-editor.org/info/rfc3987/</a>
                 </dd>
                 <dt id="bib-rfc8174">[RFC8174]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/rfc/rfc8174"><cite>RFC
-                            2119キーワードにおける大文字と小文字の曖昧性</cite></a>. B. Leiba. IETF. 2017年5月. Best Current Practice. URL: <a
-                        href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>
+                    <a href="https://www.rfc-editor.org/info/rfc8174/"><cite>RFC 2119 キーワードにおける大文字と小文字の
+                            曖昧性</cite></a>. B. Leiba. IETF. 2017 年 5 月. Best Current Practice. URL: <a
+                        href="https://www.rfc-editor.org/info/rfc8174/">https://www.rfc-editor.org/info/rfc8174/</a>
                 </dd>
                 <dt id="bib-rfc9110">[RFC9110]</dt>
                 <dd>
-                    <a href="https://httpwg.org/specs/rfc9110.html"><cite>HTTP Semantics</cite></a>. R. Fielding, Ed.;
-                    M. Nottingham, Ed.; J. Reschke, Ed. IETF. 2022年6月. Internet Standard. URL: <a
+                    <a href="https://httpwg.org/specs/rfc9110.html"><cite>HTTP セマンティクス</cite></a>. R. Fielding, 編.;
+                    M. Nottingham, 編.; J. Reschke, 編. IETF. 2022 年 6 月. インターネット標準. URL: <a
                         href="https://httpwg.org/specs/rfc9110.html">https://httpwg.org/specs/rfc9110.html</a>
                 </dd>
                 <dt id="bib-sparql12-graph-store-protocol">[SPARQL12-GRAPH-STORE-PROTOCOL]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-graph-store-protocol/"><cite>SPARQL 1.2グラフストア
-                            プロトコル</cite></a>. Andy Seaborne; Thomas Pellissier Tanon. W3C. 2024年12月19日. W3C
+                    <a href="https://www.w3.org/TR/sparql12-graph-store-protocol/"><cite>SPARQL 1.2 Graph Store
+                            Protocol</cite></a>. Andy Seaborne; Thomas Pellissier Tanon. W3C. 2024 年 12 月 19 日. W3C
                     作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-graph-store-protocol/">https://www.w3.org/TR/sparql12-graph-store-protocol/</a>
                 </dd>
                 <dt id="bib-sparql12-query">[SPARQL12-QUERY]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-query/"><cite>SPARQL 1.2クエリ言語</cite></a>. Olaf
-                    Hartig; Andy Seaborne; Ruben Taelman; Gregory Williams; Thomas Pellissier Tanon. W3C. 2026年4月23日.
-                    W3C作業草案. URL: <a
+                    <a href="https://www.w3.org/TR/sparql12-query/"><cite>SPARQL 1.2 クエリ言語</cite></a>. Olaf
+                    Hartig; Andy Seaborne; Ruben Taelman; Gregory Williams; Thomas Pellissier Tanon. W3C. 2026 年 6 月 25
+                    日.
+                    W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-query/">https://www.w3.org/TR/sparql12-query/</a>
                 </dd>
                 <dt id="bib-sparql12-update">[SPARQL12-UPDATE]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/sparql12-update/"><cite>SPARQL 1.2 Update</cite></a>. Ruben Taelman;
-                    Andy Seaborne; Thomas Pellissier Tanon. W3C. 2026年4月23日. W3C作業草案. URL: <a
+                    Andy Seaborne; Thomas Pellissier Tanon. W3C. 2026 年 6 月 12 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-update/">https://www.w3.org/TR/sparql12-update/</a>
                 </dd>
                 <dt id="bib-utr36">[UTR36]</dt>
                 <dd>
-                    <a href="https://www.unicode.org/reports/tr36/tr36-15.html"><cite>Unicode Security
-                            Considerations</cite></a>. Mark Davis; Michel Suignard. Unicode Consortium. 2014年9月19日.
-                    Unicode Technical Report #36. URL: <a
+                    <a href="https://www.unicode.org/reports/tr36/tr36-15.html"><cite>Unicode セキュリティ
+                            考慮事項</cite></a>. Mark Davis; Michel Suignard. Unicode Consortium. 2014 年 9 月
+                    19 日. Unicode 技術報告 #36. URL: <a
                         href="https://www.unicode.org/reports/tr36/tr36-15.html">https://www.unicode.org/reports/tr36/tr36-15.html</a>
                 </dd>
             </dl>
@@ -3492,77 +3588,83 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
                 <dt id="bib-json-ld11">[JSON-LD11]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/json-ld11/"><cite>JSON-LD 1.1</cite></a>. Gregg Kellogg;
-                    Pierre-Antoine Champin; Dave Longley. W3C. 2020年7月16日. W3C勧告. URL: <a
+                    Pierre-Antoine Champin; Dave Longley. W3C. 2020 年 7 月 16 日. W3C 勧告. URL: <a
                         href="https://www.w3.org/TR/json-ld11/">https://www.w3.org/TR/json-ld11/</a>
                 </dd>
                 <dt id="bib-rdf12-n-triples">[RDF12-N-TRIPLES]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/rdf12-n-triples/"><cite>RDF 1.2 N-Triples</cite></a>. Gregg Kellogg;
-                    Dominik Tomaszuk. W3C. 2026年4月24日. W3C作業草案. URL: <a
+                    Dominik Tomaszuk. W3C. 2026 年 6 月 24 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/rdf12-n-triples/">https://www.w3.org/TR/rdf12-n-triples/</a>
                 </dd>
                 <dt id="bib-rdf12-turtle">[RDF12-TURTLE]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/rdf12-turtle/"><cite>RDF 1.2 Turtle</cite></a>. Gregg Kellogg; Andy
-                    Seaborne; Dominik Tomaszuk. W3C. 2026年4月23日. W3C作業草案. URL: <a
+                    Seaborne; Dominik Tomaszuk. W3C. 2026 年 6 月 12 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/rdf12-turtle/">https://www.w3.org/TR/rdf12-turtle/</a>
                 </dd>
                 <dt id="bib-rdf12-xml">[RDF12-XML]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/rdf12-xml/"><cite>RDF 1.2 XML Syntax</cite></a>. Gregg Kellogg;
-                    Jerven Bolleman. W3C. 2026年4月9日. W3C作業草案. URL: <a
+                    <a href="https://www.w3.org/TR/rdf12-xml/"><cite>RDF 1.2 XML 構文</cite></a>. Gregg Kellogg;
+                    Jerven Bolleman. W3C. 2026 年 6 月 18 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/rdf12-xml/">https://www.w3.org/TR/rdf12-xml/</a>
+                </dd>
+                <dt id="bib-rfc10008">[RFC10008]</dt>
+                <dd>
+                    <a href="https://www.rfc-editor.org/info/rfc10008/"><cite>HTTP QUERY メソッド</cite></a>. J.
+                    Reschke; J.M. Snell; M. Bishop. IETF. 2026 年 6 月. 提案標準. URL: <a
+                        href="https://www.rfc-editor.org/info/rfc10008/">https://www.rfc-editor.org/info/rfc10008/</a>
                 </dd>
                 <dt id="bib-sparql12-concepts">[SPARQL12-CONCEPTS]</dt>
                 <dd>
-                    <a href="https://w3c.github.io/sparql-concepts/spec/"><cite>SPARQL 1.2 Concepts</cite></a>. The W3C
-                    RDF &amp; SPARQL Working Group. W3C. W3C編集者草案. URL: <a
+                    <a href="https://w3c.github.io/sparql-concepts/spec/"><cite>SPARQL 1.2 の概念</cite></a>. The W3C
+                    RDF &amp; SPARQL Working Group. W3C. W3C 編集者草案. URL: <a
                         href="https://w3c.github.io/sparql-concepts/spec/">https://w3c.github.io/sparql-concepts/spec/</a>
                 </dd>
                 <dt id="bib-sparql12-entailment">[SPARQL12-ENTAILMENT]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-entailment/"><cite>SPARQL 1.2含意レジーム</cite></a>.
-                    Peter Patel-Schneider. W3C. 2026年4月9日. W3C作業草案. URL: <a
+                    <a href="https://www.w3.org/TR/sparql12-entailment/"><cite>SPARQL 1.2 含意レジーム</cite></a>.
+                    Peter Patel-Schneider. W3C. 2026 年 4 月 9 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-entailment/">https://www.w3.org/TR/sparql12-entailment/</a>
                 </dd>
                 <dt id="bib-sparql12-federated-query">[SPARQL12-FEDERATED-QUERY]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-federated-query/"><cite>SPARQL 1.2連合
-                            クエリ</cite></a>. Ruben Taelman; Gregory Williams. W3C. 2026年4月23日. W3C作業草案.
+                    <a href="https://www.w3.org/TR/sparql12-federated-query/"><cite>SPARQL 1.2 フェデレーテッド
+                            クエリ</cite></a>. Ruben Taelman; Gregory Williams. W3C. 2026 年 4 月 23 日. W3C 作業草案.
                     URL: <a
                         href="https://www.w3.org/TR/sparql12-federated-query/">https://www.w3.org/TR/sparql12-federated-query/</a>
                 </dd>
                 <dt id="bib-sparql12-new">[SPARQL12-NEW]</dt>
                 <dd>
-                    <a href="https://w3c.github.io/sparql-new/spec/"><cite>SPARQL 1.2の新機能</cite></a>. The W3C
-                    RDF &amp; SPARQL Working Group. W3C. W3C編集者草案. URL: <a
+                    <a href="https://w3c.github.io/sparql-new/spec/"><cite>SPARQL 1.2 の新機能</cite></a>. The W3C
+                    RDF &amp; SPARQL Working Group. W3C. W3C 編集者草案. URL: <a
                         href="https://w3c.github.io/sparql-new/spec/">https://w3c.github.io/sparql-new/spec/</a>
                 </dd>
                 <dt id="bib-sparql12-results-csv-tsv">[SPARQL12-RESULTS-CSV-TSV]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-results-csv-tsv/"><cite>SPARQL 1.2クエリ結果CSVおよびTSV
-                            形式</cite></a>. Ruben Taelman; Gregory Williams; Thomas Pellissier Tanon. W3C. 2026年3月28日.
-                    W3C作業草案. URL: <a
+                    <a href="https://www.w3.org/TR/sparql12-results-csv-tsv/"><cite>SPARQL 1.2 クエリ結果 CSV および TSV
+                            形式</cite></a>. Ruben Taelman; Gregory Williams; Thomas Pellissier Tanon. W3C. 2026 年 3 月
+                    28 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-results-csv-tsv/">https://www.w3.org/TR/sparql12-results-csv-tsv/</a>
                 </dd>
                 <dt id="bib-sparql12-results-json">[SPARQL12-RESULTS-JSON]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-results-json/"><cite>SPARQL 1.2クエリ結果JSON
+                    <a href="https://www.w3.org/TR/sparql12-results-json/"><cite>SPARQL 1.2 クエリ結果 JSON
                             形式</cite></a>. Andy Seaborne; Ruben Taelman; Gregory Williams; Thomas Pellissier Tanon.
-                    W3C. 2026年3月28日. W3C作業草案. URL: <a
+                    W3C. 2026 年 3 月 28 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-results-json/">https://www.w3.org/TR/sparql12-results-json/</a>
                 </dd>
                 <dt id="bib-sparql12-results-xml">[SPARQL12-RESULTS-XML]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-results-xml/"><cite>SPARQL 1.2クエリ結果XML
-                            形式</cite></a>. Ruben Taelman; Dominik Tomaszuk; Thomas Pellissier Tanon. W3C. 2024年12月27日.
-                    W3C作業草案. URL: <a
+                    <a href="https://www.w3.org/TR/sparql12-results-xml/"><cite>SPARQL 1.2 クエリ結果 XML
+                            形式</cite></a>. Ruben Taelman; Dominik Tomaszuk; Thomas Pellissier Tanon. W3C. 2024 年 12 月
+                    27 日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-results-xml/">https://www.w3.org/TR/sparql12-results-xml/</a>
                 </dd>
                 <dt id="bib-sparql12-service-description">[SPARQL12-SERVICE-DESCRIPTION]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/sparql12-service-description/"><cite>SPARQL 1.2サービス
-                            記述</cite></a>. Ruben Taelman; Gregory Williams. W3C. 2026年4月23日. W3C作業
+                    <a href="https://www.w3.org/TR/sparql12-service-description/"><cite>SPARQL 1.2 サービス
+                            記述</cite></a>. Ruben Taelman; Gregory Williams. W3C. 2026 年 4 月 23 日. W3C 作業
                     草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-service-description/">https://www.w3.org/TR/sparql12-service-description/</a>
                 </dd>
@@ -3594,7 +3696,7 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
         aria-label="Links in this document to definition: RFC2119">
         <span class="caret"></span>
         <div>
-            <a class="self-link" href="https://www.rfc-editor.org/rfc/rfc2119#"
+            <a class="self-link" href="https://www.rfc-editor.org/info/rfc2119/#"
                 aria-label="Permalink for definition: RFC2119. Activate to close this dialog.">Permalink</a>
 
 
@@ -3610,7 +3712,7 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
         aria-label="Links in this document to definition: percent encode">
         <span class="caret"></span>
         <div>
-            <a class="self-link" href="https://www.rfc-editor.org/rfc/rfc3986#section-2.1"
+            <a class="self-link" href="https://www.rfc-editor.org/info/rfc3986/#section-2.1"
                 aria-label="Permalink for definition: percent encode. Activate to close this dialog.">Permalink</a>
 
 
@@ -3631,7 +3733,7 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
         aria-label="Links in this document to definition: percent encode">
         <span class="caret"></span>
         <div>
-            <a class="self-link" href="https://www.rfc-editor.org/rfc/rfc3986#"
+            <a class="self-link" href="https://www.rfc-editor.org/info/rfc3986/#"
                 aria-label="Permalink for definition: percent encode. Activate to close this dialog.">Permalink</a>
 
 
@@ -3649,7 +3751,7 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
         aria-label="Links in this document to definition: query parameter">
         <span class="caret"></span>
         <div>
-            <a class="self-link" href="https://www.rfc-editor.org/rfc/rfc3986#section-3.4"
+            <a class="self-link" href="https://www.rfc-editor.org/info/rfc3986/#section-3.4"
                 aria-label="Permalink for definition: query parameter. Activate to close this dialog.">Permalink</a>
 
 
@@ -3921,7 +4023,7 @@ WHERE { GRAPH ?g { ?person ?property ?value ; foaf:givenName 'Fred' } }</pre>
                 if (HL_COLORS.get("respec-hl-c1") === true) return "respec-hl-c1";
 
                 // otherwise get some other available color
-                return HL_COLORS.keys().find(c => HL_COLORS.get(c)) || "respec-hl-c1";
+                return [...HL_COLORS.keys()].find(c => HL_COLORS.get(c)) || "respec-hl-c1";
             }
 
             /**
