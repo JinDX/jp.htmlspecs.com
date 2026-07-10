@@ -451,7 +451,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.3](https://jp.htmlspecs.com/wai-aria-1.3/)（[Source](https://www.w3.org/TR/2026/WD-wai-aria-1.3-20260604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Digital Publishing WAI-ARIA Module 1.1](https://jp.htmlspecs.com/dpub-aria-1.1/)（[Source](https://www.w3.org/TR/2025/REC-dpub-aria-1.1-20250612/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Core Accessibility API Mappings 1.2](https://jp.htmlspecs.com/core-aam-1.2/)（[Source](https://www.w3.org/TR/2026/CRD-core-aam-1.2-20260702/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [HTML Accessibility API Mappings 1.0](https://jp.htmlspecs.com/html-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-html-aam-1.0-20260529/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [HTML Accessibility API Mappings 1.0](https://jp.htmlspecs.com/html-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-html-aam-1.0-20260710/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SVG Accessibility API Mappings](https://jp.htmlspecs.com/svg-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-svg-aam-1.0-20260529/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Digital Publishing Accessibility API Mappings 1.1](https://jp.htmlspecs.com/dpub-aam-1.1/)（[Source](https://www.w3.org/TR/2025/REC-dpub-aam-1.1-20250612/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Graphics Accessibility API Mappings](https://jp.htmlspecs.com/graphics-aam-1.0/)（[Source](https://www.w3.org/TR/2018/REC-graphics-aam-1.0-20181002/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
