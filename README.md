@@ -83,7 +83,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [SHACL 1.2 Core](https://jp.htmlspecs.com/shacl12-core/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-core-20260720/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SHACL 1.2 Profiling](https://jp.htmlspecs.com/shacl12-profiling/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-profiling-20260702/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SHACL 1.2 SPARQL Extensions](https://jp.htmlspecs.com/shacl12-sparql/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-sparql-20260717/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [SHACL 1.2 Rules](https://jp.htmlspecs.com/shacl12-rules/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-rules-20260716/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [SHACL 1.2 Rules](https://jp.htmlspecs.com/shacl12-rules/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-rules-20260720/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Data Catalog Vocabulary (DCAT) - Version 3](https://jp.htmlspecs.com/vocab-dcat-3/)（[Source](https://www.w3.org/TR/2024/REC-vocab-dcat-3-20240822/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Content Negotiation by Profile](https://jp.htmlspecs.com/dx-prof-conneg/)（[Source](https://www.w3.org/TR/2026/WD-dx-prof-conneg-20260703/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [ODRL Information Model 2.2](https://jp.htmlspecs.com/odrl-model/)（[Source](https://www.w3.org/TR/2018/REC-odrl-model-20180215/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
