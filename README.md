@@ -704,5 +704,6 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [QUIC Loss Detection and Congestion Control](https://jp.htmlspecs.com/http/rfc9002.html)（[Source](https://www.rfc-editor.org/rfc/rfc9002.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Version-Independent Properties of QUIC](https://jp.htmlspecs.com/http/rfc8999.html)（[Source](https://www.rfc-editor.org/rfc/rfc8999.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [The Transport Layer Security (TLS) Protocol Version 1.3](https://jp.htmlspecs.com/http/rfc9846.html)（[Source](https://www.rfc-editor.org/rfc/rfc9846.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [New Protocols Using TLS Must Require TLS 1.3](https://jp.htmlspecs.com/http/rfc9852.html)（[Source](https://www.rfc-editor.org/rfc/rfc9852.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [The WebSocket Protocol](https://jp.htmlspecs.com/http/rfc6455.html)（[Source](https://www.rfc-editor.org/rfc/rfc6455.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
