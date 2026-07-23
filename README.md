@@ -427,7 +427,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Fenced Frame](https://jp.htmlspecs.com/fenced-frame/)（[Source](https://wicg.github.io/fenced-frame/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Iframe credentialless](https://jp.htmlspecs.com/anonymous-iframe/)（[Source](https://wicg.github.io/anonymous-iframe/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Private State Token API](https://jp.htmlspecs.com/trust-token-api/)（[Source](https://wicg.github.io/trust-token-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Attribution Level 1](https://jp.htmlspecs.com/attribution/)（[Source](https://www.w3.org/TR/2026/WD-attribution-20260720/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Attribution Level 1](https://jp.htmlspecs.com/attribution/)（[Source](https://www.w3.org/TR/2026/WD-attribution-20260722/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Related Website Sets](https://jp.htmlspecs.com/first-party-sets/)（[Source](https://wicg.github.io/first-party-sets/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Private Aggregation API](https://jp.htmlspecs.com/private-aggregation-api/)（[Source](https://patcg-individual-drafts.github.io/private-aggregation-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
