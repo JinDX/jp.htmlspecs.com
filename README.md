@@ -104,7 +104,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [MathML4](https://jp.htmlspecs.com/mathml4/)（[Source](https://www.w3.org/TR/2026/WD-mathml4-20260604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### Web アプリ・インストール・ライフサイクル
-- [Web Application Manifest](https://jp.htmlspecs.com/appmanifest/)（[Source](https://www.w3.org/TR/2026/WD-appmanifest-20260507/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Web Application Manifest](https://jp.htmlspecs.com/appmanifest/)（[Source](https://www.w3.org/TR/2026/WD-appmanifest-20260723/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web App Launch Handler API](https://jp.htmlspecs.com/web-app-launch/)（[Source](https://wicg.github.io/web-app-launch/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Manifest Incubations](https://jp.htmlspecs.com/manifest-incubations/)（[Source](https://wicg.github.io/manifest-incubations/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Developing Localizable Manifests](https://jp.htmlspecs.com/localizable-manifests/)（[Source](https://www.w3.org/TR/2025/NOTE-localizable-manifests-20250214/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
