@@ -76,7 +76,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [RDF 1.2 Turtle](https://jp.htmlspecs.com/rdf12-turtle/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-turtle-20260723/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF 1.2 N-Triples](https://jp.htmlspecs.com/rdf12-n-triples/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-n-triples-20260723/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF 1.2 TriG](https://jp.htmlspecs.com/rdf12-trig/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-trig-20260612/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [RDF 1.2 N-Quads](https://jp.htmlspecs.com/rdf12-n-quads/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-n-quads-20260612/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [RDF 1.2 N-Quads](https://jp.htmlspecs.com/rdf12-n-quads/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-n-quads-20260723/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF 1.2 XML Syntax](https://jp.htmlspecs.com/rdf12-xml/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-xml-20260618/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SPARQL 1.2 Query Language](https://jp.htmlspecs.com/sparql12-query/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-query-20260625/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SPARQL 1.2 Protocol](https://jp.htmlspecs.com/sparql12-protocol/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-protocol-20260708/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
