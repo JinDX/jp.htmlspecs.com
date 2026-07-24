@@ -111,7 +111,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web App Manifest - Application Information](https://jp.htmlspecs.com/manifest-app-info/)（[Source](https://www.w3.org/TR/2023/NOTE-manifest-app-info-20230821/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Get Installed Related Apps API](https://jp.htmlspecs.com/get-installed-related-apps/)（[Source](https://wicg.github.io/get-installed-related-apps/spec/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Sub Apps API](https://jp.htmlspecs.com/sub-apps/)（[Source](https://wicg.github.io/sub-apps/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2026/CRD-service-workers-20260717/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2026/CRD-service-workers-20260723/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
 ### MiniApp・ミニアプリ・クロスプラットフォームアプリ
 - [MiniApp Manifest](https://jp.htmlspecs.com/miniapp-manifest/)（[Source](https://www.w3.org/TR/2025/WD-miniapp-manifest-20250128/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
