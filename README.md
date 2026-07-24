@@ -442,6 +442,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### アクセシビリティ
 - [Web Content Accessibility Guidelines (WCAG) 2.2](https://jp.htmlspecs.com/WCAG22/)（[Source](https://www.w3.org/TR/2024/REC-WCAG22-20241212/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
+- [WCAG Evaluation Methodology (WCAG-EM) 2.0](https://jp.htmlspecs.com/wcag-em-2/)（[Source](https://www.w3.org/TR/2026/NOTE-wcag-em-2-20260723/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [W3C Accessibility Guidelines (WCAG) 3.0](https://jp.htmlspecs.com/wcag-3.0/)（[Source](https://www.w3.org/TR/2026/WD-wcag-3.0-20260303/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Making Content Usable for People with Cognitive and Learning Disabilities](https://jp.htmlspecs.com/coga-usable/)（[Source](https://www.w3.org/TR/2021/NOTE-coga-usable-20210429/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [WAI-Adapt Explainer](https://jp.htmlspecs.com/adapt/)（[Source](https://www.w3.org/TR/2023/DNOTE-adapt-20230103/) ![Note Draft](https://img.shields.io/badge/DNOTE-ffcc00)）
