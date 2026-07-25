@@ -212,7 +212,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web of Things (WoT) Profile](https://jp.htmlspecs.com/wot-profile/)（[Source](https://www.w3.org/TR/2025/WD-wot-profile-20251104/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### ウィンドウ・画面・システム統合
-- [Screen Orientation](https://jp.htmlspecs.com/screen-orientation/)（[Source](https://www.w3.org/TR/2025/WD-screen-orientation-20251021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Screen Orientation](https://jp.htmlspecs.com/screen-orientation/)（[Source](https://www.w3.org/TR/2026/WD-screen-orientation-20260724/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Screen Wake Lock](https://jp.htmlspecs.com/screen-wake-lock/)（[Source](https://www.w3.org/TR/2024/WD-screen-wake-lock-20241024/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Local Font Access](https://jp.htmlspecs.com/local-font-access/)（[Source](https://wicg.github.io/local-font-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Idle Detection API](https://jp.htmlspecs.com/idle-detection/)（[Source](https://wicg.github.io/idle-detection/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
