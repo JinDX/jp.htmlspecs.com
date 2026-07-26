@@ -915,12 +915,12 @@
     "informative-dfn": false,
     "no-unused-dfns": false
   },
-  "gitRevision": "485c780a90e542c9cbb81b4de6809b2306dc0984",
-  "publishDate": "2026-07-22",
+  "gitRevision": "e2259cda458411d9c03c1a82d7acf0d221ab4307",
+  "publishDate": "2026-07-25",
   "previousMaturity": "WD",
-  "previousPublishDate": "2026-07-21",
-  "publishISODate": "2026-07-22T00:00:00.000Z",
-  "generatedSubtitle": "W3C Working Draft 22 July 2026"
+  "previousPublishDate": "2026-07-25",
+  "publishISODate": "2026-07-25T00:00:00.000Z",
+  "generatedSubtitle": "W3C Working Draft 25 July 2026"
 }</script>
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD">
     <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="https://www.w3.org/StyleSheets/TR/2021/dark.css">
@@ -933,14 +933,14 @@
             </a></p>
         <h1 id="title" class="title">SHACL 1.2 ルール</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C 作業草案</a> <time class="dt-published"
-                datetime="2026-07-22">2026年7月22日</time></p>
+                datetime="2026-07-25">2026年7月25日</time></p>
         <details open="">
             <summary>この文書の詳細</summary>
             <dl>
                 <dt>このバージョン:</dt>
                 <dd>
                     <a class="u-url"
-                        href="https://www.w3.org/TR/2026/WD-shacl12-rules-20260722/">https://www.w3.org/TR/2026/WD-shacl12-rules-20260722/</a>
+                        href="https://www.w3.org/TR/2026/WD-shacl12-rules-20260725/">https://www.w3.org/TR/2026/WD-shacl12-rules-20260725/</a>
                 </dd>
                 <dt>最新公開バージョン:</dt>
                 <dd>
@@ -1185,6 +1185,17 @@
                     <li class="tocline"><a class="tocxref" href="#eval-rule"><bdi class="secno">6.4 </bdi>規則の評価</a></li>
                     <li class="tocline"><a class="tocxref" href="#eval-rule-set"><bdi class="secno">6.5
                             </bdi>規則集合の評価</a></li>
+                    <li class="tocline"><a class="tocxref" href="#eval-worked-example"><bdi class="secno">6.6
+                            </bdi>実例</a>
+                        <ol class="toc">
+                            <li class="tocline"><a class="tocxref" href="#worked-example-dependencies"><bdi
+                                        class="secno">6.6.1 </bdi>依存関係の特定</a></li>
+                            <li class="tocline"><a class="tocxref" href="#worked-example-stratification"><bdi
+                                        class="secno">6.6.2 </bdi>階層化の計算</a></li>
+                            <li class="tocline"><a class="tocxref" href="#worked-example-evaluation"><bdi
+                                        class="secno">6.6.3 </bdi>各階層の評価</a></li>
+                        </ol>
+                    </li>
                 </ol>
             </li>
             <li class="tocline"><a class="tocxref" href="#shapes-rules-grammar"><bdi class="secno">7. </bdi>Shape Rules
@@ -1571,6 +1582,13 @@
             </div>
 
 
+            <p>
+                このセクションの例では、ソフトウェアコンポーネントと
+                それらの依存関係について説明します。フロントエンドはアプリケーションサーバーを呼び出し、
+                アプリケーションサーバーは既知の
+                脆弱性を持つデータベースに問い合わせます。
+            </p>
+
             <p>この最初の例では、次のデータグラフと規則集合がある:</p>
 
             <aside class="example" id="example-basic-example">
@@ -1578,41 +1596,40 @@
                     <a class="self-link" href="#example-basic-example">例<bdi> 1</bdi></a><span class="example-title">:
                         基本例</span>
                 </div>
-                <pre class="block ex-data" aria-busy="false"><code class="hljs">:A :fatherOf :X .
-:B :motherOf :X .
-:C :motherOf :A .</code></pre>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }
-RULE { ?x :childOf ?y } WHERE { ?y :motherOf ?x }</code></pre>
-                <pre class="block ex-inferred" aria-busy="false"><code class="hljs">:X :childOf :A .
-:X :childOf :B .
-:A :childOf :C .</code></pre>
+                <pre class="block ex-data" aria-busy="false"><code class="hljs">:frontend :callsService :app .
+:app      :queriesDatabase :db .
+:db       :hasVulnerability :vuln1 .</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :dependsOn ?y } WHERE { ?x :callsService ?y }
+RULE { ?x :dependsOn ?y } WHERE { ?x :queriesDatabase ?y }</code></pre>
+                <pre class="block ex-inferred" aria-busy="false"><code class="hljs">:frontend :dependsOn :app .
+:app      :dependsOn :db .</code></pre>
             </aside>
 
             <p>上記の規則をデータに適用すると、
-                <code>:X</code>が<code>:A</code>および<code>:B</code>の<code>:childOf</code>であると結論する:
+                <code>:frontend</code> が <code>:app</code> に依存し、また <code>:app</code> が
+                <code>:db</code> に依存することが、依存関係の種類にかかわらず導かれます。
             </p>
 
             <p>
-                次に、他の規則によって生成された<code>:childOf</code>トリプルに依存する
-                規則を追加することで、<code>:descendedFrom</code>関係を導出できる:
+                次に、他の規則によって生成された <code>:dependsOn</code> トリプルに依存する規則を追加することで、
+                <code>:exposedTo</code> 関係を導出できます（以下の <a href="#rule-dependency" class="sectionRef sec-ref"><bdi
+                        class="secno">4.3 </bdi>規則の依存関係</a>も参照）:
             </p>
 
-            <aside class="example" id="example-2">
+            <aside class="example" id="example-depending-on-inferred-triples">
                 <div class="marker">
-                    <a class="self-link" href="#example-2">例<bdi> 2</bdi></a>
+                    <a class="self-link" href="#example-depending-on-inferred-triples">例<bdi> 2</bdi></a><span
+                        class="example-title">: 推論されたトリプルへの依存</span>
                 </div>
-                <pre class="block ex-data" aria-busy="false"><code class="hljs">:A :fatherOf :X .
-:B :motherOf :X .
-:C :motherOf :A .</code></pre>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }
-RULE { ?x :childOf ?y } WHERE { ?y :motherOf ?x }
-RULE { ?x :descendedFrom ?y } WHERE { ?x :childOf ?y }</code></pre>
-                <pre class="block ex-inferred" aria-busy="false"><code class="hljs">:A :descendedFrom :C .
-:X :descendedFrom :B .
-:X :descendedFrom :A .
-:X :childOf :B .
-:X :childOf :A .
-:A :childOf :C .</code></pre>
+                <pre class="block ex-data" aria-busy="false"><code class="hljs">:frontend :callsService :app .
+:app      :queriesDatabase :db .
+:db       :hasVulnerability :vuln1 .</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :dependsOn ?y } WHERE { ?x :callsService ?y }
+RULE { ?x :dependsOn ?y } WHERE { ?x :queriesDatabase ?y }
+RULE { ?x :exposedTo ?v } WHERE { ?x :dependsOn ?y . ?y :hasVulnerability ?v }</code></pre>
+                <pre class="block ex-inferred" aria-busy="false"><code class="hljs">:app      :exposedTo :vuln1 .
+:frontend :dependsOn :app .
+:app      :dependsOn :db .</code></pre>
             </aside>
 
         </section>
@@ -1623,8 +1640,13 @@ RULE { ?x :descendedFrom ?y } WHERE { ?x :childOf ?y }</code></pre>
             </div>
 
             <p>
-                <code>:descendedFrom</code>トリプルに依存する規則を追加して、
-                <code>:X</code>が<code>:C</code>の<code>:descendedFrom</code>であると推論できる:
+                前のセクションの <code>:exposedTo</code> 規則は、直接の
+                依存関係にしか到達しません。<code>:frontend</code> は <code>:db</code> に直接依存していないため、
+                <code>:frontend</code> について <code>:exposedTo</code> トリプルは推論されません。
+                任意の長さの依存関係チェーンに沿って露出を伝播させるために、
+                この規則を2つの規則に置き換えます。コンポーネントは、自身が持つ
+                脆弱性に露出しており、またコンポーネントは、その直接の依存先が露出している
+                あらゆる脆弱性に露出しています。
             </p>
 
             <aside class="example" id="example-rule-recursion">
@@ -1632,23 +1654,30 @@ RULE { ?x :descendedFrom ?y } WHERE { ?x :childOf ?y }</code></pre>
                     <a class="self-link" href="#example-rule-recursion">例<bdi> 3</bdi></a><span class="example-title">:
                         規則の再帰</span>
                 </div>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }
-RULE { ?x :childOf ?y } WHERE { ?y :motherOf ?x }
-RULE { ?x :descendedFrom ?y } WHERE { ?x :childOf ?y }
-RULE { ?x :descendedFrom ?y } WHERE { ?x :childOf ?z . ?z :descendedFrom ?y }</code></pre>
-                <pre class="block ex-inferred" aria-busy="false"><code class="hljs">:A :descendedFrom :C .
-:X :descendedFrom :C .
-:X :descendedFrom :B .
-:X :descendedFrom :A .
-:X :childOf :B .
-:X :childOf :A .
-:A :childOf :C .</code></pre>
+                <pre class="block ex-data" aria-busy="false"><code class="hljs">:frontend :callsService :app .
+:app      :queriesDatabase :db .
+:db       :hasVulnerability :vuln1 .</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :dependsOn ?y } WHERE { ?x :callsService ?y }
+RULE { ?x :dependsOn ?y } WHERE { ?x :queriesDatabase ?y }
+RULE { ?x :exposedTo ?v } WHERE { ?x :hasVulnerability ?v }
+RULE { ?x :exposedTo ?v } WHERE { ?x :dependsOn ?y . ?y :exposedTo ?v }</code></pre>
+                <pre class="block ex-inferred" aria-busy="false"><code class="hljs">:db       :exposedTo :vuln1 .
+:app      :exposedTo :vuln1 .
+:frontend :exposedTo :vuln1 .
+:frontend :dependsOn :app .
+:app      :dependsOn :db .</code></pre>
             </aside>
 
-            <p>これにより、トリプル<code>:X :descendedFrom :C</code>が追加される。</p>
             <p>
-                この最後の規則は<i>再帰的</i>な規則であり、規則のボディが
-                規則のヘッドに依存している。
+                前の例と比べると、この例では
+                <code>:db :exposedTo :vuln1</code>（データベースは自身の
+                脆弱性に露出している）と、<code>:frontend :exposedTo :vuln1</code> が追加されます。
+                つまり、チェーンがどれほど長くても、露出は依存関係の
+                チェーンを通じて <code>:frontend</code> に到達します。
+            </p>
+            <p>
+                この最後の規則は<i>再帰的</i>な規則です。規則の本体が
+                規則のヘッドに依存しています。
             </p>
 
         </section>
@@ -1660,35 +1689,40 @@ RULE { ?x :descendedFrom ?y } WHERE { ?x :childOf ?z . ?z :descendedFrom ?y }</c
             </div>
 
             <p>
-                規則のボディ内で式を使用して、ボディの照合における変数の値を
-                制限できる。
-                たとえば、町とその人口に関するデータが与えられた場合、
-                人口が1500を超える町のクラスを推論できる:
+                規則の本体で式を使用して、本体の照合における変数の値を
+                制限できます。
+                たとえば、各脆弱性の深刻度が与えられている場合、
+                深刻な脆弱性に露出しているコンポーネントに
+                ステータスを付与できます。
             </p>
 
-            <aside class="example" id="example-4">
+            <aside class="example" id="example-filtering">
                 <div class="marker">
-                    <a class="self-link" href="#example-4">例<bdi> 4</bdi></a>
+                    <a class="self-link" href="#example-filtering">例<bdi> 4</bdi></a><span class="example-title">:
+                        フィルタリング</span>
                 </div>
-                <pre class="block ex-data" aria-busy="false"><code class="hljs">:town1 :population 1000 .
-:town2 :population 2000 .</code></pre>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x rdf:type :largeTown } 
-WHERE { 
-    ?x :population ?p 
-    FILTER(?p &gt; 1500)
+                <pre class="block ex-data" aria-busy="false"><code class="hljs">:app1 :exposedTo :vuln1 .
+:app2 :exposedTo :vuln2 .
+:vuln1 :severity 9.1 .
+:vuln2 :severity 4.3 .</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :status :criticallyExposed }
+WHERE {
+    ?x :exposedTo ?v .
+    ?v :severity ?s .
+    FILTER(?s &gt;= 9.0)
 }</code></pre>
                 <pre class="block ex-inferred"
-                    aria-busy="false"><code class="hljs">:town2 rdf:type :largeTown .</code></pre>
+                    aria-busy="false"><code class="hljs">:app1 :status :criticallyExposed .</code></pre>
             </aside>
 
             <p>
-                <code>FILTER</code>は式を評価し、その式がtrueに評価された場合は現在の
-                変数束縛の集合を保持し、その式がfalseに評価された場合は現在の
-                変数束縛の集合を破棄する。
+                <code>FILTER</code> は式を評価し、その式が真と評価された場合は現在の
+                変数束縛の集合を保持し、その式が偽と評価された場合は
+                現在の変数束縛の集合を破棄します。
                 これは
                 <a href="https://www.w3.org/TR/sparql12-query/#termConstraint"
-                    id="ref-for-index-term-filter-operation-of-sparql-1">SPARQLの<code>FILTER</code>操作</a>
-                と同じであり、SHACLルールはSPARQLと同じ関数や演算子の多くを提供する。
+                    id="ref-for-index-term-filter-operation-of-sparql-1">SPARQL の <code>FILTER</code> 演算</a>
+                と同じであり、SHACL Rules は SPARQL と同じ関数および演算子の多くを提供します。
             </p>
         </section>
 
@@ -1699,38 +1733,37 @@ WHERE {
             </div>
 
             <p>
-                否定により、一致してはならないパターンを指定できる。
-                これは「失敗としての否定」と呼ばれる。
+                否定を使用すると、一致してはならないパターンを指定できます。
+                これは「失敗による否定」と呼ばれます。
             </p>
             <p>
                 否定要素を評価するために、規則評価アルゴリズムは、
                 否定要素内のパターンに一致するトリプルを生成し得るすべての規則が
-                完了していることを保証する。これは
+                完了していることを保証します。これは
                 <i><a data-link-type="dfn|abstract-op" href="#dfn-stratification" class="internalDFN"
-                        id="ref-for-dfn-stratification-1">層化</a></i>と呼ばれ、否定が、
-                データ由来か、他の規則によって推論された推論済みトリプル由来かを問わず、
-                関連するすべての可能なトリプルに基づくことを保証する。
+                        id="ref-for-dfn-stratification-1">階層化</a></i>と呼ばれ、否定が、
+                データから得られたものか、否定要素内のものかにかかわらず、
+                関連する可能性のあるすべてのトリプルに基づくことを保証します。否定を含む規則は、これらの
+                トリプルを生成する規則に_依存する_と言われます（以下の<a href="#rule-dependency" class="sectionRef sec-ref"><bdi class="secno">4.3
+                    </bdi>規則の依存関係</a>を参照）。
             </p>
 
             <aside class="example" id="example-negation-as-failure">
                 <div class="marker">
                     <a class="self-link" href="#example-negation-as-failure">例<bdi> 5</bdi></a><span
-                        class="example-title">: 失敗としての否定</span>
+                        class="example-title">: 失敗による否定</span>
                 </div>
-                <pre class="block ex-data" aria-busy="false"><code class="hljs">:X1 rdf:type :Place ;
-:population 1000 .
+                <pre class="block ex-data" aria-busy="false"><code class="hljs">:app rdf:type :Component ;
+:status :criticallyExposed .
 
-:X2 rdf:type :Place ;
-:population 2000 .
-
-:X3 rdf:type :Place .</code></pre>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x rdf:type :UnclassifiedSize } 
-WHERE { 
-    ?x rdf:type :Place .
-    NOT { ?x :population ?p . }
+:logger rdf:type :Component .</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :status :safeToDeploy }
+WHERE {
+    ?x rdf:type :Component .
+    NOT { ?x :status :criticallyExposed }
 }</code></pre>
                 <pre class="block ex-inferred"
-                    aria-busy="false"><code class="hljs">:X3 rdf:type :UnclassifiedSize .</code></pre>
+                    aria-busy="false"><code class="hljs">:logger :status :safeToDeploy .</code></pre>
             </aside>
 
         </section>
@@ -1742,61 +1775,59 @@ WHERE {
             </div>
 
             <p>
-                代入により、式の結果を規則のボディ内の変数に代入できる。
-                これは、データに基づいて新しいRDF用語を作成するために使用できる。
+                代入を使用すると、規則の本体内で式の結果を変数に
+                代入できます。これは、データに基づいて新しい RDF 用語を作成するために
+                使用できます。
             </p>
 
-            <aside class="example" id="example-6">
+            <aside class="example" id="example-assignment">
                 <div class="marker">
-                    <a class="self-link" href="#example-6">例<bdi> 6</bdi></a>
+                    <a class="self-link" href="#example-assignment">例<bdi> 6</bdi></a><span class="example-title">:
+                        代入</span>
                 </div>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :calculatedDistanceKm ?kilometers }
-WHERE { 
-    ?x :distanceMiles ?miles .
-    SET ( ?kilometers := ?miles * 1.60934 )
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?v :riskScore ?r }
+WHERE {
+    ?v :severity ?s .
+    ?v :exploitLikelihood ?p .
+    SET ( ?r := ?s * ?p )
 }</code></pre>
             </aside>
 
             <p>
-                空白ノードは規則ヘッド内で使用でき、規則評価がトリプルを生成するたびに
-                それぞれ新しい空白ノードを生成する。
+                空白ノードは規則のヘッドで使用でき、規則の評価によってトリプルが生成されるたびに、
+                それぞれ新しい空白ノードが生成されます。
             </p>
 
-            <aside class="example" id="example-7">
+            <aside class="example" id="example-blank-node-in-the-rule-head">
                 <div class="marker">
-                    <a class="self-link" href="#example-7">例<bdi> 7</bdi></a>
+                    <a class="self-link" href="#example-blank-node-in-the-rule-head">例<bdi> 7</bdi></a><span
+                        class="example-title">: 規則のヘッド内の空白ノード</span>
                 </div>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { [] rdf:type :Person ;
-          ex:name ?name 
-       }
-WHERE { 
-    ...
-}</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { [] rdf:type :Notification ; :concerns ?x }
+WHERE { ?x :status :criticallyExposed }</code></pre>
             </aside>
 
             <p>
                 <a data-link-type="dfn|abstract-op" href="#dfn-assignment-element" class="internalDFN"
                     id="ref-for-dfn-assignment-element-1">代入</a>を含む規則、および
                 <a data-link-type="dfn|abstract-op" href="#dfn-rule-head" class="internalDFN"
-                    id="ref-for-dfn-rule-head-2">規則ヘッド</a>で空白ノードを作成する規則は、
-                <a data-link-type="dfn|abstract-op" href="#dfn-run-once-rule" class="internalDFN"
-                    id="ref-for-dfn-run-once-rule-1">一度だけ実行される規則</a>である。
-                そのような規則は、それらが依存し得るデータを生成するすべての規則の後に、
-                かつ、それらが生成するデータに依存する規則の前に実行される。
+                    id="ref-for-dfn-rule-head-2">規則のヘッド</a>で空白ノードを作成する規則は、<a data-link-type="dfn|abstract-op"
+                    href="#dfn-run-once-rule" class="internalDFN" id="ref-for-dfn-run-once-rule-1">一度だけ実行される規則</a>です。
+                このような規則は、それらが依存するデータを生成し得るすべての規則の後に実行され、
+                それらが生成するデータに依存する規則の前に実行されます。
                 <a data-link-type="dfn|abstract-op" href="#dfn-rule-head" class="internalDFN"
-                    id="ref-for-dfn-rule-head-3">規則ヘッド</a>内に空白ノードを含む規則も、
-                新しいRDF用語を作成し、一度だけ実行される規則である。
+                    id="ref-for-dfn-rule-head-3">規則のヘッド</a>に空白ノードを含む規則も、新しい
+                RDF 用語を作成するため、一度だけ実行される規則です。
             </p>
             <p>
-                この条件は、RDF用語を作成する規則が、潜在的に異なる結果を伴って
-                新しい用語を複数回生成しないこと、また、そのような規則が自身へ戻るループを形成して
-                無限個のRDF用語を生じさせないことを保証する。
+                この条件により、このような規則が自身にループして、無制限の数の
+                RDF 用語を生成することが防止されます。
             </p>
             <p>
                 <a data-link-type="dfn|abstract-op" href="#dfn-assignment-element" class="internalDFN"
-                    id="ref-for-dfn-assignment-element-2">代入</a>内の式を評価する際にエラーが発生した場合、
-                現在の解写像はその<a data-link-type="dfn|abstract-op" href="#dfn-assignment-element" class="internalDFN"
-                    id="ref-for-dfn-assignment-element-3">代入</a>によって拒否される。
+                    id="ref-for-dfn-assignment-element-2">代入</a>内の式を評価した結果、エラーが発生した場合、
+                現在の解マッピングは、その<a data-link-type="dfn|abstract-op" href="#dfn-assignment-element" class="internalDFN"
+                    id="ref-for-dfn-assignment-element-3">代入</a>によって棄却されます。
             </p>
         </section>
 
@@ -1831,22 +1862,38 @@ WHERE {
             </div>
 
             <p>
-                データブロックにより、RDFトリプルを規則集合評価に直接、簡潔に提供できる。
-                データブロック内のトリプルは推論グラフに追加され、
-                規則のボディ内での照合に利用できる。
+                データブロックを使用すると、RDF トリプルを規則セットの評価に直接簡潔に提供できます。
+                データブロック内のトリプルは推論グラフに追加され、規則の本体での
+                照合に使用できます。
             </p>
-            <p>@@例を更新する</p>
+
+            <p>
+                たとえば、規則セットには、データから導出するのではなく、
+                既知の事実を直接表明して含めることができます。
+            </p>
 
             <aside class="example" id="example-include-data-in-a-rule-set">
                 <div class="marker">
                     <a class="self-link" href="#example-include-data-in-a-rule-set">例<bdi> 8</bdi></a><span
-                        class="example-title">: 規則集合にデータを含める</span>
+                        class="example-title">: 規則セットにデータを含める</span>
                 </div>
                 <pre class="block ex-rules" aria-busy="false"><code class="hljs">DATA {
-    :father rdfs:subClassOf :familyRelationship .
-    :mother rdfs:subClassOf :familyRelationship .
+    # バージョン 2.0.0 以前には既知の脆弱性があり、
+    # 重大な露出状態にあるとみなされます。
+    :appV2 rdf:type :Component ;
+           :version "2.0.0" ;
+           :status :criticallyExposed .
 }</code></pre>
             </aside>
+
+            <div class="note" role="note" id="issue-container-generatedID-2">
+                <div class="note-title marker" id="h-note-1"><span>注記</span></div>
+                <p class="">
+                    データブロックは、本体が空の規則と同等です。
+                    そのトリプルは、いかなる規則も評価されることなく、
+                    推論グラフの一部になります。
+                </p>
+            </div>
 
         </section>
 
@@ -1987,49 +2034,50 @@ WHERE DATA { ... }</code></pre>
             </p>
             <ul>
                 <li>
-                    ルールには、変数が使用前に常にバインドされることを保証する
+                    規則には、変数が使用前に常に束縛されることを保証する、
                     追加の整形式条件があります。
                 </li>
                 <li>
-                    ルール本体の構文はSPARQLの<code>CONSTRUCT</code>クエリに似ていますが、
-                    <code>UNION</code>や<code>OPTIONAL</code>の構文を持たないなどの制限があります。
-                    これらは変数が常にバインドされることを保証しますが、SPARQLでは一部の
-                    変数がすべてのパターン解でバインドされるとは限りません。
-                    これらの効果は<a data-link-type="dfn|abstract-op" href="#dfn-well-formed-rule" class="internalDFN"
+                    規則本体の構文は SPARQL の <code>CONSTRUCT</code> クエリーに似ていますが、
+                    <code>UNION</code> や <code>OPTIONAL</code> の構文を使用できないなどの制限があります。
+                    これらの制限により変数が常に束縛されることが保証されますが、SPARQL では、一部の
+                    変数がすべてのパターン解で束縛されるとは限りません。
+                    これらの効果は、<a data-link-type="dfn|abstract-op" href="#dfn-well-formed-rule" class="internalDFN"
                         id="ref-for-dfn-well-formed-rule-1">整形式の
-                        ルール</a>を使用して実現でき、
+                        規則</a>を使用することで実現でき、
                     <a data-link-type="dfn|abstract-op" href="#dfn-rule-set" class="internalDFN"
-                        id="ref-for-dfn-rule-set-6">ルールセット</a>を解析できるようになります。
+                        id="ref-for-dfn-rule-set-6">規則セット</a>を解析できるようになります。
                 </li>
                 <li>
-                    ルールの<code>SET</code>形式とSPARQLの<code>BIND</code>形式では、エラー処理の
+                    規則の <code>SET</code> 形式と SPARQL の <code>BIND</code> 形式では、エラー処理の
                     動作が異なります。
-                    <code>SET</code>でエラーが発生すると現在の解が除外されますが、
-                    <code>BIND</code>では現在の解の変数が設定されません。
-                    <code>SET(?var := <i>expr</i>)</code>は、
-                    SPARQLの
-                    <code>BIND(<i>expr</i> AS ?var)</code>の後に
-                    <code>FILTER(BOUND(?var))</code>を続けたものと同じです。
+                    <code>SET</code> でエラーが発生すると、現在の解は除外されますが、
+                    <code>BIND</code> は現在の解で変数を設定しません。
+                    <code>SET(?var := <i>expr</i>)</code> は、
+                    SPARQL で
+                    <code>BIND(<i>expr</i> AS ?var)</code> の後に
+                    <code>FILTER(BOUND(?var))</code> を続けたものと同じです。
                 </li>
                 <li>
-                    <code>NOT</code>の構文は、
-                    SPARQLの<code>EXISTS</code>および<code>NOT EXISTS</code>とは異なり、
-                    内部本体がトリプルパターンとフィルターに制限され、
+                    <code>NOT</code> の構文は、
+                    SPARQL の <code>EXISTS</code> および <code>NOT EXISTS</code> とは異なり、
+                    内部本体をトリプルパターンとフィルターに制限し、
                     ネストされたパターンを許可しません。
                 </li>
                 <li>
                     プロパティパス構文は、トリプルパターンに展開できるパスのみを対象とします。
-                    任意長演算子<code>*</code>および<code>+</code>は許可されません。
-                    任意長のパスは、より一般的な手法として再帰を使用することで
-                    SHACLルールで表現できます。
+                    任意長演算子 <code>*</code> および <code>+</code> は使用できません。
+                    任意長のパスは、より一般的な手法として再帰を使用して
+                    SHACL Rules で表現できます。
                 </li>
                 <li>
-                    一部の関数はSRL構文に含まれていません。
-                    <code>COALESCE</code>も<code>BOUND</code>もありません。
+                    一部の関数は SRL 構文に含まれていません。
+                    <code>COALESCE</code> も <code>BOUND</code> もありません。
                     ハッシュ関数はありません。
-                    呼び出すたびに異なる結果を返す<code>RAND</code>もありません。
-                    <code>NOW()</code>は許可されており、SPARQLの動作と同様に、
-                    ルールセットの評価全体を通して同じ時点を返すものと定義されています。
+                    呼び出されるたびに異なる結果を返す <code>RAND</code> も
+                    ありません。<code>NOW()</code> は使用でき、SPARQL の動作と同様に、
+                    規則セットの評価全体を通じて同じ時点を返すものと
+                    定義されています。
                 </li>
             </ul>
         </section>
@@ -2349,8 +2397,8 @@ WHERE DATA { ... }</code></pre>
                 位置3は非公式には<em>目的語</em>と呼ばれる。
             </p>
 
-            <div class="note" role="note" id="issue-container-generatedID-2">
-                <div class="note-title marker" id="h-note-1"><span>注記</span></div>
+            <div class="note" role="note" id="issue-container-generatedID-3">
+                <div class="note-title marker" id="h-note-2"><span>注記</span></div>
                 <p class="">
                     <a data-link-type="dfn|abstract-op" href="#dfn-rule-element" class="internalDFN"
                         id="ref-for-dfn-rule-element-7">規則要素</a>の列の要素は、
@@ -2574,22 +2622,32 @@ WHERE DATA { ... }</code></pre>
             <aside class="example" id="example-open-dependency">
                 <div class="marker">
                     <a class="self-link" href="#example-open-dependency">例<bdi> 9</bdi></a><span class="example-title">:
-                        開いた依存関係</span>
+                        オープン依存関係</span>
                 </div>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :descendedFrom ?y } WHERE { ?x :childOf ?y }
-RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :exposedTo ?v } WHERE { ?x :dependsOn ?y . ?y :hasVulnerability ?v }
+RULE { ?x :dependsOn ?y } WHERE { ?x :callsService ?y }</code></pre>
             </aside>
 
             <p>
                 この2番目の例では、最初の規則は2番目の規則に対して
-                閉じた依存関係をもつ。
+                クローズド依存関係を持ちます。トリプルパターン <code>?x :status :criticallyExposed</code> は、
+                最初の規則の<a data-link-type="dfn|abstract-op" href="#dfn-negation-element" class="internalDFN"
+                    id="ref-for-dfn-negation-element-7">否定要素</a>内に現れ、
+                2番目の規則のヘッドにある<a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
+                    id="ref-for-dfn-triple-template-7">トリプルテンプレート</a>と一致します。
+                最初の規則は、2番目の規則が生成可能なすべての出力を
+                生成するまで評価できません。
             </p>
 
-            <aside class="example" id="example-10">
+            <aside class="example" id="example-closed-dependency">
                 <div class="marker">
-                    <a class="self-link" href="#example-10">例<bdi> 10</bdi></a>
+                    <a class="self-link" href="#example-closed-dependency">例<bdi> 10</bdi></a><span
+                        class="example-title">: クローズド依存関係</span>
                 </div>
-                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE @@</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs">RULE { ?x :status :safeToDeploy }
+WHERE { ?x rdf:type :Component . NOT { ?x :status :criticallyExposed } }
+
+RULE { ?x :status :criticallyExposed } WHERE { ?x :exposedTo ?v }</code></pre>
             </aside>
 
             <dl>
@@ -2599,9 +2657,9 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
                     <p>
                         <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
                             id="ref-for-dfn-triple-pattern-5">トリプルパターン</a>は、
-                        トリプルテンプレートがそのトリプルパターンに一致するトリプルを生成できる場合、
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
-                            id="ref-for-dfn-triple-template-7">トリプルテンプレート</a>に一致する。
+                        トリプルテンプレートがそのトリプルパターンに一致するトリプルを生成できる場合、<a data-link-type="dfn|abstract-op"
+                            href="#dfn-triple-template" class="internalDFN"
+                            id="ref-for-dfn-triple-template-8">トリプルテンプレート</a>と一致します。
                     </p>
                 </dd>
 
@@ -2613,135 +2671,130 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
                         <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
                             id="ref-for-dfn-triple-pattern-6">トリプルパターン</a>は、
                         その<a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
-                            id="ref-for-dfn-triple-pattern-7">トリプルパターン</a>が
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
-                            id="ref-for-dfn-triple-template-9">トリプルテンプレート</a>に一致する可能性がある場合、
+                            id="ref-for-dfn-triple-pattern-7">トリプルパターン</a>が<a data-link-type="dfn|abstract-op"
+                            href="#dfn-triple-template" class="internalDFN"
+                            id="ref-for-dfn-triple-template-10">トリプルテンプレート</a>と一致する可能性がある場合、
                         <dfn data-local-lt="depends-pattern-template" id="dfn-depends-on-a-triple-template" tabindex="0"
                             aria-haspopup="dialog" data-dfn-type="dfn"><a data-link-type="dfn|abstract-op"
                                 href="#dfn-triple-template" class="internalDFN"
-                                id="ref-for-dfn-triple-template-8">トリプルテンプレート</a>に依存する</dfn>。
+                                id="ref-for-dfn-triple-template-9">トリプルテンプレート</a>に依存します</dfn>。
                     </p>
                     <p>
                         <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
-                            id="ref-for-dfn-triple-pattern-8">トリプルパターン</a>は、その
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
-                            id="ref-for-dfn-triple-pattern-9">トリプルパターン</a>が
-                        規則の<a data-link-type="dfn|abstract-op" href="#dfn-rule-head" class="internalDFN"
-                            id="ref-for-dfn-rule-head-9">ヘッド</a>内の
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
-                            id="ref-for-dfn-triple-template-10">トリプルテンプレート</a>のいずれかに依存する場合、
+                            id="ref-for-dfn-triple-pattern-8">トリプルパターン</a>は、
+                        その<a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
+                            id="ref-for-dfn-triple-pattern-9">トリプルパターン</a>が、規則の<a data-link-type="dfn|abstract-op"
+                            href="#dfn-rule-head" class="internalDFN" id="ref-for-dfn-rule-head-9">ヘッド</a>内にあるいずれかの<a
+                            data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
+                            id="ref-for-dfn-triple-template-11">トリプルテンプレート</a>に依存する場合、
                         <dfn data-local-lt="depends-pattern-rule" id="dfn-depends-on-a-rule" tabindex="0"
                             aria-haspopup="dialog" data-dfn-type="dfn"><a data-link-type="dfn|abstract-op"
-                                href="#dfn-rule" class="internalDFN" id="ref-for-dfn-rule-7">規則</a>に依存する</dfn>。
+                                href="#dfn-rule" class="internalDFN" id="ref-for-dfn-rule-7">規則</a>に依存します</dfn>。
                     </p>
                 </dd>
                 <dt><dfn data-lt="rule dependency|depends on|Rule dependency" id="dfn-rule-dependency" tabindex="0"
-                        aria-haspopup="dialog" data-dfn-type="dfn">規則依存関係</dfn></dt>
+                        aria-haspopup="dialog" data-dfn-type="dfn">規則の依存関係</dfn></dt>
                 <dd>
                     <p>
-                        規則<code>R1</code>は、<code>R1</code>のボディ内の任意の
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
-                            id="ref-for-dfn-triple-pattern-10">トリプルパターン</a>が、
+                        規則 <code>R1</code> の本体内にあるいずれかの<a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern"
+                            class="internalDFN" id="ref-for-dfn-triple-pattern-10">トリプルパターン</a>が、
                         <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern-element" class="internalDFN"
-                            id="ref-for-dfn-triple-pattern-element-8">トリプルパターン要素</a>としてであれ
-                        <a data-link-type="dfn|abstract-op" href="#dfn-negation-element" class="internalDFN"
-                            id="ref-for-dfn-negation-element-7">否定要素</a>内であれ、
+                            id="ref-for-dfn-triple-pattern-element-8">トリプルパターン要素</a>として、
+                        または<a data-link-type="dfn|abstract-op" href="#dfn-negation-element" class="internalDFN"
+                            id="ref-for-dfn-negation-element-8">否定要素</a>内にあるかを問わず、
 
-                        <code>R2</code>のヘッド内の
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
-                            id="ref-for-dfn-triple-template-11">トリプルテンプレート</a>に
-                        <a href="#dfn-triple-pattern-dependency" id="ref-for-dfn-triple-pattern-dependency-1">依存する</a>
-                        場合、規則<code>R2</code>に
-                        <a data-link-type="dfn|abstract-op" href="#dfn-rule-dependency" class="internalDFN"
-                            id="ref-for-dfn-rule-dependency-1">依存する</a>。
+                        <code>R2</code> のヘッド内の<a data-link-type="dfn|abstract-op" href="#dfn-triple-template"
+                            class="internalDFN" id="ref-for-dfn-triple-template-12">トリプルテンプレート</a>に<a
+                            href="#dfn-triple-pattern-dependency"
+                            id="ref-for-dfn-triple-pattern-dependency-1">依存する</a>場合、
+                        規則 <code>R1</code> は <code>R2</code> に<a data-link-type="dfn|abstract-op"
+                            href="#dfn-rule-dependency" class="internalDFN"
+                            id="ref-for-dfn-rule-dependency-1">依存します</a>。
                     </p>
                 </dd>
                 <dt><dfn data-plurals="closed dependencies" id="dfn-closed-dependency" tabindex="0"
-                        aria-haspopup="dialog" data-dfn-type="dfn">閉じた依存関係</dfn></dt>
+                        aria-haspopup="dialog" data-dfn-type="dfn">クローズド依存関係</dfn></dt>
                 <dd>
                     <p>
-                        規則<code>R1</code>の規則<code>R2</code>に対する
-                        <a data-link-type="dfn|abstract-op" href="#dfn-rule-dependency" class="internalDFN"
-                            id="ref-for-dfn-rule-dependency-2">規則依存関係</a>は、
-                        次の条件のいずれかが成り立つ場合、
-                        <a data-link-type="dfn|abstract-op" href="#dfn-closed-dependency" class="internalDFN"
-                            id="ref-for-dfn-closed-dependency-2">閉じた依存関係</a>である:
+                        規則 <code>R1</code> の規則 <code>R2</code> に対する<a data-link-type="dfn|abstract-op"
+                            href="#dfn-rule-dependency" class="internalDFN"
+                            id="ref-for-dfn-rule-dependency-2">規則の依存関係</a>は、
+                        次のいずれかの条件が満たされる場合、<a data-link-type="dfn|abstract-op" href="#dfn-closed-dependency"
+                            class="internalDFN" id="ref-for-dfn-closed-dependency-2">クローズド依存関係</a>です。
                     </p>
                     <ul>
-                        <li><code>R1</code>の<a data-link-type="dfn|abstract-op" href="#dfn-negation-element"
-                                class="internalDFN" id="ref-for-dfn-negation-element-8">否定要素</a>内に現れる
-                            <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
+                        <li><code>R1</code> の<a data-link-type="dfn|abstract-op" href="#dfn-negation-element"
+                                class="internalDFN" id="ref-for-dfn-negation-element-9">否定要素</a>内に現れる<a
+                                data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
                                 id="ref-for-dfn-triple-pattern-11">トリプルパターン</a>が、
-                            <code>R2</code>の<a data-link-type="dfn|abstract-op" href="#dfn-rule-head"
-                                class="internalDFN" id="ref-for-dfn-rule-head-10">規則ヘッド</a>内の
-                            <a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
-                                id="ref-for-dfn-triple-template-12">トリプルテンプレート</a>に一致する。
+                            <code>R2</code> の<a data-link-type="dfn|abstract-op" href="#dfn-rule-head"
+                                class="internalDFN" id="ref-for-dfn-rule-head-10">規則のヘッド</a>内にある<a
+                                data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
+                                id="ref-for-dfn-triple-template-13">トリプルテンプレート</a>と一致する。
                         </li>
-                        <li>規則<code>R1</code>が規則
-                            <code>R2</code>に<a data-link-type="dfn|abstract-op" href="#dfn-rule-dependency"
-                                class="internalDFN" id="ref-for-dfn-rule-dependency-3">依存し</a>、
-                            かつ<code>R1</code>が<a data-link-type="dfn|abstract-op" href="#dfn-assignment-element"
-                                class="internalDFN" id="ref-for-dfn-assignment-element-10">代入要素</a>をもつ。
+                        <li>規則 <code>R1</code> が規則 <code>R2</code> に<a data-link-type="dfn|abstract-op"
+                                href="#dfn-rule-dependency" class="internalDFN"
+                                id="ref-for-dfn-rule-dependency-3">依存し</a>、
+                            <code>R1</code> が<a data-link-type="dfn|abstract-op" href="#dfn-assignment-element"
+                                class="internalDFN" id="ref-for-dfn-assignment-element-10">代入要素</a>を持つ。
                         </li>
-                        <li>規則<code>R1</code>が規則
-                            <code>R2</code>に<a data-link-type="dfn|abstract-op" href="#dfn-rule-dependency"
-                                class="internalDFN" id="ref-for-dfn-rule-dependency-4">依存し</a>、
-                            かつ<code>R1</code>の<a data-link-type="dfn|abstract-op" href="#dfn-rule-head"
-                                class="internalDFN" id="ref-for-dfn-rule-head-11">規則ヘッド</a>が空白ノードをもつ。
+                        <li>規則 <code>R1</code> が規則 <code>R2</code> に<a data-link-type="dfn|abstract-op"
+                                href="#dfn-rule-dependency" class="internalDFN"
+                                id="ref-for-dfn-rule-dependency-4">依存し</a>、
+                            <code>R1</code> の<a data-link-type="dfn|abstract-op" href="#dfn-rule-head"
+                                class="internalDFN" id="ref-for-dfn-rule-head-11">規則のヘッド</a>に空白ノードがある。
                         </li>
                     </ul>
                 </dd>
                 <dt><dfn data-plurals="open dependencies" id="dfn-open-dependency" tabindex="0" aria-haspopup="dialog"
-                        data-dfn-type="dfn">開いた依存関係</dfn></dt>
+                        data-dfn-type="dfn">オープン依存関係</dfn></dt>
                 <dd>
                     <p>
-                        規則<code>R1</code>の規則<code>R2</code>に対する
-                        <a data-link-type="dfn|abstract-op" href="#dfn-rule-dependency" class="internalDFN"
-                            id="ref-for-dfn-rule-dependency-5">規則依存関係</a>は、
-                        その依存関係が
+                        規則 <code>R1</code> の規則 <code>R2</code> に対する<a data-link-type="dfn|abstract-op"
+                            href="#dfn-rule-dependency" class="internalDFN"
+                            id="ref-for-dfn-rule-dependency-5">規則の依存関係</a>は、その依存関係が
                         <a data-link-type="dfn|abstract-op" href="#dfn-closed-dependency" class="internalDFN"
-                            id="ref-for-dfn-closed-dependency-3">閉じた依存関係</a>でない場合、
+                            id="ref-for-dfn-closed-dependency-3">クローズド依存関係</a>でない場合、
                         <a data-link-type="dfn|abstract-op" href="#dfn-open-dependency" class="internalDFN"
-                            id="ref-for-dfn-open-dependency-2">開いた依存関係</a>である。
-                        すなわち、<code>R2</code>に依存する<code>R1</code>の任意の
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern" class="internalDFN"
-                            id="ref-for-dfn-triple-pattern-12">トリプルパターン</a>は、
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern-element" class="internalDFN"
-                            id="ref-for-dfn-triple-pattern-element-9">トリプルパターン要素</a>としてのみ現れる。
+                            id="ref-for-dfn-open-dependency-2">オープン依存関係</a>です。
+                        つまり、<code>R2</code> に依存する <code>R1</code> のすべての<a data-link-type="dfn|abstract-op"
+                            href="#dfn-triple-pattern" class="internalDFN"
+                            id="ref-for-dfn-triple-pattern-12">トリプルパターン</a>は、<a data-link-type="dfn|abstract-op"
+                            href="#dfn-triple-pattern-element" class="internalDFN"
+                            id="ref-for-dfn-triple-pattern-element-9">トリプルパターン要素</a>としてのみ現れます。
                     </p>
                 </dd>
             </dl>
 
-            <div class="note" role="note" id="issue-container-generatedID-3">
-                <div class="note-title marker" id="h-note-2"><span>注記</span></div>
+            <div class="note" role="note" id="issue-container-generatedID-4">
+                <div class="note-title marker" id="h-note-3"><span>注記</span></div>
                 <div class="">
                     <p>
-                        構成要素<code>tSubj</code>、<code>tPred</code>、<code>tObj</code>をもつ
-                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
-                            id="ref-for-dfn-triple-template-13">トリプルテンプレート</a>は、
-                        次のすべてが真である場合、構成要素RDF用語
-                        <code>s</code>、<code>p</code>、<code>o</code>をもつトリプルを
-                        生成する可能性がある:
+                        コンポーネント <code>tSubj</code>、<code>tPred</code>、<code>tObj</code> を持つ<a
+                            data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
+                            id="ref-for-dfn-triple-template-14">トリプルテンプレート</a>は、
+                        次のすべてが真である場合、コンポーネントとなる RDF 用語
+                        <code>s</code>、<code>p</code>、<code>o</code> を持つトリプルを生成する可能性があります。
                     </p>
                     <ul>
-                        <li><code>tSubj</code>が変数である、または<code>tSubj</code>が
-                            <code>s</code>と<a href="https://www.w3.org/TR/rdf12-concepts/#dfn-rdf-term-equality"
-                                id="ref-for-index-term-same-rdf-term-1">同じRDF用語</a>である
+                        <li><code>tSubj</code> が変数であるか、<code>tSubj</code> が <code>s</code> と
+                            <a href="https://www.w3.org/TR/rdf12-concepts/#dfn-rdf-term-equality"
+                                id="ref-for-index-term-same-rdf-term-1">同じ RDF 用語</a>である
                         </li>
-                        <li><code>tPred</code>が変数である、または<code>tPred</code>が
-                            <code>p</code>と<a href="https://www.w3.org/TR/rdf12-concepts/#dfn-rdf-term-equality"
-                                id="ref-for-index-term-same-rdf-term-2">同じRDF用語</a>である
+                        <li><code>tPred</code> が変数であるか、<code>tPred</code> が <code>p</code> と
+                            <a href="https://www.w3.org/TR/rdf12-concepts/#dfn-rdf-term-equality"
+                                id="ref-for-index-term-same-rdf-term-2">同じ RDF 用語</a>である
                         </li>
-                        <li><code>tObj</code>が変数である、または<code>tObj</code>が
-                            <code>o</code>と<a href="https://www.w3.org/TR/rdf12-concepts/#dfn-rdf-term-equality"
-                                id="ref-for-index-term-same-rdf-term-3">同じRDF用語</a>である
+                        <li><code>tObj</code> が変数であるか、<code>tObj</code> が <code>o</code> と
+                            <a href="https://www.w3.org/TR/rdf12-concepts/#dfn-rdf-term-equality"
+                                id="ref-for-index-term-same-rdf-term-3">同じ RDF 用語</a>である
                         </li>
                     </ul>
                     <p>
-                        さらに、<code>tSubj</code>、<code>tPred</code>、および<code>tObj</code>の任意の組が
+                        さらに、<code>tSubj</code>、<code>tPred</code>、<code>tObj</code> のいずれかの組が
                         同じ変数である場合、
-                        対応する<code>s</code>、<code>p</code>、および<code>o</code>の組も
-                        同じでなければならない。
+                        対応する <code>s</code>、<code>p</code>、<code>o</code> の組も
+                        同じでなければなりません。
                     </p>
                 </div>
             </div>
@@ -2807,8 +2860,8 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
                         </p>
                     </dd>
                 </dl>
-                <div class="note" role="note" id="issue-container-generatedID-4">
-                    <div class="note-title marker" id="h-note-3"><span>注記</span></div>
+                <div class="note" role="note" id="issue-container-generatedID-5">
+                    <div class="note-title marker" id="h-note-4"><span>注記</span></div>
                     <p class="">
                         依存グラフはデータグラフの影響を受けない。
                     </p>
@@ -2948,7 +3001,7 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
                     id="ref-for-dfn-stratification-5">層化</a>は、<a data-link-type="dfn|abstract-op" href="#dfn-rule"
                     class="internalDFN" id="ref-for-dfn-rule-9">規則</a>間の依存関係に制約を課し、
                 <a data-link-type="dfn|abstract-op" href="#dfn-negation-element" class="internalDFN"
-                    id="ref-for-dfn-negation-element-9">否定要素</a>、
+                    id="ref-for-dfn-negation-element-10">否定要素</a>、
                 <a data-link-type="dfn|abstract-op" href="#dfn-assignment-element" class="internalDFN"
                     id="ref-for-dfn-assignment-element-11">代入
                     要素</a>、および
@@ -2964,8 +3017,8 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
                     id="ref-for-dfn-rule-set-19">規則集合</a>の評価から、
                 単一の明確に定義された有限の結果が得られることを保証する。
             </p>
-            <div class="note" role="note" id="issue-container-generatedID-5">
-                <div class="note-title marker" id="h-note-4"><span>注記</span></div>
+            <div class="note" role="note" id="issue-container-generatedID-6">
+                <div class="note-title marker" id="h-note-5"><span>注記</span></div>
                 <div class="">
                     <p>
                         層化過程は、他の評価上の決定を行うためにも使用できる。
@@ -3053,7 +3106,7 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
                         id="ref-for-dfn-dependency-graph-7">依存グラフ</a>のいかなる推移的依存循環にも、
                     <code>NOT</code>または一度だけ実行される規則（代入、または空白ノードを含む規則の
                     <a data-link-type="dfn|abstract-op" href="#dfn-triple-template" class="internalDFN"
-                        id="ref-for-dfn-triple-template-14">トリプルテンプレート</a>）は存在しない。
+                        id="ref-for-dfn-triple-template-15">トリプルテンプレート</a>）は存在しない。
                 </p>
             </section>
 
@@ -3139,8 +3192,8 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
     <span class="hljs-string">the</span> <span class="hljs-string">result</span> <span class="hljs-string">is</span> <span class="hljs-string">stratumLevels</span>
 <span class="hljs-string">enddefine</span></code></pre>
                 </div>
-                <div class="note" role="note" id="issue-container-generatedID-6">
-                    <div class="note-title marker" id="h-note-5"><span>注記</span></div>
+                <div class="note" role="note" id="issue-container-generatedID-7">
+                    <div class="note-title marker" id="h-note-6"><span>注記</span></div>
                     <p class="">
                         <a data-link-type="dfn|abstract-op" href="#dfn-stratification-condition" class="internalDFN"
                             id="ref-for-dfn-stratification-condition-2">層化条件</a>の帰結として、
@@ -3150,6 +3203,13 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
                         以後の評価中に変化しない。
                     </p>
                 </div>
+                <p>
+                    完全な規則セットに対する依存関係分析と
+                    階層化の段階的な適用、およびそれに続く
+                    評価までの過程は、
+                    <a href="#eval-worked-example" class="sectionRef sec-ref"><bdi class="secno">6.6 </bdi>実例</a>
+                    に示されています。
+                </p>
             </section>
         </section>
     </section>
@@ -3167,8 +3227,8 @@ RULE { ?x :childOf ?y } WHERE { ?y :fatherOf ?x }</code></pre>
             <li><a href="#rdf-rules-syntax">RDF規則構文</a></li>
         </ul>
 
-        <div class="note" role="note" id="issue-container-generatedID-7">
-            <div class="note-title marker" id="h-note-6"><span>注記</span></div>
+        <div class="note" role="note" id="issue-container-generatedID-8">
+            <div class="note-title marker" id="h-note-7"><span>注記</span></div>
             <aside class="">
                 Shape Rules Language（SRL）構文には、等価なRDF構文形式がある。
                 整形式のRDF構文はShape Rules Language構文へ翻訳できる。
@@ -3297,7 +3357,7 @@ PREFIX sparql: &lt;http://www.w3.org/ns/sparql#&gt;
             </div>
 
             <p><a href="#shapes-rules-grammar">文法</a>は以下に示す。</p>
-            <div class="note" id="issue-container-generatedID-8">
+            <div class="note" id="issue-container-generatedID-9">
                 <div class="ednote-title marker" id="h-ednote-0"><span>編集者注</span></div>
                 <p class="">ASTから抽象構文への写像。</p>
             </div>
@@ -3317,7 +3377,7 @@ PREFIX sparql: &lt;http://www.w3.org/ns/sparql#&gt;
                 SHACLシェイプ: <a href="./rules-rdf-syntax/rdf-syntax-shapes.ttl">rdf-syntax-shapes.ttl</a>
             </p>
 
-            <div class="note" id="issue-container-generatedID-9">
+            <div class="note" id="issue-container-generatedID-10">
                 <div class="ednote-title marker" id="h-ednote-1"><span>編集者注</span></div>
                 <div class="">
                     <p>整形式性:</p>
@@ -3330,7 +3390,7 @@ PREFIX sparql: &lt;http://www.w3.org/ns/sparql#&gt;
                     </ul>
                 </div>
             </div>
-            <div class="note" id="issue-container-generatedID-10">
+            <div class="note" id="issue-container-generatedID-11">
                 <div class="ednote-title marker" id="h-ednote-2"><span>編集者注</span></div>
                 <div class="">
                     <p>
@@ -3339,7 +3399,7 @@ PREFIX sparql: &lt;http://www.w3.org/ns/sparql#&gt;
                 </div>
             </div>
 
-            <div class="note" id="issue-container-generatedID-11">
+            <div class="note" id="issue-container-generatedID-12">
                 <div class="ednote-title marker" id="h-ednote-3"><span>編集者注</span></div>
                 <div class="">
                     <p>処理: アキュムレーター、ボトムアップ／構造の走査。</p>
@@ -3643,7 +3703,7 @@ PREFIX srl:    &lt;http://www.w3.org/ns/shacl-rules#&gt;
                     かつcompatible(μ1, μ2)
                     μ(v) = merge(μ1, μ2) }</span></code></pre>
                     </div>
-                    <div class="note" id="issue-container-generatedID-12">
+                    <div class="note" id="issue-container-generatedID-13">
                         <div class="ednote-title marker" id="h-ednote-4"><span>編集者注</span></div>
                         <div class="">
                             <p>
@@ -3935,44 +3995,531 @@ V = {}とする
             </p>
 
             <div class="algorithm">
-                <pre aria-busy="false"><code class="hljs yaml"><span class="hljs-string">G0を入力基底グラフとする</span>
-<span class="hljs-string">RSを規則集合とする</span>
-<span class="hljs-string">DをRS内のすべてのDATAトリプルからなるグラフとする</span>
+                <pre
+                    aria-busy="false"><code class="hljs yaml"><span class="hljs-string">let</span> <span class="hljs-string">G0</span> <span class="hljs-string">be</span> <span class="hljs-string">the</span> <span class="hljs-string">input</span> <span class="hljs-string">base</span> <span class="hljs-string">graph</span>
+<span class="hljs-string">let</span> <span class="hljs-string">RS</span> <span class="hljs-string">be</span> <span class="hljs-string">the</span> <span class="hljs-string">rule</span> <span class="hljs-string">set</span>
+<span class="hljs-string">let</span> <span class="hljs-string">D</span> <span class="hljs-string">be</span> <span class="hljs-string">the</span> <span class="hljs-string">graph</span> <span class="hljs-string">of</span> <span class="hljs-string">all</span> <span class="hljs-string">DATA</span> <span class="hljs-string">triples</span> <span class="hljs-string">in</span> <span class="hljs-string">RS</span>
 
-<span class="hljs-string">RSに層別化を適用する</span>
+<span class="hljs-string">Apply</span> <span class="hljs-string">stratification</span> <span class="hljs-string">to</span> <span class="hljs-string">RS</span>
 
-<span class="hljs-string">LSを層別化後の層のシーケンスとする</span>
+<span class="hljs-string">let</span> <span class="hljs-string">LS</span> <span class="hljs-string">be</span> <span class="hljs-string">the</span> <span class="hljs-string">sequence</span> <span class="hljs-string">of</span> <span class="hljs-string">layers</span> <span class="hljs-string">after</span> <span class="hljs-string">stratification</span>
 
-<span class="hljs-comment"># 推論グラフ</span>
-<span class="hljs-string">GI</span> <span class="hljs-string">=</span> { <span class="hljs-string">t</span> <span class="hljs-string">∈</span> <span class="hljs-string">D</span> <span class="hljs-string">|</span> <span class="hljs-string">t</span> <span class="hljs-string">∉</span> <span class="hljs-string">G0</span> }<span class="hljs-string">とする</span>
+<span class="hljs-comment"># Inference graph</span>
+<span class="hljs-string">let</span> <span class="hljs-string">GI</span> <span class="hljs-string">=</span> { <span class="hljs-string">t</span> <span class="hljs-string">∈</span> <span class="hljs-string">D</span> <span class="hljs-string">|</span> <span class="hljs-string">t</span> <span class="hljs-string">∉</span> <span class="hljs-string">G0</span> }
 
-<span class="hljs-comment"># 評価グラフ。</span>
-<span class="hljs-string">GE</span> <span class="hljs-string">=</span> <span class="hljs-string">G0</span> <span class="hljs-string">∪︀</span> <span class="hljs-string">Dとする</span>
+<span class="hljs-comment"># Evaluation graph.</span>
+<span class="hljs-string">let</span> <span class="hljs-string">GE</span> <span class="hljs-string">=</span> <span class="hljs-string">G0</span> <span class="hljs-string">∪︀</span> <span class="hljs-string">D</span>
 
-<span class="hljs-attr">LS内の各層STについて:</span>
-    <span class="hljs-attr">ST.once内の各規則Rについて:</span>
-        <span class="hljs-string">X</span> <span class="hljs-string">=</span> <span class="hljs-string">eval(R,</span> <span class="hljs-string">GE)とする</span>
-        <span class="hljs-string">Y</span> <span class="hljs-string">=</span> { <span class="hljs-string">t</span> <span class="hljs-string">∈</span> <span class="hljs-string">X</span> <span class="hljs-string">|</span> <span class="hljs-string">t</span> <span class="hljs-string">∉</span> <span class="hljs-string">GE</span> }<span class="hljs-string">とする</span>
+<span class="hljs-attr">for each stratum ST in LS:</span>
+    <span class="hljs-attr">for each rule R in ST.once:</span>
+        <span class="hljs-string">let</span> <span class="hljs-string">X</span> <span class="hljs-string">=</span> <span class="hljs-string">eval(R,</span> <span class="hljs-string">GE)</span>
+        <span class="hljs-string">let</span> <span class="hljs-string">Y</span> <span class="hljs-string">=</span> { <span class="hljs-string">t</span> <span class="hljs-string">∈</span> <span class="hljs-string">X</span> <span class="hljs-string">|</span> <span class="hljs-string">t</span> <span class="hljs-string">∉</span> <span class="hljs-string">GE</span> }
         <span class="hljs-string">GI</span> <span class="hljs-string">=</span> <span class="hljs-string">Y</span> <span class="hljs-string">∪︀</span> <span class="hljs-string">GI</span>
         <span class="hljs-string">GE</span> <span class="hljs-string">=</span> <span class="hljs-string">Y</span> <span class="hljs-string">∪︀</span> <span class="hljs-string">GE</span>
-    <span class="hljs-string">反復終了</span>
+    <span class="hljs-string">endfor</span>
 
-    <span class="hljs-string">finished</span> <span class="hljs-string">=</span> <span class="hljs-literal">false</span><span class="hljs-string">とする</span>
-    <span class="hljs-string">!finishedの間:</span>
+    <span class="hljs-string">let</span> <span class="hljs-string">finished</span> <span class="hljs-string">=</span> <span class="hljs-literal">false</span>
+    <span class="hljs-string">while</span> <span class="hljs-type">!finished:</span>
         <span class="hljs-string">finished</span> <span class="hljs-string">=</span> <span class="hljs-literal">true</span>
-        <span class="hljs-attr">ST.general内の各規則Rについて:</span>
-            <span class="hljs-string">X</span> <span class="hljs-string">=</span> <span class="hljs-string">eval(R,</span> <span class="hljs-string">GE)とする</span>
-            <span class="hljs-string">Y</span> <span class="hljs-string">=</span> { <span class="hljs-string">t</span> <span class="hljs-string">∈</span> <span class="hljs-string">X</span> <span class="hljs-string">|</span> <span class="hljs-string">t</span> <span class="hljs-string">∉</span> <span class="hljs-string">GE</span> }<span class="hljs-string">とする</span>
-            <span class="hljs-attr">Yが空でない場合:</span>
+        <span class="hljs-attr">for each rule R in ST.general:</span>
+            <span class="hljs-string">let</span> <span class="hljs-string">X</span> <span class="hljs-string">=</span> <span class="hljs-string">eval(R,</span> <span class="hljs-string">GE)</span>
+            <span class="hljs-string">let</span> <span class="hljs-string">Y</span> <span class="hljs-string">=</span> { <span class="hljs-string">t</span> <span class="hljs-string">∈</span> <span class="hljs-string">X</span> <span class="hljs-string">|</span> <span class="hljs-string">t</span> <span class="hljs-string">∉</span> <span class="hljs-string">GE</span> }
+            <span class="hljs-attr">if Y is not empty:</span>
                 <span class="hljs-string">finished</span> <span class="hljs-string">=</span> <span class="hljs-literal">false</span>
                 <span class="hljs-string">GI</span> <span class="hljs-string">=</span> <span class="hljs-string">Y</span> <span class="hljs-string">∪︀</span> <span class="hljs-string">GI</span>
                 <span class="hljs-string">GE</span> <span class="hljs-string">=</span> <span class="hljs-string">Y</span> <span class="hljs-string">∪︀</span> <span class="hljs-string">GE</span>
-            <span class="hljs-string">条件終了</span>
-        <span class="hljs-string">反復終了</span>
-    <span class="hljs-string">while終了</span>
-<span class="hljs-string">反復終了</span>
-<span class="hljs-string">結果はGI</span></code></pre>
+            <span class="hljs-string">endif</span>
+        <span class="hljs-string">endfor</span>
+    <span class="hljs-string">endwhile</span>
+<span class="hljs-string">endfor</span>
+<span class="hljs-string">the</span> <span class="hljs-string">result</span> <span class="hljs-string">is</span> <span class="hljs-string">GI</span></code></pre>
             </div>
+        </section>
+
+
+        <section id="eval-worked-example" class="informative">
+            <div class="header-wrapper">
+                <h3 id="x6-6-worked-example"><bdi class="secno">6.6 </bdi>実例</h3><a class="self-link"
+                    href="#eval-worked-example" aria-label="セクション 6.6 のパーマリンク"></a>
+            </div>
+            <p><em>このセクションは非規範的です。</em></p>
+
+            <p>
+                このセクションでは、完全な
+                <a data-link-type="dfn|abstract-op" href="#dfn-rule-set" class="internalDFN"
+                    id="ref-for-dfn-rule-set-29">規則セット</a>の評価について、規則の依存関係の特定
+                （<a href="#rule-dependency" class="sectionRef sec-ref"><bdi class="secno">4.3 </bdi>規則の
+                    依存関係</a>）、
+                階層化の計算
+                （<a href="#stratification" class="sectionRef sec-ref"><bdi class="secno">4.4 </bdi>階層化</a>）、
+                および各階層を順番に評価して
+                <a data-link-type="dfn|abstract-op" href="#dfn-inference-graph" class="internalDFN"
+                    id="ref-for-dfn-inference-graph-6">推論グラフ</a>を生成するまでを段階的に説明します
+                （<a href="#eval-rule-set" class="sectionRef sec-ref"><bdi class="secno">6.5 </bdi>規則
+                    セットの評価</a>）。
+            </p>
+            <p>
+                この例では、ソフトウェアコンポーネントとその依存関係について説明します。
+                フロントエンドはアプリケーションサーバーに依存し、そのサーバーは
+                データベースとロギングライブラリに依存します。データベースには既知の
+                脆弱性があります。規則は依存関係チェーンに沿って脆弱性への露出を
+                伝播させ、重大な脆弱性に露出しているコンポーネントに
+                <code>:criticallyExposed</code> ステータスを付与し、重大ではないコンポーネントに
+                <code>:safeToDeploy</code> ステータスを付与し、重大な露出状態にある
+                各コンポーネントの通知を作成します。
+                （実際には、脆弱性がコンポーネントに影響するかどうかは
+                デプロイされたバージョンによって決まりますが、この例ではバージョンを省略し、
+                脆弱性を直接記述しています。）
+                簡潔にするため、基本グラフでは <code>:dependsOn</code> トリプルを直接記述し、
+                <a href="#desc-basic" class="sectionRef sec-ref"><bdi class="secno">3.1 </bdi>基本パターン</a>のように、
+                より具体的な関係から導出することはしません。
+            </p>
+
+            <aside class="example" id="example-worked-example-data-and-rules">
+                <div class="marker">
+                    <a class="self-link" href="#example-worked-example-data-and-rules">例<bdi> 15</bdi></a><span
+                        class="example-title">: 実例：データと規則</span>
+                </div>
+                <pre class="block ex-data" aria-busy="false"><code class="hljs">:frontend rdf:type :Component ;
+          :dependsOn :app .
+:app      rdf:type :Component ;
+          :dependsOn :db ;
+          :dependsOn :logger .
+:db       rdf:type :Component ;
+          :hasVulnerability :vuln1 .
+:logger   rdf:type :Component .
+:vuln1    :severity 9.1 .</code></pre>
+                <pre class="block ex-rules" aria-busy="false"><code class="hljs"># R1
+RULE { ?x :exposedTo ?v } WHERE { ?x :hasVulnerability ?v }
+
+# R2
+RULE { ?x :exposedTo ?v } WHERE { ?x :dependsOn ?y . ?y :exposedTo ?v }
+
+# R3
+RULE { ?x :status :criticallyExposed }
+WHERE { ?x :exposedTo ?v . ?v :severity ?s . FILTER(?s &gt;= 9.0) }
+
+# R4
+RULE { ?x :status :safeToDeploy }
+WHERE { ?x rdf:type :Component . NOT { ?x :status :criticallyExposed } }
+
+# R5
+RULE { [] rdf:type :Notification ; :concerns ?x }
+WHERE { ?x :status :criticallyExposed }</code></pre>
+            </aside>
+
+            <p>
+                規則はコメント内で <code>R1</code> から <code>R5</code> までのラベルが付けられており、このセクションの残りでは
+                これらのラベルによって参照されます。
+                これらは、
+                <a href="#desc-recursion" class="sectionRef sec-ref"><bdi class="secno">3.2 </bdi>再帰</a>から
+                <a href="#desc-creating-rdf-terms" class="sectionRef sec-ref"><bdi class="secno">3.5 </bdi>代入
+                    と RDF 用語の作成</a>までで導入された規則です。
+                規則セットには <code>IMPORTS</code> がないため、インポート処理を行っても
+                変更されず、<code>DATA</code> ブロックもないため、評価は
+                基本グラフのみから開始されます。
+            </p>
+
+            <section id="worked-example-dependencies">
+                <div class="header-wrapper">
+                    <h4 id="x6-6-1-determining-the-dependencies"><bdi class="secno">6.6.1 </bdi>依存関係の
+                        特定</h4><a class="self-link" href="#worked-example-dependencies"
+                        aria-label="セクション 6.6.1 のパーマリンク"></a>
+                </div>
+
+                <p>
+                    各規則本体内の各トリプルパターンを、
+                    すべての規則ヘッド内のトリプルテンプレートと比較して、どの規則が
+                    どの規則に依存するかを特定します
+                    （<a href="#rule-dependency" class="sectionRef sec-ref"><bdi class="secno">4.3 </bdi>規則の
+                        依存関係</a>）。
+                </p>
+                <ul>
+                    <li>
+                        <code>R1</code> の本体は、単一のトリプルパターン
+                        <code>?x :hasVulnerability ?v</code> です。述語 <code>:hasVulnerability</code> を持つ
+                        トリプルを生成できるトリプルテンプレートを持つ規則ヘッドはないため、
+                        このパターンはデータとのみ一致できます。
+                        <code>R1</code> には依存関係がありません。
+                    </li>
+                    <li>
+                        <code>R2</code> の本体には2つのトリプルパターンがあります。
+                        <code>?x :dependsOn ?y</code> はどの規則ヘッドとも一致できないため、
+                        データとのみ一致します。<code>?y :exposedTo ?v</code> は <code>R1</code> のヘッドテンプレート
+                        <code>?x :exposedTo ?v</code> と一致し、<code>R2</code> 自身のヘッドとも一致します。
+                        どちらの出現箇所も<a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern-element"
+                            class="internalDFN" id="ref-for-dfn-triple-pattern-element-10">トリプルパターン要素</a>です
+                        （これらは<a data-link-type="dfn|abstract-op" href="#dfn-negation-element" class="internalDFN"
+                            id="ref-for-dfn-negation-element-11">否定要素</a>内には現れず、
+                        <code>R2</code> の
+                        本体には<a data-link-type="dfn|abstract-op" href="#dfn-assignment-element" class="internalDFN"
+                            id="ref-for-dfn-assignment-element-14">代入要素</a>がなく、ヘッドにも空白ノードが
+                        ありません）。したがって、
+                        <code>R2</code> は <code>R1</code> に対して<em>オープン</em>依存関係を持ち、
+                        自身に対しても<em>オープン</em>依存関係を持ちます。
+                        <code>R2</code> の自身に対する依存関係により、<code>R2</code> は再帰的な規則になります。
+                    </li>
+                    <li>
+                        <code>R3</code> の本体では、パターン <code>?x :exposedTo ?v</code> が
+                        <code>R1</code> と <code>R2</code> のヘッドに一致するため、<code>R3</code> はそれぞれに対して<em>オープン</em>
+                        依存関係を持ちます。パターン <code>?v :severity ?s</code> はどの
+                        規則ヘッドとも一致しません。
+                    </li>
+                    <li>
+                        <code>R4</code> の本体では、パターン <code>?x rdf:type :Component</code> は
+                        どの規則ヘッドとも一致しません。述語
+                        <code>rdf:type</code> を持つ唯一のヘッドテンプレートは <code>R5</code> にありますが、その目的語 <code>:Notification</code> は
+                        <code>:Component</code> とは異なる RDF 用語であるため、生成された
+                        トリプルが一致することはありません。
+                        パターン <code>?x :status :criticallyExposed</code> は、
+                        <a data-link-type="dfn|abstract-op" href="#dfn-negation-element" class="internalDFN"
+                            id="ref-for-dfn-negation-element-12">否定要素</a>
+                        <code>NOT { ?x :status :criticallyExposed }</code> 内に現れ、
+                        <code>R3</code> のヘッドテンプレートと一致します。このパターンは
+                        否定要素内に現れるため、<code>R4</code> は <code>R3</code> に対して<em>クローズド</em>
+                        依存関係を持ちます。
+                    </li>
+                    <li>
+                        <code>R5</code> の本体では、パターン <code>?x :status :criticallyExposed</code> が
+                        <code>R3</code> のヘッドと一致します。<code>R5</code> のヘッドには
+                        空白ノードが含まれるため、パターンが通常の
+                        <a data-link-type="dfn|abstract-op" href="#dfn-triple-pattern-element" class="internalDFN"
+                            id="ref-for-dfn-triple-pattern-element-11">トリプルパターン要素</a>であっても、<code>R3</code>
+                        に対する依存関係は<em>クローズド</em>
+                        依存関係になります。
+                        どの規則本体内のパターンも <code>R5</code> のヘッドテンプレートとは
+                        一致しないため、<code>R5</code> に依存する規則はありません。
+                    </li>
+                </ul>
+                <p>
+                    したがって、<a data-link-type="dfn|abstract-op" href="#dfn-dependency-graph" class="internalDFN"
+                        id="ref-for-dfn-dependency-graph-9">依存関係グラフ</a>には5つの頂点と6つの
+                    辺があります。
+                </p>
+                <ul>
+                    <li>
+                        <code>R2 → R1</code>（オープン）
+                    </li>
+                    <li>
+                        <code>R2 → R2</code>（オープン）
+                    </li>
+                    <li>
+                        <code>R3 → R1</code>（オープン）
+                    </li>
+                    <li>
+                        <code>R3 → R2</code>（オープン）
+                    </li>
+                    <li>
+                        <code>R4 → R3</code>（クローズド）
+                    </li>
+                    <li>
+                        <code>R5 → R3</code>（クローズド）
+                    </li>
+                </ul>
+                <p>
+                    <code>R4</code> と <code>R5</code> は <code>R1</code> または
+                    <code>R2</code> に直接依存していませんが、それぞれが <code>R3</code> を介して、両方に対する<a data-link-type="dfn|abstract-op"
+                        href="#dfn-transitive-rule-dependency" class="internalDFN"
+                        id="ref-for-dfn-transitive-rule-dependency-2">推移的依存関係</a>を持ちます。
+                </p>
+
+                <figure id="fig-worked-example-dep-graph">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 350" width="480"
+                        style="max-width: 480px; height: auto;" role="img"
+                        aria-labelledby="depgraph-title depgraph-desc">
+                        <title id="depgraph-title">実例の規則セットの依存関係グラフ</title>
+                        <desc id="depgraph-desc">
+                            R1、R2、R3、R4、R5 とラベル付けされた5つの頂点。
+                            破線の矢印はオープン依存関係を示します。R2 から R1、
+                            R2 から自身、R3 から R1、および R3 から R2 への依存関係です。
+                            実線の矢印はクローズド依存関係を示します。R4 から R3
+                            および R5 から R3 への依存関係です。
+                        </desc>
+                        <defs>
+                            <marker id="dep-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+                                markerHeight="7" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+                            </marker>
+                        </defs>
+                        <g fill="none" stroke="currentColor" stroke-width="1.5">
+
+                            <g stroke-dasharray="6 4" marker-end="url(#dep-arrow)">
+
+                                <line x1="223.6" y1="135.3" x2="156.4" y2="74.7"></line>
+
+                                <line x1="256.4" y1="135.3" x2="323.6" y2="74.7"></line>
+
+                                <line x1="162" y1="60" x2="316" y2="60"></line>
+
+                                <path d="M 124.4 44.4 C 60 15, 60 105, 124.4 75.6"></path>
+                            </g>
+
+                            <g marker-end="url(#dep-arrow)">
+
+                                <line x1="156.4" y1="225.3" x2="223.6" y2="164.7"></line>
+
+                                <line x1="323.6" y1="225.3" x2="256.4" y2="164.7"></line>
+                            </g>
+
+                            <circle cx="140" cy="60" r="22"></circle>
+                            <circle cx="340" cy="60" r="22"></circle>
+                            <circle cx="240" cy="150" r="22"></circle>
+                            <circle cx="140" cy="240" r="22"></circle>
+                            <circle cx="340" cy="240" r="22"></circle>
+                        </g>
+                        <g fill="currentColor" font-size="15" font-weight="bold" text-anchor="middle">
+                            <text x="140" y="65">R2</text>
+                            <text x="340" y="65">R1</text>
+                            <text x="240" y="155">R3</text>
+                            <text x="140" y="245">R4</text>
+                            <text x="340" y="245">R5</text>
+                        </g>
+
+                        <g stroke="currentColor" stroke-width="1.5">
+                            <line x1="55" y1="325" x2="105" y2="325" stroke-dasharray="6 4"></line>
+                            <line x1="245" y1="325" x2="295" y2="325"></line>
+                        </g>
+                        <g fill="currentColor" font-size="14">
+                            <text x="113" y="330">オープン依存関係</text>
+                            <text x="303" y="330">クローズド依存関係</text>
+                        </g>
+                    </svg>
+                    <figcaption><a class="self-link" href="#fig-worked-example-dep-graph">図 <bdi
+                                class="figno">1</bdi></a> <span class="fig-title">
+                            実例の規則セットの依存関係グラフ。
+                            オープン依存関係は破線の矢印で、クローズド
+                            依存関係は実線の矢印で描画されます。各辺は、一致するトリプルパターンを
+                            本体に含む規則から、一致するトリプルを生成できる
+                            ヘッドを持つ規則を指します。
+                            規則は、階層 0 を上部に、より上位の
+                            階層を下部に配置し、評価順序と一致させています。
+                        </span></figcaption>
+                </figure>
+                <p>
+                    グラフ内の唯一の循環は自己辺 <code>R2 → R2</code> であり、
+                    これはオープン依存関係です。クローズド
+                    依存関係を含む循環はないため、<a data-link-type="dfn|abstract-op" href="#dfn-stratification-condition"
+                        class="internalDFN" id="ref-for-dfn-stratification-condition-3">階層化条件</a>が
+                    満たされ、
+                    規則セットには明確に定義された結果があります。
+                </p>
+            </section>
+
+            <section id="worked-example-stratification">
+                <div class="header-wrapper">
+                    <h4 id="x6-6-2-calculating-the-stratification"><bdi class="secno">6.6.2 </bdi>階層化の
+                        計算</h4><a class="self-link" href="#worked-example-stratification"
+                        aria-label="セクション 6.6.2 のパーマリンク"></a>
+                </div>
+
+                <p>
+                    <a href="#stratification-algorithm">階層化アルゴリズム</a>に
+                    従い、
+                    すべての規則は階層 0 から開始します。その後、何も変化しなくなるまで
+                    辺が繰り返し検査されます。
+                </p>
+                <ul>
+                    <li>
+                        <em>オープン</em>辺では、始点側の規則が
+                        終点側と同じ階層またはそれより上位の階層にある必要があります。4つのオープン辺はすべて、
+                        すべての規則が階層 0 にある状態ですでにこの条件を満たしているため、
+                        変更は発生しません。
+                    </li>
+                    <li>
+                        <em>クローズド</em>辺では、始点側の規則が
+                        終点側より厳密に上位の階層にある必要があります。これは、終点側を
+                        先に完了まで実行する必要があるためです。辺 <code>R4 → R3</code>
+                        （クローズド）では、<code>R4</code> と <code>R3</code> がどちらも階層 0 にあるため、<code>R4</code> は
+                        階層 1 に移動されます。同様に、辺 <code>R5 → R3</code>
+                        （クローズド）により、<code>R5</code> は階層 1 に移動されます。
+                    </li>
+                </ul>
+                <p>
+                    さらに辺を1回走査しても変更はないため、階層は
+                    確定します。次に、各階層は
+                    <a data-link-type="dfn|abstract-op" href="#dfn-run-once-rule" class="internalDFN"
+                        id="ref-for-dfn-run-once-rule-7">一度だけ実行される規則</a>と<a data-link-type="dfn|abstract-op"
+                        href="#dfn-general-rule" class="internalDFN" id="ref-for-dfn-general-rule-3">一般規則</a>に分割されます。
+                    <code>R5</code> のヘッドには空白
+                    ノードがあるため、これは<a data-link-type="dfn|abstract-op" href="#dfn-run-once-rule" class="internalDFN"
+                        id="ref-for-dfn-run-once-rule-8">一度だけ実行される規則</a>です。ほかの規則には、
+                    <a data-link-type="dfn|abstract-op" href="#dfn-assignment-element" class="internalDFN"
+                        id="ref-for-dfn-assignment-element-15">代入要素</a>も、ヘッド内の空白ノードもありません。
+                    階層化は次のとおりです。
+                </p>
+                <ul>
+                    <li>階層 0：一般規則 <code>R1</code>、<code>R2</code>、<code>R3</code>。一度だけ実行される規則はなし</li>
+                    <li>階層 1：一度だけ実行される規則 <code>R5</code>。一般規則 <code>R4</code></li>
+                </ul>
+                <p>
+                    この順序付けは、上位
+                    階層にある規則の意図を反映しています。コンポーネントを安全にデプロイできるかどうか、および
+                    どのコンポーネントに通知が必要かは、
+                    <em>すべての</em> <code>:status :criticallyExposed</code> トリプルが導出された後にのみ判断できます
+                    — また、それらを導出する規則 <code>R3</code> は、
+                    その入力を生成する規則 <code>R1</code> および <code>R2</code> とともに、
+                    下位の階層で完了します。
+                </p>
+            </section>
+
+            <section id="worked-example-evaluation">
+                <div class="header-wrapper">
+                    <h4 id="x6-6-3-evaluating-the-strata"><bdi class="secno">6.6.3 </bdi>各階層の評価</h4><a class="self-link"
+                        href="#worked-example-evaluation" aria-label="セクション 6.6.3 のパーマリンク"></a>
+                </div>
+
+                <p>
+                    評価は、
+                    <a href="#eval-rule-set" class="sectionRef sec-ref"><bdi class="secno">6.5 </bdi>規則
+                        セットの評価</a>のアルゴリズムに従います。
+                    評価グラフ <code>GE</code> は基本グラフとして開始し、
+                    推論グラフ <code>GI</code> は空の状態で開始します。各階層は順番に
+                    完了まで評価されます。階層内の規則は
+                    パス単位で評価され、パスが新しいトリプルを生成しなくなるまで繰り返されます。
+                    このアルゴリズムは、1つのパス内で階層内の規則を
+                    評価する順序を固定していません。この実行過程では、
+                    <code>R1</code>、<code>R2</code>、<code>R3</code> の順序を使用します。異なる順序では、同じ
+                    推論が異なる回数のパスに分散される場合がありますが、
+                    階層 0 は完了まで実行されるため、同じ最終グラフが生成されます。
+                </p>
+                <p>
+                    この規則セットには <code>DATA</code> ブロックがないため、評価中のすべての時点で
+                    <code>GE</code> は <code>G0</code> と <code>GI</code> を合わせたものです。したがって、この実行過程では
+                    <code>GI</code> のみを追跡し、評価の進行に伴う状態を示すとともに、
+                    各新規トリプルに、それを生成した規則を記します。
+                </p>
+                <p><strong>階層 0、1回目のパス。</strong></p>
+                <ul>
+                    <li>
+                        <code>R1</code>：本体が
+                        <code>:db :hasVulnerability :vuln1</code> と一致し、
+                        <code>?x = :db</code> および <code>?v = :vuln1</code> が束縛されます。
+                        ヘッドは <code>:db :exposedTo :vuln1</code> を生成します。
+                        このトリプルは <code>GE</code> にないため、<code>GE</code> と <code>GI</code> に追加されます。
+                    </li>
+                    <li>
+                        <code>R2</code>：本体は <code>?x :dependsOn ?y</code> と
+                        <code>?y :exposedTo ?v</code> を結合します。<code>GE</code> には現在
+                        <code>:db :exposedTo :vuln1</code> が含まれるため、この結合から1つの解が得られます。
+                        <code>?x = :app</code>、<code>?y = :db</code>、および <code>?v = :vuln1</code>
+                        （<code>:app :dependsOn :db</code> から）です。
+                        ヘッドは新しい <code>:app :exposedTo :vuln1</code> を生成し、
+                        追加されます。<code>:frontend</code> に対する解はまだありません。これは、
+                        <code>R2</code> のこの評価が開始された時点では、
+                        <code>:app :exposedTo :vuln1</code> が <code>GE</code> に含まれていなかったためです。
+                    </li>
+                    <li>
+                        <code>R3</code>：<code>?x :exposedTo ?v</code> は現在、<code>:db</code> と
+                        <code>:app</code> に対して一致します。
+                        <code>:vuln1 :severity 9.1</code> と結合し、
+                        <code>FILTER(?s &gt;= 9.0)</code> を適用すると、両方の解が保持されます。
+                        ヘッドは <code>:db :status :criticallyExposed</code> と
+                        <code>:app :status :criticallyExposed</code> を生成し、どちらも新規です。
+                    </li>
+                </ul>
+                <pre class="block ex-inferred" aria-busy="false"><code class="hljs"># 階層 0 の1回目のパス後の GI
+:db  :exposedTo :vuln1 .                    # 新規 (R1)
+:app :exposedTo :vuln1 .                    # 新規 (R2)
+:db  :status :criticallyExposed .           # 新規 (R3)
+:app :status :criticallyExposed .           # 新規 (R3)</code></pre>
+                <p>
+                    新しいトリプルが生成されたため、階層 0 の評価は
+                    次のパスに続きます。
+                </p>
+                <p><strong>階層 0、2回目のパス。</strong></p>
+                <ul>
+                    <li>
+                        <code>R1</code>：前と同様に一致します。<code>:db :exposedTo :vuln1</code> はすでに
+                        <code>GE</code> にあるため、新しいものは生成されません。
+                    </li>
+                    <li>
+                        <code>R2</code>：結合からさらに
+                        <code>?x = :frontend</code>、<code>?y = :app</code>、および <code>?v = :vuln1</code> が得られ、
+                        新しいトリプル <code>:frontend :exposedTo :vuln1</code> が生成されます。
+                        露出が依存関係チェーンに沿って2段階伝播するには、
+                        2回のパスが必要でした。
+                    </li>
+                    <li>
+                        <code>R3</code>：新しいトリプル
+                        <code>:frontend :status :criticallyExposed</code> を生成します。
+                    </li>
+                </ul>
+                <pre class="block ex-inferred" aria-busy="false"><code class="hljs"># 階層 0 の2回目のパス後の GI
+:db       :exposedTo :vuln1 .
+:app      :exposedTo :vuln1 .
+:frontend :exposedTo :vuln1 .               # 新規 (R2)
+:db       :status :criticallyExposed .
+:app      :status :criticallyExposed .
+:frontend :status :criticallyExposed .      # 新規 (R3)</code></pre>
+                <p><strong>階層 0、3回目のパス。</strong>
+                    すべての規則のすべての解が、現在ではすでに
+                    <code>GE</code> 内にあるトリプルのみを生成します。<code>GI</code> は変更されません。
+                    新しいトリプルがないため、階層 0 は完了です。今後
+                    導出可能なすべての <code>:exposedTo</code> トリプルおよび
+                    <code>:status :criticallyExposed</code> トリプルが導出されました。
+                </p>
+                <p><strong>階層 1、一度だけ実行される規則。</strong>
+                    階層内の<a data-link-type="dfn|abstract-op" href="#dfn-run-once-rule" class="internalDFN"
+                        id="ref-for-dfn-run-once-rule-9">一度だけ実行される規則</a>が先に評価され、
+                    それぞれが厳密に1回だけ実行されます。
+                </p>
+                <ul>
+                    <li>
+                        <code>R5</code>：本体が3つの <code>:status :criticallyExposed</code>
+                        トリプルと一致し、解 <code>?x = :db</code>、<code>?x = :app</code>、および
+                        <code>?x = :frontend</code> が得られます。各解についてヘッドをインスタンス化すると、
+                        <em>新しい</em>空白ノードが作成され、解ごとに
+                        2つのトリプル、すなわち各重大コンポーネントに対する
+                        通知が生成されます。その後、階層内の一般規則が
+                        繰り返し評価されますが、<code>R5</code> が再び評価されることはありません。
+                    </li>
+                </ul>
+                <p><strong>階層 1、一般規則の1回目のパス。</strong></p>
+                <ul>
+                    <li>
+                        <code>R4</code>：パターン <code>?x rdf:type :Component</code> は、
+                        <code>:frontend</code>、<code>:app</code>、<code>:db</code>、および <code>:logger</code> と一致します。
+                        （<code>R5</code> によって直前に作成された
+                        <code>rdf:type :Notification</code> トリプルとは一致しません。）
+                        否定要素 <code>NOT { ?x :status :criticallyExposed }</code> は、
+                        <code>:frontend</code>、<code>:app</code>、および <code>:db</code> に対する解を棄却します。これは、
+                        <code>GE</code> にそれぞれの <code>:status :criticallyExposed</code> トリプルが含まれるためです。
+                        解 <code>?x = :logger</code> のみが残り、新しい
+                        トリプル <code>:logger :status :safeToDeploy</code> を生成します。
+                    </li>
+                </ul>
+                <pre class="block ex-inferred" aria-busy="false"><code class="hljs"># 階層 1 後の GI
+:db       :exposedTo :vuln1 .
+:app      :exposedTo :vuln1 .
+:frontend :exposedTo :vuln1 .
+:db       :status :criticallyExposed .
+:app      :status :criticallyExposed .
+:frontend :status :criticallyExposed .
+_:n1      rdf:type :Notification .          # 新規 (R5)
+_:n1      :concerns :db .                   # 新規 (R5)
+_:n2      rdf:type :Notification .          # 新規 (R5)
+_:n2      :concerns :app .                  # 新規 (R5)
+_:n3      rdf:type :Notification .          # 新規 (R5)
+_:n3      :concerns :frontend .             # 新規 (R5)
+:logger   :status :safeToDeploy .           # 新規 (R4)</code></pre>
+                <p><strong>階層 1、一般規則の2回目のパス。</strong>
+                    新しいトリプルはありません。評価は完了し、上に示した <code>GI</code> が
+                    結果となる<a data-link-type="dfn|abstract-op" href="#dfn-inference-graph" class="internalDFN"
+                        id="ref-for-dfn-inference-graph-7">推論グラフ</a>です。
+                </p>
+                <p>
+                    階層化によって、この結果の信頼性が確保されます。
+                    階層 0 の1回目のパス中、まだ
+                    <code>:frontend :status :criticallyExposed</code> が導出される前に評価されていた場合、<code>R4</code> は
+                    <code>:frontend :status :safeToDeploy</code> であると誤って結論付け、
+                    <code>R5</code> は <code>:db</code> と <code>:app</code> に対する通知を作成しても、
+                    <code>:frontend</code> に対する通知は作成しなかったはずです。
+                    両方を階層 1 まで遅延させることで、完全な
+                    <code>:status :criticallyExposed</code> トリプルの集合を参照できるため、各階層内で
+                    規則が評価される順序は
+                    最終結果に影響しません。
+                </p>
+            </section>
         </section>
     </section>
 
@@ -4282,8 +4829,8 @@ V = {}とする
                 </tbody>
             </table>
 
-            <div class="note" role="note" id="issue-container-generatedID-13">
-                <div class="note-title marker" id="h-note-7"><span>注</span></div>
+            <div class="note" role="note" id="issue-container-generatedID-14">
+                <div class="note-title marker" id="h-note-8"><span>注</span></div>
                 <p class="">%エンコードされたシーケンスは、
                     <a href="#rIRIREF">IRIの文字範囲</a>に含まれ、
                     ローカル名でも<a href="#rPERCENT">明示的に許可されています</a>。
@@ -6432,7 +6979,7 @@ V = {}とする
                 <dt id="bib-rdf12-turtle">[RDF12-TURTLE]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/rdf12-turtle/"><cite>RDF 1.2 Turtle</cite></a>. Gregg Kellogg; Andy
-                    Seaborne; Dominik Tomaszuk. W3C. 2026年6月12日. W3C作業草案. URL: <a
+                    Seaborne; Dominik Tomaszuk. W3C. 2026年7月23日. W3C作業草案. URL: <a
                         href="https://www.w3.org/TR/rdf12-turtle/">https://www.w3.org/TR/rdf12-turtle/</a>
                 </dd>
                 <dt id="bib-rfc2119">[RFC2119]</dt>
@@ -6604,10 +7151,11 @@ V = {}とする
                     href="#ref-for-dfn-triple-template-10" title="Reference 5">(5)</a> <a
                     href="#ref-for-dfn-triple-template-11" title="Reference 6">(6)</a> <a
                     href="#ref-for-dfn-triple-template-12" title="Reference 7">(7)</a> <a
-                    href="#ref-for-dfn-triple-template-13" title="Reference 8">(8)</a>
+                    href="#ref-for-dfn-triple-template-13" title="Reference 8">(8)</a> <a
+                    href="#ref-for-dfn-triple-template-14" title="Reference 9">(9)</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-triple-template-14" title="§ 4.4.1 Stratification Condition">§ 4.4.1
+                <a href="#ref-for-dfn-triple-template-15" title="§ 4.4.1 Stratification Condition">§ 4.4.1
                     Stratification Condition</a>
             </li>
         </ul>
@@ -6704,6 +7252,11 @@ V = {}とする
                 <a href="#ref-for-dfn-triple-pattern-element-8" title="Reference 2">(2)</a> <a
                     href="#ref-for-dfn-triple-pattern-element-9" title="Reference 3">(3)</a>
             </li>
+            <li>
+                <a href="#ref-for-dfn-triple-pattern-element-10" title="§ 6.6.1 Determining the Dependencies">§ 6.6.1
+                    Determining the Dependencies</a> <a href="#ref-for-dfn-triple-pattern-element-11"
+                    title="Reference 2">(2)</a>
+            </li>
         </ul>
     </div>
     <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-negation-element"
@@ -6733,10 +7286,16 @@ V = {}とする
             <li>
                 <a href="#ref-for-dfn-negation-element-6" title="§ 4.3 Rule Dependency">§ 4.3 Rule Dependency</a> <a
                     href="#ref-for-dfn-negation-element-7" title="Reference 2">(2)</a> <a
-                    href="#ref-for-dfn-negation-element-8" title="Reference 3">(3)</a>
+                    href="#ref-for-dfn-negation-element-8" title="Reference 3">(3)</a> <a
+                    href="#ref-for-dfn-negation-element-9" title="Reference 4">(4)</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-negation-element-9" title="§ 4.4 Stratification">§ 4.4 Stratification</a>
+                <a href="#ref-for-dfn-negation-element-10" title="§ 4.4 Stratification">§ 4.4 Stratification</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-negation-element-11" title="§ 6.6.1 Determining the Dependencies">§ 6.6.1
+                    Determining the Dependencies</a> <a href="#ref-for-dfn-negation-element-12"
+                    title="Reference 2">(2)</a>
             </li>
         </ul>
     </div>
@@ -6797,6 +7356,14 @@ V = {}とする
             <li>
                 <a href="#ref-for-dfn-assignment-element-13" title="§ 6.3 Evaluation of an Expression">§ 6.3 Evaluation
                     of an Expression</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-assignment-element-14" title="§ 6.6.1 Determining the Dependencies">§ 6.6.1
+                    Determining the Dependencies</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-assignment-element-15" title="§ 6.6.2 Calculating the Stratification">§ 6.6.2
+                    Calculating the Stratification</a>
             </li>
         </ul>
     </div>
@@ -7019,6 +7586,15 @@ V = {}とする
                 <a href="#ref-for-dfn-run-once-rule-6" title="§ 6.5 Evaluation of a Rule Set">§ 6.5 Evaluation of a Rule
                     Set</a>
             </li>
+            <li>
+                <a href="#ref-for-dfn-run-once-rule-7" title="§ 6.6.2 Calculating the Stratification">§ 6.6.2
+                    Calculating the Stratification</a> <a href="#ref-for-dfn-run-once-rule-8"
+                    title="Reference 2">(2)</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-run-once-rule-9" title="§ 6.6.3 Evaluating the Strata">§ 6.6.3 Evaluating the
+                    Strata</a>
+            </li>
         </ul>
     </div>
     <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-general-rule"
@@ -7039,6 +7615,10 @@ V = {}とする
             <li>
                 <a href="#ref-for-dfn-general-rule-2" title="§ 6.5 Evaluation of a Rule Set">§ 6.5 Evaluation of a Rule
                     Set</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-general-rule-3" title="§ 6.6.2 Calculating the Stratification">§ 6.6.2 Calculating
+                    the Stratification</a>
             </li>
         </ul>
     </div>
@@ -7110,6 +7690,9 @@ V = {}とする
             <li>
                 <a href="#ref-for-dfn-rule-set-28" title="§ 6.5 Evaluation of a Rule Set">§ 6.5 Evaluation of a Rule
                     Set</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-rule-set-29" title="§ 6.6 Worked Example">§ 6.6 Worked Example</a>
             </li>
         </ul>
     </div>
@@ -7195,6 +7778,13 @@ V = {}とする
             <li>
                 <a href="#ref-for-dfn-inference-graph-4" title="§ 4.1 Elements of the Abstract Syntax">§ 4.1 Elements of
                     the Abstract Syntax</a> <a href="#ref-for-dfn-inference-graph-5" title="Reference 2">(2)</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-inference-graph-6" title="§ 6.6 Worked Example">§ 6.6 Worked Example</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-inference-graph-7" title="§ 6.6.3 Evaluating the Strata">§ 6.6.3 Evaluating the
+                    Strata</a>
             </li>
         </ul>
     </div>
@@ -7440,6 +8030,10 @@ V = {}とする
                 <a href="#ref-for-dfn-dependency-graph-8" title="§ 6.2.2 Calculate Stratification">§ 6.2.2 Calculate
                     Stratification</a>
             </li>
+            <li>
+                <a href="#ref-for-dfn-dependency-graph-9" title="§ 6.6.1 Determining the Dependencies">§ 6.6.1
+                    Determining the Dependencies</a>
+            </li>
         </ul>
     </div>
     <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-transitive-rule-dependency"
@@ -7456,6 +8050,10 @@ V = {}とする
             <li>
                 <a href="#ref-for-dfn-transitive-rule-dependency-1" title="§ 4.3.1 Dependency Graph">§ 4.3.1 Dependency
                     Graph</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-transitive-rule-dependency-2" title="§ 6.6.1 Determining the Dependencies">§ 6.6.1
+                    Determining the Dependencies</a>
             </li>
         </ul>
     </div>
@@ -7559,6 +8157,10 @@ V = {}とする
             <li>
                 <a href="#ref-for-dfn-stratification-condition-2" title="§ 4.4.2 Stratification Algorithm">§ 4.4.2
                     Stratification Algorithm</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-stratification-condition-3" title="§ 6.6.1 Determining the Dependencies">§ 6.6.1
+                    Determining the Dependencies</a>
             </li>
         </ul>
     </div>
@@ -8187,7 +8789,7 @@ V = {}とする
                     [...HL_COLORS.keys()].forEach(key => HL_COLORS.set(key, true));
                 };
                 if (hightligtedElems.length) {
-                    document.body.addEventListener("click", resetListener, { once: true });
+                    document.body.addEventListener("click", resetListener, {once: true});
                 }
             }
 
@@ -8207,7 +8809,7 @@ V = {}とする
              */
             function getHighlightColor(target) {
                 // return current colors if applicable
-                const { value } = target.classList;
+                const {value} = target.classList;
                 const re = /respec-hl-\w+/;
                 const activeClass = re.test(value) && value.match(re);
                 if (activeClass) return activeClass[0];
@@ -8298,7 +8900,7 @@ V = {}とする
                                                     * @param {KeyboardEvent|MouseEvent} event
                                                     */
                                                    return event => {
-                                                       const { target, type } = event;
+                                                       const {target, type} = event;
 
                                                        if (!(target instanceof HTMLElement)) return;
 
@@ -8359,14 +8961,14 @@ V = {}とする
                                                        event.clientY >= rect.top
                                                    ) {
                                                        // The event probably happened inside the bounding rect...
-                                                       return { x: event.clientX, y: event.clientY };
+                                                       return {x: event.clientX, y: event.clientY};
                                                    }
 
                                                    // Offset to the middle of the element
                                                    const x = rect.x + rect.width / 2;
                                                    // Placed at the bottom of the element
                                                    const y = rect.y + rect.height;
-                                                   return { x, y };
+                                                   return {x, y};
                                                }
 
                                                /**
@@ -8397,7 +8999,7 @@ V = {}とする
                                                 * @param {HTMLElement} panel
                                                 * @param {{ x: number, y: number }} clickPosition
                                                 */
-                                               function displayPanel(dfn, panel, { x, y }) {
+                                               function displayPanel(dfn, panel, {x, y}) {
                                                    panel.hidden = false;
                                                    // distance (px) between edge of panel and the pointing triangle (caret)
                                                    const MARGIN = 20;
@@ -8407,7 +9009,7 @@ V = {}とする
                                                    let closestTop = 0;
                                                    let minDiff = Infinity;
                                                    for (const rect of dfnRects) {
-                                                       const { top, bottom } = rect;
+                                                       const {top, bottom} = rect;
                                                        const diffFromClickY = Math.abs((top + bottom) / 2 - y);
                                                        if (diffFromClickY < minDiff) {
                                                            minDiff = diffFromClickY;
@@ -8465,7 +9067,7 @@ V = {}とする
                                                            mo.disconnect();
                                                        }
                                                    });
-                                                   mo.observe(panel, { attributes: true, attributeFilter: ["hidden"] });
+                                                   mo.observe(panel, {attributes: true, attributeFilter: ["hidden"]});
                                                }
 
                                                /**
