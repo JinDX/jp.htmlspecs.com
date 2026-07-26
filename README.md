@@ -3,7 +3,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### プラットフォーム中核・言語・基盤
 - [HTML](https://jp.htmlspecs.com/)（[Source](https://html.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [ECMAScript® 2027 Language Specification](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），- [How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
+- [ECMAScript® 2027 Language Specification](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），[How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
 - [Source map format specification](https://jp.htmlspecs.com/ecma426/)（[Source](https://tc39.es/ecma426/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-js-api-2-20260724/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-web-api-2-20260724/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
@@ -490,7 +490,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ## CSS
 - [CSS current work](https://jp.htmlspecs.com/css/)（[Source](https://www.w3.org/Style/CSS/current-work)）
-- [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)），- [How to Read](https://jp.htmlspecs.com/css/read/)（[Source](https://www.w3.org/Style/CSS/read)）
+- [CSS 2.2 Specification](https://jp.htmlspecs.com/css/css22/)（[Source](https://www.w3.org/TR/2016/WD-CSS22-20160412/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)），[How to Read](https://jp.htmlspecs.com/css/read/)（[Source](https://www.w3.org/Style/CSS/read)）
 - [CSS Snapshot 2024](https://jp.htmlspecs.com/css/css-2024/)（[Source](https://www.w3.org/TR/2025/NOTE-css-2024-20250225/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [CSS Snapshot 2025](https://jp.htmlspecs.com/css/css-2025/)（[Source](https://www.w3.org/TR/2025/NOTE-css-2025-20250918/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [CSS Snapshot 2026](https://jp.htmlspecs.com/css/css-2026/)（[Source](https://www.w3.org/TR/2026/NOTE-css-2026-20260622/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
@@ -703,6 +703,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### 認証・署名・セキュリティ
 - [HTTP Digest Access Authentication](https://jp.htmlspecs.com/http/rfc7616.html)（[Source](https://httpwg.org/specs/rfc7616.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [The 'Basic' HTTP Authentication Scheme](https://jp.htmlspecs.com/http/rfc7617.html)（[Source](https://httpwg.org/specs/rfc7617.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Encrypted Content-Encoding for HTTP](https://jp.htmlspecs.com/http/rfc8188.html)（[Source](https://httpwg.org/specs/rfc8188.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Using Early Data in HTTP](https://jp.htmlspecs.com/http/rfc8470.html)（[Source](https://httpwg.org/specs/rfc8470.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [HTTP Message Signatures](https://jp.htmlspecs.com/http/rfc9421.html)（[Source](https://httpwg.org/specs/rfc9421.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
