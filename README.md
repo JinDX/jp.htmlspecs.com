@@ -364,7 +364,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [HTML Sanitizer API](https://jp.htmlspecs.com/sanitizer-api/)（[Source](https://wicg.github.io/sanitizer-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Subresource Integrity (SRI)](https://jp.htmlspecs.com/sri/)（[Source](https://www.w3.org/TR/2016/REC-SRI-20160623/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Subresource Integrity (SRI) 2](https://jp.htmlspecs.com/sri-2/)（[Source](https://www.w3.org/TR/2026/WD-sri-2-20260320/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20260505/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20260729/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Content Security Policy: Embedded Enforcement](https://jp.htmlspecs.com/csp-embedded-enforcement/)（[Source](https://www.w3.org/TR/2026/WD-csp-embedded-enforcement-20260507/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Connection Allowlists](https://jp.htmlspecs.com/connection-allowlists/)（[Source](https://wicg.github.io/connection-allowlists/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Secure Contexts](https://jp.htmlspecs.com/secure-contexts/)（[Source](https://www.w3.org/TR/2023/CRD-secure-contexts-20231110/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
