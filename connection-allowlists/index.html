@@ -1464,7 +1464,7 @@ For darkmode:
     <div class="head">
         <h1 class="no-ref p-name" id="title">接続許可リスト</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types/#CG-DRAFT">コミュニティグループ報告書草案</a>,
-            <time class="dt-updated" datetime="2026-07-28">2026年7月28日</time>
+            <time class="dt-updated" datetime="2026-07-29">2026年7月29日</time>
         </p>
         <div data-fill-with="spec-metadata">
             <dl>
@@ -1558,9 +1558,12 @@ For darkmode:
                                 統合</span></a>
                     <li><a href="#html"><span class="secno">5.2</span> <span class="content">HTML との
                                 統合</span></a>
-                    <li><a href="#rtc"><span class="secno">5.3</span> <span class="content">WebRTC との
+                    <li><a href="#html-dns-prefetch"><span class="secno">5.3</span> <span class="content">DNS
+                                プリフェッチ</span></a>
+                    <li><a href="#html-preconnect"><span class="secno">5.4</span> <span class="content">事前接続</span></a>
+                    <li><a href="#rtc"><span class="secno">5.5</span> <span class="content">WebRTCとの
                                 統合</span></a>
-                    <li><a href="#service-workers"><span class="secno">5.4</span> <span class="content">サービスワーカーとの
+                    <li><a href="#service-workers"><span class="secno">5.6</span> <span class="content">Service Workerとの
                                 統合</span></a>
                 </ol>
             <li>
@@ -3264,129 +3267,164 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
         <div class="algorithm" data-algorithm="monkey patching resolve an origin">
 
             <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#resolve-an-origin"
-                id="ref-for-resolve-an-origin①">オリジンを解決する</a>で、上記のホストのみの照合
-            アルゴリズムを呼び出し、特定のホストへの接続をいずれかのパターンが許可する可能性があるかどうかを
-            判断します。可能性がない場合、解決を失敗させます。
+                id="ref-for-resolve-an-origin①">オリジンを解決する</a>では、オプションの
+            <a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object"
+                id="ref-for-environment-settings-object①">環境設定オブジェクト</a> <var>environment</var>
+            （既定値は null）を受け入れるようにシグネチャを更新する。
 
 
+            <p>上記のホストのみの照合アルゴリズムを呼び出し、いずれかのパターンが指定されたホストへの接続を
+                許可する可能性があるかどうかを判定する。そうでない場合、解決を失敗させる。</p>
             <ol>
                 <li data-md>
-                    <ins><var>origin</var>の<a data-link-type="dfn"
-                            href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-host"
-                            id="ref-for-concept-origin-host">ホスト</a>、<var>environment</var>、および
-                        <var>allowlists</var>に対して実行した際に、<a data-link-type="abstract-op"
-                            href="#abstract-opdef-should-host-be-blocked-by-connection-allowlists"
-                            id="ref-for-abstract-opdef-should-host-be-blocked-by-connection-allowlists">接続許可リストによってホストを
-                            ブロックすべきか</a>が<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#blocked"
-                            id="ref-for-blocked①①">ブロック</a>を返す場合、
-                        <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#failure"
-                            id="ref-for-failure④">失敗</a>を返します。</ins>
+                    <ins>
+                        <var>environment</var> が null でない場合：
+
+                        <ol>
+                            <li data-md>
+                                <p><var>allowlists</var> を、<var>environment</var> の<a data-link-type="dfn"
+                                        href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
+                                        id="ref-for-policy-container⑨">ポリシーコンテナ</a>の<a data-link-type="dfn"
+                                        href="#policy-container-connection-allowlists"
+                                        id="ref-for-policy-container-connection-allowlists⑤">接続許可リスト</a>とする。
+                                </p>
+                            <li data-md>
+                                <p><a data-link-type="abstract-op"
+                                        href="#abstract-opdef-should-host-be-blocked-by-connection-allowlists"
+                                        id="ref-for-abstract-opdef-should-host-be-blocked-by-connection-allowlists">ホストを
+                                        接続許可リストによってブロックすべきか</a>を、<var>origin</var> の<a data-link-type="dfn"
+                                        href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-host"
+                                        id="ref-for-concept-origin-host">ホスト</a>、<var>environment</var>、および
+                                    <var>allowlists</var> に対して実行したとき、<a data-link-type="dfn"
+                                        href="https://infra.spec.whatwg.org/#blocked" id="ref-for-blocked①①">ブロック済み</a>
+                                    を返す場合、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#failure"
+                                        id="ref-for-failure④">失敗</a>を返す。
+                                </p>
+                        </ol>
+                    </ins>
             </ol>
         </div>
         <div class="algorithm" data-algorithm="monkey patching obtain a connection">
 
             <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-connection-obtain"
-                id="ref-for-concept-connection-obtain①">接続を取得する</a>で、現在の
-            ステップ2の前にチェックを追加します：
+                id="ref-for-concept-connection-obtain①">接続を取得する</a>では、オプションの<a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object"
+                id="ref-for-environment-settings-object②">環境設定オブジェクト</a>または<code
+                class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document">Document</a></code>
+            <var>environment</var>（既定値は null）を受け入れるようにシグネチャを更新する：
 
 
+            <p>現在のステップ 2 の前に、次の検査を追加する：</p>
             <ol start="2">
                 <li data-md>
-                    <ins><var>url</var>、<var>environment</var>、および<var>allowlists</var>に対して
-                        実行した際に、<a data-link-type="abstract-op"
-                            href="#abstract-opdef-should-url-be-blocked-by-connection-allowlists"
-                            id="ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists">接続許可リストによって URL を
-                            ブロックすべきか</a>が<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#blocked"
-                            id="ref-for-blocked①②">ブロック</a>を返す場合、
-                        <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#failure"
-                            id="ref-for-failure⑤">失敗</a>を返します。</ins>
+                    <ins>
+                        <var>environment</var> が null でない場合：
+
+                        <ol>
+                            <li data-md>
+                                <p><var>allowlists</var> を、<var>environment</var> の<a data-link-type="dfn"
+                                        href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
+                                        id="ref-for-policy-container①⓪">ポリシーコンテナ</a>の<a data-link-type="dfn"
+                                        href="#policy-container-connection-allowlists"
+                                        id="ref-for-policy-container-connection-allowlists⑥">接続許可リスト</a>とする。
+                                </p>
+                            <li data-md>
+                                <p><a data-link-type="abstract-op"
+                                        href="#abstract-opdef-should-url-be-blocked-by-connection-allowlists"
+                                        id="ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists">URL を
+                                        接続許可リストによってブロックすべきか</a>を、<var>url</var>、<var>environment</var>、および
+                                    <var>allowlists</var> に対して実行したとき、<a data-link-type="dfn"
+                                        href="https://infra.spec.whatwg.org/#blocked" id="ref-for-blocked①②">ブロック済み</a>
+                                    を返す場合、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#failure"
+                                        id="ref-for-failure⑤">失敗</a>を返す。
+                                </p>
+                        </ol>
+                    </ins>
             </ol>
         </div>
-        <p class="issue" id="issue-dcabf3fa"><a class="self-link" href="#issue-dcabf3fa"></a> Fetch への変更により、
-            使用すべき許可リストと報告に使用すべきコンテキストを識別するための追加情報を、低レベル
-            アルゴリズムの呼び出し箇所に渡す必要があります。代わりに、それらの呼び出し箇所自体にチェックを実行させる方が
-            よいかもしれません。ロジックを一元化することでより成功しやすくなると思いますが、
-            個別に取り組む方が単純かもしれません。</p>
+        <p class="issue" id="issue-dcabf3fa"><a class="self-link" href="#issue-dcabf3fa"></a> Fetch への変更では、
+            使用すべき許可リストと、報告に使用すべきコンテキストを識別するため、低水準
+            アルゴリズムの呼び出し箇所に追加情報を渡す必要がある。代わりに、それらの呼び出し箇所自体に
+            検査を実行させる方がよいかもしれない。ロジックを一元化する方が成功する可能性は高いと思うが、
+            個別に対応する方が単純かもしれない。</p>
         <h3 class="heading settled" data-level="5.2" id="html"><span class="secno">5.2. </span><span
                 class="content">HTML との統合</span><a class="self-link" href="#html"></a></h3>
         <p>上記を HTML に統合するため、<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container⑨">ポリシーコンテナー</a>
-            <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct②">構造体</a>に、
-            <a data-link-type="dfn" href="#policy-container-connection-allowlists"
-                id="ref-for-policy-container-connection-allowlists⑤">接続許可リスト</a>の<a data-link-type="dfn"
-                href="https://infra.spec.whatwg.org/#list" id="ref-for-list④">リスト</a>を
-            含む、新しい
+                id="ref-for-policy-container①①">ポリシーコンテナ</a>
+            <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct②">構造体</a>に、新しい
             <dfn class="dfn-paneled" data-dfn-for="policy container" data-dfn-type="dfn" data-noexport
-                id="policy-container-connection-allowlists">接続許可リスト</dfn>項目を追加します。これは、
+                id="policy-container-connection-allowlists">接続許可リスト</dfn>項目を追加する。この項目には、<a data-link-type="dfn"
+                href="#policy-container-connection-allowlists"
+                id="ref-for-policy-container-connection-allowlists⑦">接続許可リスト</a>の<a data-link-type="dfn"
+                href="https://infra.spec.whatwg.org/#list" id="ref-for-list④">リスト</a>が含まれる。これは、
             <a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsers.html#creating-a-policy-container-from-a-fetch-response"
-                id="ref-for-creating-a-policy-container-from-a-fetch-response">フェッチレスポンスからポリシーコンテナーを
-                作成する</a>アルゴリズムに
-            ステップを追加することで設定されます：
+                id="ref-for-creating-a-policy-container-from-a-fetch-response">フェッチ応答からポリシーコンテナを
+                作成する</a>アルゴリズムに手順を追加することで設定される：
         </p>
         <div class="algorithm" data-algorithm="monkey patching policy container creation">
             <ol start="6">
                 <li data-md>
-                    <p><var>response</var>および<var>result</var>を使用して Integrity-Policy ヘッダーを解析します。</p>
+                    <p><var>response</var> と <var>result</var> を使用して Integrity-Policy ヘッダーを解析する。</p>
                 <li data-md>
-                    <ins><var>result</var>の<a data-link-type="dfn" href="#policy-container-connection-allowlists"
-                            id="ref-for-policy-container-connection-allowlists⑥">接続許可リスト</a>を、
-                        <var>response</var>を指定して
+                    <ins><var>result</var> の<a data-link-type="dfn" href="#policy-container-connection-allowlists"
+                            id="ref-for-policy-container-connection-allowlists⑧">接続許可リスト</a>を、
+                        <var>response</var> を与えて
                         <a data-link-type="abstract-op" href="#abstract-opdef-parse-a-responses-connection-allowlists"
-                            id="ref-for-abstract-opdef-parse-a-responses-connection-allowlists">レスポンスの
-                            接続許可リストを解析</a>した
-                        結果に設定します。</ins>
+                            id="ref-for-abstract-opdef-parse-a-responses-connection-allowlists">応答の
+                            Connection Allowlists を解析した</a>
+                        結果に設定する。</ins>
                 <li data-md>
-                    <p><var>result</var>を返します。</p>
+                    <p><var>result</var> を返す。</p>
             </ol>
         </div>
-        <p class="note" role="note"><span class="marker">注:</span> 早期レスポンスの
+        <p class="note" role="note"><span class="marker">注記：</span> Early Hints リンクをフェッチするときには、早期応答の
             <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①⓪">ポリシーコンテナー</a>は、早期ヒントリンクをフェッチする際にすでに使用されるため、
-            早期ヒントの統合にそれ以上の変更は必要ありません。
+                id="ref-for-policy-container①②">ポリシーコンテナ</a>がすでに使用されるため、Early Hints の統合にさらなる
+            変更は必要ない。
         </p>
-        <p><a href="#embedded-enforcement">§ 4 埋め込み適用</a>をサポートするため、<a data-link-type="biblio"
-                href="#biblio-csp-embedded-enforcement" title="コンテンツセキュリティポリシー：埋め込み適用">[csp-embedded-enforcement]</a>が
-            必須 CSP に使用するモデルに従い、埋め込み要素からの埋め込み元の要件を、
+        <p><a href="#embedded-enforcement">§ 4 埋め込み強制</a>をサポートするため、<a data-link-type="biblio"
+                href="#biblio-csp-embedded-enforcement" title="コンテンツセキュリティポリシー：埋め込み強制">[csp-embedded-enforcement]</a>が
+            必須 CSP に使用するモデルに従い、埋め込み要素からの埋め込み側の要件を、
             <a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-snapshot-params"
                 id="ref-for-target-snapshot-params">ターゲットスナップショットパラメーター</a>および<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigation-params"
-                id="ref-for-navigation-params">ナビゲーションパラメーター</a>を介して、フレーム化された<a data-link-type="dfn"
+                id="ref-for-navigation-params">ナビゲーションパラメーター</a>を介して、フレーム内の<a data-link-type="dfn"
                 href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document④">Document</a>の
             <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①①">ポリシーコンテナー</a>へ引き渡します。具体的には、HTML と Fetch を次のように変更します：
+                id="ref-for-policy-container①③">ポリシーコンテナ</a>へ伝播させる。具体的には、HTML と Fetch を次のように修正する：
         </p>
         <ol>
             <li data-md>
-                <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                        id="ref-for-policy-container①②">ポリシーコンテナー</a>
-                    <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct③">構造体</a>に、
-                    <a data-link-type="dfn" href="#policy-container-required-connection-allowlist"
-                        id="ref-for-policy-container-required-connection-allowlist②">要求された接続許可リスト</a>
-                    項目を追加します
-                    （<a href="#embedded-enforcement-checking">§ 4.4 要件の取得と適用</a>で定義されています）。
+                <p><a data-link-type="dfn" href="#policy-container-required-connection-allowlist"
+                        id="ref-for-policy-container-required-connection-allowlist②">必須接続許可リスト</a>
+                    項目を、<a data-link-type="dfn"
+                        href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
+                        id="ref-for-policy-container①④">ポリシーコンテナ</a>
+                    <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct③">構造体</a>に
+                    追加する（<a href="#embedded-enforcement-checking">§ 4.4 要件の取得と強制</a>で
+                    定義される）。
                 </p>
             <li data-md>
-                <p><code>null</code>または<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string"
-                        id="ref-for-string⑧">文字列</a>である、
-                    要求された接続許可リスト項目を、
+                <p><code>null</code> または<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string"
+                        id="ref-for-string⑧">文字列</a>のいずれかである必須接続許可リスト項目を、
                     <a data-link-type="dfn"
                         href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-snapshot-params"
-                        id="ref-for-target-snapshot-params①">ターゲットスナップショットパラメーター</a>
-                    <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct"
-                        id="ref-for-struct④">構造体</a>に追加します。HTML の
+                        id="ref-for-target-snapshot-params①">ターゲットスナップショットパラメーター</a><a data-link-type="dfn"
+                        href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct④">構造体</a>に追加する。HTML の
                     <a data-link-type="dfn"
                         href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#snapshotting-target-snapshot-params"
                         id="ref-for-snapshotting-target-snapshot-params">ターゲットスナップショットパラメーターをスナップショットする</a>
-                    アルゴリズムは、ターゲットナビゲーション可能を指定して
+                    アルゴリズムは、この項目を、ターゲットナビガブルを与えて
                     <a data-link-type="abstract-op" href="#abstract-opdef-determine-the-required-connection-allowlist"
-                        id="ref-for-abstract-opdef-determine-the-required-connection-allowlist">要求された
-                        接続許可リストを決定する</a>を実行した結果に、この項目を設定します。
+                        id="ref-for-abstract-opdef-determine-the-required-connection-allowlist">必須接続
+                        許可リストを決定する</a>結果に設定する。
                 </p>
             <li data-md>
-                <p>対応する項目を<a data-link-type="dfn"
+                <p>対応する項目を、<a data-link-type="dfn"
                         href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigation-params"
                         id="ref-for-navigation-params①">ナビゲーションパラメーター</a><a data-link-type="dfn"
                         href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct⑤">構造体</a>に追加し、<a
@@ -3400,9 +3438,9 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                         href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#create-navigation-params-from-a-srcdoc-resource"
                         id="ref-for-create-navigation-params-from-a-srcdoc-resource">srcdoc リソースから
                         ナビゲーションパラメーターを作成する</a>は、
-                    この項目を<a data-link-type="dfn"
+                    <a data-link-type="dfn"
                         href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-snapshot-params"
-                        id="ref-for-target-snapshot-params②">ターゲットスナップショットパラメーター</a>項目から設定します。
+                        id="ref-for-target-snapshot-params②">ターゲットスナップショットパラメーター</a>項目からこれを設定する。
                 </p>
             <li data-md>
                 <p><a data-link-type="dfn"
@@ -3410,235 +3448,304 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                         id="ref-for-create-navigation-params-by-fetching①">フェッチによってナビゲーションパラメーターを作成する</a>は、
                     <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request"
                         id="ref-for-concept-request⑥">リクエスト</a>を作成した後、その項目が
-                    <code>null</code>でない場合、リクエストの<a data-link-type="dfn"
+                    <code>null</code> でない場合、リクエストの<a data-link-type="dfn"
                         href="https://fetch.spec.whatwg.org/#concept-request-header-list"
                         id="ref-for-concept-request-header-list">ヘッダーリスト</a>内の
                     `<code><a data-link-type="http-header" href="#http-headerdef-sec-required-connection-allowlist" id="ref-for-http-headerdef-sec-required-connection-allowlist②">Sec-Required-Connection-Allowlist</a></code>`
                     ヘッダーを、
                     <a data-link-type="dfn"
                         href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-snapshot-params"
-                        id="ref-for-target-snapshot-params③">ターゲットスナップショットパラメーター</a>項目に設定します。
+                        id="ref-for-target-snapshot-params③">ターゲットスナップショットパラメーター</a>項目に設定する。
                 </p>
             <li data-md>
                 <p><a data-link-type="dfn"
                         href="https://html.spec.whatwg.org/multipage/browsers.html#creating-a-policy-container-from-a-fetch-response"
-                        id="ref-for-creating-a-policy-container-from-a-fetch-response①">フェッチレスポンスから
-                        ポリシーコンテナーを作成する</a>は、追加の
-                    引数として要件を受け取り、<var>result</var>の<a data-link-type="dfn"
+                        id="ref-for-creating-a-policy-container-from-a-fetch-response①">フェッチ応答から
+                        ポリシーコンテナを作成する</a>は、追加の
+                    引数として要件を受け取り、<var>result</var> の<a data-link-type="dfn"
                         href="#policy-container-connection-allowlists"
-                        id="ref-for-policy-container-connection-allowlists⑦">接続許可リスト</a>を設定した後、以下の
+                        id="ref-for-policy-container-connection-allowlists⑨">接続許可リスト</a>を設定した後、以下の
                     <a data-link-type="abstract-op" href="#abstract-opdef-apply-a-required-connection-allowlist"
-                        id="ref-for-abstract-opdef-apply-a-required-connection-allowlist">要求された接続
-                        許可リストを適用する</a>手順を実行します。
+                        id="ref-for-abstract-opdef-apply-a-required-connection-allowlist">必須接続
+                        許可リストを適用する</a>手順を実行する。
                 </p>
         </ol>
-        <p class="note" role="note"><span class="marker">注:</span> <a data-link-type="dfn"
+        <p class="note" role="note"><span class="marker">注記：</span> <a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-snapshot-params"
-                id="ref-for-target-snapshot-params④">ターゲットスナップショットパラメーター</a>ですでに引き渡されているサンドボックスフラグと同様に、
-            要件は、<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#navigable"
-                id="ref-for-navigable">ナビゲーション可能</a>の<em>すべての</em>
-            ナビゲーション時に、
+                id="ref-for-target-snapshot-params④">ターゲットスナップショットパラメーター</a>ですでに保持されるサンドボックス化フラグと同様に、要件は
+            ナビゲーション時に
             <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element" id="ref-for-the-iframe-element③">iframe</a></code>
             <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/document-sequences.html#nav-container"
-                id="ref-for-nav-container①">コンテナー</a>からスナップショットされます。これには、フレーム化された<a data-link-type="dfn"
-                href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document⑤">Document</a>が
-            自身で開始するナビゲーションも含まれます。したがって、この
-            制約は後続の同一<a data-link-type="dfn"
+                id="ref-for-nav-container①">コンテナー</a>から、フレーム内の<a data-link-type="dfn"
+                href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document⑤">Document</a>
+            自身が開始するものを含む、<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/document-sequences.html#navigable"
-                id="ref-for-navigable①">ナビゲーション可能</a>内のナビゲーションにも適用され、フレーム化された
-            コンテンツが自身を別の場所へナビゲートすることで回避することはできません。<code>connectionAllowlist</code>コンテンツ
-            属性への変更は、
-            <code>sandbox</code>属性の動作と同様に、<a data-link-type="dfn"
+                id="ref-for-navigable">ナビガブル</a>の<em>すべての</em>
+            ナビゲーションについてスナップショットされる。したがって、この制約は後続の同一<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/document-sequences.html#navigable"
-                id="ref-for-navigable②">ナビゲーション可能</a>の次回のナビゲーション時に有効になります。
-            （これは、<a data-link-type="dfn"
+                id="ref-for-navigable①">ナビガブル</a>のナビゲーションにも適用され、フレーム内コンテンツが
+            自身を別の場所へナビゲートすることで回避することはできない。<code>connectionAllowlist</code> 内容
+            属性への変更は、<a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/document-sequences.html#navigable"
+                id="ref-for-navigable②">ナビガブル</a>の次回のナビゲーション時に有効となり、<code>sandbox</code> 属性の
+            動作を反映する。（これは、<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/document-sequences.html#nav-container"
                 id="ref-for-nav-container②">コンテナー</a>自身が開始するナビゲーションにのみ影響する
-            <code>referrerpolicy</code>とは異なることに注意してください。）
+            <code>referrerpolicy</code> とは異なることに注意されたい。）
         </p>
         <div class="algorithm" data-algorithm="apply a required connection allowlist">
 
             <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①③">ポリシーコンテナー</a>
+                id="ref-for-policy-container①⑤">ポリシーコンテナ</a>
             （<var>result</var>）、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string"
-                id="ref-for-string⑨">文字列</a>または<code>null</code>（<var>requirement</var>）、および
+                id="ref-for-string⑨">文字列</a>または <code>null</code>（<var>requirement</var>）、および
             <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response"
-                id="ref-for-concept-response⑦">レスポンス</a>（<var>response</var>）を指定して、
+                id="ref-for-concept-response⑦">応答</a>（<var>response</var>）を与えて、
             <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export
-                id="abstract-opdef-apply-a-required-connection-allowlist">要求された接続許可リストを適用する</dfn>には：
+                id="abstract-opdef-apply-a-required-connection-allowlist">必須接続許可リストを適用する</dfn>には：
 
 
             <ol>
                 <li data-md>
-                    <p><var>requirement</var>が<code>null</code>である場合、返ります。</p>
+                    <p><var>requirement</var> が <code>null</code> の場合、返る。</p>
                 <li data-md>
-                    <p><var>required</var>を、<var>requirement</var>、<var>response</var>の<a data-link-type="dfn"
+                    <p><var>required</var> を、<var>requirement</var>、<var>response</var> の<a data-link-type="dfn"
                             href="https://fetch.spec.whatwg.org/#concept-response-url"
                             id="ref-for-concept-response-url⑦">URL</a>、および
                         <a data-link-type="grammar" href="#grammardef-connection-allowlist-disposition-enforce"
-                            id="ref-for-grammardef-connection-allowlist-disposition-enforce⑧">enforce</a>を指定して
+                            id="ref-for-grammardef-connection-allowlist-disposition-enforce⑧">enforce</a>を与えて、
                         <a data-link-type="abstract-op"
                             href="#abstract-opdef-parse-a-serialized-connection-allowlist-requirement"
                             id="ref-for-abstract-opdef-parse-a-serialized-connection-allowlist-requirement①">直列化された
-                            接続許可リスト
-                            要件を解析</a>した結果とします。
+                            接続許可リスト要件を
+                            解析した</a>結果とする。
                     </p>
                 <li data-md>
-                    <p><var>required</var>が<code>null</code>である場合、返ります。</p>
+                    <p><var>required</var> が <code>null</code> の場合、返る。</p>
                 <li data-md>
-                    <p><var>result</var>の<a data-link-type="dfn" href="#policy-container-connection-allowlists"
-                            id="ref-for-policy-container-connection-allowlists⑧">接続許可リスト</a>内に、
+                    <p><var>result</var> の<a data-link-type="dfn" href="#policy-container-connection-allowlists"
+                            id="ref-for-policy-container-connection-allowlists①⓪">接続許可リスト</a>に含まれる、
                         <a data-link-type="dfn" href="#connection-allowlist-disposition"
-                            id="ref-for-connection-allowlist-disposition①⓪">処理</a>が<a data-link-type="grammar"
+                            id="ref-for-connection-allowlist-disposition①⓪">処置</a>が<a data-link-type="grammar"
                             href="#grammardef-connection-allowlist-disposition-enforce"
-                            id="ref-for-grammardef-connection-allowlist-disposition-enforce⑨">enforce</a>であり、
-                        <var>required</var>を<a data-link-type="dfn" href="#connection-allowlist-satisfies"
-                            id="ref-for-connection-allowlist-satisfies⑤">満たす</a><a data-link-type="dfn"
-                            href="#connection-allowlist" id="ref-for-connection-allowlist①⑥">接続許可リスト</a>が存在しない場合、
-                        <var>required</var>を<var>result</var>の
+                            id="ref-for-grammardef-connection-allowlist-disposition-enforce⑨">enforce</a>である
+                        <a data-link-type="dfn" href="#connection-allowlist"
+                            id="ref-for-connection-allowlist①⑥">接続許可リスト</a>のうち、
+                        <var>required</var> を<a data-link-type="dfn" href="#connection-allowlist-satisfies"
+                            id="ref-for-connection-allowlist-satisfies⑤">満たす</a>ものがない場合、
+                        <var>required</var> を <var>result</var> の
                         <a data-link-type="dfn" href="#policy-container-connection-allowlists"
-                            id="ref-for-policy-container-connection-allowlists⑨">接続許可リスト</a>に<a data-link-type="dfn"
-                            href="https://infra.spec.whatwg.org/#list-append" id="ref-for-list-append①">付加</a>します。
+                            id="ref-for-policy-container-connection-allowlists①①">接続許可リスト</a>に<a data-link-type="dfn"
+                            href="https://infra.spec.whatwg.org/#list-append" id="ref-for-list-append①">付加する</a>。
                     </p>
                 <li data-md>
-                    <p><var>result</var>の<a data-link-type="dfn" href="#policy-container-required-connection-allowlist"
-                            id="ref-for-policy-container-required-connection-allowlist③">要求された接続
-                            許可リスト</a>を<var>requirement</var>に設定します。</p>
+                    <p><var>result</var> の<a data-link-type="dfn" href="#policy-container-required-connection-allowlist"
+                            id="ref-for-policy-container-required-connection-allowlist③">必須接続
+                            許可リスト</a>を <var>requirement</var> に設定する。</p>
             </ol>
         </div>
-        <p class="note" role="note"><span class="marker">注:</span> 埋め込み元の<a data-link-type="dfn"
+        <p class="note" role="note"><span class="marker">注記：</span> 埋め込み側の<a data-link-type="dfn"
                 href="#connection-allowlist" id="ref-for-connection-allowlist①⑦">接続許可リスト</a>は、
-            レスポンスが自身について表明したもの
-            （`<code><a data-link-type="http-header" href="#http-headerdef-connection-allowlist-report-only" id="ref-for-http-headerdef-connection-allowlist-report-only①">Connection-Allowlist-Report-Only</a></code>`を含む）とともに、
-            <var>result</var>の
+            応答が自身について表明したもの（
+            `<code><a data-link-type="http-header" href="#http-headerdef-connection-allowlist-report-only" id="ref-for-http-headerdef-connection-allowlist-report-only①">Connection-Allowlist-Report-Only</a></code>`
+            を含む）と並ぶ<em>追加の</em>項目として、
+            <var>result</var> の
             <a data-link-type="dfn" href="#policy-container-connection-allowlists"
-                id="ref-for-policy-container-connection-allowlists①⓪">接続許可リスト</a>へ<em>追加の</em>項目として追加されます。
-            そのリスト内のすべての許可リストが文書の送信リクエストに適用されるため、埋め込み元の要件と
-            文書自身の表明の両方が適用されます。<a data-link-type="biblio" href="#biblio-csp-embedded-enforcement"
-                title="コンテンツセキュリティポリシー：埋め込み適用">[csp-embedded-enforcement]</a>に従い、レスポンスが要件を<a data-link-type="dfn"
-                href="#connection-allowlist-satisfies"
-                id="ref-for-connection-allowlist-satisfies⑥">満たす</a>許可リストをすでに表明している場合、
-            その表明がすでに要件を満たしており、追加項目は不要であるため、要件は
-            <em>付加されません</em>。
+                id="ref-for-policy-container-connection-allowlists①②">接続許可リスト</a>に追加される。
+            そのリスト内の各許可リストは文書の送信リクエストに対して強制されるため、埋め込み側の要件と
+            文書自身の表明の両方が適用される。<a data-link-type="biblio" href="#biblio-csp-embedded-enforcement"
+                title="コンテンツセキュリティポリシー：埋め込み強制">[csp-embedded-enforcement]</a>に従い、
+            応答がすでに要件を<a data-link-type="dfn" href="#connection-allowlist-satisfies"
+                id="ref-for-connection-allowlist-satisfies⑥">満たす</a>許可リストを
+            表明している場合、その表明がすでに要件を満たし、追加項目が不要であるため、要件は
+            <em>付加されない</em>。
         </p>
-        <p class="note" role="note"><span class="marker">注:</span> 未解決の要件を
-            <var>result</var>の<a data-link-type="dfn"
+        <p class="note" role="note"><span class="marker">注記：</span> 未解決の要件を
+            <var>result</var> の<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①④">ポリシーコンテナー</a>に保存することにより、その要件が
-            子孫へ伝播します。各子孫は、その要件（および
+                id="ref-for-policy-container①⑥">ポリシーコンテナ</a>に格納することで、要件が
+            子孫へ伝播する。各子孫は、自身の<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response"
+                id="ref-for-concept-response⑧">応答</a>に対して、要件（およびその
             <a data-link-type="grammar" href="#grammardef-connection-allowlist-response-origin"
-                id="ref-for-grammardef-connection-allowlist-response-origin⑤"><code>response-origin</code></a>トークン）を、
-            自身の<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response"
-                id="ref-for-concept-response⑧">レスポンス</a>を基準に再解決します。
-            したがって、フレームは、自身に適用される許可リストが要件より厳格である場合でも、その子にポリシーを適用する義務があります。
-            <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme③">ローカル
-                スキーム</a>（<code>about:srcdoc</code>や<code>data:</code>など）から作成された<a data-link-type="dfn"
-                href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document⑥">Document</a>では、
+                id="ref-for-grammardef-connection-allowlist-response-origin⑤"><code>response-origin</code></a>トークン）を
+            再解決する。
+            したがって、フレームは、自身に強制される許可リストが要件より厳格である場合でも、その子に対してポリシーを
+            強制する義務を負う。<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme"
+                id="ref-for-local-scheme③">ローカル
+                スキーム</a>（<code>about:srcdoc</code> や <code>data:</code> など）から作成された
+            <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document"
+                id="ref-for-concept-document⑥">Document</a>では、
             <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①⑤">ポリシーコンテナー</a>が
-            埋め込み元から継承されるため、要件もそれとともに継承されます。
+                id="ref-for-policy-container①⑦">ポリシーコンテナ</a>が
+            埋め込み側から継承されるため、要件もそれとともに継承される。
         </p>
-        <p>ブロックの決定は Fetch で行われます。ハンドシェイクに失敗したナビゲーション<a data-link-type="dfn"
-                href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response⑨">レスポンス</a>は、
+        <p>ブロックの決定は Fetch で行われる。ハンドシェイクに失敗したナビゲーションの<a data-link-type="dfn"
+                href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response⑨">応答</a>は、
             <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-network-error"
-                id="ref-for-concept-network-error">ネットワークエラー</a>に置き換えられます。<a data-link-type="dfn"
+                id="ref-for-concept-network-error">ネットワークエラー</a>に置き換えられる。<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/document-sequences.html#child-navigable"
-                id="ref-for-child-navigable②">子ナビゲーション可能</a>を対象とするナビゲーション<a data-link-type="dfn"
+                id="ref-for-child-navigable②">子ナビガブル</a>を対象とするナビゲーション<a data-link-type="dfn"
                 href="https://fetch.spec.whatwg.org/#concept-request"
                 id="ref-for-concept-request⑦">リクエスト</a>（<var>request</var>）に対する<a data-link-type="dfn"
-                href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⓪">レスポンス</a>を
-            取得した後、レスポンスが
-            <a data-link-type="abstract-op"
+                href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⓪">応答</a>を
+            取得した後、その応答が、<var>request</var> とナビゲーションの必須接続許可リストを与えて、
+            Connection Allowlist の埋め込み強制によって<a data-link-type="abstract-op"
                 href="#abstract-opdef-should-be-blocked-by-connection-allowlist-embedded-enforcement"
-                id="ref-for-abstract-opdef-should-be-blocked-by-connection-allowlist-embedded-enforcement">接続許可リストの
-                埋め込み適用によってブロックされるべきか</a>を
-            （<var>request</var>およびナビゲーションの要求された接続許可リストを指定して）判定した結果が<a data-link-type="dfn"
-                href="https://infra.spec.whatwg.org/#blocked" id="ref-for-blocked①③">ブロック</a>である場合、ユーザーエージェントは
+                id="ref-for-abstract-opdef-should-be-blocked-by-connection-allowlist-embedded-enforcement">ブロックされるべきか</a>を
+            決定した結果が<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#blocked"
+                id="ref-for-blocked①③">ブロック済み</a>である場合、
+            ユーザーエージェントは
             <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-network-error"
-                id="ref-for-concept-network-error①">ネットワークエラー</a>を返します。
+                id="ref-for-concept-network-error①">ネットワークエラー</a>を返す。
         </p>
-        <p class="issue" id="issue-1ee93fa4"><a class="self-link" href="#issue-1ee93fa4"></a> フェンス付きフレームおよび、
-            <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request"
-                id="ref-for-concept-request⑧">リクエスト</a>が埋め込み元の
+        <p class="issue" id="issue-1ee93fa4"><a class="self-link" href="#issue-1ee93fa4"></a> Fenced Frame および、
+            その<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request"
+                id="ref-for-concept-request⑧">リクエスト</a>が埋め込み側の
             <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①⑥">ポリシーコンテナー</a>によって管理されないその他の
-            コンテキストは、このメカニズムによって制約できません。そのようなコンテキストの埋め込み元が
+                id="ref-for-policy-container①⑧">ポリシーコンテナ</a>によって管理されないその他のコンテキストは、
+            この仕組みによって制約できない。そのようなコンテキストは、埋め込み側から
             <a data-link-type="dfn" href="#connection-allowlist"
-                id="ref-for-connection-allowlist①⑧">接続許可リスト</a>を要求する場合、制約なしで読み込むことを許可するのではなく、
-            そのコンテキストをブロックしなければなりません。<a href="#security-embedded-enforcement">§ 6.2 埋め込み適用</a>を参照してください。
+                id="ref-for-connection-allowlist①⑧">接続許可リスト</a>を要求された場合、制約なしで読み込むことを許可せず、
+            ブロックしなければならない。<a href="#security-embedded-enforcement">§ 6.2 埋め込み強制</a>を参照されたい。
         </p>
-        <p class="issue" id="issue-5f0939ee"><a class="self-link" href="#issue-5f0939ee"></a> この統合は、意図的に
-            <a href="https://w3c.github.io/webappsec-cspee/#html-integration"><cite>コンテンツセキュリティポリシー：
-                    埋め込み適用</cite> § 2.4 HTML との統合</a>と並行するものです。2つの
-            メカニズムは、引き渡されるポリシーの種類と「少なくとも同程度に厳格である」の比較のみが異なります。
+        <p class="issue" id="issue-5f0939ee"><a class="self-link" href="#issue-5f0939ee"></a> この統合は意図的に、
+            <a href="https://w3c.github.io/webappsec-cspee/#html-integration"><cite>コンテンツ
+                    セキュリティポリシー：埋め込み強制</cite> § 2.4 HTML との統合</a>と並行するように設計されている。両者の
+            仕組みは、保持されるポリシーの種類と「少なくとも同じ程度に厳格」という比較のみが異なる。
             理想的には、共有される基盤（<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-snapshot-params"
                 id="ref-for-target-snapshot-params⑤">ターゲットスナップショットパラメーター</a>／<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigation-params"
                 id="ref-for-navigation-params②">ナビゲーションパラメーター</a>項目、
-            リクエストヘッダーフック、およびポリシーコンテナーへの適用）は HTML（または共有の
-            埋め込みポリシー適用仕様）に分離され、ポリシーの種類をパラメーターとして受け取るようにするべきです。
-            2つの仕様を単一のメカニズムに整合させることは、後続作業として追跡されています。
+            リクエストヘッダーのフック、およびポリシーコンテナへの適用）は HTML（または共有の
+            埋め込みポリシー強制仕様）に切り出され、ポリシーの種類をパラメーター化すべきである。2 つの
+            仕様を単一の仕組みに整合させることは、後続作業として追跡されている。
         </p>
-        <h3 class="heading settled" data-level="5.3" id="rtc"><span class="secno">5.3. </span><span
+        <h3 class="heading settled" data-level="5.3" id="html-dns-prefetch"><span class="secno">5.3. </span><span
+                class="content">DNS プリフェッチ</span><a class="self-link" href="#html-dns-prefetch"></a></h3>
+        <p><a data-link-type="attr-value"
+                href="https://html.spec.whatwg.org/multipage/links.html#link-type-dns-prefetch"
+                id="ref-for-link-type-dns-prefetch①"><code>dns-prefetch</code></a>リンク型の
+            <a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/semantics.html#fetch-and-process-the-linked-resource"
+                id="ref-for-fetch-and-process-the-linked-resource">リンクされたリソースをフェッチして処理する</a>手順では、
+            リンク要素の<a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document"
+                id="ref-for-concept-node-document①">ノード文書</a>を<a data-link-type="dfn"
+                href="https://fetch.spec.whatwg.org/#resolve-an-origin" id="ref-for-resolve-an-origin②">オリジンを
+                解決する</a>に渡す：
+        </p>
+        <div class="algorithm" data-algorithm="monkey patching HTML dns-prefetch">
+
+            HTML の<a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/semantics.html#fetch-and-process-the-linked-resource"
+                id="ref-for-fetch-and-process-the-linked-resource①">リンクされたリソースをフェッチして処理する</a>手順の、
+            <a data-link-type="attr-value"
+                href="https://html.spec.whatwg.org/multipage/links.html#link-type-dns-prefetch"
+                id="ref-for-link-type-dns-prefetch②"><code>dns-prefetch</code></a>リンク型について、手順 4 を次のように
+            更新する：
+
+
+            <ol start="4">
+                <li data-md>
+                    <p>
+                        ユーザーエージェントは、<var>partitionKey</var>、
+                        <var>url</var> の<a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin"
+                            id="ref-for-concept-url-origin②">オリジン</a>
+                        <ins>、および <var>el</var> の<a data-link-type="dfn"
+                                href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object"
+                                id="ref-for-relevant-settings-object">関連設定オブジェクト</a></ins>
+                        を与えて、<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#resolve-an-origin"
+                            id="ref-for-resolve-an-origin③">オリジンを解決する</a>べきである。
+                    </p>
+            </ol>
+        </div>
+        <h3 class="heading settled" data-level="5.4" id="html-preconnect"><span class="secno">5.4. </span><span
+                class="content">事前接続</span><a class="self-link" href="#html-preconnect"></a></h3>
+        <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/links.html#preconnect"
+                id="ref-for-preconnect">事前接続</a>アルゴリズムでは、リンクオプションの<a data-link-type="dfn"
+                href="https://html.spec.whatwg.org/multipage/semantics.html#link-options-environment"
+                id="ref-for-link-options-environment">環境</a>を<a data-link-type="dfn"
+                href="https://fetch.spec.whatwg.org/#concept-connection-obtain"
+                id="ref-for-concept-connection-obtain②">接続を取得する</a>に渡す：</p>
+        <div class="algorithm" data-algorithm="monkey patching HTML preconnect">
+
+            HTML の<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/links.html#preconnect"
+                id="ref-for-preconnect①">事前接続</a>アルゴリズムの手順 5 を次のように更新する：
+
+
+            <ol start="5">
+                <li data-md>
+                    <p>
+                        ユーザーエージェントは、<var>partitionKey</var>、<var>url</var> の<a data-link-type="dfn"
+                            href="https://url.spec.whatwg.org/#concept-url-origin"
+                            id="ref-for-concept-url-origin③">オリジン</a>、<var>useCredentials</var>
+                        <ins>、および <var>options</var> の<a data-link-type="dfn"
+                                href="https://html.spec.whatwg.org/multipage/semantics.html#link-options-environment"
+                                id="ref-for-link-options-environment①">環境</a></ins>
+                        を与えて、<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-connection-obtain"
+                            id="ref-for-concept-connection-obtain③">接続を取得する</a>べきである。
+                    </p>
+            </ol>
+        </div>
+        <h3 class="heading settled" data-level="5.5" id="rtc"><span class="secno">5.5. </span><span
                 class="content">WebRTC との統合</span><a class="self-link" href="#rtc"></a></h3>
         <p>WebRTC 接続を制約するため、<a data-link-type="biblio" href="#biblio-webrtc"
                 title="WebRTC：ブラウザーにおけるリアルタイム通信">[webrtc]</a>は、候補が<a data-link-type="dfn"
                 href="https://w3c.github.io/webrtc-pc/#dfn-administratively-prohibited"
-                id="ref-for-dfn-administratively-prohibited">管理上禁止されている</a>かどうかを判断する際に、
+                id="ref-for-dfn-administratively-prohibited">管理上禁止されている</a>かどうかを決定する際に、
             <a data-link-type="abstract-op" href="#abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists"
-                id="ref-for-abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists">接続許可リストによって WebRTC
-                をブロックすべきか</a>
-            アルゴリズムを呼び出すことができます。
+                id="ref-for-abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists">WebRTC を
+                Connection Allowlists によってブロックすべきか</a>
+            アルゴリズムを呼び出すことができる。
         </p>
-        <h3 class="heading settled" data-level="5.4" id="service-workers"><span class="secno">5.4. </span><span
-                class="content">サービスワーカーとの統合</span><a class="self-link" href="#service-workers"></a>
+        <h3 class="heading settled" data-level="5.6" id="service-workers"><span class="secno">5.6. </span><span
+                class="content">Service Worker との統合</span><a class="self-link" href="#service-workers"></a>
         </h3>
-        <p>サービスワーカー自身の<a data-link-type="dfn"
+        <p>Service Worker 自身の<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/workers.html#concept-workerglobalscope-policy-container"
-                id="ref-for-concept-workerglobalscope-policy-container">ポリシーコンテナー</a>を適用する既定の動作に加えて、
-            サービスワーカーは、<code
+                id="ref-for-concept-workerglobalscope-policy-container">ポリシーコンテナ</a>を適用する既定の動作に加えて、
+            Service Worker は、<code
                 class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#windowclient" id="ref-for-windowclient">WindowClient</a></code>
-            API を使用してナビゲーションを開始する際に、自身の接続許可リストを適用する必要があります。</p>
+            API を使用してナビゲーションを呼び出す際に、自身の接続許可リストを適用する必要がある。</p>
         <p><code
                 class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#dom-windowclient-navigate" id="ref-for-dom-windowclient-navigate">navigate()</a></code>
-            および<code
+            および <code
                 class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#dom-clients-openwindow" id="ref-for-dom-clients-openwindow">openWindow(url)</a></code>
-            アルゴリズムの両方を、次のように変更しなければなりません：</p>
+            アルゴリズムは、いずれも次のように修正しなければならない：</p>
         <div class="algorithm" data-algorithm="monkey patching WindowClient navigate and openWindow">
             <ol start="4">
                 <li data-md>
-                    <ins><var>url</var>、<a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                            id="ref-for-this">this</a>の<a data-link-type="dfn"
+                    <ins><a data-link-type="abstract-op"
+                            href="#abstract-opdef-should-url-be-blocked-by-connection-allowlists"
+                            id="ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists①">URL を
+                            Connection Allowlists によってブロックすべきか</a>を、<var>url</var>、<a data-link-type="dfn"
+                            href="https://webidl.spec.whatwg.org/#this" id="ref-for-this">this</a> の<a
+                            data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object"
-                            id="ref-for-relevant-settings-object">関連設定オブジェクト</a>、および<a data-link-type="dfn"
-                            href="https://webidl.spec.whatwg.org/#this" id="ref-for-this①">this</a>の
+                            id="ref-for-relevant-settings-object①">関連設定オブジェクト</a>、および<a data-link-type="dfn"
+                            href="https://webidl.spec.whatwg.org/#this" id="ref-for-this①">this</a> の
                         <a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object"
-                            id="ref-for-relevant-settings-object①">関連設定オブジェクト</a>の<a data-link-type="dfn"
+                            id="ref-for-relevant-settings-object②">関連設定オブジェクト</a>の<a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-policy-container"
-                            id="ref-for-concept-settings-object-policy-container①">ポリシーコンテナー</a>の<a data-link-type="dfn"
+                            id="ref-for-concept-settings-object-policy-container①">ポリシーコンテナ</a>の<a data-link-type="dfn"
                             href="#policy-container-connection-allowlists"
-                            id="ref-for-policy-container-connection-allowlists①①">接続許可リスト</a>に対して
-                        実行した際に、<a data-link-type="abstract-op"
-                            href="#abstract-opdef-should-url-be-blocked-by-connection-allowlists"
-                            id="ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists①">接続許可リストによって URL
-                            を
-                            ブロックすべきか</a>が<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#blocked"
-                            id="ref-for-blocked①④">ブロック</a>を返す場合、
+                            id="ref-for-policy-container-connection-allowlists①③">接続許可リスト</a>に対して
+                        実行したとき、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#blocked"
+                            id="ref-for-blocked①④">ブロック済み</a>を返す場合、
                         <code
                             class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#securityerror" id="ref-for-securityerror">"SecurityError"</a></code>
                         <code
                             class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#idl-DOMException" id="ref-for-idl-DOMException">DOMException</a></code>で拒否された<a
                             data-link-type="dfn" href="https://wicg.github.io/web-smart-card/#transaction-state-promise"
-                            id="ref-for-transaction-state-promise">プロミス</a>を返します。</ins>
+                            id="ref-for-transaction-state-promise">プロミス</a>を返す。</ins>
             </ol>
         </div>
         <p class="issue" id="issue-adc5e302"><a class="self-link" href="#issue-adc5e302"></a> <code
                 class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#dom-windowclient-navigate" id="ref-for-dom-windowclient-navigate①">navigate()</a></code>
-            は、現在の文書をナビゲーションの<code>sourceDocument</code>として渡します。これは少し
-            見落としのように思われます。<a
-                href="https://github.com/WICG/connection-allowlists/pull/26#discussion_r3348923614">議論</a>を参照してください。</p>
+            は、現在の文書をナビゲーションの <code>sourceDocument</code> として渡す。これは多少
+            見落としのように思われる。<a
+                href="https://github.com/WICG/connection-allowlists/pull/26#discussion_r3348923614">議論</a>を参照されたい。</p>
         <h2 class="heading settled" data-level="6" id="security"><span class="secno">6. </span><span
                 class="content">セキュリティおよびプライバシーに関する考慮事項</span><a class="self-link" href="#security"></a>
         </h2>
@@ -3651,7 +3758,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
             制約の弱い同一オリジン
             コンテキストを見つけることで、あるコンテキストの許可リストを回避できる可能性が広く残されています。
             HTML の<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①⑦">ポリシーコンテナー</a>との統合により、
+                id="ref-for-policy-container①⑨">ポリシーコンテナー</a>との統合により、
             そうした可能性の一部には対処できますが、ほかにも存在する可能性があります。たとえば、攻撃者は
             フレームツリーを上にたどって制約の弱い親に到達したり、オープナー関係を維持する
             <code>window.open()</code>を介して新しいウィンドウを開いたりできる可能性があります。したがって、文書のオリジンを
@@ -3726,7 +3833,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
         <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request"
                 id="ref-for-concept-request⑨">リクエスト</a>が埋め込み元の<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①⑧">ポリシーコンテナー</a>によって管理されないコンテキスト
+                id="ref-for-policy-container②⓪">ポリシーコンテナー</a>によって管理されないコンテキスト
             （たとえばフェンス付きフレーム）は、このメカニズムによって制約できません。そのようなコンテキストに対して
             埋め込み元が<a data-link-type="dfn" href="#connection-allowlist"
                 id="ref-for-connection-allowlist②①">接続許可リスト</a>を要求する場合、制約なしで読み込むことを
@@ -3738,7 +3845,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
             許可リストをめぐる状況を複雑にします。
             サービスワーカーは、自身が管理する各文書とは異なる<a data-link-type="dfn"
                 href="https://html.spec.whatwg.org/multipage/browsers.html#policy-container"
-                id="ref-for-policy-container①⑨">ポリシーコンテナー</a>を持つため、
+                id="ref-for-policy-container②①">ポリシーコンテナー</a>を持つため、
             許可リストがサービスワーカーの許可リストとは異なる文書で開始されたメッセージまたはリクエストに、
             応答することは十分にあり得ます。この提案は、ほかのポリシーの設計に従い、
             このような能力の違いを許容します。</p>
@@ -3750,7 +3857,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
         <p>接続許可リストは、DNS ルックアップを介した情報流出のリスクを軽減することを目的としており、
             DNS リクエストを送信する前に許可リストを確認するよう、Fetch の
             <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#resolve-an-origin"
-                id="ref-for-resolve-an-origin②">オリジンを解決する</a>アルゴリズムを変更します。これにより、
+                id="ref-for-resolve-an-origin④">オリジンを解決する</a>アルゴリズムを変更します。これにより、
             リクエストを送信する要素および API の使用によって生じる暗黙的なルックアップ
             （<code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-img-element" id="ref-for-the-img-element">img</a></code>
             タグ、<code
@@ -3758,7 +3865,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
             など）だけでなく、
             <a data-link-type="attr-value"
                 href="https://html.spec.whatwg.org/multipage/links.html#link-type-dns-prefetch"
-                id="ref-for-link-type-dns-prefetch①"><code>dns-prefetch</code></a>のようなメカニズムによって
+                id="ref-for-link-type-dns-prefetch③"><code>dns-prefetch</code></a>のようなメカニズムによって
             引き起こされる明示的なルックアップにも対処します。
         </p>
         <p>とはいえ、許可リストは、特定のエンドポイントを許容できるかどうかを判断するために、
@@ -3872,14 +3979,13 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 class="content">実装上の考慮事項</span><a class="self-link" href="#impl"></a></h2>
         <h3 class="heading settled" data-level="7.1" id="impl-websocket"><span class="secno">7.1. </span><span
                 class="content">WebSocket</span><a class="self-link" href="#impl-websocket"></a></h3>
-        <p>WebSocket 接続は、<code>ws</code>または<code>wss</code>スキームを指定するパターンではなく、
-            <code>http</code>および<code>https</code>パターンの対象となることに留意すると役立ちます。
-            <u class="link-error" data-lt="establish a WebSocket connection" title="リンクエラー：エクスポート対象としてマークされた「establish a websocket connection」の「dfn」参照が見つかりません。
-  （この参照元となり得る仕様：websockets）">WebSocket 接続を確立する</u>際、ステップ1で、
-            これらの WebSocket 固有のスキームが、それぞれ<code>http</code>および<code>https</code>に書き換えられます。つまり、
-            「<code>ws://socket.example</code>」のようなパターンを含む許可リストは、意図した効果を持ちません。
-            そのパターンがリソースリクエストに一致することはないためです。
-        </p>
+        <p>WebSocket 接続は、<code>ws</code> または <code>wss</code> スキームを指定するパターンではなく、<code>http</code> および <code>https</code>
+            パターンの対象となることを覚えておくとよい。<a data-link-type="dfn"
+                href="https://websockets.spec.whatwg.org/#concept-websocket-establish"
+                id="ref-for-concept-websocket-establish">WebSocket 接続を確立する</a>とき、手順 1 では、
+            WebSocket 固有のこれらのスキームを、それぞれ <code>http</code> および <code>https</code> に書き換える。これは、
+            「<code>ws://socket.example</code>」のようなパターンを含む許可リストは意図した効果を持たないことを
+            意味する。そのパターンがリソースリクエストに一致することは決してないためである。</p>
     </main>
     <div data-fill-with="conformance">
         <h2 class="heading no-num no-ref settled" id="w3c-conformance"><span class="content">適合性</span><a
@@ -4055,24 +4161,25 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
             用語</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
     <ul class="index">
         <li>
-            <a data-link-type="biblio">[CSP]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[CSP]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="9b40f5cd">フェッチディレクティブ</span>
                 <li><span class="dfn-paneled" id="0950067d">ホストソース</span>
                 <li><span class="dfn-paneled" id="8ea172e9">サンドボックス</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[DOM]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[DOM]</a> は、次の用語を定義する：
             <ul>
+                <li><span class="dfn-paneled" id="85394472">Document</span>
                 <li><span class="dfn-paneled" id="a973e0fe">文書</span>
                 <li><span class="dfn-paneled" id="5216e1a0">ノード文書</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[FETCH]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[FETCH]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="cae9bd49">リクエストオリジンをバイト直列化する</span>
                 <li><span class="dfn-paneled" id="857d5516">クライアント</span>
-                <li><span class="dfn-paneled" id="fdb35d97">CORS チェック</span>
+                <li><span class="dfn-paneled" id="fdb35d97">CORS 検査</span>
                 <li><span class="dfn-paneled" id="3f2ca4de">現在の URL</span>
                 <li><span class="dfn-paneled" id="2ce6f6bb">fetch(input)</span>
                 <li><span class="dfn-paneled" id="ad6ec3ab">禁止リクエストヘッダー</span>
@@ -4080,50 +4187,54 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="5c66de35">構造化フィールド値を取得する</span>
                 <li><span class="dfn-paneled" id="c9e7c11a">ヘッダー</span>
                 <li><span class="dfn-paneled" id="6ee0eab1">ヘッダーリスト <small>（リクエスト用）</small></span>
-                <li><span class="dfn-paneled" id="f7b00a8b">ヘッダーリスト <small>（レスポンス用）</small></span>
+                <li><span class="dfn-paneled" id="f7b00a8b">ヘッダーリスト <small>（応答用）</small></span>
                 <li><span class="dfn-paneled" id="8f26de31">ローカルである</span>
                 <li><span class="dfn-paneled" id="63340982">ローカルスキーム</span>
                 <li><span class="dfn-paneled" id="eb1b1af3">ネットワークエラー</span>
                 <li><span class="dfn-paneled" id="8e1fb11c">接続を取得する</span>
-                <li><span class="dfn-paneled" id="86efadaf">ポリシーコンテナー</span>
+                <li><span class="dfn-paneled" id="86efadaf">ポリシーコンテナ</span>
                 <li><span class="dfn-paneled" id="55213b5b">リクエスト</span>
                 <li><span class="dfn-paneled" id="61c338be">オリジンを解決する</span>
-                <li><span class="dfn-paneled" id="ee7bba09">レスポンス</span>
+                <li><span class="dfn-paneled" id="ee7bba09">応答</span>
                 <li><span class="dfn-paneled" id="dc1cd39b">URL <small>（リクエスト用）</small></span>
-                <li><span class="dfn-paneled" id="3268a8eb">URL <small>（レスポンス用）</small></span>
+                <li><span class="dfn-paneled" id="3268a8eb">URL <small>（応答用）</small></span>
                 <li><span class="dfn-paneled" id="ae56d57e">URL リスト</span>
                 <li><span class="dfn-paneled" id="a3a31c89">ワイルドカード</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[HTML]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[HTML]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="a0c4f72a">BroadcastChannel</span>
                 <li><span class="dfn-paneled" id="402ed79d">CEReactions</span>
                 <li><span class="dfn-paneled" id="10e25f42">HTMLIFrameElement</span>
                 <li><span class="dfn-paneled" id="02fb8691">MessageChannel</span>
                 <li><span class="dfn-paneled" id="b410a6ef">オリジンの ASCII 直列化</span>
-                <li><span class="dfn-paneled" id="f23dc013">子ナビゲーション可能</span>
+                <li><span class="dfn-paneled" id="f23dc013">子ナビガブル</span>
                 <li><span class="dfn-paneled" id="762210c0">コンテナー</span>
                 <li><span class="dfn-paneled" id="07ad3048">フェッチによってナビゲーションパラメーターを作成する</span>
                 <li><span class="dfn-paneled" id="658bcdaa">srcdoc リソースからナビゲーションパラメーターを作成する</span>
-                <li><span class="dfn-paneled" id="cfb6031b">フェッチレスポンスからポリシーコンテナーを作成する</span>
+                <li><span class="dfn-paneled" id="cfb6031b">フェッチ応答からポリシーコンテナを作成する</span>
                 <li><span class="dfn-paneled" id="fa5ee9c5">作成 URL</span>
                 <li><span class="dfn-paneled" id="1abc08f1">dns-prefetch</span>
                 <li><span class="dfn-paneled" id="24cf98a1">環境</span>
+                <li><span class="dfn-paneled" id="a746ba16">環境 <small>（リンク処理
+                            オプション用）</small></span>
                 <li><span class="dfn-paneled" id="3e12e042">環境設定オブジェクト</span>
+                <li><span class="dfn-paneled" id="f98dd553">リンクされたリソースをフェッチして処理する</span>
                 <li><span class="dfn-paneled" id="77a2ee6e">ホスト</span>
                 <li><span class="dfn-paneled" id="87fcd40c">iframe</span>
                 <li><span class="dfn-paneled" id="f0811ff8">img</span>
-                <li><span class="dfn-paneled" id="9c19b7fc">ナビゲーション可能</span>
+                <li><span class="dfn-paneled" id="9c19b7fc">ナビガブル</span>
                 <li><span class="dfn-paneled" id="2594e562">ナビゲートする</span>
                 <li><span class="dfn-paneled" id="4437edc6">ナビゲーションパラメーター</span>
                 <li><span class="dfn-paneled" id="086e3aff">オリジン</span>
-                <li><span class="dfn-paneled" id="b33787b2">ポリシーコンテナー</span>
-                <li><span class="dfn-paneled" id="432147ee">ポリシーコンテナー <small>（
+                <li><span class="dfn-paneled" id="b33787b2">ポリシーコンテナ</span>
+                <li><span class="dfn-paneled" id="432147ee">ポリシーコンテナ <small>（
                             WorkerGlobalScope 用）</small></span>
-                <li><span class="dfn-paneled" id="bd1db03d">ポリシーコンテナー <small>（環境設定
+                <li><span class="dfn-paneled" id="bd1db03d">ポリシーコンテナ <small>（環境設定
                             オブジェクト用）</small></span>
                 <li><span class="dfn-paneled" id="8a7dfd23">postMessage(message, options)</span>
+                <li><span class="dfn-paneled" id="e0f03d6c">事前接続</span>
                 <li><span class="dfn-paneled" id="5ab7b520">反映する</span>
                 <li><span class="dfn-paneled" id="9c4c1e66">関連設定オブジェクト</span>
                 <li><span class="dfn-paneled" id="5c35dd47">サンドボックス</span>
@@ -4131,13 +4242,13 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="1e260fd5">ターゲットスナップショットパラメーター</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[INFRA]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[INFRA]</a> は、次の用語を定義する：
             <ul>
-                <li><span class="dfn-paneled" id="daf5c14d">許可</span>
+                <li><span class="dfn-paneled" id="daf5c14d">許可済み</span>
                 <li><span class="dfn-paneled" id="53275e46">付加する</span>
-                <li><span class="dfn-paneled" id="83af367f">ブロック</span>
+                <li><span class="dfn-paneled" id="83af367f">ブロック済み</span>
                 <li><span class="dfn-paneled" id="ae8def21">含む</span>
-                <li><span class="dfn-paneled" id="f937b7b6">続行する</span>
+                <li><span class="dfn-paneled" id="f937b7b6">継続する</span>
                 <li><span class="dfn-paneled" id="bf8d9616">失敗</span>
                 <li><span class="dfn-paneled" id="56ad2aed">挿入する</span>
                 <li><span class="dfn-paneled" id="c88f3887">項目</span>
@@ -4151,7 +4262,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="98b32dd9">成功</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[REPORTING]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[REPORTING]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="188c6617">ReportBody</span>
                 <li><span class="dfn-paneled" id="9239678f">エンドポイント</span>
@@ -4160,7 +4271,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="093a0772">レポートで使用するために URL を除去する</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[RFC9651]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[RFC9651]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="5946b9a9">内部リスト</span>
                 <li><span class="dfn-paneled" id="a7b0745e">リスト</span>
@@ -4170,15 +4281,15 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="4acd57ce">トークン</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[SERVICE-WORKERS]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[SERVICE-WORKERS]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="3d565682">WindowClient</span>
                 <li><span class="dfn-paneled" id="e76b6e66">navigate(url)</span>
                 <li><span class="dfn-paneled" id="147a58e2">openWindow(url)</span>
-                <li><span class="dfn-paneled" id="c60ed63a">サービスワーカー</span>
+                <li><span class="dfn-paneled" id="c60ed63a">Service Worker</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[URL]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[URL]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="752d140b">ホスト</span>
                 <li><span class="dfn-paneled" id="959ad97b">オリジン</span>
@@ -4186,7 +4297,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="ca3ca4ae">URL パーサー</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[URLPATTERN]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[URLPATTERN]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="90f4193a">URLPatternInit</span>
                 <li><span class="dfn-paneled" id="9a15e8d7">HTTP 構造化フィールド
@@ -4198,17 +4309,17 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="60393e82">URL パターン</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[WEB-BLUETOOTH]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[WEB-BLUETOOTH]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="4d372bae">一致する</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[WEB-SMART-CARD]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[WEB-SMART-CARD]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="c81d8804">プロミス</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[WEBIDL]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[WEBIDL]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="dca2de17">DOMException</span>
                 <li><span class="dfn-paneled" id="8855a9aa">DOMString</span>
@@ -4218,12 +4329,17 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 <li><span class="dfn-paneled" id="4013a022">this</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[WEBRTC]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[WEBRTC]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="75f3e163">管理上禁止されている</span>
             </ul>
         <li>
-            <a data-link-type="biblio">[XHR]</a> は次の用語を定義します：
+            <a data-link-type="biblio">[WEBSOCKETS]</a> は、次の用語を定義する：
+            <ul>
+                <li><span class="dfn-paneled" id="22b84272">WebSocket 接続を確立する</span>
+            </ul>
+        <li>
+            <a data-link-type="biblio">[XHR]</a> は、次の用語を定義する：
             <ul>
                 <li><span class="dfn-paneled" id="d06b2b8c">XMLHttpRequest</span>
             </ul>
@@ -4288,6 +4404,9 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
         <dt id="biblio-webrtc">[WEBRTC]
         <dd>Cullen Jennings; ほか。<a href="https://w3c.github.io/webrtc-pc/"><cite>WebRTC：ブラウザーにおけるリアルタイム通信
                 </cite></a>。URL：<a href="https://w3c.github.io/webrtc-pc/">https://w3c.github.io/webrtc-pc/</a>
+        <dt id="biblio-websockets">[WEBSOCKETS]
+        <dd>Adam Rice. <a href="https://websockets.spec.whatwg.org/"><cite>WebSockets 標準</cite></a>. 現行
+            標準. URL: <a href="https://websockets.spec.whatwg.org/">https://websockets.spec.whatwg.org/</a>
         <dt id="biblio-xhr">[XHR]
         <dd>Anne van Kesteren. <a href="https://xhr.spec.whatwg.org/"><cite>XMLHttpRequest 標準</cite></a>。現行
             標準。URL：<a href="https://xhr.spec.whatwg.org/">https://xhr.spec.whatwg.org/</a>
@@ -4564,26 +4683,27 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "0b8ef84a": {"dfnID": "0b8ef84a", "dfnText": "snapshot target snapshot params", "external": true, "refSections": [{"refs": [{"id": "ref-for-snapshotting-target-snapshot-params"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#snapshotting-target-snapshot-params"},
                 "0fa357c3": {"dfnID": "0fa357c3", "dfnText": "length", "external": true, "refSections": [{"refs": [{"id": "ref-for-string-length"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://infra.spec.whatwg.org/#string-length"},
                 "10e25f42": {"dfnID": "10e25f42", "dfnText": "HTMLIFrameElement", "external": true, "refSections": [{"refs": [{"id": "ref-for-htmliframeelement"}], "title": "4.1. The connectionAllowlist attribute"}], "url": "https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmliframeelement"},
-                "147a58e2": {"dfnID": "147a58e2", "dfnText": "openWindow(url)", "external": true, "refSections": [{"refs": [{"id": "ref-for-dom-clients-openwindow"}], "title": "5.4. Integration with Service Workers"}], "url": "https://w3c.github.io/ServiceWorker/#dom-clients-openwindow"},
+                "147a58e2": {"dfnID": "147a58e2", "dfnText": "openWindow(url)", "external": true, "refSections": [{"refs": [{"id": "ref-for-dom-clients-openwindow"}], "title": "5.6. Integration with Service Workers"}], "url": "https://w3c.github.io/ServiceWorker/#dom-clients-openwindow"},
                 "188c6617": {"dfnID": "188c6617", "dfnText": "ReportBody", "external": true, "refSections": [{"refs": [{"id": "ref-for-reportbody"}], "title": "3.3. Reporting"}], "url": "https://w3c.github.io/reporting/#reportbody"},
-                "1abc08f1": {"dfnID": "1abc08f1", "dfnText": "dns-prefetch", "external": true, "refSections": [{"refs": [{"id": "ref-for-link-type-dns-prefetch"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-link-type-dns-prefetch\u2460"}], "title": "6.4. DNS"}], "url": "https://html.spec.whatwg.org/multipage/links.html#link-type-dns-prefetch"},
+                "1abc08f1": {"dfnID": "1abc08f1", "dfnText": "dns-prefetch", "external": true, "refSections": [{"refs": [{"id": "ref-for-link-type-dns-prefetch"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-link-type-dns-prefetch\u2460"}, {"id": "ref-for-link-type-dns-prefetch\u2461"}], "title": "5.3. DNS Prefetching"}, {"refs": [{"id": "ref-for-link-type-dns-prefetch\u2462"}], "title": "6.4. DNS"}], "url": "https://html.spec.whatwg.org/multipage/links.html#link-type-dns-prefetch"},
                 "1e260fd5": {"dfnID": "1e260fd5", "dfnText": "target snapshot params", "external": true, "refSections": [{"refs": [{"id": "ref-for-target-snapshot-params"}, {"id": "ref-for-target-snapshot-params\u2460"}, {"id": "ref-for-target-snapshot-params\u2461"}, {"id": "ref-for-target-snapshot-params\u2462"}, {"id": "ref-for-target-snapshot-params\u2463"}, {"id": "ref-for-target-snapshot-params\u2464"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#target-snapshot-params"},
+                "22b84272": {"dfnID": "22b84272", "dfnText": "establish a WebSocket connection", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-websocket-establish"}], "title": "7.1. WebSockets"}], "url": "https://websockets.spec.whatwg.org/#concept-websocket-establish"},
                 "24cf98a1": {"dfnID": "24cf98a1", "dfnText": "environment", "external": true, "refSections": [{"refs": [{"id": "ref-for-environment"}, {"id": "ref-for-environment\u2460"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-environment\u2461"}], "title": "3.3. Reporting"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#environment"},
                 "2594e562": {"dfnID": "2594e562", "dfnText": "navigate", "external": true, "refSections": [{"refs": [{"id": "ref-for-navigate"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigate"},
                 "2ce6f6bb": {"dfnID": "2ce6f6bb", "dfnText": "fetch(input)", "external": true, "refSections": [{"refs": [{"id": "ref-for-dom-global-fetch"}], "title": "1.1. Threat Model"}, {"refs": [{"id": "ref-for-dom-global-fetch\u2460"}], "title": "6.4. DNS"}], "url": "https://fetch.spec.whatwg.org/#dom-global-fetch"},
                 "3268a8eb": {"dfnID": "3268a8eb", "dfnText": "URL (for response)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-response-url"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-concept-response-url\u2460"}, {"id": "ref-for-concept-response-url\u2461"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-concept-response-url\u2462"}, {"id": "ref-for-concept-response-url\u2463"}, {"id": "ref-for-concept-response-url\u2464"}, {"id": "ref-for-concept-response-url\u2465"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-concept-response-url\u2466"}], "title": "5.2. Integration with HTML"}], "url": "https://fetch.spec.whatwg.org/#concept-response-url"},
-                "3d565682": {"dfnID": "3d565682", "dfnText": "WindowClient", "external": true, "refSections": [{"refs": [{"id": "ref-for-windowclient"}], "title": "5.4. Integration with Service Workers"}], "url": "https://w3c.github.io/ServiceWorker/#windowclient"},
-                "3e12e042": {"dfnID": "3e12e042", "dfnText": "environment settings object", "external": true, "refSections": [{"refs": [{"id": "ref-for-environment-settings-object"}], "title": "3.2. Matching"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object"},
+                "3d565682": {"dfnID": "3d565682", "dfnText": "WindowClient", "external": true, "refSections": [{"refs": [{"id": "ref-for-windowclient"}], "title": "5.6. Integration with Service Workers"}], "url": "https://w3c.github.io/ServiceWorker/#windowclient"},
+                "3e12e042": {"dfnID": "3e12e042", "dfnText": "environment settings object", "external": true, "refSections": [{"refs": [{"id": "ref-for-environment-settings-object"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-environment-settings-object\u2460"}, {"id": "ref-for-environment-settings-object\u2461"}], "title": "5.1. Integration with Fetch"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object"},
                 "3f2ca4de": {"dfnID": "3f2ca4de", "dfnText": "current URL", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-request-current-url"}], "title": "3.2. Matching"}], "url": "https://fetch.spec.whatwg.org/#concept-request-current-url"},
                 "3fca5a9e": {"dfnID": "3fca5a9e", "dfnText": "map", "external": true, "refSections": [{"refs": [{"id": "ref-for-ordered-map"}], "title": "3.2. Matching"}], "url": "https://infra.spec.whatwg.org/#ordered-map"},
-                "4013a022": {"dfnID": "4013a022", "dfnText": "this", "external": true, "refSections": [{"refs": [{"id": "ref-for-this"}, {"id": "ref-for-this\u2460"}], "title": "5.4. Integration with Service Workers"}], "url": "https://webidl.spec.whatwg.org/#this"},
+                "4013a022": {"dfnID": "4013a022", "dfnText": "this", "external": true, "refSections": [{"refs": [{"id": "ref-for-this"}, {"id": "ref-for-this\u2460"}], "title": "5.6. Integration with Service Workers"}], "url": "https://webidl.spec.whatwg.org/#this"},
                 "402ed79d": {"dfnID": "402ed79d", "dfnText": "CEReactions", "external": true, "refSections": [{"refs": [{"id": "ref-for-cereactions"}], "title": "4.1. The connectionAllowlist attribute"}], "url": "https://html.spec.whatwg.org/multipage/custom-elements.html#cereactions"},
-                "432147ee": {"dfnID": "432147ee", "dfnText": "policy container (for WorkerGlobalScope)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-workerglobalscope-policy-container"}], "title": "5.4. Integration with Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/workers.html#concept-workerglobalscope-policy-container"},
+                "432147ee": {"dfnID": "432147ee", "dfnText": "policy container (for WorkerGlobalScope)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-workerglobalscope-policy-container"}], "title": "5.6. Integration with Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/workers.html#concept-workerglobalscope-policy-container"},
                 "4437edc6": {"dfnID": "4437edc6", "dfnText": "navigation params", "external": true, "refSections": [{"refs": [{"id": "ref-for-navigation-params"}, {"id": "ref-for-navigation-params\u2460"}, {"id": "ref-for-navigation-params\u2461"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#navigation-params"},
                 "45d80b74": {"dfnID": "45d80b74", "dfnText": "hostname component", "external": true, "refSections": [{"refs": [{"id": "ref-for-url-pattern-hostname-component"}], "title": "3.2. Matching"}], "url": "https://urlpattern.spec.whatwg.org/#url-pattern-hostname-component"},
                 "4acd57ce": {"dfnID": "4acd57ce", "dfnText": "token", "external": true, "refSections": [{"refs": [{"id": "ref-for-name-tokens"}, {"id": "ref-for-name-tokens\u2460"}, {"id": "ref-for-name-tokens\u2461"}, {"id": "ref-for-name-tokens\u2462"}, {"id": "ref-for-name-tokens\u2463"}, {"id": "ref-for-name-tokens\u2464"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-name-tokens\u2465"}, {"id": "ref-for-name-tokens\u2466"}, {"id": "ref-for-name-tokens\u2467"}, {"id": "ref-for-name-tokens\u2468"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-name-tokens\u2460\u24ea"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://www.rfc-editor.org/rfc/rfc9651#name-tokens"},
                 "4d372bae": {"dfnID": "4d372bae", "dfnText": "matches", "external": true, "refSections": [{"refs": [{"id": "ref-for-bluetoothdatafilterinit-matches"}, {"id": "ref-for-bluetoothdatafilterinit-matches\u2460"}], "title": "3.2. Matching"}], "url": "https://webbluetoothcg.github.io/web-bluetooth/#bluetoothdatafilterinit-matches"},
-                "5216e1a0": {"dfnID": "5216e1a0", "dfnText": "node document", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-node-document"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://dom.spec.whatwg.org/#concept-node-document"},
+                "5216e1a0": {"dfnID": "5216e1a0", "dfnText": "node document", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-node-document"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-concept-node-document\u2460"}], "title": "5.3. DNS Prefetching"}], "url": "https://dom.spec.whatwg.org/#concept-node-document"},
                 "53275e46": {"dfnID": "53275e46", "dfnText": "append", "external": true, "refSections": [{"refs": [{"id": "ref-for-list-append"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-list-append\u2460"}], "title": "5.2. Integration with HTML"}], "url": "https://infra.spec.whatwg.org/#list-append"},
                 "55213b5b": {"dfnID": "55213b5b", "dfnText": "request", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-request"}, {"id": "ref-for-concept-request\u2460"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-concept-request\u2461"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-concept-request\u2462"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-concept-request\u2463"}, {"id": "ref-for-concept-request\u2464"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-concept-request\u2465"}, {"id": "ref-for-concept-request\u2466"}, {"id": "ref-for-concept-request\u2467"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-concept-request\u2468"}], "title": "6.2. Embedded Enforcement"}], "url": "https://fetch.spec.whatwg.org/#concept-request"},
                 "56ad2aed": {"dfnID": "56ad2aed", "dfnText": "insert", "external": true, "refSections": [{"refs": [{"id": "ref-for-list-insert"}, {"id": "ref-for-list-insert\u2460"}], "title": "3.1. Parsing"}], "url": "https://infra.spec.whatwg.org/#list-insert"},
@@ -4593,38 +4713,40 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "5c4f772b": {"dfnID": "5c4f772b", "dfnText": "match", "external": true, "refSections": [{"refs": [{"id": "ref-for-url-pattern-match"}, {"id": "ref-for-url-pattern-match\u2460"}], "title": "3.2. Matching"}], "url": "https://urlpattern.spec.whatwg.org/#url-pattern-match"},
                 "5c66de35": {"dfnID": "5c66de35", "dfnText": "get a structured field value", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-header-list-get-structured-header"}, {"id": "ref-for-concept-header-list-get-structured-header\u2460"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-concept-header-list-get-structured-header\u2461"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://fetch.spec.whatwg.org/#concept-header-list-get-structured-header"},
                 "60393e82": {"dfnID": "60393e82", "dfnText": "URL pattern", "external": true, "refSections": [{"refs": [{"id": "ref-for-url-pattern"}, {"id": "ref-for-url-pattern\u2460"}], "title": "2. Connection Allowlists"}, {"refs": [{"id": "ref-for-url-pattern\u2461"}, {"id": "ref-for-url-pattern\u2462"}, {"id": "ref-for-url-pattern\u2463"}, {"id": "ref-for-url-pattern\u2464"}, {"id": "ref-for-url-pattern\u2465"}, {"id": "ref-for-url-pattern\u2466"}], "title": "4.3. Comparing allowlists"}, {"refs": [{"id": "ref-for-url-pattern\u2467"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://urlpattern.spec.whatwg.org/#url-pattern"},
-                "61c338be": {"dfnID": "61c338be", "dfnText": "resolve an origin", "external": true, "refSections": [{"refs": [{"id": "ref-for-resolve-an-origin"}, {"id": "ref-for-resolve-an-origin\u2460"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-resolve-an-origin\u2461"}], "title": "6.4. DNS"}], "url": "https://fetch.spec.whatwg.org/#resolve-an-origin"},
+                "61c338be": {"dfnID": "61c338be", "dfnText": "resolve an origin", "external": true, "refSections": [{"refs": [{"id": "ref-for-resolve-an-origin"}, {"id": "ref-for-resolve-an-origin\u2460"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-resolve-an-origin\u2461"}, {"id": "ref-for-resolve-an-origin\u2462"}], "title": "5.3. DNS Prefetching"}, {"refs": [{"id": "ref-for-resolve-an-origin\u2463"}], "title": "6.4. DNS"}], "url": "https://fetch.spec.whatwg.org/#resolve-an-origin"},
                 "63340982": {"dfnID": "63340982", "dfnText": "local scheme", "external": true, "refSections": [{"refs": [{"id": "ref-for-local-scheme"}, {"id": "ref-for-local-scheme\u2460"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-local-scheme\u2461"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-local-scheme\u2462"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-local-scheme\u2463"}, {"id": "ref-for-local-scheme\u2464"}], "title": "6.2. Embedded Enforcement"}], "url": "https://fetch.spec.whatwg.org/#local-scheme"},
                 "649608b9": {"dfnID": "649608b9", "dfnText": "list", "external": true, "refSections": [{"refs": [{"id": "ref-for-list"}], "title": "2. Connection Allowlists"}, {"refs": [{"id": "ref-for-list\u2460"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-list\u2461"}, {"id": "ref-for-list\u2462"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-list\u2463"}], "title": "5.2. Integration with HTML"}], "url": "https://infra.spec.whatwg.org/#list"},
                 "658bcdaa": {"dfnID": "658bcdaa", "dfnText": "create navigation params from a srcdoc resource", "external": true, "refSections": [{"refs": [{"id": "ref-for-create-navigation-params-from-a-srcdoc-resource"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/browsing-the-web.html#create-navigation-params-from-a-srcdoc-resource"},
                 "6ee0eab1": {"dfnID": "6ee0eab1", "dfnText": "header list (for request)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-request-header-list"}], "title": "5.2. Integration with HTML"}], "url": "https://fetch.spec.whatwg.org/#concept-request-header-list"},
                 "752d140b": {"dfnID": "752d140b", "dfnText": "host", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-host"}, {"id": "ref-for-concept-host\u2460"}], "title": "3.2. Matching"}], "url": "https://url.spec.whatwg.org/#concept-host"},
-                "75f3e163": {"dfnID": "75f3e163", "dfnText": "administratively prohibited", "external": true, "refSections": [{"refs": [{"id": "ref-for-dfn-administratively-prohibited"}], "title": "5.3. Integration with WebRTC"}], "url": "https://w3c.github.io/webrtc-pc/#dfn-administratively-prohibited"},
+                "75f3e163": {"dfnID": "75f3e163", "dfnText": "administratively prohibited", "external": true, "refSections": [{"refs": [{"id": "ref-for-dfn-administratively-prohibited"}], "title": "5.5. Integration with WebRTC"}], "url": "https://w3c.github.io/webrtc-pc/#dfn-administratively-prohibited"},
                 "762210c0": {"dfnID": "762210c0", "dfnText": "container", "external": true, "refSections": [{"refs": [{"id": "ref-for-nav-container"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-nav-container\u2460"}, {"id": "ref-for-nav-container\u2461"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/document-sequences.html#nav-container"},
                 "7660bec4": {"dfnID": "7660bec4", "dfnText": "parameters", "external": true, "refSections": [{"refs": [{"id": "ref-for-name-parameters"}], "title": "3. Connection Allowlist Headers"}], "url": "https://www.rfc-editor.org/rfc/rfc9651#name-parameters"},
                 "77a2ee6e": {"dfnID": "77a2ee6e", "dfnText": "host", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-origin-host"}], "title": "5.1. Integration with Fetch"}], "url": "https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-host"},
                 "7ed9d314": {"dfnID": "7ed9d314", "dfnText": "generate and queue a report", "external": true, "refSections": [{"refs": [{"id": "ref-for-generate-and-queue-a-report"}], "title": "3.3. Reporting"}], "url": "https://w3c.github.io/reporting/#generate-and-queue-a-report"},
-                "83af367f": {"dfnID": "83af367f", "dfnText": "blocked", "external": true, "refSections": [{"refs": [{"id": "ref-for-blocked"}, {"id": "ref-for-blocked\u2460"}, {"id": "ref-for-blocked\u2461"}, {"id": "ref-for-blocked\u2462"}, {"id": "ref-for-blocked\u2463"}, {"id": "ref-for-blocked\u2464"}, {"id": "ref-for-blocked\u2465"}, {"id": "ref-for-blocked\u2466"}, {"id": "ref-for-blocked\u2467"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-blocked\u2468"}, {"id": "ref-for-blocked\u2460\u24ea"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-blocked\u2460\u2460"}, {"id": "ref-for-blocked\u2460\u2461"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-blocked\u2460\u2462"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-blocked\u2460\u2463"}], "title": "5.4. Integration with Service Workers"}], "url": "https://infra.spec.whatwg.org/#blocked"},
+                "83af367f": {"dfnID": "83af367f", "dfnText": "blocked", "external": true, "refSections": [{"refs": [{"id": "ref-for-blocked"}, {"id": "ref-for-blocked\u2460"}, {"id": "ref-for-blocked\u2461"}, {"id": "ref-for-blocked\u2462"}, {"id": "ref-for-blocked\u2463"}, {"id": "ref-for-blocked\u2464"}, {"id": "ref-for-blocked\u2465"}, {"id": "ref-for-blocked\u2466"}, {"id": "ref-for-blocked\u2467"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-blocked\u2468"}, {"id": "ref-for-blocked\u2460\u24ea"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-blocked\u2460\u2460"}, {"id": "ref-for-blocked\u2460\u2461"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-blocked\u2460\u2462"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-blocked\u2460\u2463"}], "title": "5.6. Integration with Service Workers"}], "url": "https://infra.spec.whatwg.org/#blocked"},
+                "85394472": {"dfnID": "85394472", "dfnText": "Document", "external": true, "refSections": [{"refs": [{"id": "ref-for-document"}], "title": "5.1. Integration with Fetch"}], "url": "https://dom.spec.whatwg.org/#document"},
                 "857d5516": {"dfnID": "857d5516", "dfnText": "client", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-request-client"}, {"id": "ref-for-concept-request-client\u2460"}], "title": "3.2. Matching"}], "url": "https://fetch.spec.whatwg.org/#concept-request-client"},
                 "86efadaf": {"dfnID": "86efadaf", "dfnText": "policy container", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-request-policy-container"}], "title": "3.2. Matching"}], "url": "https://fetch.spec.whatwg.org/#concept-request-policy-container"},
                 "87fcd40c": {"dfnID": "87fcd40c", "dfnText": "iframe", "external": true, "refSections": [{"refs": [{"id": "ref-for-the-iframe-element"}], "title": "4.1. The connectionAllowlist attribute"}, {"refs": [{"id": "ref-for-the-iframe-element\u2460"}, {"id": "ref-for-the-iframe-element\u2461"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-the-iframe-element\u2462"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-the-iframe-element\u2463"}], "title": "6.2. Embedded Enforcement"}], "url": "https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element"},
                 "8855a9aa": {"dfnID": "8855a9aa", "dfnText": "DOMString", "external": true, "refSections": [{"refs": [{"id": "ref-for-idl-DOMString"}], "title": "3.3. Reporting"}, {"refs": [{"id": "ref-for-idl-DOMString\u2460"}], "title": "4.1. The connectionAllowlist attribute"}], "url": "https://webidl.spec.whatwg.org/#idl-DOMString"},
                 "8a7dfd23": {"dfnID": "8a7dfd23", "dfnText": "postMessage(message, options)", "external": true, "refSections": [{"refs": [{"id": "ref-for-dom-window-postmessage-options"}], "title": "6.5. postMessage(...)"}], "url": "https://html.spec.whatwg.org/multipage/web-messaging.html#dom-window-postmessage-options"},
-                "8e1fb11c": {"dfnID": "8e1fb11c", "dfnText": "obtain a connection", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-connection-obtain"}, {"id": "ref-for-concept-connection-obtain\u2460"}], "title": "5.1. Integration with Fetch"}], "url": "https://fetch.spec.whatwg.org/#concept-connection-obtain"},
+                "8e1fb11c": {"dfnID": "8e1fb11c", "dfnText": "obtain a connection", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-connection-obtain"}, {"id": "ref-for-concept-connection-obtain\u2460"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-concept-connection-obtain\u2461"}, {"id": "ref-for-concept-connection-obtain\u2462"}], "title": "5.4. Preconnecting"}], "url": "https://fetch.spec.whatwg.org/#concept-connection-obtain"},
                 "8ea172e9": {"dfnID": "8ea172e9", "dfnText": "sandbox", "external": true, "refSections": [{"refs": [{"id": "ref-for-sandbox"}], "title": "6.1. Same-Origin Contexts"}], "url": "https://w3c.github.io/webappsec-csp/#sandbox"},
                 "8f26de31": {"dfnID": "8f26de31", "dfnText": "is local", "external": true, "refSections": [{"refs": [{"id": "ref-for-is-local"}], "title": "3.2. Matching"}], "url": "https://fetch.spec.whatwg.org/#is-local"},
                 "90f4193a": {"dfnID": "90f4193a", "dfnText": "URLPatternInit", "external": true, "refSections": [{"refs": [{"id": "ref-for-dictdef-urlpatterninit"}], "title": "3.2. Matching"}], "url": "https://urlpattern.spec.whatwg.org/#dictdef-urlpatterninit"},
                 "9239678f": {"dfnID": "9239678f", "dfnText": "endpoint", "external": true, "refSections": [{"refs": [{"id": "ref-for-endpoint"}], "title": "1. Introduction"}, {"refs": [{"id": "ref-for-endpoint\u2460"}], "title": "2. Connection Allowlists"}, {"refs": [{"id": "ref-for-endpoint\u2461"}], "title": "3. Connection Allowlist Headers"}], "url": "https://w3c.github.io/reporting/#endpoint"},
-                "959ad97b": {"dfnID": "959ad97b", "dfnText": "origin", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-url-origin"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-concept-url-origin\u2460"}], "title": "3.1. Parsing"}], "url": "https://url.spec.whatwg.org/#concept-url-origin"},
+                "959ad97b": {"dfnID": "959ad97b", "dfnText": "origin", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-url-origin"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-concept-url-origin\u2460"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-concept-url-origin\u2461"}], "title": "5.3. DNS Prefetching"}, {"refs": [{"id": "ref-for-concept-url-origin\u2462"}], "title": "5.4. Preconnecting"}], "url": "https://url.spec.whatwg.org/#concept-url-origin"},
                 "984221ca": {"dfnID": "984221ca", "dfnText": "struct", "external": true, "refSections": [{"refs": [{"id": "ref-for-struct"}], "title": "2. Connection Allowlists"}, {"refs": [{"id": "ref-for-struct\u2460"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-struct\u2461"}, {"id": "ref-for-struct\u2462"}, {"id": "ref-for-struct\u2463"}, {"id": "ref-for-struct\u2464"}], "title": "5.2. Integration with HTML"}], "url": "https://infra.spec.whatwg.org/#struct"},
                 "98b32dd9": {"dfnID": "98b32dd9", "dfnText": "success", "external": true, "refSections": [{"refs": [{"id": "ref-for-success"}, {"id": "ref-for-success\u2460"}, {"id": "ref-for-success\u2461"}, {"id": "ref-for-success\u2462"}, {"id": "ref-for-success\u2463"}], "title": "3.2. Matching"}], "url": "https://infra.spec.whatwg.org/#success"},
                 "9a15e8d7": {"dfnID": "9a15e8d7", "dfnText": "build a URL pattern from an HTTP structured field value", "external": true, "refSections": [{"refs": [{"id": "ref-for-build-a-url-pattern-from-an-http-structured-field-value"}], "title": "3.1. Parsing"}], "url": "https://urlpattern.spec.whatwg.org/#build-a-url-pattern-from-an-http-structured-field-value"},
                 "9b40f5cd": {"dfnID": "9b40f5cd", "dfnText": "fetch directives", "external": true, "refSections": [{"refs": [{"id": "ref-for-fetch-directives"}], "title": "1.2. Overlap with Content Security Policy"}], "url": "https://w3c.github.io/webappsec-csp/#fetch-directives"},
                 "9c19b7fc": {"dfnID": "9c19b7fc", "dfnText": "navigable", "external": true, "refSections": [{"refs": [{"id": "ref-for-navigable"}, {"id": "ref-for-navigable\u2460"}, {"id": "ref-for-navigable\u2461"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/document-sequences.html#navigable"},
-                "9c4c1e66": {"dfnID": "9c4c1e66", "dfnText": "relevant settings object", "external": true, "refSections": [{"refs": [{"id": "ref-for-relevant-settings-object"}, {"id": "ref-for-relevant-settings-object\u2460"}], "title": "5.4. Integration with Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object"},
+                "9c4c1e66": {"dfnID": "9c4c1e66", "dfnText": "relevant settings object", "external": true, "refSections": [{"refs": [{"id": "ref-for-relevant-settings-object"}], "title": "5.3. DNS Prefetching"}, {"refs": [{"id": "ref-for-relevant-settings-object\u2460"}, {"id": "ref-for-relevant-settings-object\u2461"}], "title": "5.6. Integration with Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object"},
                 "9cce47fd": {"dfnID": "9cce47fd", "dfnText": "sequence", "external": true, "refSections": [{"refs": [{"id": "ref-for-idl-sequence"}], "title": "3.3. Reporting"}], "url": "https://webidl.spec.whatwg.org/#idl-sequence"},
                 "a0c4f72a": {"dfnID": "a0c4f72a", "dfnText": "BroadcastChannel", "external": true, "refSections": [{"refs": [{"id": "ref-for-broadcastchannel"}], "title": "6.5. postMessage(...)"}], "url": "https://html.spec.whatwg.org/multipage/web-messaging.html#broadcastchannel"},
                 "a3a31c89": {"dfnID": "a3a31c89", "dfnText": "wildcard", "external": true, "refSections": [{"refs": [{"id": "ref-for-wildcard"}], "title": "4.2. Embedded Enforcement Headers"}], "url": "https://fetch.spec.whatwg.org/#wildcard"},
+                "a746ba16": {"dfnID": "a746ba16", "dfnText": "environment (for link processing options)", "external": true, "refSections": [{"refs": [{"id": "ref-for-link-options-environment"}, {"id": "ref-for-link-options-environment\u2460"}], "title": "5.4. Preconnecting"}], "url": "https://html.spec.whatwg.org/multipage/semantics.html#link-options-environment"},
                 "a7b0745e": {"dfnID": "a7b0745e", "dfnText": "list", "external": true, "refSections": [{"refs": [{"id": "ref-for-name-list"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-name-list\u2460"}, {"id": "ref-for-name-list\u2461"}, {"id": "ref-for-name-list\u2462"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-name-list\u2463"}], "title": "4.1. The connectionAllowlist attribute"}, {"refs": [{"id": "ref-for-name-list\u2464"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-name-list\u2465"}, {"id": "ref-for-name-list\u2466"}, {"id": "ref-for-name-list\u2467"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://www.rfc-editor.org/rfc/rfc9651#name-list"},
                 "a973e0fe": {"dfnID": "a973e0fe", "dfnText": "document", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-document"}, {"id": "ref-for-concept-document\u2460"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-concept-document\u2461"}], "title": "4.1. The connectionAllowlist attribute"}, {"refs": [{"id": "ref-for-concept-document\u2462"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-concept-document\u2463"}, {"id": "ref-for-concept-document\u2464"}, {"id": "ref-for-concept-document\u2465"}], "title": "5.2. Integration with HTML"}], "url": "https://dom.spec.whatwg.org/#concept-document"},
                 "abstract-opdef-apply-a-required-connection-allowlist": {"dfnID": "abstract-opdef-apply-a-required-connection-allowlist", "dfnText": "apply a required connection allowlist", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-apply-a-required-connection-allowlist"}], "title": "5.2. Integration with HTML"}], "url": "#abstract-opdef-apply-a-required-connection-allowlist"},
@@ -4638,21 +4760,21 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "abstract-opdef-should-be-blocked-by-connection-allowlist-embedded-enforcement": {"dfnID": "abstract-opdef-should-be-blocked-by-connection-allowlist-embedded-enforcement", "dfnText": "should be blocked by Connection Allowlist embedded enforcement", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-should-be-blocked-by-connection-allowlist-embedded-enforcement"}], "title": "5.2. Integration with HTML"}], "url": "#abstract-opdef-should-be-blocked-by-connection-allowlist-embedded-enforcement"},
                 "abstract-opdef-should-host-be-blocked-by-connection-allowlists": {"dfnID": "abstract-opdef-should-host-be-blocked-by-connection-allowlists", "dfnText": "should host be blocked by Connection Allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-should-host-be-blocked-by-connection-allowlists"}], "title": "5.1. Integration with Fetch"}], "url": "#abstract-opdef-should-host-be-blocked-by-connection-allowlists"},
                 "abstract-opdef-should-request-be-blocked-by-connection-allowlists": {"dfnID": "abstract-opdef-should-request-be-blocked-by-connection-allowlists", "dfnText": "should request be blocked by Connection Allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-should-request-be-blocked-by-connection-allowlists"}], "title": "5.1. Integration with Fetch"}], "url": "#abstract-opdef-should-request-be-blocked-by-connection-allowlists"},
-                "abstract-opdef-should-url-be-blocked-by-connection-allowlists": {"dfnID": "abstract-opdef-should-url-be-blocked-by-connection-allowlists", "dfnText": "should url be blocked by Connection Allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists\u2460"}], "title": "5.4. Integration with Service Workers"}], "url": "#abstract-opdef-should-url-be-blocked-by-connection-allowlists"},
-                "abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists": {"dfnID": "abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists", "dfnText": "should WebRTC be blocked by Connection Allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists"}], "title": "5.3. Integration with WebRTC"}], "url": "#abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists"},
+                "abstract-opdef-should-url-be-blocked-by-connection-allowlists": {"dfnID": "abstract-opdef-should-url-be-blocked-by-connection-allowlists", "dfnText": "should url be blocked by Connection Allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-abstract-opdef-should-url-be-blocked-by-connection-allowlists\u2460"}], "title": "5.6. Integration with Service Workers"}], "url": "#abstract-opdef-should-url-be-blocked-by-connection-allowlists"},
+                "abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists": {"dfnID": "abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists", "dfnText": "should WebRTC be blocked by Connection Allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists"}], "title": "5.5. Integration with WebRTC"}], "url": "#abstract-opdef-should-webrtc-be-blocked-by-connection-allowlists"},
                 "ad6ec3ab": {"dfnID": "ad6ec3ab", "dfnText": "forbidden request-header", "external": true, "refSections": [{"refs": [{"id": "ref-for-forbidden-request-header"}], "title": "4.2. Embedded Enforcement Headers"}], "url": "https://fetch.spec.whatwg.org/#forbidden-request-header"},
                 "ae56d57e": {"dfnID": "ae56d57e", "dfnText": "URL list", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-request-url-list"}], "title": "3.2. Matching"}], "url": "https://fetch.spec.whatwg.org/#concept-request-url-list"},
                 "ae8def21": {"dfnID": "ae8def21", "dfnText": "contain", "external": true, "refSections": [{"refs": [{"id": "ref-for-list-contain"}], "title": "4.3. Comparing allowlists"}], "url": "https://infra.spec.whatwg.org/#list-contain"},
                 "allows-a-connection-allowlist-from": {"dfnID": "allows-a-connection-allowlist-from", "dfnText": "allows a connection allowlist from", "external": false, "refSections": [{"refs": [{"id": "ref-for-allows-a-connection-allowlist-from"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "#allows-a-connection-allowlist-from"},
                 "b0d7f3c3": {"dfnID": "b0d7f3c3", "dfnText": "USVString", "external": true, "refSections": [{"refs": [{"id": "ref-for-idl-USVString"}, {"id": "ref-for-idl-USVString\u2460"}], "title": "3.3. Reporting"}], "url": "https://webidl.spec.whatwg.org/#idl-USVString"},
-                "b33787b2": {"dfnID": "b33787b2", "dfnText": "policy container", "external": true, "refSections": [{"refs": [{"id": "ref-for-policy-container"}], "title": "1.1. Threat Model"}, {"refs": [{"id": "ref-for-policy-container\u2460"}, {"id": "ref-for-policy-container\u2461"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-policy-container\u2462"}, {"id": "ref-for-policy-container\u2463"}, {"id": "ref-for-policy-container\u2464"}, {"id": "ref-for-policy-container\u2465"}, {"id": "ref-for-policy-container\u2466"}, {"id": "ref-for-policy-container\u2467"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-policy-container\u2468"}, {"id": "ref-for-policy-container\u2460\u24ea"}, {"id": "ref-for-policy-container\u2460\u2460"}, {"id": "ref-for-policy-container\u2460\u2461"}, {"id": "ref-for-policy-container\u2460\u2462"}, {"id": "ref-for-policy-container\u2460\u2463"}, {"id": "ref-for-policy-container\u2460\u2464"}, {"id": "ref-for-policy-container\u2460\u2465"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-policy-container\u2460\u2466"}], "title": "6.1. Same-Origin Contexts"}, {"refs": [{"id": "ref-for-policy-container\u2460\u2467"}], "title": "6.2. Embedded Enforcement"}, {"refs": [{"id": "ref-for-policy-container\u2460\u2468"}], "title": "6.3. Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/browsers.html#policy-container"},
+                "b33787b2": {"dfnID": "b33787b2", "dfnText": "policy container", "external": true, "refSections": [{"refs": [{"id": "ref-for-policy-container"}], "title": "1.1. Threat Model"}, {"refs": [{"id": "ref-for-policy-container\u2460"}, {"id": "ref-for-policy-container\u2461"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-policy-container\u2462"}, {"id": "ref-for-policy-container\u2463"}, {"id": "ref-for-policy-container\u2464"}, {"id": "ref-for-policy-container\u2465"}, {"id": "ref-for-policy-container\u2466"}, {"id": "ref-for-policy-container\u2467"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-policy-container\u2468"}, {"id": "ref-for-policy-container\u2460\u24ea"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-policy-container\u2460\u2460"}, {"id": "ref-for-policy-container\u2460\u2461"}, {"id": "ref-for-policy-container\u2460\u2462"}, {"id": "ref-for-policy-container\u2460\u2463"}, {"id": "ref-for-policy-container\u2460\u2464"}, {"id": "ref-for-policy-container\u2460\u2465"}, {"id": "ref-for-policy-container\u2460\u2466"}, {"id": "ref-for-policy-container\u2460\u2467"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-policy-container\u2460\u2468"}], "title": "6.1. Same-Origin Contexts"}, {"refs": [{"id": "ref-for-policy-container\u2461\u24ea"}], "title": "6.2. Embedded Enforcement"}, {"refs": [{"id": "ref-for-policy-container\u2461\u2460"}], "title": "6.3. Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/browsers.html#policy-container"},
                 "b410a6ef": {"dfnID": "b410a6ef", "dfnText": "ASCII serialization of an origin", "external": true, "refSections": [{"refs": [{"id": "ref-for-ascii-serialisation-of-an-origin"}], "title": "3.1. Parsing"}], "url": "https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin"},
-                "bd1db03d": {"dfnID": "bd1db03d", "dfnText": "policy container (for environment settings object)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-settings-object-policy-container"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-concept-settings-object-policy-container\u2460"}], "title": "5.4. Integration with Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-policy-container"},
+                "bd1db03d": {"dfnID": "bd1db03d", "dfnText": "policy container (for environment settings object)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-settings-object-policy-container"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-concept-settings-object-policy-container\u2460"}], "title": "5.6. Integration with Service Workers"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-policy-container"},
                 "bf8d9616": {"dfnID": "bf8d9616", "dfnText": "failure", "external": true, "refSections": [{"refs": [{"id": "ref-for-failure"}, {"id": "ref-for-failure\u2460"}, {"id": "ref-for-failure\u2461"}, {"id": "ref-for-failure\u2462"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-failure\u2463"}, {"id": "ref-for-failure\u2464"}], "title": "5.1. Integration with Fetch"}], "url": "https://infra.spec.whatwg.org/#failure"},
                 "bf9f0d4e": {"dfnID": "bf9f0d4e", "dfnText": "create", "external": true, "refSections": [{"refs": [{"id": "ref-for-url-pattern-create"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-url-pattern-create\u2460"}], "title": "4.3. Comparing allowlists"}], "url": "https://urlpattern.spec.whatwg.org/#url-pattern-create"},
-                "c3e881ef": {"dfnID": "c3e881ef", "dfnText": "SecurityError", "external": true, "refSections": [{"refs": [{"id": "ref-for-securityerror"}], "title": "5.4. Integration with Service Workers"}], "url": "https://webidl.spec.whatwg.org/#securityerror"},
+                "c3e881ef": {"dfnID": "c3e881ef", "dfnText": "SecurityError", "external": true, "refSections": [{"refs": [{"id": "ref-for-securityerror"}], "title": "5.6. Integration with Service Workers"}], "url": "https://webidl.spec.whatwg.org/#securityerror"},
                 "c60ed63a": {"dfnID": "c60ed63a", "dfnText": "service worker", "external": true, "refSections": [{"refs": [{"id": "ref-for-dfn-service-worker"}], "title": "6.3. Service Workers"}], "url": "https://w3c.github.io/ServiceWorker/#dfn-service-worker"},
-                "c81d8804": {"dfnID": "c81d8804", "dfnText": "promise", "external": true, "refSections": [{"refs": [{"id": "ref-for-transaction-state-promise"}], "title": "5.4. Integration with Service Workers"}], "url": "https://wicg.github.io/web-smart-card/#transaction-state-promise"},
+                "c81d8804": {"dfnID": "c81d8804", "dfnText": "promise", "external": true, "refSections": [{"refs": [{"id": "ref-for-transaction-state-promise"}], "title": "5.6. Integration with Service Workers"}], "url": "https://wicg.github.io/web-smart-card/#transaction-state-promise"},
                 "c88f3887": {"dfnID": "c88f3887", "dfnText": "item", "external": true, "refSections": [{"refs": [{"id": "ref-for-struct-item"}], "title": "2. Connection Allowlists"}], "url": "https://infra.spec.whatwg.org/#struct-item"},
                 "c9aec5e7": {"dfnID": "c9aec5e7", "dfnText": "string", "external": true, "refSections": [{"refs": [{"id": "ref-for-name-string"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-name-string\u2460"}], "title": "4.3. Comparing allowlists"}, {"refs": [{"id": "ref-for-name-string\u2461"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://www.rfc-editor.org/rfc/rfc9651#name-string"},
                 "c9e7c11a": {"dfnID": "c9e7c11a", "dfnText": "header", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-header"}, {"id": "ref-for-concept-header\u2460"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-concept-header\u2461"}, {"id": "ref-for-concept-header\u2462"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-concept-header\u2463"}, {"id": "ref-for-concept-header\u2464"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-concept-header\u2465"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://fetch.spec.whatwg.org/#concept-header"},
@@ -4675,7 +4797,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "d762bbef": {"dfnID": "d762bbef", "dfnText": "hostname", "external": true, "refSections": [{"refs": [{"id": "ref-for-dom-urlpatterninit-hostname"}], "title": "3.2. Matching"}], "url": "https://urlpattern.spec.whatwg.org/#dom-urlpatterninit-hostname"},
                 "daf5c14d": {"dfnID": "daf5c14d", "dfnText": "allowed", "external": true, "refSections": [{"refs": [{"id": "ref-for-allowed"}, {"id": "ref-for-allowed\u2460"}, {"id": "ref-for-allowed\u2461"}, {"id": "ref-for-allowed\u2462"}, {"id": "ref-for-allowed\u2463"}, {"id": "ref-for-allowed\u2464"}, {"id": "ref-for-allowed\u2465"}, {"id": "ref-for-allowed\u2466"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-allowed\u2467"}, {"id": "ref-for-allowed\u2468"}, {"id": "ref-for-allowed\u2460\u24ea"}, {"id": "ref-for-allowed\u2460\u2460"}, {"id": "ref-for-allowed\u2460\u2461"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://infra.spec.whatwg.org/#allowed"},
                 "dc1cd39b": {"dfnID": "dc1cd39b", "dfnText": "URL (for request)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-request-url"}, {"id": "ref-for-concept-request-url\u2460"}, {"id": "ref-for-concept-request-url\u2461"}, {"id": "ref-for-concept-request-url\u2462"}], "title": "3.2. Matching"}], "url": "https://fetch.spec.whatwg.org/#concept-request-url"},
-                "dca2de17": {"dfnID": "dca2de17", "dfnText": "DOMException", "external": true, "refSections": [{"refs": [{"id": "ref-for-idl-DOMException"}], "title": "5.4. Integration with Service Workers"}], "url": "https://webidl.spec.whatwg.org/#idl-DOMException"},
+                "dca2de17": {"dfnID": "dca2de17", "dfnText": "DOMException", "external": true, "refSections": [{"refs": [{"id": "ref-for-idl-DOMException"}], "title": "5.6. Integration with Service Workers"}], "url": "https://webidl.spec.whatwg.org/#idl-DOMException"},
                 "dcffbccd": {"dfnID": "dcffbccd", "dfnText": "URL", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-url"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-concept-url\u2460"}, {"id": "ref-for-concept-url\u2461"}, {"id": "ref-for-concept-url\u2462"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-concept-url\u2463"}, {"id": "ref-for-concept-url\u2464"}, {"id": "ref-for-concept-url\u2465"}], "title": "3.3. Reporting"}, {"refs": [{"id": "ref-for-concept-url\u2466"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-concept-url\u2467"}], "title": "4.3. Comparing allowlists"}, {"refs": [{"id": "ref-for-concept-url\u2468"}, {"id": "ref-for-concept-url\u2460\u24ea"}, {"id": "ref-for-concept-url\u2460\u2460"}, {"id": "ref-for-concept-url\u2460\u2461"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://url.spec.whatwg.org/#concept-url"},
                 "de2211fe": {"dfnID": "de2211fe", "dfnText": "structured header", "external": true, "refSections": [{"refs": [{"id": "ref-for-name-introduction"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-name-introduction\u2460"}, {"id": "ref-for-name-introduction\u2461"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-name-introduction\u2462"}], "title": "4.1. The connectionAllowlist attribute"}, {"refs": [{"id": "ref-for-name-introduction\u2463"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-name-introduction\u2464"}, {"id": "ref-for-name-introduction\u2465"}, {"id": "ref-for-name-introduction\u2466"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://www.rfc-editor.org/rfc/rfc9651#name-introduction"},
                 "dictdef-connectionallowlistviolationreport": {"dfnID": "dictdef-connectionallowlistviolationreport", "dfnText": "ConnectionAllowlistViolationReport", "external": false, "refSections": [{"refs": [{"id": "ref-for-dictdef-connectionallowlistviolationreport"}, {"id": "ref-for-dictdef-connectionallowlistviolationreport\u2460"}, {"id": "ref-for-dictdef-connectionallowlistviolationreport\u2461"}, {"id": "ref-for-dictdef-connectionallowlistviolationreport\u2462"}], "title": "3.3. Reporting"}], "url": "#dictdef-connectionallowlistviolationreport"},
@@ -4686,7 +4808,8 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "dom-connectionallowlistviolationreport-disposition": {"dfnID": "dom-connectionallowlistviolationreport-disposition", "dfnText": "disposition", "external": false, "refSections": [{"refs": [{"id": "ref-for-dom-connectionallowlistviolationreport-disposition"}, {"id": "ref-for-dom-connectionallowlistviolationreport-disposition\u2460"}], "title": "3.3. Reporting"}], "url": "#dom-connectionallowlistviolationreport-disposition"},
                 "dom-connectionallowlistviolationreport-url": {"dfnID": "dom-connectionallowlistviolationreport-url", "dfnText": "url", "external": false, "refSections": [{"refs": [{"id": "ref-for-dom-connectionallowlistviolationreport-url"}], "title": "3.3. Reporting"}], "url": "#dom-connectionallowlistviolationreport-url"},
                 "dom-htmliframeelement-connectionallowlist": {"dfnID": "dom-htmliframeelement-connectionallowlist", "dfnText": "connectionAllowlist", "external": false, "refSections": [{"refs": [{"id": "ref-for-dom-htmliframeelement-connectionallowlist"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-dom-htmliframeelement-connectionallowlist\u2460"}], "title": "4.1. The connectionAllowlist attribute"}], "url": "#dom-htmliframeelement-connectionallowlist"},
-                "e76b6e66": {"dfnID": "e76b6e66", "dfnText": "navigate(url)", "external": true, "refSections": [{"refs": [{"id": "ref-for-dom-windowclient-navigate"}, {"id": "ref-for-dom-windowclient-navigate\u2460"}], "title": "5.4. Integration with Service Workers"}], "url": "https://w3c.github.io/ServiceWorker/#dom-windowclient-navigate"},
+                "e0f03d6c": {"dfnID": "e0f03d6c", "dfnText": "preconnect", "external": true, "refSections": [{"refs": [{"id": "ref-for-preconnect"}, {"id": "ref-for-preconnect\u2460"}], "title": "5.4. Preconnecting"}], "url": "https://html.spec.whatwg.org/multipage/links.html#preconnect"},
+                "e76b6e66": {"dfnID": "e76b6e66", "dfnText": "navigate(url)", "external": true, "refSections": [{"refs": [{"id": "ref-for-dom-windowclient-navigate"}, {"id": "ref-for-dom-windowclient-navigate\u2460"}], "title": "5.6. Integration with Service Workers"}], "url": "https://w3c.github.io/ServiceWorker/#dom-windowclient-navigate"},
                 "eb1b1af3": {"dfnID": "eb1b1af3", "dfnText": "network error", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-network-error"}, {"id": "ref-for-concept-network-error\u2460"}], "title": "5.2. Integration with HTML"}], "url": "https://fetch.spec.whatwg.org/#concept-network-error"},
                 "ee7bba09": {"dfnID": "ee7bba09", "dfnText": "response", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-response"}], "title": "3. Connection Allowlist Headers"}, {"refs": [{"id": "ref-for-concept-response\u2460"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-concept-response\u2461"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-concept-response\u2462"}, {"id": "ref-for-concept-response\u2463"}, {"id": "ref-for-concept-response\u2464"}, {"id": "ref-for-concept-response\u2465"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-concept-response\u2466"}, {"id": "ref-for-concept-response\u2467"}, {"id": "ref-for-concept-response\u2468"}, {"id": "ref-for-concept-response\u2460\u24ea"}], "title": "5.2. Integration with HTML"}], "url": "https://fetch.spec.whatwg.org/#concept-response"},
                 "element-attrdef-iframe-connectionallowlist": {"dfnID": "element-attrdef-iframe-connectionallowlist", "dfnText": "connectionAllowlist", "external": false, "refSections": [], "url": "#element-attrdef-iframe-connectionallowlist"},
@@ -4696,6 +4819,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "f23dc013": {"dfnID": "f23dc013", "dfnText": "child navigable", "external": true, "refSections": [{"refs": [{"id": "ref-for-child-navigable"}, {"id": "ref-for-child-navigable\u2460"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-child-navigable\u2461"}], "title": "5.2. Integration with HTML"}], "url": "https://html.spec.whatwg.org/multipage/document-sequences.html#child-navigable"},
                 "f7b00a8b": {"dfnID": "f7b00a8b", "dfnText": "header list (for response)", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-response-header-list"}, {"id": "ref-for-concept-response-header-list\u2460"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-concept-response-header-list\u2461"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-concept-response-header-list\u2462"}], "title": "4.4. Obtaining and enforcing a requirement"}], "url": "https://fetch.spec.whatwg.org/#concept-response-header-list"},
                 "f937b7b6": {"dfnID": "f937b7b6", "dfnText": "continue", "external": true, "refSections": [{"refs": [{"id": "ref-for-iteration-continue"}, {"id": "ref-for-iteration-continue\u2460"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-iteration-continue\u2461"}, {"id": "ref-for-iteration-continue\u2462"}, {"id": "ref-for-iteration-continue\u2463"}, {"id": "ref-for-iteration-continue\u2464"}, {"id": "ref-for-iteration-continue\u2465"}, {"id": "ref-for-iteration-continue\u2466"}], "title": "3.2. Matching"}], "url": "https://infra.spec.whatwg.org/#iteration-continue"},
+                "f98dd553": {"dfnID": "f98dd553", "dfnText": "fetch and process the linked resource", "external": true, "refSections": [{"refs": [{"id": "ref-for-fetch-and-process-the-linked-resource"}, {"id": "ref-for-fetch-and-process-the-linked-resource\u2460"}], "title": "5.3. DNS Prefetching"}], "url": "https://html.spec.whatwg.org/multipage/semantics.html#fetch-and-process-the-linked-resource"},
                 "fa5ee9c5": {"dfnID": "fa5ee9c5", "dfnText": "creation URL", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-environment-creation-url"}], "title": "3.3. Reporting"}], "url": "https://html.spec.whatwg.org/multipage/webappapis.html#concept-environment-creation-url"},
                 "fdb35d97": {"dfnID": "fdb35d97", "dfnText": "CORS check", "external": true, "refSections": [{"refs": [{"id": "ref-for-concept-cors-check"}], "title": "4.2. Embedded Enforcement Headers"}], "url": "https://fetch.spec.whatwg.org/#concept-cors-check"},
                 "grammardef-connection-allowlist-disposition-enforce": {"dfnID": "grammardef-connection-allowlist-disposition-enforce", "dfnText": "enforce", "external": false, "refSections": [{"refs": [{"id": "ref-for-grammardef-connection-allowlist-disposition-enforce"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2460"}, {"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2461"}, {"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2462"}, {"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2463"}, {"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2464"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2465"}, {"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2466"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2467"}, {"id": "ref-for-grammardef-connection-allowlist-disposition-enforce\u2468"}], "title": "5.2. Integration with HTML"}], "url": "#grammardef-connection-allowlist-disposition-enforce"},
@@ -4712,7 +4836,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "http-headerdef-connection-allowlist": {"dfnID": "http-headerdef-connection-allowlist", "dfnText": "Connection-Allowlist", "external": false, "refSections": [{"refs": [{"id": "ref-for-http-headerdef-connection-allowlist"}], "title": "1. Introduction"}, {"refs": [{"id": "ref-for-http-headerdef-connection-allowlist\u2460"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-http-headerdef-connection-allowlist\u2461"}, {"id": "ref-for-http-headerdef-connection-allowlist\u2462"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-http-headerdef-connection-allowlist\u2463"}, {"id": "ref-for-http-headerdef-connection-allowlist\u2464"}], "title": "4.1. The connectionAllowlist attribute"}, {"refs": [{"id": "ref-for-http-headerdef-connection-allowlist\u2465"}], "title": "4.2. Embedded Enforcement Headers"}, {"refs": [{"id": "ref-for-http-headerdef-connection-allowlist\u2466"}, {"id": "ref-for-http-headerdef-connection-allowlist\u2467"}, {"id": "ref-for-http-headerdef-connection-allowlist\u2468"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-http-headerdef-connection-allowlist\u2460\u24ea"}, {"id": "ref-for-http-headerdef-connection-allowlist\u2460\u2460"}], "title": "6.2. Embedded Enforcement"}], "url": "#http-headerdef-connection-allowlist"},
                 "http-headerdef-connection-allowlist-report-only": {"dfnID": "http-headerdef-connection-allowlist-report-only", "dfnText": "Connection-Allowlist-Report-Only", "external": false, "refSections": [{"refs": [{"id": "ref-for-http-headerdef-connection-allowlist-report-only"}], "title": "3.1. Parsing"}, {"refs": [{"id": "ref-for-http-headerdef-connection-allowlist-report-only\u2460"}], "title": "5.2. Integration with HTML"}], "url": "#http-headerdef-connection-allowlist-report-only"},
                 "http-headerdef-sec-required-connection-allowlist": {"dfnID": "http-headerdef-sec-required-connection-allowlist", "dfnText": "Sec-Required-Connection-Allowlist", "external": false, "refSections": [{"refs": [{"id": "ref-for-http-headerdef-sec-required-connection-allowlist"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-http-headerdef-sec-required-connection-allowlist\u2460"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-http-headerdef-sec-required-connection-allowlist\u2461"}], "title": "5.2. Integration with HTML"}], "url": "#http-headerdef-sec-required-connection-allowlist"},
-                "policy-container-connection-allowlists": {"dfnID": "policy-container-connection-allowlists", "dfnText": "connection allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-policy-container-connection-allowlists"}, {"id": "ref-for-policy-container-connection-allowlists\u2460"}, {"id": "ref-for-policy-container-connection-allowlists\u2461"}, {"id": "ref-for-policy-container-connection-allowlists\u2462"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-policy-container-connection-allowlists\u2463"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-policy-container-connection-allowlists\u2464"}, {"id": "ref-for-policy-container-connection-allowlists\u2465"}, {"id": "ref-for-policy-container-connection-allowlists\u2466"}, {"id": "ref-for-policy-container-connection-allowlists\u2467"}, {"id": "ref-for-policy-container-connection-allowlists\u2468"}, {"id": "ref-for-policy-container-connection-allowlists\u2460\u24ea"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-policy-container-connection-allowlists\u2460\u2460"}], "title": "5.4. Integration with Service Workers"}], "url": "#policy-container-connection-allowlists"},
+                "policy-container-connection-allowlists": {"dfnID": "policy-container-connection-allowlists", "dfnText": "connection allowlists", "external": false, "refSections": [{"refs": [{"id": "ref-for-policy-container-connection-allowlists"}, {"id": "ref-for-policy-container-connection-allowlists\u2460"}, {"id": "ref-for-policy-container-connection-allowlists\u2461"}, {"id": "ref-for-policy-container-connection-allowlists\u2462"}], "title": "3.2. Matching"}, {"refs": [{"id": "ref-for-policy-container-connection-allowlists\u2463"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-policy-container-connection-allowlists\u2464"}, {"id": "ref-for-policy-container-connection-allowlists\u2465"}], "title": "5.1. Integration with Fetch"}, {"refs": [{"id": "ref-for-policy-container-connection-allowlists\u2466"}, {"id": "ref-for-policy-container-connection-allowlists\u2467"}, {"id": "ref-for-policy-container-connection-allowlists\u2468"}, {"id": "ref-for-policy-container-connection-allowlists\u2460\u24ea"}, {"id": "ref-for-policy-container-connection-allowlists\u2460\u2460"}, {"id": "ref-for-policy-container-connection-allowlists\u2460\u2461"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-policy-container-connection-allowlists\u2460\u2462"}], "title": "5.6. Integration with Service Workers"}], "url": "#policy-container-connection-allowlists"},
                 "policy-container-required-connection-allowlist": {"dfnID": "policy-container-required-connection-allowlist", "dfnText": "required connection allowlist", "external": false, "refSections": [{"refs": [{"id": "ref-for-policy-container-required-connection-allowlist"}], "title": "4. Embedded Enforcement"}, {"refs": [{"id": "ref-for-policy-container-required-connection-allowlist\u2460"}], "title": "4.4. Obtaining and enforcing a requirement"}, {"refs": [{"id": "ref-for-policy-container-required-connection-allowlist\u2461"}, {"id": "ref-for-policy-container-required-connection-allowlist\u2462"}], "title": "5.2. Integration with HTML"}, {"refs": [{"id": "ref-for-policy-container-required-connection-allowlist\u2463"}], "title": "6.2. Embedded Enforcement"}], "url": "#policy-container-required-connection-allowlist"},
             };
 
@@ -5150,6 +5274,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "#policy-container-required-connection-allowlist": {"displayText": "required connection allowlist", "export": true, "for_": ["policy container"], "level": "1", "normative": true, "shortname": "connection-allowlists", "spec": "connection-allowlists-1", "status": "local", "text": "required connection allowlist", "type": "dfn", "url": "#policy-container-required-connection-allowlist"},
                 "https://dom.spec.whatwg.org/#concept-document": {"displayText": "document", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "dom", "spec": "dom", "status": "current", "text": "document", "type": "dfn", "url": "https://dom.spec.whatwg.org/#concept-document"},
                 "https://dom.spec.whatwg.org/#concept-node-document": {"displayText": "node document", "export": true, "for_": ["Node"], "level": "1", "normative": true, "shortname": "dom", "spec": "dom", "status": "current", "text": "node document", "type": "dfn", "url": "https://dom.spec.whatwg.org/#concept-node-document"},
+                "https://dom.spec.whatwg.org/#document": {"displayText": "Document", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "dom", "spec": "dom", "status": "current", "text": "Document", "type": "interface", "url": "https://dom.spec.whatwg.org/#document"},
                 "https://fetch.spec.whatwg.org/#byte-serializing-a-request-origin": {"displayText": "byte-serializing a request origin", "export": false, "for_": [], "level": "1", "normative": true, "shortname": "fetch", "spec": "fetch", "status": "current", "text": "byte-serializing a request origin", "type": "dfn", "url": "https://fetch.spec.whatwg.org/#byte-serializing-a-request-origin"},
                 "https://fetch.spec.whatwg.org/#concept-connection-obtain": {"displayText": "obtain a connection", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "fetch", "spec": "fetch", "status": "current", "text": "obtain a connection", "type": "dfn", "url": "https://fetch.spec.whatwg.org/#concept-connection-obtain"},
                 "https://fetch.spec.whatwg.org/#concept-cors-check": {"displayText": "CORS check", "export": false, "for_": [], "level": "1", "normative": true, "shortname": "fetch", "spec": "fetch", "status": "current", "text": "cors check", "type": "dfn", "url": "https://fetch.spec.whatwg.org/#concept-cors-check"},
@@ -5194,6 +5319,9 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmliframeelement": {"displayText": "HTMLIFrameElement", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "HTMLIFrameElement", "type": "interface", "url": "https://html.spec.whatwg.org/multipage/iframe-embed-object.html#htmliframeelement"},
                 "https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element": {"displayText": "iframe", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "iframe", "type": "element", "url": "https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element"},
                 "https://html.spec.whatwg.org/multipage/links.html#link-type-dns-prefetch": {"displayText": "dns-prefetch", "export": true, "for_": ["link/rel"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "dns-prefetch", "type": "attr-value", "url": "https://html.spec.whatwg.org/multipage/links.html#link-type-dns-prefetch"},
+                "https://html.spec.whatwg.org/multipage/links.html#preconnect": {"displayText": "preconnect", "export": true, "for_": [], "level": "", "normative": true, "shortname": "html", "spec": "html", "status": "anchor-block", "text": "preconnect", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/links.html#preconnect"},
+                "https://html.spec.whatwg.org/multipage/semantics.html#fetch-and-process-the-linked-resource": {"displayText": "fetch and process the linked resource", "export": true, "for_": [], "level": "", "normative": true, "shortname": "html", "spec": "html", "status": "anchor-block", "text": "fetch and process the linked resource", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/semantics.html#fetch-and-process-the-linked-resource"},
+                "https://html.spec.whatwg.org/multipage/semantics.html#link-options-environment": {"displayText": "environment", "export": true, "for_": ["link processing options"], "level": "", "normative": true, "shortname": "html", "spec": "html", "status": "anchor-block", "text": "environment", "type": "dfn", "url": "https://html.spec.whatwg.org/multipage/semantics.html#link-options-environment"},
                 "https://html.spec.whatwg.org/multipage/web-messaging.html#broadcastchannel": {"displayText": "BroadcastChannel", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "BroadcastChannel", "type": "interface", "url": "https://html.spec.whatwg.org/multipage/web-messaging.html#broadcastchannel"},
                 "https://html.spec.whatwg.org/multipage/web-messaging.html#dom-window-postmessage-options": {"displayText": "postMessage(message, options)", "export": true, "for_": ["Window"], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "postMessage(message, options)", "type": "method", "url": "https://html.spec.whatwg.org/multipage/web-messaging.html#dom-window-postmessage-options"},
                 "https://html.spec.whatwg.org/multipage/web-messaging.html#messagechannel": {"displayText": "MessageChannel", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "html", "spec": "html", "status": "current", "text": "MessageChannel", "type": "interface", "url": "https://html.spec.whatwg.org/multipage/web-messaging.html#messagechannel"},
@@ -5250,6 +5378,7 @@ from" data-noexport id="allows-a-connection-allowlist-from">接続許可リス�
                 "https://webidl.spec.whatwg.org/#idl-sequence": {"displayText": "sequence", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "sequence", "type": "dfn", "url": "https://webidl.spec.whatwg.org/#idl-sequence"},
                 "https://webidl.spec.whatwg.org/#securityerror": {"displayText": "SecurityError", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "SecurityError", "type": "exception", "url": "https://webidl.spec.whatwg.org/#securityerror"},
                 "https://webidl.spec.whatwg.org/#this": {"displayText": "this", "export": true, "for_": [], "level": "1", "normative": true, "shortname": "webidl", "spec": "webidl", "status": "current", "text": "this", "type": "dfn", "url": "https://webidl.spec.whatwg.org/#this"},
+                "https://websockets.spec.whatwg.org/#concept-websocket-establish": {"displayText": "establish a WebSocket connection", "export": true, "for_": [], "level": "", "normative": true, "shortname": "websockets", "spec": "websockets", "status": "anchor-block", "text": "establish a websocket connection", "type": "dfn", "url": "https://websockets.spec.whatwg.org/#concept-websocket-establish"},
                 "https://wicg.github.io/web-smart-card/#transaction-state-promise": {"displayText": "promise", "export": true, "for_": ["transaction state"], "level": "1", "normative": true, "shortname": "web-smart-card", "spec": "web-smart-card", "status": "current", "text": "promise", "type": "dfn", "url": "https://wicg.github.io/web-smart-card/#transaction-state-promise"},
                 "https://www.rfc-editor.org/rfc/rfc9651#name-inner-list": {"displayText": "inner list", "export": true, "for_": ["structured header"], "level": "", "normative": true, "shortname": "rfc9651", "spec": "rfc9651", "status": "anchor-block", "text": "inner list", "type": "dfn", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-inner-list"},
                 "https://www.rfc-editor.org/rfc/rfc9651#name-introduction": {"displayText": "structured header", "export": true, "for_": [], "level": "", "normative": true, "shortname": "rfc9651", "spec": "rfc9651", "status": "anchor-block", "text": "structured header", "type": "dfn", "url": "https://www.rfc-editor.org/rfc/rfc9651#name-introduction"},
