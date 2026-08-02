@@ -183,6 +183,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Selection API](https://jp.htmlspecs.com/selection-api/)（[Source](https://www.w3.org/TR/2026/WD-selection-api-20260611/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Input Events Level 1](https://jp.htmlspecs.com/input-events-1/)（[Source](https://www.w3.org/TR/2023/DISC-input-events-1-20230928/) ![Discontinued Draft](https://img.shields.io/badge/DISC-ffcc00)）
 - [Input Events Level 2](https://jp.htmlspecs.com/input-events-2/)（[Source](https://www.w3.org/TR/2026/WD-input-events-2-20260501/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Autofill Event](https://jp.htmlspecs.com/autofill-event/)（[Source](https://wicg.github.io/autofill-event/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### デバイス・センサー・ハードウェアインターフェイス
 - [Web Serial API](https://jp.htmlspecs.com/serial/)（[Source](https://wicg.github.io/serial/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
