@@ -408,7 +408,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Verifiable Credential Forgery Defense v1.0](https://jp.htmlspecs.com/vc-forgery-defense-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-forgery-defense-1.0-20260714/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Verifiable Credential Rendering Methods v1.0](https://jp.htmlspecs.com/vc-render-method/)（[Source](https://www.w3.org/TR/2026/WD-vc-render-method-20260405/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Verifiable Credential Barcodes v1.0](https://jp.htmlspecs.com/vc-barcodes-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-barcodes-1.0-20260728/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Recognized Entities v1.0](https://jp.htmlspecs.com/vc-recognized-entities-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-recognized-entities-1.0-20260726/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Recognized Entities v1.0](https://jp.htmlspecs.com/vc-recognized-entities-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-recognized-entities-1.0-20260802/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### OAuth・認可プロトコル
 - [The OAuth 2.0 Authorization Framework](https://jp.htmlspecs.com/oauth2/)（[Source](https://www.rfc-editor.org/rfc/rfc6749.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
