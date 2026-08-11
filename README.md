@@ -114,12 +114,6 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Sub Apps API](https://jp.htmlspecs.com/sub-apps/)（[Source](https://wicg.github.io/sub-apps/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2026/CRD-service-workers-20260804/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
-### MiniApp・ミニアプリ・クロスプラットフォームアプリ
-- [MiniApp Manifest](https://jp.htmlspecs.com/miniapp-manifest/)（[Source](https://www.w3.org/TR/2025/WD-miniapp-manifest-20250128/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [MiniApp Packaging](https://jp.htmlspecs.com/miniapp-packaging/)（[Source](https://www.w3.org/TR/2025/WD-miniapp-packaging-20250128/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [MiniApp Lifecycle](https://jp.htmlspecs.com/miniapp-lifecycle/)（[Source](https://www.w3.org/TR/2023/WD-miniapp-lifecycle-20230529/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [MiniApp Standardization White Paper version 2](https://jp.htmlspecs.com/mini-app-white-paper/)（[Source](https://www.w3.org/TR/2022/DNOTE-mini-app-white-paper-20220701/) ![Note Draft](https://img.shields.io/badge/DNOTE-ffcc00)）
-
 ### ネットワーク・転送・リアルタイム通信
 - [Fetch](https://jp.htmlspecs.com/fetch/)（[Source](https://fetch.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Streams](https://jp.htmlspecs.com/streams/)（[Source](https://streams.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
