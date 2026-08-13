@@ -112,7 +112,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web App Manifest - Application Information](https://jp.htmlspecs.com/manifest-app-info/)（[Source](https://www.w3.org/TR/2023/NOTE-manifest-app-info-20230821/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
 - [Get Installed Related Apps API](https://jp.htmlspecs.com/get-installed-related-apps/)（[Source](https://wicg.github.io/get-installed-related-apps/spec/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Sub Apps API](https://jp.htmlspecs.com/sub-apps/)（[Source](https://wicg.github.io/sub-apps/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2026/CRD-service-workers-20260804/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Service Workers Nightly](https://jp.htmlspecs.com/service-workers/)（[Source](https://www.w3.org/TR/2026/CRD-service-workers-20260812/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
 ### ネットワーク・転送・リアルタイム通信
 - [Fetch](https://jp.htmlspecs.com/fetch/)（[Source](https://fetch.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
@@ -286,7 +286,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### グラフィックス・画像・GPU・WebXR
 - [Accelerated Shape Detection in Images](https://jp.htmlspecs.com/shape-detection-api/)（[Source](https://wicg.github.io/shape-detection-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [WebGPU](https://jp.htmlspecs.com/webgpu/)（[Source](https://www.w3.org/TR/2026/CRD-webgpu-20260810/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebGPU](https://jp.htmlspecs.com/webgpu/)（[Source](https://www.w3.org/TR/2026/CRD-webgpu-20260812/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [WebGPU Shading Language](https://jp.htmlspecs.com/WGSL/)（[Source](https://www.w3.org/TR/2026/CRD-WGSL-20260806/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [WebGL Specification](https://jp.htmlspecs.com/webgl/)（[Source](https://registry.khronos.org/webgl/specs/latest/1.0/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebGL 2.0 Specification](https://jp.htmlspecs.com/webgl2/)（[Source](https://registry.khronos.org/webgl/specs/latest/2.0/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
