@@ -1148,10 +1148,24 @@
             </p>
         </div>
         <p>ユーザーエージェントがウェブページをユーザ不可視と判断した場合、デバイスの電力消費を減らすためにアイドル期間を間引くことがあります。例として、連続ではなく10秒ごとに一回だけアイドル期間を呼び出すなどです。</p>
-        <p>最後に注意すべき点として、ページの負荷が高い場合、ユーザーエージェントがアイドルCPU時間を全く確保できない場合もあります。そのため、<a data-link-type="idl"
-                data-lt="requestIdleCallback()" href="#dom-window-requestidlecallback" class="internalDFN"
+        <p>最後に注意すべき微妙な点は、ページの負荷が高い間、ユーザーエージェントが
+            利用可能なアイドルCPU時間を持てる保証がないことである。そのため、
+            ユーザーエージェントがアイドル
+            期間をまったくスケジュールしないことも完全に許容され、その結果、
+            <a data-link-type="idl" data-lt="requestIdleCallback()" href="#dom-window-requestidlecallback"
+                class="internalDFN"
                 id="ref-for-dom-window-requestidlecallback-4"><code>requestIdleCallback</code></a><code>()</code>
-            API経由で投稿されたアイドルコールバックは、無期限に実行が延期される可能性があり、その場合アイドル期間自体がスケジューリングされないこともあります。コールバックをアイドル期間中に実行したいものの、実行期限を設けておきたい場合には、<code>options</code>引数の<code>timeout</code>プロパティを指定できます。指定したタイムアウトが先に到達した場合は、アイドル期間外でもタスクがキューイングされて実行されます。
+            APIを介して登録されたアイドルコールバックが
+            上限の定められていない可能性のある
+            時間にわたって延期されることになる。作者がコールバックを
+            アイドル期間内に実行することを望む一方で、その実行期限を必要とする
+            場合、作者は<code>timeout</code>プロパティを<code>options</code>
+            引数に指定して<a data-link-type="idl" data-lt="requestIdleCallback()" href="#dom-window-requestidlecallback"
+                class="internalDFN"
+                id="ref-for-dom-window-requestidlecallback-5"><code>requestIdleCallback</code></a><code>()</code>に渡すことができる:
+            指定されたタイムアウトが、
+            コールバックがアイドル期間内に実行される前に満了した場合、そのコールバックを
+            実行するタスクがキューに入れられる。
         </p>
         <div class="note" role="note" id="why50">
             <div role="heading" class="note-title marker" id="h-note-2" aria-level="3"><span>注記</span></div>
@@ -1356,16 +1370,24 @@ callback <a class="internalDFN idlID" data-link-type="callback" href="#dom-idler
                 が呼ばれたとき、ユーザーエージェントは次の手順を実行しなければならない:
             </p>
             <ol>
-                <li><var>window</var> を this の <a data-link-type="interface" data-lt="Window"
+                <li><var>window</var>を、この<a data-link-type="interface" data-lt="Window"
                         href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#window"><code>Window</code></a>
                     オブジェクトとする。</li>
-                <li><var>window</var> の <a href="#dfn-list-of-idle-request-callbacks" class="internalDFN"
-                        data-link-type="dfn" id="ref-for-dfn-list-of-idle-request-callbacks-2">アイドルリクエストコールバックのリスト</a>
-                    または <a href="#dfn-list-of-runnable-idle-callbacks" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-list-of-runnable-idle-callbacks-1">実行可能なアイドルコールバックのリスト</a> のうちで
-                    <var>handle</var> に紐付くエントリを探す。
+                <li><var>window</var>の<a href="#dfn-list-of-idle-request-callbacks" class="internalDFN"
+                        data-link-type="dfn" id="ref-for-dfn-list-of-idle-request-callbacks-2">アイドル
+                        リクエスト
+                        コールバックのリスト</a>または<a href="#dfn-list-of-runnable-idle-callbacks" class="internalDFN"
+                        data-link-type="dfn" id="ref-for-dfn-list-of-runnable-idle-callbacks-1">実行可能なアイドル
+                        コールバックのリスト</a>のいずれかにある、
+                    値<var>handle</var>に関連付けられたエントリを見つける。
                 </li>
-                <li>該当するエントリが存在すれば、そのエントリを両方のリストから取り除く。</li>
+                <li>そのようなエントリが存在する場合、<var>window</var>の
+                    <a href="#dfn-list-of-idle-request-callbacks" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-list-of-idle-request-callbacks-3">アイドルリクエストコールバックのリスト</a>と<a
+                        href="#dfn-list-of-runnable-idle-callbacks" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-list-of-runnable-idle-callbacks-2">実行可能なアイドル
+                        コールバックのリスト</a>の両方から、そのエントリを削除する。
+                </li>
             </ol>
             <div class="note" role="note" id="issue-container-generatedID-5">
                 <div role="heading" class="note-title marker" id="h-note-6" aria-level="4"><span>注記</span></div>
@@ -1544,35 +1566,40 @@ callback <a class="internalDFN idlID" data-link-type="callback" href="#dom-idler
                         title="High Resolution Time">HR-TIME</a></cite>]。
             </p>
             <ol>
-                <li>ユーザーエージェントが新たに高優先度な作業がスケジューリングされたなどの理由でアイドル期間を早期終了すべきだと判断した場合、このアルゴリズムからリターン。
+                <li>新たにスケジュールされた優先度の高い作業が原因で、ユーザーエージェントが
+                    アイドル期間を早期に終了すべきだと判断した場合、アルゴリズムから戻る。
                 </li>
-                <li><var>now</var>を現在時刻にする。</li>
-                <li><var>now</var>が<var>getDeadline</var>の呼び出し結果より小さく、かつ
+                <li><var>now</var>を現在時刻とする。</li>
+                <li><var>now</var>が<var>getDeadline</var>を呼び出した結果より小さく、かつ
                     <var>window</var>の<a href="#dfn-list-of-runnable-idle-callbacks" class="internalDFN"
-                        data-link-type="dfn"
-                        id="ref-for-dfn-list-of-runnable-idle-callbacks-5">実行可能アイドルコールバックのリスト</a>が空でなければ:
+                        data-link-type="dfn" id="ref-for-dfn-list-of-runnable-idle-callbacks-5">実行可能なアイドル
+                        コールバックのリスト</a>が空でない場合:
                     <ol>
-                        <li><var>window</var>の<a href="#dfn-list-of-runnable-idle-callbacks" class="internalDFN"
-                                data-link-type="dfn"
-                                id="ref-for-dfn-list-of-runnable-idle-callbacks-6">実行可能アイドルコールバックのリスト</a>から
-                            先頭の<var>callback</var>をpopする。
+                        <li>先頭の<var>callback</var>を<var>window</var>の
+                            <a href="#dfn-list-of-runnable-idle-callbacks" class="internalDFN" data-link-type="dfn"
+                                id="ref-for-dfn-list-of-runnable-idle-callbacks-6">実行可能なアイドルコールバックのリスト</a>から取り出す。
                         </li>
-                        <li><a href="#dom-idledeadline" class="internalDFN" data-link-type="idl"
-                                id="ref-for-dom-idledeadline-7"><code>IdleDeadline</code></a>
-                            を生成し、その<a href="#dfn-get-deadline-time" class="internalDFN" data-link-type="dfn"
-                                id="ref-for-dfn-get-deadline-time-2">期限時刻の取得</a>アルゴリズムを<var>getDeadline</var>
-                            にする。この<var>deadlineArg</var>を用意する。
+                        <li><var>deadlineArg</var>を新しい<a href="#dom-idledeadline" class="internalDFN"
+                                data-link-type="idl" id="ref-for-dom-idledeadline-7"><code>IdleDeadline</code></a>とし、その
+                            <a href="#dfn-get-deadline-time" class="internalDFN" data-link-type="dfn"
+                                id="ref-for-dfn-get-deadline-time-2">期限時刻を取得する</a>アルゴリズムを
+                            <var>getDeadline</var>とする。
                         </li>
                         <li><a data-link-type="dfn"
-                                href="https://webidl.spec.whatwg.org/#invoke-a-callback-function">コールバック関数の呼び出し</a>で
-                            <var>callback</var>を « <var>deadlineArg</var> » , "<code>report</code>"を引数に呼び出す。
+                                href="https://webidl.spec.whatwg.org/#invoke-a-callback-function">呼び出し</a>を
+                            <var>callback</var>に対して、« <var>deadlineArg</var> »および"<code>report</code>"を用いて行う。
                         </li>
                         <li><var>window</var>の<a href="#dfn-list-of-runnable-idle-callbacks" class="internalDFN"
-                                data-link-type="dfn"
-                                id="ref-for-dfn-list-of-runnable-idle-callbacks-7">実行可能アイドルコールバックのリスト</a>
-                            が空でなければ、タスクを<a data-link-type="dfn"
-                                href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task">キューイング</a>し、
-                            パラメータには<var>getDeadline</var>と<var>window</var>を使い、本アルゴリズムの残りステップを実行してリターン
+                                data-link-type="dfn" id="ref-for-dfn-list-of-runnable-idle-callbacks-7">実行可能な
+                                アイドルコールバックのリスト</a>
+                            が空でない場合、<a data-link-type="dfn"
+                                href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task">タスクを
+                                キューに入れ</a>、そのタスクに
+                            <a href="#dfn-invoke-idle-callbacks-algorithm" class="internalDFN" data-link-type="dfn"
+                                id="ref-for-dfn-invoke-idle-callbacks-algorithm-2">アイドルコールバックを呼び出すアルゴリズム</a>の手順を
+                            <var>getDeadline</var>
+                            および<var>window</var>をパラメーターとして実行させ、この
+                            アルゴリズムから戻る
                         </li>
                     </ol>
                 </li>
