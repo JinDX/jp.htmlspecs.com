@@ -385,7 +385,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### ID・認証・資格情報
 - [WebOTP API](https://jp.htmlspecs.com/web-otp/)（[Source](https://wicg.github.io/web-otp/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web Authentication: An API for accessing Public Key Credentials Level 2](https://jp.htmlspecs.com/webauthn-2/)（[Source](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [Web Authentication: An API for accessing Public Key Credentials Level 3](https://jp.htmlspecs.com/webauthn-3/)（[Source](https://www.w3.org/TR/2026/CR-webauthn-3-20260526/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
+- [Web Authentication: An API for accessing Public Key Credentials Level 3](https://jp.htmlspecs.com/webauthn-3/)（[Source](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [A Well-Known URL for Relying Party Passkey Endpoints](https://jp.htmlspecs.com/passkey-endpoints/)（[Source](https://www.w3.org/TR/2026/WD-passkey-endpoints-1-20260114/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [A Well-Known URL for Changing Passwords](https://jp.htmlspecs.com/change-password-url/)（[Source](https://www.w3.org/TR/2024/WD-change-password-url-20240603/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Credential Management Level 1](https://jp.htmlspecs.com/credential-management-1/)（[Source](https://www.w3.org/TR/2026/WD-credential-management-1-20260702/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
