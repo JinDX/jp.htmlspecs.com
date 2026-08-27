@@ -458,15 +458,15 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.2](https://jp.htmlspecs.com/wai-aria-1.2/)（[Source](https://www.w3.org/TR/2023/REC-wai-aria-1.2-20230606/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Accessible Rich Internet Applications (WAI-ARIA) 1.3](https://jp.htmlspecs.com/wai-aria-1.3/)（[Source](https://www.w3.org/TR/2026/WD-wai-aria-1.3-20260604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Digital Publishing WAI-ARIA Module 1.1](https://jp.htmlspecs.com/dpub-aria-1.1/)（[Source](https://www.w3.org/TR/2025/REC-dpub-aria-1.1-20250612/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [Core Accessibility API Mappings 1.2](https://jp.htmlspecs.com/core-aam-1.2/)（[Source](https://www.w3.org/TR/2026/CRD-core-aam-1.2-20260805/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [HTML Accessibility API Mappings 1.0](https://jp.htmlspecs.com/html-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-html-aam-1.0-20260805/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [SVG Accessibility API Mappings](https://jp.htmlspecs.com/svg-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-svg-aam-1.0-20260805/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Core Accessibility API Mappings 1.2](https://jp.htmlspecs.com/core-aam-1.2/)（[Source](https://www.w3.org/TR/2026/CRD-core-aam-1.2-20260827/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [HTML Accessibility API Mappings 1.0](https://jp.htmlspecs.com/html-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-html-aam-1.0-20260827/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [SVG Accessibility API Mappings](https://jp.htmlspecs.com/svg-aam-1.0/)（[Source](https://www.w3.org/TR/2026/WD-svg-aam-1.0-20260827/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Digital Publishing Accessibility API Mappings 1.1](https://jp.htmlspecs.com/dpub-aam-1.1/)（[Source](https://www.w3.org/TR/2025/REC-dpub-aam-1.1-20250612/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Graphics Accessibility API Mappings](https://jp.htmlspecs.com/graphics-aam-1.0/)（[Source](https://www.w3.org/TR/2018/REC-graphics-aam-1.0-20181002/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [WAI-ARIA Graphics Module](https://jp.htmlspecs.com/graphics-aria-1.0/)（[Source](https://www.w3.org/TR/2018/REC-graphics-aria-1.0-20181002/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [ARIA in HTML](https://jp.htmlspecs.com/html-aria/)（[Source](https://www.w3.org/TR/2026/REC-html-aria-20260811/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Accessible Name and Description Computation 1.1](https://jp.htmlspecs.com/accname-1.1/)（[Source](https://www.w3.org/TR/2018/REC-accname-1.1-20181218/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [Accessible Name and Description Computation 1.2](https://jp.htmlspecs.com/accname-1.2/)（[Source](https://www.w3.org/TR/2026/WD-accname-1.2-20260805/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Accessible Name and Description Computation 1.2](https://jp.htmlspecs.com/accname-1.2/)（[Source](https://www.w3.org/TR/2026/WD-accname-1.2-20260827/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Accessibility Conformance Testing (ACT) Rules Format 1.1](https://jp.htmlspecs.com/act-rules-format/)（[Source](https://www.w3.org/TR/2026/REC-act-rules-format-1.1-20260205/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Using ARIA](https://jp.htmlspecs.com/using-aria/)（[Source](https://www.w3.org/TR/2026/DISC-using-aria-20260224/) ![Discontinued Draft](https://img.shields.io/badge/DISC-ffcc00)）
 
