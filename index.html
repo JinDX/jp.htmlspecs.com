@@ -67,7 +67,7 @@
         <a href="https://github.com/whatwg/html/commits" class="changes"><span><strong>コミット</strong>
             <code>GitHub 上</code></span></a>
         <a id="commit-snapshot-link"
-          href="https://html.spec.whatwg.org/commit-snapshots/ae6c5d8ddfe6c819730f8f766d550dd1417e66c9/"
+          href="https://html.spec.whatwg.org/commit-snapshots/df14ce3085887cc99d821d238c5192857904de58/"
           class="changes"><span><strong>スナップショット</strong> <code>このコミット時点</code></span></a>
       </div>
       <div>
@@ -162641,8 +162641,14 @@ button2<c- p="">.</c->onclick <c- o="">=</c-> <c- p="">()</c-> <c- p="">=&gt;</c
         </ol>
       </li>
       <li>
-        <p><var>noopener</var> が true であるか、<var>windowType</var> が「<code>new with no
-   opener</code>」である場合、null を返します。</p>
+        <p><var>windowType</var> が "<code>new with no opener</code>" である場合、null を返す。</p>
+      </li>
+      <li>
+        <p><var>noopener</var> が true であり、かつ <var>target</var> が "<code>_self</code>"、"<code>_parent</code>"、または
+          "<code>_top</code>" のいずれとも <a
+            id="apis-for-creating-and-navigating-browsing-contexts-by-name:ascii-case-insensitive"
+            href="https://infra.spec.whatwg.org/#ascii-case-insensitive" data-x-internal="ascii-case-insensitive">ASCII
+            大文字・小文字不区別</a>で一致しない場合、null を返す。</p>
       </li>
       <li>
         <p><var>targetNavigable</var> の<a href="#nav-wp"
@@ -237913,13 +237919,10 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
             要素のスタック</a>内の最後のノードとする。</p>
       </li>
       <li>
-        <p><i>ループ</i>：<var>node</var>が開いている要素のスタック内の最初のノードである場合、
-          <var>last</var>を true に設定し、パーサーが<a href="#html-fragment-parsing-algorithm"
-            id="the-insertion-mode:html-fragment-parsing-algorithm">HTML
-            フラグメント
-            構文解析アルゴリズム</a>（<a href="#fragment-case" id="the-insertion-mode:fragment-case">フラグメントの場合</a>）の一部として作成された場合は、
-          <var>node</var>を、そのアルゴリズムに渡された<var id="the-insertion-mode:concept-frag-parse-context"><a
-              href="#concept-frag-parse-context">コンテキスト</a></var>要素に設定する。
+        <p><i>ループ</i>: <var>node</var> が開いている要素のスタック内の最初のノードである場合、
+          <var>last</var> を true に設定し、パーサーの <a href="#fragment-context-element"
+            id="the-insertion-mode:fragment-context-element">フラグメントコンテキスト要素</a> が null でない場合、
+          <var>node</var> をその要素に設定する（<a href="#fragment-case" id="the-insertion-mode:fragment-case">フラグメントの場合</a>）。
         </p>
       </li>
       <li>
@@ -238086,15 +238089,13 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
   </div>
 
   <div data-algorithm="">
-    <p><dfn id="adjusted-current-node">調整済み現在ノード</dfn>とは、構文解析器が<a href="#html-fragment-parsing-algorithm"
-        id="the-stack-of-open-elements:html-fragment-parsing-algorithm-2">HTML 断片構文解析アルゴリズム</a>の
-      一部として作成され、かつ<a href="#stack-of-open-elements"
-        id="the-stack-of-open-elements:stack-of-open-elements-3">開いている要素のスタック</a>に
-      要素が一つしかない場合（<a href="#fragment-case" id="the-stack-of-open-elements:fragment-case-3">断片の場合</a>）は、<i
-        id="the-stack-of-open-elements:concept-frag-parse-context"><a
-          href="#concept-frag-parse-context">コンテキスト</a></i>要素である。それ以外の場合、<a href="#adjusted-current-node"
-        id="the-stack-of-open-elements:adjusted-current-node">調整済み現在ノード</a>は<a href="#current-node"
-        id="the-stack-of-open-elements:current-node">現在のノード</a>である。
+    <p><dfn id="adjusted-current-node">調整済み現在ノード</dfn>は、その要素が null でなく、かつ <a href="#stack-of-open-elements"
+        id="the-stack-of-open-elements:stack-of-open-elements-3">開いている要素のスタック</a>に要素が 1 つしかない場合
+      （<a href="#fragment-case" id="the-stack-of-open-elements:fragment-case-3">フラグメントの場合</a>）、パーサーの <a
+        href="#fragment-context-element" id="the-stack-of-open-elements:fragment-context-element">フラグメントコンテキスト
+        要素</a>であり、それ以外の場合、<a href="#adjusted-current-node"
+        id="the-stack-of-open-elements:adjusted-current-node">調整済み現在ノード</a>は
+      <a href="#current-node" id="the-stack-of-open-elements:current-node">現在ノード</a>である。
     </p>
   </div>
 
@@ -238616,15 +238617,24 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
   <h5 id="other-parsing-state-flags"><span class="secno">13.2.4.5</span> その他の構文解析状態フラグ<a
       href="#other-parsing-state-flags" class="self-link"></a></h5>
 
-  <p><dfn id="root-insertion-target">ルート挿入対象</dfn>。これは null または <code id="other-parsing-state-flags:documentfragment"><a data-x-internal="documentfragment"
-      href="https://dom.spec.whatwg.org/#interface-documentfragment">DocumentFragment</a></code> である
-    （初期値は null）。</p>
+  <p><dfn id="root-insertion-target">ルート挿入先</dfn>。これは null または <code
+      id="other-parsing-state-flags:documentfragment"><a data-x-internal="documentfragment" href="https://dom.spec.whatwg.org/#interface-documentfragment">DocumentFragment</a></code>
+    である（初期値は null）。</p>
 
-  <p>真偽値の <dfn id="allow-declarative-shadow-roots">宣言的シャドウルートを許可する</dfn>
-    （初期値は false）。</p>
+  <p><code
+      id="other-parsing-state-flags:element"><a data-x-internal="element" href="https://dom.spec.whatwg.org/#interface-element">Element</a></code>または
+    null の
+    <dfn id="fragment-context-element">フラグメントコンテキスト要素</dfn>。初期値は null。
+  </p>
 
-  <p><dfn id="scripting-mode">スクリプティングモード</dfn>。これは<a href="#parser-scripting-mode"
-      id="other-parsing-state-flags:parser-scripting-mode">構文解析器スクリプティングモード</a>である。</p>
+  <p>ブール値の <dfn id="allow-declarative-shadow-roots">宣言的シャドウルートを許可</dfn>（初期値は false）。</p>
+
+  <p><dfn id="scripting-mode">スクリプティングモード</dfn>。これは <a href="#parser-scripting-mode"
+      id="other-parsing-state-flags:parser-scripting-mode">パーサースクリプティングモード</a>である。これは、パーサーの作成時にパーサーが関連付けられている <code
+      id="other-parsing-state-flags:document"><a href="#document">Document</a></code> に対して <a href="#concept-n-script"
+      id="other-parsing-state-flags:concept-n-script">スクリプティングが有効であった</a>場合、最初は <a href="#scripting-mode-normal"
+      id="other-parsing-state-flags:scripting-mode-normal">通常</a>に設定され、それ以外の場合は <a href="#scripting-mode-disabled"
+      id="other-parsing-state-flags:scripting-mode-disabled">無効</a>に設定される。</p>
 
   <p><dfn id="parser-scripting-mode">構文解析器スクリプティングモード</dfn>は、次のいずれかである：</p>
 
@@ -242227,13 +242237,11 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
     </ul>
   </div>
 
-  <p class="note">問題のノードが、<a href="#html-fragment-parsing-algorithm"
-      id="tree-construction:html-fragment-parsing-algorithm">HTML 断片
-      構文解析アルゴリズム</a>へ渡された<var id="tree-construction:concept-frag-parse-context"><a
-        href="#concept-frag-parse-context">コンテキスト</a></var>要素である場合、その要素の開始タグトークンは、
-    その<a href="#html-fragment-parsing-algorithm" id="tree-construction:html-fragment-parsing-algorithm-2">HTML
-      断片構文解析アルゴリズム</a>中に作成された
-    「偽の」トークンである。</p>
+  <p class="note">対象のノードがパーサーの <a href="#fragment-context-element"
+      id="tree-construction:fragment-context-element">フラグメントコンテキスト要素</a>である場合、
+    その要素の開始タグトークンは、<a href="#html-fragment-parsing-algorithm"
+      id="tree-construction:html-fragment-parsing-algorithm">HTML フラグメント
+      解析アルゴリズム</a>によって作成された「偽の」トークンである。</p>
 
   <hr>
 
@@ -242252,171 +242260,130 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
   <h5 id="creating-and-inserting-nodes"><span class="secno">13.2.6.1</span> ノードの作成と挿入<a
       href="#creating-and-inserting-nodes" class="self-link"></a></h5>
 
-  <p>構文解析器がトークンを処理している間、<dfn id="foster-parent">里親処理</dfn>を有効または
-    無効にできる。これは次のアルゴリズムへ影響する。</p>
+  <p><dfn id="insertion-location">挿入位置</dfn>は、<dfn id="insertion-location-target-parent">対象親</dfn>（<code
+      id="creating-and-inserting-nodes:node"><a data-x-internal="node" href="https://dom.spec.whatwg.org/#interface-node">Node</a></code>）
+    と <dfn id="insertion-location-reference-child">参照子</dfn>（<code
+      id="creating-and-inserting-nodes:node-2"><a data-x-internal="node" href="https://dom.spec.whatwg.org/#interface-node">Node</a></code>
+    または
+    null）からなる <a id="creating-and-inserting-nodes:tuple" href="https://infra.spec.whatwg.org/#tuple"
+      data-x-internal="tuple">タプル</a>である。</p>
+
+  <p>パーサーがトークンを処理している間、<dfn id="foster-parent">フォスターペアレンティング</dfn>を有効または無効にできる。
+    これは次のアルゴリズムに影響する。</p>
 
   <div data-algorithm="">
-    <p><dfn id="appropriate-place-for-inserting-a-node">ノードを挿入するための適切な場所</dfn>は、任意で特定の
-      <i>override target</i> を使用して、以下の手順を実行することで返されるノード内の位置である:
+    <p>オプションの
+      <code
+        id="creating-and-inserting-nodes:node-3"><a data-x-internal="node" href="https://dom.spec.whatwg.org/#interface-node">Node</a></code>
+      <var>overrideTarget</var>（デフォルトは null）が与えられたとき、<dfn
+        id="appropriate-place-for-inserting-a-node">ノードを挿入する適切な位置</dfn>を見つけるには、
+      次の手順を実行する。これらは
+      <a href="#insertion-location" id="creating-and-inserting-nodes:insertion-location">挿入
+        位置</a>を返す。
     </p>
 
     <ol>
       <li>
-        <p><i>上書き対象</i>が指定されている場合、<var>target</var> を
-          <i>上書き対象</i>とする。
+        <p><var>overrideTarget</var> が null でない場合は <var>targetParent</var> を <var>overrideTarget</var> とし、それ以外の場合は
+          <a href="#current-node" id="creating-and-inserting-nodes:current-node">現在ノード</a>とする。
         </p>
-
-        <p>それ以外の場合、<var>target</var> を<a href="#current-node"
-            id="creating-and-inserting-nodes:current-node">現在のノード</a>とする。</p>
       </li>
       <li>
-        <p>次の一覧から最初に一致する手順を使用して、<var>adjusted insertion location</var> を決定する：</p>
-
-        <dl class="switch">
-          <dt><a href="#foster-parent" id="creating-and-inserting-nodes:foster-parent">里親処理</a>が有効であり、
-            <var>target</var> が <code
-              id="creating-and-inserting-nodes:the-table-element"><a href="#the-table-element">table</a></code>、
-            <code id="creating-and-inserting-nodes:the-tbody-element"><a
-              href="#the-tbody-element">tbody</a></code>、<code id="creating-and-inserting-nodes:the-tfoot-element"><a
-              href="#the-tfoot-element">tfoot</a></code>、
-            <code id="creating-and-inserting-nodes:the-thead-element"><a
-              href="#the-thead-element">thead</a></code>、または
-            <code id="creating-and-inserting-nodes:the-tr-element"><a
-              href="#the-tr-element">tr</a></code> 要素である場合
-          </dt>
-          <dd>
-            <p class="note">里親処理は、コンテンツが表内で誤って入れ子にされている場合に行われる。</p>
-
-            <p>次の下位手順を実行する：</p>
-
-            <ol>
-              <li>
-                <p><var>last template</var> を、存在する場合は<a href="#stack-of-open-elements"
-                    id="creating-and-inserting-nodes:stack-of-open-elements">開いている
-                    要素のスタック</a>内の最後の <code id="creating-and-inserting-nodes:the-template-element"><a
-                    href="#the-template-element">template</a></code> 要素とする。
-                </p>
-
-              </li>
-              <li>
-                <p><var>last table</var> を、存在する場合は<a href="#stack-of-open-elements"
-                    id="creating-and-inserting-nodes:stack-of-open-elements-2">開いている
-                    要素のスタック</a>内の最後の <code id="creating-and-inserting-nodes:the-table-element-2"><a
-                    href="#the-table-element">table</a></code> 要素とする。
-                </p>
-
-              </li>
-              <li>
-                <p><var>last template</var> が存在し、かつ <var>last table</var> が存在しないか、
-                  存在しても <var>last template</var> が<a href="#stack-of-open-elements"
-                    id="creating-and-inserting-nodes:stack-of-open-elements-3">開いている
-                    要素のスタック</a>内で <var>last table</var> より下
-                  （より最近に追加された位置）にある場合、<var>adjusted insertion location</var> を
-                  <var>last template</var> の<a href="#template-contents"
-                    id="creating-and-inserting-nodes:template-contents">テンプレート内容</a>内の、
-                  最後の子の後（子がある場合）とし、これらの手順を中止する。
-                </p>
-              </li>
-              <li>
-                <p><var>last table</var> が存在しない場合、<var>adjusted insertion
-                    location</var> を<a href="#stack-of-open-elements"
-                    id="creating-and-inserting-nodes:stack-of-open-elements-4">開いている要素のスタック</a>内の
-                  最初の要素（<code id="creating-and-inserting-nodes:the-html-element"><a
-                    href="#the-html-element">html</a></code> 要素）内の、最後の子の後（子がある場合）とし、
-                  これらの手順を中止する。
-                  （<a href="#fragment-case" id="creating-and-inserting-nodes:fragment-case">断片の場合</a>）
-                </p>
-
-
-
-              </li>
-              <li>
-                <p><var>last table</var> が親ノードを持つ場合、<var>adjusted insertion location</var> を
-                  <var>last table</var> の親ノード内の、<var>last table</var> の直前とし、
-                  これらの手順を中止する。
-                </p>
-              </li>
-              <li>
-                <p><var>previous element</var> を、<a href="#stack-of-open-elements"
-                    id="creating-and-inserting-nodes:stack-of-open-elements-5">開いている
-                    要素のスタック</a>内で <var>last table</var> の直上にある要素とする。</p>
-              </li>
-              <li>
-                <p><var>adjusted insertion location</var> を <var>previous
-                    element</var> 内の、最後の子の後（子がある場合）とする。</p>
-              </li>
-            </ol>
-
-            <p class="note">これらの手順が必要となる理由の一つは、要素、特にこの場合の <code id="creating-and-inserting-nodes:the-table-element-3"><a
-                href="#the-table-element">table</a></code> 要素が、構文解析器によって挿入された後に
-              スクリプトによって DOM 内の別の場所へ移動されたり、DOM から完全に削除されたりする
-              可能性があるためである。
-            </p>
-          </dd>
-          <dt>それ以外の場合</dt>
-          <dd>
-            <p><var>adjusted insertion location</var> を <var>target</var> 内の、
-              最後の子の後（子がある場合）とする。</p>
-          </dd>
-        </dl>
+        <p><var>referenceChild</var> を null とする。</p>
       </li>
       <li>
-        <p>もし <var>adjusted insertion location</var> が
-          <code
-            id="creating-and-inserting-nodes:the-template-element-2"><a href="#the-template-element">template</a></code>
-          要素の内部にある場合:
+        <p><a href="#foster-parent" id="creating-and-inserting-nodes:foster-parent">フォスターペアレンティング</a>が有効であり、
+          <var>targetParent</var> が <code
+            id="creating-and-inserting-nodes:the-table-element"><a href="#the-table-element">table</a></code>、<code
+            id="creating-and-inserting-nodes:the-tbody-element"><a href="#the-tbody-element">tbody</a></code>、<code
+            id="creating-and-inserting-nodes:the-tfoot-element"><a href="#the-tfoot-element">tfoot</a></code>、
+          <code id="creating-and-inserting-nodes:the-thead-element"><a href="#the-thead-element">thead</a></code>、または
+          <code id="creating-and-inserting-nodes:the-tr-element"><a href="#the-tr-element">tr</a></code> 要素である場合：
         </p>
+
+        <p class="note">フォスターペアレンティングは、コンテンツがテーブル内で誤ってネストされている場合に発生する。</p>
 
         <ol>
           <li>
-            <p>その要素を <var>template</var> とする。</p>
-          </li>
-          <li>
-            <p><var>target</var> を <var>template</var> の
-              <a href="#insertion-target" id="creating-and-inserting-nodes:insertion-target">insertion target</a> とする。
+            <p><a href="#stack-of-open-elements"
+                id="creating-and-inserting-nodes:stack-of-open-elements">開いている要素のスタック</a>内に <code
+                id="creating-and-inserting-nodes:the-template-element"><a href="#the-template-element">template</a></code>
+              または
+              <code id="creating-and-inserting-nodes:the-table-element-2"><a href="#the-table-element">table</a></code>
+              要素が存在する場合、<var>lastTemplateOrTable</var> をその最後の要素とし、
+              それ以外の場合は null とする。
             </p>
           </li>
           <li>
-            <p>もし <var>target</var> が null ではない場合:</p>
-
-            <ol>
-              <li>
-                <p><var>template</var> の
-                  <a href="#insertion-end-marker" id="creating-and-inserting-nodes:insertion-end-marker">insertion end
-                    marker</a>
-                  が null ではなく、かつその
-                  <a id="creating-and-inserting-nodes:parent" href="https://dom.spec.whatwg.org/#concept-tree-parent"
-                    data-x-internal="parent">parent</a>
-                  が <var>target</var> である場合、
-                  <var>adjusted insertion location</var> を
-                  <var>target</var> の内部で、
-                  <var>template</var> の
-                  <a href="#insertion-end-marker" id="creating-and-inserting-nodes:insertion-end-marker-2">insertion end
-                    marker</a>
-                  の前に設定する。
-                </p>
-
-                <p class="note">end marker が削除されているか、別のノードへ移動されている場合、
-                  次の手順でノードは代わりに <var>target</var> に追加される。</p>
-              </li>
-              <li>
-                <p>それ以外の場合、<var>adjusted insertion location</var> を
-                  <var>target</var> の内部で、その最後の子の後（存在する場合）に設定する。
-                </p>
-              </li>
-            </ol>
+            <p><var>lastTemplateOrTable</var> が null の場合、（
+              <a href="#stack-of-open-elements" id="creating-and-inserting-nodes:stack-of-open-elements-2">開いている
+                要素のスタック</a>内の最初の要素（<code
+                id="creating-and-inserting-nodes:the-html-element"><a href="#the-html-element">html</a></code> 要素）、
+              null）を返す。
+              （<a href="#fragment-case" id="creating-and-inserting-nodes:fragment-case">フラグメントの場合</a>）
+            </p>
           </li>
           <li>
-            <p>それ以外の場合、<var>adjusted insertion location</var> を
-              <var>template</var> の
-              <a href="#template-contents" id="creating-and-inserting-nodes:template-contents-2">template contents</a>
-              の内部で、その最後の子の後（存在する場合）に設定する。
+            <p><var>lastTemplateOrTable</var> が <code
+                id="creating-and-inserting-nodes:the-template-element-2"><a href="#the-template-element">template</a></code>
+              要素である場合、
+              <var>targetParent</var> を <var>lastTemplateOrTable</var> に設定する。
+            </p>
+          </li>
+          <li>
+            <p>それ以外の場合、<var>lastTemplateOrTable</var> の <a id="creating-and-inserting-nodes:parent"
+                href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>が null でない場合、
+              <var>targetParent</var> を <var>lastTemplateOrTable</var> の <a id="creating-and-inserting-nodes:parent-2"
+                href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>に設定し、
+              <var>referenceChild</var> を <var>lastTemplateOrTable</var> に設定する。
+            </p>
+          </li>
+          <li>
+            <p>それ以外の場合、<var>targetParent</var> を <a href="#stack-of-open-elements"
+                id="creating-and-inserting-nodes:stack-of-open-elements-3">開いている要素のスタック</a>内で
+              <var>lastTemplateOrTable</var> の直上にある要素に設定する。
             </p>
           </li>
         </ol>
+
+        <p class="note">これらの手順が必要となる理由の一部は、要素、特にこの場合の
+          <code id="creating-and-inserting-nodes:the-table-element-3"><a href="#the-table-element">table</a></code>
+          要素が、パーサーによって挿入された後にスクリプトによって
+          DOM 内の別の場所へ移動されたり、実際に DOM から完全に削除されたりする可能性があるためである。
+        </p>
       </li>
       <li>
-        <p><var>adjusted insertion location</var> を返す。</p>
+        <p><var>targetParent</var> が <code
+            id="creating-and-inserting-nodes:the-template-element-3"><a href="#the-template-element">template</a></code>
+          要素でない場合、
+          （<var>targetParent</var>, <var>referenceChild</var>）を返す。</p>
+      </li>
+      <li>
+        <p><var>patchInsertionTarget</var> を <var>targetParent</var> の
+          <a href="#insertion-target" id="creating-and-inserting-nodes:insertion-target">挿入先</a>とする。
+        </p>
+      </li>
+      <li>
+        <p><var>patchInsertionTarget</var> が null の場合、（<var>targetParent</var> の
+          <a href="#template-contents" id="creating-and-inserting-nodes:template-contents">template の内容</a>, null）を返す。
+        </p>
+      </li>
+      <li>
+        <p><var>targetParent</var> の <a href="#insertion-end-marker"
+            id="creating-and-inserting-nodes:insertion-end-marker">挿入終了マーカー</a>が null でなく、かつその
+          <a id="creating-and-inserting-nodes:parent-3" href="https://dom.spec.whatwg.org/#concept-tree-parent"
+            data-x-internal="parent">親</a>が <var>patchInsertionTarget</var> である場合、
+          （<var>patchInsertionTarget</var>, <var>targetParent</var> の
+          <a href="#insertion-end-marker" id="creating-and-inserting-nodes:insertion-end-marker-2">挿入終了
+            マーカー</a>）を返す。
+        </p>
+
+        <p class="note">終了マーカーが削除されたか別のノードへ移動された場合、次の手順では代わりにノードが
+          <var>patchInsertionTarget</var> に追加される。
+        </p>
+      </li>
+      <li>
+        <p>（<var>patchInsertionTarget</var>, null）を返す。</p>
       </li>
     </ol>
   </div>
@@ -242424,35 +242391,37 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
   <hr>
 
   <div data-algorithm="">
-    <p>トークン <var>token</var>、文字列 <var>namespace</var>、および <code id="creating-and-inserting-nodes:node"><a data-x-internal="node"
-        href="https://dom.spec.whatwg.org/#interface-node">Node</a></code> オブジェクト
+    <p>トークン <var>token</var>、文字列 <var>namespace</var>、および <code
+        id="creating-and-inserting-nodes:node-4"><a data-x-internal="node" href="https://dom.spec.whatwg.org/#interface-node">Node</a></code>
+      オブジェクト
       <var>intendedParent</var> が与えられたとき、<dfn id="create-an-element-for-the-token">トークン用の要素を作成する</dfn>には：
     </p>
 
     <ol>
       <li>
         <p><a href="#active-speculative-html-parser"
-            id="creating-and-inserting-nodes:active-speculative-html-parser">アクティブな投機的 HTML
-            構文解析器</a>が null でない場合、<var>namespace</var>、<var>token</var> のタグ名、
-          および <var>token</var> の属性が与えられたときに<a href="#create-a-speculative-mock-element"
-            id="creating-and-inserting-nodes:create-a-speculative-mock-element">投機的モック要素を作成する</a>結果を
-          返す。
+            id="creating-and-inserting-nodes:active-speculative-html-parser">アクティブな投機的 HTML パーサー</a>が
+          null でない場合、<var>namespace</var>、<var>token</var> のタグ名、および <var>token</var> の
+          属性を与えて
+          <a href="#create-a-speculative-mock-element"
+            id="creating-and-inserting-nodes:create-a-speculative-mock-element">投機的モック要素を作成した</a>結果を返す。
         </p>
       </li>
       <li>
-        <p>それ以外の場合、任意で <var>namespace</var>、<var>token</var> のタグ名、および
-          <var>token</var> の属性が与えられたときに<a href="#create-a-speculative-mock-element"
+        <p>それ以外の場合、オプションとして
+          <var>namespace</var>、<var>token</var> のタグ名、および <var>token</var> の属性を与えて
+          <a href="#create-a-speculative-mock-element"
             id="creating-and-inserting-nodes:create-a-speculative-mock-element-2">投機的モック要素を作成する</a>。
         </p>
 
-        <p class="note">結果は使用されない。この手順により、非投機的構文解析から<a href="#speculative-fetch"
-            id="creating-and-inserting-nodes:speculative-fetch">投機的フェッチ</a>を開始できる。
-          この時点でもフェッチが投機的なのは、たとえば要素が挿入されるまでに
-          <var>intendedParent</var> が文書から削除される可能性があるためである。
-        </p>
+        <p class="note">その結果は使用されない。この手順により、非投機的解析から <a href="#speculative-fetch"
+            id="creating-and-inserting-nodes:speculative-fetch">投機的フェッチ</a>を
+          開始できる。この時点ではフェッチは依然として投機的である。
+          たとえば、要素が挿入されるまでに <var>intendedParent</var> が
+          文書から削除されている可能性があるためである。</p>
       </li>
       <li>
-        <p><var>document</var> を、<var>intendedParent</var> の<a id="creating-and-inserting-nodes:node-document"
+        <p><var>document</var> を <var>intendedParent</var> の <a id="creating-and-inserting-nodes:node-document"
             href="https://dom.spec.whatwg.org/#concept-node-document" data-x-internal="node-document">ノード文書</a>とする。
         </p>
       </li>
@@ -242460,165 +242429,176 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
         <p><var>localName</var> を <var>token</var> のタグ名とする。</p>
       </li>
       <li>
-        <p><var>is</var> を、存在する場合は <var>token</var> 内の「<code
-            id="creating-and-inserting-nodes:attr-is"><a href="#attr-is">is</a></code>」属性の値とし、
+        <p>そのような属性が存在する場合、<var>is</var> を <var>token</var> 内の "<code
+            id="creating-and-inserting-nodes:attr-is"><a href="#attr-is">is</a></code>" 属性の値とし、
           それ以外の場合は null とする。
         </p>
       </li>
       <li>
-        <p><var>registry</var> を、<var>intendedParent</var> が与えられたときに<a href="#look-up-a-custom-element-registry"
-            id="creating-and-inserting-nodes:look-up-a-custom-element-registry">カスタム要素レジストリーを
-            検索する</a>結果とする。</p>
+        <p><var>registry</var> を、<var>intendedParent</var> を与えて <a href="#look-up-a-custom-element-registry"
+            id="creating-and-inserting-nodes:look-up-a-custom-element-registry">カスタム要素レジストリを検索した</a>
+          結果とする。</p>
       </li>
       <li>
-        <p><var>definition</var> を、<var>registry</var>、<var>namespace</var>、
-          <var>localName</var>、および <var>is</var> が与えられたときに<a href="#look-up-a-custom-element-definition"
-            id="creating-and-inserting-nodes:look-up-a-custom-element-definition">カスタム要素定義を検索する</a>
-          結果とする。
+        <p><var>definition</var> を、<var>registry</var>、
+          <var>namespace</var>、<var>localName</var>、および <var>is</var> を与えて
+          <a href="#look-up-a-custom-element-definition"
+            id="creating-and-inserting-nodes:look-up-a-custom-element-definition">カスタム要素
+            定義を検索した</a>結果とする。
         </p>
       </li>
       <li>
-        <p><var>definition</var> が null でなく、かつ構文解析器が<a href="#html-fragment-parsing-algorithm"
-            id="creating-and-inserting-nodes:html-fragment-parsing-algorithm">HTML 断片構文解析アルゴリズム</a>の
-          一部として作成されていない場合、<var>willExecuteScript</var> を true とする。それ以外の場合は
-          false とする。</p>
+        <p><var>definition</var> が null でなく、かつパーサーの <a href="#fragment-context-element"
+            id="creating-and-inserting-nodes:fragment-context-element">フラグメントコンテキスト要素</a>が null である場合、
+          <var>willExecuteScript</var> を true とし、それ以外の場合は
+          false とする。
+        </p>
       </li>
       <li>
-        <p><var>willExecuteScript</var> が true である場合：</p>
+        <p><var>willExecuteScript</var> が true の場合：</p>
 
         <ol>
           <li>
-            <p><var>document</var> の<a href="#throw-on-dynamic-markup-insertion-counter"
-                id="creating-and-inserting-nodes:throw-on-dynamic-markup-insertion-counter">動的マークアップ挿入時
-                スローカウンター</a>を増加させる。</p>
+            <p><var>document</var> の <a href="#throw-on-dynamic-markup-insertion-counter"
+                id="creating-and-inserting-nodes:throw-on-dynamic-markup-insertion-counter">動的マークアップ挿入時スロー
+                カウンター</a>をインクリメントする。</p>
           </li>
           <li>
             <p><a id="creating-and-inserting-nodes:javascript-execution-context-stack"
                 href="https://tc39.es/ecma262/#execution-context-stack"
-                data-x-internal="javascript-execution-context-stack">JavaScript 実行コンテキストスタック</a>が
-              空である場合、<a href="#perform-a-microtask-checkpoint"
-                id="creating-and-inserting-nodes:perform-a-microtask-checkpoint">マイクロタスクチェックポイントを
-                実行する</a>。</p>
+                data-x-internal="javascript-execution-context-stack">JavaScript 実行コンテキストスタック</a>が空の場合、
+              <a href="#perform-a-microtask-checkpoint"
+                id="creating-and-inserting-nodes:perform-a-microtask-checkpoint">マイクロタスク
+                チェックポイントを実行する</a>。
+            </p>
           </li>
           <li>
-            <p>新しい<a href="#element-queue" id="creating-and-inserting-nodes:element-queue">要素キュー</a>を
-              <var>document</var> の<a href="#relevant-agent" id="creating-and-inserting-nodes:relevant-agent">関連
-                エージェント</a>の<a href="#custom-element-reactions-stack"
-                id="creating-and-inserting-nodes:custom-element-reactions-stack">カスタム要素リアクション
-                スタック</a>へプッシュする。
+            <p>新しい <a href="#element-queue" id="creating-and-inserting-nodes:element-queue">要素キュー</a>を
+              <var>document</var> の <a href="#relevant-agent" id="creating-and-inserting-nodes:relevant-agent">関連
+                エージェント</a>の <a href="#custom-element-reactions-stack"
+                id="creating-and-inserting-nodes:custom-element-reactions-stack">カスタム要素リアクションスタック</a>にプッシュする。
             </p>
           </li>
         </ol>
       </li>
       <li>
-        <p><var>element</var> を、<var>document</var>、<var>localName</var>、
-          <var>namespace</var>、null、<var>is</var>、<var>willExecuteScript</var>、および
-          <var>registry</var> が与えられたときに<a href="https://dom.spec.whatwg.org/#concept-create-element"
-            id="creating-and-inserting-nodes:create-an-element" data-x-internal="create-an-element">要素を作成する</a>結果とする。
+        <p><var>element</var> を、<var>document</var>、<var>localName</var>、<var>namespace</var>、null、
+          <var>is</var>、<var>willExecuteScript</var>、および <var>registry</var> を与えて <a
+            href="https://dom.spec.whatwg.org/#concept-create-element"
+            id="creating-and-inserting-nodes:create-an-element" data-x-internal="create-an-element">要素を
+            作成した</a>結果とする。
         </p>
 
-        <p class="note"><var>willExecuteScript</var> が true である場合、これにより<a href="#custom-element-constructor"
+        <p class="note"><var>willExecuteScript</var> が true の場合、これにより <a href="#custom-element-constructor"
             id="creating-and-inserting-nodes:custom-element-constructor">カスタム要素
-            コンストラクター</a>が実行される。ただし、<a href="#throw-on-dynamic-markup-insertion-counter"
-            id="creating-and-inserting-nodes:throw-on-dynamic-markup-insertion-counter-2">動的マークアップ挿入時
-            スローカウンター</a>を増加させているため、これによって<a href="#dom-document-write"
-            id="creating-and-inserting-nodes:dom-document-write">新しい文字がトークナイザーへ挿入される</a>
-          ことも、<a href="#dom-document-open" id="creating-and-inserting-nodes:dom-document-open">文書が消去される</a>こともない。</p>
+            コンストラクター</a>が実行される。ただし、
+          <a href="#throw-on-dynamic-markup-insertion-counter"
+            id="creating-and-inserting-nodes:throw-on-dynamic-markup-insertion-counter-2">動的マークアップ挿入時スロー
+            カウンター</a>をインクリメントしたため、これによって <a href="#dom-document-write"
+            id="creating-and-inserting-nodes:dom-document-write">新しい文字がトークナイザーに挿入される</a>ことや、
+          <a href="#dom-document-open" id="creating-and-inserting-nodes:dom-document-open">文書が破棄
+            される</a>ことはない。
+        </p>
       </li>
       <li>
-        <p>指定されたトークン内の各属性を <var>element</var> へ<a href="https://dom.spec.whatwg.org/#concept-element-attributes-append"
+        <p>与えられたトークン内の各属性を <var>element</var> に
+          <a href="https://dom.spec.whatwg.org/#concept-element-attributes-append"
             id="creating-and-inserting-nodes:concept-element-attributes-append"
-            data-x-internal="concept-element-attributes-append">付加する</a>。</p>
-
-        <p class="note">これにより、<code>attributeChangedCallback</code> 用の<a
-            href="#enqueue-a-custom-element-callback-reaction"
-            id="creating-and-inserting-nodes:enqueue-a-custom-element-callback-reaction">カスタム要素コールバック
-            リアクションをキューする</a>ことがあり、そのリアクションは直ちに
-          （次の手順で）実行される可能性がある。
+            data-x-internal="concept-element-attributes-append">追加する</a>。
         </p>
 
-        <p class="note"><code id="creating-and-inserting-nodes:attr-is-2"><a href="#attr-is">is</a></code> 属性は<a
+        <p class="note">これにより <code>attributeChangedCallback</code> のための
+          <a href="#enqueue-a-custom-element-callback-reaction"
+            id="creating-and-inserting-nodes:enqueue-a-custom-element-callback-reaction">カスタム要素
+            コールバックリアクションをキューに追加する</a>ことがあり、これは（次の
+          手順で）直ちに実行される可能性がある。
+        </p>
+
+        <p class="note"><code id="creating-and-inserting-nodes:attr-is-2"><a href="#attr-is">is</a></code> 属性は <a
             href="https://dom.spec.whatwg.org/#concept-create-element"
             id="creating-and-inserting-nodes:create-an-element-2"
-            data-x-internal="create-an-element">カスタマイズされた組み込み要素の作成</a>を制御するが、
-          関連する<a href="#custom-element-constructor"
-            id="creating-and-inserting-nodes:custom-element-constructor-2">カスタム要素コンストラクター</a>の
-          実行中には存在しない。この手順で、その他すべての属性とともに付加される。
+            data-x-internal="create-an-element">カスタマイズされた組み込み要素の作成</a>を
+          <a href="#customized-built-in-element"
+            id="creating-and-inserting-nodes:customized-built-in-element">制御する</a>が、関連する <a
+            href="#custom-element-constructor"
+            id="creating-and-inserting-nodes:custom-element-constructor-2">カスタム要素コンストラクター</a>の実行中には
+          存在せず、この手順ですべての他の属性とともに追加される。
         </p>
       </li>
       <li>
-        <p><var>willExecuteScript</var> が true である場合：</p>
+        <p><var>willExecuteScript</var> が true の場合：</p>
 
         <ol>
           <li>
-            <p><var>queue</var> を、<var>document</var> の<a href="#relevant-agent"
+            <p><var>queue</var> を、<var>document</var> の <a href="#relevant-agent"
                 id="creating-and-inserting-nodes:relevant-agent-2">関連
-                エージェント</a>の<a href="#custom-element-reactions-stack"
-                id="creating-and-inserting-nodes:custom-element-reactions-stack-2">カスタム要素リアクション
-                スタック</a>からポップした結果とする。（これは上でプッシュされたものと同じ<a href="#element-queue"
-                id="creating-and-inserting-nodes:element-queue-2">要素キュー</a>となる。）
+                エージェント</a>の <a href="#custom-element-reactions-stack"
+                id="creating-and-inserting-nodes:custom-element-reactions-stack-2">カスタム要素リアクションスタック</a>からポップした結果とする。
+              （これは上でプッシュされたものと同じ
+              <a href="#element-queue" id="creating-and-inserting-nodes:element-queue-2">要素キュー</a>となる。）
             </p>
           </li>
           <li>
-            <p><var>queue</var> 内の<a href="#invoke-custom-element-reactions"
-                id="creating-and-inserting-nodes:invoke-custom-element-reactions">カスタム要素リアクションを
-                呼び出す</a>。
+            <p><var>queue</var> 内の <a href="#invoke-custom-element-reactions"
+                id="creating-and-inserting-nodes:invoke-custom-element-reactions">カスタム要素リアクションを呼び出す</a>。
             </p>
           </li>
           <li>
-            <p><var>document</var> の<a href="#throw-on-dynamic-markup-insertion-counter"
-                id="creating-and-inserting-nodes:throw-on-dynamic-markup-insertion-counter-3">動的マークアップ挿入時
-                スローカウンター</a>を減少させる。</p>
+            <p><var>document</var> の <a href="#throw-on-dynamic-markup-insertion-counter"
+                id="creating-and-inserting-nodes:throw-on-dynamic-markup-insertion-counter-3">動的マークアップ挿入時スロー
+                カウンター</a>をデクリメントする。</p>
           </li>
         </ol>
       </li>
       <li>
-        <p><var>element</var> が、値が要素の名前空間と厳密に同じでない <code>xmlns</code> 属性を
-          <em><a id="creating-and-inserting-nodes:xmlns-namespace" href="https://infra.spec.whatwg.org/#xmlns-namespace"
-              data-x-internal="xmlns-namespace">XMLNS
-              名前空間</a>内に</em>持つ場合、これは<a href="#parse-errors"
-            id="creating-and-inserting-nodes:parse-errors">構文解析エラー</a>である。同様に、
-          <var>element</var> が<a id="creating-and-inserting-nodes:xmlns-namespace-2"
-            href="https://infra.spec.whatwg.org/#xmlns-namespace" data-x-internal="xmlns-namespace">XMLNS 名前空間</a>内に
-          <code>xmlns:xlink</code> 属性を持ち、
-          その値が<a id="creating-and-inserting-nodes:xlink-namespace" href="https://infra.spec.whatwg.org/#xlink-namespace"
-            data-x-internal="xlink-namespace">XLink 名前空間</a>でない場合、これは<a href="#parse-errors"
+        <p><var>element</var> が <em><a id="creating-and-inserting-nodes:xmlns-namespace"
+              href="https://infra.spec.whatwg.org/#xmlns-namespace" data-x-internal="xmlns-namespace">XMLNS
+              名前空間</a>内の</em> <code>xmlns</code> 属性を持ち、その値が要素の名前空間と厳密に同一でない場合、それは
+          <a href="#parse-errors" id="creating-and-inserting-nodes:parse-errors">構文解析エラー</a>である。同様に、
+          <var>element</var> が <a id="creating-and-inserting-nodes:xmlns-namespace-2"
+            href="https://infra.spec.whatwg.org/#xmlns-namespace" data-x-internal="xmlns-namespace">XMLNS 名前空間</a>内の
+          <code>xmlns:xlink</code> 属性を持ち、その値が
+          <a id="creating-and-inserting-nodes:xlink-namespace" href="https://infra.spec.whatwg.org/#xlink-namespace"
+            data-x-internal="xlink-namespace">XLink 名前空間</a>でない場合、それは <a href="#parse-errors"
             id="creating-and-inserting-nodes:parse-errors-2">構文解析エラー</a>である。
         </p>
       </li>
       <li>
-        <p><var>element</var> が<a href="#category-reset"
-            id="creating-and-inserting-nodes:category-reset">リセット可能要素</a>であり、
+        <p><var>element</var> が <a href="#category-reset"
+            id="creating-and-inserting-nodes:category-reset">リセット可能要素</a>であり、かつ
           <a href="#form-associated-custom-element"
             id="creating-and-inserting-nodes:form-associated-custom-element">フォーム関連カスタム要素</a>でない場合、
-          その<a href="#concept-form-reset-control"
-            id="creating-and-inserting-nodes:concept-form-reset-control">リセットアルゴリズム</a>を呼び出す。
-          （これにより、要素の属性に基づいて、要素の<a href="#concept-fe-value" id="creating-and-inserting-nodes:concept-fe-value">値</a>および<a
-            href="#concept-fe-checked" id="creating-and-inserting-nodes:concept-fe-checked">チェック状態</a>が初期化される。）
+          その <a href="#concept-form-reset-control"
+            id="creating-and-inserting-nodes:concept-form-reset-control">リセットアルゴリズム</a>を呼び出す。（これにより、
+          要素の属性に基づいて要素の <a href="#concept-fe-value" id="creating-and-inserting-nodes:concept-fe-value">値</a>と <a
+            href="#concept-fe-checked" id="creating-and-inserting-nodes:concept-fe-checked">チェック状態</a>
+          が初期化される。）
         </p>
       </li>
       <li>
-        <p><var>element</var> が<a href="#form-associated-element"
-            id="creating-and-inserting-nodes:form-associated-element">フォーム関連要素</a>であり、
+        <p><var>element</var> が <a href="#form-associated-element"
+            id="creating-and-inserting-nodes:form-associated-element">フォーム関連要素</a>であり、かつ
           <a href="#form-associated-custom-element"
             id="creating-and-inserting-nodes:form-associated-custom-element-2">フォーム関連カスタム要素</a>ではなく、
           <a href="#form-element-pointer" id="creating-and-inserting-nodes:form-element-pointer"><code>form</code>
-            要素ポインター</a>が null でなく、<a href="#stack-of-open-elements"
-            id="creating-and-inserting-nodes:stack-of-open-elements-6">開いている要素のスタック</a>上に
-          <code id="creating-and-inserting-nodes:the-template-element-3"><a
-            href="#the-template-element">template</a></code> 要素がなく、<var>element</var> が<a href="#category-listed"
-            id="creating-and-inserting-nodes:category-listed">列挙対象</a>でないか、
-          <code id="creating-and-inserting-nodes:attr-fae-form"><a
-            href="#attr-fae-form">form</a></code> 属性を持たず、かつ <var>intendedParent</var> が<a href="#form-element-pointer"
+            要素ポインター</a>が null でなく、
+          <a href="#stack-of-open-elements"
+            id="creating-and-inserting-nodes:stack-of-open-elements-4">開いている要素のスタック</a>上に <code
+            id="creating-and-inserting-nodes:the-template-element-4"><a href="#the-template-element">template</a></code>
+          要素がなく、<var>element</var> が <a href="#category-listed"
+            id="creating-and-inserting-nodes:category-listed">リスト対象</a>でないか <code
+            id="creating-and-inserting-nodes:attr-fae-form"><a href="#attr-fae-form">form</a></code>
+          属性を持たず、かつ <var>intendedParent</var> が <a href="#form-element-pointer"
             id="creating-and-inserting-nodes:form-element-pointer-2"><code>form</code> 要素
-            ポインター</a>によって指される要素と同じ<a id="creating-and-inserting-nodes:tree"
-            href="https://dom.spec.whatwg.org/#concept-tree" data-x-internal="tree">ツリー</a>内にある場合、<var>element</var> を<a
-            href="#form-element-pointer" id="creating-and-inserting-nodes:form-element-pointer-3"><code>form</code> 要素
-            ポインター</a>によって指される <code id="creating-and-inserting-nodes:the-form-element"><a
-            href="#the-form-element">form</a></code> 要素へ<a href="#concept-form-association"
-            id="creating-and-inserting-nodes:concept-form-association">関連付け</a>、
-          <var>element</var> の<a href="#parser-inserted-flag"
-            id="creating-and-inserting-nodes:parser-inserted-flag">構文解析器挿入済みフラグ</a>を設定する。
+            ポインター</a>が指す要素と同じ
+          <a id="creating-and-inserting-nodes:tree" href="https://dom.spec.whatwg.org/#concept-tree"
+            data-x-internal="tree">ツリー</a>内にある場合、<var>element</var> を
+          <a href="#form-element-pointer" id="creating-and-inserting-nodes:form-element-pointer-3"><code>form</code> 要素
+            ポインター</a>が指す <code
+            id="creating-and-inserting-nodes:the-form-element"><a href="#the-form-element">form</a></code>
+          要素に <a href="#concept-form-association"
+            id="creating-and-inserting-nodes:concept-form-association">関連付け</a>、<var>element</var> の <a
+            href="#parser-inserted-flag" id="creating-and-inserting-nodes:parser-inserted-flag">パーサー挿入済みフラグ</a>を設定する。
         </p>
       </li>
       <li>
@@ -242628,27 +242608,31 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
   </div>
 
   <div data-algorithm="">
-    <p>任意の挿入位置 <var>insertionLocation</var>（既定値は null）を使用して<dfn id="adjusted-insertion-location">調整済み挿入位置</dfn>を計算するには：
-    </p>
+    <p>オプションの <a href="#insertion-location" id="creating-and-inserting-nodes:insertion-location-2">挿入
+        位置</a> <var>insertionLocation</var>（デフォルトは null）を用いて <dfn
+        id="adjusted-insertion-location">調整済み挿入位置</dfn>を計算するには：</p>
 
     <ol>
       <li>
-        <p><var>insertionLocation</var> が null である場合、<var>overrideTarget</var> を null とする。
-          それ以外の場合、<var>insertionLocation</var> が含まれるノードとする。</p>
+        <p><var>insertionLocation</var> が null の場合、<var>overrideTarget</var> を null とし、
+          それ以外の場合は <var>insertionLocation</var> の <a href="#insertion-location-target-parent"
+            id="creating-and-inserting-nodes:insertion-location-target-parent">対象親</a>とする。</p>
       </li>
       <li>
-        <p><var>adjustedInsertionLocation</var> を、<var>overrideTarget</var> が与えられたときの<a
+        <p><var>adjustedInsertionLocation</var> を、<var>overrideTarget</var> を与えた <a
             href="#appropriate-place-for-inserting-a-node"
-            id="creating-and-inserting-nodes:appropriate-place-for-inserting-a-node">ノードを挿入する
-            適切な位置</a>とする。</p>
+            id="creating-and-inserting-nodes:appropriate-place-for-inserting-a-node">ノードを挿入する適切な
+            位置</a>とする。</p>
       </li>
       <li>
-        <p><var>adjustedInsertionLocation</var> が含まれるノードが<a href="#stack-of-open-elements"
-            id="creating-and-inserting-nodes:stack-of-open-elements-7">開いている要素のスタック</a>内の
-          最初の要素であり、構文解析器の<a href="#root-insertion-target" id="creating-and-inserting-nodes:root-insertion-target">ルート挿入
-            対象</a>が null でない場合、<var>adjustedInsertionLocation</var> を構文解析器の
-          <a href="#root-insertion-target" id="creating-and-inserting-nodes:root-insertion-target-2">ルート挿入対象</a>内の、
-          最後の子の後（子がある場合）に設定する。
+        <p><var>adjustedInsertionLocation</var> の <a href="#insertion-location-target-parent"
+            id="creating-and-inserting-nodes:insertion-location-target-parent-2">対象親</a>が
+          <a href="#stack-of-open-elements" id="creating-and-inserting-nodes:stack-of-open-elements-5">開いている
+            要素のスタック</a>内の最初の要素であり、かつパーサーの <a href="#root-insertion-target"
+            id="creating-and-inserting-nodes:root-insertion-target">ルート挿入先</a>が
+          null でない場合、<var>adjustedInsertionLocation</var> を（パーサーの <a href="#root-insertion-target"
+            id="creating-and-inserting-nodes:root-insertion-target-2">ルート挿入
+            先</a>, null）に設定する。
         </p>
       </li>
       <li>
@@ -242660,33 +242644,32 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
   <hr>
 
   <div data-algorithm="">
-    <p><dfn id="insert-an-element-at-the-adjusted-insertion-location">調整済み挿入位置に要素を挿入する</dfn>には、要素
-      <var>element</var> および任意の挿入位置 <var>insertionLocation</var>（デフォルト値は
-      null）を指定する:
+    <p>要素
+      <var>element</var> とオプションの <a href="#insertion-location"
+        id="creating-and-inserting-nodes:insertion-location-3">挿入位置</a> <var>insertionLocation</var>
+      （デフォルトは null）を用いて、<dfn id="insert-an-element-at-the-adjusted-insertion-location">調整済み挿入
+        位置に要素を挿入する</dfn>には：
     </p>
 
     <ol>
       <li>
-        <p><var>insertionLocation</var> を、<var>insertionLocation</var> を与えた<a href="#adjusted-insertion-location"
-            id="creating-and-inserting-nodes:adjusted-insertion-location">調整済み挿入位置</a>に設定する。
-        </p>
+        <p>（<var>targetParent</var>, <var>referenceChild</var>）を、<var>insertionLocation</var> を与えた <a
+            href="#adjusted-insertion-location" id="creating-and-inserting-nodes:adjusted-insertion-location">調整済み挿入
+            位置</a>とする。</p>
       </li>
       <li>
-        <p><var>target</var> を、<var>insertionLocation</var> 自身が存在するノードとする。</p>
-      </li>
-      <li>
-        <p>次のいずれかが真である場合：</p>
+        <p>次のいずれかが true の場合：</p>
 
         <ul>
-          <li><var>element</var> の<a id="creating-and-inserting-nodes:parent-2"
+          <li><var>element</var> の <a id="creating-and-inserting-nodes:parent-4"
               href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>が null でない；
           </li>
-          <li><var>element</var> が <var>target</var> の<a
+          <li><var>element</var> が <var>targetParent</var> の <a
               id="creating-and-inserting-nodes:host-including-inclusive-ancestor"
               href="https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor"
               data-x-internal="host-including-inclusive-ancestor">ホストを含む包括的祖先</a>である；または
           </li>
-          <li><var>target</var> が、すでに要素の子を持つ <code
+          <li><var>targetParent</var> が、すでに要素の子を持つ <code
               id="creating-and-inserting-nodes:document"><a href="#document">Document</a></code> ノードである、</li>
         </ul>
 
@@ -242695,35 +242678,38 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
       <li>
         <p><a id="creating-and-inserting-nodes:assert" href="https://infra.spec.whatwg.org/#assert"
             data-x-internal="assert">表明</a>：<var>element</var>、
-          <var>target</var>、null、および « » を与えて<a id="creating-and-inserting-nodes:ensure-pre-insert-validity"
+          <var>targetParent</var>、<var>referenceChild</var>、および « » が与えられた <a
+            id="creating-and-inserting-nodes:ensure-pre-insert-validity"
             href="https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity"
-            data-x-internal="ensure-pre-insert-validity">挿入前の妥当性を保証</a>しても、例外を投げない。
+            data-x-internal="ensure-pre-insert-validity">挿入前妥当性の確保</a>は例外をスローしない。
         </p>
       </li>
       <li>
-        <p>パーサーが<a href="#html-fragment-parsing-algorithm"
-            id="creating-and-inserting-nodes:html-fragment-parsing-algorithm-2">HTML フラグメント構文解析
-            アルゴリズム</a>の一部として作成されたものでない場合、新しい<a href="#element-queue"
-            id="creating-and-inserting-nodes:element-queue-3">要素キュー</a>を <var>element</var> の
-          <a href="#relevant-agent" id="creating-and-inserting-nodes:relevant-agent-3">関連エージェント</a>の<a
-            href="#custom-element-reactions-stack"
-            id="creating-and-inserting-nodes:custom-element-reactions-stack-3">カスタム要素リアクションスタック</a>にプッシュする。
+        <p>パーサーの <a href="#fragment-context-element"
+            id="creating-and-inserting-nodes:fragment-context-element-2">フラグメントコンテキスト要素</a>が null の場合、
+          新しい <a href="#element-queue" id="creating-and-inserting-nodes:element-queue-3">要素キュー</a>を
+          <var>element</var> の <a href="#relevant-agent" id="creating-and-inserting-nodes:relevant-agent-3">関連
+            エージェント</a>の <a href="#custom-element-reactions-stack"
+            id="creating-and-inserting-nodes:custom-element-reactions-stack-3">カスタム
+            要素リアクションスタック</a>にプッシュする。
         </p>
       </li>
       <li>
-        <p><var>element</var> を <var>insertionLocation</var> に挿入する。</p>
+        <p><var>element</var> を
+          <var>targetParent</var> 内の <var>referenceChild</var> の前に
+          <a href="https://dom.spec.whatwg.org/#concept-node-insert"
+            id="creating-and-inserting-nodes:concept-node-insert" data-x-internal="concept-node-insert">挿入する</a>。
+        </p>
       </li>
       <li>
-        <p>パーサーが<a href="#html-fragment-parsing-algorithm"
-            id="creating-and-inserting-nodes:html-fragment-parsing-algorithm-3">HTML フラグメント構文解析
-            アルゴリズム</a>の一部として作成されたものでない場合、<a href="#element-queue"
-            id="creating-and-inserting-nodes:element-queue-4">要素キュー</a>を <var>element</var> の
-          <a href="#relevant-agent" id="creating-and-inserting-nodes:relevant-agent-4">関連エージェント</a>の<a
-            href="#custom-element-reactions-stack"
-            id="creating-and-inserting-nodes:custom-element-reactions-stack-4">カスタム要素リアクションスタック</a>からポップし、そのキュー内の
-          <a href="#invoke-custom-element-reactions"
-            id="creating-and-inserting-nodes:invoke-custom-element-reactions-2">カスタム要素リアクションを
-            呼び出す</a>。
+        <p>パーサーの <a href="#fragment-context-element"
+            id="creating-and-inserting-nodes:fragment-context-element-3">フラグメントコンテキスト要素</a>が null の場合、
+          <var>element</var> の <a href="#relevant-agent"
+            id="creating-and-inserting-nodes:relevant-agent-4">関連エージェント</a>の <a href="#custom-element-reactions-stack"
+            id="creating-and-inserting-nodes:custom-element-reactions-stack-4">カスタム要素
+            リアクションスタック</a>から <a href="#element-queue" id="creating-and-inserting-nodes:element-queue-4">要素
+            キュー</a>をポップし、そのキュー内の <a href="#invoke-custom-element-reactions"
+            id="creating-and-inserting-nodes:invoke-custom-element-reactions-2">カスタム要素リアクションを呼び出す</a>。
         </p>
       </li>
     </ol>
@@ -242732,32 +242718,36 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
 
 
   <div data-algorithm="">
-    <p><dfn id="insert-a-foreign-element">外部要素を挿入する</dfn>には、トークン <var>token</var>、文字列
-      <var>namespace</var>、およびブール値 <var>onlyAddToElementStack</var> が与えられた場合:
+    <p>トークン <var>token</var>、文字列
+      <var>namespace</var>、およびブール値 <var>onlyAddToElementStack</var> が与えられたとき、<dfn
+        id="insert-a-foreign-element">外来要素を挿入する</dfn>には：
     </p>
 
     <ol>
       <li>
         <p><var>adjustedInsertionLocation</var> を <a href="#appropriate-place-for-inserting-a-node"
-            id="creating-and-inserting-nodes:appropriate-place-for-inserting-a-node-2">ノードを挿入するための適切な場所</a>とする。</p>
+            id="creating-and-inserting-nodes:appropriate-place-for-inserting-a-node-2">ノードを挿入する適切な
+            位置</a>とする。</p>
       </li>
       <li>
-        <p><var>element</var> を、<var>token</var>、<var>namespace</var>、および
-          <var>adjustedInsertionLocation</var> が存在するノードが与えられた
-          <a href="#create-an-element-for-the-token"
-            id="creating-and-inserting-nodes:create-an-element-for-the-token">トークン用の要素を作成する</a>の結果とする。
-        </p>
+        <p><var>element</var> を、<var>token</var>、<var>namespace</var>、
+          および <var>adjustedInsertionLocation</var> の <a href="#insertion-location-target-parent"
+            id="creating-and-inserting-nodes:insertion-location-target-parent-3">対象親</a>を与えて <a
+            href="#create-an-element-for-the-token"
+            id="creating-and-inserting-nodes:create-an-element-for-the-token">トークン用の要素を作成した</a>
+          結果とする。</p>
       </li>
       <li>
-        <p><var>onlyAddToElementStack</var> が false の場合、<a href="#insert-an-element-at-the-adjusted-insertion-location"
-            id="creating-and-inserting-nodes:insert-an-element-at-the-adjusted-insertion-location">調整済み挿入位置に要素を挿入する</a>を
-          <var>element</var> とともに実行する。
-        </p>
+        <p><var>onlyAddToElementStack</var> が false の場合、<var>element</var> を用いて <a
+            href="#insert-an-element-at-the-adjusted-insertion-location"
+            id="creating-and-inserting-nodes:insert-an-element-at-the-adjusted-insertion-location">調整済み
+            挿入位置に要素を
+            挿入する</a>を実行する。</p>
       </li>
       <li>
         <p><var>element</var> を <a href="#stack-of-open-elements"
-            id="creating-and-inserting-nodes:stack-of-open-elements-8">開いている要素のスタック</a>にプッシュし、それが新しい
-          <a href="#current-node" id="creating-and-inserting-nodes:current-node-2">現在のノード</a>となるようにする。
+            id="creating-and-inserting-nodes:stack-of-open-elements-6">開いている要素のスタック</a>にプッシュし、それを新しい
+          <a href="#current-node" id="creating-and-inserting-nodes:current-node-2">現在ノード</a>とする。
         </p>
       </li>
       <li>
@@ -243215,43 +243205,55 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
   <hr>
 
   <div data-algorithm="">
-    <p>以下の手順が、トークンの処理中にユーザーエージェントへ<dfn id="insert-a-character">文字を挿入する</dfn>よう要求する場合、ユーザーエージェントは
-      次の手順を実行しなければならない：</p>
+    <p>以下の手順で、トークンの処理中にユーザーエージェントが<dfn id="insert-a-character">文字を挿入する</dfn>ことを要求される場合、
+      ユーザーエージェントは次の手順を実行しなければならない：</p>
 
     <ol>
       <li>
-        <p><var>data</var> を、このアルゴリズムへ渡された文字、または文字が明示的に
-          指定されていない場合は、処理中の文字トークンの文字とする。</p>
+        <p><var>data</var> をアルゴリズムに渡された文字とする。明示的に文字が指定されていない場合は、
+          処理中の文字トークンの文字とする。</p>
       </li>
       <li>
-        <p><var>insertionLocation</var> を<a href="#adjusted-insertion-location"
-            id="creating-and-inserting-nodes:adjusted-insertion-location-2">調整済み挿入位置</a>とする。</p>
+        <p>（<var>targetParent</var>, <var>referenceChild</var>）を <a href="#adjusted-insertion-location"
+            id="creating-and-inserting-nodes:adjusted-insertion-location-2">調整済み挿入
+            位置</a>とする。</p>
       </li>
       <li>
-        <p><var>insertionLocation</var> が <code id="creating-and-inserting-nodes:document-2"><a
-            href="#document">Document</a></code> ノード内にある場合、返る。</p>
+        <p><var>targetParent</var> が <code
+            id="creating-and-inserting-nodes:document-2"><a href="#document">Document</a></code> ノードである場合、返る。</p>
 
-        <p class="note">DOM は <code id="creating-and-inserting-nodes:document-3"><a
-            href="#document">Document</a></code> ノードが <code id="creating-and-inserting-nodes:text"><a data-x-internal="text"
-            href="https://dom.spec.whatwg.org/#interface-text">Text</a></code> ノードの子を持つことを
-          許可しないため、それらは破棄される。</p>
+        <p class="note">DOM は <code id="creating-and-inserting-nodes:document-3"><a href="#document">Document</a></code>
+          ノードが <code
+            id="creating-and-inserting-nodes:text"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+          ノードを
+          子として持つことを許可しないため、それらは破棄される。</p>
       </li>
       <li>
-        <p><var>insertionLocation</var> の直前に <code id="creating-and-inserting-nodes:text-2"><a data-x-internal="text"
-            href="https://dom.spec.whatwg.org/#interface-text">Text</a></code> ノードがある場合、
-          <var>data</var> をその <code id="creating-and-inserting-nodes:text-3"><a data-x-internal="text"
-            href="https://dom.spec.whatwg.org/#interface-text">Text</a></code> ノードの<a
-            href="https://dom.spec.whatwg.org/#concept-cd-data" id="creating-and-inserting-nodes:concept-cd-data"
-            data-x-internal="concept-cd-data">データ</a>へ付加する。
+        <p><var>referenceChild</var> が null でない場合、<var>previousSibling</var> を <var>referenceChild</var> の <a
+            id="creating-and-inserting-nodes:previous-sibling"
+            href="https://dom.spec.whatwg.org/#concept-tree-previous-sibling" data-x-internal="previous-sibling">直前の
+            兄弟</a>とし、それ以外の場合は <var>targetParent</var> の
+          <a id="creating-and-inserting-nodes:last-child" href="https://dom.spec.whatwg.org/#concept-tree-last-child"
+            data-x-internal="last-child">最後の子</a>とする。
+        </p>
+      </li>
+      <li>
+        <p><var>previousSibling</var> が <code
+            id="creating-and-inserting-nodes:text-2"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+          ノードである場合、<var>data</var> を
+          <var>previousSibling</var> の <a href="https://dom.spec.whatwg.org/#concept-cd-data"
+            id="creating-and-inserting-nodes:concept-cd-data" data-x-internal="concept-cd-data">データ</a>に追加する。
         </p>
 
-        <p>それ以外の場合、<var>text</var> を、<var>insertionLocation</var> が存在するノードの
-          <a id="creating-and-inserting-nodes:node-document-2" href="https://dom.spec.whatwg.org/#concept-node-document"
-            data-x-internal="node-document">ノードドキュメント</a>
-          および <var>data</var> が与えられた
-          <a href="https://dom.spec.whatwg.org/#create-a-text-node" id="creating-and-inserting-nodes:create-a-text-node"
-            data-x-internal="create-a-text-node">テキストノードを作成する</a>
-          の結果とし、<var>text</var> を <var>insertionLocation</var> に挿入する。
+        <p>それ以外の場合、<var>text</var> を、<var>targetParent</var> の <a id="creating-and-inserting-nodes:node-document-2"
+            href="https://dom.spec.whatwg.org/#concept-node-document" data-x-internal="node-document">ノード文書</a>
+          と <var>data</var> を与えて <a href="https://dom.spec.whatwg.org/#create-a-text-node"
+            id="creating-and-inserting-nodes:create-a-text-node" data-x-internal="create-a-text-node">テキスト
+            ノードを作成した</a>結果とし、
+          <var>text</var> を
+          <var>targetParent</var> 内の <var>referenceChild</var> の前に <a
+            href="https://dom.spec.whatwg.org/#concept-node-insert"
+            id="creating-and-inserting-nodes:concept-node-insert-2" data-x-internal="concept-node-insert">挿入する</a>。
         </p>
       </li>
     </ol>
@@ -243259,16 +243261,16 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
 
   <div class="example">
 
-    <p>以下は、パーサーへの入力例と、それらによって生成される <code
-        id="creating-and-inserting-nodes:text-4"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
-      ノードの対応する数であり、スクリプトを実行するユーザーエージェントを前提とする。</p>
+    <p>以下は、スクリプトを実行するユーザーエージェントを想定した、パーサーへの入力例と、それによって生成される <code
+        id="creating-and-inserting-nodes:text-3"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+      ノードの対応する数である。</p>
 
     <table>
       <thead>
         <tr>
           <th>入力 </th>
           <th><code
-              id="creating-and-inserting-nodes:text-5"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+              id="creating-and-inserting-nodes:text-4"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
             ノードの数
           </th>
         </tr>
@@ -243281,9 +243283,9 @@ window<c- p="">.</c->fakeWorklet1<c- p="">.</c->addModule<c- p="">(</c-><c- u=""
 document<c- p="">.</c->body<c- p="">.</c->removeChild<c- p="">(</c->script<c- p="">);</c->
 <c- p="">&lt;/</c-><c- f="">script</c-><c- p="">&gt;</c->B</code></pre>
           </td>
-          <td>文書内の 1 つの <code
-              id="creating-and-inserting-nodes:text-6"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
-            ノードで、「AB」を含む。
+          <td>文書内に 1 つの <code
+              id="creating-and-inserting-nodes:text-5"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+            ノードがあり、"AB" を含む。
           </td>
         </tr>
         <tr>
@@ -243294,10 +243296,10 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
 <c- p="">&lt;/</c-><c- f="">script</c-><c- p="">&gt;</c->C</code></pre>
           </td>
           <td>3 つの <code
-              id="creating-and-inserting-nodes:text-7"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
-            ノード。スクリプトの前の「A」、スクリプトの内容、およびスクリプトの後の「BC」（パーサーは、スクリプトによって作成された
+              id="creating-and-inserting-nodes:text-6"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+            ノード。スクリプトの前の "A"、スクリプトの内容、およびスクリプトの後の "BC"（パーサーはスクリプトによって作成された
             <code
-              id="creating-and-inserting-nodes:text-8"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+              id="creating-and-inserting-nodes:text-7"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
             ノードに追加する）。
           </td>
         </tr>
@@ -243309,44 +243311,44 @@ text<c- p="">.</c->data&nbsp;<c- o="">=</c->&nbsp;<c- t="">'B'</c-><c- p="">;</c
 document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p="">);</c->
 <c- p="">&lt;/</c-><c- f="">script</c-><c- p="">&gt;</c->C</code></pre>
           </td>
-          <td>文書内の隣接する 2 つの <code
-              id="creating-and-inserting-nodes:text-9"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
-            ノードで、「A」と「BC」を含む。
+          <td>文書内に隣接する 2 つの <code
+              id="creating-and-inserting-nodes:text-8"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+            ノードがあり、"A" と "BC" を含む。
           </td>
         </tr>
         <tr>
           <td>
             <pre><code class="html">A<c- p="">&lt;</c-><c- f="">table</c-><c- p="">&gt;</c->B<c- p="">&lt;</c-><c- f="">tr</c-><c- p="">&gt;</c->C<c- p="">&lt;/</c-><c- f="">tr</c-><c- p="">&gt;</c->D<c- p="">&lt;/</c-><c- f="">table</c-><c- p="">&gt;</c-></code></pre>
           </td>
-          <td>table の前にある 1 つの <code
-              id="creating-and-inserting-nodes:text-10"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
-            ノードで、「ABCD」を含む。（これは<a href="#foster-parent"
-              id="creating-and-inserting-nodes:foster-parent-2">フォスターペアレンティング</a>によって生じる。）
+          <td>テーブルの前に 1 つの <code
+              id="creating-and-inserting-nodes:text-9"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+            ノードがあり、"ABCD" を含む。（これは <a href="#foster-parent"
+              id="creating-and-inserting-nodes:foster-parent-2">フォスターペアレンティング</a>によって引き起こされる。）
           </td>
         </tr>
         <tr>
           <td>
             <pre><code class="html">A<c- p="">&lt;</c-><c- f="">table</c-><c- p="">&gt;&lt;</c-><c- f="">tr</c-><c- p="">&gt;</c->&nbsp;B<c- p="">&lt;/</c-><c- f="">tr</c-><c- p="">&gt;</c->&nbsp;C<c- p="">&lt;/</c-><c- f="">table</c-><c- p="">&gt;</c-></code></pre>
           </td>
-          <td>table の前にある 1 つの <code
-              id="creating-and-inserting-nodes:text-11"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
-            ノードで、「A&nbsp;B&nbsp;C」（A-空白-B-空白-C）を含む。（これは<a href="#foster-parent"
-              id="creating-and-inserting-nodes:foster-parent-3">フォスターペアレンティング</a>によって生じる。）
+          <td>テーブルの前に 1 つの <code
+              id="creating-and-inserting-nodes:text-10"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+            ノードがあり、"A&nbsp;B&nbsp;C"（A-空白-B-空白-C）を含む。（これは <a href="#foster-parent"
+              id="creating-and-inserting-nodes:foster-parent-3">フォスターペアレンティング</a>によって引き起こされる。）
           </td>
         </tr>
         <tr>
           <td>
             <pre><code class="html">A<c- p="">&lt;</c-><c- f="">table</c-><c- p="">&gt;&lt;</c-><c- f="">tr</c-><c- p="">&gt;</c->&nbsp;B<c- p="">&lt;/</c-><c- f="">tr</c-><c- p="">&gt;</c->&nbsp;<c- p="">&lt;/</c-><c- f="">em</c-><c- p="">&gt;</c->C<c- p="">&lt;/</c-><c- f="">table</c-><c- p="">&gt;</c-></code></pre>
           </td>
-          <td>table の前にある 1 つの <code
+          <td>テーブルの前に 1 つの <code
+              id="creating-and-inserting-nodes:text-11"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
+            ノードがあり、"A&nbsp;BC"（A-空白-B-C）を含み、さらにテーブル内（<code
+              id="creating-and-inserting-nodes:the-tbody-element-2"><a href="#the-tbody-element">tbody</a></code>
+            の子として）に 1 つの <code
               id="creating-and-inserting-nodes:text-12"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
-            ノードで、「A&nbsp;BC」（A-空白-B-C）を含み、table 内（<code
-              id="creating-and-inserting-nodes:the-tbody-element-2"><a href="#the-tbody-element">tbody</a></code>の子として）に
-            1 つの <code
-              id="creating-and-inserting-nodes:text-13"><a data-x-internal="text" href="https://dom.spec.whatwg.org/#interface-text">Text</a></code>
             ノードがあり、
-            1 つの空白文字を含む。（文字でないトークンによって非空白文字から分離された空白文字は、
-            それらの他のトークンが後で無視される場合でも、<a href="#foster-parent" id="creating-and-inserting-nodes:foster-parent-4">フォスター
+            単一の空白文字を含む。（非文字トークンによって非空白文字から分離された空白文字は、
+            それらの他のトークンがその後無視される場合であっても、<a href="#foster-parent" id="creating-and-inserting-nodes:foster-parent-4">フォスター
               ペアレンティング</a>の影響を受けない。）
           </td>
         </tr>
@@ -243358,71 +243360,78 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
   <hr>
 
   <div data-algorithm="">
-    <p>以下の手順が、コメントトークンの処理中にユーザーエージェントへ<dfn id="insert-a-comment">コメントを挿入する</dfn>よう要求する場合、任意の挿入位置
-      <var>insertionLocation</var>（既定値は null）を使用して、ユーザーエージェントは
-      次の手順を実行しなければならない：
+    <p>以下の手順で、コメントトークンの処理中にユーザーエージェントが<dfn id="insert-a-comment">コメントを挿入する</dfn>ことを要求され、
+      オプションの <a href="#insertion-location" id="creating-and-inserting-nodes:insertion-location-4">挿入位置</a>
+      <var>insertionLocation</var>
+      （デフォルトは null）がある場合、ユーザーエージェントは次の手順を実行しなければならない：
     </p>
 
     <ol>
       <li>
-        <p><var>data</var>を、処理されているコメントトークンで
-          与えられたデータとする。</p>
+        <p><var>data</var> を、処理中のコメントトークンで与えられたデータと
+          する。</p>
       </li>
       <li>
-        <p><var>insertionLocation</var>を、<var>insertionLocation</var>を与えた<a href="#adjusted-insertion-location"
-            id="creating-and-inserting-nodes:adjusted-insertion-location-3">調整済み挿入位置</a>に
-          設定する。
-        </p>
+        <p>（<var>targetParent</var>, <var>referenceChild</var>）を、<var>insertionLocation</var> を与えた <a
+            href="#adjusted-insertion-location" id="creating-and-inserting-nodes:adjusted-insertion-location-3">調整済み挿入
+            位置</a>とする。</p>
       </li>
       <li>
-        <p><var>comment</var>を、<var>insertionLocation</var>が存在するノードの<a id="creating-and-inserting-nodes:node-document-3"
+        <p><var>comment</var> を、<var>targetParent</var> の <a id="creating-and-inserting-nodes:node-document-3"
             href="https://dom.spec.whatwg.org/#concept-node-document" data-x-internal="node-document">ノード文書</a>
-          および <var>data</var>を与えて<a href="https://dom.spec.whatwg.org/#create-a-comment-node"
+          と
+          <var>data</var> を与えて <a href="https://dom.spec.whatwg.org/#create-a-comment-node"
             id="creating-and-inserting-nodes:create-a-comment-node" data-x-internal="create-a-comment-node">コメント
             ノードを作成した</a>結果とする。
         </p>
-
       </li>
       <li>
-        <p><var>comment</var>を<var>insertionLocation</var>に挿入する。</p>
+        <p><var>comment</var> を
+          <var>targetParent</var> 内の <var>referenceChild</var> の前に <a
+            href="https://dom.spec.whatwg.org/#concept-node-insert"
+            id="creating-and-inserting-nodes:concept-node-insert-3" data-x-internal="concept-node-insert">挿入する</a>。
+        </p>
       </li>
     </ol>
   </div>
 
   <div data-algorithm="">
-    <p>以下の手順が、処理命令トークンを処理している間に、オプションの挿入位置
-      <var>insertionLocation</var>（既定値は null）を用いて、ユーザーエージェントに<dfn id="insert-a-processing-instruction">処理
-        命令を挿入する</dfn>ことを要求する場合、ユーザーエージェントは次の手順を実行しなければならない：
+    <p>以下の手順で、処理命令トークンの処理中にユーザーエージェントが<dfn id="insert-a-processing-instruction">処理
+        命令を挿入する</dfn>ことを要求され、
+      オプションの <a href="#insertion-location" id="creating-and-inserting-nodes:insertion-location-5">挿入位置</a>
+      <var>insertionLocation</var>（デフォルトは null）がある場合、ユーザーエージェントは次の手順を実行しなければならない：
     </p>
 
     <ol>
       <li>
-        <p><var>target</var>を、処理されている処理命令トークンで
-          与えられたターゲットとする。</p>
+        <p><var>piTarget</var> を、処理中の処理命令トークンで与えられたターゲットと
+          する。</p>
       </li>
       <li>
-        <p><var>data</var>を、処理されている処理命令トークンで
-          与えられたデータとする。</p>
+        <p><var>data</var> を、処理中の処理命令トークンで与えられたデータと
+          する。</p>
       </li>
       <li>
-        <p><var>insertionLocation</var>を、<var>insertionLocation</var>を与えた<a href="#adjusted-insertion-location"
-            id="creating-and-inserting-nodes:adjusted-insertion-location-4">調整済み挿入位置</a>に
-          設定する。
-        </p>
+        <p>（<var>targetParent</var>, <var>referenceChild</var>）を、<var>insertionLocation</var> を与えた <a
+            href="#adjusted-insertion-location" id="creating-and-inserting-nodes:adjusted-insertion-location-4">調整済み挿入
+            位置</a>とする。</p>
       </li>
       <li>
-        <p><var>pi</var>を、<var>insertionLocation</var>が存在する
-          ノードの<a id="creating-and-inserting-nodes:node-document-4"
-            href="https://dom.spec.whatwg.org/#concept-node-document"
-            data-x-internal="node-document">ノード文書</a>、<var>target</var>、および
-          <var>data</var>を与えて<a href="https://dom.spec.whatwg.org/#create-a-processing-instruction-node"
+        <p><var>pi</var> を、
+          <var>targetParent</var> の <a id="creating-and-inserting-nodes:node-document-4"
+            href="https://dom.spec.whatwg.org/#concept-node-document" data-x-internal="node-document">ノード
+            文書</a>、<var>piTarget</var>、および <var>data</var> を与えて <a
+            href="https://dom.spec.whatwg.org/#create-a-processing-instruction-node"
             id="creating-and-inserting-nodes:create-a-processing-instruction-node"
             data-x-internal="create-a-processing-instruction-node">処理命令ノードを作成した</a>結果とする。
         </p>
-
       </li>
       <li>
-        <p><var>pi</var>を<var>insertionLocation</var>に挿入する。</p>
+        <p><var>pi</var> を
+          <var>targetParent</var> 内の <var>referenceChild</var> の前に <a
+            href="https://dom.spec.whatwg.org/#concept-node-insert"
+            id="creating-and-inserting-nodes:concept-node-insert-4" data-x-internal="concept-node-insert">挿入する</a>。
+        </p>
       </li>
     </ol>
   </div>
@@ -243572,190 +243581,189 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
       ユーザーエージェントはトークンを次のように処理しなければならない：</p>
 
     <dl class="switch">
-      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED (LF)、U+000C FORM FEED (FF)、
+      <dt>U+0009 CHARACTER
+        TABULATION、U+000A LINE FEED (LF)、U+000C FORM FEED (FF)、
         U+000D CARRIAGE RETURN (CR)、または U+0020 SPACE のいずれかである文字トークン</dt>
       <dd>
         <p>トークンを無視する。</p>
       </dd>
       <dt>コメントトークン</dt>
       <dd>
-        <p><code id="the-initial-insertion-mode:document-2"><a href="#document">Document</a></code> オブジェクトの最後の
-          子として<a href="#insert-a-comment" id="the-initial-insertion-mode:insert-a-comment">コメントを挿入する</a>。
+        <p>（<code id="the-initial-insertion-mode:document-2"><a href="#document">Document</a></code> オブジェクト、null）を与えて
+          <a href="#insert-a-comment" id="the-initial-insertion-mode:insert-a-comment">コメントを挿入する</a>。
         </p>
       </dd>
       <dt>処理命令トークン</dt>
       <dd>
-        <p><code id="the-initial-insertion-mode:document-3"><a href="#document">Document</a></code>
-          オブジェクトの最後の子として<a href="#insert-a-processing-instruction"
+        <p>（<code id="the-initial-insertion-mode:document-3"><a href="#document">Document</a></code> オブジェクト、
+          null）を与えて <a href="#insert-a-processing-instruction"
             id="the-initial-insertion-mode:insert-a-processing-instruction">処理命令を挿入する</a>。</p>
       </dd>
       <dt>DOCTYPE トークン</dt>
       <dd>
-        <p>DOCTYPE トークンの名前が「<code>html</code>」でないか、トークンの公開
+        <p>DOCTYPE トークンの名前が "<code>html</code>" でないか、トークンの公開
           識別子が欠落していないか、またはトークンのシステム識別子が欠落しておらず、かつ
-          「<code
-            id="the-initial-insertion-mode:about:legacy-compat"><a href="#about:legacy-compat">about:legacy-compat</a></code>」でもない場合、
-          <a href="#parse-errors" id="the-initial-insertion-mode:parse-errors">構文解析エラー</a>がある。
-        </p>
+          "<code
+            id="the-initial-insertion-mode:about:legacy-compat"><a href="#about:legacy-compat">about:legacy-compat</a></code>"
+          でもない場合、<a href="#parse-errors" id="the-initial-insertion-mode:parse-errors">構文解析エラー</a>である。</p>
 
         <p><var>doctype</var> を、<code id="the-initial-insertion-mode:document-4"><a href="#document">Document</a></code>
-          ノード、DOCTYPE トークンで与えられた名前（名前が存在しない場合は空文字列）、DOCTYPE トークンで与えられた公開識別子（公開識別子が存在しない場合は空文字列）、および DOCTYPE
-          トークンで与えられたシステム識別子（システム識別子が存在しない場合は空文字列）が与えられた
+          ノード、DOCTYPE トークンで与えられた名前（名前が欠落している場合は
+          空文字列）、DOCTYPE トークンで与えられた公開識別子（公開識別子が欠落している場合は
+          空文字列）、および DOCTYPE トークンで与えられたシステム識別子（システム識別子が欠落している場合は空文字列）を与えて
           <a href="https://dom.spec.whatwg.org/#create-a-doctype" id="the-initial-insertion-mode:create-a-doctype"
-            data-x-internal="create-a-doctype">doctype を作成する</a>
-          の結果とする。その後、<code id="the-initial-insertion-mode:document-5"><a href="#document">Document</a></code>
-          ノードに
+            data-x-internal="create-a-doctype">doctype を
+            作成した</a>結果とする。次に、<code id="the-initial-insertion-mode:document-5"><a href="#document">Document</a></code>
+          ノードが
           <code
             id="the-initial-insertion-mode:documenttype"><a data-x-internal="documenttype" href="https://dom.spec.whatwg.org/#interface-documenttype">DocumentType</a></code>
-          子も要素子もない場合、<var>doctype</var> を
-          <code id="the-initial-insertion-mode:document-6"><a href="#document">Document</a></code> ノードに追加する。
+          の子も要素の子も持たない場合、
+          <var>doctype</var> を <code id="the-initial-insertion-mode:document-6"><a href="#document">Document</a></code>
+          ノードに追加する。
         </p>
 
         <p class="note">これにより、<code
             id="the-initial-insertion-mode:documenttype-2"><a data-x-internal="documenttype" href="https://dom.spec.whatwg.org/#interface-documenttype">DocumentType</a></code>
           ノードが
+          <code id="the-initial-insertion-mode:document-7"><a href="#document">Document</a></code> オブジェクトの
           <code
             id="the-initial-insertion-mode:dom-document-doctype"><a data-x-internal="dom-document-doctype" href="https://dom.spec.whatwg.org/#dom-document-doctype">doctype</a></code>
-          属性の値として
-          <code id="the-initial-insertion-mode:document-7"><a href="#document">Document</a></code> オブジェクトから返されることも保証される。
+          属性の値として返されることも保証される。
         </p>
 
-        <p id="quirks-mode-doctypes">次に、ドキュメントが<em>not</em> <a href="#an-iframe-srcdoc-document"
+        <p id="quirks-mode-doctypes">次に、文書が <a href="#an-iframe-srcdoc-document"
             id="the-initial-insertion-mode:an-iframe-srcdoc-document"><code>iframe</code>
-            <code>srcdoc</code> ドキュメント</a>であり、かつ
-          <a href="#parser-cannot-change-the-mode-flag"
-            id="the-initial-insertion-mode:parser-cannot-change-the-mode-flag">parser cannot
-            change the mode flag</a> が false であり、DOCTYPE トークンが次の一覧にある条件のいずれかに一致する場合、
+            <code>srcdoc</code> 文書</a>で<em>なく</em>、<a href="#parser-cannot-change-the-mode-flag"
+            id="the-initial-insertion-mode:parser-cannot-change-the-mode-flag">パーサーが
+            モードフラグを変更できない</a>が false であり、かつ DOCTYPE トークンが次のリストの条件のいずれかに一致する場合、
           <code id="the-initial-insertion-mode:document-8"><a href="#document">Document</a></code> を <a
             id="the-initial-insertion-mode:quirks-mode" href="https://dom.spec.whatwg.org/#concept-document-quirks"
-            data-x-internal="quirks-mode">quirks mode</a> に設定する:
+            data-x-internal="quirks-mode">quirks モード</a>に設定する：
         </p>
 
         <ul class="brief">
-          <li> <i id="the-initial-insertion-mode:force-quirks-flag"><a href="#force-quirks-flag">強制互換
-                フラグ</a></i>が<i>オン</i>に設定されている。 </li>
-          <li> 名前が「<code>html</code>」でない。 </li>
-          <li> 公開識別子が「<code>-//W3O//DTD W3 HTML Strict 3.0//EN//</code>」に設定されている。 </li>
-          <li> 公開識別子が「<code>-/W3C/DTD HTML 4.0 Transitional/EN</code>」に設定されている。 </li>
-          <li> 公開識別子が「<code>HTML</code>」に設定されている。 </li>
-          <li> システム識別子が
-            「<code>http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd</code>」に設定されている。 </li>
-          <li> 公開識別子が「<code>+//Silmaril//dtd html Pro v0r11 19970101//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//AS//DTD HTML 3.0 asWedit + extensions//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//AdvaSoft Ltd//DTD HTML 3.0 asWedit + extensions//</code>」で始まる。
+          <li> <i id="the-initial-insertion-mode:force-quirks-flag"><a href="#force-quirks-flag">強制 quirks
+                フラグ</a></i>が <i>オン</i>に設定されている。 </li>
+          <li> 名前が "<code>html</code>" ではない。 </li>
+          <li> 公開識別子が次の値に設定されている： "<code>-//W3O//DTD W3 HTML Strict 3.0//EN//</code>" </li>
+          <li> 公開識別子が次の値に設定されている： "<code>-/W3C/DTD HTML 4.0 Transitional/EN</code>" </li>
+          <li> 公開識別子が次の値に設定されている： "<code>HTML</code>" </li>
+          <li> システム識別子が次の値に設定されている：
+            "<code>http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>+//Silmaril//dtd html Pro v0r11 19970101//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//AS//DTD HTML 3.0 asWedit + extensions//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//AdvaSoft Ltd//DTD HTML 3.0 asWedit + extensions//</code>"
           </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 2.0 Level 1//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 2.0 Level 2//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 2.0 Strict Level 1//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 2.0 Strict Level 2//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 2.0 Strict//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 2.0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 2.1E//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 3.0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 3.2 Final//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 3.2//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML 3//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Level 0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Level 1//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Level 2//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Level 3//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Strict Level 0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Strict Level 1//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Strict Level 2//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Strict Level 3//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML Strict//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//IETF//DTD HTML//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Metrius//DTD Metrius Presentational//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Microsoft//DTD Internet Explorer 2.0 HTML Strict//</code>」で始まる。
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 2.0 Level 1//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 2.0 Level 2//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 2.0 Strict Level 1//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 2.0 Strict Level 2//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 2.0 Strict//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 2.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 2.1E//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 3.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 3.2 Final//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 3.2//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML 3//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Level 0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Level 1//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Level 2//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Level 3//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Strict Level 0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Strict Level 1//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Strict Level 2//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Strict Level 3//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML Strict//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//IETF//DTD HTML//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Metrius//DTD Metrius Presentational//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Microsoft//DTD Internet Explorer 2.0 HTML Strict//</code>"
           </li>
-          <li> 公開識別子が「<code>-//Microsoft//DTD Internet Explorer 2.0 HTML//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Microsoft//DTD Internet Explorer 2.0 Tables//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Microsoft//DTD Internet Explorer 3.0 HTML Strict//</code>」で始まる。
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Microsoft//DTD Internet Explorer 2.0 HTML//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Microsoft//DTD Internet Explorer 2.0 Tables//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Microsoft//DTD Internet Explorer 3.0 HTML Strict//</code>"
           </li>
-          <li> 公開識別子が「<code>-//Microsoft//DTD Internet Explorer 3.0 HTML//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Microsoft//DTD Internet Explorer 3.0 Tables//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Netscape Comm. Corp.//DTD HTML//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Netscape Comm. Corp.//DTD Strict HTML//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//O'Reilly and Associates//DTD HTML 2.0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//O'Reilly and Associates//DTD HTML Extended 1.0//</code>」で始まる。
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Microsoft//DTD Internet Explorer 3.0 HTML//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Microsoft//DTD Internet Explorer 3.0 Tables//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Netscape Comm. Corp.//DTD HTML//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Netscape Comm. Corp.//DTD Strict HTML//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//O'Reilly and Associates//DTD HTML 2.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//O'Reilly and Associates//DTD HTML Extended 1.0//</code>"
           </li>
-          <li> 公開識別子が
-            「<code>-//O'Reilly and Associates//DTD HTML Extended Relaxed 1.0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//SQ//DTD HTML 2.0 HoTMetaL + extensions//</code>」で始まる。 </li>
-          <li> 公開識別子が
-            「<code>-//SoftQuad Software//DTD HoTMetaL PRO 6.0::19990601::extensions to HTML 4.0//</code>」で始まる。 </li>
-          <li> 公開識別子が
-            「<code>-//SoftQuad//DTD HoTMetaL PRO 4.0::19971010::extensions to HTML 4.0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Spyglass//DTD HTML 2.0 Extended//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Sun Microsystems Corp.//DTD HotJava HTML//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//Sun Microsystems Corp.//DTD HotJava Strict HTML//</code>」で始まる。
+          <li> 公開識別子が次の文字列で始まる：
+            "<code>-//O'Reilly and Associates//DTD HTML Extended Relaxed 1.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//SQ//DTD HTML 2.0 HoTMetaL + extensions//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる：
+            "<code>-//SoftQuad Software//DTD HoTMetaL PRO 6.0::19990601::extensions to HTML 4.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる：
+            "<code>-//SoftQuad//DTD HoTMetaL PRO 4.0::19971010::extensions to HTML 4.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Spyglass//DTD HTML 2.0 Extended//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Sun Microsystems Corp.//DTD HotJava HTML//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//Sun Microsystems Corp.//DTD HotJava Strict HTML//</code>"
           </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML 3 1995-03-24//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML 3.2 Draft//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML 3.2 Final//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML 3.2//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML 3.2S Draft//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML 4.0 Frameset//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML 4.0 Transitional//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML Experimental 19960712//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD HTML Experimental 970421//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD W3 HTML//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3O//DTD W3 HTML 3.0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//WebTechs//DTD Mozilla HTML 2.0//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//WebTechs//DTD Mozilla HTML//</code>」で始まる。 </li>
-          <li> システム識別子が欠落しているか空文字列であり、公開識別子が
-            「<code>-//W3C//DTD HTML 4.01 Frameset//</code>」で始まる。 </li>
-          <li> システム識別子が欠落しているか空文字列であり、公開識別子が
-            「<code>-//W3C//DTD HTML 4.01 Transitional//</code>」で始まる。 </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML 3 1995-03-24//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML 3.2 Draft//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML 3.2 Final//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML 3.2//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML 3.2S Draft//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML 4.0 Frameset//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML 4.0 Transitional//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML Experimental 19960712//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD HTML Experimental 970421//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD W3 HTML//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3O//DTD W3 HTML 3.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//WebTechs//DTD Mozilla HTML 2.0//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//WebTechs//DTD Mozilla HTML//</code>" </li>
+          <li> システム識別子が欠落しているか空文字列であり、かつ公開識別子が次の文字列で始まる：
+            "<code>-//W3C//DTD HTML 4.01 Frameset//</code>" </li>
+          <li> システム識別子が欠落しているか空文字列であり、かつ公開識別子が次の文字列で始まる：
+            "<code>-//W3C//DTD HTML 4.01 Transitional//</code>" </li>
         </ul>
 
-        <p>それ以外の場合、文書が<a href="#an-iframe-srcdoc-document"
+        <p>それ以外の場合、文書が <a href="#an-iframe-srcdoc-document"
             id="the-initial-insertion-mode:an-iframe-srcdoc-document-2"><code>iframe</code> <code>srcdoc</code>
             文書</a>で<em>なく</em>、<a href="#parser-cannot-change-the-mode-flag"
             id="the-initial-insertion-mode:parser-cannot-change-the-mode-flag-2">パーサーが
-            モードフラグを変更できない</a>が false であり、かつ DOCTYPE トークンが
-          次の一覧の条件のいずれかに一致する場合、<code
-            id="the-initial-insertion-mode:document-9"><a href="#document">Document</a></code>を<a
+            モードフラグを変更できない</a>が false であり、かつ DOCTYPE トークンが次のリストの条件のいずれかに一致する場合、
+          <code id="the-initial-insertion-mode:document-9"><a href="#document">Document</a></code> を <a
             id="the-initial-insertion-mode:limited-quirks-mode"
             href="https://dom.spec.whatwg.org/#concept-document-limited-quirks"
-            data-x-internal="limited-quirks-mode">限定互換モード</a>に設定する：</p>
-
-        <ul class="brief">
-          <li> 公開識別子が「<code>-//W3C//DTD XHTML 1.0 Frameset//</code>」で始まる。 </li>
-          <li> 公開識別子が「<code>-//W3C//DTD XHTML 1.0 Transitional//</code>」で始まる。 </li>
-          <li> システム識別子が欠落しておらず、かつ空文字列でもなく、公開識別子が
-            「<code>-//W3C//DTD HTML 4.01 Frameset//</code>」で始まる。 </li>
-          <li> システム識別子が欠落しておらず、かつ空文字列でもなく、公開識別子が
-            「<code>-//W3C//DTD HTML 4.01 Transitional//</code>」で始まる。 </li>
-        </ul>
-
-        <p>システム識別子および公開識別子の文字列は、上記の一覧で与えられた値と
-          <a id="the-initial-insertion-mode:ascii-case-insensitive"
-            href="https://infra.spec.whatwg.org/#ascii-case-insensitive" data-x-internal="ascii-case-insensitive">ASCII
-            大文字・小文字を区別しない</a>方法で比較しなければならない。値が
-          空文字列であるシステム識別子は、上記の条件の目的上、欠落しているとは見なされない。
+            data-x-internal="limited-quirks-mode">limited-quirks モード</a>に設定する：
         </p>
 
+        <ul class="brief">
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD XHTML 1.0 Frameset//</code>" </li>
+          <li> 公開識別子が次の文字列で始まる： "<code>-//W3C//DTD XHTML 1.0 Transitional//</code>" </li>
+          <li> システム識別子が欠落しておらず空文字列でもなく、かつ公開識別子が次の文字列で始まる：
+            "<code>-//W3C//DTD HTML 4.01 Frameset//</code>" </li>
+          <li> システム識別子が欠落しておらず空文字列でもなく、かつ公開識別子が次の文字列で始まる：
+            "<code>-//W3C//DTD HTML 4.01 Transitional//</code>" </li>
+        </ul>
+
+        <p>システム識別子と公開識別子の文字列は、上記のリストで与えられた値と <a id="the-initial-insertion-mode:ascii-case-insensitive"
+            href="https://infra.spec.whatwg.org/#ascii-case-insensitive" data-x-internal="ascii-case-insensitive">ASCII
+            大文字・小文字不区別</a>で比較しなければならない。値が空文字列であるシステム識別子は、
+          上記の条件の目的では欠落しているとは見なされない。</p>
+
         <p>次に、<a href="#insertion-mode" id="the-initial-insertion-mode:insertion-mode-2">挿入
-            モード</a>を「<a href="#the-before-html-insertion-mode"
-            id="the-initial-insertion-mode:the-before-html-insertion-mode">html の前</a>」に切り替える。</p>
+            モード</a>を "<a href="#the-before-html-insertion-mode"
+            id="the-initial-insertion-mode:the-before-html-insertion-mode">before html</a>" に切り替える。</p>
       </dd>
-      <dt>その他すべて</dt>
+      <dt>その他</dt>
       <dd>
-        <p>文書が<a href="#an-iframe-srcdoc-document"
+        <p>文書が <a href="#an-iframe-srcdoc-document"
             id="the-initial-insertion-mode:an-iframe-srcdoc-document-3"><code>iframe</code> <code>srcdoc</code>
-            文書</a>で<em>ない</em>場合、これは<a href="#parse-errors" id="the-initial-insertion-mode:parse-errors-2">構文解析
+            文書</a>で<em>ない</em>場合、これは <a href="#parse-errors" id="the-initial-insertion-mode:parse-errors-2">構文解析
             エラー</a>である。<a href="#parser-cannot-change-the-mode-flag"
             id="the-initial-insertion-mode:parser-cannot-change-the-mode-flag-3">パーサーがモードフラグを変更できない</a>
-          が false である場合、
-          <code id="the-initial-insertion-mode:document-10"><a href="#document">Document</a></code>を<a
+          が false の場合、
+          <code id="the-initial-insertion-mode:document-10"><a href="#document">Document</a></code> を <a
             id="the-initial-insertion-mode:quirks-mode-2" href="https://dom.spec.whatwg.org/#concept-document-quirks"
-            data-x-internal="quirks-mode">互換モード</a>に設定する。
+            data-x-internal="quirks-mode">quirks モード</a>に設定する。
         </p>
 
         <p>いずれの場合も、<a href="#insertion-mode" id="the-initial-insertion-mode:insertion-mode-3">挿入
-            モード</a>を「<a href="#the-before-html-insertion-mode"
-            id="the-initial-insertion-mode:the-before-html-insertion-mode-2">html の前</a>」に切り替え、次にトークンを再処理する。
+            モード</a>を "<a href="#the-before-html-insertion-mode"
+            id="the-initial-insertion-mode:the-before-html-insertion-mode-2">before html</a>" に切り替え、その後トークンを再処理する。
         </p>
       </dd>
     </dl>
@@ -243774,73 +243782,73 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
     <dl class="switch">
       <dt>DOCTYPE トークン</dt>
       <dd>
-        <p><a href="#parse-errors" id="the-before-html-insertion-mode:parse-errors">構文解析エラー</a>。
-          そのトークンを無視する。
+        <p><a href="#parse-errors" id="the-before-html-insertion-mode:parse-errors">構文解析エラー</a>。トークンを無視する。
         </p>
       </dd>
       <dt>コメントトークン</dt>
       <dd>
-        <p><code id="the-before-html-insertion-mode:document"><a
-          href="#document">Document</a></code> オブジェクトの最後の子として<a href="#insert-a-comment"
-            id="the-before-html-insertion-mode:insert-a-comment">コメントを挿入する</a>。</p>
+        <p>（<code id="the-before-html-insertion-mode:document"><a href="#document">Document</a></code> オブジェクト、null）を与えて
+          <a href="#insert-a-comment" id="the-before-html-insertion-mode:insert-a-comment">コメントを挿入する</a>。
+        </p>
       </dd>
       <dt>処理命令トークン</dt>
       <dd>
-        <p><code id="the-before-html-insertion-mode:document-2"><a
-            href="#document">Document</a></code> オブジェクトの最後の子として<a href="#insert-a-processing-instruction"
+        <p>（<code id="the-before-html-insertion-mode:document-2"><a href="#document">Document</a></code>
+          オブジェクト、
+          null）を与えて <a href="#insert-a-processing-instruction"
             id="the-before-html-insertion-mode:insert-a-processing-instruction">処理命令を挿入する</a>。</p>
       </dd>
-      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED（LF）、U+000C
-        FORM FEED（FF）、U+000D CARRIAGE RETURN（CR）、または U+0020 SPACE のいずれかである文字トークン</dt>
+      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED (LF)、U+000C
+        FORM FEED (FF)、U+000D CARRIAGE RETURN (CR)、または U+0020 SPACE のいずれかである文字トークン</dt>
       <dd>
-        <p>そのトークンを無視する。</p>
+        <p>トークンを無視する。</p>
       </dd>
-      <dt>タグ名が「html」である開始タグ</dt>
+      <dt>タグ名が "html" である開始タグ</dt>
       <dd>
         <p><a href="#create-an-element-for-the-token"
-            id="the-before-html-insertion-mode:create-an-element-for-the-token">トークン用の要素を作成する</a>を
+            id="the-before-html-insertion-mode:create-an-element-for-the-token">トークン用の要素を作成する</a>。これは
           <a id="the-before-html-insertion-mode:html-namespace-2" href="https://infra.spec.whatwg.org/#html-namespace"
-            data-x-internal="html-namespace-2">HTML 名前空間</a>内で実行し、
-          意図された親として
-          <code id="the-before-html-insertion-mode:document-3"><a href="#document">Document</a></code>を指定する。
-          その要素と
-          <code id="the-before-html-insertion-mode:document-4"><a href="#document">Document</a></code>を指定して、
-          <a href="#insert-an-element-at-the-adjusted-insertion-location"
+            data-x-internal="html-namespace-2">HTML 名前空間</a>内で行い、
+          <code id="the-before-html-insertion-mode:document-3"><a href="#document">Document</a></code> を意図された
+          親とする。その要素と（<code
+            id="the-before-html-insertion-mode:document-4"><a href="#document">Document</a></code>、null）を用いて、<a
+            href="#insert-an-element-at-the-adjusted-insertion-location"
             id="the-before-html-insertion-mode:insert-an-element-at-the-adjusted-insertion-location">調整済み挿入
-            位置に要素を挿入する</a>を、その最後の子（存在する場合）の後に実行する。
-          この要素を<a href="#stack-of-open-elements"
-            id="the-before-html-insertion-mode:stack-of-open-elements">開いている要素のスタック</a>に入れる。
+            位置に要素を挿入する</a>。この
+          要素を
+          <a href="#stack-of-open-elements" id="the-before-html-insertion-mode:stack-of-open-elements">開いている
+            要素のスタック</a>に入れる。
         </p>
 
-        <p><a href="#insertion-mode" id="the-before-html-insertion-mode:insertion-mode-2">挿入モード</a>を「<a
-            href="#the-before-head-insertion-mode"
-            id="the-before-html-insertion-mode:the-before-head-insertion-mode">head の前</a>」へ切り替える。</p>
+        <p><a href="#insertion-mode" id="the-before-html-insertion-mode:insertion-mode-2">挿入モード</a>を
+          "<a href="#the-before-head-insertion-mode"
+            id="the-before-html-insertion-mode:the-before-head-insertion-mode">head の
+            前</a>" に切り替える。</p>
       </dd>
-      <dt>タグ名が「head」、「body」、「html」、「br」のいずれかである終了タグ</dt>
+      <dt>タグ名が "head"、"body"、"html"、"br" のいずれかである終了タグ</dt>
       <dd>
-        <p>以下の「その他の場合」の項目で説明されるように動作する。</p>
+        <p>以下の「その他」の項目に記述されているとおりに処理する。</p>
       </dd>
       <dt>その他の終了タグ</dt>
       <dd>
-        <p><a href="#parse-errors" id="the-before-html-insertion-mode:parse-errors-2">構文解析エラー</a>。
-          そのトークンを無視する。
+        <p><a href="#parse-errors" id="the-before-html-insertion-mode:parse-errors-2">構文解析エラー</a>。トークンを無視する。
         </p>
       </dd>
-      <dt>その他の場合</dt>
+      <dt>その他</dt>
       <dd>
         <p><a id="the-before-html-insertion-mode:node-document"
-            href="https://dom.spec.whatwg.org/#concept-node-document" data-x-internal="node-document">ノード文書</a>が <code
-            id="the-before-html-insertion-mode:document-5"><a
-            href="#document">Document</a></code> オブジェクトである <code id="the-before-html-insertion-mode:the-html-element"><a
-            href="#the-html-element">html</a></code> 要素を作成する。それを <code id="the-before-html-insertion-mode:document-6"><a
-            href="#document">Document</a></code> オブジェクトへ付加する。この要素を<a href="#stack-of-open-elements"
-            id="the-before-html-insertion-mode:stack-of-open-elements-2">開いている
-            要素のスタック</a>へ入れる。</p>
+            href="https://dom.spec.whatwg.org/#concept-node-document" data-x-internal="node-document">ノード文書</a>が
+          <code id="the-before-html-insertion-mode:document-5"><a href="#document">Document</a></code> オブジェクトである <code
+            id="the-before-html-insertion-mode:the-html-element"><a href="#the-html-element">html</a></code> 要素を作成する。
+          それを <code id="the-before-html-insertion-mode:document-6"><a href="#document">Document</a></code> オブジェクトに追加する。
+          この要素を <a href="#stack-of-open-elements" id="the-before-html-insertion-mode:stack-of-open-elements-2">開いている
+            要素のスタック</a>に入れる。
+        </p>
 
-        <p><a href="#insertion-mode" id="the-before-html-insertion-mode:insertion-mode-3">挿入モード</a>を「<a
-            href="#the-before-head-insertion-mode"
-            id="the-before-html-insertion-mode:the-before-head-insertion-mode-2">head の前</a>」へ切り替え、
-          その後トークンを再処理する。</p>
+        <p><a href="#insertion-mode" id="the-before-html-insertion-mode:insertion-mode-3">挿入モード</a>を
+          "<a href="#the-before-head-insertion-mode"
+            id="the-before-html-insertion-mode:the-before-head-insertion-mode-2">head の
+            前</a>" に切り替え、その後トークンを再処理する。</p>
       </dd>
     </dl>
   </div>
@@ -244062,92 +244070,95 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
 
         <ol>
           <li>
-            <p><var>adjustedInsertionLocation</var> を<a href="#appropriate-place-for-inserting-a-node"
-                id="parsing-main-inhead:appropriate-place-for-inserting-a-node">ノードを挿入する
-                適切な位置</a>とする。</p>
+            <p><var>adjustedInsertionLocation</var> を <a href="#appropriate-place-for-inserting-a-node"
+                id="parsing-main-inhead:appropriate-place-for-inserting-a-node">ノードを挿入する適切な
+                位置</a>とする。</p>
           </li>
           <li>
             <p><a href="#create-an-element-for-the-token"
-                id="parsing-main-inhead:create-an-element-for-the-token">トークン用の要素を作成する</a>を
-              <a id="parsing-main-inhead:html-namespace-2" href="https://infra.spec.whatwg.org/#html-namespace"
-                data-x-internal="html-namespace-2">HTML 名前空間</a>内で実行し、
-              意図された親を <var>adjustedInsertionLocation</var> が存在するノードとする。
-            </p>
+                id="parsing-main-inhead:create-an-element-for-the-token">トークン用の要素を作成する</a>。これは <a
+                id="parsing-main-inhead:html-namespace-2" href="https://infra.spec.whatwg.org/#html-namespace"
+                data-x-internal="html-namespace-2">HTML 名前空間</a>内で行い、
+              意図された親は <var>adjustedInsertionLocation</var> が存在するノードとする。</p>
           </li>
           <li>
-            <p><a href="#scripting-mode" id="parsing-main-inhead:scripting-mode-3">スクリプティングモード</a>が<a
-                href="#scripting-mode-fragment" id="parsing-main-inhead:scripting-mode-fragment">断片</a>でない場合、
-              要素の<a href="#parser-document" id="parsing-main-inhead:parser-document">構文解析器文書</a>を <code
-                id="parsing-main-inhead:document"><a
-                href="#document">Document</a></code> に設定する。
+            <p><a href="#scripting-mode" id="parsing-main-inhead:scripting-mode-3">スクリプティングモード</a>が <a
+                href="#scripting-mode-fragment" id="parsing-main-inhead:scripting-mode-fragment">フラグメント</a>でない場合、
+              要素の
+              <a href="#parser-document" id="parsing-main-inhead:parser-document">パーサー文書</a>を <code
+                id="parsing-main-inhead:document"><a href="#document">Document</a></code> に設定する。
             </p>
 
-            <p class="note"><a href="#scripting-mode-fragment" id="parsing-main-inhead:scripting-mode-fragment-2">断片</a>
-              <a href="#scripting-mode" id="parsing-main-inhead:scripting-mode-4">スクリプティングモード</a>は、<a
-                href="#parser-inserted" id="parsing-main-inhead:parser-inserted">構文解析器によって挿入された</a>スクリプトを、
-              構文解析器によって挿入されていないものとして扱う。これにより、たとえば
-              <code id="parsing-main-inhead:dom-range-createcontextualfragment"><a
-                href="#dom-range-createcontextualfragment">createContextualFragment()</a></code> によって
-              作成された断片を適用するときにスクリプトを実行できる。
+            <p class="note"><a href="#scripting-mode-fragment"
+                id="parsing-main-inhead:scripting-mode-fragment-2">フラグメント</a>
+              <a href="#scripting-mode" id="parsing-main-inhead:scripting-mode-4">スクリプティングモード</a>では、<a
+                href="#parser-inserted" id="parsing-main-inhead:parser-inserted">パーサー挿入済み</a>スクリプトを、あたかも
+              パーサー挿入済みでないかのように扱う。これにより、たとえば
+              <code
+                id="parsing-main-inhead:dom-range-createcontextualfragment"><a href="#dom-range-createcontextualfragment">createContextualFragment()</a></code>
+              によって作成されたフラグメントを適用するときにスクリプトを実行できる。
             </p>
           </li>
           <li>
-            <p>要素の<a href="#script-force-async" id="parsing-main-inhead:script-force-async">強制 async</a>を false に設定する。
-            </p>
+            <p>要素の <a href="#script-force-async" id="parsing-main-inhead:script-force-async">強制
+                async</a>を false に設定する。</p>
 
-            <p class="note">これにより、スクリプトが外部スクリプトである場合、スクリプト内の
-              <code id="parsing-main-inhead:dom-document-write"><a
-                href="#dom-document-write">document.write()</a></code> 呼び出しが、他の多くの場合のように
-              文書を消去するのではなく、インラインで実行されることが保証される。また、終了タグが
-              検出されるまでスクリプトが実行されることも防止される。
-            </p>
+            <p class="note">これにより、スクリプトが外部スクリプトである場合、そのスクリプト内の <code
+                id="parsing-main-inhead:dom-document-write"><a href="#dom-document-write">document.write()</a></code>
+              呼び出しは、多くの他の場合のように文書を破棄するのではなく、インラインで実行される。
+              また、終了タグが検出されるまでスクリプトが実行されるのを防ぐ。</p>
           </li>
           <li>
-            <p>構文解析器の<a href="#scripting-mode" id="parsing-main-inhead:scripting-mode-5">スクリプティングモード</a>が<a
-                href="#scripting-mode-inert" id="parsing-main-inhead:scripting-mode-inert">不活性</a>である場合、<code
-                id="parsing-main-inhead:the-script-element"><a
-                href="#the-script-element">script</a></code> 要素の<a href="#already-started"
-                id="parsing-main-inhead:already-started">すでに開始済み</a>を true に設定する。
-              （<a href="#fragment-case" id="parsing-main-inhead:fragment-case">断片の場合</a>）
+            <p>パーサーの <a href="#scripting-mode" id="parsing-main-inhead:scripting-mode-5">スクリプティングモード</a>が
+              <a href="#scripting-mode-inert" id="parsing-main-inhead:scripting-mode-inert">不活性</a>である場合、
+              <code id="parsing-main-inhead:the-script-element"><a href="#the-script-element">script</a></code>
+              要素の
+              <a href="#already-started" id="parsing-main-inhead:already-started">開始済み</a>を true に設定する。（<a
+                href="#fragment-case" id="parsing-main-inhead:fragment-case">フラグメントの場合</a>）
             </p>
           </li>
           <li id="document-written-scripts-intervention">
-            <p>構文解析器が <code id="parsing-main-inhead:dom-document-write-2"><a
-                href="#dom-document-write">document.write()</a></code> または <code
-                id="parsing-main-inhead:dom-document-writeln"><a
-                href="#dom-document-writeln">document.writeln()</a></code> メソッドによって呼び出された場合、
-              任意で <code id="parsing-main-inhead:the-script-element-2"><a
-                href="#the-script-element">script</a></code> 要素の<a href="#already-started"
-                id="parsing-main-inhead:already-started-2">すでに開始済み</a>を true に設定する。
-              （たとえば、ユーザーエージェントはこの条項を使用して、低速なネットワーク状況下、
-              またはページの読み込みにすでに長時間かかっている場合に、<code id="parsing-main-inhead:dom-document-write-3"><a
-                href="#dom-document-write">document.write()</a></code> によって挿入された<a href="#concept-origin"
-                id="parsing-main-inhead:concept-origin">クロスオリジン</a>スクリプトの実行を防止できる。）
+            <p>パーサーが <code
+                id="parsing-main-inhead:dom-document-write-2"><a href="#dom-document-write">document.write()</a></code>
+              または <code
+                id="parsing-main-inhead:dom-document-writeln"><a href="#dom-document-writeln">document.writeln()</a></code>
+              メソッドを介して呼び出された場合、オプションとして
+              <code id="parsing-main-inhead:the-script-element-2"><a href="#the-script-element">script</a></code>
+              要素の <a href="#already-started" id="parsing-main-inhead:already-started-2">開始済み</a>を
+              true に設定する。（たとえば、ユーザー
+              エージェントはこの節を使用して、低速な
+              ネットワーク条件下、またはページの読み込みにすでに長時間かかっている場合に、<code
+                id="parsing-main-inhead:dom-document-write-3"><a href="#dom-document-write">document.write()</a></code>
+              を介して挿入された <a href="#concept-origin" id="parsing-main-inhead:concept-origin">クロスオリジン</a>
+              スクリプトの実行を防ぐことができる。）
             </p>
           </li>
           <li>
-            <p>新しく作成した要素を、<var>adjustedInsertionLocation</var> が与えられたときの<a href="#adjusted-insertion-location"
-                id="parsing-main-inhead:adjusted-insertion-location">調整済み挿入位置</a>へ挿入する。
+            <p>新しく作成された
+              要素と <var>adjustedInsertionLocation</var> を用いて、<a
+                href="#insert-an-element-at-the-adjusted-insertion-location"
+                id="parsing-main-inhead:insert-an-element-at-the-adjusted-insertion-location">調整済み挿入位置に
+                要素を挿入する</a>。</p>
+          </li>
+          <li>
+            <p>要素を <a href="#stack-of-open-elements"
+                id="parsing-main-inhead:stack-of-open-elements-3">開いている要素のスタック</a>にプッシュし、それを新しい
+              <a href="#current-node" id="parsing-main-inhead:current-node-3">現在ノード</a>とする。
             </p>
           </li>
           <li>
-            <p>要素を<a href="#stack-of-open-elements"
-                id="parsing-main-inhead:stack-of-open-elements-3">開いている要素のスタック</a>へプッシュし、
-              新しい<a href="#current-node" id="parsing-main-inhead:current-node-3">現在のノード</a>とする。
+            <p>トークナイザーを <a href="#script-data-state" id="parsing-main-inhead:script-data-state">スクリプトデータ状態</a>に切り替える。
             </p>
           </li>
           <li>
-            <p>トークナイザーを<a href="#script-data-state" id="parsing-main-inhead:script-data-state">スクリプトデータ状態</a>へ切り替える。</p>
-          </li>
-          <li>
-            <p><a href="#original-insertion-mode" id="parsing-main-inhead:original-insertion-mode">元の挿入モード</a>を現在の<a
-                href="#insertion-mode" id="parsing-main-inhead:insertion-mode-4">挿入
+            <p><a href="#original-insertion-mode" id="parsing-main-inhead:original-insertion-mode">元の
+                挿入モード</a>を現在の <a href="#insertion-mode" id="parsing-main-inhead:insertion-mode-4">挿入
                 モード</a>に設定する。</p>
 
           </li>
           <li>
-            <p><a href="#insertion-mode" id="parsing-main-inhead:insertion-mode-5">挿入モード</a>を「<a
-                href="#parsing-main-incdata" id="parsing-main-inhead:parsing-main-incdata">テキスト</a>」へ切り替える。</p>
+            <p><a href="#insertion-mode" id="parsing-main-inhead:insertion-mode-5">挿入モード</a>を "<a
+                href="#parsing-main-incdata" id="parsing-main-inhead:parsing-main-incdata">テキスト</a>" に切り替える。</p>
           </li>
         </ol>
       </dd>
@@ -244278,7 +244289,7 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
                     href="https://dom.spec.whatwg.org/#element-shadow-host" data-x-internal="shadow-host">シャドウ
                     ホスト</a>である場合、
                   <a href="#insert-an-element-at-the-adjusted-insertion-location"
-                    id="parsing-main-inhead:insert-an-element-at-the-adjusted-insertion-location">調整済み挿入位置に
+                    id="parsing-main-inhead:insert-an-element-at-the-adjusted-insertion-location-2">調整済み挿入位置に
                     要素を挿入する</a>を
                   <var>template</var>および<var>adjustedInsertionLocation</var>を用いて実行する。
                 </p>
@@ -244312,7 +244323,7 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
                     <ol>
                       <li>
                         <p><a href="#insert-an-element-at-the-adjusted-insertion-location"
-                            id="parsing-main-inhead:insert-an-element-at-the-adjusted-insertion-location-2">調整済み挿入位置に
+                            id="parsing-main-inhead:insert-an-element-at-the-adjusted-insertion-location-3">調整済み挿入位置に
                             要素を挿入する</a>を
                           <var>template</var>および<var>adjustedInsertionLocation</var>を用いて実行する。
                         </p>
@@ -244368,7 +244379,7 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
             <ol>
               <li>
                 <p><var>scope</var>を<a href="#adjusted-insertion-location"
-                    id="parsing-main-inhead:adjusted-insertion-location-2">調整済み挿入
+                    id="parsing-main-inhead:adjusted-insertion-location">調整済み挿入
                     位置</a>を含むノードとする。</p>
 
                 <p class="note"><a href="#fragment-case" id="parsing-main-inhead:fragment-case-2">フラグメント
@@ -244447,7 +244458,7 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
                   </li>
                   <li>
                     <p><a href="#insert-an-element-at-the-adjusted-insertion-location"
-                        id="parsing-main-inhead:insert-an-element-at-the-adjusted-insertion-location-3">調整済み挿入位置に
+                        id="parsing-main-inhead:insert-an-element-at-the-adjusted-insertion-location-4">調整済み挿入位置に
                         要素を挿入する</a>を
                       <var>template</var>を用いて実行する。
                     </p>
@@ -245858,11 +245869,10 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
       </dd>
       <dt>タグ名が「input」である開始タグ</dt>
       <dd>
-        <p>構文解析器が<a href="#html-fragment-parsing-algorithm"
-            id="parsing-main-inbody:html-fragment-parsing-algorithm">HTML 断片構文解析アルゴリズム</a>の
-          一部として作成され（<a href="#fragment-case" id="parsing-main-inbody:fragment-case-3">断片の場合</a>）、そのアルゴリズムへ渡された<a
-            href="#concept-frag-parse-context" id="parsing-main-inbody:concept-frag-parse-context">コンテキスト</a>要素が <code
-            id="parsing-main-inbody:the-select-element"><a href="#the-select-element">select</a></code> 要素である場合：</p>
+        <p>パーサーの <a href="#fragment-context-element"
+            id="parsing-main-inbody:fragment-context-element">フラグメントコンテキスト要素</a>が <code
+            id="parsing-main-inbody:the-select-element"><a href="#the-select-element">select</a></code> 要素である場合
+          （<a href="#fragment-case" id="parsing-main-inbody:fragment-case-3">フラグメントの場合</a>）：</p>
 
         <ol>
           <li>
@@ -246045,11 +246055,10 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
       </dd>
       <dt>タグ名が「select」である開始タグ</dt>
       <dd>
-        <p>構文解析器が<a href="#html-fragment-parsing-algorithm"
-            id="parsing-main-inbody:html-fragment-parsing-algorithm-2">HTML 断片構文解析アルゴリズム</a>の
-          一部として作成され（<a href="#fragment-case" id="parsing-main-inbody:fragment-case-4">断片の場合</a>）、そのアルゴリズムへ渡された<a
-            href="#concept-frag-parse-context" id="parsing-main-inbody:concept-frag-parse-context-2">コンテキスト</a>要素が <code
-            id="parsing-main-inbody:the-select-element-3"><a href="#the-select-element">select</a></code> 要素である場合：</p>
+        <p>パーサーの <a href="#fragment-context-element"
+            id="parsing-main-inbody:fragment-context-element-2">フラグメントコンテキスト要素</a>が <code
+            id="parsing-main-inbody:the-select-element-3"><a href="#the-select-element">select</a></code> 要素である場合
+          （<a href="#fragment-case" id="parsing-main-inbody:fragment-case-4">フラグメントの場合</a>）：</p>
 
         <ol>
           <li>
@@ -246520,44 +246529,85 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
             </ol>
           </li>
           <li>
-            <p><var>insertionLocation</var> を <var>commonAncestor</var> の最後の子の後（存在する場合）とする。</p>
+            <p>（<var>target</var>, <var>refNode</var>）を、（<var>commonAncestor</var>, null）が与えられた <a
+                href="#adjusted-insertion-location" id="parsing-main-inbody:adjusted-insertion-location">調整済み挿入
+                位置</a>とする。</p>
           </li>
           <li>
-            <p><var>adjustedInsertionLocation</var> を、<var>insertionLocation</var> が与えられた<a
-                href="#adjusted-insertion-location"
-                id="parsing-main-inbody:adjusted-insertion-location">調整済み挿入位置</a>とする。</p>
+            <p><var>lastNode</var> の <a id="parsing-main-inbody:parent"
+                href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>が null でない場合、
+              <var>lastNode</var> を <a href="https://dom.spec.whatwg.org/#concept-node-remove"
+                id="parsing-main-inbody:concept-node-remove" data-x-internal="concept-node-remove">削除する</a>。
+            </p>
           </li>
           <li>
-            <p><var>target</var> を、<var>adjustedInsertionLocation</var> が存在するノードとする。</p>
-          </li>
-          <li>
-            <p><var>refNode</var> を、<var>adjustedInsertionLocation</var>
-              が直前にあるノードとする。ただし、<var>adjustedInsertionLocation</var> が <var>target</var> の最後の子の後にある場合は null とする。</p>
-          </li>
-          <li>
-            <p><var>lastNode</var> の<a id="parsing-main-inbody:parent"
-                href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>が null でない場合、<a
-                href="https://dom.spec.whatwg.org/#concept-node-remove" id="parsing-main-inbody:concept-node-remove"
-                data-x-internal="concept-node-remove"><var>lastNode</var>を削除する</a>。</p>
-          </li>
-          <li>
-            <p>以下のすべてが真の場合:</p>
+            <p>次のすべてが true の場合：</p>
 
             <ul>
-              <li><var>lastNode</var> の<a id="parsing-main-inbody:parent-2"
-                  href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>が null である;</li>
-              <li><var>lastNode</var> が <var>target</var> の<a id="parsing-main-inbody:host-including-inclusive-ancestor"
+              <li><var>lastNode</var> の <a id="parsing-main-inbody:parent-2"
+                  href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>が null である；
+              </li>
+              <li><var>lastNode</var> が <var>target</var> の <a
+                  id="parsing-main-inbody:host-including-inclusive-ancestor"
                   href="https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor"
-                  data-x-internal="host-including-inclusive-ancestor">host-including inclusive ancestor</a>ではない;</li>
+                  data-x-internal="host-including-inclusive-ancestor">ホストを含む包括的祖先</a>ではない；
+              </li>
               <li><var>target</var> が <code id="parsing-main-inbody:document-2"><a href="#document">Document</a></code>
-                ノードではない、または要素子を持たない; および</li>
-              <li><var>refNode</var> が null、またはその<a id="parsing-main-inbody:parent-3"
+                ノードでないか、または要素の
+                子を持たない；かつ</li>
+              <li><var>refNode</var> が null であるか、その <a id="parsing-main-inbody:parent-3"
                   href="https://dom.spec.whatwg.org/#concept-tree-parent" data-x-internal="parent">親</a>が
-                <var>target</var> である;
+                <var>target</var> である、
               </li>
             </ul>
 
-            <p>その場合:</p>
+            <p>その場合：</p>
+
+            <ol>
+              <li>
+                <p><a id="parsing-main-inbody:assert" href="https://infra.spec.whatwg.org/#assert"
+                    data-x-internal="assert">表明</a>：<var>lastNode</var>、<var>target</var>、<var>refNode</var>、および « »
+                  が与えられた <a id="parsing-main-inbody:ensure-pre-insert-validity"
+                    href="https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity"
+                    data-x-internal="ensure-pre-insert-validity">挿入前妥当性の確保</a>は例外をスローしない。
+                </p>
+              </li>
+              <li>
+                <p><var>lastNode</var> を
+                  <var>target</var> 内の <var>refNode</var> の前に <a href="https://dom.spec.whatwg.org/#concept-node-insert"
+                    id="parsing-main-inbody:concept-node-insert" data-x-internal="concept-node-insert">挿入する</a>。
+                </p>
+              </li>
+            </ol>
+          </li>
+          <li>
+            <p><var>formattingElement</var> の作成元となったトークン用の <a href="#create-an-element-for-the-token"
+                id="parsing-main-inbody:create-an-element-for-the-token-2">要素を作成する</a>。
+              これは <a id="parsing-main-inbody:html-namespace-2-2" href="https://infra.spec.whatwg.org/#html-namespace"
+                data-x-internal="html-namespace-2">HTML 名前空間</a>内で行い、<var>furthestBlock</var> を意図された
+              親とする。
+            </p>
+          </li>
+          <li>
+            <p><var>furthestBlock</var> のすべての子ノードを取得し、直前の手順で作成された
+              要素に追加する。</p>
+          </li>
+          <li>
+            <p>その新しい要素を <var>furthestBlock</var> に追加する。</p>
+          </li>
+          <li>
+            <p><var>formattingElement</var> を <a href="#list-of-active-formatting-elements"
+                id="parsing-main-inbody:list-of-active-formatting-elements-13">アクティブな書式設定
+                要素のリスト</a>から削除し、新しい要素を <a href="#list-of-active-formatting-elements"
+                id="parsing-main-inbody:list-of-active-formatting-elements-14">アクティブな書式設定
+                要素のリスト</a>内の前述のブックマークの位置に挿入する。</p>
+          </li>
+          <li>
+            <p><var>formattingElement</var> を <a href="#stack-of-open-elements"
+                id="parsing-main-inbody:stack-of-open-elements-88">開いている
+                要素のスタック</a>から削除し、新しい要素を <a href="#stack-of-open-elements"
+                id="parsing-main-inbody:stack-of-open-elements-89">開いている要素のスタック</a>内の、
+              そのスタックにおける <var>furthestBlock</var> の位置の直下に挿入する。</p>
           </li>
         </ol>
       </li>
@@ -247943,62 +247993,63 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
     </p>
 
     <dl class="switch">
-      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED（LF）、U+000C
-        FORM FEED（FF）、U+000D CARRIAGE RETURN（CR）、または U+0020 SPACE のいずれかである文字トークン</dt>
+      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED (LF)、U+000C
+        FORM FEED (FF)、U+000D CARRIAGE RETURN (CR)、または U+0020 SPACE のいずれかである文字トークン</dt>
       <dd>
-        <p>「<a href="#parsing-main-inbody" id="parsing-main-afterbody:parsing-main-inbody">body
-            内</a>」<a href="#insertion-mode" id="parsing-main-afterbody:insertion-mode-2">挿入モード</a>の<a
-            href="#using-the-rules-for" id="parsing-main-afterbody:using-the-rules-for">規則を使用して</a>トークンを処理する。</p>
+        <p>トークンを "<a href="#parsing-main-inbody" id="parsing-main-afterbody:parsing-main-inbody">body
+            内</a>" <a href="#insertion-mode" id="parsing-main-afterbody:insertion-mode-2">挿入モード</a>の<a
+            href="#using-the-rules-for" id="parsing-main-afterbody:using-the-rules-for">規則を
+            使用して</a>処理する。</p>
       </dd>
       <dt>コメントトークン</dt>
       <dd>
-        <p><a href="#stack-of-open-elements" id="parsing-main-afterbody:stack-of-open-elements">開いている要素のスタック</a>内の最初の要素
-          （<code id="parsing-main-afterbody:the-html-element"><a
-          href="#the-html-element">html</a></code> 要素）の最後の子として<a href="#insert-a-comment"
-            id="parsing-main-afterbody:insert-a-comment">コメントを挿入する</a>。</p>
+        <p>（<a href="#stack-of-open-elements" id="parsing-main-afterbody:stack-of-open-elements">開いている
+            要素のスタック</a>内の最初の要素（<code
+            id="parsing-main-afterbody:the-html-element"><a href="#the-html-element">html</a></code> 要素）、null）を与えて <a
+            href="#insert-a-comment" id="parsing-main-afterbody:insert-a-comment">コメントを挿入する</a>。
+        </p>
       </dd>
       <dt>処理命令トークン</dt>
       <dd>
-        <p><a href="#stack-of-open-elements"
-            id="parsing-main-afterbody:stack-of-open-elements-2">開いている要素のスタック</a>内の最初の要素
-          （<code id="parsing-main-afterbody:the-html-element-2"><a
-            href="#the-html-element">html</a></code> 要素）の最後の子として<a href="#insert-a-processing-instruction"
-            id="parsing-main-afterbody:insert-a-processing-instruction">処理命令を挿入する</a>。
+        <p>（<a href="#stack-of-open-elements" id="parsing-main-afterbody:stack-of-open-elements-2">開いている
+            要素のスタック</a>内の最初の要素（<code
+            id="parsing-main-afterbody:the-html-element-2"><a href="#the-html-element">html</a></code> 要素）、null）を与えて <a
+            href="#insert-a-processing-instruction" id="parsing-main-afterbody:insert-a-processing-instruction">処理
+            命令を挿入する</a>。
         </p>
       </dd>
       <dt>DOCTYPE トークン</dt>
       <dd>
-        <p><a href="#parse-errors" id="parsing-main-afterbody:parse-errors">構文解析エラー</a>。
-          そのトークンを無視する。</p>
+        <p><a href="#parse-errors" id="parsing-main-afterbody:parse-errors">構文解析エラー</a>。トークンを無視する。</p>
       </dd>
-      <dt>タグ名が「html」である開始タグ</dt>
+      <dt>タグ名が "html" である開始タグ</dt>
       <dd>
-        <p>「<a href="#parsing-main-inbody" id="parsing-main-afterbody:parsing-main-inbody-2">body
-            内</a>」<a href="#insertion-mode" id="parsing-main-afterbody:insertion-mode-3">挿入モード</a>の<a
-            href="#using-the-rules-for" id="parsing-main-afterbody:using-the-rules-for-2">規則を使用して</a>トークンを処理する。</p>
+        <p>トークンを "<a href="#parsing-main-inbody" id="parsing-main-afterbody:parsing-main-inbody-2">body
+            内</a>" <a href="#insertion-mode" id="parsing-main-afterbody:insertion-mode-3">挿入モード</a>の<a
+            href="#using-the-rules-for" id="parsing-main-afterbody:using-the-rules-for-2">規則を
+            使用して</a>処理する。</p>
       </dd>
-      <dt>タグ名が「html」である終了タグ</dt>
+      <dt>タグ名が "html" である終了タグ</dt>
       <dd>
-        <p>構文解析器が<a href="#html-fragment-parsing-algorithm"
-            id="parsing-main-afterbody:html-fragment-parsing-algorithm">HTML 断片構文解析アルゴリズム</a>の
-          一部として作成された場合、これは<a href="#parse-errors"
-            id="parsing-main-afterbody:parse-errors-2">構文解析エラー</a>である。そのトークンを無視する。（<a href="#fragment-case"
-            id="parsing-main-afterbody:fragment-case">断片の場合</a>）</p>
+        <p>パーサーの <a href="#fragment-context-element"
+            id="parsing-main-afterbody:fragment-context-element">フラグメントコンテキスト要素</a>が null でない場合、これは <a
+            href="#parse-errors" id="parsing-main-afterbody:parse-errors-2">構文解析
+            エラー</a>である。トークンを無視する。（<a href="#fragment-case" id="parsing-main-afterbody:fragment-case">フラグメントの
+            場合</a>）</p>
 
         <p>それ以外の場合、<a href="#insertion-mode" id="parsing-main-afterbody:insertion-mode-4">挿入
-            モード</a>を「<a href="#the-after-after-body-insertion-mode"
-            id="parsing-main-afterbody:the-after-after-body-insertion-mode">body の後の後</a>」へ切り替える。</p>
+            モード</a>を "<a href="#the-after-after-body-insertion-mode"
+            id="parsing-main-afterbody:the-after-after-body-insertion-mode">body の後の後</a>" に切り替える。</p>
       </dd>
       <dt>ファイル終端トークン</dt>
       <dd>
         <p><a href="#stop-parsing" id="parsing-main-afterbody:stop-parsing">構文解析を停止する</a>。</p>
       </dd>
-      <dt>その他の場合</dt>
+      <dt>その他</dt>
       <dd>
         <p><a href="#parse-errors" id="parsing-main-afterbody:parse-errors-3">構文解析エラー</a>。<a href="#insertion-mode"
-            id="parsing-main-afterbody:insertion-mode-5">挿入モード</a>を「<a href="#parsing-main-inbody"
-            id="parsing-main-afterbody:parsing-main-inbody-3">body 内</a>」へ切り替え、
-          そのトークンを再処理する。</p>
+            id="parsing-main-afterbody:insertion-mode-5">挿入モード</a>を "<a href="#parsing-main-inbody"
+            id="parsing-main-afterbody:parsing-main-inbody-3">body 内</a>" に切り替え、トークンを再処理する。</p>
       </dd>
     </dl>
   </div>
@@ -248056,15 +248107,13 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
             href="#stack-of-open-elements" id="parsing-main-inframeset:stack-of-open-elements">開いている要素のスタック</a>からポップする。
         </p>
 
-        <p>構文解析器が<a href="#html-fragment-parsing-algorithm"
-            id="parsing-main-inframeset:html-fragment-parsing-algorithm">HTML 断片構文解析アルゴリズム</a>の
-          一部として作成されておらず（<a href="#fragment-case" id="parsing-main-inframeset:fragment-case-2">断片の場合</a>）、かつ<a
-            href="#current-node" id="parsing-main-inframeset:current-node-3">現在のノード</a>が
-          <code id="parsing-main-inframeset:frameset"><a href="#frameset">frameset</a></code> 要素でなくなった
-          場合、<a href="#insertion-mode" id="parsing-main-inframeset:insertion-mode-3">挿入モード</a>を「<a
-            href="#parsing-main-afterframeset" id="parsing-main-inframeset:parsing-main-afterframeset">frameset
-            の後</a>」へ切り替える。
-        </p>
+        <p>パーサーの <a href="#fragment-context-element"
+            id="parsing-main-inframeset:fragment-context-element">フラグメントコンテキスト要素</a>が null であり、かつ <a
+            href="#current-node" id="parsing-main-inframeset:current-node-3">現在
+            ノード</a>がもはや <code id="parsing-main-inframeset:frameset"><a href="#frameset">frameset</a></code>
+          要素でない場合、<a href="#insertion-mode" id="parsing-main-inframeset:insertion-mode-3">挿入
+            モード</a>を "<a href="#parsing-main-afterframeset"
+            id="parsing-main-inframeset:parsing-main-afterframeset">frameset の後</a>" に切り替える。</p>
       </dd>
       <dt>タグ名が「frame」である開始タグ</dt>
       <dd>
@@ -248094,7 +248143,7 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
         <p class="note"><a href="#current-node" id="parsing-main-inframeset:current-node-6">現在のノード</a>がルートの
           <code id="parsing-main-inframeset:the-html-element-3"><a
           href="#the-html-element">html</a></code> 要素になり得るのは、
-          <a href="#fragment-case" id="parsing-main-inframeset:fragment-case-3">断片の場合</a>だけである。
+          <a href="#fragment-case" id="parsing-main-inframeset:fragment-case-2">断片の場合</a>だけである。
         </p>
 
         <p><a href="#stop-parsing" id="parsing-main-inframeset:stop-parsing">構文解析を停止する</a>。</p>
@@ -248183,37 +248232,38 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
     <dl class="switch">
       <dt>コメントトークン</dt>
       <dd>
-        <p><code id="the-after-after-body-insertion-mode:document"><a
-            href="#document">Document</a></code> オブジェクトの最後の子として<a href="#insert-a-comment"
+        <p>（<code id="the-after-after-body-insertion-mode:document"><a href="#document">Document</a></code>
+          オブジェクト、null）を与えて <a href="#insert-a-comment"
             id="the-after-after-body-insertion-mode:insert-a-comment">コメントを挿入する</a>。</p>
       </dd>
       <dt>処理命令トークン</dt>
       <dd>
-        <p><code id="the-after-after-body-insertion-mode:document-2"><a
-            href="#document">Document</a></code> オブジェクトの最後の子として<a href="#insert-a-processing-instruction"
+        <p>（<code id="the-after-after-body-insertion-mode:document-2"><a href="#document">Document</a></code>
+          オブジェクト、
+          null）を与えて <a href="#insert-a-processing-instruction"
             id="the-after-after-body-insertion-mode:insert-a-processing-instruction">処理命令を挿入する</a>。</p>
       </dd>
       <dt>DOCTYPE トークン</dt>
-      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED（LF）、U+000C
-        FORM FEED（FF）、U+000D CARRIAGE RETURN（CR）、または U+0020 SPACE のいずれかである文字トークン</dt>
-      <dt>タグ名が「html」である開始タグ</dt>
+      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED (LF)、U+000C
+        FORM FEED (FF)、U+000D CARRIAGE RETURN (CR)、または U+0020 SPACE のいずれかである文字トークン</dt>
+      <dt>タグ名が "html" である開始タグ</dt>
       <dd>
-        <p>「<a href="#parsing-main-inbody" id="the-after-after-body-insertion-mode:parsing-main-inbody">body 内</a>」<a
-            href="#insertion-mode" id="the-after-after-body-insertion-mode:insertion-mode-2">挿入モード</a>の<a
-            href="#using-the-rules-for"
-            id="the-after-after-body-insertion-mode:using-the-rules-for">規則を使用して</a>トークンを処理する。</p>
+        <p>トークンを "<a href="#parsing-main-inbody" id="the-after-after-body-insertion-mode:parsing-main-inbody">body
+            内</a>" <a href="#insertion-mode" id="the-after-after-body-insertion-mode:insertion-mode-2">挿入モード</a>の<a
+            href="#using-the-rules-for" id="the-after-after-body-insertion-mode:using-the-rules-for">規則を使用して</a>処理する。
+        </p>
       </dd>
       <dt>ファイル終端トークン</dt>
       <dd>
         <p><a href="#stop-parsing" id="the-after-after-body-insertion-mode:stop-parsing">構文解析を停止する</a>。</p>
       </dd>
-      <dt>その他の場合</dt>
+      <dt>その他</dt>
       <dd>
         <p><a href="#parse-errors" id="the-after-after-body-insertion-mode:parse-errors">構文解析エラー</a>。<a
-            href="#insertion-mode" id="the-after-after-body-insertion-mode:insertion-mode-3">挿入モード</a>を
-          「<a href="#parsing-main-inbody" id="the-after-after-body-insertion-mode:parsing-main-inbody-2">body
-            内</a>」へ切り替え、
-          そのトークンを再処理する。</p>
+            href="#insertion-mode" id="the-after-after-body-insertion-mode:insertion-mode-3">挿入モード</a>を "<a
+            href="#parsing-main-inbody" id="the-after-after-body-insertion-mode:parsing-main-inbody-2">body 内</a>"
+          に切り替え、
+          トークンを再処理する。</p>
       </dd>
     </dl>
   </div>
@@ -248232,41 +248282,45 @@ document<c- p="">.</c->body<c- p="">.</c->appendChild<c- p="">(</c->text<c- p=""
     <dl class="switch">
       <dt>コメントトークン</dt>
       <dd>
-        <p><code id="the-after-after-frameset-insertion-mode:document"><a
-            href="#document">Document</a></code> オブジェクトの最後の子として<a href="#insert-a-comment"
-            id="the-after-after-frameset-insertion-mode:insert-a-comment">コメントを挿入する</a>。</p>
+        <p>（<code id="the-after-after-frameset-insertion-mode:document"><a href="#document">Document</a></code>
+          オブジェクト、null）を与えて <a href="#insert-a-comment"
+            id="the-after-after-frameset-insertion-mode:insert-a-comment">コメントを
+            挿入する</a>。
+        </p>
       </dd>
       <dt>処理命令トークン</dt>
       <dd>
-        <p><code id="the-after-after-frameset-insertion-mode:document-2"><a
-            href="#document">Document</a></code> オブジェクトの最後の子として<a href="#insert-a-processing-instruction"
-            id="the-after-after-frameset-insertion-mode:insert-a-processing-instruction">処理命令を挿入する</a>。</p>
+        <p>（<code id="the-after-after-frameset-insertion-mode:document-2"><a href="#document">Document</a></code>
+          オブジェクト、
+          null）を与えて <a href="#insert-a-processing-instruction"
+            id="the-after-after-frameset-insertion-mode:insert-a-processing-instruction">処理
+            命令を挿入する</a>。</p>
       </dd>
       <dt>DOCTYPE トークン</dt>
-      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED（LF）、U+000C
-        FORM FEED（FF）、U+000D CARRIAGE RETURN（CR）、または U+0020 SPACE のいずれかである文字トークン</dt>
-      <dt>タグ名が「html」である開始タグ</dt>
+      <dt>U+0009 CHARACTER TABULATION、U+000A LINE FEED (LF)、U+000C
+        FORM FEED (FF)、U+000D CARRIAGE RETURN (CR)、または U+0020 SPACE のいずれかである文字トークン</dt>
+      <dt>タグ名が "html" である開始タグ</dt>
       <dd>
-        <p>「<a href="#parsing-main-inbody" id="the-after-after-frameset-insertion-mode:parsing-main-inbody">body
-            内</a>」<a href="#insertion-mode" id="the-after-after-frameset-insertion-mode:insertion-mode-2">挿入モード</a>の<a
+        <p>トークンを "<a href="#parsing-main-inbody" id="the-after-after-frameset-insertion-mode:parsing-main-inbody">body
+            内</a>" <a href="#insertion-mode" id="the-after-after-frameset-insertion-mode:insertion-mode-2">挿入モード</a>の<a
             href="#using-the-rules-for"
-            id="the-after-after-frameset-insertion-mode:using-the-rules-for">規則を使用して</a>トークンを処理する。</p>
+            id="the-after-after-frameset-insertion-mode:using-the-rules-for">規則を使用して</a>処理する。</p>
       </dd>
       <dt>ファイル終端トークン</dt>
       <dd>
         <p><a href="#stop-parsing" id="the-after-after-frameset-insertion-mode:stop-parsing">構文解析を停止する</a>。</p>
       </dd>
-      <dt>タグ名が「noframes」である開始タグ</dt>
+      <dt>タグ名が "noframes" である開始タグ</dt>
       <dd>
-        <p>「<a href="#parsing-main-inhead" id="the-after-after-frameset-insertion-mode:parsing-main-inhead">head
-            内</a>」<a href="#insertion-mode" id="the-after-after-frameset-insertion-mode:insertion-mode-3">挿入モード</a>の<a
+        <p>トークンを "<a href="#parsing-main-inhead" id="the-after-after-frameset-insertion-mode:parsing-main-inhead">head
+            内</a>" <a href="#insertion-mode" id="the-after-after-frameset-insertion-mode:insertion-mode-3">挿入モード</a>の<a
             href="#using-the-rules-for"
-            id="the-after-after-frameset-insertion-mode:using-the-rules-for-2">規則を使用して</a>トークンを処理する。</p>
+            id="the-after-after-frameset-insertion-mode:using-the-rules-for-2">規則を使用して</a>処理する。</p>
       </dd>
-      <dt>その他の場合</dt>
+      <dt>その他</dt>
       <dd>
         <p><a href="#parse-errors" id="the-after-after-frameset-insertion-mode:parse-errors">構文解析エラー</a>。
-          そのトークンを無視する。</p>
+          トークンを無視する。</p>
       </dd>
     </dl>
   </div>
@@ -251349,13 +251403,15 @@ console<c- p="">.</c->assert<c- p="">(</c->container<c- p="">.</c->firstChild <c
         href="https://dom.spec.whatwg.org/#interface-documentfragment">DocumentFragment</a></code> を返す。
     </p>
 
-    <p class="note"><a href="#html-parser" id="parsing-html-fragments:html-parser">HTML 構文解析器</a>の節にあるアルゴリズム内で
-      <dfn id="fragment-case">断片の場合</dfn>と記された部分は、このアルゴリズムのために構文解析器が
-      作成された場合にのみ発生する部分である。アルゴリズムには情報提供のみを目的としてそのような
-      表示が付けられており、規範的な効力はない。構文解析器がこのアルゴリズムを処理する目的で
-      作成されたものでない場合でも、<a href="#fragment-case" id="parsing-html-fragments:fragment-case">断片の場合</a>として記述された条件が発生し得るなら、
-      それは仕様の誤りである。
-    </p>
+    <p class="note"><a href="#html-parser" id="parsing-html-fragments:html-parser">HTML
+        パーサー</a>節のアルゴリズム内で <dfn id="fragment-case">フラグメントの場合</dfn> と記された部分は、パーサーの <a href="#fragment-context-element"
+        id="parsing-html-fragments:fragment-context-element">フラグメントコンテキスト
+        要素</a>が null でない場合にのみ発生する部分である。アルゴリズムには、
+      情報提供のみを目的としてこのような注記が付けられており、このような注記に規範的な効力はない。<a href="#fragment-case"
+        id="parsing-html-fragments:fragment-case">フラグメントの場合</a>として
+      記述された条件が、パーサーの <a href="#fragment-context-element"
+        id="parsing-html-fragments:fragment-context-element-2">フラグメントコンテキスト
+        要素</a>が null である場合でも発生する可能性があるなら、それは仕様の誤りである。</p>
 
     <ol>
       <li>
@@ -251419,6 +251475,12 @@ console<c- p="">.</c->assert<c- p="">(</c->container<c- p="">.</c->firstChild <c
         </p>
       </li>
       <li>
+        <p>パーサーの <a href="#fragment-context-element"
+            id="parsing-html-fragments:fragment-context-element-3">フラグメントコンテキスト要素</a>を <var
+            id="parsing-html-fragments:concept-frag-parse-context-3"><a
+              href="#concept-frag-parse-context">context</a></var> に設定する。</p>
+      </li>
+      <li>
         <p><var>contextDocument</var> の<a href="#concept-n-script"
             id="parsing-html-fragments:concept-n-script">スクリプト処理が無効</a>である場合、
           <var>scriptingMode</var> を<a href="#scripting-mode-disabled"
@@ -251431,7 +251493,7 @@ console<c- p="">.</c->assert<c- p="">(</c->container<c- p="">.</c->firstChild <c
         </p>
       </li>
       <li>
-        <p><var id="parsing-html-fragments:concept-frag-parse-context-3"><a
+        <p><var id="parsing-html-fragments:concept-frag-parse-context-4"><a
               href="#concept-frag-parse-context">context</a></var> に応じて、<a href="#html-parser"
             id="parsing-html-fragments:html-parser-3">HTML 構文解析器</a>の
           <a href="#tokenization" id="parsing-html-fragments:tokenization">トークン化</a>段階の状態を次のように設定する：
@@ -251513,7 +251575,7 @@ console<c- p="">.</c->assert<c- p="">(</c->container<c- p="">.</c->firstChild <c
         </p>
       </li>
       <li>
-        <p><var id="parsing-html-fragments:concept-frag-parse-context-4"><a
+        <p><var id="parsing-html-fragments:concept-frag-parse-context-5"><a
               href="#concept-frag-parse-context">context</a></var> が <code
             id="parsing-html-fragments:the-template-element"><a
             href="#the-template-element">template</a></code> 要素である場合、「<a href="#parsing-main-intemplate"
@@ -251526,13 +251588,13 @@ console<c- p="">.</c->assert<c- p="">(</c->container<c- p="">.</c->firstChild <c
         </p>
       </li>
       <li>
-        <p>名前が <var id="parsing-html-fragments:concept-frag-parse-context-5"><a
+        <p>名前が <var id="parsing-html-fragments:concept-frag-parse-context-6"><a
               href="#concept-frag-parse-context">context</a></var> のローカル名であり、属性が
-          <var id="parsing-html-fragments:concept-frag-parse-context-6"><a
+          <var id="parsing-html-fragments:concept-frag-parse-context-7"><a
               href="#concept-frag-parse-context">context</a></var> の属性である開始タグトークンを作成する。
         </p>
 
-        <p>この開始タグトークンを <var id="parsing-html-fragments:concept-frag-parse-context-7"><a
+        <p>この開始タグトークンを <var id="parsing-html-fragments:concept-frag-parse-context-8"><a
               href="#concept-frag-parse-context">context</a></var> の開始タグトークンとする。たとえば、
           それが<a href="#html-integration-point" id="parsing-html-fragments:html-integration-point">HTML 統合点</a>であるかどうかを
           判定する目的で使用する。</p>
@@ -251542,8 +251604,8 @@ console<c- p="">.</c->assert<c- p="">(</c->container<c- p="">.</c->firstChild <c
             id="parsing-html-fragments:reset-the-insertion-mode-appropriately">挿入モードを
             適切にリセットする</a>。</p>
 
-        <p class="note">構文解析器は、このアルゴリズムの一部として <var id="parsing-html-fragments:concept-frag-parse-context-8"><a
-              href="#concept-frag-parse-context">context</a></var> 要素を参照する。</p>
+        <p class="note">パーサーはそのアルゴリズムの一部として、自身の <a href="#fragment-context-element"
+            id="parsing-html-fragments:fragment-context-element-4">フラグメントコンテキスト要素</a>を参照する。</p>
       </li>
       <li>
         <p><a href="#html-parser" id="parsing-html-fragments:html-parser-5">HTML 構文解析器</a>の<a
