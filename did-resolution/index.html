@@ -438,32 +438,31 @@
             align-items: baseline
         }
 
-        :is(h2, h3, h4, h5, h6):not(#toc>h2, #abstract>h2, #sotd>h2, .head>h2):has(+a.self-link) {
+        :is(h2, h3, h4, h5, h6):not(:where(#toc>h2, #abstract>h2, #sotd>h2, .head>h2)):has(+a.self-link) {
             position: relative;
             left: -.5em
         }
 
-        :is(h2, h3, h4, h5, h6):not(#toch2)+a.self-link {
+        :is(h2, h3, h4, h5, h6):not(:where(#toch2))+a.self-link {
             color: inherit;
             order: -1;
             position: relative;
             left: -1.1em;
             font-size: 1rem;
-            opacity: .5
+            opacity: .8;
+            text-decoration: none
         }
 
         :is(h2, h3, h4, h5, h6)+a.self-link::before {
-            content: "§";
-            text-decoration: none;
-            color: var(--heading-text)
+            content: "§"
         }
 
         :is(h2, h3)+a.self-link {
             top: -.2em
         }
 
-        :is(h4, h5, h6)+a.self-link::before {
-            color: #000
+        :is(h2, h3)+a.self-link::before {
+            color: var(--heading-text)
         }
 
         @media (max-width:767px) {
@@ -488,7 +487,8 @@
         }
     </style>
     <meta name="color-scheme" content="light">
-    <!-- <meta name="revision" content="9e330e0add70e35a7abb1ccaa827df51ed3bf3b8"> -->
+    <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/dark.css" disabled="">
+    <!-- <meta name="revision" content="71a50058090417f9947b9f13985fc8b561a4ad59"> -->
     <meta name="description" content="分散型識別子（DID）の解決とは、特定のDIDについてDID
 文書および付随するメタデータを取得するプロセスである。このプロセスはDID
 と一連の解決オプションを入力として受け取り、DID文書と、解決された文書および
@@ -734,7 +734,7 @@
         }
     </style>
     <script id="initialUserConfig" type="application/json">{
-  "specStatus": "CR",
+  "specStatus": "CRD",
   "implementationReportURI": "https://w3c.github.io/did-resolution-test-suite/",
   "shortName": "did-resolution-1.0",
   "subtitle": "Algorithms and guidelines for resolving DIDs and dereferencing DID URLs",
@@ -903,12 +903,14 @@
   "lint": {
     "informative-dfn": false
   },
-  "publishDate": "2026-08-06",
-  "crEnd": "2026-09-03",
-  "publishISODate": "2026-08-06T00:00:00.000Z",
-  "generatedSubtitle": "W3C Candidate Recommendation Snapshot 06 August 2026"
+  "gitRevision": "71a50058090417f9947b9f13985fc8b561a4ad59",
+  "publishDate": "2026-08-28",
+  "previousMaturity": "CR",
+  "previousPublishDate": "2026-08-06",
+  "publishISODate": "2026-08-28T00:00:00.000Z",
+  "generatedSubtitle": "W3C Candidate Recommendation Draft 28 August 2026"
 }</script>
-    <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/W3C-CR">
+    <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/W3C-CRD">
 </head>
 
 <body data-cite="infra rfc3986 did" class="h-entry">
@@ -918,16 +920,15 @@
             </a></p>
         <h1 id="title" class="title">分散型識別子解決（DID Resolution）v1</h1>
         <h2 id="subtitle" class="subtitle">DIDの解決およびDID URLの参照解決のためのアルゴリズムとガイドライン</h2>
-        <p id="w3c-state"><a href="https://www.w3.org/standards/types#CR">W3C勧告候補スナップショット</a>
-            <time class="dt-published" datetime="2026-08-06">2026年8月6日</time>
-        </p>
+        <p id="w3c-state"><a href="https://www.w3.org/standards/types#CRD">W3C 勧告候補草案</a> <time class="dt-published"
+                datetime="2026-08-28">2026年8月28日</time></p>
         <details open="">
             <summary>この文書に関する詳細</summary>
             <dl>
                 <dt>このバージョン:</dt>
                 <dd>
                     <a class="u-url"
-                        href="https://www.w3.org/TR/2026/CR-did-resolution-1.0-20260806/">https://www.w3.org/TR/2026/CR-did-resolution-1.0-20260806/</a>
+                        href="https://www.w3.org/TR/2026/CRD-did-resolution-1.0-20260828/">https://www.w3.org/TR/2026/CRD-did-resolution-1.0-20260828/</a>
                 </dd>
                 <dt>最新の公開バージョン:</dt>
                 <dd>
@@ -937,12 +938,11 @@
                 <dd><a href="https://w3c.github.io/did-resolution/">https://w3c.github.io/did-resolution/</a></dd>
                 <dt>履歴:</dt>
                 <dd>
-                    <a data-previous-shortname="did-resolution"
+                    <a
                         href="https://www.w3.org/standards/history/did-resolution-1.0/">https://www.w3.org/standards/history/did-resolution-1.0/</a>
                 </dd>
                 <dd>
-                    <a data-previous-shortname="did-resolution"
-                        href="https://github.com/w3c/did-resolution/commits/">Commit history</a>
+                    <a href="https://github.com/w3c/did-resolution/commits/">Commit history</a>
                 </dd>
 
                 <dt>実装報告:</dt>
@@ -1035,150 +1035,155 @@
 
     <section id="sotd" class="introductory">
         <h2>この文書のステータス</h2>
-        <p><em>この節では、この文書の公開時点における状態について説明します。現在の <abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr>
+        <p><em>この節では、公開時点におけるこの
+                文書のステータスについて説明します。現在の <abbr title="World Wide Web Consortium">W3C</abbr>
                 公開文書の一覧およびこの技術報告書の最新版は、
-                <a href="https://www.w3.org/TR/"><abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr> 標準および草案
+
+                <a href="https://www.w3.org/TR/"><abbr title="World Wide Web Consortium">W3C</abbr> 標準および草案
                     索引</a>で確認できます。</em></p>
         <p>
-            <abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr> 分散型識別子ワーキンググループは、
+            <abbr title="World Wide Web Consortium">W3C</abbr> Decentralized Identifier Working Group は、
             この
-            文書を <abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr> 勧告候補として公開し、
-            ソフトウェア開発者に対して、この文書のすべての機能が実装可能であるかを検証するために
-            設計された実験的な実装を提供するよう
-            求めています。
+            文書を <abbr title="World Wide Web Consortium">W3C</abbr> 勧告候補として公開し、
+
+            ソフトウェア開発者に対して、この
+            文書のすべての機能の実装可能性を検証するために設計された実験的実装を
+            提供するよう求めています。
         </p>
 
         <p>
-            実装者には、未解決の
+            実装者は、未解決の
             <a href="https://www.w3.org/policies/process/#correction-classes">クラス
-                1、2、または 3</a> の問題のうち、
-            <a href="https://github.com/w3c/did/issues/">Issue トラッカーに記載されているもの</a>によって、仕様が
-            変更される可能性があることに注意が促されています。
+                1、2、または 3</a> の課題のうち、
+            <a href="https://github.com/w3c/did/issues/">課題トラッカーに記載されているもの</a>が仕様の
+            変更につながる可能性があることに注意してください。
         </p>
 
         <p>
-            <abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr> 勧告候補段階を終了するために、<abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr>
-            DID ワーキング
-            グループは、次の事項を要求します。
+            <abbr title="World Wide Web Consortium">W3C</abbr> 勧告候補フェーズを終了するために、<abbr
+                title="World Wide Web Consortium">W3C</abbr> DID Working
+            Group は次の事項を要求します。
         </p>
         <ol>
             <li>
-                仕様で定義された各機能について、<a href="https://www.w3.org/Consortium/Process/#implementation-experience">少なくとも 2
-                    つの独立した
-                    相互運用可能な実装</a>が存在すること。ここで相互運用性は、
-                公開テストスイートに合格し、2 つ以上の
-                実装が相互に連携することによって検証できます。勧告案へ
+                仕様で定義されたすべての
+                機能について、<a href="https://www.w3.org/Consortium/Process/#implementation-experience">少なくとも 2 つの独立した
+                    相互運用可能な実装</a>があり、相互運用性が
+                公開テストスイートに合格すること、および 2 つ以上の
+                実装が相互に連携して動作することによって検証できること。勧告案へ
                 進むためには、各規範的仕様に、
-                仕様で定義されたすべての機能に対する公開テストスイートが存在しなければ
-                なりません。
+                仕様で定義されたすべての機能を対象とする公開テストスイートが必要です。
             </li>
             <li>
-                機械的にテスト可能な規範的記述については、各機能につき少なくとも 2 つの
-                適合実装が存在すること。
+                機械的にテスト可能な規範的記述については、機能ごとに少なくとも 2 つの
+                適合実装があること。
             </li>
             <li>
-                機械的にテストできない規範的記述については、各機能につき少なくとも
-                2 つの実装例が存在すること。
+                機械的にテストできない規範的記述については、機能ごとに少なくとも
+                2 つの実装例があること。
             </li>
             <li>
-                上記の各独立実装が、少なくとも
-                2 つの DID メソッドをサポートすること。これらの DID メソッドは、1）公開仕様を持ち（仕様を
-                無償で利用でき、自由に実装できること）、かつ 2）上記の独立実装のうち複数によって
-                相互運用可能な形で実装されている必要があります。
-                これは、それぞれ少なくとも 2 つの独立実装によって実装された、
-                公開仕様を持つ DID メソッドが少なくとも 2 つ存在することを意味します。
+                上記の各独立実装が、
+                少なくとも 2 つの DID メソッドをサポートし、それらが 1) 公開仕様（自由に
+                利用可能な仕様であり、自由に実装可能）を持ち、かつ 2) 上記の独立実装の
+                うち複数によって相互運用可能に実装されていること。
+                これは、公開仕様を持つ DID メソッドが少なくとも 2 つ存在し、
+                そのそれぞれが少なくとも 2 つの独立実装によって
+                実装されることを意味します。
             </li>
         </ol>
 
         <p>
             機能とは、仕様内の機能的に関連する 1 つ以上の規範的
             記述として定義されます。
-            この仕様における相互運用性とは、
-            データモデルのプロパティおよびその
-            値を参照するものなどの規範的記述が、2 つの異なる DID
+            この仕様では、相互運用性とは、
+
+            データモデルのプロパティやその
+            値を参照するものなどの規範的記述が、異なる 2 つの DID
             メソッド間で同じように解釈されることとして
             定義されます。
         </p>
 
 
         <p>
-            この文書に関するコメントを歓迎します。Issue は
-            <a href="https://github.com/w3c/did-resolution/issues/">GitHub</a> に直接提出するか、
-            <a href="mailto:public-did-wg@w3.org">public-did-wg@w3.org</a> に送信してください
+            この文書に関するコメントを歓迎します。<a href="https://github.com/w3c/did-resolution/issues/">GitHub</a> に直接課題を登録するか、
+
+            <a href="mailto:public-did-wg@w3.org">public-did-wg@w3.org</a> まで送信してください
             （<a href="mailto:public-did-wg-request@w3.org?subject=subscribe">購読</a>、
             <a href="https://lists.w3.org/Archives/Public/public-did-wg/">アーカイブ</a>）。
         </p>
 
         <div class="issue atrisk" id="issue-container-number-1">
-            <div class="issue-title marker" id="h-issue"><span>（リスクのある機能）Issue 1</span></div>
+            <div class="issue-title marker" id="h-issue"><span>（リスクのある機能）課題 1</span></div>
             <p class="atrisk">
                 <a data-link-type="dfn" href="https://www.w3.org/TR/did-core/#dfn-did-url-dereferencing">DID URL
                     参照解決</a>機能の定義は、
                 現在
-                <dfn id="dfn-at-risk" tabindex="0" aria-haspopup="dialog" data-dfn-type="dfn">リスクあり</dfn>と
-                マークされており、仕様から変更または削除される可能性があります。
-                ワーキンググループは、この仕様で定義されている当該機能の
+                <dfn id="dfn-at-risk" tabindex="0" aria-haspopup="dialog" data-dfn-type="dfn">リスクあり</dfn>としてマークされており、
+                仕様から変更または削除される可能性が高いです。
+                Working Group は、この仕様で定義されているこの機能の
                 価値について、実装者からのフィードバックを求めています。
             </p>
         </div>
 
         <p>
-            本仕様に関する作業の一部は、米国
-            国土安全保障省科学技術局から
-            契約 HSHQDC-17-C-00019 に基づく資金提供を受けています。本仕様の内容は、
+            この仕様に関する作業の一部は、米国
+            国土安全保障省科学技術局から、
+            契約 HSHQDC-17-C-00019 に基づく資金提供を受けています。この仕様の内容は、
             必ずしも米国政府の立場または方針を反映するものではなく、
-            公式な承認を示すものと解釈すべきではありません。
+            公式な承認を意味するものと解釈してはなりません。
         </p>
 
         <p>
-            本仕様に関する作業は、Christopher Allen、Shannon Appelcline、Kiara
+            この仕様に関する作業は、Christopher Allen、Shannon Appelcline、Kiara
             Robles、Brian Weller、Betty Dhamers、Kaliya Young、Kim Hamilton Duffy、Manu
-            Sporny、Drummond Reed、Joe Andrieu、および Heather Vescent が支援する Rebooting the Web of
+            Sporny、Drummond Reed、Joe Andrieu、Heather Vescent が促進する Rebooting the Web of
             Trust コミュニティからも支援を受けています。
         </p>
         <p>
-            この文書は、<a href="https://www.w3.org/groups/wg/did">分散型識別子
-                ワーキンググループ</a>によって、
+            この文書は、<a href="https://www.w3.org/groups/wg/did">Decentralized Identifier
+                Working Group</a> によって、
             <a href="https://www.w3.org/policies/process/20250818/#recs-and-notes">勧告
-                トラック</a>を使用した勧告候補スナップショットとして公開されました。
+                トラック</a>を使用して
+            勧告候補草案として公開されました。
         </p>
         <p>
             勧告候補としての公開は、
-            <abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr>およびその会員による承認を意味するものではありません。勧告候補スナップショットは、
-            <a href="https://www.w3.org/policies/process/20250818/#dfn-wide-review">広範なレビュー</a>を受けており、
-            <a href="https://w3c.github.io/did-resolution-test-suite/">実装経験</a>を収集することを目的とし、
-            ワーキンググループのメンバーから、実装に対する
-            <a href="https://www.w3.org/policies/patent-policy/#sec-Requirements">ロイヤリティフリーのライセンス供与</a>
-            の確約を得ています。
+            <abbr title="World Wide Web Consortium">W3C</abbr> およびそのメンバーによる承認を意味するものではありません。勧告候補草案には、
+            Working
+            Group が後続の勧告候補スナップショットに含めることを意図している、
+            前回の勧告候補からの変更が統合されています。
         </p>
         <p>
-            この勧告候補が勧告へ移行するのは、
-            早くても
-            2026年9月3日以降となる見込みです。
+            これは草案文書であり、いつでも他の
+            文書によって更新、置換、または廃止される可能性があります。この文書を進行中の
+            作業以外のものとして引用することは適切ではありません。
+
         </p>
         <p>
 
             この文書は、
-            <a href="https://www.w3.org/policies/patent-policy/"><abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr>
+
+            <a href="https://www.w3.org/policies/patent-policy/"><abbr title="World Wide Web Consortium">W3C</abbr>
                 特許
-                方針</a>に基づいて活動するグループによって作成されました。
+                方針</a>の下で活動するグループによって作成されました。
 
 
-            <abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr>は、このグループの成果物に関連して行われた
-            <a rel="disclosure" href="https://www.w3.org/groups/wg/did/ipr">すべての特許開示の公開リスト</a>
-            を管理しています。このページには、
+            <abbr title="World Wide Web Consortium">W3C</abbr> は、
+            グループの成果物に関連して行われた
+            <a rel="disclosure" href="https://www.w3.org/groups/wg/did/ipr">特許開示の公開一覧</a>を
+            維持しています。そのページには、
             特許を開示するための手順も記載されています。ある特許に
-            <a href="https://www.w3.org/policies/patent-policy/#def-essential">必須クレーム</a>
-            が含まれていると考え、その特許について実際に
-            知っている個人は、
+            <a href="https://www.w3.org/policies/patent-policy/#def-essential">必須クレーム</a>が含まれていると考える
+            実際の知識を有する個人は、
             <a href="https://www.w3.org/policies/patent-policy/#sec-Disclosure"><abbr
-                    title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr>特許方針の第6節</a>に従ってその情報を開示しなければなりません。
+                    title="World Wide Web Consortium">W3C</abbr> 特許方針の第 6 節</a>に従ってその情報を開示しなければなりません。
 
         </p>
         <p>
-            この文書には、
-            <a id="w3c_process_revision" href="https://www.w3.org/policies/process/20250818/">2025年8月18日付の<abbr
-                    title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr>プロセス文書</a>が適用されます。
+            この文書は、
+            <a id="w3c_process_revision" href="https://www.w3.org/policies/process/20250818/">2025年8月18日版 <abbr
+                    title="World Wide Web Consortium">W3C</abbr> プロセス文書</a>に準拠します。
         </p>
     </section>
     <nav id="toc">
@@ -1475,17 +1480,17 @@ resolutionOptions)</code>インターフェイス（
                 DID文書で宣言されたサービスを介して保存されているユーザーの履歴書を取得できる。
             </p>
             <p>
-                さらに、この仕様の<a href="#dereferencing-algorithm">DID URL 参照解決アルゴリズム</a>は、
-                クライアントがフラグメント（例: <code>#key-1</code>）をたどって、<a data-link-type="dfn"
-                    href="https://www.w3.org/TR/did-core/#dfn-did-documents">DID 文書</a>から特定の<a
-                    href="#dfn-verification-method" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-verification-method-1">検証方法</a>を抽出する方法を示しています
-                （<a href="#example-dereferencing-to-verification-method">詳細な例はこちらを参照</a>）。
-                実際には、実装者は、
-                規範的な MUST 要件およびエラー条件（無効な DID、
-                無効化された DID、サポートされていないメソッド、相対 URL の展開など）を検証する
-                <a href="https://github.com/w3c-ccg/did-resolution-mocha-test-suite">DID 解決テストスイート</a>に対してリゾルバーを検証し、
-                クライアントアプリケーションが、異なる DID メソッド間で
+                さらに、この仕様の <a href="#dereferencing-algorithm">DID URL 参照解決アルゴリズム</a>は、
+                クライアントがフラグメント（例: <code>#key-1</code>）をたどって、
+                特定の <a href="#dfn-verification-method" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-verification-method-1">検証メソッド</a>を <a data-link-type="dfn"
+                    href="https://www.w3.org/TR/did-core/#dfn-did-documents">DID 文書</a>から抽出する方法を示しています
+                （<a href="#example-dereferencing-to-verification-method">詳細な例はこちらを参照してください</a>）。
+                実装者には、リゾルバを
+                <a href="https://github.com/w3c/did-resolution-test-suite">DID Resolution Test Suite</a>
+                に対して検証することが推奨されます。このテストスイートは、規範的な MUST 要件およびエラー条件（無効な DID、
+                無効化された DID、サポートされていないメソッド、相対 URL の展開など）を検証し、
+                クライアントアプリケーションが異なる DID メソッド間でも
                 正しい解決動作を確実に利用できるようにします。
             </p>
         </section>
