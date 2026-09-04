@@ -691,6 +691,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [The ORIGIN HTTP/2 Frame](https://jp.htmlspecs.com/http/rfc8336.html)（[Source](https://httpwg.org/specs/rfc8336.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Bootstrapping WebSockets with HTTP/2](https://jp.htmlspecs.com/http/rfc8441.html)（[Source](https://httpwg.org/specs/rfc8441.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [The Proxy-Status HTTP Response Header Field](https://jp.htmlspecs.com/http/rfc9209.html)（[Source](https://httpwg.org/specs/rfc9209.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [Incremental Forwarding of HTTP Messages](https://jp.htmlspecs.com/http/rfc10036.html)（[Source](https://www.rfc-editor.org/rfc/rfc10036.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Bootstrapping WebSockets with HTTP/3](https://jp.htmlspecs.com/http/rfc9220.html)（[Source](https://httpwg.org/specs/rfc9220.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Proxying UDP in HTTP](https://jp.htmlspecs.com/http/rfc9298.html)（[Source](https://www.rfc-editor.org/rfc/rfc9298) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [The ORIGIN Extension in HTTP/3](https://jp.htmlspecs.com/http/rfc9412.html)（[Source](https://httpwg.org/specs/rfc9412.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
