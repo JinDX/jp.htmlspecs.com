@@ -658,6 +658,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### メソッド・ステータスコード・プロトコル構築
 - [Building Protocols with HTTP](https://jp.htmlspecs.com/http/rfc9205.html)（[Source](https://httpwg.org/specs/rfc9205.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [PATCH Method for HTTP](https://jp.htmlspecs.com/http/rfc5789.html)（[Source](https://httpwg.org/specs/rfc5789.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [The HTTP QUERY Method](https://jp.htmlspecs.com/http/rfc10008.html)（[Source](https://www.rfc-editor.org/rfc/rfc10008.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Additional HTTP Status Codes](https://jp.htmlspecs.com/http/rfc6585.html)（[Source](https://httpwg.org/specs/rfc6585.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [An HTTP Status Code to Report Legal Obstacles](https://jp.htmlspecs.com/http/rfc7725.html)（[Source](https://httpwg.org/specs/rfc7725.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [An HTTP Status Code for Indicating Hints](https://jp.htmlspecs.com/http/rfc8297.html)（[Source](https://httpwg.org/specs/rfc8297.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
