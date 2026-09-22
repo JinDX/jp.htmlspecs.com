@@ -427,7 +427,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Requesting Permissions](https://jp.htmlspecs.com/permissions-request/)（[Source](https://wicg.github.io/permissions-request/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [The HTML Permission Elements](https://jp.htmlspecs.com/permission-elements/)（[Source](https://wicg.github.io/PEPC/permission-elements.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Self-Review Questionnaire: Security and Privacy](https://jp.htmlspecs.com/security-privacy-questionnaire/)（[Source](https://www.w3.org/TR/2025/NOTE-security-privacy-questionnaire-20250418/) ![Note](https://img.shields.io/badge/NOTE-309c40)）
-- [Permissions Policy](https://jp.htmlspecs.com/permissions-policy/)（[Source](https://www.w3.org/TR/2026/WD-permissions-policy-1-20260618/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Permissions Policy](https://jp.htmlspecs.com/permissions-policy/)（[Source](https://www.w3.org/TR/2026/WD-permissions-policy-1-20260922/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Document Policy](https://jp.htmlspecs.com/document-policy/)（[Source](https://wicg.github.io/document-policy/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Capability Delegation](https://jp.htmlspecs.com/capability-delegation/)（[Source](https://wicg.github.io/capability-delegation/spec.html) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Global Privacy Control (GPC)](https://jp.htmlspecs.com/gpc/)（[Source](https://www.w3.org/TR/2026/WD-gpc-20260917/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
