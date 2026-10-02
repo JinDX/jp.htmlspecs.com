@@ -1325,7 +1325,7 @@
   "copyrightStart": "2008",
   "github": "https://github.com/w3c/sparql-query",
   "wgPublicList": "public-rdf-star-wg",
-  "previousPublishDate": "2026-09-21",
+  "previousPublishDate": "2026-09-30",
   "prevRecURI": "https://www.w3.org/TR/2013/REC-sparql11-query-20130321",
   "prevRecShortname": "sparql11-query",
   "previousMaturity": "WD",
@@ -1365,10 +1365,10 @@
   "lint": {
     "no-unused-dfns": false
   },
-  "gitRevision": "5ff2230cc0d1d0dae66df44f3a207e6abfeede46",
-  "publishDate": "2026-09-30",
-  "publishISODate": "2026-09-30T00:00:00.000Z",
-  "generatedSubtitle": "W3C Working Draft 30 September 2026"
+  "gitRevision": "7f707ffea120bc1170eb71c65bef6a1901c25128",
+  "publishDate": "2026-10-01",
+  "publishISODate": "2026-10-01T00:00:00.000Z",
+  "generatedSubtitle": "W3C Working Draft 01 October 2026"
 }</script>
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD">
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/dark.css" disabled="">
@@ -1381,14 +1381,14 @@
             </a></p>
         <h1 id="title" class="title">SPARQL 1.2 クエリ言語</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C作業草案</a> <time class="dt-published"
-                datetime="2026-09-30">2026年9月30日</time></p>
+                datetime="2026-10-01">2026年10月1日</time></p>
         <details open="">
             <summary>この文書の詳細</summary>
             <dl>
                 <dt>このバージョン:</dt>
                 <dd>
                     <a class="u-url"
-                        href="https://www.w3.org/TR/2026/WD-sparql12-query-20260930/">https://www.w3.org/TR/2026/WD-sparql12-query-20260930/</a>
+                        href="https://www.w3.org/TR/2026/WD-sparql12-query-20261001/">https://www.w3.org/TR/2026/WD-sparql12-query-20261001/</a>
                 </dd>
                 <dt>最新公開バージョン:</dt>
                 <dd>
@@ -7517,6 +7517,14 @@ WHERE { ?annot  a:annotates  &lt;http://www.w3.org/TR/rdf-sparql-query/&gt; .
                     <a href="#func-logical-and">logical-and</a>は、
                     いずれかの<a data-link-type="dfn|abstract-op" href="#dfn-sparql-eval-error" class="internalDFN"
                         id="ref-for-dfn-sparql-eval-error-4">エラー</a>を生成します。
+                </li>
+                <li>
+                    SPARQL 式が変数であり、
+                    その式を評価する対象となる解マッピングがその変数を含む場合、
+                    この評価の結果は、解マッピングがその変数に割り当てる RDF 用語
+                    となる。
+                    SPARQL 式が、解マッピングに含まれない変数である場合、
+                    その式を評価した結果はエラーとなる。
                 </li>
             </ul>
             <p>true（<span class="truth">T</span>）、false
@@ -14195,16 +14203,25 @@ ppeval(<var>x</var>:term, <a href="#defn_ppeOneOrMorePath" class="ppeOp">OneOrMo
     { } それ以外の場合</pre>
             </div>
             <div class="defn">
-                <p><b>定義：<span id="eval_negatedPropertySet">NegatedPropertySet の評価</span></b></p>
-                <pre class="nohighlight"><var>μ'</var> を解マッピングの拡張として記述する：
-<var>μ'</var>(<var>μ</var>, <var>x</var>) = <var>μ</var>(<var>x</var>)   <var>x</var> が変数の場合
-<var>μ'</var>(<var>μ</var>, <var>t</var>) = <var>t</var>      <var>t</var> が RDF 用語の場合</pre>
+                <p><b>定義: <span id="eval_negatedPropertySet">NegatedPropertySet の評価</span></b></p>
+                <p><var>S</var> を空でない IRI の集合とする。
+                    <var>G</var> を<a href="#defn_ActiveGraph">アクティブグラフ</a>とする。</p>
                 <pre
-                    class="nohighlight"><var>x</var> と <var>y</var> を変数または RDF 用語、<var>S</var> を IRI の集合、
-<var>G</var> を<a href="#defn_ActiveGraph">アクティブグラフ</a>とする。
+                    class="nohighlight">ppeval(<var>vx</var>:var, <a href="#defn_ppeNPS" class="ppeOp">NPS</a>(<var>S</var>), <var>vy</var>:var) =
+     { { (<var>vx</var>, <var>s</var>), (<var>vy</var>, <var>o</var>) } |
+         ∃ an IRI <var>p</var> such that <var>p</var> ∉ <var>S</var> and the triple (<var>s</var>, <var>p</var>, <var>o</var>) is in <var>G</var> }
 
-   ppeval(<var>x</var>, <a href="#defn_ppeNPS" class="ppeOp">NPS</a>(<var>S</var>), <var>y</var>) =
-       { <var>μ</var> | ∃ トリプル(<var>μ'</var>(<var>μ</var>, <var>x</var>), <var>p</var>, <var>μ'</var>(<var>μ</var>, <var>y</var>)) が <var>G</var> 内に存在し、<var>p</var> の IRI ∉ <var>S</var> である }</pre>
+ppeval(<var>vx</var>:var, <a href="#defn_ppeNPS" class="ppeOp">NPS</a>(<var>S</var>), <var>y</var>:term) =
+     { { (<var>vx</var>, <var>s</var>) } |
+         ∃ an IRI <var>p</var> such that <var>p</var> ∉ <var>S</var> and the triple (<var>s</var>, <var>p</var>, <var>y</var>) is in <var>G</var> }
+
+ppeval(<var>x</var>:term, <a href="#defn_ppeNPS" class="ppeOp">NPS</a>(<var>S</var>), <var>vy</var>:var) =
+     { { (<var>vy</var>, <var>o</var>) } |
+         ∃ an IRI <var>p</var> such that <var>p</var> ∉ <var>S</var> and the triple (<var>x</var>, <var>p</var>, <var>o</var>) is in <var>G</var> }
+
+ppeval(<var>x</var>:term, <a href="#defn_ppeNPS" class="ppeOp">NPS</a>(<var>S</var>), <var>y</var>:term) =
+     { {} |
+         ∃ an IRI <var>p</var> such that <var>p</var> ∉ <var>S</var> and the triple (<var>x</var>, <var>p</var>, <var>y</var>) is in <var>G</var> }</pre>
             </div>
         </section>
         <section id="sparqlAlgebra">
@@ -19366,7 +19383,7 @@ _:x rdf:type xsd:decimal .</pre>
 
                     <a href="https://www.w3.org/TR/sparql12-query/"><cite>SPARQL 1.2 クエリ言語</cite></a>. Olaf
 
-                    Hartig; Andy Seaborne; Ruben Taelman; Gregory Williams; Thomas Pellissier Tanon. W3C. 2026年9月21日
+                    Hartig; Andy Seaborne; Ruben Taelman; Gregory Williams; Thomas Pellissier Tanon. W3C. 2026年9月30日
 
                     . W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/sparql12-query/">https://www.w3.org/TR/sparql12-query/</a>
