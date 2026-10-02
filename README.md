@@ -101,7 +101,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### 数学
 - [MathML Core](https://jp.htmlspecs.com/mathml-core/)（[Source](https://www.w3.org/TR/2025/CR-mathml-core-20250624/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
-- [MathML4](https://jp.htmlspecs.com/mathml4/)（[Source](https://www.w3.org/TR/2026/WD-mathml4-20260604/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MathML4](https://jp.htmlspecs.com/mathml4/)（[Source](https://www.w3.org/TR/2026/WD-mathml4-20261001/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### Web アプリ・インストール・ライフサイクル
 - [Web Application Manifest](https://jp.htmlspecs.com/appmanifest/)（[Source](https://www.w3.org/TR/2026/WD-appmanifest-20260813/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
