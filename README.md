@@ -367,7 +367,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Referrer Policy](https://jp.htmlspecs.com/referrer-policy/)（[Source](https://www.w3.org/TR/2017/CR-referrer-policy-20170126/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [Fetch Metadata Request Headers](https://jp.htmlspecs.com/fetch-metadata/)（[Source](https://www.w3.org/TR/2026/WD-fetch-metadata-20260921/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Mixed Content](https://jp.htmlspecs.com/mixed-content/)（[Source](https://www.w3.org/TR/2023/CRD-mixed-content-20230223/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [Trusted Types](https://jp.htmlspecs.com/trusted-types/)（[Source](https://www.w3.org/TR/2026/WD-trusted-types-20260623/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Trusted Types](https://jp.htmlspecs.com/trusted-types/)（[Source](https://www.w3.org/TR/2026/WD-trusted-types-20261007/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Clear Site Data](https://jp.htmlspecs.com/clear-site-data/)（[Source](https://www.w3.org/TR/2017/WD-clear-site-data-20171130/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [A File Format to Aid in Security Vulnerability Disclosure](https://jp.htmlspecs.com/rfc9116/)（[Source](https://www.rfc-editor.org/rfc/rfc9116.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Device Bound Session Credentials](https://jp.htmlspecs.com/dbsc/)（[Source](https://www.w3.org/TR/2025/WD-dbsc-1-20250821/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
