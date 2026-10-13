@@ -399,7 +399,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Data Integrity BBS Cryptosuites v1.0](https://jp.htmlspecs.com/vc-di-bbs/)（[Source](https://www.w3.org/TR/2026/CRD-vc-di-bbs-20260910/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Verifiable Credential Confidence Methods v1.0](https://jp.htmlspecs.com/vc-confidence-method/)（[Source](https://www.w3.org/TR/2026/WD-vc-confidence-method-20260910/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Bitstring Status List v1.0](https://jp.htmlspecs.com/vc-bitstring-status-list/)（[Source](https://www.w3.org/TR/2025/REC-vc-bitstring-status-list-20250515/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [VCALM v1.0](https://jp.htmlspecs.com/vcalm-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vcalm-1.0-20260821/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [VCALM v1.0](https://jp.htmlspecs.com/vcalm-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vcalm-1.0-20261012/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Verifiable Credential Forgery Defense v1.0](https://jp.htmlspecs.com/vc-forgery-defense-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-forgery-defense-1.0-20260825/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Verifiable Credential Rendering Methods v1.0](https://jp.htmlspecs.com/vc-render-method/)（[Source](https://www.w3.org/TR/2026/WD-vc-render-method-20261006/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Verifiable Credential Barcodes v1.0](https://jp.htmlspecs.com/vc-barcodes-1.0/)（[Source](https://www.w3.org/TR/2026/WD-vc-barcodes-1.0-20260822/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
