@@ -336,7 +336,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Server Timing](https://jp.htmlspecs.com/server-timing/)（[Source](https://www.w3.org/TR/2026/WD-server-timing-20260407/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Paint Timing](https://jp.htmlspecs.com/paint-timing/)（[Source](https://www.w3.org/TR/2026/WD-paint-timing-20261002/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Largest Contentful Paint](https://jp.htmlspecs.com/largest-contentful-paint/)（[Source](https://www.w3.org/TR/2026/WD-largest-contentful-paint-20260826/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Event Timing API](https://jp.htmlspecs.com/event-timing/)（[Source](https://www.w3.org/TR/2026/WD-event-timing-20260319/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Event Timing API](https://jp.htmlspecs.com/event-timing/)（[Source](https://www.w3.org/TR/2026/WD-event-timing-20261013/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Container Timing API](https://jp.htmlspecs.com/container-timing/)（[Source](https://w3c.github.io/container-timing/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Performance measure memory](https://jp.htmlspecs.com/performance-measure-memory/)（[Source](https://wicg.github.io/performance-measure-memory/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2026/WD-device-memory-1-20260330/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
