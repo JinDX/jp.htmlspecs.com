@@ -2210,7 +2210,58 @@ For darkmode:
             ウェブサイトは以下のようなコードを利用します:
 
 
-            <pre class="highlight">（省略：ソースコード部分は翻訳不要）</pre>
+            <pre class="highlight"><c- a>let</c-> chosenHeartRateService <c- o>=</c-> <c- kc>null</c-><c- p>;</c->
+
+navigator<c- p>.</c->bluetooth<c- p>.</c-><a data-link-type="idl" href="#dom-bluetooth-requestdevice" id="ref-for-dom-bluetooth-requestdevice">requestDevice</a><c- p>({</c->
+  filters<c- o>:</c-> <c- p>[{</c->
+    services<c- o>:</c-> <c- p>[</c-><c- t>'heart_rate'</c-><c- p>],</c->
+  <c- p>}]</c->
+<c- p>}).</c->then<c- p>(</c->device <c- p>=></c-> device<c- p>.</c->gatt<c- p>.</c-><a data-link-type="functionish" href="#dom-bluetoothremotegattserver-connect" id="ref-for-dom-bluetoothremotegattserver-connect">connect<c- p>()</c-></a><c- p>)</c->
+<c- p>.</c->then<c- p>(</c->server <c- p>=></c-> server<c- p>.</c-><a data-link-type="idl" href="#dom-bluetoothremotegattserver-getprimaryservice" id="ref-for-dom-bluetoothremotegattserver-getprimaryservice">getPrimaryService</a><c- p>(</c-><a data-link-type="idl" href="https://github.com/WebBluetoothCG/registries/blob/master/gatt_assigned_services.txt#:~:text=heart_rate" id="ref-for-:~:text=heart_rate"><c- t>'heart_rate'</c-></a><c- p>))</c->
+<c- p>.</c->then<c- p>(</c->service <c- p>=></c-> <c- p>{</c->
+  chosenHeartRateService <c- o>=</c-> service<c- p>;</c->
+  <c- k>return</c-> Promise<c- p>.</c->all<c- p>([</c->
+    service<c- p>.</c-><a data-link-type="idl" href="#dom-bluetoothremotegattservice-getcharacteristic" id="ref-for-dom-bluetoothremotegattservice-getcharacteristic">getCharacteristic</a><c- p>(</c-><a data-link-type="idl" href="https://github.com/WebBluetoothCG/registries/blob/master/gatt_assigned_characteristics.txt#:~:text=body_sensor_location" id="ref-for-:~:text=body_sensor_location"><c- t>'body_sensor_location'</c-></a><c- p>)</c->
+      <c- p>.</c->then<c- p>(</c->handleBodySensorLocationCharacteristic<c- p>),</c->
+    service<c- p>.</c-><a data-link-type="idl" href="#dom-bluetoothremotegattservice-getcharacteristic" id="ref-for-dom-bluetoothremotegattservice-getcharacteristic①">getCharacteristic</a><c- p>(</c-><a data-link-type="idl" href="https://github.com/WebBluetoothCG/registries/blob/master/gatt_assigned_characteristics.txt#:~:text=heart_rate_measurement" id="ref-for-:~:text=heart_rate_measurement"><c- t>'heart_rate_measurement'</c-></a><c- p>)</c->
+      <c- p>.</c->then<c- p>(</c->handleHeartRateMeasurementCharacteristic<c- p>),</c->
+  <c- p>]);</c->
+<c- p>});</c->
+
+<c- a>function</c-> handleBodySensorLocationCharacteristic<c- p>(</c->characteristic<c- p>)</c-> <c- p>{</c->
+  <c- k>if</c-> <c- p>(</c->characteristic <c- o>===</c-> <c- kc>null</c-><c- p>)</c-> <c- p>{</c->
+    console<c- p>.</c->log<c- p>(</c-><c- u>"Unknown sensor location."</c-><c- p>);</c->
+    <c- k>return</c-> Promise<c- p>.</c->resolve<c- p>();</c->
+  <c- p>}</c->
+  <c- k>return</c-> characteristic<c- p>.</c-><a data-link-type="functionish" href="#dom-bluetoothremotegattcharacteristic-readvalue" id="ref-for-dom-bluetoothremotegattcharacteristic-readvalue">readValue<c- p>()</c-></a>
+  <c- p>.</c->then<c- p>(</c->sensorLocationData <c- p>=></c-> <c- p>{</c->
+    <c- a>const</c-> sensorLocation <c- o>=</c-> sensorLocationData<c- p>.</c->getUint8<c- p>(</c-><c- mf>0</c-><c- p>);</c->
+    <c- k>switch</c-> <c- p>(</c->sensorLocation<c- p>)</c-> <c- p>{</c->
+      <c- k>case</c-> <c- mf>0</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Other'</c-><c- p>;</c->
+      <c- k>case</c-> <c- mf>1</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Chest'</c-><c- p>;</c->
+      <c- k>case</c-> <c- mf>2</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Wrist'</c-><c- p>;</c->
+      <c- k>case</c-> <c- mf>3</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Finger'</c-><c- p>;</c->
+      <c- k>case</c-> <c- mf>4</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Hand'</c-><c- p>;</c->
+      <c- k>case</c-> <c- mf>5</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Ear Lobe'</c-><c- p>;</c->
+      <c- k>case</c-> <c- mf>6</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Foot'</c-><c- p>;</c->
+      <c- k>default</c-><c- o>:</c-> <c- k>return</c-> <c- t>'Unknown'</c-><c- p>;</c->
+    <c- p>}</c->
+  <c- p>}).</c->then<c- p>(</c->location <c- p>=></c-> console<c- p>.</c->log<c- p>(</c->location<c- p>));</c->
+<c- p>}</c->
+
+<c- a>function</c-> handleHeartRateMeasurementCharacteristic<c- p>(</c->characteristic<c- p>)</c-> <c- p>{</c->
+  <c- k>return</c-> characteristic<c- p>.</c-><a data-link-type="functionish" href="#dom-bluetoothremotegattcharacteristic-startnotifications" id="ref-for-dom-bluetoothremotegattcharacteristic-startnotifications">startNotifications<c- p>()</c-></a>
+  <c- p>.</c->then<c- p>(</c-><c- kr>char</c-> <c- p>=></c-> <c- p>{</c->
+    characteristic<c- p>.</c->addEventListener<c- p>(</c-><c- t>'</c-><a class="idl-code" data-link-type="event" href="#eventdef-bluetoothremotegattcharacteristic-characteristicvaluechanged" id="ref-for-eventdef-bluetoothremotegattcharacteristic-characteristicvaluechanged"><c- t>characteristicvaluechanged</c-></a><c- t>'</c-><c- p>,</c->
+                                    onHeartRateChanged<c- p>);</c->
+  <c- p>});</c->
+<c- p>}</c->
+
+<c- a>function</c-> onHeartRateChanged<c- p>(</c->event<c- p>)</c-> <c- p>{</c->
+  <c- a>const</c-> characteristic <c- o>=</c-> event<c- p>.</c->target<c- p>;</c->
+  console<c- p>.</c->log<c- p>(</c->parseHeartRate<c- p>(</c->characteristic<c- p>.</c-><a class="idl-code" data-link-type="attribute" href="#dom-bluetoothremotegattcharacteristic-value" id="ref-for-dom-bluetoothremotegattcharacteristic-value">value</a><c- p>));</c->
+<c- p>}</c->
+</pre>
             <p><code>parseHeartRate()</code> は、
                 <a data-link-type="idl"
                     href="https://github.com/WebBluetoothCG/registries/blob/master/gatt_assigned_characteristics.txt#:~:text=heart_rate_measurement"
@@ -2218,24 +2269,72 @@ For darkmode:
                     <code>heart_rate_measurement</code>のドキュメント</a>
                 を参照し、<code
                     class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-dataview-constructor" id="ref-for-sec-dataview-constructor">DataView</a></code>
-                に格納された
+                を読み取る形で定義できます。この DataView は
                 <code
                     class="idl"><a data-link-type="idl" href="#bluetoothremotegattcharacteristic" id="ref-for-bluetoothremotegattcharacteristic">BluetoothRemoteGATTCharacteristic</a></code>
                 の
                 <code
                     class="idl"><a data-link-type="idl" href="#dom-bluetoothremotegattcharacteristic-value" id="ref-for-dom-bluetoothremotegattcharacteristic-value①">value</a></code>
-                フィールドから読み取る形で定義できます。
+                フィールドに格納されています。
             </p>
-            <pre class="highlight">（省略：ソースコード部分は翻訳不要）</pre>
+            <pre class="highlight"><c- a>function</c-> parseHeartRate<c- p>(</c->data<c- p>)</c-> <c- p>{</c->
+  <c- a>const</c-> flags <c- o>=</c-> data<c- p>.</c->getUint8<c- p>(</c-><c- mf>0</c-><c- p>);</c->
+  <c- a>const</c-> rate16Bits <c- o>=</c-> flags <c- o>&amp;</c-> <c- mh>0x1</c-><c- p>;</c->
+  <c- a>const</c-> result <c- o>=</c-> <c- p>{};</c->
+  <c- a>let</c-> index <c- o>=</c-> <c- mf>1</c-><c- p>;</c->
+  <c- k>if</c-> <c- p>(</c->rate16Bits<c- p>)</c-> <c- p>{</c->
+    result<c- p>.</c->heartRate <c- o>=</c-> data<c- p>.</c->getUint16<c- p>(</c->index<c- p>,</c-> <c- d>/*littleEndian=*/</c-><c- kc>true</c-><c- p>);</c->
+    index <c- o>+=</c-> <c- mf>2</c-><c- p>;</c->
+  <c- p>}</c-> <c- k>else</c-> <c- p>{</c->
+    result<c- p>.</c->heartRate <c- o>=</c-> data<c- p>.</c->getUint8<c- p>(</c->index<c- p>);</c->
+    index <c- o>+=</c-> <c- mf>1</c-><c- p>;</c->
+  <c- p>}</c->
+  <c- a>const</c-> contactDetected <c- o>=</c-> flags <c- o>&amp;</c-> <c- mh>0x2</c-><c- p>;</c->
+  <c- a>const</c-> contactSensorPresent <c- o>=</c-> flags <c- o>&amp;</c-> <c- mh>0x4</c-><c- p>;</c->
+  <c- k>if</c-> <c- p>(</c->contactSensorPresent<c- p>)</c-> <c- p>{</c->
+    result<c- p>.</c->contactDetected <c- o>=</c-> <c- o>!!</c->contactDetected<c- p>;</c->
+  <c- p>}</c->
+  <c- a>const</c-> energyPresent <c- o>=</c-> flags <c- o>&amp;</c-> <c- mh>0x8</c-><c- p>;</c->
+  <c- k>if</c-> <c- p>(</c->energyPresent<c- p>)</c-> <c- p>{</c->
+    result<c- p>.</c->energyExpended <c- o>=</c-> data<c- p>.</c->getUint16<c- p>(</c->index<c- p>,</c-> <c- d>/*littleEndian=*/</c-><c- kc>true</c-><c- p>);</c->
+    index <c- o>+=</c-> <c- mf>2</c-><c- p>;</c->
+  <c- p>}</c->
+  <c- a>const</c-> rrIntervalPresent <c- o>=</c-> flags <c- o>&amp;</c-> <c- mh>0x10</c-><c- p>;</c->
+  <c- k>if</c-> <c- p>(</c->rrIntervalPresent<c- p>)</c-> <c- p>{</c->
+    <c- a>const</c-> rrIntervals <c- o>=</c-> <c- p>[];</c->
+    <c- k>for</c-> <c- p>(;</c-> index <c- o>+</c-> <c- mf>1</c-> <c- o>&lt;</c-> data<c- p>.</c->byteLength<c- p>;</c-> index <c- o>+=</c-> <c- mf>2</c-><c- p>)</c-> <c- p>{</c->
+      rrIntervals<c- p>.</c->push<c- p>(</c->data<c- p>.</c->getUint16<c- p>(</c->index<c- p>,</c-> <c- d>/*littleEndian=*/</c-><c- kc>true</c-><c- p>));</c->
+    <c- p>}</c->
+    result<c- p>.</c->rrIntervals <c- o>=</c-> rrIntervals<c- p>;</c->
+  <c- p>}</c->
+  <c- k>return</c-> result<c- p>;</c->
+<c- p>}</c->
+</pre>
             <p><code>onHeartRateChanged()</code>は以下のようなオブジェクトをログ出力するかもしれません</p>
-            <pre class="highlight">（省略：ソースコード部分は翻訳不要）</pre>
+            <pre class="highlight"><c- p>{</c->
+  heartRate<c- o>:</c-> <c- mf>70</c-><c- p>,</c->
+  contactDetected<c- o>:</c-> <c- kc>true</c-><c- p>,</c->
+  energyExpended<c- o>:</c-> <c- mf>750</c-><c- p>,</c->     <c- c1>// Meaning 750kJ.</c->
+  rrIntervals<c- o>:</c-> <c- p>[</c-><c- mf>890</c-><c- p>,</c-> <c- mf>870</c-><c- p>]</c->  <c- c1>// Meaning .87s and .85s.</c->
+<c- p>}</c->
+</pre>
             <p>心拍センサが<code>energyExpended</code> フィールドを報告している場合、
                 ウェブアプリケーションは
                 <code
                     class="idl"><a data-link-type="idl" href="https://github.com/WebBluetoothCG/registries/blob/master/gatt_assigned_characteristics.txt#:~:text=heart_rate_control_point" id="ref-for-:~:text=heart_rate_control_point">heart_rate_control_point</a></code>
                 キャラクタリスティックに書き込みを行うことで、その値を<code>0</code>にリセットできます。
             </p>
-            <pre class="highlight">（省略：ソースコード部分は翻訳不要）</pre>
+            <pre class="highlight"><c- a>function</c-> resetEnergyExpended<c- p>()</c-> <c- p>{</c->
+  <c- k>if</c-> <c- p>(</c-><c- o>!</c->chosenHeartRateService<c- p>)</c-> <c- p>{</c->
+    <c- k>return</c-> Promise<c- p>.</c->reject<c- p>(</c-><c- ow>new</c-> <c- ne>Error</c-><c- p>(</c-><c- t>'No heart rate sensor selected yet.'</c-><c- p>));</c->
+  <c- p>}</c->
+  <c- k>return</c-> chosenHeartRateService<c- p>.</c-><a data-link-type="idl" href="#dom-bluetoothremotegattservice-getcharacteristic" id="ref-for-dom-bluetoothremotegattservice-getcharacteristic②">getCharacteristic</a><c- p>(</c-><a data-link-type="idl" href="https://github.com/WebBluetoothCG/registries/blob/master/gatt_assigned_characteristics.txt#:~:text=heart_rate_control_point" id="ref-for-:~:text=heart_rate_control_point①"><c- t>'heart_rate_control_point'</c-></a><c- p>)</c->
+  <c- p>.</c->then<c- p>(</c->controlPoint <c- p>=></c-> <c- p>{</c->
+    <c- a>const</c-> resetEnergyExpended <c- o>=</c-> <c- ow>new</c-> Uint8Array<c- p>([</c-><c- mf>1</c-><c- p>]);</c->
+    <c- k>return</c-> controlPoint<c- p>.</c-><a data-link-type="idl" href="#dom-bluetoothremotegattcharacteristic-writevalue" id="ref-for-dom-bluetoothremotegattcharacteristic-writevalue">writeValue</a><c- p>(</c->resetEnergyExpended<c- p>);</c->
+  <c- p>});</c->
+<c- p>}</c->
+</pre>
         </div>
         <h2 class="heading settled" data-level="2" id="security-and-privacy"><span class="secno">2. </span><span
                 class="content">セキュリティに関する考慮事項</span><a class="self-link" href="#security-and-privacy"></a>
@@ -6248,7 +6347,7 @@ DataView(<var>bytes</var>)</code> への写像を追加します。
                 Caching</a> システムは、
             <a data-link-type="dfn" href="#bond" id="ref-for-bond">bonded</a> なクライアントが 1 回の接続から次の接続にわたって
             属性への参照を保存できるようにします。Web Bluetooth は、サイトがアクセス権を持つデバイスに対して
-            <em>bonded ではない</em> と見なします。つまり、
+            <em><a data-link-type="dfn" href="#bond" id="ref-for-bond①">bonded</a> ではない</em> と見なします。つまり、
             <code
                 class="idl"><a data-link-type="idl" href="#bluetoothremotegattservice" id="ref-for-bluetoothremotegattservice②">BluetoothRemoteGATTService</a></code>、
             <code
@@ -7153,7 +7252,8 @@ DataView(<var>bytes</var>)</code> への写像を追加します。
                     class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-promise-objects" id="ref-for-sec-promise-objects⑨">Promise</a></code>
                 をラップします。
             </div>
-            <p><var>promise</var> を包む、<var>gattServer</var> に対する
+            <p><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-promise-objects"
+                    id="ref-for-sec-promise-objects①⓪">Promise</a> <var>promise</var> を包む、<var>gattServer</var> に対する
                 <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport
                     id="connection-checking-wrapper">接続チェックラッパー</dfn>を作成するには、
                 UA は次を行わなければなりません（MUST）:
@@ -7412,7 +7512,9 @@ DataView(<var>bytes</var>)</code> への写像を追加します。
                                 <var>result</var> の
                                 <code
                                     class="idl"><a data-link-type="idl" href="#dom-bluetoothremotegattservice-isprimary" id="ref-for-dom-bluetoothremotegattservice-isprimary②">isPrimary</a></code>
-                                を <code>true</code> に、そうでなければ
+                                を <code>true</code> に、そうでなければ <var>result</var> の <a data-link-type="idl"
+                                    href="#dom-bluetoothremotegattservice-isprimary"
+                                    id="ref-for-dom-bluetoothremotegattservice-isprimary③">isPrimary</a> を
                                 <code>false</code> に初期化します。
                             </p>
                         <li data-md>
@@ -7857,8 +7959,9 @@ getDescriptors(<var>descriptor</var>)</code></dfn></code> メソッドは、こ�
                                 <var>global</var> に与え、
                                 "<code
                                     class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#notsupportederror" id="ref-for-notsupportederror①">NotSupportedError</a></code>"
-                                の <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
-                                    id="ref-for-reject①④">reject</a> により
+                                の <a data-link-type="idl" href="https://webidl.spec.whatwg.org/#idl-DOMException"
+                                    id="ref-for-idl-DOMException①①">DOMException</a> によって <a data-link-type="dfn"
+                                    href="https://webidl.spec.whatwg.org/#reject" id="ref-for-reject①④">reject</a> により
                                 <var>promise</var> を拒否して、これらの手順を中止します。
                             </p>
                         <li data-md>
@@ -7888,7 +7991,10 @@ getDescriptors(<var>descriptor</var>)</code></dfn></code> メソッドは、こ�
                                         <var>global</var> に与え、
                                         "<code
                                             class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#invalidstateerror" id="ref-for-invalidstateerror④">InvalidStateError</a></code>"
-                                        の <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
+                                        の <a data-link-type="idl"
+                                            href="https://webidl.spec.whatwg.org/#idl-DOMException"
+                                            id="ref-for-idl-DOMException①②">DOMException</a> によって <a
+                                            data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
                                             id="ref-for-reject①⑤">reject</a> により <var>promise</var> を拒否して、これらの手順を中止します。
                                     </p>
                                 <li data-md>
@@ -7933,7 +8039,10 @@ getDescriptors(<var>descriptor</var>)</code></dfn></code> メソッドは、こ�
                                                 <var>global</var> に与え、
                                                 "<code
                                                     class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#networkerror" id="ref-for-networkerror①⓪">NetworkError</a></code>"
-                                                の <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
+                                                の <a data-link-type="idl"
+                                                    href="https://webidl.spec.whatwg.org/#idl-DOMException"
+                                                    id="ref-for-idl-DOMException①③">DOMException</a> によって <a
+                                                    data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
                                                     id="ref-for-reject①⑥">reject</a> により <var>promise</var>
                                                 を拒否して、これらの手順を中止します。
                                             </p>
@@ -7964,7 +8073,10 @@ getDescriptors(<var>descriptor</var>)</code></dfn></code> メソッドは、こ�
                                         <var>global</var> に与え、
                                         "<code
                                             class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#networkerror" id="ref-for-networkerror①①">NetworkError</a></code>"
-                                        の <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
+                                        の <a data-link-type="idl"
+                                            href="https://webidl.spec.whatwg.org/#idl-DOMException"
+                                            id="ref-for-idl-DOMException①④">DOMException</a> によって <a
+                                            data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
                                             id="ref-for-reject①⑦">reject</a> により <var>promise</var>
                                         を拒否して、これらの手順を中止してもよいです（MAY）。
                                     </p>
@@ -8002,7 +8114,10 @@ getDescriptors(<var>descriptor</var>)</code></dfn></code> メソッドは、こ�
                                         に存在しなければ、
                                         "<code
                                             class="idl"><a data-link-type="idl" href="https://webidl.spec.whatwg.org/#networkerror" id="ref-for-networkerror①③">NetworkError</a></code>"
-                                        の <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
+                                        の <a data-link-type="idl"
+                                            href="https://webidl.spec.whatwg.org/#idl-DOMException"
+                                            id="ref-for-idl-DOMException①⑤">DOMException</a> によって <a
+                                            data-link-type="dfn" href="https://webidl.spec.whatwg.org/#reject"
                                             id="ref-for-reject①⑧">reject</a> により <var>promise</var> を拒否し、これらの手順を中止します。
                                     </p>
                                 <li data-md>
@@ -8391,7 +8506,7 @@ startNotifications()</code></dfn></code> メソッドは、呼び出されたと
             <ol>
                 <li data-md>
                     <p><var>global</var> を <a data-link-type="dfn" href="https://webidl.spec.whatwg.org/#this"
-                            id="ref-for-this④⑷">this</a> の <a data-link-type="dfn"
+                            id="ref-for-this④⑦">this</a> の <a data-link-type="dfn"
                             href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-relevant-global"
                             id="ref-for-concept-relevant-global①⑤">関連付けられたグローバルオブジェクト</a>とします。</p>
                 <li data-md>
@@ -9062,7 +9177,7 @@ stopNotifications()</code></dfn></code> メソッドは、呼び出されたと�
                                     class="idl"><a data-link-type="idl" href="#dom-bluetoothremotegattdescriptor-characteristic" id="ref-for-dom-bluetoothremotegattdescriptor-characteristic①">characteristic</a></code>
                                 を、
                                 <code
-                                    class="idl"><a data-link-type="idl" href="#bluetoothremotegattcharacteristic" id="ref-for-bluetoothremotegattcharacteristic①⑱">BluetoothRemoteGATTCharacteristic</a></code>
+                                    class="idl"><a data-link-type="idl" href="#bluetoothremotegattcharacteristic" id="ref-for-bluetoothremotegattcharacteristic①⑧">BluetoothRemoteGATTCharacteristic</a></code>
                                 のうち <var>descriptor</var> が現れる Characteristic を表すインスタンスから初期化します。
                             </p>
                         <li data-md>
@@ -9767,7 +9882,7 @@ writeValue(<var>value</var>)</code></dfn></code> メソッドは、呼び出さ�
         <div class="algorithm" data-algorithm="disconnection">
 
             <a data-link-type="dfn" href="#bluetooth-device" id="ref-for-bluetooth-device①⑦">Bluetooth デバイス</a>
-            <var>device</var> の <a data-link-type="dfn" href="#att-bearer" id="ref-for-att-bearer⑷">ATT Bearer</a>
+            <var>device</var> の <a data-link-type="dfn" href="#att-bearer" id="ref-for-att-bearer⑦">ATT Bearer</a>
             が失われた（例: リモートデバイスが範囲外に移動した、またはユーザーがプラットフォーム機能で切断した）とき、
             各 <code
                 class="idl"><a data-link-type="idl" href="#bluetoothdevice" id="ref-for-bluetoothdevice④④">BluetoothDevice</a></code>
@@ -9869,7 +9984,10 @@ writeValue(<var>value</var>)</code></dfn></code> メソッドは、呼び出さ�
                                 デスクリプタを持つ場合、UA は <a data-link-type="dfn" href="#characteristic-descriptors"
                                     id="ref-for-characteristic-descriptors②">Characteristic Descriptors</a>
                                 手続きのいずれかを用いて、
-                                <var>characteristic</var> のそのデスクリプタ内の <code>Notification</code> と
+                                <var>characteristic</var> の <a data-link-type="dfn"
+                                    href="#client-characteristic-configuration"
+                                    id="ref-for-client-characteristic-configuration⑥">Client Characteristic
+                                    Configuration</a> デスクリプタ内の <code>Notification</code> と
                                 <code>Indication</code> ビットをクリアするべきです（SHOULD）。
                             </p>
                         <li data-md>
@@ -9948,7 +10066,8 @@ writeValue(<var>value</var>)</code></dfn></code> メソッドは、呼び出さ�
                                     class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-dataview-constructor" id="ref-for-sec-dataview-constructor①⑦">DataView</a></code>（新しい
                                 <code
                                     class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262/#sec-arraybuffer-constructor" id="ref-for-sec-arraybuffer-constructor①⓪">ArrayBuffer</a></code>
-                                をラップし、Characteristic の新しい値を保持するもの）に設定します。
+                                をラップし、<a data-link-type="dfn" href="#characteristic"
+                                    id="ref-for-characteristic①①">Characteristic</a> の新しい値を保持するもの）に設定します。
                             </p>
                         <li data-md>
                             <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire"
@@ -10215,7 +10334,9 @@ writeValue(<var>value</var>)</code></dfn></code> メソッドは、呼び出さ�
                                             <code
                                                 class="idl"><a data-link-type="idl" href="#eventdef-bluetoothremotegattservice-serviceremoved" id="ref-for-eventdef-bluetoothremotegattservice-serviceremoved①">serviceremoved</a></code>
                                             で、<code>bubbles</code> 属性を <code>true</code> に初期化して、
-                                            その <a class="idl" data-link-type="idl" href="#bluetoothremotegattservice"
+                                            その <a data-link-type="dfn" href="#service"
+                                                id="ref-for-service①⑧">Service</a> を表す <a class="idl"
+                                                data-link-type="idl" href="#bluetoothremotegattservice"
                                                 id="ref-for-bluetoothremotegattservice②⑥">BluetoothRemoteGATTService</a>
                                             に対して発火します。
                                         </p>
@@ -10255,7 +10376,8 @@ writeValue(<var>value</var>)</code></dfn></code> メソッドは、呼び出さ�
                                     <code
                                         class="idl"><a data-link-type="idl" href="#eventdef-bluetoothremotegattservice-servicechanged" id="ref-for-eventdef-bluetoothremotegattservice-servicechanged②">servicechanged</a></code>
                                     で、<code>bubbles</code> 属性を <code>true</code> に初期化して、
-                                    当該 <code
+                                    当該 <a data-link-type="dfn" href="#service" id="ref-for-service②②">Service</a> を表す
+                                    <code
                                         class="idl"><a data-link-type="idl" href="#bluetoothremotegattservice" id="ref-for-bluetoothremotegattservice③⓪">BluetoothRemoteGATTService</a></code>
                                     に対して発火します。
                                 </p>
