@@ -426,6 +426,141 @@
 
     <link rel="stylesheet" href="https://www.w3.org/TR/lws10-core/local.css">
 
+    <style>
+        /* Tabbed examples: one pane per media type (see the script below). */
+        .example-tabs {
+            margin: 1em 0;
+        }
+
+        .example-tabs>.tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .25em;
+            margin-bottom: -1px;
+        }
+
+        .example-tabs>.tab-bar button {
+            font: inherit;
+            font-size: .85em;
+            padding: .3em .7em;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            border-radius: .3em .3em 0 0;
+            background: #f4f4f4;
+            color: inherit;
+        }
+
+        .example-tabs>.tab-bar button[aria-selected="true"] {
+            background: #fff;
+            font-weight: bold;
+        }
+
+        .example-tabs>[data-tab] {
+            border: 1px solid #ccc;
+            padding: 0 .5em;
+        }
+
+        .example-tabs>[data-tab]>pre {
+            margin: .5em 0;
+        }
+
+        /* Without script (and in print), show every pane under its label. */
+        .example-tabs:not(.ready)>[data-tab]::before {
+            content: attr(data-tab);
+            display: block;
+            font-weight: bold;
+            padding-top: .3em;
+        }
+
+        @media print {
+            .example-tabs>.tab-bar {
+                display: none;
+            }
+
+            .example-tabs>[data-tab][hidden] {
+                display: block;
+            }
+        }
+    </style>
+
+    <script>
+        // Tabbed examples: each .example-tabs block gets one tab per child with
+        // a data-tab label. Turtle and N-Triples panes are highlighted here,
+        // because ReSpec's highlighter has no Turtle grammar. Inline so that it
+        // works in PR previews and published copies, which carry no local files.
+        (function () {
+            const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const span = (c, t) => '<span class="hljs-' + c + '">' + esc(t) + "</span>";
+            const TURTLE = /(#[^\n]*)|(<[^>\s]*>)|("(?:[^"\\\n]|\\.)*")(\^\^|@[A-Za-z-]+)?|(@prefix|@base|\ba\b)|([A-Za-z][\w-]*:[\w.-]*|:[\w.-]+)|(\b\d+\b)/g;
+            function turtle(text) {
+                let out = "", last = 0, m;
+                TURTLE.lastIndex = 0;
+                while ((m = TURTLE.exec(text))) {
+                    out += esc(text.slice(last, m.index));
+                    if (m[1]) out += span("comment", m[1]);
+                    else if (m[2]) out += span("link", m[2]);
+                    else if (m[3]) out += span("string", m[3]) + (m[4] ? esc(m[4]) : "");
+                    else if (m[5]) out += span("keyword", m[5]);
+                    else if (m[6]) {
+                        const i = m[6].indexOf(":") + 1;
+                        out += span("literal", m[6].slice(0, i)) + (i < m[6].length ? span("attr", m[6].slice(i)) : "");
+                    }
+                    else out += span("number", m[7]);
+                    last = TURTLE.lastIndex;
+                }
+                return out + esc(text.slice(last));
+            }
+            function highlight(code) {
+                code.innerHTML = turtle(code.textContent);
+                code.classList.add("hljs");
+                code.dataset.lwsHighlighted = "";
+            }
+            function build() {
+                let n = 0;
+                for (const box of document.querySelectorAll(".example-tabs")) {
+                    for (const old of box.querySelectorAll(":scope > .tab-bar")) old.remove();
+                    const panes = [...box.querySelectorAll(":scope > [data-tab]")];
+                    if (!panes.length) continue;
+                    for (const pane of panes) {
+                        if (!/turtle|n-triples/.test(pane.dataset.tab)) continue;
+                        for (const code of pane.querySelectorAll("pre code.nohighlight:not([data-lws-highlighted])")) highlight(code);
+                    }
+                    const bar = document.createElement("div");
+                    bar.className = "tab-bar";
+                    bar.setAttribute("role", "tablist");
+                    const select = (i) => panes.forEach((pane, j) => {
+                        pane.hidden = i !== j;
+                        bar.children[j].setAttribute("aria-selected", String(i === j));
+                    });
+                    panes.forEach((pane, i) => {
+                        const button = document.createElement("button");
+                        button.type = "button";
+                        const id = "lws-tab-" + n++;
+                        button.id = id;
+                        button.setAttribute("role", "tab");
+                        button.setAttribute("aria-controls", id + "-panel");
+                        pane.id = id + "-panel";
+                        pane.setAttribute("role", "tabpanel");
+                        pane.setAttribute("aria-labelledby", id);
+                        button.textContent = pane.dataset.tab;
+                        button.addEventListener("click", () => select(i));
+                        bar.append(button);
+                    });
+                    box.prepend(bar);
+                    box.classList.add("ready");
+                    select(0);
+                }
+            }
+            function start() {
+                if (document.respec) document.respec.ready.then(build);
+                else build();
+            }
+            if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+            else start();
+        })();
+    </script>
+
 
     <meta name="color-scheme" content="light">
     <!-- <meta name="revision" content="d6af1a1dfe22e76ef5637f238d32e20e41b2b23e"> -->
@@ -461,14 +596,14 @@
   "name": "Linked Web Storage Protocol 1.0",
   "inLanguage": "en",
   "license": "https://www.w3.org/copyright/software-license-2023/",
-  "datePublished": "2026-10-15",
+  "datePublished": "2026-10-16",
   "copyrightHolder": {
     "name": "World Wide Web Consortium",
     "url": "https://www.w3.org/"
   },
   "discussionUrl": "https://github.com/w3c/lws-protocol/issues/",
   "alternativeHeadline": "",
-  "isBasedOn": "https://www.w3.org/TR/2026/WD-lws10-core-20261014/",
+  "isBasedOn": "https://www.w3.org/TR/2026/WD-lws10-core-20261016/",
   "description": "[@@ from charter]",
   "editor": [
     {
@@ -1009,6 +1144,134 @@
       }
     },
     {
+      "id": "https://www.rfc-editor.org/info/rfc6906/",
+      "type": "TechArticle",
+      "name": "The 'profile' Link Relation Type",
+      "url": "https://www.rfc-editor.org/info/rfc6906/",
+      "creator": [
+        {
+          "name": "E. Wilde"
+        }
+      ],
+      "publisher": {
+        "name": "IETF"
+      }
+    },
+    {
+      "id": "https://www.w3.org/TR/rdf12-concepts/",
+      "type": "TechArticle",
+      "name": "RDF 1.2 Concepts and Abstract Data Model",
+      "url": "https://www.w3.org/TR/rdf12-concepts/",
+      "creator": [
+        {
+          "name": "Andy Seaborne"
+        },
+        {
+          "name": "Gregg Kellogg"
+        },
+        {
+          "name": "Olaf Hartig"
+        },
+        {
+          "name": "Pierre-Antoine Champin"
+        }
+      ],
+      "publisher": {
+        "name": "W3C"
+      }
+    },
+    {
+      "id": "https://www.w3.org/TR/json-ld11/",
+      "type": "TechArticle",
+      "name": "JSON-LD 1.1",
+      "url": "https://www.w3.org/TR/json-ld11/",
+      "creator": [
+        {
+          "name": "Gregg Kellogg"
+        },
+        {
+          "name": "Pierre-Antoine Champin"
+        },
+        {
+          "name": "Dave Longley"
+        }
+      ],
+      "publisher": {
+        "name": "W3C"
+      }
+    },
+    {
+      "id": "https://www.w3.org/TR/rdf12-turtle/",
+      "type": "TechArticle",
+      "name": "RDF 1.2 Turtle",
+      "url": "https://www.w3.org/TR/rdf12-turtle/",
+      "creator": [
+        {
+          "name": "Gregg Kellogg"
+        },
+        {
+          "name": "Andy Seaborne"
+        },
+        {
+          "name": "Dominik Tomaszuk"
+        }
+      ],
+      "publisher": {
+        "name": "W3C"
+      }
+    },
+    {
+      "id": "https://www.w3.org/TR/rdf12-trig/",
+      "type": "TechArticle",
+      "name": "RDF 1.2 TriG",
+      "url": "https://www.w3.org/TR/rdf12-trig/",
+      "creator": [
+        {
+          "name": "Gregg Kellogg"
+        },
+        {
+          "name": "Dominik Tomaszuk"
+        }
+      ],
+      "publisher": {
+        "name": "W3C"
+      }
+    },
+    {
+      "id": "https://www.w3.org/TR/rdf12-n-triples/",
+      "type": "TechArticle",
+      "name": "RDF 1.2 N-Triples",
+      "url": "https://www.w3.org/TR/rdf12-n-triples/",
+      "creator": [
+        {
+          "name": "Gregg Kellogg"
+        },
+        {
+          "name": "Dominik Tomaszuk"
+        }
+      ],
+      "publisher": {
+        "name": "W3C"
+      }
+    },
+    {
+      "id": "https://www.w3.org/TR/rdf12-n-quads/",
+      "type": "TechArticle",
+      "name": "RDF 1.2 N-Quads",
+      "url": "https://www.w3.org/TR/rdf12-n-quads/",
+      "creator": [
+        {
+          "name": "Gregg Kellogg"
+        },
+        {
+          "name": "Dominik Tomaszuk"
+        }
+      ],
+      "publisher": {
+        "name": "W3C"
+      }
+    },
+    {
       "id": "https://www.rfc-editor.org/info/rfc2119/",
       "type": "TechArticle",
       "name": "Key words for use in RFCs to Indicate Requirement Levels",
@@ -1034,26 +1297,6 @@
       ],
       "publisher": {
         "name": "IETF"
-      }
-    },
-    {
-      "id": "https://www.w3.org/TR/json-ld11/",
-      "type": "TechArticle",
-      "name": "JSON-LD 1.1",
-      "url": "https://www.w3.org/TR/json-ld11/",
-      "creator": [
-        {
-          "name": "Gregg Kellogg"
-        },
-        {
-          "name": "Pierre-Antoine Champin"
-        },
-        {
-          "name": "Dave Longley"
-        }
-      ],
-      "publisher": {
-        "name": "W3C"
       }
     },
     {
@@ -1497,12 +1740,12 @@
   "lint": {
     "no-unused-dfns": false
   },
-  "gitRevision": "0e7ad1892cab93c623af294cc5d9f36151e297fa",
-  "publishDate": "2026-10-15",
+  "gitRevision": "4f85230da32b8b2e20863ae538b4e9ad31e217be",
+  "publishDate": "2026-10-16",
   "previousMaturity": "WD",
-  "previousPublishDate": "2026-10-14",
-  "publishISODate": "2026-10-15T00:00:00.000Z",
-  "generatedSubtitle": "W3C Working Draft 15 October 2026"
+  "previousPublishDate": "2026-10-16",
+  "publishISODate": "2026-10-16T00:00:00.000Z",
+  "generatedSubtitle": "W3C Working Draft 16 October 2026"
 }</script>
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD">
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/dark.css" disabled="">
@@ -1515,14 +1758,14 @@
             </a></p>
         <h1 id="title" class="title">Linked Web Storageプロトコル 1.0</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C作業草案</a> <time class="dt-published"
-                datetime="2026-10-15">2026年10月15日</time></p>
+                datetime="2026-10-16">2026年10月16日</time></p>
         <details open="">
             <summary>この文書の詳細</summary>
             <dl>
                 <dt>このバージョン:</dt>
                 <dd>
                     <a class="u-url"
-                        href="https://www.w3.org/TR/2026/WD-lws10-core-20261015/">https://www.w3.org/TR/2026/WD-lws10-core-20261015/</a>
+                        href="https://www.w3.org/TR/2026/WD-lws10-core-20261016/">https://www.w3.org/TR/2026/WD-lws10-core-20261016/</a>
                 </dd>
                 <dt>最新公開バージョン:</dt>
                 <dd>
@@ -1900,19 +2143,21 @@
                     <li class="tocline"><a class="tocxref" href="#lws-media-type-0"><bdi class="secno">12.1 </bdi>LWS
                             メディアタイプ</a>
                         <ol class="toc">
-                            <li class="tocline"><a class="tocxref" href="#media-type-equivalence"><bdi
-                                        class="secno">12.1.1 </bdi>メディアタイプの等価性</a></li>
-                            <li class="tocline"><a class="tocxref" href="#pagination"><bdi class="secno">12.1.2
+                            <li class="tocline"><a class="tocxref" href="#lws-profile"><bdi class="secno">12.1.1
+                                    </bdi>LWS プロファイル</a></li>
+                            <li class="tocline"><a class="tocxref" href="#content-negotiation"><bdi class="secno">12.1.2
+                                    </bdi>コンテンツネゴシエーション</a></li>
+                            <li class="tocline"><a class="tocxref" href="#pagination"><bdi class="secno">12.1.3
                                     </bdi>ページネーション</a>
                                 <ol class="toc">
                                     <li class="tocline"><a class="tocxref" href="#pagination-model"><bdi
-                                                class="secno">12.1.2.1 </bdi>ページネーションモデル</a></li>
+                                                class="secno">12.1.3.1 </bdi>ページネーションモデル</a></li>
                                     <li class="tocline"><a class="tocxref" href="#pagination-link-relations"><bdi
-                                                class="secno">12.1.2.2 </bdi>ページネーションリンク関係</a></li>
+                                                class="secno">12.1.3.2 </bdi>ページネーションのリンク関係</a></li>
                                     <li class="tocline"><a class="tocxref" href="#requesting-pages"><bdi
-                                                class="secno">12.1.2.3 </bdi>ページの要求</a></li>
+                                                class="secno">12.1.3.3 </bdi>ページの要求</a></li>
                                     <li class="tocline"><a class="tocxref" href="#example-paginated-container"><bdi
-                                                class="secno">12.1.2.4 </bdi>例：ページ分割されたコンテナー</a></li>
+                                                class="secno">12.1.3.4 </bdi>例: ページ分割されたコンテナー</a></li>
                                 </ol>
                             </li>
                         </ol>
@@ -3553,12 +3798,12 @@ signature</code></pre>
                 <h3 id="x8-1-container-representation"><bdi class="secno">8.1 </bdi>コンテナ表現</h3><a class="self-link"
                     href="#container-representation" aria-label="第8.1節へのパーマリンク"></a>
             </div>
-            <p>クライアントが <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-21">コンテナー</a>を取得すると、サーバーは、その <a href="#dfn-containers"
-                    class="internalDFN" data-link-type="dfn" id="ref-for-dfn-containers-22">コンテナー</a>およびその内容を記述する、構造化された
-                <dfn data-plurals="container representations" id="dfn-container-representation" tabindex="0"
-                    aria-haspopup="dialog" data-dfn-type="dfn">コンテナー表現</dfn>を返す。この節では、コンテナー表現の必須および
-                オプションのプロパティを定義する。
+            <p>LWS の<dfn data-plurals="container representations" id="dfn-container-representation" tabindex="0"
+                    aria-haspopup="dialog" data-dfn-type="dfn">コンテナー表現</dfn>は<a href="#dfn-containers"
+                    class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-containers-21">コンテナー</a>とその内容を記述する。この節では、その表現が
+                <code>application/lws+json</code>として提供される場合の必須プロパティと任意のプロパティを定義する。他の RDF メディア
+                タイプの表現は、<a href="#content-negotiation">コンテンツネゴシエーション</a>を通じて要求できる。
             </p>
             <section id="container-properties">
                 <div class="header-wrapper">
@@ -3568,17 +3813,17 @@ signature</code></pre>
                 <p>コンテナ表現は、次のプロパティを含まなければ<em class="rfc2119">MUST</em>ならない:</p>
                 <ul>
                     <li><strong><code>id</code></strong>: <a href="#dfn-containers" class="internalDFN"
-                            data-link-type="dfn" id="ref-for-dfn-containers-23">コンテナ</a>のURI。</li>
+                            data-link-type="dfn" id="ref-for-dfn-containers-22">コンテナ</a>のURI。</li>
                     <li><strong><code>type</code></strong>: 値<code>"Container"</code>。</li>
                     <li><strong><code>totalItems</code></strong>: クライアントに開示できる<a href="#dfn-containers"
                             class="internalDFN" data-link-type="dfn"
-                            id="ref-for-dfn-containers-24">コンテナ</a>内に含まれるリソースの総数を示す整数。
+                            id="ref-for-dfn-containers-23">コンテナ</a>内に含まれるリソースの総数を示す整数。
                         この数は正確であるべき<em class="rfc2119">SHOULD</em>だが、概算であっても<em class="rfc2119">MAY</em>よい。</li>
                     <li><strong><code>items</code></strong>: 含まれるリソース記述の配列（下記参照）。
                         <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                            id="ref-for-dfn-containers-25">コンテナ</a>が空の場合、これは空配列でなければ<em class="rfc2119">MUST</em>
+                            id="ref-for-dfn-containers-24">コンテナ</a>が空の場合、これは空配列でなければ<em class="rfc2119">MUST</em>
                         ならない。<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                            id="ref-for-dfn-containers-26">コンテナ</a>一覧が
+                            id="ref-for-dfn-containers-25">コンテナ</a>一覧が
                         ページ分割されている場合、<code>items</code>は現在のページのリソースのみを含む。詳細は<a href="#pagination">ページネーション</a>を参照。
                     </li>
                 </ul>
@@ -3590,7 +3835,7 @@ signature</code></pre>
                         aria-label="第8.1.2節へのパーマリンク"></a>
                 </div>
                 <p><code>items</code>配列内の各エントリーは、<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-27">コンテナ</a>内に含まれるリソースを記述する。包含リソース記述は、
+                        id="ref-for-dfn-containers-26">コンテナ</a>内に含まれるリソースを記述する。包含リソース記述は、
                     次を含まなければ<em class="rfc2119">MUST</em>ならない:</p>
                 <ul>
                     <li><strong><code>id</code></strong>: 含まれるリソースのURI。</li>
@@ -3618,9 +3863,21 @@ signature</code></pre>
                         表現の例</h4><a class="self-link" href="#example-container-representation"
                         aria-label="第8.1.3節へのパーマリンク"></a>
                 </div>
-                <p>次の例は、2つのリソースを含む<code>/alice/notes/</code>にある<a href="#dfn-containers" class="internalDFN"
-                        data-link-type="dfn" id="ref-for-dfn-containers-28">コンテナ</a>を示している:</p>
-                <pre><code class="json hljs" aria-busy="false"><span class="hljs-punctuation">{</span>
+                <p>次の例は、<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-containers-27">コンテナー</a>が
+                    <code>https://storage.example/alice/notes/</code> にあり、2 つのリソースを含むことを示す。他のタブには、
+                    同じコンテナーが <a href="#dfn-lws-profile" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-lws-profile-1">LWS プロファイル</a>の他の RDF メディアタイプで示される。
+                </p>
+                <div class="example-tabs ready" data-base="https://storage.example/alice/notes/">
+                    <div class="tab-bar" role="tablist"><button type="button" id="lws-tab-0" role="tab"
+                            aria-controls="lws-tab-0-panel" aria-selected="true">application/lws+json</button><button
+                            type="button" id="lws-tab-1" role="tab" aria-controls="lws-tab-1-panel"
+                            aria-selected="false">text/turtle</button><button type="button" id="lws-tab-2" role="tab"
+                            aria-controls="lws-tab-2-panel" aria-selected="false">application/n-triples</button></div>
+                    <div data-tab="application/lws+json" id="lws-tab-0-panel" role="tabpanel"
+                        aria-labelledby="lws-tab-0">
+                        <pre><code class="json hljs" aria-busy="false"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">"@context"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"https://www.w3.org/ns/lws/v1"</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"/alice/notes/"</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Container"</span><span class="hljs-punctuation">,</span>
@@ -3643,6 +3900,47 @@ signature</code></pre>
   <span class="hljs-punctuation">]</span>
 <span class="hljs-punctuation">}</span>
 </code></pre>
+                    </div>
+                    <div data-tab="text/turtle" id="lws-tab-1-panel" role="tabpanel" aria-labelledby="lws-tab-1"
+                        hidden="">
+                        <pre><code class="nohighlight hljs" data-lws-highlighted=""><span class="hljs-keyword">@prefix</span> <span class="hljs-literal">lws:</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#&gt;</span> .
+<span class="hljs-keyword">@prefix</span> <span class="hljs-literal">dcterms:</span> <span class="hljs-link">&lt;http://purl.org/dc/terms/&gt;</span> .
+<span class="hljs-keyword">@prefix</span> <span class="hljs-literal">schema:</span> <span class="hljs-link">&lt;http://schema.org/&gt;</span> .
+<span class="hljs-keyword">@prefix</span> <span class="hljs-literal">xsd:</span> <span class="hljs-link">&lt;http://www.w3.org/2001/XMLSchema#&gt;</span> .
+
+<span class="hljs-link">&lt;&gt;</span> <span class="hljs-keyword">a</span> <span class="hljs-literal">lws:</span><span class="hljs-attr">Container</span> ;
+  <span class="hljs-literal">lws:</span><span class="hljs-attr">totalItems</span> <span class="hljs-number">2</span> ;
+  <span class="hljs-literal">lws:</span><span class="hljs-attr">items</span> <span class="hljs-link">&lt;shoppinglist.txt&gt;</span>, <span class="hljs-link">&lt;todo.json&gt;</span> .
+
+<span class="hljs-link">&lt;shoppinglist.txt&gt;</span> <span class="hljs-keyword">a</span> <span class="hljs-literal">lws:</span><span class="hljs-attr">DataResource</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">format</span> <span class="hljs-string">"text/plain"</span> ;
+  <span class="hljs-literal">schema:</span><span class="hljs-attr">size</span> <span class="hljs-string">"47"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">long</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">modified</span> <span class="hljs-string">"2025-11-24T12:00:00Z"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">dateTime</span> .
+
+<span class="hljs-link">&lt;todo.json&gt;</span> <span class="hljs-keyword">a</span> <span class="hljs-literal">lws:</span><span class="hljs-attr">DataResource</span>, <span class="hljs-link">&lt;http://example.org/customType&gt;</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">format</span> <span class="hljs-string">"application/json"</span> ;
+  <span class="hljs-literal">schema:</span><span class="hljs-attr">size</span> <span class="hljs-string">"2048"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">long</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">modified</span> <span class="hljs-string">"2025-11-24T13:00:00Z"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">dateTime</span> .
+</code></pre>
+                    </div>
+                    <div data-tab="application/n-triples" id="lws-tab-2-panel" role="tabpanel"
+                        aria-labelledby="lws-tab-2" hidden="">
+                        <pre><code class="nohighlight hljs" data-lws-highlighted=""><span class="hljs-link">&lt;https://storage.example/alice/notes/&gt;</span> <span class="hljs-link">&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#Container&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/&gt;</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#totalItems&gt;</span> <span class="hljs-string">"2"</span>^^<span class="hljs-link">&lt;http://www.w3.org/2001/XMLSchema#integer&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/&gt;</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#items&gt;</span> <span class="hljs-link">&lt;https://storage.example/alice/notes/shoppinglist.txt&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/&gt;</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#items&gt;</span> <span class="hljs-link">&lt;https://storage.example/alice/notes/todo.json&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/shoppinglist.txt&gt;</span> <span class="hljs-link">&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#DataResource&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/shoppinglist.txt&gt;</span> <span class="hljs-link">&lt;http://purl.org/dc/terms/format&gt;</span> <span class="hljs-string">"text/plain"</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/shoppinglist.txt&gt;</span> <span class="hljs-link">&lt;http://schema.org/size&gt;</span> <span class="hljs-string">"47"</span>^^<span class="hljs-link">&lt;http://www.w3.org/2001/XMLSchema#long&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/shoppinglist.txt&gt;</span> <span class="hljs-link">&lt;http://purl.org/dc/terms/modified&gt;</span> <span class="hljs-string">"2025-11-24T12:00:00Z"</span>^^<span class="hljs-link">&lt;http://www.w3.org/2001/XMLSchema#dateTime&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/todo.json&gt;</span> <span class="hljs-link">&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#DataResource&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/todo.json&gt;</span> <span class="hljs-link">&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;</span> <span class="hljs-link">&lt;http://example.org/customType&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/todo.json&gt;</span> <span class="hljs-link">&lt;http://purl.org/dc/terms/format&gt;</span> <span class="hljs-string">"application/json"</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/todo.json&gt;</span> <span class="hljs-link">&lt;http://schema.org/size&gt;</span> <span class="hljs-string">"2048"</span>^^<span class="hljs-link">&lt;http://www.w3.org/2001/XMLSchema#long&gt;</span> .
+<span class="hljs-link">&lt;https://storage.example/alice/notes/todo.json&gt;</span> <span class="hljs-link">&lt;http://purl.org/dc/terms/modified&gt;</span> <span class="hljs-string">"2025-11-24T13:00:00Z"</span>^^<span class="hljs-link">&lt;http://www.w3.org/2001/XMLSchema#dateTime&gt;</span> .
+</code></pre>
+                    </div>
+                </div>
             </section>
         </section>
     </section>
@@ -3689,7 +3987,7 @@ signature</code></pre>
             要件は説明文および表に記載されています。また、このバインディングはHTTP（
             最初の対象プロトコルとして）を扱いますが、LWS操作は原理上、将来ほかのプロトコルにバインドすることもできます。
             <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                id="ref-for-dfn-containers-29">コンテナー</a>表現のメディア型要件は、<a href="#lws-media-type" class="sec-ref"><bdi
+                id="ref-for-dfn-containers-28">コンテナー</a>表現のメディア型要件は、<a href="#lws-media-type" class="sec-ref"><bdi
                     class="secno">12. </bdi>LWS メディア型</a>で定義されています。
         </p>
 
@@ -3705,7 +4003,7 @@ signature</code></pre>
                         title="Web Linking">RFC8288</a></cite>] の原則に基づいている。
                 Metadata は発見可能性を向上させ、自己記述型 API をサポートし、resource 操作および
                 <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-30">container</a> 階層と整合する。
+                    id="ref-for-dfn-containers-29">container</a> 階層と整合する。
             </p>
             <p><strong>Metadata Model</strong>
                 LWS におけるすべての metadata は、resource（link context）を起点とする型付き link の集合として表現される。
@@ -3720,11 +4018,11 @@ signature</code></pre>
                     id="ref-for-dfn-data-resources-2">data resources</a> の場合、metadata には representation が含まれ、
                 それぞれに format および省略可能な sizeInBytes がある。
                 <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-31">containers</a> および
+                    id="ref-for-dfn-containers-30">containers</a> および
                 <a href="#dfn-data-resources" class="internalDFN" data-link-type="dfn"
                     id="ref-for-dfn-data-resources-3">data resources</a> については、
                 親 <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-32">container</a> resource への link を、
+                    id="ref-for-dfn-containers-31">container</a> resource への link を、
                 resource の metadata の一部であるとみなす。
             </p>
             <p><strong><a href="#dfn-linkset-resource" class="internalDFN" data-link-type="dfn"
@@ -3756,7 +4054,7 @@ signature</code></pre>
                 </li>
                 <li><a href="#dfn-containment" class="internalDFN" data-link-type="dfn"
                         id="ref-for-dfn-containment-8">包含</a>：サーバーは、ルート以外のすべてのリソースについて、親<a href="#dfn-containers"
-                        class="internalDFN" data-link-type="dfn" id="ref-for-dfn-containers-33">コンテナー</a>を指す
+                        class="internalDFN" data-link-type="dfn" id="ref-for-dfn-containers-32">コンテナー</a>を指す
                     <code>rel="up"</code>を持つLinkヘッダーを<em class="rfc2119">必ず</em>含めなければなりません。
                 </li>
                 <li>プリファレンス：クライアントは、特定の関係を含めるか省略するために、URI
@@ -3855,88 +4153,92 @@ signature</code></pre>
                     href="#create-resource" aria-label="第9.2節へのパーマリンク"></a>
             </div>
 
-            <p><strong>リソースを作成する</strong>操作は、新しい<a href="#dfn-served-resource"
+            <p><strong>リソースの作成</strong>操作は、新しい<a href="#dfn-served-resource"
                     id="ref-for-dfn-served-resource-6">提供リソース</a>を既存の<a href="#dfn-containers" class="internalDFN"
-                    data-link-type="dfn" id="ref-for-dfn-containers-34">コンテナ</a>に追加する。この
+                    data-link-type="dfn" id="ref-for-dfn-containers-33">コンテナー</a>に追加する。この
                 操作は、<a href="#dfn-data-resources" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-data-resources-4">データリソース</a>およびサブコンテナの作成の両方を扱う。</p>
+                    id="ref-for-dfn-data-resources-4">データリソース</a>とサブコンテナーの両方の作成を扱う。</p>
             <p><strong>入力:</strong></p>
             <ul>
-                <li><strong>対象コンテナ:</strong> 新しいリソースが作成される<a href="#dfn-containers" class="internalDFN"
-                        data-link-type="dfn" id="ref-for-dfn-containers-35">コンテナ</a>の識別子。</li>
-                <li><strong>識別子ヒント:</strong> 新しいリソースの識別子に対する任意の提案。サーバーは
-                    このヒントを使用してもよいが、使用を要求されない。</li>
-                <li><strong>コンテンツ:</strong> 新しいリソースの初期コンテンツおよび型。</li>
+                <li><strong>対象コンテナー:</strong> 新しいリソースが作成される<a href="#dfn-containers" class="internalDFN"
+                        data-link-type="dfn" id="ref-for-dfn-containers-34">コンテナー</a>の
+                    識別子。</li>
+                <li><strong>識別子のヒント:</strong> 新しいリソースの識別子に関する任意の提案。サーバーは
+                    このヒントを使用してもよいが、使用する義務はない。</li>
+                <li><strong>内容:</strong> 新しいリソースの初期内容とタイプ。</li>
             </ul>
-            <p><strong>振る舞い:</strong></p>
+            <p><strong>動作:</strong></p>
             <ul>
-                <li><strong>識別子生成:</strong> サーバーは、新しい
-                    リソースの最終的な識別子（URI）を決定する。識別子ヒントが提供された場合、サーバーは、
+                <li><strong>識別子の生成:</strong> サーバーは新しい
+                    リソースの最終的な識別子（URI）を決定する。識別子のヒントが提供された場合、サーバーは
                     <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-36">コンテナ</a>内での
-                    一意性および妥当性を確保しながら、それを取り込もうとする。ヒントが提供されない場合、サーバーは
-                    一意な識別子を生成する。
+                        id="ref-for-dfn-containers-35">コンテナー</a>内での一意性と有効性を確保しながら、
+                    そのヒントを取り入れようとする。ヒントが提供されない場合、
+                    サーバーは一意の識別子を生成する。
                 </li>
-                <li><strong>コンテナメンバーシップ更新:</strong> サーバーは、新しいリソースを
-                    対象<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-37">コンテナ</a>のメンバーシップ一覧に原子的に追加する。</li>
-                <li><strong>メタデータ初期化:</strong> サーバーは、新しい
+                <li><strong>コンテナーのメンバーシップの更新:</strong> サーバーは新しいリソースを対象
+                    <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-containers-36">コンテナー</a>のメンバー一覧にアトミックに追加する。
+                </li>
+                <li><strong>メタデータの初期化:</strong> サーバーは新しい
                     リソースのシステムメタデータを初期化する。リソースに関連付けられた<a href="#dfn-metadata-resource" class="internalDFN"
                         data-link-type="dfn" id="ref-for-dfn-metadata-resource-2">メタデータリソース</a>がある場合、それも
                     初期化される。</li>
             </ul>
-            <p><strong>可能な応答:</strong></p>
+            <p><strong>考えられる応答:</strong></p>
             <ul>
-                <li><strong id="dfn-created">作成済み:</strong> 操作は成功した。サーバーは、新しく作成されたリソースの最終的な
-                    識別子を返す。</li>
+                <li><strong id="dfn-created">作成済み:</strong> 操作が成功した。サーバーは新しく作成された
+                    リソースの最終的な識別子を返す。</li>
                 <li><strong>対象が見つからない:</strong> 指定された対象<a href="#dfn-containers" class="internalDFN"
-                        data-link-type="dfn" id="ref-for-dfn-containers-38">コンテナ</a>は存在しない。</li>
-                <li><strong>許可されていない:</strong> クライアントの身元は既知であるが、この<a href="#dfn-containers" class="internalDFN"
-                        data-link-type="dfn" id="ref-for-dfn-containers-39">コンテナ</a>にリソースを作成する権限がない。</li>
-                <li><strong>不明な要求者:</strong> サーバーはクライアントの身元を認識せず、
+                        data-link-type="dfn" id="ref-for-dfn-containers-37">コンテナー</a>が
+                    存在しない。</li>
+                <li><strong>許可されていない:</strong> クライアントの識別情報は既知だが、この
+                    <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-containers-38">コンテナー</a>内にリソースを作成する権限がない。
+                </li>
+                <li><strong>不明な要求者:</strong> サーバーがクライアントの識別情報を認識できず、
                     認証を必要とする。</li>
-                <li><strong>競合:</strong> 生成された識別子を持つリソースが既に存在する、または
-                    別の状態競合がある。</li>
+                <li><strong>競合:</strong> 生成された識別子を持つリソースがすでに存在するか、
+                    別の状態の競合がある。</li>
                 <li><strong>不明なエラー:</strong> 予期しない内部エラーが発生した。</li>
             </ul>
-            <p>新しいリソースは、対象となる<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-40">コンテナー</a>URIに対してPOSTを使用して作成され、サーバーが
-                最終的な識別子を割り当てます。クライアントは、RFC8288のウェブリンク構文に従い、POST要求に1つ以上の
-                <code>Link</code>ヘッダーを含めることで、新しいリソースに初期のユーザー管理メタデータを<em class="rfc2119">任意で</em>提供できます。
-                [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc8288"
-                        title="ウェブリンク">RFC8288</a></cite>]。サーバー管理メタデータは、<em class="rfc2119">必ず</em>
-                作成時にサーバーによって自動的に生成され、クライアントが提供したリンクによって<em class="rfc2119">決して</em>
-                上書きされてはなりません。
-            </p>
-            <p>成功時、サーバーは、<code>Location</code>ヘッダーに新しいURIを指定して、201ステータスコードを<em class="rfc2119">必ず</em>返さなければなりません。
-                サーバーは、親<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-41">コンテナー</a>へのリンク
-                （<code>rel="up"</code>）や、作成されたリソース専用の<a href="#dfn-linkset-resource" class="internalDFN"
+            <p>新しいリソースは、対象の<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-containers-39">コンテナー</a> URI に POST を使用して作成され、サーバーが
+                最終的な識別子を割り当てる。クライアントは<em class="rfc2119">任意で</em>新しい
+                リソースのユーザー管理の初期メタデータを、POST 要求に 1 つ以上の<code>Link</code>ヘッダーを含め、
+                [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc8288" title="Web リンク">RFC8288</a></cite>]
+                の Web リンクの構文に従って提供してもよい。サーバー管理のメタデータは<em class="rfc2119">必ず</em>
+                作成時にサーバーによって自動生成されなければならず、<em class="rfc2119">決して</em>
+                クライアントが提供したリンクによって上書きされてはならない。</p>
+            <p>成功時、サーバーは<em class="rfc2119">必ず</em>新しい URI を
+                <code>Location</code>ヘッダーに含めて 201 ステータスコードを返さなければならない。サーバーは<em
+                    class="rfc2119">必ず</em><code>Link</code>ヘッダーに
+                主要なサーバー管理のメタデータを含めなければならない。これには、親<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-containers-40">コンテナー</a>へのリンク
+                （<code>rel="up"</code>）と、作成されたリソース専用の<a href="#dfn-linkset-resource" class="internalDFN"
                     data-link-type="dfn" id="ref-for-dfn-linkset-resource-7">リンクセットリソース</a>へのリンク
-                （<code>rel="linkset"; type="application/linkset+json"</code>）を含む、主要なサーバー管理メタデータ用の
-                <code>Link</code>ヘッダーを<em class="rfc2119">必ず</em>含めなければなりません。追加のリンクには、<em
-                    class="rfc2119">原則として</em><code>rel="type"</code>を含めるべきです（
+                （<code>rel="linkset"; type="application/linkset+json"</code>）が含まれる。追加のリンクには<em
+                    class="rfc2119">原則として</em><code>rel="type"</code>を含めるべきである（
                 <code>https://www.w3.org/ns/lws#Container</code>または
-                <code>https://www.w3.org/ns/lws#DataResource</code>を示します）。本文は、<em class="rfc2119">任意で</em>空にするか、
-                リソースの最小限の表現を含めることができます。一貫性を維持するため、すべてのメタデータの作成およびリンクは、
-                リソースの作成と<em class="rfc2119">必ず</em>アトミックでなければなりません。
+                <code>https://www.w3.org/ns/lws#DataResource</code>を示す）。本文は<em class="rfc2119">任意で</em>空にするか、
+                リソースの最小限の表現を含めてもよい。すべてのメタデータの作成とリンク付けは<em class="rfc2119">必ず</em>整合性を維持するためにリソースの作成とアトミックに行わなければならない。
             </p>
-            <p><strong>POST（コンテナーURIに対して）</strong> – <em>サーバーが割り当てた名前で作成：</em>
-                POSTを使用して、既存の<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-42">コンテナー</a>内に新しいリソースを追加します。サーバーがリソースの
-                識別子を割り当てます。クライアントは、作成するリソースの種類を次のように示します。</p>
+            <p><strong>POST（コンテナー URI への要求）</strong> – <em>サーバーが割り当てる名前で作成:</em>
+                POST を使用して、既存の<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-containers-41">コンテナー</a>内に新しいリソースを追加する。サーバーが
+                リソースの識別子を割り当てる。クライアントは、作成するリソースのタイプを次のように示す。</p>
             <ul>
                 <li><strong><a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                            id="ref-for-dfn-containers-43">コンテナー</a></strong>を作成するには、クライアントは、Containerタイプを指す
-                    <code>rel="type"</code>を持つ<code>Link</code>ヘッダーを<em class="rfc2119">必ず</em>含めなければなりません。
+                            id="ref-for-dfn-containers-42">コンテナー</a></strong>を作成するには、クライアントは<em
+                        class="rfc2119">必ず</em><code>rel="type"</code>を持つ<code>Link</code>ヘッダーを含め、
+                    Container タイプを指すようにしなければならない。
                     <code>Link: &lt;https://www.w3.org/ns/lws#Container&gt;; rel="type"</code>。
                 </li>
                 <li><strong><a href="#dfn-data-resources" class="internalDFN" data-link-type="dfn"
-                            id="ref-for-dfn-data-resources-5">データリソース</a></strong>を作成するには、クライアントは、適切な
-                    <code>Content-Type</code>ヘッダーとともに、要求本文にリソースの内容を含めます。
-                </li>
+                            id="ref-for-dfn-data-resources-5">データリソース</a></strong>を作成するには、クライアントは
+                    適切な<code>Content-Type</code>ヘッダーとともに要求本文にリソースの内容を含める。</li>
             </ul>
-            <p><strong>例（POSTによる新しいデータリソースの作成）：</strong></p>
+            <p><strong>例（POST による新しいデータリソースの作成）:</strong></p>
             <pre><code aria-busy="false" class="hljs http"><span class="hljs-keyword">POST</span> <span class="hljs-string">/alice/notes/</span> <span class="hljs-meta">HTTP/1.1</span>
 <span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>example.com
 <span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer &lt;token&gt;
@@ -3951,14 +4253,13 @@ apples
 orange juice
 </code></pre>
             <p>この例では、クライアントは<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-44">コンテナー</a><code>/alice/notes/</code>にPOSTしています。
-                クライアントは<code>text/plain</code>の内容（買い物リスト）を提供し、新しいリソースの名前として
-                <code>shoppinglist.txt</code>を提案します。<code>/alice/notes/</code>が存在し、クライアントが
-                認可されている場合、サーバーは新しい<a href="#dfn-data-resources" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-data-resources-6">データリソース</a>を作成し、<a href="#dfn-containers" class="internalDFN"
-                    data-link-type="dfn" id="ref-for-dfn-containers-45">コンテナー</a>のメンバーに追加します。
+                    id="ref-for-dfn-containers-43">コンテナー</a><code>/alice/notes/</code>に POST する。
+                <code>text/plain</code>の内容（買い物リスト）を提供する。<code>/alice/notes/</code>が存在し、
+                クライアントが認可されている場合、サーバーは新しい<a href="#dfn-data-resources" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-data-resources-6">データリソース</a>を作成し、それを<a href="#dfn-containers" class="internalDFN"
+                    data-link-type="dfn" id="ref-for-dfn-containers-44">コンテナー</a>のメンバー一覧に追加する。
             </p>
-            <p><strong>例（POSTへの応答 — データリソース）：</strong></p>
+            <p><strong>例（POST への応答 — データリソース）:</strong></p>
             <pre><code aria-busy="false" class="hljs http"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">201</span> Created
 <span class="hljs-attribute">Location</span><span class="hljs-punctuation">: </span>/alice/notes/shoppinglist.txt
 <span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>text/plain; charset=UTF-8
@@ -3967,26 +4268,26 @@ orange juice
 <span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;https://www.w3.org/ns/lws#DataResource&gt;; rel="type"
 <span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>0
 </code></pre>
-            <p>成功時には、<code>Location</code>ヘッダーに新しいURIを指定して201 Createdを返します。本文は、
-                空または最小限の表現にできます。
-                対象となる<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-46">コンテナー</a><code>/alice/notes/</code>が存在しない場合、別のステータスコードの方が適切でない限り、サーバーは
-                <em class="rfc2119">必ず</em>404エラーステータスを返さなければなりません。
+            <p>成功時には、新しい URI を<code>Location</code>ヘッダーに含めて 201 Created を返す。本文は
+                空でも、最小限の表現でもよい。
+                対象の<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-containers-45">コンテナー</a><code>/alice/notes/</code>が存在しない場合、サーバーは
+                <em class="rfc2119">必ず</em>別のステータスコードの方が適切でない限り、404 エラーステータスを返さなければならない。
             </p>
             <p><strong><a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-47">コンテナー</a>の作成：</strong>新しい<a href="#dfn-containers"
+                        id="ref-for-dfn-containers-46">コンテナー</a>の作成:</strong> 新しい<a href="#dfn-containers"
                     class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-48">コンテナー</a>を作成するには、クライアントは、Containerタイプを示す
-                <code>Link</code>ヘッダーとともに、既存の親<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-49">コンテナー</a>に対してPOSTを使用します。例：
-            </p>
+                    id="ref-for-dfn-containers-47">コンテナー</a>を作成するには、クライアントは既存の親<a href="#dfn-containers"
+                    class="internalDFN" data-link-type="dfn" id="ref-for-dfn-containers-48">コンテナー</a>に対して、Container
+                タイプを示す<code>Link</code>ヘッダーを
+                付けて POST を使用する。例:</p>
             <pre><code aria-busy="false" class="hljs http"><span class="hljs-keyword">POST</span> <span class="hljs-string">/alice/</span> <span class="hljs-meta">HTTP/1.1</span>
 <span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>example.com
 <span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer &lt;token&gt;
 <span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>0
 <span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;https://www.w3.org/ns/lws#Container&gt;; rel="type"
 </code></pre>
-            <p><strong>例（POSTへの応答 — コンテナー）：</strong></p>
+            <p><strong>例（POST への応答 — コンテナー）:</strong></p>
             <pre><code aria-busy="false" class="hljs http"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">201</span> Created
 <span class="hljs-attribute">Location</span><span class="hljs-punctuation">: </span>/alice/notes/
 <span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;/alice/notes/.meta&gt;; rel="linkset"; type="application/linkset+json"
@@ -3995,25 +4296,27 @@ orange juice
 <span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>0
 </code></pre>
             <p>これにより、<code>/alice/notes/</code>に新しい<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-50">コンテナー</a>が作成され、サーバーによって生成される
-                メタデータには、<code>https://www.w3.org/ns/lws#Container</code>としての<code>rel="type"</code>が含まれます。</p>
-            <p><strong>作成に関する追加の注記（HTTPバインディング）：</strong></p>
+                    id="ref-for-dfn-containers-49">コンテナー</a>が作成され、サーバーによって生成された
+                <code>rel="type"</code>が<code>https://www.w3.org/ns/lws#Container</code>であるメタデータも含まれる。
+            </p>
+            <p><strong>作成に関する追加の注記（HTTP バインディング）:</strong></p>
             <ul>
-                <li>POSTは冪等ではありません。繰り返すと重複が作成される可能性があるため、クライアントは<em class="rfc2119">原則として</em>
-                    意図しない再試行を避けるか、それを防止するために一意の識別子または検査を使用すべきです。</li>
-                <li>メタデータの更新はアトミックです。サーバーは、成功応答を返す前に、<a href="#dfn-linkset-resource" class="internalDFN"
-                        data-link-type="dfn" id="ref-for-dfn-linkset-resource-8">リンクセットリソース</a>が作成され、必須の
-                    サーバー管理フィールドが設定されていることを<em class="rfc2119">必ず</em>保証しなければなりません。</li>
-                <li>検出可能性のため、サーバーは、ハードコードされたURIを持たないクライアントを誘導するために、401応答に
-                    <code>rel="https://www.w3.org/ns/lws#storage"</code>を持つ<code>Link</code>ヘッダーを<em
-                        class="rfc2119">原則として</em>含めるべきです。
+                <li>POST は冪等ではない。繰り返すと重複が発生する可能性があるため、クライアントは<em class="rfc2119">原則として</em>
+                    意図しない再試行を避けるか、一意の識別子や検査を使用して重複を防ぐべきである。</li>
+                <li>メタデータの更新はアトミックである。サーバーは<em class="rfc2119">必ず</em><a href="#dfn-linkset-resource"
+                        class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-linkset-resource-8">リンクセットリソース</a>が作成され、必須の
+                    サーバー管理フィールドが設定されていることを、成功を返す前に保証しなければならない。</li>
+                <li>発見可能性のため、サーバーは<em class="rfc2119">原則として</em><code>Link</code>ヘッダーに
+                    <code>rel="https://www.w3.org/ns/lws#storage"</code>を含めて 401 応答で返し、
+                    URI をハードコードしていないクライアントを案内すべきである。
                 </li>
             </ul>
-            <p><strong>メタデータの管理および取得（作成に関連）：</strong>
-                メタデータは主に読み取り操作によって取得されますが、作成時に生成されます。クライアントは、
-                作成直後に、新しいリソースURIに対してGETまたはHEADを使用してメタデータを取得できます。クライアントは、
-                特定のメタデータリンク（関係タイプを介して）および属性を含めるよう要求するために、
-                <code>Prefer</code>ヘッダーを使用できます。
+            <p><strong>メタデータの管理と取得（作成に関連）:</strong>
+                メタデータは主に読み取り操作によって取得されるが、作成時に生成される。クライアントは
+                作成直後に新しいリソース URI に GET または HEAD を使用して取得できる。クライアントは
+                <code>Prefer</code>ヘッダーを使用して、特定のメタデータリンク（関係タイプによる）と
+                属性を含めるよう要求できる。
             </p>
 
         </section>
@@ -4025,47 +4328,45 @@ orange juice
             </div>
 
             <p>既存のリソースの表現、または<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-51">コンテナー</a>の一覧を取得します。</p>
+                    id="ref-for-dfn-containers-50">コンテナー</a>の一覧を取得する。</p>
             <ul>
-                <li><strong>入力</strong>: 対象識別子およびオプションのパラメーター。</li>
+                <li><strong>入力</strong>: 対象の識別子と任意のパラメーター。</li>
                 <li><strong>動作</strong>:<ul>
-                        <li>コンテナー以外のリソースの場合、サーバーはリソースの内容を返します。</li>
+                        <li>コンテナー以外のリソースについては、サーバーはリソースの内容を返す。</li>
                         <li><a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                                id="ref-for-dfn-containers-52">コンテナー</a>の場合、サーバーはメンバー
-                            リソースの一覧を返します。この一覧は<a href="#container-membership-and-authorization">認可</a>に基づいてフィルタリングされる<em
-                                class="rfc2119">場合があります</em>。一覧には
-                            各メンバーの中核メタデータを含めなければなりません。</li>
+                                id="ref-for-dfn-containers-51">コンテナー</a>については、サーバーはメンバー
+                            リソースの一覧を返す。この一覧は<a href="#container-membership-and-authorization">認可</a>に基づいて<em
+                                class="rfc2119">任意で</em>フィルタリングしてもよい。一覧には
+                            各メンバーの基本メタデータを含めなければならない。</li>
                     </ul>
                 </li>
                 <li><strong>結果</strong>: 要求された表現、または失敗の通知。</li>
             </ul>
-            <p>リソース読み取り操作は、HTTP GET リクエスト（ヘッダーのみのリクエストには HEAD）を使用してリソース表現を要求します。
+            <p>リソースの読み取り操作は、HTTP GET 要求（ヘッダーのみの要求には HEAD）を使用してリソースの表現を要求する。
                 動作は、対象 URL が<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-53">コンテナー</a>であるか、コンテナー以外のリソース（<a href="#dfn-data-resources"
+                    id="ref-for-dfn-containers-52">コンテナー</a>であるか、コンテナー以外のリソース（<a href="#dfn-data-resources"
                     class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-data-resources-7">データリソース</a>）であるかによって異なります。サーバーはメタデータを介してリソース種別を<em
-                    class="rfc2119">必ず</em>
-                区別しなければなりません。すべての応答は、<code>rel="linkset"</code>、<code>rel="up"</code>、
-                <code>rel="type"</code>などの主要な関係のための<code>Link</code>ヘッダーを含め、8.1節で定義される
-                メタデータと<em class="rfc2119">必ず</em>統合しなければなりません。サーバーは読み取り中、リソースの状態とそのメタデータとの間の原子性を<em
-                    class="rfc2119">必ず</em>保証しなければなりません。
+                    id="ref-for-dfn-data-resources-7">データリソース</a>）であるかによって異なる。サーバーは<em class="rfc2119">必ず</em>
+                メタデータを通じてリソースのタイプを区別しなければならない。すべての応答は<em class="rfc2119">必ず</em>
+                8.1 節で定義されるメタデータと統合しなければならず、これには
+                <code>rel="linkset"</code>、<code>rel="up"</code>、<code>rel="type"</code>などの主要な関係を示す<code>Link</code>ヘッダーが含まれる。サーバーは<em
+                    class="rfc2119">必ず</em>読み取り時にリソースの状態とそのメタデータの間の原子性を保証しなければならない。
             </p>
             <p><strong>GET（コンテナー以外のリソース）</strong> – <em>リソースの内容を取得する:</em>
-                完全な内容を取得するには、リソース URI に GET を送信します（認可されている場合）。200 OK で応答し、本文には
-                データを含め、Content-Type は保存されているメディア型と一致させます。サーバーは部分的な
-                取得のために[<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc7233"
-                        title="ハイパーテキスト転送プロトコル (HTTP/1.1): 範囲リクエスト">RFC7233</a></cite>]に従った範囲リクエストを<em
-                    class="rfc2119">必ず</em>サポートしなければなりません。
-                応答には、[<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc9110"
-                        title="HTTP の意味論">RFC9110</a></cite>]で定義されている<code>ETag</code>ヘッダーを<em
-                    class="rfc2119">必ず</em>含めなければなりません。</p>
-            <p><strong>例（ファイルを GET）:</strong></p>
+                リソースの URI に GET を送信して、内容全体を取得する（認可されている場合）。200 OK で応答し、本文に
+                データを含め、Content-Type を保存されているメディアタイプに一致させる。サーバーは<em class="rfc2119">必ず</em>
+                部分取得のために [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc7233"
+                        title="ハイパーテキスト転送プロトコル（HTTP/1.1）: 範囲要求">RFC7233</a></cite>] に従った範囲要求をサポートしなければならない。
+                応答には<em class="rfc2119">必ず</em>
+                [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc9110"
+                        title="HTTP セマンティクス">RFC9110</a></cite>] で定義される<code>ETag</code>ヘッダーを含めなければならない。</p>
+            <p><strong>例（ファイルの GET）:</strong></p>
             <pre><code aria-busy="false" class="hljs http"><span class="hljs-keyword">GET</span> <span class="hljs-string">/alice/notes/shoppinglist.txt</span> <span class="hljs-meta">HTTP/1.1</span>
 <span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer &lt;token&gt;
 <span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>text/plain
 </code></pre>
             <p>これは<code>/alice/notes/shoppinglist.txt</code>の内容を要求し、クライアントが
-                テキスト形式での取得を希望していることを示します。リソースが存在し、テキストであり、クライアントにアクセス権があると仮定すると:</p>
+                テキスト形式で取得したいことを示す。リソースが存在し、テキストであり、クライアントにアクセス権があると仮定すると、次のようになる。</p>
             <pre><code aria-busy="false" class="hljs http"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">200</span> OK
 <span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>text/plain; charset=UTF-8
 <span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>34
@@ -4083,40 +4384,52 @@ chocolate bars
 hash
 eggs
 </code></pre>
-            <p>サーバーはテキスト内容（<code>Content-Length</code>で示されるとおり合計34バイト）を返しました。
-                内容はファイルに保存されているデータそのものです。<code>ETag: "abc123456"</code>は、
-                キャッシュおよび条件付きリクエストのためのバリデーターです。応答には
-                メタデータの発見可能性のための<code>Link</code>ヘッダーが含まれ、<code>up</code>や<code>type</code>などの必須フィールドがあります。</p>
+            <p>サーバーはテキストの内容を返した（<code>Content-Length</code>が示すとおり、合計 34 バイト）。
+                内容はファイルに保存されているデータと完全に同一である。<code>ETag: "abc123456"</code>は、
+                キャッシュおよび条件付き要求のための検証子である。応答には
+                メタデータの発見可能性のための<code>Link</code>ヘッダーが含まれ、<code>up</code>や<code>type</code>などの必須フィールドを持つ。</p>
             <p><strong>GET（<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-54">コンテナー</a>リソース）</strong> – <em><a href="#dfn-containers"
+                        id="ref-for-dfn-containers-53">コンテナー</a>リソース）</strong> – <em><a href="#dfn-containers"
                         class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-55">コンテナー</a>の内容を一覧表示する:</em>
+                        id="ref-for-dfn-containers-54">コンテナー</a>の内容を一覧表示する:</em>
                 対象 URI が<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-56">コンテナー</a>に対応する場合（メタデータの型によって判定）、GET リクエストは
+                    id="ref-for-dfn-containers-55">コンテナー</a>に対応する場合（メタデータのタイプによって判定される）、GET 要求は
                 <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-57">コンテナー</a>のメンバー一覧を返します。応答本文は、<a href="#dfn-container-representation"
-                    class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-container-representation-3">コンテナー表現</a>節で定義されている<a
-                    href="#container-representation">コンテナー表現</a>であり、LWS コンテナーのメディア
-                型を使用します。この一覧には各メンバーのメタデータとして、リソース識別子（<em class="rfc2119">必須</em>）、型（<em
-                    class="rfc2119">必須</em>）、メディア型（DataResources の場合は<em class="rfc2119">必須</em>）、サイズ（<em
-                    class="rfc2119">推奨</em>）、および
-                更新タイムスタンプ（<em class="rfc2119">推奨</em>）が含まれます。
+                    id="ref-for-dfn-containers-56">コンテナー</a>のメンバーの一覧を返す。
+                <code>Content-Type: application/lws+json</code>を持つ応答は、
+                <a href="#dfn-container-representation" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-container-representation-3">コンテナー
+                    表現</a>であり、<a href="#container-representation">コンテナー
+                    表現</a>の節で定義される。この表現では、一覧に各メンバーのメタデータが含まれる。
+                リソースの識別子（<em class="rfc2119">必須</em>）、タイプ（<em class="rfc2119">必須</em>）、メディアタイプ
+                （DataResources では<em class="rfc2119">必須</em>）、サイズ（<em class="rfc2119">推奨</em>）、および
+                更新日時のタイムスタンプ（<em class="rfc2119">推奨</em>）。
             </p>
-            <p><strong>例（コンテナーを GET）:</strong></p>
-            <pre><code aria-busy="false" class="hljs http"><span class="hljs-keyword">GET</span> <span class="hljs-string">/alice/notes/</span> <span class="hljs-meta">HTTP/1.1</span>
+            <p><strong>例（コンテナーの GET）:</strong> <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-containers-57">コンテナー</a>が存在し、クライアントにアクセス権があると仮定する。
+                タブには、異なるメディアタイプでの同じ要求が示される。<a href="#content-negotiation" class="sec-ref"><bdi class="secno">12.1.2
+                    </bdi>コンテンツネゴシエーション</a>を参照。</p>
+            <div class="example-tabs ready">
+                <div class="tab-bar" role="tablist"><button type="button" id="lws-tab-3" role="tab"
+                        aria-controls="lws-tab-3-panel" aria-selected="true">application/lws+json</button><button
+                        type="button" id="lws-tab-4" role="tab" aria-controls="lws-tab-4-panel"
+                        aria-selected="false">text/turtle (LWS プロファイル)</button></div>
+                <div data-tab="application/lws+json" id="lws-tab-3-panel" role="tabpanel" aria-labelledby="lws-tab-3">
+                    <p>要求:</p>
+                    <pre><code class="http hljs" aria-busy="false"><span class="hljs-keyword">GET</span> <span class="hljs-string">/alice/notes/</span> <span class="hljs-meta">HTTP/1.1</span>
 <span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer &lt;token&gt;
 <span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>application/lws+json
 </code></pre>
-            <p>コンテナーが存在し、クライアントにアクセス権があると仮定すると:</p>
-            <pre><code aria-busy="false" class="hljs http"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">200</span> OK
+                    <p>応答ヘッダー:</p>
+                    <pre><code class="http hljs" aria-busy="false"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">200</span> OK
 <span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/lws+json
 <span class="hljs-attribute">ETag</span><span class="hljs-punctuation">: </span>"container-etag-789"
 <span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;/alice/notes/.meta&gt;; rel="linkset"; type="application/linkset+json"
 <span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;/alice/&gt;; rel="up"
 <span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;https://www.w3.org/ns/lws#Container&gt;; rel="type"
-
-<span class="language-json"><span class="hljs-punctuation">{</span>
+</code></pre>
+                    <p>応答本文:</p>
+                    <pre><code class="json hljs" aria-busy="false"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">"@context"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"https://www.w3.org/ns/lws/v1"</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"id"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"/alice/notes/"</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">"type"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"Container"</span><span class="hljs-punctuation">,</span>
@@ -4138,43 +4451,80 @@ eggs
     <span class="hljs-punctuation">}</span>
   <span class="hljs-punctuation">]</span>
 <span class="hljs-punctuation">}</span>
-</span></code></pre>
+</code></pre>
+                </div>
+                <div data-tab="text/turtle (LWS profile)" id="lws-tab-4-panel" role="tabpanel"
+                    aria-labelledby="lws-tab-4" hidden="">
+                    <p>要求:</p>
+                    <pre><code class="http hljs" aria-busy="false"><span class="hljs-keyword">GET</span> <span class="hljs-string">/alice/notes/</span> <span class="hljs-meta">HTTP/1.1</span>
+<span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer &lt;token&gt;
+<span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>text/turtle; profile="https://www.w3.org/ns/lws/v1"
+</code></pre>
+                    <p>応答ヘッダー:</p>
+                    <pre><code class="http hljs" aria-busy="false"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">200</span> OK
+<span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>text/turtle; profile="https://www.w3.org/ns/lws/v1"
+<span class="hljs-attribute">ETag</span><span class="hljs-punctuation">: </span>"container-etag-789"
+<span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;/alice/notes/.meta&gt;; rel="linkset"; type="application/linkset+json"
+<span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;/alice/&gt;; rel="up"
+<span class="hljs-attribute">Link</span><span class="hljs-punctuation">: </span>&lt;https://www.w3.org/ns/lws#Container&gt;; rel="type"
+</code></pre>
+                    <p>応答本文:</p>
+                    <pre><code class="nohighlight hljs" data-lws-highlighted=""><span class="hljs-keyword">@prefix</span> <span class="hljs-literal">lws:</span> <span class="hljs-link">&lt;https://www.w3.org/ns/lws#&gt;</span> .
+<span class="hljs-keyword">@prefix</span> <span class="hljs-literal">dcterms:</span> <span class="hljs-link">&lt;http://purl.org/dc/terms/&gt;</span> .
+<span class="hljs-keyword">@prefix</span> <span class="hljs-literal">schema:</span> <span class="hljs-link">&lt;http://schema.org/&gt;</span> .
+<span class="hljs-keyword">@prefix</span> <span class="hljs-literal">xsd:</span> <span class="hljs-link">&lt;http://www.w3.org/2001/XMLSchema#&gt;</span> .
+
+<span class="hljs-link">&lt;&gt;</span> <span class="hljs-keyword">a</span> <span class="hljs-literal">lws:</span><span class="hljs-attr">Container</span> ;
+  <span class="hljs-literal">lws:</span><span class="hljs-attr">totalItems</span> <span class="hljs-number">2</span> ;
+  <span class="hljs-literal">lws:</span><span class="hljs-attr">items</span> <span class="hljs-link">&lt;shoppinglist.txt&gt;</span>, <span class="hljs-link">&lt;todo.json&gt;</span> .
+
+<span class="hljs-link">&lt;shoppinglist.txt&gt;</span> <span class="hljs-keyword">a</span> <span class="hljs-literal">lws:</span><span class="hljs-attr">DataResource</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">format</span> <span class="hljs-string">"text/plain"</span> ;
+  <span class="hljs-literal">schema:</span><span class="hljs-attr">size</span> <span class="hljs-string">"47"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">long</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">modified</span> <span class="hljs-string">"2025-11-24T12:00:00Z"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">dateTime</span> .
+
+<span class="hljs-link">&lt;todo.json&gt;</span> <span class="hljs-keyword">a</span> <span class="hljs-literal">lws:</span><span class="hljs-attr">DataResource</span>, <span class="hljs-link">&lt;http://example.org/customType&gt;</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">format</span> <span class="hljs-string">"application/json"</span> ;
+  <span class="hljs-literal">schema:</span><span class="hljs-attr">size</span> <span class="hljs-string">"2048"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">long</span> ;
+  <span class="hljs-literal">dcterms:</span><span class="hljs-attr">modified</span> <span class="hljs-string">"2025-11-24T13:00:00Z"</span>^^<span class="hljs-literal">xsd:</span><span class="hljs-attr">dateTime</span> .
+</code></pre>
+                </div>
+            </div>
             <p>この例では、<code>/alice/notes/</code>は<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-58">コンテナー</a>です。応答は
-                LWS コンテキストを持つ JSON-LD を使用し、必須メタデータとともにメンバーを一覧表示します。各項目には、その<code>type</code>、
-                <code>id</code>、<code>format</code>、<code>size</code>、および<code>modified</code>タイムスタンプがフラットな
-                プロパティとして含まれます。
+                    id="ref-for-dfn-containers-58">コンテナー</a>である。応答は
+                LWS コンテキストを使用した JSON-LD で、必須のメタデータとともにメンバーを一覧表示する。各項目には<code>type</code>、
+                <code>id</code>、<code>format</code>、<code>size</code>、<code>modified</code>のタイムスタンプがフラットな
+                プロパティとして含まれる。
             </p>
-            <p>すべての場合において、サーバーは応答
-                ヘッダーに次のメタデータを<em class="rfc2119">必ず</em>含めなければなりません。[<cite><a class="bibref" data-link-type="biblio"
-                        href="#bib-rfc9110" title="HTTP の意味論">RFC9110</a></cite>]で定義されている<code>ETag</code>ヘッダー、および
+            <p>いずれの場合も、サーバーは<em class="rfc2119">必ず</em>応答ヘッダーに次のメタデータを含めなければならない。
+                [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc9110"
+                        title="HTTP セマンティクス">RFC9110</a></cite>] で定義される<code>ETag</code>ヘッダーと、
                 <code>rel="linkset"</code>、<code>rel="up"</code>、<code>rel="type"</code>を持ち、それが
                 <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-59">コンテナー</a>であることを示す<code>Link</code>ヘッダーです。
+                    id="ref-for-dfn-containers-59">コンテナー</a>であることを示す<code>Link</code>ヘッダー。
             </p>
             <p><strong>HEAD（任意のリソースまたは<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-60">コンテナー</a>）</strong> – <em>ヘッダー／メタデータのみ:</em>
-                LWS サーバーは、<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-containers-61">コンテナー</a>とコンテナー以外の両方について、HEAD [<cite><a class="bibref"
-                        data-link-type="biblio" href="#bib-rfc9110" title="HTTP の意味論">RFC9110</a></cite>]を<em
-                    class="rfc2119">必ず</em>サポートし、
-                GET と同じヘッダー
-                （<code>Content-Type</code>、メタデータ用の<code>Link</code>を含む）を返しますが、本文は返しません。これにより、
-                内容を転送せずにメタデータを取得できます。
+                        id="ref-for-dfn-containers-60">コンテナー</a>）</strong> – <em>ヘッダーとメタデータのみ:</em>
+                LWS サーバーは<em class="rfc2119">必ず</em>コンテナーと非コンテナーの両方について HEAD [<cite><a class="bibref"
+                        data-link-type="biblio" href="#bib-rfc9110" title="HTTP セマンティクス">RFC9110</a></cite>] をサポートし、
+                <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-containers-61">コンテナー</a>と非コンテナーに対して、GET と同じヘッダーを返さなければならない。
+                （<code>Content-Type</code>やメタデータ用の<code>Link</code>を含む）が、本文は含めない。これにより、
+                内容を転送せずにメタデータを取得できる。
             </p>
-            <p><strong>キャッシュと条件付きリクエスト:</strong> LWS は HTTP のキャッシュ意味論を利用します。サーバーは、
-                [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc9110"
-                        title="HTTP の意味論">RFC9110</a></cite>]で定義されている条件付きリクエストを<em class="rfc2119">サポートすることが推奨されます</em>。
-                これには、エンティティタグ（<code>ETags</code>）や日付ベースのバリデーター（
-                <code>If-Modified-Since</code>ヘッダーなど）といった仕組みが含まれます。リソースまたは<a href="#dfn-containers" class="internalDFN"
+            <p><strong>キャッシュと条件付き要求:</strong> LWS は HTTP のキャッシュセマンティクスを活用する。サーバーは<em class="rfc2119">原則として</em>[<cite><a
+                        class="bibref" data-link-type="biblio" href="#bib-rfc9110"
+                        title="HTTP セマンティクス">RFC9110</a></cite>] で定義される条件付き要求をサポートすべきであり、
+                エンティティタグ（<code>ETags</code>）や日付ベースの検証子（
+                <code>If-Modified-Since</code>ヘッダーなど）の仕組みを含む。リソースまたは<a href="#dfn-containers" class="internalDFN"
                     data-link-type="dfn" id="ref-for-dfn-containers-62">コンテナー</a>の一覧が
-                変更されていない場合は、冗長な転送を避けるため<code>304 Not Modified</code>で応答します。
+                変更されていない場合は、不要な転送を避けるために<code>304 Not Modified</code>で応答する。
             </p>
-            <p><strong>検出可能性と認可：</strong>検出可能性を高めるため、
-                <code>401 Unauthorized</code>レスポンスには、<code>WWW-Authenticate</code>ヘッダーが含まれ、
-                <code>resource_metadata</code>パラメーターを伴う。これは<a
-                    href="#authorization-server-discovery">認可サーバーの検出</a>で説明されており、クライアントはこれにより、
-                URIをハードコードせずに認可サーバーを見つけることができる。
+            <p><strong>発見可能性と認可:</strong> 発見可能性を高めるため、
+                <code>401 Unauthorized</code>応答には、
+                <code>resource_metadata</code>パラメーターを持つ<code>WWW-Authenticate</code>ヘッダーが含まれる。これは<a
+                    href="#authorization-server-discovery">認可サーバーの発見</a>で説明されており、クライアントが
+                URI をハードコードせずに認可サーバーを特定できるようにする。
             </p>
 
         </section>
@@ -6100,123 +6450,155 @@ Content-Type: application/linkset+json
                 <h3 id="x12-1-lws-media-type"><bdi class="secno">12.1 </bdi>LWS メディアタイプ</h3><a class="self-link"
                     href="#lws-media-type-0" aria-label="第12.1節へのパーマリンク"></a>
             </div>
-            <p>LWS <a href="#dfn-storage-description-resource" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-storage-description-resource-12">ストレージ記述</a>は、メディアタイプ
-                <code>application/lws+cid</code> でシリアライズ可能で<em class="rfc2119">なければならない</em>。
-                <code>application/lws+cid</code> メディアタイプは、LWS 語彙で拡張された
-                <abbr title="ワールド・ワイド・ウェブ・コンソーシアム">W3C</abbr> Controlled Identifier 文書 [<cite><a class="bibref"
-                        data-link-type="biblio" href="#bib-cid-1-0" title="制御識別子 v1.0">CID-1.0</a></cite>]
-                を特殊化した文書を識別する。
+            <p>LWS の<a href="#dfn-storage-description-resource" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-storage-description-resource-12">ストレージ記述</a>は<em
+                    class="rfc2119">必ず</em>メディアタイプ<code>application/lws+cid</code>でシリアライズ可能でなければならない。
+                <code>application/lws+cid</code>メディアタイプは、
+                <abbr title="World Wide Web Consortium">W3C</abbr>の制御識別子文書[<cite><a class="bibref"
+                        data-link-type="biblio" href="#bib-cid-1-0" title="制御識別子 v1.0">CID-1.0</a></cite>]を LWS
+                語彙で拡張した特化文書を識別する。
             </p>
-            <p>LWS <a href="#dfn-container-representation" class="internalDFN" data-link-type="dfn"
-                    id="ref-for-dfn-container-representation-4">コンテナー表現</a>は、メディアタイプ <code>application/lws+json</code>
-                に<em class="rfc2119">対応しなければならない</em>。</p>
-            <p>LWS コンテナー表現は JSON-LD の規約を使用するが、LWS の制約および要件は、
-                特定のメディアタイプを使用する根拠となる。LWS コンテナーは JSON-LD の制限付きプロファイルとみなせるため、
-                実装は、メディアタイプ
-                <code>application/ld+json; profile="https://www.w3.org/ns/lws/v1"</code> を
-                <code>application/lws+json</code> と同等とみなす<em class="rfc2119">べきである</em>。
-            </p>
-            <section id="media-type-equivalence">
+            <p>LWS の<a href="#dfn-container-representation" class="internalDFN" data-link-type="dfn"
+                    id="ref-for-dfn-container-representation-4">コンテナー表現</a>は<em
+                    class="rfc2119">必ず</em>メディアタイプ<code>application/lws+json</code>をサポートしなければならない。</p>
+            <p>LWS のコンテナー表現は JSON-LD の規約を使用するが、LWS に固有の制約と要件により、
+                専用のメディアタイプを使用することが正当化される。</p>
+            <section id="lws-profile">
                 <div class="header-wrapper">
-                    <h4 id="x12-1-1-media-type-equivalence"><bdi class="secno">12.1.1 </bdi>メディアタイプの等価性</h4>
-                    <a class="self-link" href="#media-type-equivalence" aria-label="第12.1.1節へのパーマリンク"></a>
+                    <h4 id="x12-1-1-lws-profile"><bdi class="secno">12.1.1 </bdi>LWS プロファイル</h4><a class="self-link"
+                        href="#lws-profile" aria-label="12.1.1 節への固定リンク"></a>
                 </div>
-                <p><a href="#dfn-container-representation" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-container-representation-5">コンテナー表現</a>では、メディアタイプ
-                    <code>application/lws+json</code>、<code>application/ld+json</code>、および
-                    <code>application/json</code> は同等である。レスポンス本文は、<a href="#container-representation"
-                        class="sec-ref"><bdi class="secno">8.1 </bdi>コンテナー
-                        表現</a>で定義されている <a href="#dfn-container-representation" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-container-representation-6">コンテナー表現</a>の構造に準拠する同一の
-                    JSON-LD 文書であり、<code>Content-Type</code> レスポンスヘッダーのみが異なる。サーバーは、これらの
-                    メディアタイプのいずれかを求めるリクエストを受け入れ<em class="rfc2119">なければならず</em>、<code>Content-Type</code> レスポンスヘッダーを要求された
-                    メディアタイプに設定し<em class="rfc2119">なければならない</em>。
+                <p>URI <code>https://www.w3.org/ns/lws/v1</code>は<dfn id="dfn-lws-profile" tabindex="0"
+                        aria-haspopup="dialog" data-dfn-type="dfn">LWS プロファイル</dfn>[<cite><a class="bibref"
+                            data-link-type="biblio" href="#bib-rfc6906"
+                            title="「profile」リンク関係タイプ">RFC6906</a></cite>]を識別する。<a href="#dfn-containers"
+                        class="internalDFN" data-link-type="dfn" id="ref-for-dfn-containers-73">コンテナー</a>の表現が<a
+                        href="#dfn-lws-profile" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-lws-profile-2">LWS プロファイル</a>に適合するのは、
+                    同じ<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-containers-74">コンテナー</a>の状態とページの<code>application/lws+json</code>表現と
+                    RDF 同型である場合である。すなわち、エンコードされた RDF が、
+                    <a href="https://www.w3.org/TR/rdf12-concepts/#section-dataset-isomorphism">RDF データセットの
+                        比較</a>[<cite><a class="bibref" data-link-type="biblio" href="#bib-rdf12-concepts"
+                            title="RDF 1.2 の概念と抽象データモデル">RDF12-CONCEPTS</a></cite>]で定義されるように、
+                    <code>application/lws+json</code>表現を JSON-LD として解釈したときにエンコードされる RDF と同型である場合である[<cite><a
+                            class="bibref" data-link-type="biblio" href="#bib-json-ld11"
+                            title="JSON-LD 1.1">JSON-LD11</a></cite>]。<code>application/lws+json</code>
+                    表現は常に<a href="#dfn-lws-profile" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-lws-profile-3">LWS プロファイル</a>に適合する。
                 </p>
-                <p>コンテナーレスポンスの <code>Content-Type</code> はリクエストの
-                    <code>Accept</code> ヘッダーに依存するため、これらのレスポンスには
-                    <code>Vary: Accept</code> ヘッダーを含める<em class="rfc2119">べきである</em> [<cite><a class="bibref"
-                            data-link-type="biblio" href="#bib-rfc9110" title="HTTP セマンティクス">RFC9110</a></cite>]。
+            </section>
+            <section id="content-negotiation">
+                <div class="header-wrapper">
+                    <h4 id="x12-1-2-content-negotiation"><bdi class="secno">12.1.2 </bdi>コンテンツネゴシエーション</h4><a
+                        class="self-link" href="#content-negotiation" aria-label="12.1.2 節への固定リンク"></a>
+                </div>
+                <p>サーバーは<em class="rfc2119">必ず</em><a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-containers-75">コンテナー</a>に対する<code>application/lws+json</code>の要求に応じ、
+                    <em class="rfc2119">必ず</em>応答の<code>Content-Type</code>ヘッダーを選択された表現のメディアタイプに設定しなければならない。
                 </p>
-                <p><strong>注記（非規範的）：</strong> この等価性は、上記の3つのメディアタイプにのみ適用される。
-                    あらゆる HTTP リソースと同様に、サーバーは標準的なコンテントネゴシエーションを通じて、コンテナーの追加の表現（たとえば
-                    <code>text/turtle</code>）を提供できる [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc9110"
-                            title="HTTP セマンティクス">RFC9110</a></cite>]。この
-                    仕様は、そのような対応を要求するものでも妨げるものでもない。
+                <p>クライアントは、RDF メディアタイプの<code>profile</code>パラメーターに<a href="#dfn-lws-profile" class="internalDFN"
+                        data-link-type="dfn" id="ref-for-dfn-lws-profile-4">LWS プロファイル</a>の URI を含めることで、
+                    <a href="#dfn-lws-profile" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-lws-profile-5">LWS プロファイル</a>に適合する表現を要求する。
+                    このパラメーターを定義する RDF メディアタイプには、<code>application/ld+json</code>
+                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-json-ld11"
+                            title="JSON-LD 1.1">JSON-LD11</a></cite>]、<code>text/turtle</code>[<cite><a class="bibref"
+                            data-link-type="biblio" href="#bib-rdf12-turtle"
+                            title="RDF 1.2 Turtle">RDF12-TURTLE</a></cite>]、<code>application/trig</code>[<cite><a
+                            class="bibref" data-link-type="biblio" href="#bib-rdf12-trig"
+                            title="RDF 1.2 TriG">RDF12-TRIG</a></cite>]、<code>application/n-triples</code>[<cite><a
+                            class="bibref" data-link-type="biblio" href="#bib-rdf12-n-triples"
+                            title="RDF 1.2 N-Triples">RDF12-N-TRIPLES</a></cite>]、および<code>application/n-quads</code>
+                    [<cite><a class="bibref" data-link-type="biblio" href="#bib-rdf12-n-quads"
+                            title="RDF 1.2 N-Quads">RDF12-N-QUADS</a></cite>]がある。サーバーがそのようなメディアタイプを選択した場合、
+                    応答は<em class="rfc2119">必ず</em><a href="#dfn-lws-profile" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-lws-profile-6">LWS プロファイル</a>に適合しなければならない。
+                    つまり、<code>application/lws+json</code>表現と<em class="rfc2119">必ず</em>RDF 同型でなければならず、
+                    その<code>Content-Type</code>には<em class="rfc2119">必ず</em>同じ
+                    <code>profile</code>パラメーターを含めなければならない。サーバーは、そのメディアタイプで
+                    <a href="#dfn-lws-profile" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-lws-profile-7">LWS プロファイル</a>に適合する表現を生成できない場合、
+                    そのメディアタイプを<em class="rfc2119">選択してはならない</em>。
                 </p>
+                <p>選択される表現が要求の<code>Accept</code>ヘッダーに依存する場合、応答には<em
+                        class="rfc2119">原則として</em><code>Vary: Accept</code>ヘッダーを含めるべきである[<cite><a class="bibref"
+                            data-link-type="biblio" href="#bib-rfc9110" title="HTTP セマンティクス">RFC9110</a></cite>]。</p>
             </section>
             <section id="pagination">
                 <div class="header-wrapper">
-                    <h4 id="x12-1-2-pagination"><bdi class="secno">12.1.2 </bdi>ページネーション</h4><a class="self-link"
-                        href="#pagination" aria-label="第12.1.2節へのパーマリンク"></a>
+                    <h4 id="x12-1-3-pagination"><bdi class="secno">12.1.3 </bdi>ページネーション</h4><a class="self-link"
+                        href="#pagination" aria-label="12.1.3 節への固定リンク"></a>
                 </div>
                 <p><a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-73">コンテナー</a>などの特定の複合リソースは、多数のリソースを保持する場合がある。
-                    クライアントが一覧を段階的に取得できるようにするため、サーバーは、メンバー数がサーバーによって決定された
-                    しきい値を超える <a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
-                        id="ref-for-dfn-containers-74">コンテナー</a>について、ページネーションに対応する<em class="rfc2119">べきである</em>。</p>
+                        id="ref-for-dfn-containers-76">コンテナー</a>などの一部の複合リソースには、多数のリソースが含まれる場合がある。
+                    クライアントが一覧を段階的に取得できるようにするため、サーバーは<em class="rfc2119">原則として</em>、
+                    メンバー数がサーバーによって決定されたしきい値を超える<a href="#dfn-containers" class="internalDFN" data-link-type="dfn"
+                        id="ref-for-dfn-containers-77">コンテナー</a>について、ページネーションをサポートすべきである。</p>
                 <section id="pagination-model">
                     <div class="header-wrapper">
-                        <h5 id="x12-1-2-1-pagination-model"><bdi class="secno">12.1.2.1 </bdi>ページネーションモデル</h5><a
-                            class="self-link" href="#pagination-model" aria-label="第12.1.2.1節へのパーマリンク"></a>
+                        <h5 id="x12-1-3-1-pagination-model"><bdi class="secno">12.1.3.1 </bdi>ページネーションモデル</h5><a
+                            class="self-link" href="#pagination-model" aria-label="12.1.3.1 節への固定リンク"></a>
                     </div>
-                    <p>ページネーションはリンクベースである。サーバーは HTTP <code>Link</code> ヘッダーを介してページネーション URI を提供し
+                    <p>ページネーションはリンクベースである。サーバーは HTTP の<code>Link</code>ヘッダーを通じてページネーション用 URI を提供し
                         [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc8288"
                                 title="Web リンク">RFC8288</a></cite>]、
-                        クライアントが数値オフセットに依存せずに一覧全体をナビゲートできるようにする。</p>
-                    <p>一覧がページ分割されている場合、レスポンス本文には現在のページの項目のみが含まれる。
-                        複合リソースの <code>id</code>、<code>type</code>、および <code>totalItems</code> プロパティは
-                        メンバー全体を反映する一方、<code>items</code> には
-                        現在のページにあるリソースのみが含まれる。</p>
+                        クライアントが数値オフセットに依存せずに一覧全体をたどれるようにする。</p>
+                    <p>一覧がページ分割されている場合、応答本文には現在のページの項目のみが含まれる。
+                        複合リソースの<code>id</code>、<code>type</code>、<code>totalItems</code>プロパティは
+                        メンバー全体を反映する一方、<code>items</code>には
+                        現在のページのリソースのみが含まれる。</p>
                 </section>
                 <section id="pagination-link-relations">
                     <div class="header-wrapper">
-                        <h5 id="x12-1-2-2-pagination-link-relations"><bdi class="secno">12.1.2.2 </bdi>ページネーションリンク
+                        <h5 id="x12-1-3-2-pagination-link-relations"><bdi class="secno">12.1.3.2 </bdi>ページネーションのリンク
                             関係</h5><a class="self-link" href="#pagination-link-relations"
-                            aria-label="第12.1.2.2節へのパーマリンク"></a>
+                            aria-label="12.1.3.2 節への固定リンク"></a>
                     </div>
-                    <p>ページネーション URI は、次の標準リンク
-                        関係を使用して <code>Link</code> ヘッダーで伝達される。</p>
+                    <p>ページネーション用 URI は、次の標準リンク関係を使用して<code>Link</code>ヘッダーで
+                        伝達される。</p>
                     <ul>
-                        <li><strong><code>rel="first"</code></strong>：結果の最初のページの URI。ページ分割されたレスポンスに存在し<em
-                                class="rfc2119">なければならない</em>。</li>
-                        <li><strong><code>rel="last"</code></strong>：結果の最後のページの URI。ページ分割されたレスポンスに存在しても<em
-                                class="rfc2119">よい</em>。</li>
-                        <li><strong><code>rel="next"</code></strong>：結果の次のページの URI。後続の
-                            ページがある場合は存在し<em class="rfc2119">なければならない</em>。最後のページでは省略し<em class="rfc2119">なければならない</em>。
-                        </li>
-                        <li><strong><code>rel="prev"</code></strong>：結果の前のページの URI。先行する
-                            ページがある場合は存在しても<em class="rfc2119">よい</em>。最初のページでは省略し<em class="rfc2119">なければならない</em>。</li>
+                        <li><strong><code>rel="first"</code></strong>: 結果の最初のページの URI。<em
+                                class="rfc2119">必ず</em>ページ分割された応答に含めなければならない。</li>
+                        <li><strong><code>rel="last"</code></strong>: 結果の最後のページの URI。<em
+                                class="rfc2119">任意で</em>ページ分割された応答に含めてもよい。</li>
+                        <li><strong><code>rel="next"</code></strong>: 結果の次のページの URI。後続の
+                            ページがある場合は<em class="rfc2119">必ず</em>含めなければならない。
+                            最後のページでは<em class="rfc2119">必ず</em>省略しなければならない。</li>
+                        <li><strong><code>rel="prev"</code></strong>: 結果の前のページの URI。先行する
+                            ページがある場合は<em class="rfc2119">任意で</em>含めてもよい。
+                            最初のページでは<em class="rfc2119">必ず</em>省略しなければならない。</li>
                     </ul>
-                    <p>すべてのページネーション URI はクライアントにとって不透明である。クライアントは、ページネーション
-                        URI を構築または変更する<em class="rfc2119">べきではない</em>。サーバーによって提供された URI を使用する<em
-                            class="rfc2119">べきである</em>。</p>
+                    <p>すべてのページネーション用 URI はクライアントにとって不透明である。クライアントは<em class="rfc2119">原則として</em>
+                        ページネーション用 URI を構築または変更すべきではない。
+                        代わりに、サーバーが提供する URI を<em class="rfc2119">原則として</em>使用すべきである。</p>
                 </section>
                 <section id="requesting-pages">
                     <div class="header-wrapper">
-                        <h5 id="x12-1-2-3-requesting-pages"><bdi class="secno">12.1.2.3 </bdi>ページの要求</h5><a
-                            class="self-link" href="#requesting-pages" aria-label="第12.1.2.3節へのパーマリンク"></a>
+                        <h5 id="x12-1-3-3-requesting-pages"><bdi class="secno">12.1.3.3 </bdi>ページの要求</h5><a
+                            class="self-link" href="#requesting-pages" aria-label="12.1.3.3 節への固定リンク"></a>
                     </div>
-                    <p>クライアントは、最初のページを取得するために複合リソースの URI を要求する。レスポンスには、
-                        クライアントが後続のページを取得するためにたどるページネーション
-                        Link ヘッダーが含まれる。サーバーは、以前の走査中に取得したページネーション URI を介した
-                        特定のページへの直接アクセスにも対応しても<em class="rfc2119">よい</em>。</p>
-                    <p>ページ分割されたレスポンスを返す場合、サーバーは 200
-                        OK で応答し<em class="rfc2119">なければならない</em>。レスポンス本文の <code>totalItems</code>
-                        プロパティは、現在のページだけでなく、すべてのページにわたる項目の総数を反映する<em class="rfc2119">べきである</em>。</p>
+                    <p>クライアントは最初のページを取得するために複合リソースの URI を要求する。応答には
+                        ページネーション用の
+                        Link ヘッダーが含まれ、クライアントはこれに従って後続のページを取得する。サーバーは<em class="rfc2119">任意で</em>、
+                        以前の走査で取得したページネーション用 URI を介して特定のページへの直接アクセスもサポートしてよい。</p>
+                    <p>ページ分割された応答が返される場合、サーバーは<em class="rfc2119">必ず</em>200
+                        OK で応答しなければならない。応答本文の<code>totalItems</code>
+                        プロパティは<em class="rfc2119">原則として</em>現在のページだけでなく、すべてのページにわたる項目の総数を
+                        反映すべきである。</p>
                 </section>
                 <section id="example-paginated-container">
                     <div class="header-wrapper">
-                        <h5 id="x12-1-2-4-example-paginated-container"><bdi class="secno">12.1.2.4 </bdi>例：
+                        <h5 id="x12-1-3-4-example-paginated-container"><bdi class="secno">12.1.3.4 </bdi>例:
                             ページ分割されたコンテナー</h5><a class="self-link" href="#example-paginated-container"
-                            aria-label="第12.1.2.4節へのパーマリンク"></a>
+                            aria-label="12.1.3.4 節への固定リンク"></a>
                     </div>
-                    <p>リクエスト：</p>
+                    <p>要求:</p>
                     <pre><code aria-busy="false" class="hljs http"><span class="hljs-keyword">GET</span> <span class="hljs-string">/alice/photos/</span> <span class="hljs-meta">HTTP/1.1</span>
 <span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer &lt;token&gt;
 <span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>application/lws+json
 </code></pre>
-                    <p>レスポンス（最初のページ）：</p>
+                    <p>応答（最初のページ）:</p>
                     <pre><code aria-busy="false" class="hljs http"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">200</span> OK
 <span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/lws+json
 <span class="hljs-attribute">ETag</span><span class="hljs-punctuation">: </span>"photos-page1-etag"
@@ -6250,12 +6632,12 @@ Content-Type: application/linkset+json
   <span class="hljs-punctuation">]</span>
 <span class="hljs-punctuation">}</span>
 </span></code></pre>
-                    <p>リクエスト（次のページ）：</p>
+                    <p>要求（次のページ）:</p>
                     <pre><code aria-busy="false" class="hljs http"><span class="hljs-keyword">GET</span> <span class="hljs-string">/alice/photos/?page=2</span> <span class="hljs-meta">HTTP/1.1</span>
 <span class="hljs-attribute">Authorization</span><span class="hljs-punctuation">: </span>Bearer &lt;token&gt;
 <span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>application/lws+json
 </code></pre>
-                    <p>レスポンス（中間のページ）：</p>
+                    <p>応答（中間のページ）:</p>
                     <pre><code aria-busy="false" class="hljs http"><span class="hljs-meta">HTTP/1.1</span> <span class="hljs-number">200</span> OK
 <span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/lws+json
 <span class="hljs-attribute">ETag</span><span class="hljs-punctuation">: </span>"photos-page2-etag"
@@ -6815,11 +7197,6 @@ Content-Type: application/linkset+json
                 固有のメディアタイプを使用することを正当化する多数の制約および追加要件があることに注意されたい。
             </p>
 
-            <p>
-                LWSコンテナーはJSON-LDの制限されたプロファイルと見なすことができるため、実装は
-                <code>application/ld+json; profile="https://www.w3.org/ns/lws/v1"</code>メディアタイプを
-                <code>application/lws+json</code>と同等と見なすことが<em class="rfc2119">望ましい</em>。
-            </p>
         </section>
 
         <section id="iana-media-type-cid-registry">
@@ -6901,7 +7278,7 @@ Content-Type: application/linkset+json
                 </dd>
                 <dt id="bib-foaf">[FOAF]</dt>
                 <dd>
-                    <a href="http://xmlns.com/foaf/spec/"><cite>FOAF 語彙仕様 0.99（Paddington
+                    <a href="http://xmlns.com/foaf/spec/"><cite>FOAF 語彙仕様 0.99（パディントン
                             版）</cite></a>. Dan Brickley; Libby Miller. FOAF プロジェクト. 2014年1月14日. URL: <a
                         href="http://xmlns.com/foaf/spec/">http://xmlns.com/foaf/spec/</a>
                 </dd>
@@ -6919,144 +7296,183 @@ Content-Type: application/linkset+json
                 </dd>
                 <dt id="bib-odrl-vocab">[ODRL-VOCAB]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/odrl-vocab/"><cite>ODRL 語彙 &amp; 式 2.2</cite></a>.
+                    <a href="https://www.w3.org/TR/odrl-vocab/"><cite>ODRL 語彙と表現 2.2</cite></a>.
                     Renato Iannella; Michael Steidl; Stuart Myles; Víctor Rodríguez-Doncel. W3C. 2018年2月15日. W3C
                     勧告. URL: <a href="https://www.w3.org/TR/odrl-vocab/">https://www.w3.org/TR/odrl-vocab/</a>
                 </dd>
                 <dt id="bib-openid-connect-core">[OPENID-CONNECT-CORE]</dt>
                 <dd>
                     <a href="https://openid.net/specs/openid-connect-core-1_0.html"><cite>OpenID Connect Core 1.0
-                            正誤表セット2を反映</cite></a>. N. Sakimura; J. Bradley; M. Jones; B. de Medeiros; C.
+                            正誤表セット 2 を反映</cite></a>. N. Sakimura; J. Bradley; M. Jones; B. de Medeiros; C.
                     Mortimore. OpenID Foundation. 2023年12月15日. 最終版. URL: <a
                         href="https://openid.net/specs/openid-connect-core-1_0.html">https://openid.net/specs/openid-connect-core-1_0.html</a>
                 </dd>
+                <dt id="bib-rdf12-concepts">[RDF12-CONCEPTS]</dt>
+                <dd>
+                    <a href="https://www.w3.org/TR/rdf12-concepts/"><cite>RDF 1.2 の概念と抽象データ
+                            モデル</cite></a>. Andy Seaborne; Gregg Kellogg; Olaf Hartig; Pierre-Antoine Champin. W3C. 7
+                    4月 2026年. W3C 勧告候補. URL: <a
+                        href="https://www.w3.org/TR/rdf12-concepts/">https://www.w3.org/TR/rdf12-concepts/</a>
+                </dd>
+                <dt id="bib-rdf12-n-quads">[RDF12-N-QUADS]</dt>
+                <dd>
+                    <a href="https://www.w3.org/TR/rdf12-n-quads/"><cite>RDF 1.2 N-Quads</cite></a>. Gregg Kellogg;
+                    Dominik Tomaszuk. W3C. 2026年10月10日. W3C 作業草案. URL: <a
+                        href="https://www.w3.org/TR/rdf12-n-quads/">https://www.w3.org/TR/rdf12-n-quads/</a>
+                </dd>
+                <dt id="bib-rdf12-n-triples">[RDF12-N-TRIPLES]</dt>
+                <dd>
+                    <a href="https://www.w3.org/TR/rdf12-n-triples/"><cite>RDF 1.2 N-Triples</cite></a>. Gregg Kellogg;
+                    Dominik Tomaszuk. W3C. 2026年10月7日. W3C 作業草案. URL: <a
+                        href="https://www.w3.org/TR/rdf12-n-triples/">https://www.w3.org/TR/rdf12-n-triples/</a>
+                </dd>
+                <dt id="bib-rdf12-trig">[RDF12-TRIG]</dt>
+                <dd>
+                    <a href="https://www.w3.org/TR/rdf12-trig/"><cite>RDF 1.2 TriG</cite></a>. Gregg Kellogg; Dominik
+                    Tomaszuk. W3C. 2026年10月7日. W3C 作業草案. URL: <a
+                        href="https://www.w3.org/TR/rdf12-trig/">https://www.w3.org/TR/rdf12-trig/</a>
+                </dd>
+                <dt id="bib-rdf12-turtle">[RDF12-TURTLE]</dt>
+                <dd>
+                    <a href="https://www.w3.org/TR/rdf12-turtle/"><cite>RDF 1.2 Turtle</cite></a>. Gregg Kellogg; Andy
+                    Seaborne; Dominik Tomaszuk. W3C. 2026年10月7日. W3C 作業草案. URL: <a
+                        href="https://www.w3.org/TR/rdf12-turtle/">https://www.w3.org/TR/rdf12-turtle/</a>
+                </dd>
                 <dt id="bib-rfc2119">[RFC2119]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc2119/"><cite>要求レベルを示すために RFC で使用する
-                            キーワード</cite></a>. S. Bradner. IETF. 1997年3月. 現行の最良の慣行. URL: <a
+                    <a href="https://www.rfc-editor.org/info/rfc2119/"><cite>RFC で用いるキーワードによる
+                            要件レベルの表示</cite></a>. S. Bradner. IETF. 1997年3月. 現行のベストプラクティス. URL: <a
                         href="https://www.rfc-editor.org/info/rfc2119/">https://www.rfc-editor.org/info/rfc2119/</a>
                 </dd>
                 <dt id="bib-rfc3339">[RFC3339]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc3339/"><cite>インターネット上の日付と時刻：
-                            タイムスタンプ</cite></a>. G. Klyne; C. Newman. IETF. 2002年7月. 提案標準. URL: <a
+                    <a href="https://www.rfc-editor.org/info/rfc3339/"><cite>インターネット上の日付と時刻:
+                            タイムスタンプ</cite></a>. G. Klyne; C. Newman. IETF. 2002年7月. 標準化提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc3339/">https://www.rfc-editor.org/info/rfc3339/</a>
                 </dd>
                 <dt id="bib-rfc3986">[RFC3986]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc3986/"><cite>Uniform Resource Identifier (URI)：汎用
+                    <a href="https://www.rfc-editor.org/info/rfc3986/"><cite>統一資源識別子 (URI): 汎用
                             構文</cite></a>. T. Berners-Lee; R. Fielding; L. Masinter. IETF. 2005年1月. インターネット
                     標準. URL: <a
                         href="https://www.rfc-editor.org/info/rfc3986/">https://www.rfc-editor.org/info/rfc3986/</a>
                 </dd>
                 <dt id="bib-rfc4918">[RFC4918]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc4918/"><cite>Web 分散オーサリングおよびバージョン管理
-                            （WebDAV）のための HTTP 拡張</cite></a>. L. Dusseault, 編. IETF. 2007年6月. 提案
-                    標準. URL: <a
+                    <a href="https://www.rfc-editor.org/info/rfc4918/"><cite>Web 分散
+                            オーサリングとバージョン管理 (WebDAV) のための HTTP 拡張</cite></a>. L. Dusseault, 編. IETF. 2007年6月. 標準化
+                    提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc4918/">https://www.rfc-editor.org/info/rfc4918/</a>
                 </dd>
                 <dt id="bib-rfc5789">[RFC5789]</dt>
                 <dd>
                     <a href="https://httpwg.org/specs/rfc5789.html"><cite>HTTP の PATCH メソッド</cite></a>. L.
-                    Dusseault; J. Snell. IETF. 2010年3月. 提案標準. URL: <a
+                    Dusseault; J. Snell. IETF. 2010年3月. 標準化提案. URL: <a
                         href="https://httpwg.org/specs/rfc5789.html">https://httpwg.org/specs/rfc5789.html</a>
                 </dd>
                 <dt id="bib-rfc6749">[RFC6749]</dt>
                 <dd>
                     <a href="https://www.rfc-editor.org/info/rfc6749/"><cite>OAuth 2.0 認可
-                            フレームワーク</cite></a>. D. Hardt, 編. IETF. 2012年10月. 提案標準. URL: <a
+                            フレームワーク</cite></a>. D. Hardt, 編. IETF. 2012年10月. 標準化提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc6749/">https://www.rfc-editor.org/info/rfc6749/</a>
                 </dd>
                 <dt id="bib-rfc6750">[RFC6750]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc6750/"><cite>OAuth 2.0 認可フレームワーク：
-                            Bearer トークンの使用</cite></a>. M. Jones; D. Hardt. IETF. 2012年10月. 提案標準.
+                    <a href="https://www.rfc-editor.org/info/rfc6750/"><cite>OAuth 2.0 認可フレームワーク:
+                            Bearer トークンの使用</cite></a>. M. Jones; D. Hardt. IETF. 2012年10月. 標準化提案.
                     URL: <a href="https://www.rfc-editor.org/info/rfc6750/">https://www.rfc-editor.org/info/rfc6750/</a>
                 </dd>
                 <dt id="bib-rfc6902">[RFC6902]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc6902/"><cite>JavaScript Object Notation (JSON)
-                            パッチ</cite></a>. P. Bryan, 編.; M. Nottingham, 編. IETF. 2013年4月. 提案標準.
+                    <a href="https://www.rfc-editor.org/info/rfc6902/"><cite>JavaScript オブジェクト表記 (JSON)
+                            パッチ</cite></a>. P. Bryan, 編; M. Nottingham, 編. IETF. 2013年4月. 標準化提案.
                     URL: <a href="https://www.rfc-editor.org/info/rfc6902/">https://www.rfc-editor.org/info/rfc6902/</a>
+                </dd>
+                <dt id="bib-rfc6906">[RFC6906]</dt>
+                <dd>
+                    <a href="https://www.rfc-editor.org/info/rfc6906/"><cite>「profile」リンク関係
+                            タイプ</cite></a>. E. Wilde. IETF. 2013年3月. 情報提供. URL: <a
+                        href="https://www.rfc-editor.org/info/rfc6906/">https://www.rfc-editor.org/info/rfc6906/</a>
                 </dd>
                 <dt id="bib-rfc7231">[RFC7231]</dt>
                 <dd>
-                    <a href="https://httpwg.org/specs/rfc7231.html"><cite>Hypertext Transfer Protocol (HTTP/1.1)：
-                            セマンティクスとコンテンツ</cite></a>. R. Fielding, 編.; J. Reschke, 編. IETF. 2014年6月.
-                    提案標準. URL: <a href="https://httpwg.org/specs/rfc7231.html">https://httpwg.org/specs/rfc7231.html</a>
+                    <a href="https://httpwg.org/specs/rfc7231.html"><cite>ハイパーテキスト転送プロトコル (HTTP/1.1):
+                            セマンティクスと内容</cite></a>. R. Fielding, 編; J. Reschke, 編. IETF. 2014年6月.
+                    標準化提案. URL: <a
+                        href="https://httpwg.org/specs/rfc7231.html">https://httpwg.org/specs/rfc7231.html</a>
                 </dd>
                 <dt id="bib-rfc7233">[RFC7233]</dt>
                 <dd>
-                    <a href="https://httpwg.org/specs/rfc7233.html"><cite>Hypertext Transfer Protocol (HTTP/1.1)：範囲
-                            リクエスト</cite></a>. R. Fielding, 編.; Y. Lafon, 編.; J. Reschke, 編. IETF. 2014年6月.
-                    提案標準. URL: <a href="https://httpwg.org/specs/rfc7233.html">https://httpwg.org/specs/rfc7233.html</a>
+                    <a href="https://httpwg.org/specs/rfc7233.html"><cite>ハイパーテキスト転送プロトコル (HTTP/1.1): 範囲
+                            要求</cite></a>. R. Fielding, 編; Y. Lafon, 編; J. Reschke, 編. IETF. 2014年6月.
+                    標準化提案. URL: <a
+                        href="https://httpwg.org/specs/rfc7233.html">https://httpwg.org/specs/rfc7233.html</a>
                 </dd>
                 <dt id="bib-rfc7240">[RFC7240]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc7240/"><cite>HTTP の Prefer ヘッダー</cite></a>. J.
-                    Snell. IETF. 2014年6月. 提案標準. URL: <a
+                    <a href="https://www.rfc-editor.org/info/rfc7240/"><cite>HTTP 用 Prefer ヘッダー</cite></a>. J.
+                    Snell. IETF. 2014年6月. 標準化提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc7240/">https://www.rfc-editor.org/info/rfc7240/</a>
                 </dd>
                 <dt id="bib-rfc8174">[RFC8174]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc8174/"><cite>RFC
-                            2119 キーワードにおける大文字と小文字の曖昧さ</cite></a>. B. Leiba. IETF. 2017年5月. 現行の最良の慣行. URL: <a
+                    <a href="https://www.rfc-editor.org/info/rfc8174/"><cite>大文字と小文字の違いに関する曖昧さ（RFC
+                            2119 のキーワード）</cite></a>. B. Leiba. IETF. 2017年5月. 現行のベストプラクティス. URL: <a
                         href="https://www.rfc-editor.org/info/rfc8174/">https://www.rfc-editor.org/info/rfc8174/</a>
                 </dd>
                 <dt id="bib-rfc8288">[RFC8288]</dt>
                 <dd>
-                    <a href="https://httpwg.org/specs/rfc8288.html"><cite>Web リンキング</cite></a>. M. Nottingham. IETF.
-                    2017年10月. 提案標準. URL: <a
+                    <a href="https://httpwg.org/specs/rfc8288.html"><cite>Web リンク</cite></a>. M. Nottingham. IETF.
+                    2017年10月. 標準化提案. URL: <a
                         href="https://httpwg.org/specs/rfc8288.html">https://httpwg.org/specs/rfc8288.html</a>
                 </dd>
                 <dt id="bib-rfc8414">[RFC8414]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc8414/"><cite>OAuth 2.0 認可サーバー
-                            メタデータ</cite></a>. M. Jones; N. Sakimura; J. Bradley. IETF. 2018年6月. 提案標準.
+                    <a href="https://www.rfc-editor.org/info/rfc8414/"><cite>OAuth 2.0 認可サーバーの
+                            メタデータ</cite></a>. M. Jones; N. Sakimura; J. Bradley. IETF. 2018年6月. 標準化提案.
                     URL: <a href="https://www.rfc-editor.org/info/rfc8414/">https://www.rfc-editor.org/info/rfc8414/</a>
                 </dd>
                 <dt id="bib-rfc8693">[RFC8693]</dt>
                 <dd>
                     <a href="https://www.rfc-editor.org/info/rfc8693/"><cite>OAuth 2.0 トークン交換</cite></a>. M.
-                    Jones; A. Nadalin; B. Campbell, 編.; J. Bradley; C. Mortimore. IETF. 2020年1月. 提案
-                    標準. URL: <a
+                    Jones; A. Nadalin; B. Campbell, 編; J. Bradley; C. Mortimore. IETF. 2020年1月. 標準化
+                    提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc8693/">https://www.rfc-editor.org/info/rfc8693/</a>
                 </dd>
                 <dt id="bib-rfc9068">[RFC9068]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc9068/"><cite>OAuth 2.0
-                            アクセストークン用 JSON Web Token (JWT) プロファイル</cite></a>. V. Bertocci. IETF. 2021年10月. 提案標準. URL: <a
+                    <a href="https://www.rfc-editor.org/info/rfc9068/"><cite>JSON Web Token (JWT) による OAuth 2.0
+                            アクセストークンのプロファイル</cite></a>. V. Bertocci. IETF. 2021年10月. 標準化提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc9068/">https://www.rfc-editor.org/info/rfc9068/</a>
                 </dd>
                 <dt id="bib-rfc9110">[RFC9110]</dt>
                 <dd>
-                    <a href="https://httpwg.org/specs/rfc9110.html"><cite>HTTP セマンティクス</cite></a>. R. Fielding, 編.;
-                    M. Nottingham, 編.; J. Reschke, 編. IETF. 2022年6月. インターネット標準. URL: <a
+                    <a href="https://httpwg.org/specs/rfc9110.html"><cite>HTTP セマンティクス</cite></a>. R. Fielding, 編;
+                    M. Nottingham, 編; J. Reschke, 編. IETF. 2022年6月. インターネット標準. URL: <a
                         href="https://httpwg.org/specs/rfc9110.html">https://httpwg.org/specs/rfc9110.html</a>
                 </dd>
                 <dt id="bib-rfc9112">[rfc9112]</dt>
                 <dd>
-                    <a href="https://httpwg.org/specs/rfc9112.html"><cite>HTTP/1.1</cite></a>. R. Fielding, 編.; M.
-                    Nottingham, 編.; J. Reschke, 編. IETF. 2022年6月. インターネット標準. URL: <a
+                    <a href="https://httpwg.org/specs/rfc9112.html"><cite>HTTP/1.1</cite></a>. R. Fielding, 編; M.
+                    Nottingham, 編; J. Reschke, 編. IETF. 2022年6月. インターネット標準. URL: <a
                         href="https://httpwg.org/specs/rfc9112.html">https://httpwg.org/specs/rfc9112.html</a>
                 </dd>
                 <dt id="bib-rfc9264">[RFC9264]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc9264/"><cite>リンクセット：メディアタイプとリンクセット用のリンク関係
-                            型</cite></a>. E. Wilde; H. Van de Sompel. IETF. 2022年7月. 提案
-                    標準. URL: <a
+                    <a href="https://www.rfc-editor.org/info/rfc9264/"><cite>Linkset: メディアタイプおよび
+                            リンクセット用のリンク関係タイプ</cite></a>. E. Wilde; H. Van de Sompel. IETF. 2022年7月. 標準化
+                    提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc9264/">https://www.rfc-editor.org/info/rfc9264/</a>
                 </dd>
                 <dt id="bib-rfc9457">[RFC9457]</dt>
                 <dd>
                     <a href="https://www.rfc-editor.org/info/rfc9457/"><cite>HTTP API の問題詳細</cite></a>.
-                    M. Nottingham; E. Wilde; S. Dalal. IETF. 2023年7月. 提案標準. URL: <a
+                    M. Nottingham; E. Wilde; S. Dalal. IETF. 2023年7月. 標準化提案. URL: <a
                         href="https://www.rfc-editor.org/info/rfc9457/">https://www.rfc-editor.org/info/rfc9457/</a>
                 </dd>
                 <dt id="bib-rfc9728">[RFC9728]</dt>
                 <dd>
-                    <a href="https://www.rfc-editor.org/info/rfc9728/"><cite>OAuth 2.0 保護されたリソースの
+                    <a href="https://www.rfc-editor.org/info/rfc9728/"><cite>OAuth 2.0 保護対象リソースの
                             メタデータ</cite></a>. M.B. Jones; P. Hunt; A. Parecki. IETF. 2025年4月. 標準化提案.
                     URL: <a href="https://www.rfc-editor.org/info/rfc9728/">https://www.rfc-editor.org/info/rfc9728/</a>
                 </dd>
@@ -7067,15 +7483,15 @@ Content-Type: application/linkset+json
                 </dd>
                 <dt id="bib-webarch">[WebArch]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/webarch/"><cite>World Wide Web のアーキテクチャ、第
+                    <a href="https://www.w3.org/TR/webarch/"><cite>ワールドワイドウェブのアーキテクチャ、第
                             1巻</cite></a>. Ian Jacobs; Norman Walsh. W3C. 2004年12月15日. W3C 勧告. URL: <a
                         href="https://www.w3.org/TR/webarch/">https://www.w3.org/TR/webarch/</a>
                 </dd>
                 <dt id="bib-xmlschema11-2">[XMLSCHEMA11-2]</dt>
                 <dd>
-                    <a href="https://www.w3.org/TR/xmlschema11-2/"><cite>W3C XML Schema Definition Language (XSD) 1.1
-                            第2部：データ型</cite></a>. David Peterson; Sandy Gao; Ashok Malhotra; Michael
-                    Sperberg-McQueen; Henry Thompson; Paul V. Biron et al. W3C. 2012年4月5日. W3C 勧告. URL:
+                    <a href="https://www.w3.org/TR/xmlschema11-2/"><cite>W3C XML スキーマ定義言語 (XSD) 1.1
+                            第2部: データ型</cite></a>. David Peterson; Sandy Gao; Ashok Malhotra; Michael
+                    Sperberg-McQueen; Henry Thompson; Paul V. Biron ほか. W3C. 2012年4月5日. W3C 勧告. URL:
                     <a href="https://www.w3.org/TR/xmlschema11-2/">https://www.w3.org/TR/xmlschema11-2/</a>
                 </dd>
             </dl>
@@ -7669,54 +8085,54 @@ Content-Type: application/linkset+json
             </li>
             <li>
                 <a href="#ref-for-dfn-containers-21" title="§ 8.1 Container Representation">§ 8.1 Container
-                    Representation</a> <a href="#ref-for-dfn-containers-22" title="Reference 2">(2)</a>
+                    Representation</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-23" title="§ 8.1.1 Container Properties">§ 8.1.1 Container
-                    Properties</a> <a href="#ref-for-dfn-containers-24" title="Reference 2">(2)</a> <a
-                    href="#ref-for-dfn-containers-25" title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-26"
+                <a href="#ref-for-dfn-containers-22" title="§ 8.1.1 Container Properties">§ 8.1.1 Container
+                    Properties</a> <a href="#ref-for-dfn-containers-23" title="Reference 2">(2)</a> <a
+                    href="#ref-for-dfn-containers-24" title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-25"
                     title="Reference 4">(4)</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-27" title="§ 8.1.2 Contained Resource Description">§ 8.1.2 Contained
+                <a href="#ref-for-dfn-containers-26" title="§ 8.1.2 Contained Resource Description">§ 8.1.2 Contained
                     Resource Description</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-28" title="§ 8.1.3 Example Container Representation">§ 8.1.3 Example
+                <a href="#ref-for-dfn-containers-27" title="§ 8.1.3 Example Container Representation">§ 8.1.3 Example
                     Container Representation</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-29" title="§ 9. Operations">§ 9. Operations</a>
+                <a href="#ref-for-dfn-containers-28" title="§ 9. Operations">§ 9. Operations</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-30" title="§ 9.1 Metadata">§ 9.1 Metadata</a> <a
-                    href="#ref-for-dfn-containers-31" title="Reference 2">(2)</a> <a href="#ref-for-dfn-containers-32"
-                    title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-33" title="Reference 4">(4)</a>
+                <a href="#ref-for-dfn-containers-29" title="§ 9.1 Metadata">§ 9.1 Metadata</a> <a
+                    href="#ref-for-dfn-containers-30" title="Reference 2">(2)</a> <a href="#ref-for-dfn-containers-31"
+                    title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-32" title="Reference 4">(4)</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-34" title="§ 9.2 Create resource">§ 9.2 Create resource</a> <a
-                    href="#ref-for-dfn-containers-35" title="Reference 2">(2)</a> <a href="#ref-for-dfn-containers-36"
-                    title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-37" title="Reference 4">(4)</a> <a
-                    href="#ref-for-dfn-containers-38" title="Reference 5">(5)</a> <a href="#ref-for-dfn-containers-39"
-                    title="Reference 6">(6)</a> <a href="#ref-for-dfn-containers-40" title="Reference 7">(7)</a> <a
-                    href="#ref-for-dfn-containers-41" title="Reference 8">(8)</a> <a href="#ref-for-dfn-containers-42"
-                    title="Reference 9">(9)</a> <a href="#ref-for-dfn-containers-43" title="Reference 10">(10)</a> <a
-                    href="#ref-for-dfn-containers-44" title="Reference 11">(11)</a> <a href="#ref-for-dfn-containers-45"
-                    title="Reference 12">(12)</a> <a href="#ref-for-dfn-containers-46" title="Reference 13">(13)</a> <a
-                    href="#ref-for-dfn-containers-47" title="Reference 14">(14)</a> <a href="#ref-for-dfn-containers-48"
-                    title="Reference 15">(15)</a> <a href="#ref-for-dfn-containers-49" title="Reference 16">(16)</a> <a
-                    href="#ref-for-dfn-containers-50" title="Reference 17">(17)</a>
+                <a href="#ref-for-dfn-containers-33" title="§ 9.2 Create resource">§ 9.2 Create resource</a> <a
+                    href="#ref-for-dfn-containers-34" title="Reference 2">(2)</a> <a href="#ref-for-dfn-containers-35"
+                    title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-36" title="Reference 4">(4)</a> <a
+                    href="#ref-for-dfn-containers-37" title="Reference 5">(5)</a> <a href="#ref-for-dfn-containers-38"
+                    title="Reference 6">(6)</a> <a href="#ref-for-dfn-containers-39" title="Reference 7">(7)</a> <a
+                    href="#ref-for-dfn-containers-40" title="Reference 8">(8)</a> <a href="#ref-for-dfn-containers-41"
+                    title="Reference 9">(9)</a> <a href="#ref-for-dfn-containers-42" title="Reference 10">(10)</a> <a
+                    href="#ref-for-dfn-containers-43" title="Reference 11">(11)</a> <a href="#ref-for-dfn-containers-44"
+                    title="Reference 12">(12)</a> <a href="#ref-for-dfn-containers-45" title="Reference 13">(13)</a> <a
+                    href="#ref-for-dfn-containers-46" title="Reference 14">(14)</a> <a href="#ref-for-dfn-containers-47"
+                    title="Reference 15">(15)</a> <a href="#ref-for-dfn-containers-48" title="Reference 16">(16)</a> <a
+                    href="#ref-for-dfn-containers-49" title="Reference 17">(17)</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-51" title="§ 9.3 Read resource">§ 9.3 Read resource</a> <a
-                    href="#ref-for-dfn-containers-52" title="Reference 2">(2)</a> <a href="#ref-for-dfn-containers-53"
-                    title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-54" title="Reference 4">(4)</a> <a
-                    href="#ref-for-dfn-containers-55" title="Reference 5">(5)</a> <a href="#ref-for-dfn-containers-56"
-                    title="Reference 6">(6)</a> <a href="#ref-for-dfn-containers-57" title="Reference 7">(7)</a> <a
-                    href="#ref-for-dfn-containers-58" title="Reference 8">(8)</a> <a href="#ref-for-dfn-containers-59"
-                    title="Reference 9">(9)</a> <a href="#ref-for-dfn-containers-60" title="Reference 10">(10)</a> <a
-                    href="#ref-for-dfn-containers-61" title="Reference 11">(11)</a> <a href="#ref-for-dfn-containers-62"
-                    title="Reference 12">(12)</a>
+                <a href="#ref-for-dfn-containers-50" title="§ 9.3 Read resource">§ 9.3 Read resource</a> <a
+                    href="#ref-for-dfn-containers-51" title="Reference 2">(2)</a> <a href="#ref-for-dfn-containers-52"
+                    title="Reference 3">(3)</a> <a href="#ref-for-dfn-containers-53" title="Reference 4">(4)</a> <a
+                    href="#ref-for-dfn-containers-54" title="Reference 5">(5)</a> <a href="#ref-for-dfn-containers-55"
+                    title="Reference 6">(6)</a> <a href="#ref-for-dfn-containers-56" title="Reference 7">(7)</a> <a
+                    href="#ref-for-dfn-containers-57" title="Reference 8">(8)</a> <a href="#ref-for-dfn-containers-58"
+                    title="Reference 9">(9)</a> <a href="#ref-for-dfn-containers-59" title="Reference 10">(10)</a> <a
+                    href="#ref-for-dfn-containers-60" title="Reference 11">(11)</a> <a href="#ref-for-dfn-containers-61"
+                    title="Reference 12">(12)</a> <a href="#ref-for-dfn-containers-62" title="Reference 13">(13)</a>
             </li>
             <li>
                 <a href="#ref-for-dfn-containers-63" title="§ 9.5 Delete resource">§ 9.5 Delete resource</a> <a
@@ -7728,8 +8144,16 @@ Content-Type: application/linkset+json
                     title="Reference 9">(9)</a> <a href="#ref-for-dfn-containers-72" title="Reference 10">(10)</a>
             </li>
             <li>
-                <a href="#ref-for-dfn-containers-73" title="§ 12.1.2 Pagination">§ 12.1.2 Pagination</a> <a
+                <a href="#ref-for-dfn-containers-73" title="§ 12.1.1 LWS Profile">§ 12.1.1 LWS Profile</a> <a
                     href="#ref-for-dfn-containers-74" title="Reference 2">(2)</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-containers-75" title="§ 12.1.2 Content Negotiation">§ 12.1.2 Content
+                    Negotiation</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-containers-76" title="§ 12.1.3 Pagination">§ 12.1.3 Pagination</a> <a
+                    href="#ref-for-dfn-containers-77" title="Reference 2">(2)</a>
             </li>
         </ul>
     </div>
@@ -8479,9 +8903,32 @@ Content-Type: application/linkset+json
                 <a href="#ref-for-dfn-container-representation-4" title="§ 12.1 LWS Media Type">§ 12.1 LWS Media
                     Type</a>
             </li>
+        </ul>
+    </div>
+    <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-lws-profile"
+        aria-label="Links in this document to definition: LWS profile">
+        <span class="caret"></span>
+        <div>
+            <a class="self-link" href="#dfn-lws-profile"
+                aria-label="Permalink for definition: LWS profile. Activate to close this dialog.">Permalink</a>
+
+
+        </div>
+        <p><b>Referenced in:</b></p>
+        <ul>
             <li>
-                <a href="#ref-for-dfn-container-representation-5" title="§ 12.1.1 Media Type Equivalence">§ 12.1.1 Media
-                    Type Equivalence</a> <a href="#ref-for-dfn-container-representation-6" title="Reference 2">(2)</a>
+                <a href="#ref-for-dfn-lws-profile-1" title="§ 8.1.3 Example Container Representation">§ 8.1.3 Example
+                    Container Representation</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-lws-profile-2" title="§ 12.1.1 LWS Profile">§ 12.1.1 LWS Profile</a> <a
+                    href="#ref-for-dfn-lws-profile-3" title="Reference 2">(2)</a>
+            </li>
+            <li>
+                <a href="#ref-for-dfn-lws-profile-4" title="§ 12.1.2 Content Negotiation">§ 12.1.2 Content
+                    Negotiation</a> <a href="#ref-for-dfn-lws-profile-5" title="Reference 2">(2)</a> <a
+                    href="#ref-for-dfn-lws-profile-6" title="Reference 3">(3)</a> <a href="#ref-for-dfn-lws-profile-7"
+                    title="Reference 4">(4)</a>
             </li>
         </ul>
     </div>
