@@ -65,7 +65,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Micropub](https://jp.htmlspecs.com/micropub/)（[Source](https://www.w3.org/TR/2017/REC-micropub-20170523/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Web Annotation Data Model](https://jp.htmlspecs.com/annotation-model/)（[Source](https://www.w3.org/TR/2017/REC-annotation-model-20170223/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Data on the Web Best Practices](https://jp.htmlspecs.com/dwbp/)（[Source](https://www.w3.org/TR/2017/REC-dwbp-20170131/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [Linked Web Storage Protocol 1.0](https://jp.htmlspecs.com/lws10-core/)（[Source](https://www.w3.org/TR/2026/WD-lws10-core-20261016/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Linked Web Storage Protocol 1.0](https://jp.htmlspecs.com/lws10-core/)（[Source](https://www.w3.org/TR/2026/WD-lws10-core-20261019/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [LWS 1.0 Authentication Suite: OpenID Connect](https://jp.htmlspecs.com/lws10-authn-openid/)（[Source](https://www.w3.org/TR/2026/WD-lws10-authn-openid-20261015/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [LWS 1.0 Authentication Suite: SAML 2.0](https://jp.htmlspecs.com/lws10-authn-saml/)（[Source](https://www.w3.org/TR/2026/WD-lws10-authn-saml-20261015/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [LWS 1.0 Authentication Suite: Self-signed Identity using Controlled Identifiers](https://jp.htmlspecs.com/lws10-authn-ssi-cid/)（[Source](https://www.w3.org/TR/2026/WD-lws10-authn-ssi-cid-20261015/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
@@ -660,7 +660,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### メソッド・ステータスコード・プロトコル構築
 - [Building Protocols with HTTP](https://jp.htmlspecs.com/http/rfc9205.html)（[Source](https://httpwg.org/specs/rfc9205.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [PATCH Method for HTTP](https://jp.htmlspecs.com/http/rfc5789.html)（[Source](https://httpwg.org/specs/rfc5789.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
-- [The HTTP QUERY Method](https://jp.htmlspecs.com/http/rfc10008.html)（[Source](https://www.rfc-editor.org/rfc/rfc10008.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [The HTTP QUERY Method](https://jp.htmlspecs.com/http/rfc10008.html)（[Source](https://httpwg.org/specs/rfc10008.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Additional HTTP Status Codes](https://jp.htmlspecs.com/http/rfc6585.html)（[Source](https://httpwg.org/specs/rfc6585.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [An HTTP Status Code to Report Legal Obstacles](https://jp.htmlspecs.com/http/rfc7725.html)（[Source](https://httpwg.org/specs/rfc7725.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [An HTTP Status Code for Indicating Hints](https://jp.htmlspecs.com/http/rfc8297.html)（[Source](https://httpwg.org/specs/rfc8297.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
