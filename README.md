@@ -331,7 +331,6 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Element Timing API](https://jp.htmlspecs.com/element-timing/)（[Source](https://w3c.github.io/element-timing/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [User Timing Level 2](https://jp.htmlspecs.com/user-timing-2/)（[Source](https://www.w3.org/TR/2019/REC-user-timing-2-20190226/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [User Timing](https://jp.htmlspecs.com/user-timing/)（[Source](https://www.w3.org/TR/2026/CRD-user-timing-20260311/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [Long Tasks API](https://jp.htmlspecs.com/longtasks-1/)（[Source](https://www.w3.org/TR/2026/WD-longtasks-1-20260319/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Long Animation Frames API](https://jp.htmlspecs.com/long-animation-frames/)（[Source](https://www.w3.org/TR/2026/WD-long-animation-frames-20260428/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Server Timing](https://jp.htmlspecs.com/server-timing/)（[Source](https://www.w3.org/TR/2026/WD-server-timing-20260407/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Paint Timing](https://jp.htmlspecs.com/paint-timing/)（[Source](https://www.w3.org/TR/2026/WD-paint-timing-20261014/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
@@ -339,7 +338,6 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Event Timing API](https://jp.htmlspecs.com/event-timing/)（[Source](https://www.w3.org/TR/2026/WD-event-timing-20261013/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Container Timing API](https://jp.htmlspecs.com/container-timing/)（[Source](https://w3c.github.io/container-timing/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Performance measure memory](https://jp.htmlspecs.com/performance-measure-memory/)（[Source](https://wicg.github.io/performance-measure-memory/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Device Memory API](https://jp.htmlspecs.com/device-memory/)（[Source](https://www.w3.org/TR/2026/WD-device-memory-1-20260330/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Layout Instability API](https://jp.htmlspecs.com/layout-instability/)（[Source](https://wicg.github.io/layout-instability/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### スケジューリング・ライフサイクル・プリロード・レポート
