@@ -183,7 +183,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [WebHID API](https://jp.htmlspecs.com/hid/)（[Source](https://hid.spec.whatwg.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [WebUSB API](https://jp.htmlspecs.com/usb/)（[Source](https://usb.spec.whatwg.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web Smart Card API](https://jp.htmlspecs.com/web-smart-card/)（[Source](https://wicg.github.io/web-smart-card/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Web MIDI API](https://jp.htmlspecs.com/webmidi/)（[Source](https://www.w3.org/TR/2025/WD-webmidi-20250121/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Web MIDI API](https://jp.htmlspecs.com/webmidi/)（[Source](https://www.w3.org/TR/2026/WD-webmidi-20261020/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web Bluetooth API](https://jp.htmlspecs.com/bluetooth/)（[Source](https://bluetooth.spec.whatwg.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web NFC API](https://jp.htmlspecs.com/web-nfc/)（[Source](https://w3c-cg.github.io/web-nfc/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Geolocation API](https://jp.htmlspecs.com/geolocation/)（[Source](https://www.w3.org/TR/2026/CR-geolocation-20260326/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
