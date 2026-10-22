@@ -588,7 +588,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### 画像・マスク・グラフィック装飾
 - [CSS Images Module Level 3](https://jp.htmlspecs.com/css/css-images-3/)（[Source](https://www.w3.org/TR/2023/CRD-css-images-3-20231218/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [CSS Images Module Level 4](https://jp.htmlspecs.com/css/css-images-4/)（[Source](https://www.w3.org/TR/2025/WD-css-images-4-20250930/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [CSS Image Animation Module Level 1](https://jp.htmlspecs.com/css/css-image-animation-1/)（[Source](https://www.w3.org/TR/2026/WD-css-image-animation-1-20260409/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [CSS Image Animation Module Level 1](https://jp.htmlspecs.com/css/css-image-animation-1/)（[Source](https://www.w3.org/TR/2026/WD-css-image-animation-1-20261021/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Masking Module Level 1](https://jp.htmlspecs.com/css/css-masking-1/)（[Source](https://www.w3.org/TR/2021/CRD-css-masking-1-20210805/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 
 ### アニメーション・変形・遷移・ビュー遷移
