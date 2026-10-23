@@ -1104,7 +1104,7 @@
 
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(blob);
-                img.onload = () => window.URL.revokeObjectURL(this.src);
+                img.onload = () => window.URL.revokeObjectURL(img.src);
 
                 document.body.appendChild(img);
               }
@@ -2428,7 +2428,7 @@
                                 |record:NDEFRecordInit|、|context|、|recordsDepth| を与えて
                                 <a>create NDEF record</a> を実行した結果、または基盤プラットフォームが
                                 等価な値を |ndef| に提供することを確実にします。アルゴリズムが例外 |e| を投げた場合、
-                                |promise| を |e| で reject し、これらの手順を中止します。
+                                その例外 |e| を再度投げます。
                             </li>
                             <li>
                                 |output| に |ndef| を追加します。
@@ -2437,7 +2437,7 @@
                     </li>
                     <li>
                         |output| と |context| を与えて <a>check created records</a> を実行し、|error: Error| を投げた場合、
-                        |promise| を |error| で reject し、これらの手順を中止します。
+                        その |error| を再度投げます。
                     </li>
                     <li>
                         |output| を返します。
@@ -2506,7 +2506,7 @@
                         <li>
                             |record| の <a>recordType</a> に応じて切り替え、以下に示すアルゴリズムを
                             |record|、|ndef|、|context|、|recordsDepth| で呼び出し、その結果を返します。
-                            例外 |e| が投げられた場合、|promise| を |e| で reject し、これらの手順を中止します。
+                            例外 |e| が投げられた場合、その例外 |e| を再度投げます。
                             <dl>
                                 <dt>"`empty`"</dt>
                                 <ul>
@@ -2551,16 +2551,16 @@
                             <ul>
                                 <li>
                                     |context| が `""`（すなわち |record| が別の <a>NDEF record</a> のペイロードではない）
-                                    の場合、{{TypeError}} で |promise| を reject し、これらの手順を中止します。
+                                    の場合、{{TypeError}} を [= exception/throw =] します。
                                 </li>
                                 <li>
                                     |record| の <a>recordType</a> に対して <a>validate local type</a> を実行して
-                                    false を返す場合、{{TypeError}} で |promise| を reject し、これらの手順を中止します。
+                                    false を返す場合、{{TypeError}} を [= exception/throw =] します。
                                 </li>
                                 <li>
                                     |record|、|ndef|、|context|、|recordsDepth| を与えて
                                     <a>map local type to NDEF</a> を実行した結果を返します。
-                                    それが例外 |e| を投げる場合、|promise| を |e| で reject し、これらの手順を中止します。
+                                    それが例外 |e| を投げる場合、その例外 |e| を再度投げます。
                                 </li>
                             </ul>
                         </li>
@@ -2568,7 +2568,7 @@
                             |record| の <a>recordType</a> に対して <a>validate external type</a> が true を返す場合、
                             |record|、|ndef|、|context|、|recordsDepth| を与えて
                             <a>map external data to NDEF</a> を返します。
-                            それが例外 |e| を投げる場合、|promise| を |e| で reject し、これらの手順を中止します。
+                            それが例外 |e| を投げる場合、その例外 |e| を再度投げます。
                         </li>
                         <li>
                             それ以外の場合、{{TypeError}} を [= exception/throw =] し、これらの手順を中止します。
@@ -3836,7 +3836,7 @@
                 <aside class="note" data-link-for="NDEFRecord">
                     <p>
                         Unicode 標準は UTF-8、UTF-16、UTF-32 など複数のエンコーディングを定義しています。
-                        UTF-8 はウェブで推奨されるエンコーディングであり、[=code points=] が単一バイトで表現されるため、
+                        UTF-8 はウェブで推奨されるエンコーディングであり、単一バイトの符号単位を使用し、[=code points=] は1～4バイトの列で表現されるため、
                         エンディアンに依存しない利点があります。
                     </p>
                     <p>
@@ -3848,7 +3848,7 @@
                         すべてがビッグエンディアンのバイト順序で読み戻されます。
                     </p>
                     <p>
-                        UTF-16 の場合、各 [=code point=] が 2 バイトにまたがるため、読み書き間でバイト順序が異なる可能性があり、
+                        UTF-16 の場合、各 [=code point=] は1個または2個の2バイト符号単位で表現されるため、読み書き間でバイト順序が異なる可能性があり、
                         バイト順序は重要です。このため UTF-16 でエンコードされたテキストには通常バイトオーダマーク（BOM、`0xFEFF`）が含まれます。
                         ホストマシンと NDEF でバイト順序が異なる場合、値は `0xFFFE` として読み戻され、
                         バイト順序を入れ替える必要があることを示します。[[[ENCODING]]] ではバイト順序に応じて
