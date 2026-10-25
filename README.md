@@ -259,7 +259,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Encrypted Media Extensions](https://jp.htmlspecs.com/encrypted-media-2/)（[Source](https://www.w3.org/TR/2026/WD-encrypted-media-2-20261013/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Remote Playback](https://jp.htmlspecs.com/remote-playback/)（[Source](https://www.w3.org/TR/2024/CRD-remote-playback-20240430/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Open Screen Application Protocol](https://jp.htmlspecs.com/openscreen-application/)（[Source](https://www.w3.org/TR/2026/WD-openscreen-application-20261024/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Open Screen Network Protocol](https://jp.htmlspecs.com/openscreen-network/)（[Source](https://www.w3.org/TR/2026/WD-openscreen-network-20260210/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Open Screen Network Protocol](https://jp.htmlspecs.com/openscreen-network/)（[Source](https://www.w3.org/TR/2026/WD-openscreen-network-20261024/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### メディア形式・字幕・コーデック
 - [WebVTT: The Web Video Text Tracks Format](https://jp.htmlspecs.com/webvtt1/)（[Source](https://www.w3.org/TR/2026/CRD-webvtt1-20260520/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
