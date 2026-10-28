@@ -6,8 +6,8 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [HTML Ruby Markup Extensions](https://jp.htmlspecs.com/html-ruby-extensions/)（[Source](https://www.w3.org/TR/2026/CR-html-ruby-extensions-20260604/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [ECMAScript® 2027 Language Specification](https://ecma262.com/j)（[Source](https://tc39.es/ecma262/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)），[How to Read](https://jp.htmlspecs.com/es-howto/)（[Source](https://timothygu.me/es-howto/)）
 - [Source map format specification](https://jp.htmlspecs.com/ecma426/)（[Source](https://tc39.es/ecma426/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-js-api-2-20261023/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-web-api-2-20261023/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebAssembly JavaScript Interface](https://jp.htmlspecs.com/wasm-js-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-js-api-2-20261027/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [WebAssembly Web API](https://jp.htmlspecs.com/wasm-web-api-2/)（[Source](https://www.w3.org/TR/2026/CRD-wasm-web-api-2-20261027/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [DOM](https://jp.htmlspecs.com/dom/)（[Source](https://dom.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [DOM Parsing and Serialization](https://jp.htmlspecs.com/dom-parsing/)（[Source](https://www.w3.org/TR/2016/WD-DOM-Parsing-20160517/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [URL](https://jp.htmlspecs.com/url/)（[Source](https://url.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
@@ -101,7 +101,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### 数学
 - [MathML Core](https://jp.htmlspecs.com/mathml-core/)（[Source](https://www.w3.org/TR/2025/CR-mathml-core-20250624/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
-- [MathML4](https://jp.htmlspecs.com/mathml4/)（[Source](https://www.w3.org/TR/2026/WD-mathml4-20261026/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [MathML4](https://jp.htmlspecs.com/mathml4/)（[Source](https://www.w3.org/TR/2026/WD-mathml4-20261027/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### Web アプリ・インストール・ライフサイクル
 - [Web Application Manifest](https://jp.htmlspecs.com/appmanifest/)（[Source](https://www.w3.org/TR/2026/WD-appmanifest-20261026/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
@@ -180,7 +180,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### デバイス・センサー・ハードウェアインターフェイス
 - [WebSerial](https://jp.htmlspecs.com/serial/)（[Source](https://serial.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
-- [WebHID API](https://jp.htmlspecs.com/hid/)（[Source](https://hid.spec.whatwg.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [WebHID Standard](https://jp.htmlspecs.com/hid/)（[Source](https://hid.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [WebUSB API](https://jp.htmlspecs.com/usb/)（[Source](https://usb.spec.whatwg.org/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web Smart Card API](https://jp.htmlspecs.com/web-smart-card/)（[Source](https://wicg.github.io/web-smart-card/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web MIDI API](https://jp.htmlspecs.com/webmidi/)（[Source](https://www.w3.org/TR/2026/WD-webmidi-20261020/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
@@ -355,7 +355,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web Cryptography Level 2](https://jp.htmlspecs.com/webcrypto-2/)（[Source](https://www.w3.org/TR/2025/WD-webcrypto-2-20250422/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Modern Algorithms in the Web Cryptography API](https://jp.htmlspecs.com/webcrypto-modern-algos/)（[Source](https://wicg.github.io/webcrypto-modern-algos/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Subresource Integrity (SRI) 2](https://jp.htmlspecs.com/sri-2/)（[Source](https://www.w3.org/TR/2026/WD-sri-2-20260320/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20260916/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20261027/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Content Security Policy: Embedded Enforcement](https://jp.htmlspecs.com/csp-embedded-enforcement/)（[Source](https://www.w3.org/TR/2026/WD-csp-embedded-enforcement-20260507/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Connection Allowlists](https://jp.htmlspecs.com/connection-allowlists/)（[Source](https://wicg.github.io/connection-allowlists/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Secure Contexts](https://jp.htmlspecs.com/secure-contexts/)（[Source](https://www.w3.org/TR/2023/CRD-secure-contexts-20231110/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
@@ -472,7 +472,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### デジタル出版・電子書籍
 - [EPUB 3.3](https://jp.htmlspecs.com/epub-33/)（[Source](https://www.w3.org/TR/2026/REC-epub-33-20260113/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [EPUB Reading Systems 3.3](https://jp.htmlspecs.com/epub-rs-33/)（[Source](https://www.w3.org/TR/2024/REC-epub-rs-33-20241017/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [EPUB 3.4](https://jp.htmlspecs.com/epub-34/)（[Source](https://www.w3.org/TR/2026/CRD-epub-34-20261022/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [EPUB 3.4](https://jp.htmlspecs.com/epub-34/)（[Source](https://www.w3.org/TR/2026/CRD-epub-34-20261027/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [EPUB Reading Systems 3.4](https://jp.htmlspecs.com/epub-rs-34/)（[Source](https://www.w3.org/TR/2026/CRD-epub-rs-34-20260721/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [EPUB Accessibility 1.2](https://jp.htmlspecs.com/epub-a11y-12/)（[Source](https://www.w3.org/TR/2026/CRD-epub-a11y-12-20260912/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Publication Manifest](https://jp.htmlspecs.com/pub-manifest/)（[Source](https://www.w3.org/TR/2020/REC-pub-manifest-20201110/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
@@ -513,7 +513,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 
 ### 色・背景・境界・視覚効果
 - [CSS Color Module Level 3](https://jp.htmlspecs.com/css/css-color-3/)（[Source](https://www.w3.org/TR/2022/REC-css-color-3-20220118/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
-- [CSS Color Module Level 4](https://jp.htmlspecs.com/css/css-color-4/)（[Source](https://www.w3.org/TR/2026/CRD-css-color-4-20261026/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [CSS Color Module Level 4](https://jp.htmlspecs.com/css/css-color-4/)（[Source](https://www.w3.org/TR/2026/CRD-css-color-4-20261027/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [CSS Color Module Level 5](https://jp.htmlspecs.com/css/css-color-5/)（[Source](https://www.w3.org/TR/2026/WD-css-color-5-20261026/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Color Adjustment Module Level 1](https://jp.htmlspecs.com/css/css-color-adjust-1/)（[Source](https://www.w3.org/TR/2025/CR-css-color-adjust-1-20251216/) ![Candidate Recommendation](https://img.shields.io/badge/CR-cfd510)）
 - [CSS Color HDR Module Level 1](https://jp.htmlspecs.com/css/css-color-hdr-1/)（[Source](https://www.w3.org/TR/2026/WD-css-color-hdr-1-20261026/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
