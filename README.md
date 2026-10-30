@@ -219,7 +219,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Fullscreen](https://jp.htmlspecs.com/fullscreen/)（[Source](https://fullscreen.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Contact Picker API](https://jp.htmlspecs.com/contact-picker/)（[Source](https://www.w3.org/TR/2026/WD-contact-picker-20261026/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Window Controls Overlay](https://jp.htmlspecs.com/window-controls-overlay/)（[Source](https://wicg.github.io/window-controls-overlay/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Window Management](https://jp.htmlspecs.com/window-management/)（[Source](https://www.w3.org/TR/2026/WD-window-management-20260908/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Window Management](https://jp.htmlspecs.com/window-management/)（[Source](https://www.w3.org/TR/2026/WD-window-management-20261030/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Web Printing API](https://jp.htmlspecs.com/web-printing/)（[Source](https://wicg.github.io/web-printing/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Web Share API](https://jp.htmlspecs.com/web-share/)（[Source](https://www.w3.org/TR/2023/REC-web-share-20230530/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [Web Share Target API](https://jp.htmlspecs.com/web-share-target/)（[Source](https://w3c.github.io/web-share-target/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
@@ -358,7 +358,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Subresource Integrity (SRI) 2](https://jp.htmlspecs.com/sri-2/)（[Source](https://www.w3.org/TR/2026/WD-sri-2-20260320/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Content Security Policy Level 3](https://jp.htmlspecs.com/CSP3/)（[Source](https://www.w3.org/TR/2026/WD-CSP3-20261027/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Content Security Policy: Embedded Enforcement](https://jp.htmlspecs.com/csp-embedded-enforcement/)（[Source](https://www.w3.org/TR/2026/WD-csp-embedded-enforcement-20260507/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Connection Allowlists](https://jp.htmlspecs.com/connection-allowlists/)（[Source](https://wicg.github.io/connection-allowlists/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
+- [Connection Allowlists](https://jp.htmlspecs.com/connection-allowlists/)（[Source](https://w3c.github.io/connection-allowlists/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Secure Contexts](https://jp.htmlspecs.com/secure-contexts/)（[Source](https://www.w3.org/TR/2023/CRD-secure-contexts-20231110/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [The Web Origin Concept](https://jp.htmlspecs.com/web-origin/)（[Source](https://www.rfc-editor.org/rfc/rfc6454.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Threat Model for the Web](https://jp.htmlspecs.com/threat-model-web/)（[Source](https://www.w3.org/TR/2026/DNOTE-threat-model-web-20260922/) ![Note Draft](https://img.shields.io/badge/DNOTE-ffcc00)）
