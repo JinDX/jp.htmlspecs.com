@@ -143,7 +143,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Badging API](https://jp.htmlspecs.com/badging/)（[Source](https://www.w3.org/TR/2026/WD-badging-20260427/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### ストレージ・ファイル・データアクセス
-- [Indexed Database API 3.0](https://jp.htmlspecs.com/IndexedDB/)（[Source](https://www.w3.org/TR/2026/WD-IndexedDB-3-20261029/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Indexed Database API 3.0](https://jp.htmlspecs.com/IndexedDB/)（[Source](https://www.w3.org/TR/2026/WD-IndexedDB-3-20261030/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Storage](https://jp.htmlspecs.com/storage/)（[Source](https://storage.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [Storage Buckets](https://jp.htmlspecs.com/storage-buckets/)（[Source](https://wicg.github.io/storage-buckets/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [File API](https://jp.htmlspecs.com/FileAPI/)（[Source](https://www.w3.org/TR/2026/WD-FileAPI-20260912/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
