@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>JS セルフプロファイリング API</title>
+    <title>JS 自己プロファイリング API</title>
     <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"></script>
     <script class="remove">
         var respecConfig = {
@@ -39,8 +39,8 @@
 <body>
     <section id="abstract">
         <p>
-            この仕様は、クライアントの JavaScript 実行時間を測定するためのサンプリングプロファイラーを
-            Web アプリケーションが制御できるようにする API を説明します。
+            この仕様は、Webアプリケーションがサンプリングプロファイラーを制御して、
+            クライアントのJavaScript実行時間を測定できるAPIを記述する。
         </p>
     </section>
     <section id="sotd">
@@ -48,20 +48,20 @@
     <section class="informative" id="introduction">
         <h2>はじめに</h2>
         <p>
-            現在、複雑な Web アプリケーションからは、クライアント上で JS の
-            実行時間がどこに費やされているかを限定的にしか把握できません。スタックサンプルを効率的に
-            収集できないため、アプリケーションは不正確であり、実行を大幅に
-            低速化させる可能性があるプロファイリング用フックをコードに組み込まざるを得ません。
-            サンプリングプロファイラーを操作する API を提供することで、
-            アプリケーションは最小限のオーバーヘッドで、集約および分析に使用できる
-            詳細な実行データを収集できます。
+            複雑なWebアプリケーションは現在、クライアントにおけるJSの
+            実行時間の内訳を十分に把握できない。効率的に
+            スタックサンプルを収集できなければ、アプリケーションはコードに
+            不正確で、大幅な速度低下を招く可能性のあるプロファイリングフックを組み込んで
+            実行せざるを得ない。サンプリングプロファイラーを操作するAPIを提供することで、
+            アプリケーションは集計と分析のための豊富な実行データを
+            最小限のオーバーヘッドで収集できる。
         </p>
         <section class="informative">
             <h2>例</h2>
-            <p>次の例は、コストの高い処理をユーザーがプロファイリングし、10ms ごとに JS 実行
-                サンプルを収集する方法を示しています。トレースをサーバーに送信して分析することで、外れ値や JS 実行
-                特性を集約してデバッグできます。</p>
-            <pre class="example" title="計算負荷の高い処理をプロファイリングする。">
+            <p>次の例は、負荷の高い処理をプロファイリングし、JS実行サンプルを
+                10msごとに収集する方法を示す。トレースをサーバーへ送信して分析することで、外れ値をデバッグし、JS実行の
+                特性を集計して調べることができる。</p>
+            <pre class="example" title="計算負荷の高い処理のプロファイリング。">
         const profiler = new Profiler({ sampleInterval: 10, maxBufferSize: 10000 });
         const start = performance.now();
         for (let i = 0; i &lt; 1000000; i++) {
@@ -75,9 +75,9 @@
         });
         sendTrace(traceJson);
         </pre>
-            <p>実際によくあるもう一つのシナリオは、ページ読み込み全体にわたって JS をプロファイリングすることです。この例では onload
-                イベントをプロファイリングし、トレースとともにパフォーマンスタイミングデータを送信します。</p>
-            <pre class="example" title="ページ読み込みをプロファイリングする。">
+            <p>もう一つの一般的な実際の利用例は、ページ読み込み全体にわたるJSのプロファイリングである。この例ではonload
+                イベントをプロファイリングし、パフォーマンスタイミングデータをトレースとともに送信する。</p>
+            <pre class="example" title="ページ読み込みのプロファイリング。">
         const profiler = new Profiler({ sampleInterval: 10, maxBufferSize: 10000 });
 
         window.addEventListener('load', async () => {
@@ -89,7 +89,7 @@
           sendTrace(traceJson);
         });
 
-        // ページの残りの JS 初期化ロジック
+        // ページの残りのJS初期化ロジック
         </pre>
         </section>
     </section>
@@ -98,200 +98,260 @@
     <section>
         <h2>定義</h2>
         <p>
-            <dfn data-lt="sample|samples">サンプル</dfn>とは、特定の時点における実行の
-            瞬間的な状態を表す記述子です。各サンプルは
-            <a>スタック</a>に関連付けられます。
+            <dfn data-lt="sample|samples">サンプル</dfn>は、ある時点における
+            瞬間的な実行状態の記述子である。各サンプルには
+            <a>スタック</a>が関連付けられる。
         </p>
         <p>
-            <dfn>スタック</dfn>とは、最も外側のフレームから最も内側のフレームまで
-            順番に並べなければならない<a>フレーム</a>のリストです。
+            <dfn>スタック</dfn>は<a>フレーム</a>のリストであり、
+            最も外側のフレームから最も内側のフレームへ順に並んでいなければならない。
         </p>
         <p>
-            <dfn data-lt="frame|frames">フレーム</dfn>とは、現在の実行状態に関する情報を含む
-            <a>スタック</a>のコンテキスト内の要素です。
+            <dfn data-lt="frame|frames">フレーム</dfn>は、<a>スタック</a>のコンテキスト内にある要素で、
+            現在の実行状態に関する情報を含む。
         </p>
     </section>
     <section>
         <h2>プロファイリングセッション</h2>
         <p>
-            <dfn>プロファイリングセッション</dfn>とは、<a>サンプル</a>を生成する抽象的な生成元です。各セッションは次のものを持ちます。
+            <dfn>プロファイリングセッション</dfn>は、<a>サンプル</a>を生成する抽象的な主体である。各セッションは次を持つ：
         </p>
         <ol>
-            <li><dfn>状態</dfn>。<code>{started, paused, stopped}</code> のいずれかです。</li>
+            <li><dfn>状態</dfn>。<code>{started, paused, stopped}</code>のいずれかである。</li>
             <li>
-                <dfn>サンプル間隔</dfn>。セッションがサンプルを取得する周期として定義されます。
+                <dfn>サンプリング間隔</dfn>。セッションがサンプルを取得する周期として定義される。
                 <p class="note">
-                    UA はこの頻度でサンプルを取得することを要求されません。ただし、より高品質な
-                    トレースを生成するため、この頻度でサンプルを取得するようサンプリングを優先することが
-                    推奨されます。
+                    UAがこの頻度でサンプルを取得することは要求されない。ただし、
+                    より高品質なトレースを生成するため、この頻度でサンプルを取得するよう
+                    サンプリングを優先することが推奨される。
                 </p>
             </li>
             <li>プロファイリング対象の<dfn data-cite="!ECMA-262#agent">エージェント</dfn>。</li>
             <li>プロファイリング対象の<dfn data-cite="!ECMA-262#realm">レルム</dfn>。</li>
-            <li>サンプルのタイムスタンプを相対的に測定する基準となる<dfn data-cite="!HR-TIME-2#dfn-time-origin">時刻起点</dfn>。</li>
-            <li><dfn>サンプルバッファサイズ上限</dfn>。</li>
+            <li>サンプルのタイムスタンプを測定する際の基準となる<dfn data-cite="!HR-TIME-2#dfn-time-origin">時間起点</dfn>
+                。</li>
+            <li><dfn>サンプルバッファーサイズ上限</dfn>。</li>
             <li>取得した<a>サンプル</a>を格納する<a>ProfilerTrace</a>。</li>
         </ol>
         <p>
-            同じページ上で複数のプロファイリングセッションをサポートすべきです。
+            同じページ上で複数のプロファイリングセッションに対応するべきである。
         </p>
         <section>
             <h2>状態</h2>
             <p>
-                <code>started</code> 状態では、UA は<a>サンプル間隔</a>が経過するたびに
-                <a>サンプルを取得する</a>アルゴリズムを [= in parallel =] 実行し、ベストエフォートでサンプルを取得すべきです。
-                <code>paused</code> 状態および <code>stopped</code> 状態では、UA はサンプルを取得すべきではありません。
+                <code>started</code>状態では、UAは可能な限り、
+                <a>サンプルを取得する</a>アルゴリズムを[= 並列
+                に =]実行して、<a>サンプリング間隔</a>が経過するたびにサンプルを取得するべきである。
+                <code>paused</code>状態と<code>stopped</code>状態では、UAはサンプルを取得するべきではない。
             </p>
             <p>
-                プロファイリングセッションは <code>started</code> 状態で開始しなければなりません。
+                プロファイリングセッションは、<code>started</code>状態で開始しなければならない。
             </p>
             <p>
-                UA は、セッションを <code>started</code> から <code>paused</code> へ、および <code>paused</code>
-                から <code>started</code> へ移行してもよいです。
+                UAは、セッションを<code>started</code>から<code>paused</code>へ、また<code>paused</code>から
+                <code>started</code>へ移行させてもよい。
             </p>
             <p class="note">
-                閲覧コンテキストがフォアグラウンドにない場合、ユーザーエージェントは
-                プロファイリングセッションのサンプリングを一時停止することが推奨されます。
+                ユーザーエージェントは、閲覧コンテキストがフォアグラウンドにない場合、
+                プロファイリングセッションのサンプリングを一時停止することが推奨される。
             </p>
             <p>
-                <code>stopped</code> のセッションは、<code>started</code> 状態または <code>paused</code> 状態へ移行してはなりません。
+                <code>stopped</code>状態のセッションは、<code>started</code>状態または<code>paused</code>状態へ移行してはならない。
             </p>
         </section>
     </section>
     <section>
         <h2>処理モデル</h2>
         <p>
-            <a>プロファイリングセッション</a>を指定して<dfn>サンプルを取得する</dfn>には、次の手順を実行します。
+            <a>プロファイリングセッション</a>が与えられたとき、<dfn>サンプルを取得する</dfn>には、次の手順を実行する：
         </p>
         <ol>
-            <li><a>ProfilerTrace.samples</a> の長さが、プロファイリングセッションに関連付けられた
-                <a>サンプルバッファサイズ上限</a>以上である場合、関連付けられた<a>Profiler</a>に
-                <dfn>samplebufferfull</dfn> 型の新しいイベントを発火し、状態を <code>stopped</code> に移行して、
-                return します。
+            <li><a>ProfilerTrace.samples</a>の長さが、<a>サンプルバッファーサイズ
+                    上限</a>（プロファイリングセッションに関連付けられたもの）以上の場合、新しいイベントを発火する。その型は
+                <dfn>samplebufferfull</dfn>で、対象は関連付けられた<a>Profiler</a>とし、状態を<code>stopped</code>へ移行し、
+                戻る。
             </li>
-            <li><var>sample</var> を新しい<a>ProfilerSample</a>とします。</li>
-            <li><var>sample</var> の<a>ProfilerSample.timestamp</a>プロパティを、
-                <a>プロファイリングセッション</a>の<a>時刻起点</a>を基準とする<dfn
-                    data-cite="!hr-time-2#dfn-current-high-resolution-time">現在の高解像度時刻</dfn>に設定します。
+            <li><var>sample</var>を、新しい<a>ProfilerSample</a>とする。</li>
+            <li><var>sample</var>の<a>ProfilerSample.timestamp</a>プロパティを、<dfn
+                    data-cite="!hr-time-2#dfn-current-high-resolution-time">現在の高分解能時刻</dfn>に設定する。その時刻の基準は、
+                <a>プロファイリングセッション</a>の<a>時間起点</a>とする。
             </li>
-            <li><var>stack</var> を、プロファイリングセッションの<a>エージェント</a>に関連付けられた
-                <dfn data-cite="!ECMA-262#execution-context-stack">実行コンテキストスタック</dfn>とします。
+            <li><var>stack</var>を、<dfn data-cite="!ECMA-262#execution-context-stack">実行コンテキスト
+                    スタック</dfn>（プロファイリングセッションの<a>エージェント</a>に関連付けられたもの）とする。</li>
+            <li><var>sample</var>の<a>ProfilerSample.stackId</a>プロパティを、<a>スタック
+                    IDを取得する</a>アルゴリズムを<var>stack</var>に対して実行した結果に設定する。</li>
+            <li><var>marker</var>を、プロファイリングセッションに
+                関連付けられた<a
+                    data-cite="HTML5#environment-settings-object">環境設定オブジェクト</a>が与えられた下で、<a>マーカーを取得する</a>アルゴリズムを実行した結果とする。
             </li>
-            <li><var>sample</var> の<a>ProfilerSample.stackId</a>プロパティを、
-                <var>stack</var> に対する<a>スタック ID を取得する</a>アルゴリズムの結果に設定します。
+            <li><var>marker</var>がnullでない場合、<var>sample</var>の<a>ProfilerSample.marker</a>プロパティを
+                <var>marker</var>に設定する。
             </li>
-            <li><var>sample</var> を、セッションの<a>ProfilerTrace</a>に関連付けられた
-                <a>ProfilerTrace.samples</a>に追加します。
+            <li><var>sample</var>を、セッションの
+                <a>ProfilerTrace</a>に関連付けられた<a>ProfilerTrace.samples</a>に追加する。
             </li>
         </ol>
         <p>
-            <var>stack</var> に束縛された<a>実行コンテキストスタック</a>を指定して
-            <dfn>スタック ID を取得する</dfn>には、次の手順を実行します。
+            <a data-cite="HTML5#environment-settings-object">環境
+                設定オブジェクト</a><var>settings</var>が与えられたとき、<dfn>マーカーを取得する</dfn>には、次の手順を実行する：
+        </p>
         <ol>
-            <li><var>stack</var> が空の場合、<code>undefined</code> を返します。</li>
-            <li><var>head</var> を <var>stack</var> の先頭要素とし、<var>tail</var> を
-                <var>stack</var> からその先頭要素を削除した残りとします。
+            <li><var>candidateMarker</var>を、トップレベルの処理を最もよく表す<a>ProfilerMarker</a>値とする。
+                その処理はサンプルの取得時に、ユーザーエージェントがプロファイリングセッションの<a>エージェント</a>で実行していたものとし、
+                該当する値がなければnullとする。</li>
+            <li><var>candidateMarker</var>がnullの場合、nullを返す。</li>
+            <li><var>candidateMarker</var>が表す処理が、[=
+                同一オリジン =]でない特定の文書のために実行された場合、その比較対象となる<a data-cite="HTML5#concept-settings-object-origin">オリジン</a>は
+                <var>settings</var>のものとし、nullを返す。
             </li>
-            <li><var>parentId</var> を、<var>tail</var> に対して<a>スタック ID を取得する</a>を再帰的に呼び出した結果とします。
+            <li><var>candidateMarker</var>と
+                <var>settings</var>が与えられた下で、<a>マーカーをフィルタリングする</a>を実行した結果を返す。
             </li>
-            <li><var>frameId</var> を、<var>head</var> に対して<a>フレーム ID を取得する</a>を呼び出した結果とします。</li>
-            <li><var>frameId</var> が <code>undefined</code> の場合、<var>parentId</var> を返します。</li>
-            <li><var>profilerStack</var> を、<a>ProfilerStack.frameId</a> が
-                <var>frameId</var> と等しく、<a>ProfilerStack.parentId</a> が <var>parentId</var> と等しい
-                新しい<a>ProfilerStack</a>とします。</a>
-            <li><var>profilerStack</var> および<a>ProfilerTrace.stacks</a>に対して
-                <a>要素 ID を取得する</a>を実行した結果を返します。
+        </ol>
+        <p class="note">
+            ユーザーエージェントの内部動作から<a>ProfilerMarker</a>値への対応付けは、意図的に
+            実装定義としている。エンジンのアーキテクチャが異なるためである。規範的でない指針として、ユーザーエージェントには、
+            作成者スクリプトの実行中は<code>script</code>を、ガベージコレクション中は<code>gc</code>を、
+            算出スタイルの再計算中は<code>style</code>を、ボックスの幾何情報の計算中は<code>layout</code>を
+            （すなわちリフロー中に）、文書内容のラスタライズ中または合成中は<code>paint</code>を報告することが期待される。
+            <code>other</code>マーカーは、上記のいずれの分類にも当てはまらないユーザーエージェントの処理に
+            使用される。どの分類も該当しない場合（例えば、エージェントがアイドル状態の場合）、<a>マーカーを取得する</a>
+            アルゴリズムはnullを返し、結果として得られる
+            <a>ProfilerSample</a>の<a>ProfilerSample.marker</a>属性は存在しないままとなる。
+        </p>
+        <p class="note">
+            同一オリジン検査は、マーカーが、プロファイラーと[= 同一オリジン
+            =]である文書のために実行された処理のみを表すことを保証する。これは、このAPIがクロスオリジンの動作を明らかにしてはならないという要件と整合する。処理のうち、
+            単一の文書に帰属しないもの&mdash;例えば、エンジン全体のガベージコレクション&mdash;は、
+            その検査による制約を受けない。その代わり、そのような処理はプロファイラーがクロスオリジン分離されている場合にのみ公開される。
+            これは<a>マーカーをフィルタリングする</a>によって強制される。
+        </p>
+        <p>
+            <a>ProfilerMarker</a><var>marker</var>と<a
+                data-cite="HTML5#environment-settings-object">環境設定オブジェクト</a><var>settings</var>が与えられたとき、<dfn>マーカーをフィルタリングする</dfn>には、
+            次の手順を実行する：
+        </p>
+        <ol>
+            <li><var>settings</var>の<a
+                    data-cite="HTML5#concept-settings-object-cross-origin-isolated-capability">クロスオリジン分離
+                    能力</a>がtrueの場合、<var>marker</var>を返す。</li>
+            <li><var>marker</var>が<code>"style"</code>または<code>"layout"</code>の場合、<var>marker</var>を返す。</li>
+            <li>nullを返す。</li>
+        </ol>
+        <p class="note">
+            <a>マーカーをフィルタリングする</a>アルゴリズムは、クロスオリジン分離されていない
+            コンテキストでは、<code>style</code>マーカーと<code>layout</code>マーカーのみが<a>ProfilerSample</a>に現れるという観測可能な動作を生む。
+            <code>script</code>、<code>gc</code>、<code>paint</code>、<code>other</code>の各マーカーは抑制される。
+            この動作の根拠は、<a href="#conditional-markers">マーカーの条件付き公開</a>を参照。ユーザー
+            エージェントは、オプトインの仕組み（例えば、オリジントライアルトークンや文書ポリシー）を提供してもよい。その仕組みは、
+            特定の<a
+                data-cite="HTML5#environment-settings-object">環境設定オブジェクト</a>について、<a>マーカーをフィルタリングする</a>が返す集合を拡大する。そのようなオプトインは、
+            オリジンをまたいでマーカーを公開してはならない。
+        </p>
+        <p>
+            <var>stack</var>に束縛された<a>実行コンテキストスタック</a>が与えられたとき、<dfn>スタックIDを取得する</dfn>には、次の
+            手順を実行する：
+        <ol>
+            <li><var>stack</var>が空の場合、<code>undefined</code>を返す。</li>
+            <li><var>head</var>を<var>stack</var>の最上位要素とし、<var>tail</var>を、
+                <var>stack</var>から最上位要素を取り除いた残りとする。
+            </li>
+            <li><var>parentId</var>を、<var>tail</var>に対して<a>スタックIDを取得する</a>を再帰的に呼び出した結果とする。
+            </li>
+            <li><var>frameId</var>を、<var>head</var>に対して<a>フレームIDを取得する</a>を呼び出した結果とする。</li>
+            <li><var>frameId</var>が<code>undefined</code>の場合、<var>parentId</var>を返す。</li>
+            <li><var>profilerStack</var>を、新しい<a>ProfilerStack</a>とし、その<a>ProfilerStack.frameId</a>は
+                <var>frameId</var>と等しく、<a>ProfilerStack.parentId</a>は<var>parentId</var>と等しいものとする。</a>
+            <li><var>profilerStack</var>と
+                <a>ProfilerTrace.stacks</a>に対して<a>要素IDを取得する</a>を実行した結果を返す。
             </li>
         </ol>
         </p>
         <p>
-            <var>context</var> に束縛された<dfn data-cite="!ECMA-262#sec-execution-contexts">実行
-                コンテキスト</dfn>を指定して<dfn>フレーム ID を取得する</dfn>には、次の手順を実行します。
+            <dfn data-cite="!ECMA-262#sec-execution-contexts">実行
+                コンテキスト</dfn>が<var>context</var>に束縛されて与えられたとき、<dfn>フレームIDを取得する</dfn>には、次の手順を実行する：
         <ol>
-            <li><var>context</var> に関連付けられた [= realm =] が、プロファイリングセッションに関連付けられた
-                レルムと一致しない場合、<code>undefined</code> を返します。</li>
-            <li><var>instance</var> を、<var>context</var> に関連付けられた
-                <dfn data-cite="!ECMA-262#sec-function-instances">関数インスタンス</dfn>と等しいものとします。
-            </li>
-            <li><var>scriptOrModule</var> を、<var>context</var> に関連付けられた
-                <code>ScriptOrModule</code> と等しいものとします。
+            <li><var>context</var>に関連付けられた[= レルム =]が、
+                プロファイリングセッションに関連付けられたレルムと一致しない場合、<code>undefined</code>を返す。</li>
+            <li><var>instance</var>を、<dfn data-cite="!ECMA-262#sec-function-instances">関数
+                    インスタンス</dfn>（<var>context</var>に関連付けられたもの）と等しいものとする。</li>
+            <li><var>scriptOrModule</var>を、
+                <var>context</var>に関連付けられた<code>ScriptOrModule</code>と等しいものとする。
             </li>
             <li>
-                |attributedScriptOrModule : ScriptOrModule| を、次のアルゴリズムを実行した結果と等しいものとします。
+                |attributedScriptOrModule : ScriptOrModule|を、次の
+                アルゴリズムを実行した結果と等しいものとする：
                 <ol>
-                    <li>|scriptOrModule| が null でない場合、|scriptOrModule| を返します。</li>
-                    <li>|instance| が組み込み関数オブジェクトである場合、|instance| を呼び出した関数を含む
-                        <code>ScriptOrModule</code> を返します。
+                    <li>|scriptOrModule|がnullでない場合、|scriptOrModule|を返す。</li>
+                    <li>|instance|が組み込み関数オブジェクトの場合、<code>ScriptOrModule</code>のうち、
+                        |instance|を呼び出した関数を含むものを返す。
                         <p class="ednote">
-                            上記のロジックの目的は、アクセス不能なスクリプトによって呼び出された組み込み関数が
-                            トレースに公開されないようにすることです。そのため、帰属先としてそれらを呼び出した
-                            <code>ScriptOrModule</code> を使用します。
+                            上記のロジックの目的は、アクセスできないスクリプトから呼び出された組み込み関数が
+                            トレースに公開されないことを保証することであり、その呼び出し元の<code>ScriptOrModule</code>を
+                            帰属先として使用する。
                         </p>
                         <p class="issue">
-                            「|instance| を呼び出した関数を含む <code>ScriptOrModule</code>」は、
-                            より厳密に定義すべきです。これを提供するため、<code>ScriptOrModule</code> を定義する
-                            スタック上の最上位の実行コンテキストを利用できますが、これは理想的ではありません。
-                            理論上、組み込み関数が実行コンテキストスタックにキューされる別の仕組みが存在する可能性があり、
-                            その場合、帰属は無効になります。
+                            「[...] |instance|を呼び出した関数を含む<code>ScriptOrModule</code>」
+                            は、より厳密に定義するべきである。スタック上の最も上にある実行コンテキストで、
+                            <code>ScriptOrModule</code>を定義するものを利用してこれを提供できるが、理想的ではない--
+                            組み込み関数を実行コンテキストスタックへ追加する別の仕組みが（理論上は）
+                            存在する可能性があり、その場合、この帰属付けは無効になる。
                         </p>
                     </li>
-                    <li>それ以外の場合、null を返します。</li>
+                    <li>それ以外の場合、nullを返す。</li>
                 </ol>
             </li>
-            <li>|attributedScriptOrModule| が null の場合、<code>undefined</code> を返します。</li>
-            <li>|attributedScript : Script| を、
-                |attributedScriptOrModule|.[[\HostDefined]] から取得した [= script =] とします。</li>
+            <li>|attributedScriptOrModule|がnullの場合、<code>undefined</code>を返す。</li>
+            <li>|attributedScript : Script|を、
+                |attributedScriptOrModule|.[[\HostDefined]]から取得した[= スクリプト =]とする。</li>
             <li>
-                |attributedScript| が [= classic script =] であり、その
-                <dfn data-cite="HTML5#muted-errors">ミュートエラー</dfn>真偽値が <code>true</code> と等しい場合、
-                <code>undefined</code> を返します。
+                |attributedScript|が[= クラシックスクリプト =]であり、その<dfn data-cite="HTML5#muted-errors">エラーの
+                    抑制</dfn>を表す真偽値が<code>true</code>と等しい場合、<code>undefined</code>を返す。
                 <p class="ednote">
-                    この検査により、CORS クロスオリジンレスポンスで提供されたクロスオリジンスクリプトの
-                    スタックフレームが含まれないようにします。この用途をより適切に反映するよう、
-                    <a>ミュートエラー</a>の名称変更を検討してもよいでしょう。
+                    この検査は、クロスオリジンのスクリプトに由来するスタックフレームを含めないことを保証する。そのスクリプトは、
+                    CORSクロスオリジン応答で提供されたものである。この用途をより適切に反映するよう、<a>エラーの抑制</a>の名前を
+                    変更することを検討してもよい。
                 <p>
             </li>
-            <li><var>frame</var> を新しい<a>ProfilerFrame</a>とします。</li>
-            <li><var>frame</var> の<a>ProfilerFrame.name</a>を、|instance| に関連付けられた
-                <dfn data-cite="!ECMA-262#sec-function-instances-name">関数インスタンス名</dfn>に設定します。
-            </li>
+            <li><var>frame</var>を、新しい<a>ProfilerFrame</a>とする。</li>
+            <li><var>frame</var>の<a>ProfilerFrame.name</a>を、<dfn
+                    data-cite="!ECMA-262#sec-function-instances-name">関数インスタンス名</dfn>のうち、
+                |instance|に関連付けられたものに設定する。</li>
             <li>
-                |scriptOrModule| が null でない場合:
+                |scriptOrModule|がnullでない場合：
                 <ol>
-                    <li><var>script</var> を、
-                        <var>scriptOrModule</var>.[[\HostDefined]] から取得した
-                        <dfn data-cite="HTML5#concept-script">スクリプト</dfn>とします。
+                    <li><var>script</var>を、<dfn data-cite="HTML5#concept-script">スクリプト</dfn>のうち、
+                        <var>scriptOrModule</var>.[[\HostDefined]]から取得したものとする。
                     </li>
-                    <li><var>resourceString</var> を、<var>script</var> の
-                        <dfn data-cite="HTML5#concept-script-base-url">ベース URL</dfn>と等しいものとします。
+                    <li><var>resourceString</var>を、<dfn
+                            data-cite="HTML5#concept-script-base-url">基底URL</dfn>（<var>script</var>のもの）と等しいものとする。</li>
+                    <li><a>ProfilerFrame.resourceId</a>を、<a>要素IDを取得する</a>を
+                        <var>resourceString</var>と<a>ProfilerTrace.resources</a>に対して実行した結果に設定する。
                     </li>
-                    <li><a>ProfilerFrame.resourceId</a>を、<var>resourceString</var> および
-                        <a>ProfilerTrace.resources</a>に対して<a>要素 ID を取得する</a>を実行した結果に設定します。
+                    <li><var>frame</var>の<a>ProfilerFrame.line</a>を、行の1を基点とするインデックスに設定する。その行は、
+                        |script|内で<var>instance</var>が定義されている行とする。
                     </li>
-                    <li><var>frame</var> の<a>ProfilerFrame.line</a>を、
-                        |script| 内で <var>instance</var> が定義されている行の 1 を起点とするインデックスに設定します。
-                    </li>
-                    <li><var>frame</var> の<a>ProfilerFrame.column</a>を、
-                        |script| 内で <var>instance</var> が定義されている列の 1 を起点とするインデックスに設定します。
+                    <li><var>frame</var>の<a>ProfilerFrame.column</a>を、列の1を基点とするインデックスに設定する。その列は、
+                        |script|内で<var>instance</var>が定義されている列とする。
                     </li>
                 </ol>
-            <li><var>frame</var> および<a>ProfilerTrace.frames</a>に対して
-                <a>要素 ID を取得する</a>を実行した結果を返します。
+            <li><var>frame</var>と
+                <a>ProfilerTrace.frames</a>に対して<a>要素IDを取得する</a>を実行した結果を返す。
             </li>
         </ol>
         </p>
         <p>
-            <var>list</var> 内の <var>item</var> に対して<dfn>要素 ID を取得する</dfn>には、次の手順を実行します。
+            <var>list</var>内の<var>item</var>の<dfn>要素IDを取得する</dfn>には、次の手順を実行する：
         <ol>
-            <li><var>list</var> 内に <var>item</var> と成分ごとに等しい要素が存在する場合、そのインデックスを返します。
+            <li><var>list</var>内に、各構成要素が<var>item</var>と等しい要素が存在する場合、そのインデックスを返す。
             </li>
-            <li>それ以外の場合、<var>item</var> を <var>list</var> の末尾に追加し、そのインデックスを返します。</li>
+            <li>それ以外の場合、<var>item</var>を<var>list</var>の末尾に追加し、そのインデックスを返す。</li>
         </ol>
         </p>
     </section>
 
     <section data-dfn-for="Profiler" data-link-for="Profiler">
-        <h2><dfn>Profiler</dfn> インターフェイス</h2>
+        <h2><dfn>Profiler</dfn>インターフェイス</h2>
         <pre class="idl">
       [Exposed=(Window, Worker)]
       interface Profiler : EventTarget {
@@ -302,105 +362,101 @@
         Promise&lt;ProfilerTrace&gt; stop();
       };
       </pre>
-        <p>各<a>Profiler</a>は、正確に一つの<a>プロファイリングセッション</a>に関連付けられなければなりません。</p>
-        <p><dfn>sampleInterval</dfn> 属性は、関連付けられた<a>プロファイリングセッション</a>の
-            <a>サンプル間隔</a>を、<dfn
-                data-cite="!hr-time-2#sec-domhighrestimestamp">DOMHighResTimeStamp</dfn>として表した値を反映しなければなりません。
+        <p>各<a>Profiler</a>には、正確に一つの<a>プロファイリングセッション</a>が関連付けられていなければならない。</p>
+        <p><dfn>sampleInterval</dfn>属性は、関連付けられた
+            <a>プロファイリングセッション</a>の<a>サンプリング間隔</a>を、<dfn
+                data-cite="!hr-time-2#sec-domhighrestimestamp">DOMHighResTimeStamp</dfn>として表した値を反映しなければならない。
         </p>
-        <p><dfn>stopped</dfn> 属性は、<a>プロファイリングセッション</a>の状態が
-            <code>stopped</code> である場合に限り、かつその場合に限って true でなければなりません。
+        <p><dfn>stopped</dfn>属性は、<a>プロファイリングセッション</a>の状態が
+            <code>stopped</code>である場合に限り、trueでなければならない。
         </p>
         <section>
             <h2><dfn data-lt="constructor()">new Profiler(options)</dfn></h2>
-            <a>new Profiler(options)</a> は、<a>ProfilerInitOptions</a> 型のオブジェクト
-            <var>options</var> を指定して、次の手順を実行します。
+            <a>new Profiler(options)</a>は、型が
+            <a>ProfilerInitOptions</a>であるオブジェクト<var>options</var>が与えられた下で、次の手順を実行する：
             <ol>
-                <li><var>options</var> の {{ProfilerInitOptions/sampleInterval}} が 0 未満の場合、
-                    <code>RangeError</code> をスローします。
+                <li><var>options</var>の{{ProfilerInitOptions/sampleInterval}}が0未満の場合、
+                    <code>RangeError</code>を投げる。
                 </li>
                 <li>
-                    |globalObject| を<dfn data-cite="!HTML5#current-global-object">現在のグローバルオブジェクト</dfn>とします。
+                    |globalObject|を、<dfn data-cite="!HTML5#current-global-object">現在のグローバルオブジェクト</dfn>とする。
                 </li>
                 <li>
-                    |globalObject| が<dfn data-cite="!HTML5#window">Window</dfn>または<dfn
-                        data-cite="!HTML5#the-workerglobalscope-common-interface">WorkerGlobalScope</dfn>である場合:
+                    |globalObject|が<dfn data-cite="!HTML5#window">Window</dfn>または<dfn
+                        data-cite="!HTML5#the-workerglobalscope-common-interface">WorkerGlobalScope</dfn>である場合：
                     <ol>
                         <li>
-                            |globalObject| から <code>"js-profiling-mode"</code> の
                             <a
-                                href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#algo-get-policy-value">ポリシー値を取得します</a>。
-                            |profilingMode| をその結果とします。
+                                href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#algo-get-policy-value">ポリシー値を
+                                取得する</a>。対象は|globalObject|の<code>"js-profiling-mode"</code>とし、
+                            |profilingMode|をその結果とする。
                         </li>
                         <li>
-                            |profilingMode| が <code>"eager"</code> または <code>"lazy"</code> でない場合:
+                            |profilingMode|が<code>"eager"</code>でも<code>"lazy"</code>でもない場合：
                             <ol>
                                 <li>
-                                    |globalObject| から <code>"js-profiling"</code> の
                                     <a
-                                        href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#algo-get-policy-value">ポリシー値を取得します</a>。
-                                    |jsProfilingEnabled| をその結果とします。
+                                        href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#algo-get-policy-value">ポリシー値を
+                                        取得する</a>。対象は|globalObject|の<code>"js-profiling"</code>とし、
+                                    |jsProfilingEnabled|をその結果とする。
                                 </li>
                                 <li>
-                                    |jsProfilingEnabled| が false の場合、<code>"NotAllowedError"</code>
-                                    DOMException をスローします。
+                                    |jsProfilingEnabled|がfalseの場合、<code>"NotAllowedError"</code>
+                                    DOMExceptionを投げる。
                                 </li>
                             </ol>
                         </li>
                     </ol>
                 </li>
                 <li>
-                    それ以外の場合、<code>"NotAllowedError"</code> DOMException をスローします。
+                    それ以外の場合、<code>"NotAllowedError"</code> DOMExceptionを投げる。
                 </li>
-                <li>次の条件を持つ新しい<a>プロファイリングセッション</a>を作成します。</li>
+                <li>次のような新しい<a>プロファイリングセッション</a>を作成する：</li>
                 <ol>
-                    <li>関連付けられた<a>サンプル間隔</a>を、<a>ProfilerInitOptions.sampleInterval</a>
-                        または UA がサポートする次に小さい間隔のいずれかに設定します。</li>
-                    <li>関連付けられた<a>時刻起点</a>を、|globalObject| の時刻起点と等しくします。</li>
-                    <li>関連付けられた<a>サンプルバッファサイズ上限</a>を {{ProfilerInitOptions/maxBufferSize}} に設定します。
+                    <li>関連付けられた<a>サンプリング間隔</a>は、<a>ProfilerInitOptions.sampleInterval</a>
+                        またはUAが対応する、その次に小さい間隔に設定される。</li>
+                    <li>関連付けられた<a>時間起点</a>は、|globalObject|の時間起点と等しい。</li>
+                    <li>関連付けられた<a>サンプルバッファーサイズ上限</a>は、{{ProfilerInitOptions/maxBufferSize}}に設定される。
                     </li>
-                    <li>関連付けられた [= agent =] を
-                        <dfn data-cite="!ECMA-262#surrounding-agent">周囲のエージェント</dfn>に設定します。
-                    </li>
-                    <li>関連付けられた [= realm =] を
-                        <dfn data-cite="!ECMA-262#current-realm">現在のレルムレコード</dfn>に設定します。
-                    </li>
-                    <li>関連付けられた<a>ProfilerTrace</a>を
-                        <code>«[{{ProfilerTrace/resources}} → «», {{ProfilerTrace/frames}} → «», {{ProfilerTrace/stacks}} → «», {{ProfilerTrace/samples}} → «»]»</code>
-                        に設定します。
+                    <li>関連付けられた[= エージェント =]は、<dfn data-cite="!ECMA-262#surrounding-agent">周囲のエージェント</dfn>に設定される。</li>
+                    <li>関連付けられた[= レルム =]は、<dfn data-cite="!ECMA-262#current-realm">現在のレルム
+                            レコード</dfn>に設定される。</li>
+                    <li>関連付けられた<a>ProfilerTrace</a>は、
+                        <code>«[{{ProfilerTrace/resources}} → «», {{ProfilerTrace/frames}} → «», {{ProfilerTrace/stacks}} → «», {{ProfilerTrace/samples}} → «»]»</code>に設定される。
                     </li>
                 </ol>
-                <li>新しく作成された<a>プロファイリングセッション</a>に関連付けられた新しい<a>Profiler</a>を返します。</li>
+                <li>新しく作成した<a>プロファイリングセッション</a>に関連付けられた、新しい<a>Profiler</a>を返す。</li>
             </ol>
             </p>
         </section>
         <section>
-            <h2><dfn>stop()</dfn> メソッド</h2>
+            <h2><dfn>stop()</dfn>メソッド</h2>
             <p>
-                プロファイラーを停止し、トレースを返します。このメソッドは次の手順を実行しなければなりません。
+                プロファイラーを停止し、トレースを返す。このメソッドは、次の手順を実行しなければならない：
             </p>
             <ol>
-                <li>関連付けられた [= profiling session =] の状態が <code>stopped</code> である場合、<code>"InvalidStateError"</code> DOMException で [= a promise
-                    rejected with =] を返します。
-                <li>[= profiling session =] の状態を <code>stopped</code> に設定します。</li>
-                <li>|p:Promise| を [= a new promise =] とします。</li>
+                <li>関連付けられた[= プロファイリングセッション =]の状態が<code>stopped</code>の場合、[= 次の値で
+                    拒否されたプロミス =]を返す。その値は<code>"InvalidStateError"</code> DOMExceptionとする。
+                <li>[= プロファイリングセッション =]の状態を<code>stopped</code>に設定する。</li>
+                <li>|p:Promise|を、[= 新しいプロミス =]とする。</li>
                 <li>
-                    次の手順を [= in parallel =] 実行します。
+                    次の手順を[= 並列に =]実行する：
                     <ol>
-                        <li>[= profiling session =] を停止するための [= implementation-defined =] の処理をすべて実行します。</li>
-                        <li>プロファイラーの [= profiling session
-                            =] に関連付けられた {{ProfilerTrace}} で |p| を解決します。</li>
+                        <li>[= プロファイリングセッション =]を停止するために、[= 実装定義 =]の処理を実行する。</li>
+                        <li>|p|を、プロファイラーの[= プロファイリングセッション
+                            =]に関連付けられた{{ProfilerTrace}}で解決する。</li>
                     </ol>
                 </li>
-                <li>|p| を返します。</li>
+                <li>|p|を返す。</li>
             </ol>
             <p>
-                <a>stop()</a> が呼び出された後に取得された<a>サンプル</a>は、
-                <a>プロファイリングセッション</a>に含めるべきではありません。
+                <a>stop()</a>の呼び出し後に取得された<a>サンプル</a>は、<a>プロファイリング
+                    セッション</a>に含めるべきではない。
             </p>
         </section>
     </section>
     <section data-dfn-for="ProfilerTrace" data-link-for="ProfilerTrace">
-        <h2><dfn>ProfilerTrace</dfn> 辞書</h2>
+        <h2><dfn>ProfilerTrace</dfn>辞書</h2>
         <pre class="idl">
       typedef DOMString ProfilerResource;
 
@@ -411,52 +467,60 @@
         required sequence&lt;ProfilerSample&gt; samples;
       };
       </pre>
-        <p><dfn>resources</dfn> 属性は、<a>サンプルを取得する</a>アルゴリズムによって設定された
-            <dfn>ProfilerResource</dfn> リストを返さなければなりません。
-        </p>
+        <p><dfn>resources</dfn>属性は、<dfn>ProfilerResource</dfn>リストのうち、<a>サンプルを
+                取得する</a>アルゴリズムによって設定されたものを返さなければならない。</p>
 
-        <p><dfn>frames</dfn> 属性は、<a>サンプルを取得する</a>アルゴリズムによって設定された
-            <a>ProfilerFrame</a> リストを返さなければなりません。
-        </p>
-        <p><dfn>stacks</dfn> 属性は、<a>サンプルを取得する</a>アルゴリズムによって設定された
-            <a>ProfilerStack</a> リストを返さなければなりません。
-        </p>
-        <p><dfn>samples</dfn> 属性は、<a>サンプルを取得する</a>アルゴリズムによって設定された
-            <a>ProfilerSample</a> リストを返さなければなりません。
-        </p>
+        <p><dfn>frames</dfn>属性は、<a>サンプルを取得する</a>
+            アルゴリズムによって設定された<a>ProfilerFrame</a>リストを返さなければならない。</p>
+        <p><dfn>stacks</dfn>属性は、<a>サンプルを取得する</a>
+            アルゴリズムによって設定された<a>ProfilerStack</a>リストを返さなければならない。</p>
+        <p><dfn>samples</dfn>属性は、<a>サンプルを取得する</a>
+            アルゴリズムによって設定された<a>ProfilerSample</a>リストを返さなければならない。</p>
         <p class="note">
-            この表現は、<a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#">V8
-                トレース
+            <a href="https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#">V8トレース
                 イベント形式</a>
             および<a
                 href="https://github.com/devtools-html/perf.html/blob/master/docs-developer/gecko-profile-format.md">Gecko
-                プロファイル形式</a>から着想を得ており、
-            容易かつ効率的にシリアル化できるよう設計されています。
+                プロファイル形式</a>に着想を得た、
+            この表現は、容易かつ効率的にシリアライズできるよう設計されている。
         </p>
         <section data-dfn-for="ProfilerSample" data-link-for="ProfilerSample">
-            <h2><dfn>ProfilerSample</dfn> 辞書</h2>
+            <h2><dfn>ProfilerSample</dfn>辞書</h2>
             <pre class="idl">
+        enum ProfilerMarker { "script", "gc", "style", "layout", "paint", "other" };
+
         dictionary ProfilerSample {
           required DOMHighResTimeStamp timestamp;
           unsigned long long stackId;
+          ProfilerMarker? marker;
         };
         </pre>
-            <p><dfn>timestamp</dfn> は、初期化された値を返さなければなりません。</p>
-            <p><dfn>stackId</dfn> は、初期化された値を返さなければなりません。</p>
+            <p><dfn>timestamp</dfn>は、初期化された値を返さなければならない。</p>
+            <p><dfn>stackId</dfn>は、初期化された値を返さなければならない。</p>
+            <p><dfn>marker</dfn>は、<a>サンプルを取得する</a>アルゴリズムによって初期化された値を返すか、
+                マーカーが設定されなかった場合は存在しないものでなければならない。公開可能なマーカー値の集合は、
+                <a>マーカーをフィルタリングする</a>アルゴリズムによって制御される。
+            </p>
+            <p class="note">
+                クロスオリジン分離されたコンテキストでは、<a>マーカーをフィルタリングする</a>アルゴリズムは、
+                <a>ProfilerMarker</a>列挙のすべての値を返す。分離されていないコンテキストでは、<code>style</code>と
+                <code>layout</code>のみを返すため、それ以外のマーカーは抑制される（<a>marker</a>属性は、
+                対応する<a>ProfilerSample</a>に存在しない）。
+            </p>
         </section>
         <section data-dfn-for="ProfilerStack" data-link-for="ProfilerStack">
-            <h2><dfn>ProfilerStack</dfn> 辞書</h2>
+            <h2><dfn>ProfilerStack</dfn>辞書</h2>
             <pre class="idl">
         dictionary ProfilerStack {
           unsigned long long parentId;
           required unsigned long long frameId;
         };
         </pre>
-            <p><dfn>parentId</dfn> は、初期化された値を返さなければなりません。</p>
-            <p><dfn>frameId</dfn> は、初期化された値を返さなければなりません。</p>
+            <p><dfn>parentId</dfn>は、初期化された値を返さなければならない。</p>
+            <p><dfn>frameId</dfn>は、初期化された値を返さなければならない。</p>
         </section>
         <section data-dfn-for="ProfilerFrame" data-link-for="ProfilerFrame">
-            <h2><dfn>ProfilerFrame</dfn> 辞書</h2>
+            <h2><dfn>ProfilerFrame</dfn>辞書</h2>
             <pre class="idl">
         dictionary ProfilerFrame {
           required DOMString name;
@@ -465,118 +529,115 @@
           unsigned long long column;
         };
         </pre>
-            <p><dfn>name</dfn> は、初期化された値を返さなければなりません。</p>
-            <p><dfn>resourceId</dfn> は、初期化された値を返さなければなりません。</p>
-            <p><dfn>line</dfn> は、初期化された値を返さなければなりません。</p>
-            <p><dfn>column</dfn> は、初期化された値を返さなければなりません。</p>
+            <p><dfn>name</dfn>は、初期化された値を返さなければならない。</p>
+            <p><dfn>resourceId</dfn>は、初期化された値を返さなければならない。</p>
+            <p><dfn>line</dfn>は、初期化された値を返さなければならない。</p>
+            <p><dfn>column</dfn>は、初期化された値を返さなければならない。</p>
         </section>
     </section>
     <section data-dfn-for="ProfilerInitOptions" data-link-for="ProfilerInitOptions">
-        <h2><dfn>ProfilerInitOptions</dfn> 辞書</h2>
+        <h2><dfn>ProfilerInitOptions</dfn>辞書</h2>
         <pre class="idl">
       dictionary ProfilerInitOptions {
         required DOMHighResTimeStamp sampleInterval;
         required unsigned long maxBufferSize;
       };
       </pre>
-        <p><a>ProfilerInitOptions</a> は、次のフィールドをサポートしなければなりません。</p>
+        <p><a>ProfilerInitOptions</a>は、次のフィールドに対応しなければならない：</p>
         <ul>
-            <li><dfn>sampleInterval</dfn> は、アプリケーションが希望する<a>サンプル間隔</a>です。この値は
-                0 以上でなければなりません。</li>
-            <li><dfn>maxBufferSize</dfn> は、サンプル数で表した希望する<a>サンプルバッファサイズ上限</a>です。</li>
+            <li><dfn>sampleInterval</dfn>は、アプリケーションが希望する<a>サンプリング間隔</a>である。この値は、
+                0以上でなければならない。</li>
+            <li><dfn>maxBufferSize</dfn>は、希望する<a>サンプルバッファーサイズ上限</a>をサンプル数で表したものである。</li>
         </ul>
     </section>
     <section id="document-policy">
         <h2>文書ポリシー</h2>
         <p>
-            この仕様は、プロファイリング機能および初期化動作を制御するため、
-            <a href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html">文書
-                ポリシー</a>に<a
-                href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point">構成
-                ポイント</a>を定義します。
+            この仕様は、<a
+                href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point">設定
+                ポイント</a>を<a href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html">文書
+                ポリシー</a>内に定義し、プロファイリング機能と初期化動作を制御する。
         </p>
         <section>
             <h2><code>js-profiling-mode</code></h2>
             <p>
-                この仕様は、<code>js-profiling-mode</code> という名前の<a
-                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point">構成
-                    ポイント</a>を定義します。その<a
-                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point-type">型</a>は
-                <code>enum</code> で、許可される値は <code>"eager"</code> および <code>"lazy"</code> です。<a
+                この仕様は、<a
+                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point">設定
+                    ポイント</a>を定義し、その名前は<code>js-profiling-mode</code>とする。その<a
+                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point-type">型</a>
+                は<code>enum</code>で、許可される値は<code>"eager"</code>と<code>"lazy"</code>である。<a
                     href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point-default-value">既定
-                    値</a>は空文字列です。
+                    値</a>は空文字列である。
             </p>
             <p>
-                このポリシーを設定すると、スクリプトが JS セルフプロファイリング API を使用することを許可します。
+                設定されると、このポリシーはスクリプトによるJS自己プロファイリングAPIの使用を許可する。
             </p>
             <section>
                 <h2><code>eager</code></h2>
                 <p>
-                    <code>js-profiling-mode</code> が <code>"eager"</code> に設定されている場合、
-                    ページ読み込み中のプロファイリングが想定されていることを UA に通知します。
+                    <code>js-profiling-mode</code>が<code>"eager"</code>に設定されると、
+                    ページ読み込み中のプロファイリングが想定されることをUAに通知する。
                 </p>
                 <p class="note">
-                    UA はこのヒントを使用して、文書読み込み中のできるだけ早い段階で必要なメタデータを保存し、
-                    プロファイリングコンポーネントをウォームアップするなど、プロファイリング基盤を早期に
-                    初期化できます。ただし、プロファイリングが実際に使用されていない場合でも、
-                    無視できないパフォーマンスオーバーヘッドが生じる可能性があります。このオーバーヘッドは、
-                    First Contentful Paint (FCP) や Largest Contentful Paint (LCP) などの指標に
-                    悪影響を及ぼす可能性があります。
+                    UAはこのヒントを使用して、プロファイリング基盤を早期に初期化し、必要な
+                    メタデータを格納して、文書読み込み中のできるだけ早い段階でプロファイリングコンポーネントを準備できる。ただし、
+                    これにより、プロファイリングが実際に使用されていなくても、無視できないパフォーマンスオーバーヘッドが発生する可能性がある。この
+                    オーバーヘッドは、First Contentful Paint（FCP）やLargest Contentful
+                    Paint（LCP）などの指標に悪影響を及ぼす可能性がある。
                 </p>
             </section>
             <section>
                 <h2><code>lazy</code></h2>
                 <p>
-                    <code>js-profiling-mode</code> が <code>"lazy"</code> に設定されている場合、
-                    プロファイリングが条件付きで使用されることを UA に通知します。
+                    <code>js-profiling-mode</code>が<code>"lazy"</code>に設定されると、
+                    プロファイリングが条件付きで使用されることをUAに通知する。
                 </p>
                 <p class="note">
-                    UA はこのヒントを使用して、最初の<a>Profiler</a>がインスタンス化されるまで
-                    プロファイリング関連の初期化オーバーヘッドを遅延させることができ、
-                    プロファイリングが実際に使用されていない場合の重要なレンダリング期間中の
-                    パフォーマンスコストを回避できます。ただし、ユーザー操作の処理中に初期化が行われると、
-                    Interaction to Next Paint (INP) に悪影響を及ぼす可能性があります。このモードは、
-                    サンプリングの判断に基づいて条件付きでプロファイリングを有効にする文書に特に適しています。
+                    UAはこのヒントを使用して、プロファイリング関連の初期化オーバーヘッドを、最初の
+                    <a>Profiler</a>がインスタンス化されるまで延期し、重要なレンダリング期間中に
+                    プロファイリングが実際に使用されていない場合のパフォーマンスコストを回避できる。ただし、ユーザー操作の
+                    処理中に初期化が発生すると、Interaction to Next Paint（INP）に悪影響を及ぼす可能性がある。このモードは、特に、
+                    サンプリングの判断に基づいてプロファイリングを条件付きで有効にする文書に適している。
                 </p>
             </section>
         </section>
         <section>
             <h2><code>js-profiling</code>（非推奨）</h2>
             <p>
-                この仕様は、<code>js-profiling</code> という名前の<a
-                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point">構成
-                    ポイント</a>も定義します。その<a
-                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point-type">型</a>は
-                <code>boolean</code> で、<a
+                この仕様は、<a
+                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point">設定
+                    ポイント</a>も定義し、その名前は<code>js-profiling</code>とする。その<a
+                    href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point-type">型</a>
+                は<code>boolean</code>で、<a
                     href="https://w3c.github.io/webappsec-permissions-policy/document-policy.html#configuration-point-default-value">既定
-                    値</a>は <code>false</code> です。
+                    値</a>は<code>false</code>である。
             </p>
             <p>
-                有効にすると、このポリシーはスクリプトが JS セルフプロファイリング API を使用することを許可し、
-                プロファイリング基盤の早期初期化を実行するよう UA に通知します
-                （意味的には <code>js-profiling-mode=eager</code> と同等です）。
+                有効にされると、このポリシーはスクリプトによるJS自己プロファイリングAPIの使用を許可し、UAに
+                プロファイリング基盤の早期初期化を実行するよう通知する（意味的には
+                <code>js-profiling-mode=eager</code>と等価である）。
             </p>
             <p class="note">
-                <code>js-profiling</code> 真偽値構成ポイントは、<code>js-profiling-mode</code> を優先するため
-                非推奨です。両方が指定された場合、<code>js-profiling-mode</code> が優先され、
-                <code>js-profiling</code> は無視されなければなりません。実装は後方互換性のために
-                <code>js-profiling</code> をサポートすべきですが、将来そのサポートを削除してもよいです。
+                <code>js-profiling</code>真偽値設定ポイントは非推奨であり、代わりに
+                <code>js-profiling-mode</code>を使用する。両方が指定された場合、<code>js-profiling-mode</code>が優先され、
+                <code>js-profiling</code>は無視しなければならない。実装は、後方互換性のために<code>js-profiling</code>に対応するべきであるが、
+                将来、その対応を削除してもよい。
             </p>
         </section>
     </section>
     <section>
         <h2>自動化</h2>
         <p>
-            ユーザーエージェントの自動化およびアプリケーションテストのために、この文書は次の
-            [[WebDriver]] <a data-cite="webdriver#dfn-extension-command">拡張コマンド</a>を定義します。
+            ユーザーエージェントの自動化とアプリケーションのテストを目的として、この文書は次の
+            [[WebDriver]]の<a data-cite="webdriver#dfn-extension-command">拡張コマンド</a>を定義する。
         </p>
         <section>
-            <h2>サンプルを強制取得</h2>
+            <h2>サンプルの強制取得</h2>
             <table class="data">
                 <thead>
                     <tr>
-                        <th>HTTP メソッド</th>
-                        <th>URI テンプレート</th>
+                        <th>HTTPメソッド</th>
+                        <th>URIテンプレート</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -587,67 +648,91 @@
                 </tbody>
             </table>
             <p>
-                <dfn>サンプルを強制取得</dfn><a data-cite="webdriver#dfn-extension-command">拡張コマンド</a>は、
-                より決定論的なテストを可能にするため、すべての [=プロファイリングセッション=] に
-                [=サンプルを取得する=]ことを強制します。
+                <dfn>サンプルの強制取得</dfn>の<a data-cite="webdriver#dfn-extension-command">拡張コマンド</a>は、
+                より決定的なテストを可能にするため、すべての[=プロファイリングセッション=]に[=サンプルを取得する=]ことを強制する。
             </p>
             <p>
-                <a data-cite="webdriver#dfn-remote-end-steps">リモート側の手順</a>は次のとおりです。
+                <a data-cite="webdriver#dfn-remote-end-steps">リモートエンドの手順</a>は次のとおりである：
             <ol>
-                <li>|sessions:list| を、<a data-cite="webdriver#dfn-current-browsing-context">現在の閲覧コンテキスト</a>で作成された
-                    すべての [=プロファイリングセッション=] の [=リスト=] とします。</li>
+                <li>|sessions:list|を、すべての[=プロファイリングセッション=]からなる[=リスト=]とする。それらは<a
+                        data-cite="webdriver#dfn-current-browsing-context">現在の閲覧コンテキスト</a>内で作成されたものとする。</li>
                 <li>
-                    |sessions| の各 |session:profiling session| について:
+                    |sessions|の各|session:profiling session|について：
                     <ol>
-                        <li>|session| の [=状態=] が <code>started</code> である場合、
-                            |session| を指定して [=サンプルを取得する=]を実行します。
+                        <li>|session|の[=状態=]が<code>started</code>の場合、|session|を用いて[=サンプルを取得する=]。
                         </li>
                     </ol>
                 </li>
-                <li>データ <code>null</code> を伴う<a data-cite="webdriver#dfn-success">成功</a>を返します。</li>
+                <li>データを<code>null</code>として、<a data-cite="webdriver#dfn-success">成功</a>を返す。</li>
             </ol>
             </p>
         </section>
     </section>
     <section id="privacy-security" class="informative">
         <h2>プライバシーとセキュリティ</h2>
-        <p>次の節では、API におけるプライバシーおよびセキュリティ上の選択について詳しく説明し、
-            さまざまな種類の攻撃に対する保護戦略を示します。</p>
+        <p>以下の節では、このAPIにおけるプライバシーとセキュリティに関する設計上の選択を詳述し、
+            さまざまな種類の攻撃に対する保護策を示す。</p>
         <section>
             <h2>クロスオリジンスクリプトの内容</h2>
             <p>
-                この API は、<a>サンプルを取得する</a>アルゴリズムによって含まれるすべての関数が、
-                <a>ミュートエラー</a>プロパティを通じて<dfn data-cite="HTML5#cors-same-origin">CORS 同一オリジン</dfn>として提供されたスクリプト内で
-                定義されていることを要求することで、クロスオリジンスクリプトの内容が公開されるのを防ぎます。
-                ブラウザーの組み込み関数（<code>performance.now()</code> など）も、
-                [= CORS-same-origin =] スクリプトから呼び出された場合にのみ含めなければなりません。
+                このAPIは、クロスオリジンスクリプトの内容を公開しないよう、次の要件を課す。
+                <a>サンプルを取得する</a>アルゴリズムによって含められるすべての関数は、<dfn
+                    data-cite="HTML5#cors-same-origin">CORS同一オリジン</dfn>で提供されるスクリプト内で定義されていなければならず、これは<a>エラーの抑制</a>プロパティによって保証される。
+                ブラウザーの組み込み機能（<code>performance.now()</code>など）も、
+                [= CORS同一オリジン =]のスクリプトから呼び出された場合にのみ含めなければならない。
             </p>
             <p>
-                その結果、この API は、手動による計測ですでに取得可能な情報を超えて、
-                クロスオリジンスクリプトの内容や実行特性に関する新たな知見を公開しません。
-                UA が極端に小さい<a>サンプル間隔</a>値（たとえば 1 ミリ秒未満）をサポートする場合は、
-                この性質が維持されることを検証することが推奨されます。
+                その結果、このAPIは、クロスオリジンスクリプトの内容や実行特性について、
+                手動で計測処理を組み込むことで既に得られる情報を超える、新たな知見を公開しない。UAは、
+                非常に短い<a>サンプリング間隔</a>の値（例えば、
+                1ミリ秒未満）に対応する場合、この性質が成り立つことを検証することが奨励される。
             </p>
         </section>
         <section>
-            <h2>クロスオリジン実行</h2>
+            <h2>クロスオリジンの実行</h2>
             <p>
-                クロスオリジン実行コンテキストは、<a>サンプルを取得する</a>アルゴリズム内の
-                レルム検査を通じて API から観測可能であるべきではありません。したがって、
-                プロファイラーと<a>エージェント</a>を共有するクロスオリジン <code>iframes</code> および
-                その他の実行コンテキストの実行は、この API を通じて観測できません。
+                クロスオリジンの実行コンテキストは、
+                <a>サンプルを取得する</a>アルゴリズム内のレルム検査により、このAPIから観測できないようにするべきである。クロスオリジンの<code>iframes</code>やその他の実行コンテキストで、
+                プロファイラーと<a>エージェント</a>を共有するものについては、したがって、この
+                APIを通じてその実行を観測できない。
             </p>
         </section>
         <section>
             <h2>タイミング攻撃</h2>
             <p>
-                高解像度のタイミング情報を得る新たな情報源を導入する可能性がある API では、
-                タイミング攻撃が引き続き懸念事項となります。トレースで収集されるタイムスタンプは、
-                サイドチャネル攻撃の新たな経路を公開しないよう、[[?HR-Time]] の
-                <a>現在の高解像度時刻</a>と同じ情報源から取得すべきです。
+                高分解能のタイミング情報の新たな情報源を導入し得るAPIでは、
+                タイミング攻撃が引き続き懸念となる。トレース内で収集されるタイムスタンプは、[[?HR-Time]]の
+                <a>現在の高分解能時刻</a>と同じ情報源から取得し、新たなサイドチャネル攻撃の経路を公開しないようにするべきである。
             <p class="note">
-                [[?HR-Time]] による<a href="https://www.w3.org/TR/hr-time-2/#clock-resolution">クロック
-                    解像度</a>の議論を参照してください。
+                [[?HR-Time]]の<a href="https://www.w3.org/TR/hr-time-2/#clock-resolution">クロックの
+                    分解能</a>に関する議論を参照。
+            </p>
+        </section>
+        <section id="conditional-markers">
+            <h2>マーカーの条件付き公開</h2>
+            <p>
+                既定では、<a>マーカーをフィルタリングする</a>アルゴリズムは、<code>script</code>、<code>gc</code>、
+                <code>paint</code>、<code>other</code>の各マーカーを、プロファイラーの<a
+                    data-cite="HTML5#environment-settings-object">環境設定オブジェクト</a>において、その<a
+                    data-cite="HTML5#concept-settings-object-cross-origin-isolated-capability">クロスオリジン分離
+                    能力</a>がtrueに設定されている場合にのみ公開する。これらのマーカーは、確実には
+                単一のオリジンに帰属させられないエンジンの処理を反映する可能性がある&mdash;例えば、ガベージコレクションやその他のコンテキスト間のエンジン動作は、
+                コンテキスト間の処理を関連付ける可能性があり、描画では他のフレームの内容が合成される場合がある。そのような処理の
+                タイミングを分離せずに公開すると、クロスオリジンのサイドチャネルにつながる可能性がある。そのようなサイドチャネルは、
+                <a data-cite="HTML5#concept-settings-object-cross-origin-isolated-capability">クロスオリジン
+                    分離</a>が軽減するよう設計されているものであるため、分離を公開の条件としている。ユーザーエージェントは、公開される
+                集合を明示的なオプトイン（上記の<a>マーカーをフィルタリングする</a>の注記で説明したもの）によって拡大してもよいが、そのようなオプトインは、
+                オリジンをまたいでマーカーを公開してはならない。
+            </p>
+            <p>
+                <code>style</code>マーカーと<code>layout</code>マーカーは、クロスオリジン分離なしで公開される。
+                これらが明らかにするタイミングは、既に同一オリジンから観測可能であるためである。文書は、既存のAPIを使用して、自身のスタイルとレイアウトについて既に同期的に
+                更新を反映し、その所要時間を測定できる&mdash;例えば、
+                <code>getBoundingClientRect()</code>はレイアウトを強制し、<code>getComputedStyle()</code>はスタイルの更新を反映する
+                （必要な場合はレイアウトも反映する）。この性質を保つため、<a>マーカーを取得する</a>アルゴリズムは、
+                プロファイラーと同一オリジンの文書のために実行された処理についてのみマーカーを報告する。処理のうち、
+                同一オリジンの文書に帰属させられないものは、これらのマーカーを通じて報告されない。その結果、これらは、
+                同一オリジンの文書が既に自身で取得できるものを超えるタイミング情報を公開しない。
             </p>
         </section>
     </section>
