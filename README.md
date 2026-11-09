@@ -253,7 +253,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Media Capture from DOM Elements](https://jp.htmlspecs.com/mediacapture-fromelement/)（[Source](https://www.w3.org/TR/2025/WD-mediacapture-fromelement-20250212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [MediaStreamTrack Content Hints](https://jp.htmlspecs.com/mst-content-hint/)（[Source](https://www.w3.org/TR/2025/WD-mst-content-hint-20250919/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [MediaStreamTrack Insertable Media Processing using Streams](https://jp.htmlspecs.com/mediacapture-transform/)（[Source](https://www.w3.org/TR/2026/WD-mediacapture-transform-20260416/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Autoplay Detection](https://jp.htmlspecs.com/autoplay-detection/)（[Source](https://www.w3.org/TR/2025/WD-autoplay-detection-20250904/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Autoplay Detection](https://jp.htmlspecs.com/autoplay-detection/)（[Source](https://www.w3.org/TR/2026/WD-autoplay-detection-20261109/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [MediaStream Recording](https://jp.htmlspecs.com/mediastream-recording/)（[Source](https://www.w3.org/TR/2026/WD-mediastream-recording-20260316/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Media Capabilities](https://jp.htmlspecs.com/media-capabilities/)（[Source](https://www.w3.org/TR/2026/WD-media-capabilities-20261018/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [MediaStream Image Capture](https://jp.htmlspecs.com/image-capture/)（[Source](https://www.w3.org/TR/2025/WD-image-capture-20250423/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
