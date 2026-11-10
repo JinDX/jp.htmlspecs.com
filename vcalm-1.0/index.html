@@ -939,14 +939,14 @@
         <h1 id="title" class="title">VCALM v1.0</h1>
         <h2 id="subtitle" class="subtitle">ライフサイクル管理のための検証可能なクレデンシャル API</h2>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C 作業草案</a> <time class="dt-published"
-                datetime="2026-10-13">2026年10月13日</time></p>
+                datetime="2026-11-10">2026年11月10日</time></p>
         <details open="">
             <summary>この文書の詳細</summary>
             <dl>
                 <dt>このバージョン:</dt>
                 <dd>
                     <a class="u-url"
-                        href="https://www.w3.org/TR/2026/WD-vcalm-1.0-20261013/">https://www.w3.org/TR/2026/WD-vcalm-1.0-20261013/</a>
+                        href="https://www.w3.org/TR/2026/WD-vcalm-1.0-20261110/">https://www.w3.org/TR/2026/WD-vcalm-1.0-20261110/</a>
                 </dd>
                 <dt>最新公開バージョン:</dt>
                 <dd>
@@ -4490,7 +4490,7 @@
 
                 <p>
                     <code>QueryByExample</code> の JSON Schema は、ソフトウェア・システムへの統合用に
-                    <a href="https://www.w3.org/TR/2026/WD-vcalm-1.0-20261013/schemas/qbe.json">別ファイルで提供されています</a>。
+                    <a href="https://www.w3.org/TR/2026/WD-vcalm-1.0-20261110/schemas/qbe.json">別ファイルで提供されています</a>。
                 </p>
 
                 <p>
@@ -9992,6 +9992,7 @@ interaction-url = <a href="https://url.spec.whatwg.org/#concept-url">URL</a></pr
                 ステータスリストクレデンシャルの実装方法に関する
                 規範的な例を提供する。
             </p>
+<p>状態サービスが複数のインデックス割り当てコンテキストを管理する場合、クライアントは状態リストの作成時に <code>indexAllocator</code> 値を提供しても<em class="rfc2119">よい</em>。この値は、リストを参照する資格情報に <code>statusListIndex</code> 値を割り当てるための共有割り当て状態（例えばテナント別または <code>statusPurpose</code> 別のレジストリ）を識別する。リスト作成時（または発行時に初めてインデックスを割り当てる際）に <code>indexAllocator</code> を提供した場合、その割り当て状態に依存する後続の状態更新は、実装が単一の既定のアロケーターを曖昧さなく推論できる場合を除き、同じ <code>indexAllocator</code> 値を再利用しなければ<em class="rfc2119">ならない</em>。</p>
 
             <div class="api-detail" data-api-endpoint="post /status-lists">
                 <p>POST /status-lists - 新しいステータスリストを作成する</p>
@@ -10013,7 +10014,7 @@ interaction-url = <a href="https://url.spec.whatwg.org/#concept-url">URL</a></pr
                             <td style="vertical-align: top;"><code>id</code> [string]</td>
                             <td>ステータスリストの省略可能な識別子。指定されなかった場合、サービスが生成する。
                             </td>
-                        </tr>
+                        </tr><tr><td style="vertical-align: top;"><code>indexAllocator</code> [string]</td><td>この状態リストに関連付けられたインデックス割り当てコンテキストの省略可能な識別子。指定した場合、同じ割り当て状態に依存する状態更新はこの値を再利用しなければならない（`UpdateCredentialStatusRequest.indexAllocator` を参照）。</td></tr>
                         <tr>
                             <td style="vertical-align: top;"><code>options</code> [object]</td>
                             <td>オブジェクト</td>
@@ -10216,6 +10217,9 @@ interaction-url = <a href="https://url.spec.whatwg.org/#concept-url">URL</a></pr
                 そのリスト内のインデックスを含む）、および新しいステータス値を指定する。
                 ステータスサービスは、それに応じてステータスリストクレデンシャルを更新する。
             </p>
+<p>発行者インスタンスは、発行する検証可能な資格情報に一つ以上の状態エントリーを割り当てる責任を負う。発行者ソフトウェアには、状態メタデータ（状態リストやリストのインデックスなど）を過剰に、または誤って割り当てないようにすることが期待される。過剰に割り当てられた、誤って割り当てられた、または未使用の情報は、検証可能な資格情報の保有者と発行者の双方にプライバシー上の害を及ぼし得るためである。高可用性、水平スケーリング、分散、またはこれらを組み合わせたアーキテクチャでは、異なるコンポーネント間で状態の割り当て状態を適切に共有、識別、参照しない限り、これが特に困難になり得る。<code>indexAllocator</code> フィールドを使って共有状態を識別・参照することで、協調を改善し、状態メタデータの原子的な割り当てと使用が可能になる。</p>
+<p>状態メカニズムは各<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifiable-credential">検証可能な資格情報</a>を、リスト内の <code>statusListIndex</code> に関連付ける（例えば<cite><a href="https://www.w3.org/TR/vc-bitstring-status-list/">Bitstring Status List v1.0</a></cite> 仕様を参照）。これらのインデックスを割り当てる実装は通常、使用中の値を追跡し、インデックスの誤った再利用を防ぎ、状態更新が正しいエントリーを変更するようにする。状態サービスが複数の追跡機構（テナント別、デプロイメント別、<code>statusPurpose</code> 別のアロケーターなど）をサポートする場合、省略可能な <code>indexAllocator</code> リクエストフィールドが、この更新に適用するアロケーターのコンテキストを指定する。同じ識別子は通常、発行時にインデックスを最初に割り当てたとき（またはリストをプロビジョニングしたとき）に確定または返されている。このため、本仕様ではリスト作成と資格情報発行が別々の API インターフェースであっても、発行と状態更新のフローの整合性が維持される。</p>
+<div class="note" id="note-indexallocator-values"><div class="note-title marker">注記: indexAllocator の値</div><p>許可される <code>indexAllocator</code> 文字列は実装定義であり、本仕様は特定の値やその発見メカニズムを義務付けない。</p></div>
 
             <div class="api-detail" data-api-endpoint="post /credentials/status">
                 <p>POST /credentials/status - 発行済みクレデンシャルのステータスを更新する</p>
@@ -10256,7 +10260,7 @@ interaction-url = <a href="https://url.spec.whatwg.org/#concept-url">URL</a></pr
                         </tr>
                         <tr>
                             <td style="vertical-align: top;"><code>indexAllocator</code> [string]</td>
-                            <td>VC に使用または割り当てられているインデックスをサービスが把握するために使用する。</td>
+                            <td>状態サービスがこのリクエストに使用するインデックス割り当てコンテキストの省略可能な識別子。ビット文字列状態リストなどの状態メカニズムは、各資格情報をリスト内の `statusListIndex` に関連付ける。実装は通常、内部記録（空きリスト、カウンター、テナント別プールなど）を維持し、インデックスの二重割り当てを防ぎ、更新対象を正しい行にする。複数のアロケーターが存在する場合（テナント、環境、`statusPurpose` ごとに別のパイプラインがある場合など）、`indexAllocator` は、`credentialId` と `credentialStatus` と併せてどのレジストリやポリシーを参照または更新するかをサービスに伝える。実装が単一の既定のアロケーターを推論する場合、または `credentialStatus` がリストエントリーを既に完全に識別する場合は、省略できる。許可される値は実装固有であり、本仕様は名前のレジストリを定義しない。</td>
                         </tr>
                     </tbody>
                 </table>
@@ -11154,7 +11158,7 @@ interaction-url = <a href="https://url.spec.whatwg.org/#concept-url">URL</a></pr
                 <dt id="bib-digital-credentials">[digital-credentials]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/digital-credentials/"><cite>デジタルクレデンシャル</cite></a>. Marcos
-                    Caceres; Tim Cappalli; Mohamed Amir Yosef. W3C. 2026年9月4日. W3C 作業草案. URL: <a
+                    Caceres; Tim Cappalli; Mohamed Amir Yosef. W3C. 2026年11月5日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/digital-credentials/">https://www.w3.org/TR/digital-credentials/</a>
                 </dd>
                 <dt id="bib-infra">[infra]</dt>
@@ -11250,13 +11254,13 @@ interaction-url = <a href="https://url.spec.whatwg.org/#concept-url">URL</a></pr
                 <dt id="bib-vc-recognized-entities">[VC-RECOGNIZED-ENTITIES]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/vc-recognized-entities-1.0/"><cite>認識されたエンティティ
-                            v1.0</cite></a>. Manu Sporny. W3C. 2026年9月6日. W3C 作業草案. URL: <a
+                            v1.0</cite></a>. Manu Sporny. W3C. 2026年11月4日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/vc-recognized-entities-1.0/">https://www.w3.org/TR/vc-recognized-entities-1.0/</a>
                 </dd>
                 <dt id="bib-vcalm">[VCALM]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/vcalm-1.0/"><cite>VCALM v1.0</cite></a>. Patrick St-Louis; Kayode
-                    Ezike; Manu Sporny; Ted Thibodeau Jr. W3C. 2026年10月12日. W3C 作業草案. URL: <a
+                    Ezike; Manu Sporny; Ted Thibodeau Jr. W3C. 2026年10月13日. W3C 作業草案. URL: <a
                         href="https://www.w3.org/TR/vcalm-1.0/">https://www.w3.org/TR/vcalm-1.0/</a>
                 </dd>
             </dl>
