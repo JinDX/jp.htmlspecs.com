@@ -151,7 +151,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [File System Access API](https://jp.htmlspecs.com/file-system-access/)（[Source](https://wicg.github.io/file-system-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Cookie Store API](https://jp.htmlspecs.com/cookiestore/)（[Source](https://cookiestore.spec.whatwg.org/) ![Living Standard](https://img.shields.io/badge/LS-3c790a)）
 - [File and Directory Entries API](https://jp.htmlspecs.com/entries-api/)（[Source](https://wicg.github.io/entries-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
-- [Web Locks API](https://jp.htmlspecs.com/web-locks/)（[Source](https://www.w3.org/TR/2026/WD-web-locks-20261109/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Web Locks API](https://jp.htmlspecs.com/web-locks/)（[Source](https://www.w3.org/TR/2026/WD-web-locks-20261112/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Storage Access API](https://jp.htmlspecs.com/storage-access/)（[Source](https://privacycg.github.io/storage-access/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [requestStorageAccessFor API](https://jp.htmlspecs.com/request-storage-access-for/)（[Source](https://privacycg.github.io/requestStorageAccessFor/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 - [Shared Storage API](https://jp.htmlspecs.com/shared-storage/)（[Source](https://wicg.github.io/shared-storage/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
