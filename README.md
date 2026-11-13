@@ -200,7 +200,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Accelerometer](https://jp.htmlspecs.com/accelerometer/)（[Source](https://www.w3.org/TR/2026/CRD-accelerometer-20260514/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Magnetometer](https://jp.htmlspecs.com/magnetometer/)（[Source](https://www.w3.org/TR/2026/WD-magnetometer-20260514/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Gyroscope](https://jp.htmlspecs.com/gyroscope/)（[Source](https://www.w3.org/TR/2026/CRD-gyroscope-20260514/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
-- [Gamepad](https://jp.htmlspecs.com/gamepad/)（[Source](https://www.w3.org/TR/2025/WD-gamepad-20250710/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Gamepad](https://jp.htmlspecs.com/gamepad/)（[Source](https://www.w3.org/TR/2026/WD-gamepad-20261113/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### Web of Things・IoT
 - [Web of Things (WoT) Thing Description 2.0](https://jp.htmlspecs.com/wot-thing-description-2.0/)（[Source](https://www.w3.org/TR/2025/WD-wot-thing-description-2.0-20251104/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
