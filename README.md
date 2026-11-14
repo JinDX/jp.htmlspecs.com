@@ -231,7 +231,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Web Audio API](https://jp.htmlspecs.com/webaudio/)（[Source](https://www.w3.org/TR/2026/WD-webaudio-1.1-20260922/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Audio Output Devices API](https://jp.htmlspecs.com/audio-output/)（[Source](https://www.w3.org/TR/2025/CRD-audio-output-20251009/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Audio Session](https://jp.htmlspecs.com/audio-session/)（[Source](https://www.w3.org/TR/2024/WD-audio-session-20241113/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [Media Session](https://jp.htmlspecs.com/mediasession/)（[Source](https://www.w3.org/TR/2026/WD-mediasession-20261109/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [Media Session](https://jp.htmlspecs.com/mediasession/)（[Source](https://www.w3.org/TR/2026/WD-mediasession-20261114/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### 音声映像キャプチャ・WebRTC・再生
 - [WebRTC](https://jp.htmlspecs.com/webrtc/)（[Source](https://www.w3.org/TR/2025/REC-webrtc-20250313/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
