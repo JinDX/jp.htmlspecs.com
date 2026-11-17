@@ -439,7 +439,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Private Aggregation API](https://jp.htmlspecs.com/private-aggregation-api/)（[Source](https://patcg-individual-drafts.github.io/private-aggregation-api/) ![Draft](https://img.shields.io/badge/Draft-ffcc00)）
 
 ### 決済・デジタル商品
-- [Payment Request API](https://jp.htmlspecs.com/payment-request/)（[Source](https://www.w3.org/TR/2026/CRD-payment-request-20260622/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Payment Request API](https://jp.htmlspecs.com/payment-request/)（[Source](https://www.w3.org/TR/2026/CRD-payment-request-20261117/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
 - [Web-based Payment Handler API](https://jp.htmlspecs.com/web-based-payment-handler/)（[Source](https://www.w3.org/TR/2026/WD-web-based-payment-handler-20261116/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Payment Method Manifest](https://jp.htmlspecs.com/payment-method-manifest/)（[Source](https://www.w3.org/TR/2017/WD-payment-method-manifest-20171212/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [Payment Method Identifiers](https://jp.htmlspecs.com/payment-method-id/)（[Source](https://www.w3.org/TR/2022/REC-payment-method-id-20220908/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
