@@ -703,6 +703,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [Incremental Forwarding of HTTP Messages](https://jp.htmlspecs.com/http/rfc10036.html)（[Source](https://www.rfc-editor.org/rfc/rfc10036.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Bootstrapping WebSockets with HTTP/3](https://jp.htmlspecs.com/http/rfc9220.html)（[Source](https://httpwg.org/specs/rfc9220.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Proxying UDP in HTTP](https://jp.htmlspecs.com/http/rfc9298.html)（[Source](https://www.rfc-editor.org/rfc/rfc9298) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [Security Considerations for Optimistic Protocol Transitions in HTTP/1.1](https://jp.htmlspecs.com/http/rfc9931.html)（[Source](https://www.rfc-editor.org/rfc/rfc9931.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [The ORIGIN Extension in HTTP/3](https://jp.htmlspecs.com/http/rfc9412.html)（[Source](https://httpwg.org/specs/rfc9412.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Client-Cert HTTP Header Field](https://jp.htmlspecs.com/http/rfc9440.html)（[Source](https://httpwg.org/specs/rfc9440.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 
