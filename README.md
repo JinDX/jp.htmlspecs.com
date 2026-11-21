@@ -678,6 +678,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 ### 表現メタデータ・リンク・内容エンコーディング
 - [HTTP State Management Mechanism](https://jp.htmlspecs.com/http/rfc6265.html)（[Source](https://httpwg.org/specs/rfc6265.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Use of the Content-Disposition Header Field in the Hypertext Transfer Protocol (HTTP)](https://jp.htmlspecs.com/http/rfc6266.html)（[Source](https://httpwg.org/specs/rfc6266.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
+- [Indicating Character Encoding and Language for HTTP Header Field Parameters](https://jp.htmlspecs.com/http/rfc8187.html)（[Source](https://www.rfc-editor.org/rfc/rfc8187.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Hypertext Transfer Protocol (HTTP) Client-Initiated Content-Encoding](https://jp.htmlspecs.com/http/rfc7694.html)（[Source](https://httpwg.org/specs/rfc7694.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Web Linking](https://jp.htmlspecs.com/http/rfc8288.html)（[Source](https://httpwg.org/specs/rfc8288.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）
 - [Well-Known Uniform Resource Identifiers (URIs)](https://jp.htmlspecs.com/http/rfc8615.html)（[Source](https://www.rfc-editor.org/rfc/rfc8615.html) ![RFC](https://img.shields.io/badge/RFC-0057B8)）

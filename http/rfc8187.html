@@ -1,0 +1,733 @@
+<html lang="ja"><pre>﻿
+
+
+
+
+
+Internet Engineering Task Force (IETF)                        J. Reschke
+Request for Comments: 8187                                    greenbytes
+Obsoletes: <a href="https://www.rfc-editor.org/rfc/rfc5987">5987</a>                                           September 2017
+Category: Standards Track
+ISSN: 2070-1721
+
+
+    <span class="h1">HTTP ヘッダーフィールドのパラメーターにおける</span>
+                               <span class="h1">文字エンコーディングと言語の指定</span>
+
+概要
+
+   既定では、Hypertext Transfer Protocol（HTTP）メッセージの
+   ヘッダーフィールド値に US-ASCII 符号化文字集合に含まれない文字を
+   容易に含めることはできない。<a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> は、
+   Multipurpose Internet Mail Extensions（MIME）のヘッダー
+   フィールド値内のパラメーターで使用する符号化方式を定義している。
+   この文書は、HTTP ヘッダーフィールドに適した符号化方式を規定する。
+   これは <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> の符号化方式の簡略化されたプロファイルと互換性がある。
+
+   この文書は <a href="https://www.rfc-editor.org/rfc/rfc5987">RFC 5987</a> を廃止する。
+
+このメモの位置付け
+
+   これはインターネット標準化過程の文書である。
+
+   この文書は Internet Engineering Task Force（IETF）の成果である。
+   IETF コミュニティの合意を表している。
+   公開レビューを受け、Internet Engineering Steering Group
+   （IESG）によって公開が承認されている。
+   インターネット標準の詳細は <a href="https://www.rfc-editor.org/rfc/rfc7841#section-2">RFC 7841 の第 2 節</a>に記載されている。
+
+   この文書の現在の状態、正誤情報、
+   およびフィードバックの提供方法は、
+   <a href="https://www.rfc-editor.org/info/rfc8187">https://www.rfc-editor.org/info/rfc8187</a> で確認できる。
+
+著作権表示
+
+   Copyright (c) 2017 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to <a href="https://www.rfc-editor.org/bcp/bcp78">BCP 78</a> and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (<a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a>) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in <a href="#section-4">Section 4</a>.e of
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 1]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-2" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+目次
+
+   <a href="#section-1">1</a>.  はじめに  . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-2">2</a>
+   <a href="#section-2">2</a>.  表記規則  . . . . . . . . . . . . . . . . . . .   <a href="#page-3">3</a>
+   <a href="#section-3">3</a>.   <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> との比較および符号化方式の定義 . . . .   <a href="#page-3">3</a>
+     <a href="#section-3.1">3.1</a>.  パラメーター継続 . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+     3.2.  パラメーター値の文字エンコーディングと
+           言語情報 . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+       <a href="#section-3.2.1">3.2.1</a>.  定義  . . . . . . . . . . . . . . . . . . . . .   <a href="#page-4">4</a>
+       <a href="#section-3.2.2">3.2.2</a>.  歴史的な注記  . . . . . . . . . . . . . . . . . .   <a href="#page-6">6</a>
+       <a href="#section-3.2.3">3.2.3</a>.  例  . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-6">6</a>
+     <a href="#section-3.3">3.3</a>.  符号化語における言語指定 . . . . . . . . .   <a href="#page-7">7</a>
+   <a href="#section-4">4</a>.  HTTP ヘッダーフィールド定義での使用指針 . . . .   <a href="#page-7">7</a>
+     <a href="#section-4.1">4.1</a>.  この拡張を使用する場合 . . . . . . . . . . . . . . . .   <a href="#page-8">8</a>
+     <a href="#section-4.2">4.2</a>.  エラー処理  . . . . . . . . . . . . . . . . . . . . .   <a href="#page-8">8</a>
+   <a href="#section-5">5</a>.  セキュリティ上の考慮事項 . . . . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
+   <a href="#section-6">6</a>.  IANA に関する考慮事項 . . . . . . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
+   <a href="#section-7">7</a>.  参考文献  . . . . . . . . . . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
+     <a href="#section-7.1">7.1</a>.  規範的な参考文献  . . . . . . . . . . . . . . . . . .   <a href="#page-9">9</a>
+     <a href="#section-7.2">7.2</a>.  参考情報の文献  . . . . . . . . . . . . . . . . .  <a href="#page-10">10</a>
+   <a href="#appendix-A">付録 A</a>.  次の仕様からの変更： <a href="https://www.rfc-editor.org/rfc/rfc5987">RFC 5987</a>  . . . . . . . . . . . . . . .  <a href="#page-12">12</a>
+   <a href="#appendix-B">付録 B</a>.  実装報告  . . . . . . . . . . . . . . .  <a href="#page-12">12</a>
+   謝辞  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-13">13</a>
+   著者の連絡先  . . . . . . . . . . . . . . . . . . . . . . . .  <a href="#page-13">13</a>
+
+<span class="h2"><a class="selflink" id="section-1" href="#section-1">1</a>.  はじめに</span>
+
+   US-ASCII 符号化文字集合（[<a href="https://www.rfc-editor.org/rfc/rfc0020" title="&quot;ASCII format for network interchange&quot;">RFC0020</a>]）に含まれない文字を
+   HTTP ヘッダーフィールド（[<a href="https://www.rfc-editor.org/rfc/rfc7230" title="&quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;">RFC7230</a>]）で使用するのは容易ではない：
+
+   o  HTTP 仕様は、フィールド値での非 US-ASCII 文字の使用を推奨せず、
+      これらを拡張 Backus-Naur Form（ABNF）の "obs-text" 生成規則に
+      分類している（<a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2">[RFC7230]、第 3.2 節</a>）。
+
+   o  また、フィールド値の既定の文字符号化方式については規定していない。
+      したがって、非 US-ASCII 文字を使用するには、
+      個々のフィールド定義で規定するか、
+      何らかの帯域外情報を用いる必要がある。
+
+   o  最後に、一部の API は、HTTP メッセージから得られた
+      オクテット列を文字列に対応付けるために、
+      既定の文字符号化方式を仮定している。例えば XMLHttpRequest
+      API（[<a href="#ref-XMLHttpRequest">XMLHttpRequest</a>]）はインターフェイス定義言語の型
+      "ByteString" を使用しており、実質的に ISO-8859-1
+      文字符号化方式（[<a href="#ref-ISO-8859-1">ISO-8859-1</a>]）が使用されることになる。
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 2]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-3" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   一方、<a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> は MIME ヘッダーフィールド内の
+   パラメーターの符号化方式を定義している（[<a href="https://www.rfc-editor.org/rfc/rfc2231" title="&quot;MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations&quot;">RFC2231</a>]）。MIME は
+   HTTP メッセージとは異なり、非バイナリーの転送路で送る必要がある。
+   この文書は、HTTP ヘッダーフィールドに適した符号化方式を規定する。
+   これは、次の仕様の符号化方式の簡略化されたプロファイルと互換性がある：
+   <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a>。この方式は、一般的な「パラメーター」
+   （"name=value"）構文を使用する任意の HTTP ヘッダーフィールドに適用できる。
+
+   この文書は [<a href="https://www.rfc-editor.org/rfc/rfc5987" title="&quot;Character Set and Language Encoding for Hypertext Transfer Protocol (HTTP) Header Field Parameters&quot;">RFC5987</a>] を廃止し、その状態を「歴史的」に変更する。
+   変更点は<a href="#appendix-A">付録 A</a>にまとめている。
+
+      注：この文書の以降の部分では、<a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> の参照は、
+      採用した機能の選択理由を説明することのみを目的としている。
+      したがって、これらの参照は純粋に参考情報である。
+
+      注：この符号化方式は、HTTP 経由で送られるメッセージのペイロードには適用しない。
+      例えば、メディア型 "multipart/form-data" を使用する場合のペイロード
+      （[<a href="https://www.rfc-editor.org/rfc/rfc7578" title="&quot;Returning Values from Forms: multipart/ form-data&quot;">RFC7578</a>]）が該当する。
+
+<span class="h2"><a class="selflink" id="section-2" href="#section-2">2</a>.  表記規則</span>
+
+   この文書のキーワード "MUST"、"MUST NOT"、"REQUIRED"、"SHALL"、"SHALL NOT"、
+   "SHOULD"、"SHOULD NOT"、"RECOMMENDED"、"NOT RECOMMENDED"、"MAY"、
+   および "OPTIONAL" は、次の仕様に記載された意味で解釈する：
+   [<a href="https://www.rfc-editor.org/rfc/rfc2119" title="&quot;Key words for use in RFCs to Indicate Requirement Levels&quot;">RFC2119</a>]。
+
+   この仕様は [<a href="https://www.rfc-editor.org/rfc/rfc5234" title="&quot;Augmented BNF for Syntax Specifications: ABNF&quot;">RFC5234</a>] で定義された ABNF 記法を使用する。
+   参照によって取り込むコア規則は、
+   <a href="https://www.rfc-editor.org/rfc/rfc5234#appendix-B.1">[RFC5234] の付録 B.1</a> に定義された ALPHA（英字）、DIGIT（十進数の 0-9）、HEXDIG
+   （十六進数の 0-9/A-F/a-f）、および LWSP（線形空白）である。
+
+   この仕様は [<a href="https://www.rfc-editor.org/rfc/rfc6365" title="&quot;Terminology Used in Internationalization in the IETF&quot;">RFC6365</a>] で定義された用語、すなわち
+   「文字符号化方式」（以下では「文字エンコーディング」と略す）、
+   "charset"、および「符号化文字集合」を使用する。
+
+   これは <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> とは異なることに注意する。同 RFC は「文字符号化方式」を
+   意味する用語として「文字集合」を使用している。
+
+<span class="h2"><a class="selflink" id="section-3" href="#section-3">3</a>.   <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> との比較および符号化方式の定義</span>
+
+   <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> は MIME の拡張をいくつか定義している。以下の各節では、
+   それらを HTTP ヘッダーフィールドに適用するかどうか、および適用方法を説明する。
+
+   要約すると：
+
+   o  パラメーター継続は不要である（<a href="#section-3.1">第 3.1 節</a>）。
+
+
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 3]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-4" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   o  文字エンコーディングと言語情報は有用なので、
+      単純なサブセットを規定する（<a href="#section-3.2">第 3.2 節</a>）。また、
+
+   o  符号化語における言語指定は不要である
+      （<a href="#section-3.3">第 3.3 節</a>）。
+
+<span class="h3"><a class="selflink" id="section-3.1" href="#section-3.1">3.1</a>.  パラメーター継続</span>
+
+   <a href="https://www.rfc-editor.org/rfc/rfc2231#section-3">[RFC2231] の第 3 節</a> は、MIME ヘッダーに適用される
+   長さの制限に対処する仕組みを定義している。これらの制限は
+   HTTP には適用されない（<a href="https://www.rfc-editor.org/rfc/rfc7231#appendix-A.6">[RFC7231]、付録 A.6</a>）。
+
+   したがって、パラメーター継続は、この仕様が定義する
+   符号化方式には含まれない。
+
+<span class="h3"><a class="selflink" id="section-3.2" href="#section-3.2">3.2</a>.  パラメーター値の文字エンコーディングと言語情報</span>
+
+   <a href="https://www.rfc-editor.org/rfc/rfc2231#section-4">[RFC2231] の第 4 節</a> は、パラメーター値に言語情報を埋め込む方法と、
+   非 ASCII 文字を符号化する方法を規定している。
+   これは MIME および HTTP のヘッダーフィールドの
+   パラメーターにおける制限に対処するものである。
+
+   しかし、<a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> は実装必須の文字エンコーディングを規定していないため、
+   送信者が使用するエンコーディングを決めるのは難しい。
+   したがって、この仕様を実装する受信者は、
+   "UTF-8" 文字エンコーディング [<a href="https://www.rfc-editor.org/rfc/rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>] をサポートしなければならない（MUST）。
+
+   さらに、<a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> は文字エンコーディング情報の省略を認めている。
+   この仕様で定義する符号化方式では、
+   省略を認めない。
+
+<span class="h4"><a class="selflink" id="section-3.2.1" href="#section-3.2.1">3.2.1</a>.  定義</span>
+
+   通常、拡張パラメーター値の存在は、
+   末尾がアスタリスクのパラメーター名で示される。ただし、
+   これは単なる慣例であり、拡張パラメーター値は、
+   この拡張を使うヘッダーフィールドの定義において
+   明示的に規定する必要がある（<a href="#section-4">第 4 節</a>参照）。
+
+   拡張パラメーター値の ABNF を以下に示す：
+
+
+
+
+
+
+
+
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 4]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-5" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+     ext-value     = charset  "'" [ language ] "'" value-chars
+                   ; like <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a>'s &lt;extended-initial-value&gt;
+                   ; (see <a href="https://www.rfc-editor.org/rfc/rfc2231#section-7">[RFC2231], Section&nbsp;7</a>)
+
+     charset       = "UTF-8" / mime-charset
+
+     mime-charset  = 1*mime-charsetc
+     mime-charsetc = ALPHA / DIGIT
+                   / "!" / "#" / "$" / "%" / "&amp;"
+                   / "+" / "-" / "^" / "_" / "`"
+                   / "{" / "}" / "~"
+                   ; as &lt;mime-charset&gt; in <a href="https://www.rfc-editor.org/rfc/rfc2978#section-2.3">Section&nbsp;2.3 of [RFC2978]</a>
+                   ; except that the single quote is not included
+                   ; SHOULD be registered in the IANA charset registry
+
+     language      = &lt;Language-Tag, see <a href="https://www.rfc-editor.org/rfc/rfc5646#section-2.1">[RFC5646], Section&nbsp;2.1</a>&gt;
+
+     value-chars   = *( pct-encoded / attr-char )
+
+     pct-encoded   = "%" HEXDIG HEXDIG
+                   ; see <a href="https://www.rfc-editor.org/rfc/rfc3986#section-2.1">[RFC3986], Section&nbsp;2.1</a>
+
+     attr-char     = ALPHA / DIGIT
+                   / "!" / "#" / "$" / "&amp;" / "+" / "-" / "."
+                   / "^" / "_" / "`" / "|" / "~"
+                   ; token except ( "*" / "'" / "%" )
+
+   拡張パラメーターの値部分（ext-value）は、
+   次の三つの部分からなるトークンである：
+
+   1.  必須（REQUIRED）の文字エンコーディング名（charset）、
+
+   2.  任意（OPTIONAL）の言語情報（language）、および
+
+   3.  実際の値を表す文字列（value-chars）。
+       各部分は単一引用符で区切られる。
+
+   文字エンコーディング名と言語タグはいずれも、
+   US-ASCII 符号化文字集合に制限され、大文字と小文字を区別せずに照合する
+   （<a href="https://www.rfc-editor.org/rfc/rfc2978#section-2.3">[RFC2978] の第 2.3 節</a>および<a href="https://www.rfc-editor.org/rfc/rfc5646#section-2.1.1">[RFC5646] の
+   第 2.1.1 節</a>参照）。
+
+   値部分では、attr-char に含まれない文字を、
+   指定した文字エンコーディングでオクテット列に符号化する。
+   次に、そのオクテット列を、次の規定に従ってパーセント符号化する：
+   <a href="https://www.rfc-editor.org/rfc/rfc3986#section-2.1">[RFC3986] の第 2.1 節</a>。
+
+
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 5]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-6" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   生成者は "UTF-8"（[<a href="https://www.rfc-editor.org/rfc/rfc3629" title="&quot;UTF-8, a transformation format of ISO 10646&quot;">RFC3629</a>]）文字エンコーディングを使用しなければならない（MUST）。
+   拡張文字エンコーディング（mime-charset）は、
+   将来の使用のために予約されている。
+
+      注：受信者は、符号化エラーを堅牢に処理できるようにすることが望ましい。
+      例えば、不正な形式や不完全なパーセントエスケープ列、
+      または復号できないオクテット列がある。
+      この仕様は特定の動作を義務付けない。
+      例えば、次の方策はいずれも許容される：
+
+      *  パラメーターを無視する。
+
+      *  復号できないオクテット列を除去する。または、
+
+      *  復号できないオクテット列を代替文字で置き換える。
+         例えば Unicode 文字 U+FFFD
+         （REPLACEMENT CHARACTER）である。
+
+<span class="h4"><a class="selflink" id="section-3.2.2" href="#section-3.2.2">3.2.2</a>.  歴史的な注記</span>
+
+   <a href="https://www.rfc-editor.org/rfc/rfc7230">RFC 7230</a> の token 生成規則（<a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2.6">[RFC7230]、第 3.2.6 節</a>）は、
+   <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> で使用する生成規則（<a href="https://www.rfc-editor.org/rfc/rfc2045#section-5.1">[RFC2045] の
+   第 5.1 節</a>から導入）と異なり、波括弧（"{" および "}"）を除外している。
+   したがって、attr-char 生成規則からも
+   この二つの文字を除外する。
+
+   ここで定義する &lt;mime-charset&gt; の ABNF は、
+   <a href="https://www.rfc-editor.org/rfc/rfc2978#section-2.3">[RFC2978] の第 2.3 節</a>と異なり、単一引用符を
+   認めない（RFC 正誤情報 ID 1912 [<a href="#ref-Err1912" title="&quot;Erratum ID 1912, RFC 2978&quot;">Err1912</a>] も参照）。実際、
+   この文書の執筆時点では、その文字を使った
+   文字エンコーディング名は登録されていない。
+
+   <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> との後方互換性のため、この仕様が定義する符号化方式は、
+   一般的なパラメーター構文とは異なり、
+   quoted-string 記法を認めない。汎用の
+   パーサー部品を使用する実装は、quoted-string
+   記法の使用を検出できず、この形式が無効であっても
+   受け入れることがある。
+
+   [<a id="ref-RFC5987">RFC5987</a>] は ISO-8859-1（[<a href="#ref-ISO-8859-1">ISO-8859-1</a>]）のサポートも要求していた。
+   既存のコードとの互換性のため、受信者には
+   このエンコーディングもサポートすることを奨励する。
+
+<span class="h4"><a class="selflink" id="section-3.2.3" href="#section-3.2.3">3.2.3</a>.  例</span>
+
+   "token" を使う非拡張の記法：
+
+     foo: bar; title=Economy
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 6]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-7" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   "quoted-string" を使う非拡張の記法：
+
+     foo: bar; title="US-$ rates"
+
+   Unicode 文字 U+00A3（"£"、POUND SIGN）を使用する
+   拡張記法：
+
+     foo: bar; title*=utf-8'en'%C2%A3%20rates
+
+   注：Unicode のポンド記号 U+00A3 は、
+   UTF-8 文字エンコーディングでオクテット列 C2 A3 に符号化され、
+   次にパーセント符号化される。空白文字は attr-char に含まれないため、
+   %20 として符号化されることにも注意する。
+
+   Unicode 文字 U+00A3（"£"、POUND SIGN）
+   および U+20AC（"€"、EURO SIGN）を使う拡張記法：
+
+     foo: bar; title*=UTF-8''%c2%a3%20and%20%e2%82%ac%20rates
+
+   注：Unicode のポンド記号 U+00A3 は、
+   UTF-8 文字エンコーディングでオクテット列 C2 A3 に符号化され、
+   次にパーセント符号化される。同様に、Unicode のユーロ記号 U+20AC は、
+   オクテット列 E2 82 AC に符号化され、次にパーセント
+   符号化される。HEXDIG は大文字と小文字の両方を認めるため、
+   受信者は両方を理解しなければならない。また、言語
+   情報は任意であるが、文字エンコーディングは任意ではない。
+
+<span class="h3"><a class="selflink" id="section-3.3" href="#section-3.3">3.3</a>.  符号化語における言語指定</span>
+
+   <a href="https://www.rfc-editor.org/rfc/rfc2231#section-5">[RFC2231] の第 5 節</a> は [<a href="https://www.rfc-editor.org/rfc/rfc2047" title="&quot;MIME (Multipurpose Internet Mail Extensions) Part Three: Message Header Extensions for Non-ASCII Text&quot;">RFC2047</a>] の符号化方式を拡張し、
+   符号化語での言語指定もサポートする。現在は廃止された HTTP/1.1 仕様の <a href="https://www.rfc-editor.org/rfc/rfc2616">RFC 2616</a> は、
+   <a href="https://www.rfc-editor.org/rfc/rfc2047">RFC 2047</a> を参照していた
+   （<a href="https://www.rfc-editor.org/rfc/rfc2616#section-2.2">[RFC2616]、第 2.2 節</a>）。しかし、どのヘッダー
+   フィールドに適用するかは不明確だった。そのため、HTTP/1.1 仕様の現在の改訂版では、
+   次の仕様で定義された符号化形式の使用を非推奨とした：<a href="https://www.rfc-editor.org/rfc/rfc2047">RFC</a>
+   <a href="https://www.rfc-editor.org/rfc/rfc2047">2047</a>（<a href="https://www.rfc-editor.org/rfc/rfc7230#section-3.2.4">[RFC7230] の第 3.2.4 節</a>参照）。
+
+   したがって、この仕様はこの機能を含めない。
+
+<span class="h2"><a class="selflink" id="section-4" href="#section-4">4</a>.  HTTP ヘッダーフィールド定義での使用指針</span>
+
+   拡張を使用する HTTP ヘッダーフィールドの仕様は、
+   <a href="#section-3.2">第 3.2 節</a>で定義する拡張を使うことを明確に述べることが望ましい。
+   簡単な方法は、この仕様を規範的に参照し、
+   個々のヘッダーフィールドのパラメーターの ABNF に
+   ext-value 生成規則を含めることである。
+
+
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 7]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-8" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   例えば：
+
+     foo         = token ";" LWSP title-param
+     title-param = "title" LWSP "=" LWSP value
+                 / "title*" LWSP "=" LWSP ext-value
+     ext-value   = &lt;see <a href="https://www.rfc-editor.org/rfc/rfc8187#section-3.2">RFC 8187, Section&nbsp;3.2</a>&gt;
+
+      注：次の節で定義されたパラメーター値の継続機能、
+      すなわち <a href="https://www.rfc-editor.org/rfc/rfc2231#section-3">[RFC2231] の第 3 節</a>の機能では、同じ名前の拡張パラメーターを
+      複数指定することはできない。継続の処理が
+      曖昧になるためである。したがって、
+      この拡張を使用する仕様には、この場合を禁止することを勧める。
+      これにより <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> との互換性が保たれる。
+
+      注：この仕様は、末尾がアスタリスクの
+      パラメーター名に新しい解釈を自動的に割り当てるものではない。
+      前述のとおり、ここで定義する構文を採用するかどうかは、
+      非拡張パラメーターの仕様が決める。
+      とはいえ、既存の一部の実装では、
+      パラメーター名の末尾がアスタリスクの場合に
+      この記法へ自動的に切り替えることが知られている。そのため、
+      末尾がアスタリスクのパラメーター名を別の用途に使うと、
+      相互運用性の問題が生じる可能性が高い。
+
+<span class="h3"><a class="selflink" id="section-4.1" href="#section-4.1">4.1</a>.  この拡張を使用する場合</span>
+
+   <a href="https://www.rfc-editor.org/rfc/rfc2277#section-4.2">[RFC2277] の第 4.2 節</a> は、人間が読めるテキストを含む
+   プロトコル要素が言語情報を保持できることを要求している。したがって、
+   パラメーター値がテキストであり、その言語が分かっている場合には、
+   常に ext-value 生成規則を使うことが望ましい。
+
+   また、パラメーター値に US-ASCII 符号化文字集合に
+   含まれない文字を保持する必要がある場合にも、
+   この拡張を使うことが望ましい（[<a href="https://www.rfc-editor.org/rfc/rfc0020" title="&quot;ASCII format for network interchange&quot;">RFC0020</a>]）。
+   Unicode 文字集合のサブセットに限定した新しい
+   パラメーターを定義することは許容できない点に注意する。
+
+<span class="h3"><a class="selflink" id="section-4.2" href="#section-4.2">4.2</a>.  エラー処理</span>
+
+   ヘッダーフィールドの仕様は、同じ名前のパラメーターを
+   複数認めるかどうか、およびその処理方法を定義する必要がある。
+   この仕様は、拡張構文を使うパラメーターを
+   優先することを提案する。これにより、生成者は、
+   拡張構文をまだ理解しない受信者の動作を損なわずに、
+   両方の形式を使用できる。
+
+
+
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 8]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-9" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   例：
+
+     foo: bar; title="EURO exchange rates";
+               title*=utf-8''%e2%82%ac%20exchange%20rates
+
+   この場合、送信者は旧来の受信者向けに ASCII 版のタイトルを提供し、
+   この仕様を理解する受信者向けに国際化された版も含める。
+   後者の受信者は当然、古い構文よりも
+   新しい構文を優先することが望ましい。
+
+<span class="h2"><a class="selflink" id="section-5" href="#section-5">5</a>.  セキュリティ上の考慮事項</span>
+
+   この文書で説明した形式は非 ASCII 文字を転送できるため、
+   文字の「なりすまし」が可能になる。
+   その場合、表示された値が実際とは異なるものに見える。
+
+   また、UTF-8 の復号に関係する
+   既知の攻撃シナリオがある。
+
+   両方の話題の詳細は、<a href="https://www.rfc-editor.org/rfc/rfc3629#section-10">[RFC3629] の第 10 節</a>を参照。
+
+   さらに、この文書で規定する拡張は、
+   一つのパラメーターについて複数の言語版を転送できる。
+   同じパラメーターの異なる言語版が同等でない場合、
+   このような使用によってなりすまし攻撃が可能になることがある。
+   この攻撃が実際に有効かどうかは、
+   規定されたパラメーターによって決まる。
+
+<span class="h2"><a class="selflink" id="section-6" href="#section-6">6</a>.  IANA に関する考慮事項</span>
+
+   この文書は IANA による措置を必要としない。
+
+<span class="h2"><a class="selflink" id="section-7" href="#section-7">7</a>.  参考文献</span>
+
+<span class="h3"><a class="selflink" id="section-7.1" href="#section-7.1">7.1</a>.  規範的な参考文献</span>
+
+   [<a id="ref-RFC0020">RFC0020</a>]  Cerf, V., "ASCII format for network interchange", STD 80,
+              <a href="https://www.rfc-editor.org/rfc/rfc20">RFC 20</a>, DOI 10.17487/RFC0020, October 1969,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc20">https://www.rfc-editor.org/info/rfc20</a>&gt;.
+
+   [<a id="ref-RFC2119">RFC2119</a>]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", <a href="https://www.rfc-editor.org/bcp/bcp14">BCP 14</a>, <a href="https://www.rfc-editor.org/rfc/rfc2119">RFC 2119</a>,
+              DOI 10.17487/RFC2119, March 1997,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;.
+
+   [<a id="ref-RFC2978">RFC2978</a>]  Freed, N. and J. Postel, "IANA Charset Registration
+              Procedures", <a href="https://www.rfc-editor.org/bcp/bcp19">BCP 19</a>, <a href="https://www.rfc-editor.org/rfc/rfc2978">RFC 2978</a>, DOI 10.17487/RFC2978,
+              October 2000, &lt;<a href="https://www.rfc-editor.org/info/rfc2978">https://www.rfc-editor.org/info/rfc2978</a>&gt;.
+
+
+
+<span class="grey">Reschke                      Standards Track                    [Page 9]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-10" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   [<a id="ref-RFC3629">RFC3629</a>]  Yergeau, F., "UTF-8, a transformation format of ISO
+              10646", STD 63, <a href="https://www.rfc-editor.org/rfc/rfc3629">RFC 3629</a>, DOI 10.17487/RFC3629, November
+              2003, &lt;<a href="https://www.rfc-editor.org/info/rfc3629">https://www.rfc-editor.org/info/rfc3629</a>&gt;.
+
+   [<a id="ref-RFC3986">RFC3986</a>]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              <a href="https://www.rfc-editor.org/rfc/rfc3986">RFC 3986</a>, DOI 10.17487/RFC3986, January 2005,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc3986">https://www.rfc-editor.org/info/rfc3986</a>&gt;.
+
+   [<a id="ref-RFC5234">RFC5234</a>]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, <a href="https://www.rfc-editor.org/rfc/rfc5234">RFC 5234</a>,
+              DOI 10.17487/RFC5234, January 2008,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc5234">https://www.rfc-editor.org/info/rfc5234</a>&gt;.
+
+   [<a id="ref-RFC5646">RFC5646</a>]  Phillips, A., Ed. and M. Davis, Ed., "Tags for Identifying
+              Languages", <a href="https://www.rfc-editor.org/bcp/bcp47">BCP 47</a>, <a href="https://www.rfc-editor.org/rfc/rfc5646">RFC 5646</a>, DOI 10.17487/RFC5646,
+              September 2009, &lt;<a href="https://www.rfc-editor.org/info/rfc5646">https://www.rfc-editor.org/info/rfc5646</a>&gt;.
+
+   [<a id="ref-RFC7230">RFC7230</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Message Syntax and Routing",
+              <a href="https://www.rfc-editor.org/rfc/rfc7230">RFC 7230</a>, DOI 10.17487/RFC7230, June 2014,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7230">https://www.rfc-editor.org/info/rfc7230</a>&gt;.
+
+   [<a id="ref-RFC7231">RFC7231</a>]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Semantics and Content", <a href="https://www.rfc-editor.org/rfc/rfc7231">RFC 7231</a>,
+              DOI 10.17487/RFC7231, June 2014,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7231">https://www.rfc-editor.org/info/rfc7231</a>&gt;.
+
+<span class="h3"><a class="selflink" id="section-7.2" href="#section-7.2">7.2</a>.  参考情報の文献</span>
+
+   [<a id="ref-Err1912">Err1912</a>]  RFC Errata, "Erratum ID 1912, <a href="https://www.rfc-editor.org/rfc/rfc2978">RFC 2978</a>",
+              &lt;<a href="https://www.rfc-editor.org/errata/eid1912">https://www.rfc-editor.org/errata/eid1912</a>&gt;.
+
+   [<a id="ref-ISO-8859-1">ISO-8859-1</a>]
+              International Organization for Standardization,
+              "Information technology -- 8-bit single-byte coded graphic
+              character sets -- Part 1: Latin alphabet No. 1", ISO/
+              IEC 8859-1:1998, 1998.
+
+   [<a id="ref-RFC2045">RFC2045</a>]  Freed, N. and N. Borenstein, "Multipurpose Internet Mail
+              Extensions (MIME) Part One: Format of Internet Message
+              Bodies", <a href="https://www.rfc-editor.org/rfc/rfc2045">RFC 2045</a>, DOI 10.17487/RFC2045, November 1996,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2045">https://www.rfc-editor.org/info/rfc2045</a>&gt;.
+
+   [<a id="ref-RFC2047">RFC2047</a>]  Moore, K., "MIME (Multipurpose Internet Mail Extensions)
+              Part Three: Message Header Extensions for Non-ASCII Text",
+              <a href="https://www.rfc-editor.org/rfc/rfc2047">RFC 2047</a>, DOI 10.17487/RFC2047, November 1996,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2047">https://www.rfc-editor.org/info/rfc2047</a>&gt;.
+
+
+
+<span class="grey">Reschke                      Standards Track                   [Page 10]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-11" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   [<a id="ref-RFC2231">RFC2231</a>]  Freed, N. and K. Moore, "MIME Parameter Value and Encoded
+              Word Extensions: Character Sets, Languages, and
+              Continuations", <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a>, DOI 10.17487/RFC2231, November
+              1997, &lt;<a href="https://www.rfc-editor.org/info/rfc2231">https://www.rfc-editor.org/info/rfc2231</a>&gt;.
+
+   [<a id="ref-RFC2277">RFC2277</a>]  Alvestrand, H., "IETF Policy on Character Sets and
+              Languages", <a href="https://www.rfc-editor.org/bcp/bcp18">BCP 18</a>, <a href="https://www.rfc-editor.org/rfc/rfc2277">RFC 2277</a>, DOI 10.17487/RFC2277,
+              January 1998, &lt;<a href="https://www.rfc-editor.org/info/rfc2277">https://www.rfc-editor.org/info/rfc2277</a>&gt;.
+
+   [<a id="ref-RFC2616">RFC2616</a>]  Fielding, R., Gettys, J., Mogul, J., Frystyk, H.,
+              Masinter, L., Leach, P., and T. Berners-Lee, "Hypertext
+              Transfer Protocol -- HTTP/1.1", <a href="https://www.rfc-editor.org/rfc/rfc2616">RFC 2616</a>,
+              DOI 10.17487/RFC2616, June 1999,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc2616">https://www.rfc-editor.org/info/rfc2616</a>&gt;.
+
+   [<a id="ref-RFC5987">RFC5987</a>]  Reschke, J., "Character Set and Language Encoding for
+              Hypertext Transfer Protocol (HTTP) Header Field
+              Parameters", <a href="https://www.rfc-editor.org/rfc/rfc5987">RFC 5987</a>, DOI 10.17487/RFC5987, August 2010,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc5987">https://www.rfc-editor.org/info/rfc5987</a>&gt;.
+
+   [<a id="ref-RFC5988">RFC5988</a>]  Nottingham, M., "Web Linking", <a href="https://www.rfc-editor.org/rfc/rfc5988">RFC 5988</a>,
+              DOI 10.17487/RFC5988, October 2010,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc5988">https://www.rfc-editor.org/info/rfc5988</a>&gt;.
+
+   [<a id="ref-RFC6266">RFC6266</a>]  Reschke, J., "Use of the Content-Disposition Header Field
+              in the Hypertext Transfer Protocol (HTTP)", <a href="https://www.rfc-editor.org/rfc/rfc6266">RFC 6266</a>,
+              DOI 10.17487/RFC6266, June 2011,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc6266">https://www.rfc-editor.org/info/rfc6266</a>&gt;.
+
+   [<a id="ref-RFC6365">RFC6365</a>]  Hoffman, P. and J. Klensin, "Terminology Used in
+              Internationalization in the IETF", <a href="https://www.rfc-editor.org/bcp/bcp166">BCP 166</a>, <a href="https://www.rfc-editor.org/rfc/rfc6365">RFC 6365</a>,
+              DOI 10.17487/RFC6365, September 2011,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc6365">https://www.rfc-editor.org/info/rfc6365</a>&gt;.
+
+   [<a id="ref-RFC7578">RFC7578</a>]  Masinter, L., "Returning Values from Forms: multipart/
+              form-data", <a href="https://www.rfc-editor.org/rfc/rfc7578">RFC 7578</a>, DOI 10.17487/RFC7578, July 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7578">https://www.rfc-editor.org/info/rfc7578</a>&gt;.
+
+   [<a id="ref-RFC7616">RFC7616</a>]  Shekh-Yusef, R., Ed., Ahrens, D., and S. Bremer, "HTTP
+              Digest Access Authentication", <a href="https://www.rfc-editor.org/rfc/rfc7616">RFC 7616</a>,
+              DOI 10.17487/RFC7616, September 2015,
+              &lt;<a href="https://www.rfc-editor.org/info/rfc7616">https://www.rfc-editor.org/info/rfc7616</a>&gt;.
+
+   [<a id="ref-RFC8053">RFC8053</a>]  Oiwa, Y., Watanabe, H., Takagi, H., Maeda, K., Hayashi,
+              T., and Y. Ioku, "HTTP Authentication Extensions for
+              Interactive Clients", <a href="https://www.rfc-editor.org/rfc/rfc8053">RFC 8053</a>, DOI 10.17487/RFC8053,
+              January 2017, &lt;<a href="https://www.rfc-editor.org/info/rfc8053">https://www.rfc-editor.org/info/rfc8053</a>&gt;.
+
+
+
+
+<span class="grey">Reschke                      Standards Track                   [Page 11]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-12" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   [<a id="ref-XMLHttpRequest">XMLHttpRequest</a>]
+              WhatWG, "XMLHttpRequest", &lt;<a href="https://xhr.spec.whatwg.org/">https://xhr.spec.whatwg.org/</a>&gt;.
+
+<span class="h2"><a class="selflink" id="appendix-A" href="#appendix-A">付録 A</a>.  次の仕様からの変更： <a href="https://www.rfc-editor.org/rfc/rfc5987">RFC 5987</a></span>
+
+   この節では、[<a href="https://www.rfc-editor.org/rfc/rfc5987" title="&quot;Character Set and Language Encoding for Hypertext Transfer Protocol (HTTP) Header Field Parameters&quot;">RFC5987</a>] からの変更を要約する：
+
+   o  文書の題名を「HTTP ヘッダーフィールドのパラメーターにおける
+      文字エンコーディングと言語の指定」に変更した。
+
+   o  フィールド値の非 ASCII 文字に関する問題をよりよく説明するため、
+      はじめにの節を書き直した。
+
+   o  "ISO-8859-1" エンコーディングをサポートする要件を削除した。
+
+   o  この文書は、汎用の「パラメーター」の ABNF を
+      再定義しようとはしなくなった（HTTP には本当に汎用的な
+      パラメーター定義がないことが判明した。例えば、
+      空白の処理には微妙な違いがある）。
+
+   o  現在の実装のエラー処理の欠陥に関する注記は、
+      もはや正確ではないため削除した。
+
+<span class="h2"><a class="selflink" id="appendix-B" href="#appendix-B">付録 B</a>.  実装報告</span>
+
+   この文書で定義する符号化方式は、現在、四つの
+   異なる HTTP ヘッダーフィールドで使用されている：
+
+   o  "Authentication-Control"（[<a href="https://www.rfc-editor.org/rfc/rfc8053" title="&quot;HTTP Authentication Extensions for Interactive Clients&quot;">RFC8053</a>] で定義）、
+
+   o  "Authorization"（HTTP ダイジェスト認証で使用され、
+      [<a href="https://www.rfc-editor.org/rfc/rfc7616" title="&quot;HTTP Digest Access Authentication&quot;">RFC7616</a>] で定義）、
+
+   o  "Content-Disposition"（[<a href="https://www.rfc-editor.org/rfc/rfc6266" title="&quot;Use of the Content-Disposition Header Field in the Hypertext Transfer Protocol (HTTP)&quot;">RFC6266</a>] で定義）、および
+
+   o  "Link"（[<a href="https://www.rfc-editor.org/rfc/rfc5988" title="&quot;Web Linking&quot;">RFC5988</a>] で定義）。
+
+   この符号化方式は、1997 年の
+   [<a href="https://www.rfc-editor.org/rfc/rfc2231" title="&quot;MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations&quot;">RFC2231</a>] が定義した方式のプロファイル／明確化であるため、
+   [<a href="https://www.rfc-editor.org/rfc/rfc5987" title="&quot;Character Set and Language Encoding for Hypertext Transfer Protocol (HTTP) Header Field Parameters&quot;">RFC5987</a>] の公開時には、多くのユーザーエージェントが "Content-Disposition" での使用を既にサポートしていた。
+
+   [<a href="https://www.rfc-editor.org/rfc/rfc5987" title="&quot;Character Set and Language Encoding for Hypertext Transfer Protocol (HTTP) Header Field Parameters&quot;">RFC5987</a>] の公開以降、さらに三つの一般的なデスクトップのユーザー
+   エージェントがこの符号化方式をサポートした。詳細は
+   &lt;<a href="http://purl.org/NET/http/content-disposition-tests#encoding-2231-char">http://purl.org/NET/http/content-disposition-tests#encoding-</a>
+   <a href="http://purl.org/NET/http/content-disposition-tests#encoding-2231-char">2231-char</a>&gt; を参照。現時点では、主要なデスクトップの
+   ユーザーエージェントはすべて、現在の版でサポートしている。
+
+
+
+
+
+<span class="grey">Reschke                      Standards Track                   [Page 12]</span></pre>
+<hr class='noprint'/><!--NewPage--><pre class='newpage'><span id="page-13" ></span>
+<span class="grey"><a href="https://www.rfc-editor.org/rfc/rfc8187">RFC 8187</a>            Charset/Language Encoding in HTTP     September 2017</span>
+
+
+   Internet Explorer 9 の実装は、
+   ISO-8859-1 文字エンコーディングをサポートしないことに注意する。今回の改訂は、
+   UTF-8 ですべての符号位置を表現できることを認め、
+   ISO-8859-1 をサポートする要件を削除する。
+
+   一方、"Link" ヘッダーフィールドは、それよりも最近の
+   [<a href="https://www.rfc-editor.org/rfc/rfc5988" title="&quot;Web Linking&quot;">RFC5988</a>] で規定された。この文書の執筆時点では、
+   Firefox（リリース 15 以降）を除くユーザーエージェントは、
+   "title*" パラメーターをサポートしていなかった。
+
+   <a href="https://www.rfc-editor.org/rfc/rfc7616#section-3.4">[RFC7616] の第 3.4 節</a> は、HTTP ダイジェスト認証で使用する
+   "username*" パラメーターを定義している。執筆時点では、
+   この拡張を実装したユーザーエージェントはなかった。
+
+謝辞
+
+   ABNF の詳細の解明を助けてくれた Martin Dürst と Frank Ellermann、
+   全般的なレビューを行った Graham Klyne と Alexey Melnikov、
+   <a href="https://www.rfc-editor.org/rfc/rfc2231">RFC 2231</a> との非互換性を指摘した Chris Newman、そして
+   実装者としてのフィードバックを提供した Benjamin Carlyle、Roar Lauritzsen、
+   Eric Lawrence、James Manger に感謝する。
+
+   さらに、IETF HTTP 作業グループのメンバーには、
+   今回の <a href="https://www.rfc-editor.org/rfc/rfc5987">RFC 5987</a> の更新に関するフィードバックをいただいたことに感謝する。
+
+著者の連絡先
+
+   Julian F. Reschke
+   greenbytes GmbH
+   Hafenweg 16
+   Münster, NW  48155
+   Germany
+
+   Email: julian.reschke@greenbytes.de
+   URI:   <a href="http://greenbytes.de/tech/webdav/">http://greenbytes.de/tech/webdav/</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Reschke                      Standards Track                   [Page 13]
+</pre>
+<p>非公式の日本語訳。IETF が公開した英語の原文を正本とする。 <a href="https://www.rfc-editor.org/rfc/rfc8187.html">RFC 8187</a></p>
+<script src="https://htmlspecs.com/dropdown.js"></script>
