@@ -614,6 +614,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [CSS View Transitions Module Level 2](https://jp.htmlspecs.com/css/css-view-transitions-2/)（[Source](https://www.w3.org/TR/2024/WD-css-view-transitions-2-20241113/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Animation Worklet API](https://jp.htmlspecs.com/css/css-animation-worklet-1/)（[Source](https://www.w3.org/TR/2019/WD-css-animation-worklet-1-20190625/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [CSS Will Change Module Level 1](https://jp.htmlspecs.com/css/css-will-change-1/)（[Source](https://www.w3.org/TR/2022/CRD-css-will-change-1-20220505/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
+- [Pointer-driven Animations Module Level 1](https://jp.htmlspecs.com/css/pointer-animations-1/)（[Source](https://www.w3.org/TR/2026/WD-pointer-animations-1-20261124/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 
 ### 条件・コンテナー・スコープ・レスポンシブ
 - [CSS Conditional Rules Module Level 3](https://jp.htmlspecs.com/css/css-conditional-3/)（[Source](https://www.w3.org/TR/2024/CRD-css-conditional-3-20240815/) ![Candidate Recommendation Draft](https://img.shields.io/badge/CRD-e2a669)）
