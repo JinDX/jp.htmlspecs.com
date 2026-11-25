@@ -76,7 +76,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [RDF 1.2 Schema](https://jp.htmlspecs.com/rdf12-schema/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-schema-20261123/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF 1.2 Turtle](https://jp.htmlspecs.com/rdf12-turtle/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-turtle-20261111/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF 1.2 N-Triples](https://jp.htmlspecs.com/rdf12-n-triples/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-n-triples-20261122/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [RDF 1.2 TriG](https://jp.htmlspecs.com/rdf12-trig/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-trig-20261113/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [RDF 1.2 TriG](https://jp.htmlspecs.com/rdf12-trig/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-trig-20261125/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF 1.2 N-Quads](https://jp.htmlspecs.com/rdf12-n-quads/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-n-quads-20261120/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF 1.2 XML Syntax](https://jp.htmlspecs.com/rdf12-xml/)（[Source](https://www.w3.org/TR/2026/WD-rdf12-xml-20261025/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [RDF Dataset Canonicalization](https://jp.htmlspecs.com/rdf-canon/)（[Source](https://www.w3.org/TR/2024/REC-rdf-canon-20240521/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
