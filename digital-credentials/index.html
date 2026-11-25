@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <!-- <meta name="generator" content="ReSpec 37.6.0"> -->
+    <!-- <meta name="generator" content="ReSpec 37.6.1"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <style>
 span.example-title{text-transform:none}
@@ -179,7 +179,7 @@ ul.index code{color:inherit}
 #index-defined-here .print-only{display:initial}
 }
 </style>
-    <!-- <meta name="revision" content="10de1719938966abb53a6aa13213b0bbec5ce890"> -->
+    <!-- <meta name="revision" content="7312dbe7e8b57d7428efd9a0849773b8f56c30bd"> -->
     <meta name="description" content="この文書は、ユーザーエージェントが運転免許証、政府発行の身分証明書、または
         その他の種類のデジタルクレデンシャルなどのデジタルクレデンシャルの
         提示および発行を仲介できるようにする API を規定します。この API は
@@ -323,23 +323,30 @@ var[data-type]:hover::after,var[data-type]:hover::before{opacity:1}
       "date": "2025-02-25",
       "publisher": "W3C",
       "id": "identity-web-impact"
+    },
+    "web-dev-strict-csp-article": {
+      "title": "Mitigate cross-site scripting (XSS) with a strict Content Security Policy (CSP)",
+      "href": "https://web.dev/articles/strict-csp",
+      "date": "2024-09-13",
+      "publisher": "web.dev",
+      "id": "web-dev-strict-csp-article"
     }
   },
   "xref": {
     "profile": "web-platform"
   },
-  "gitRevision": "10de1719938966abb53a6aa13213b0bbec5ce890",
-  "publishDate": "2026-11-23",
+  "gitRevision": "7312dbe7e8b57d7428efd9a0849773b8f56c30bd",
+  "publishDate": "2026-11-25",
   "previousMaturity": "WD",
-  "previousPublishDate": "2026-11-19",
-  "publishISODate": "2026-11-23T00:00:00.000Z",
-  "generatedSubtitle": "W3C Working Draft 23 November 2026"
+  "previousPublishDate": "2026-11-23",
+  "publishISODate": "2026-11-25T00:00:00.000Z",
+  "generatedSubtitle": "W3C Working Draft 25 November 2026"
 }</script>
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD">
     <link rel="stylesheet" href="https://www.w3.org/StyleSheets/TR/2021/dark.css" disabled="">
 </head>
 
-<body data-cite="WEBIDL credential-management permissions-policy vc-data-model HTML INFRA URL WEBIDL DOM FETCH"
+<body data-cite="WEBIDL credential-management permissions-policy secure-contexts vc-data-model HTML INFRA URL WEBIDL DOM FETCH"
     class="h-entry">
     <div class="head">
         <p class="logos"><a class="logo" href="https://www.w3.org/"><img alt="W3C" height="48"
@@ -347,14 +354,14 @@ var[data-type]:hover::after,var[data-type]:hover::before{opacity:1}
             </a></p>
         <h1 id="title" class="title">デジタルクレデンシャル</h1>
         <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C 作業草案</a> <time class="dt-published"
-                datetime="2026-11-23">2026年11月23日</time></p>
+                datetime="2026-11-25">2026年11月25日</time></p>
         <details open="">
             <summary>この文書の詳細</summary>
             <dl>
                 <dt>このバージョン:</dt>
                 <dd>
                     <a class="u-url"
-                        href="https://www.w3.org/TR/2026/WD-digital-credentials-20261123/">https://www.w3.org/TR/2026/WD-digital-credentials-20261123/</a>
+                        href="https://www.w3.org/TR/2026/WD-digital-credentials-20261125/">https://www.w3.org/TR/2026/WD-digital-credentials-20261125/</a>
                 </dd>
                 <dt>最新の公開バージョン:</dt>
                 <dd>
@@ -776,12 +783,15 @@ var[data-type]:hover::after,var[data-type]:hover::before{opacity:1}
                     <li class="tocline"><a class="tocxref" href="#content-process-compromise"><bdi class="secno">10.3 </bdi>
                             侵害されたコンテンツプロセスからの偽造リクエスト
                         </a></li>
-                    <li class="tocline"><a class="tocxref" href="#signing-presentation-requests"><bdi class="secno">10.4
+                    <li class="tocline"><a class="tocxref" href="#verifier-hardening-against-script-injection"><bdi class="secno">10.4 </bdi>
+                            スクリプト挿入に対する検証者の防御強化
+                        </a></li>
+                    <li class="tocline"><a class="tocxref" href="#signing-presentation-requests"><bdi class="secno">10.5
                             </bdi>
                             プレゼンテーション要求の署名
                         </a></li>
                     <li class="tocline"><a class="tocxref" href="#cross-device-security-and-proximity"><bdi
-                                class="secno">10.5 </bdi>
+                                class="secno">10.6 </bdi>
                             クロスデバイスセキュリティと近接性
                         </a></li>
                 </ol>
@@ -4203,6 +4213,18 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         を変更しようとします。プロトコルまたはクレデンシャル形式に起因する脅威は、<a data-link-type="dfn|abstract-op" href="#dfn-protocol-and-format-vulnerabilities" class="internalDFN" id="ref-for-update-20261119-ja-50">プロトコルおよび形式の脆弱性</a>として別途説明されています。
                     </dd>
                     <dt>
+          <dfn data-noexport="" id="dfn-verifier-origin-script-compromise" tabindex="0" aria-haspopup="dialog" data-dfn-type="dfn">検証者オリジンのスクリプト侵害</dfn>
+        </dt>
+                <dd>
+                    クロスサイトスクリプティングや侵害された依存関係などにより<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-7">検証者</a>のオリジンでスクリプトを実行できる攻撃者は、<a data-link-type="dfn|abstract-op" href="#dfn-credential-response" class="internalDFN" id="ref-for-dfn-credential-response-3">クレデンシャル応答</a>（<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-8">検証者</a>が復号してページに公開したもの）を読み取るか、そのオリジンから独自のクレデンシャル要求を開始しようとします。
+                </dd>
+                <dt>
+          <dfn data-noexport="" id="dfn-browser-extension-access" tabindex="0" aria-haspopup="dialog" data-dfn-type="dfn">ブラウザー拡張機能によるアクセス</dfn>
+        </dt>
+                <dd>
+                    利用者が<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-9">検証者</a>のページ上での実行を許可したブラウザー拡張機能が、そのページを経由する内容を読み取ったり変更したりします。これには送信されるクレデンシャル要求や、<a data-link-type="dfn|abstract-op" href="#dfn-credential-response" class="internalDFN" id="ref-for-dfn-credential-response-4">クレデンシャル応答</a>（<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-10">検証者</a>がページに公開するもの）が含まれます。
+                </dd>
+                <dt>
                         <dfn data-noexport="" id="dfn-api-flooding" tabindex="0" aria-haspopup="dialog"
                             data-dfn-type="dfn">API フラッディング</dfn>
                     </dt>
@@ -4351,11 +4373,11 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     href="https://webidl.spec.whatwg.org/#dfn-interface"
                     id="ref-for-index-term-interfaces-1">インターフェイス</a>は、
                 <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"
-                    id="ref-for-index-term-secure-contexts-1">セキュアコンテキスト</a>でのみ公開され、<a data-link-type="dfn|abstract-op"
+                    id="ref-for-index-term-secure-context-2">セキュアコンテキスト</a>でのみ公開され、<a data-link-type="dfn|abstract-op"
                     href="#dfn-network-tampering" class="internalDFN" id="ref-for-dfn-network-tampering-1">ネットワーク改ざん</a>のリスクを
                 <a data-link-type="dfn" data-lt="secure contexts"
                     href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"
-                    id="ref-for-index-term-secure-contexts-2">非セキュアコンテキスト</a>（例えば、悪意のあるスクリプトが
+                    id="ref-for-index-term-secure-context-3">非セキュアコンテキスト</a>（例えば、悪意のあるスクリプトが
                 ネットワークを介して注入される場合）を通じて低減する。詳細については、
                 <cite><a data-matched-text="[[[secure-contexts]]]" href="https://www.w3.org/TR/secure-contexts/">セキュア
                         コンテキスト</a></cite>仕様の
@@ -4519,11 +4541,32 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             id="ref-for-dfn-digital-credential-chooser-14">デジタル認証情報の選択画面</a>に到達する前にすでにチェックされ消費されるため、その状態の2度目のチェックを独立したステップとして表現できないからである。</p>
       </div>
     </section>
-<section id="signing-presentation-requests">
+<section id="verifier-hardening-against-script-injection"><div class="header-wrapper"><h3 id="x10-4-verifier-hardening-against-script-injection"><bdi class="secno">10.4 </bdi> スクリプト挿入に対する検証者の防御強化</h3><a class="self-link" href="#verifier-hardening-against-script-injection" aria-label="第 10.4 節へのパーマリンク"></a></div>
+      <p>
+            <a href="#DC-API" data-matched-text="[[[#DC-API|Digital Credentials API]]]">デジタルクレデンシャル API</a>は<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context" id="ref-for-index-term-secure-context-4">セキュアコンテキスト</a>でのみ公開されます。これは、ページが<a data-link-type="dfn" href="https://www.w3.org/TR/secure-contexts/#potentially-trustworthy-origin" id="ref-for-index-term-potentially-trustworthy-origin-1">潜在的に信頼できるオリジン</a>（たとえば HTTPS）を通じて利用者に届いたことを意味しますが、そのページで動作するすべてのスクリプトを信頼できるという意味ではありません。ここでの<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-11">検証者</a>は、利用者がアクセスしている、クレデンシャルを要求するサイトです。攻撃者は、利用者のブラウザー内でそのサイト自身のページ上に入り込み実行されるスクリプトです。クロスサイトスクリプティングの欠陥を通じて挿入されるもの、侵害されたサードパーティーライブラリーとともに読み込まれるもの、改ざんされたスクリプトとして配信されるものが含まれます。<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-12">検証者</a>のサーバーが完全に健全でも、問題はページにあります。脅威モデルではこれを<a data-link-type="dfn|abstract-op" href="#dfn-verifier-origin-script-compromise" class="internalDFN" id="ref-for-dfn-verifier-origin-script-compromise-1">検証者オリジンのスクリプト侵害</a>と呼びます。
+        </p>
+      <p>
+            そこで実行されるスクリプトは、サイト自身のコードと同じアクセス権限を持ちます。<a data-link-type="dfn|abstract-op" href="#dfn-credential-response" class="internalDFN" id="ref-for-dfn-credential-response-5">クレデンシャル応答</a>は、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-13">検証者</a>が復号してページに返すと読み取れます。API を自ら呼び出すこともでき、その場合は要求がサイト自身の<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin" id="ref-for-index-term-origin-11">オリジン</a>から発信されるため、サイトが送信したものに見えます。
+        </p>
+      <p>
+            応答の暗号化を必須にすること（<a href="#encrypting-credential-responses" data-matched-text="[[[#encrypting-credential-responses]]]" class="sec-ref"><bdi class="secno">11.3.1.7 </bdi> クレデンシャル応答の暗号化</a>を参照）はこの攻撃から応答を保護しますが、応答が暗号化されている間に限られます。要求に手を加えない挿入スクリプトが平文を読み取れるのは、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-14">検証者</a>がページ上で復号するか、サーバーで復号した平文をページに送り返した場合だけです。一方、要求を変更したり自ら要求を開始したりするスクリプトは、独自の応答暗号化鍵を指定できます。これを検知できるのは、要求に署名を必須とする<a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager" id="ref-for-index-term-credential-manager-27">資格情報マネージャー</a>だけです。ただし、その署名鍵は<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-15">検証者</a>のものと認識している必要があります（<a href="#signing-presentation-requests" data-matched-text="[[[#signing-presentation-requests]]]" class="sec-ref"><bdi class="secno">10.5 </bdi> プレゼンテーション要求の署名</a>を参照）。このため、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-16">検証者</a>には<a data-link-type="dfn|abstract-op" href="#dfn-credential-response" class="internalDFN" id="ref-for-dfn-credential-response-6">クレデンシャル応答</a>をサーバーで復号し、復号鍵をページに置かないことが推奨されます。ページに平文を必要とする<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-17">検証者</a>は攻撃者にも同じアクセスを許すので、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-18">検証者</a>はページが実際に使うデータだけを公開することが推奨されます。
+        </p>
+      <p>
+            すべての要求を<a data-link-type="dfn|abstract-op" href="#dfn-digital-credential-chooser" class="internalDFN" id="ref-for-dfn-digital-credential-chooser-18">デジタルクレデンシャル選択機能</a>または<a data-link-type="dfn|abstract-op" href="#dfn-credential-manager-chooser" class="internalDFN" id="ref-for-dfn-credential-manager-chooser-9">クレデンシャルマネージャー選択機能</a>を通じて仲介することで、API が気付かれずに悪用されることを抑えられます。ただし、どちらの選択画面も、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-19">検証者</a>が既にページに公開したデータを挿入スクリプトが読み取ることを防ぎません。
+        </p>
+      <p>
+            多層防御として、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-20">検証者</a>はページのスクリプト挿入対策を強化することが推奨されます。強力な<cite><a class="bibref" data-link-type="biblio" href="#bib-csp3" title="Content Security Policy Level 3">コンテンツセキュリティポリシー</a></cite>、たとえば許可するオリジンのリストではなくノンスやハッシュを使った厳格なポリシー（[<cite><a class="bibref" data-link-type="biblio" href="#bib-web-dev-strict-csp-article" title="Mitigate cross-site scripting (XSS) with a strict Content Security Policy (CSP)">web-dev-strict-csp-article</a></cite>]を参照）は、一部の挿入スクリプトや許可されていないスクリプトの実行を阻止できます。ただし、そのような厳格なポリシーの作成は難しく、サイトが成長するにつれてその厳格さを保つことも難しいため、実際にはリスクを低減するものであって、なくすものではありません。<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-21">検証者</a>には、DOM ベースの挿入リスクを下げる<cite><a data-matched-text="[[[trusted-types]]]" href="https://www.w3.org/TR/trusted-types/">Trusted Types</a></cite>と、改ざんまたは侵害されたサードパーティースクリプトを防ぐ<cite><a data-matched-text="[[[SRI]]]" href="https://www.w3.org/TR/sri-2/">サブリソース完全性</a></cite>の使用も推奨されます。<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-22">検証者</a>は<code>Integrity-Policy:
+        blocked-destinations=(script)</code>ヘッダーを送信することもできます（<a data-matched-text="[[[SRI#integrity-policy-section]]]" href="https://www.w3.org/TR/sri-2/#integrity-policy-section" class="sec-ref">§ <bdi class="secno">3.8 </bdi>Integrity-Policy</a>を参照）。これにより<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent" id="ref-for-index-term-user-agents-27">ユーザーエージェント</a>は、完全性メタデータがない外部スクリプトと、no-CORS の外部スクリプトの要求をブロックします。<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-23">検証者</a>は署名付き要求も利用でき、以下の制限の範囲内で<a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager" id="ref-for-index-term-credential-manager-28">資格情報マネージャー</a>が改変された要求や置き換えられた応答暗号化鍵を検知できるようになります（<a href="#signing-presentation-requests" data-matched-text="[[[#signing-presentation-requests]]]" class="sec-ref"><bdi class="secno">10.5 </bdi> プレゼンテーション要求の署名</a>を参照）。
+        </p>
+      <p>
+            これらの対策は脅威を軽減しますが、排除はしません。コンテンツセキュリティポリシー、<cite><a data-matched-text="[[[trusted-types]]]" href="https://www.w3.org/TR/trusted-types/">Trusted Types</a></cite>、<cite><a data-matched-text="[[[SRI]]]" href="https://www.w3.org/TR/sri-2/">サブリソース完全性</a></cite>は<a data-link-type="dfn|abstract-op" href="#dfn-browser-extension-access" class="internalDFN" id="ref-for-dfn-browser-extension-access-1">ブラウザー拡張機能によるアクセス</a>には対応しません。利用者がページ上での実行を許可したブラウザー拡張機能はページに完全にアクセスでき、送信前に要求を読み取ったり書き換えたりできます。署名付き要求が有効なのは、<a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager" id="ref-for-index-term-credential-manager-29">資格情報マネージャー</a>が<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-24">検証者</a>のものと既に認識している鍵で署名を検証し、代わりの未署名要求も拒否する場合に限られます。そうでない場合、拡張機能は署名を取り除き、代わりに未署名の要求を送信し、独自の応答暗号化鍵を指定できます。<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-25">検証者</a>が各要求をサーバーで構築して署名し、ページから来た要求には一切署名しないことで、拡張機能による<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier" id="ref-for-index-term-verifiers-26">検証者</a>の署名の偽造は防げますが、署名の削除は防げません。<a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager" id="ref-for-index-term-credential-manager-30">資格情報マネージャー</a>がどの要求を受け入れるかはクレデンシャルが属するエコシステムによって決まり、この仕様では定めません（<a href="#signing-presentation-requests" data-matched-text="[[[#signing-presentation-requests]]]" class="sec-ref"><bdi class="secno">10.5 </bdi> プレゼンテーション要求の署名</a>を参照）。ページのスクリプト実行モデルの外にある挿入経路も、これらの仕組みで対処できる範囲を超えています。
+        </p>
+      </section>
+    <section id="signing-presentation-requests">
             <div class="header-wrapper">
-        <h3 id="x10-4-signing-presentation-requests"><bdi class="secno">10.4 </bdi>
+        <h3 id="x10-5-signing-presentation-requests"><bdi class="secno">10.5 </bdi>
           プレゼンテーション要求の署名
-        </h3><a class="self-link" href="#signing-presentation-requests" aria-label="Permalink for Section 10.4"></a>
+        </h3><a class="self-link" href="#signing-presentation-requests" aria-label="Permalink for Section 10.5"></a>
       </div>
 
 
@@ -4531,7 +4574,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 <a data-link-type="dfn|abstract-op" href="#dfn-presentation-protocol" class="internalDFN"
                     id="ref-for-dfn-presentation-protocol-23">提示プロトコル</a>がリクエストに
                 署名する方法を提供している場合、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                    id="ref-for-index-term-verifiers-7">検証者</a>には、その方法を使用することが強く推奨されます。
+                    id="ref-for-index-term-verifiers-27">検証者</a>には、その方法を使用することが強く推奨されます。
             </p>
             <p>
                 署名されていないリクエストは、検証者自身のページで実行されている
@@ -4543,21 +4586,21 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     暗号化する</a>ために使用されるパラメーターを置き換えることで、レスポンスが検証者ではなく
                 攻撃者に対して暗号化されるようにすることもできます。API を<a data-link-type="dfn"
                     href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"
-                    id="ref-for-index-term-secure-contexts-3">セキュアコンテキスト</a>で使用することを要求しても、これを防ぐことはできません。なぜなら、
+                    id="ref-for-index-term-secure-context-5">セキュアコンテキスト</a>で使用することを要求しても、これを防ぐことはできません。なぜなら、
                 攻撃者はすでに
                 その内部にいるからです。署名されていないリクエストでは、<a data-link-type="dfn"
                     href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-24">資格情報マネージャー</a>は、
+                    id="ref-for-index-term-credential-manager-31">資格情報マネージャー</a>は、
                 検証者が自身のページにそのような
                 スクリプトが存在しない状態を保っていることを信頼しなければなりません。一方、署名されたリクエストは、<a data-link-type="dfn"
                     href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-25">資格情報マネージャー</a>に確認できるものを提供するため、
+                    id="ref-for-index-term-credential-manager-32">資格情報マネージャー</a>に確認できるものを提供するため、
                 変更が気付かれないまま通過するのではなく、検出できるようになります。
             </p>
             <p>
                 それでも、署名が役立つのは、<a data-link-type="dfn"
                     href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-26">資格情報マネージャー</a>が、
+                    id="ref-for-index-term-credential-manager-33">資格情報マネージャー</a>が、
                 その署名がリクエストを行っている検証者のものであると判断できる場合に限られます。
                 ページ内のスクリプトは、改変したリクエストに
                 自身の鍵で再署名できるため、署名を、
@@ -4571,16 +4614,16 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 提供します（
                 <a href="#cross-device-security-and-proximity"
                     data-matched-text="[[[#cross-device-security-and-proximity]]]" class="sec-ref"><bdi
-                        class="secno">10.5 </bdi>
+                        class="secno">10.6 </bdi>
                     デバイス間のセキュリティと近接性</a>を参照）。
             </p>
         </section>
         <section id="cross-device-security-and-proximity">
             <div class="header-wrapper">
-        <h3 id="x10-5-cross-device-security-and-proximity"><bdi class="secno">10.5 </bdi>
+        <h3 id="x10-6-cross-device-security-and-proximity"><bdi class="secno">10.6 </bdi>
           クロスデバイスセキュリティと近接性
         </h3><a class="self-link" href="#cross-device-security-and-proximity"
-          aria-label="Permalink for Section 10.5"></a>
+          aria-label="Permalink for Section 10.6"></a>
       </div>
 
 
@@ -4589,7 +4632,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 <a data-link-type="dfn|abstract-op" href="#dfn-digital-credential" class="internalDFN"
                     id="ref-for-dfn-digital-credential-32">デジタル資格情報</a>を、<a data-link-type="dfn"
                     href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-27">資格情報マネージャー</a>として機能させ、
+                    id="ref-for-index-term-credential-manager-34">資格情報マネージャー</a>として機能させ、
                 ノートパソコンなどのプライマリデバイスに提示するクロスデバイス体験をサポートします。
                 特定のデータ交換
                 プロトコル（例：暗号形式およびトランスポート）は、この API の
@@ -4605,16 +4648,16 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 Low Energy 経由）を強制することで、リモートリレー攻撃を軽減し、セキュリティを確保します。重要なのは、
                 クロスデバイスフローでは、<a data-link-type="dfn"
                     href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-28">資格情報マネージャー</a>が、プライマリデバイスから転送された
+                    id="ref-for-index-term-credential-manager-35">資格情報マネージャー</a>が、プライマリデバイスから転送された
                 <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin"
-                    id="ref-for-index-term-origin-2">オリジン</a>文字列を本質的に信頼することはできないという点です。プライマリ
+                    id="ref-for-index-term-origin-12">オリジン</a>文字列を本質的に信頼することはできないという点です。プライマリ
                 デバイスまたはそのブラウザーが侵害されている可能性があるためです。したがって、
                 <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                    id="ref-for-index-term-verifiers-8">検証者</a>が暗号学的に
+                    id="ref-for-index-term-verifiers-28">検証者</a>が暗号学的に
                 自身の身元を証明する署名付きリクエストを採用するプロトコルは、
                 ブラウザーが表明する<a data-link-type="dfn"
                     href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin"
-                    id="ref-for-index-term-origin-3">オリジン</a>のみに依存する場合よりも大幅に強力なセキュリティ
+                    id="ref-for-index-term-origin-13">オリジン</a>のみに依存する場合よりも大幅に強力なセキュリティ
                 保証を提供します。
             </p>
         </section>
@@ -4640,7 +4683,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
         <p>
             Digital Credentials API は、複数の技術層とさまざまな参加者
             （<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                id="ref-for-index-term-verifiers-9">検証者</a>、<a data-link-type="dfn"
+                id="ref-for-index-term-verifiers-29">検証者</a>、<a data-link-type="dfn"
                 href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-holders"
                 id="ref-for-index-term-holders-21">保有者</a>、および<a data-link-type="dfn"
                 href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
@@ -4676,7 +4719,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             代わりに、ここでの考慮事項は Digital Credentials API
             自体に焦点を当て、API と相互作用するエコシステムの
             関連するプライバシー特性を考慮しつつ、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                id="ref-for-index-term-user-agents-21">ユーザーエージェント</a>が API の実装において<a data-link-type="dfn"
+                id="ref-for-index-term-user-agents-28">ユーザーエージェント</a>が API の実装において<a data-link-type="dfn"
                 href="https://www.w3.org/TR/privacy-principles/#dfn-user-agent-duties"
                 id="ref-for-index-term-user-agent-duties-1">ユーザーエージェントの責務</a>をどのように果たせるかを説明します。
         </p>
@@ -4716,7 +4759,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             </p>
             <p>
                 この API は、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                    id="ref-for-index-term-verifiers-10">検証者</a>と
+                    id="ref-for-index-term-verifiers-30">検証者</a>と
                 <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-holders"
                     id="ref-for-index-term-holders-22">保持者</a>の間の接続インターフェースを提供する。
                 すなわち、<a data-link-type="dfn|abstract-op" data-lt="presentation protocol"
@@ -4744,12 +4787,12 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             </p>
             <p>
                 Digital Credentials API は、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-22">ユーザー
+                    id="ref-for-index-term-user-agents-29">ユーザー
                     エージェント</a>に、ユーザーに代わって
                 仲介する能力（例えば、<a data-link-type="dfn|abstract-op" href="#dfn-digital-credential-chooser"
-                    class="internalDFN" id="ref-for-dfn-digital-credential-chooser-15">デジタルクレデンシャル選択機能</a>や<a
+                    class="internalDFN" id="ref-for-dfn-digital-credential-chooser-19">デジタルクレデンシャル選択機能</a>や<a
                     data-link-type="dfn|abstract-op" href="#dfn-credential-manager-chooser" class="internalDFN"
-                    id="ref-for-dfn-credential-manager-chooser-4">クレデンシャルマネージャー選択機能</a>の形で）を提供し、
+                    id="ref-for-dfn-credential-manager-chooser-10">クレデンシャルマネージャー選択機能</a>の形で）を提供し、
                 要求に文脈を与え、
                 <a href="#permission-prior-to-credential-manager-selection" data-matched-text="[[[#permission-prior-to-credential-manager-selection|prevent
           immediate exposure to holder applications]]]">保有者アプリケーションへの
@@ -4769,7 +4812,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     <a data-matched-text="[[[privacy-principles#purpose-limitation|purpose limitation]]]"
                         href="https://www.w3.org/TR/privacy-principles/#purpose-limitation">目的の限定</a>、
                     ユーザーへの説明の容易さ、および<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-23">ユーザーエージェント</a>による
+                        id="ref-for-index-term-user-agents-30">ユーザーエージェント</a>による
                     プライバシーとセキュリティの保護を実現できます。
                 </aside>
             </div>
@@ -4794,18 +4837,18 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 これは、一部のユーザーがクレデンシャル情報を交換するための
                 最もプライバシー保護の強い手段を望まない、または使用を許可されない可能性があることを意味します。
                 それでも、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-24">ユーザーエージェント</a>は、デフォルトでプライバシーを保護し、
+                    id="ref-for-index-term-user-agents-31">ユーザーエージェント</a>は、デフォルトでプライバシーを保護し、
                 害から守る体験をユーザーに提供する必要があります。
             </p>
             <p>
                 このように嗜好やユースケースが幅広いため、
                 <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-25">ユーザーエージェント</a>が、ユーザーが自ら個人情報を
+                    id="ref-for-index-term-user-agents-32">ユーザーエージェント</a>が、ユーザーが自ら個人情報を
                 公開しようとしているのか、それともそうするよう欺かれているのかを見分けることは
                 難しい場合があります。したがって、情報交換を開始する前に、
                 各ユーザーがどのデータを共有するのか、そして誰が
                 情報交換に参加するのかを理解していることを保証するのは、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-26">ユーザーエージェント</a>の責任です。
+                    id="ref-for-index-term-user-agents-33">ユーザーエージェント</a>の責任です。
             </p>
         </section>
         <section id="presentation-protocol-and-credential-format">
@@ -4823,7 +4866,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 ユーザー情報を交換するために使用する<a data-link-type="dfn|abstract-op" href="#dfn-presentation-protocol"
                     class="internalDFN" id="ref-for-dfn-presentation-protocol-26">提示プロトコル</a>およびクレデンシャル形式は、
                 ユーザーのプライバシーを保護するという<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-27">ユーザーエージェント</a>の目標にとって極めて重要です。
+                    id="ref-for-index-term-user-agents-34">ユーザーエージェント</a>の目標にとって極めて重要です。
             </p>
             <section id="presentation-protocol-considerations-for-user-privacy">
                 <div class="header-wrapper">
@@ -4897,10 +4940,10 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-holders"
                             id="ref-for-index-term-holders-24">保持者</a>が
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-11">検証者</a>によって要求された
+                            id="ref-for-index-term-verifiers-31">検証者</a>によって要求された
                         最小限の必要な情報を共有できるようにする。プロトコルは、
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-12">検証者</a>が必要なクレームを
+                            id="ref-for-index-term-verifiers-32">検証者</a>が必要なクレームを
                         正確に指定できるようにすることで、選択的開示を実現することが期待される。
                     </p>
                 </section>
@@ -4916,15 +4959,15 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                             href="https://github.com/w3c/credential-considerations/blob/main/credentials-considerations.md#unlinkable-presentations">非リンク可能性</a>
                         は、ユーザーが資格情報から属性を複数回提示した場合に、
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-13">検証者</a>がこれらの個別の提示を
+                            id="ref-for-index-term-verifiers-33">検証者</a>がこれらの個別の提示を
                         同じユーザーに関するものだと結論付けるために関連付けることができない
                         （検証者間リンク可能性）、または<a data-link-type="dfn"
                             href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-14">検証者</a>が
+                            id="ref-for-index-term-verifiers-34">検証者</a>が
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
                             id="ref-for-index-term-issuers-10">発行者</a>と共謀して、
                         <a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-29">資格情報マネージャー</a>から
+                            id="ref-for-index-term-credential-manager-36">資格情報マネージャー</a>から
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
                             id="ref-for-index-term-issuers-11">発行者</a>への資格情報の交換を報告できない
                         （検証者・発行者間リンク可能性）ことを保証する特性である。前者は、
@@ -4933,7 +4976,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
                             id="ref-for-index-term-issuers-12">発行者</a>によって維持できる特性であり、
                         例えば個々の<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-15">検証者</a>ごとに新しい資格情報を発行することによって実現できる。
+                            id="ref-for-index-term-verifiers-35">検証者</a>ごとに新しい資格情報を発行することによって実現できる。
                     </p>
                     <p>
                         後者は、例えば
@@ -4941,7 +4984,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                             href="https://www.w3.org/TR/vc-data-model-2.0/#zero-knowledge-proofs">ゼロ知識証明</a>によって
                         実現可能であるが、暗号化された応答などの API の設計上の選択により、
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-28">ユーザーエージェント</a>が
+                            id="ref-for-index-term-user-agents-35">ユーザーエージェント</a>が
                         検証者・発行者間の非リンク可能性が実際に達成されたことを証明することは
                         不可能である。それでも、プロトコルは可能な限りリンク可能性を制限することが
                         求められる。
@@ -4953,19 +4996,19 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     </p>
                     <p>
                         Digital Credentials API を通じて、<a data-link-type="dfn"
-                            href="https://infra.spec.whatwg.org/#user-agent" id="ref-for-index-term-user-agents-29">ユーザー
+                            href="https://infra.spec.whatwg.org/#user-agent" id="ref-for-index-term-user-agents-36">ユーザー
                             エージェント</a>は、
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-16">検証者</a>と<a data-link-type="dfn"
+                            id="ref-for-index-term-verifiers-36">検証者</a>と<a data-link-type="dfn"
                             href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-30">資格情報マネージャー</a>がリンク不能な
+                            id="ref-for-index-term-credential-manager-37">資格情報マネージャー</a>がリンク不能な
                         属性を交換するのを支援できますが、レスポンスが暗号化されているため、
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-17">検証者</a>と
+                            id="ref-for-index-term-verifiers-37">検証者</a>と
                         <a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-31">資格情報マネージャー</a>の間でリンク可能な情報が一切渡されないことを保証することはできません。
+                            id="ref-for-index-term-credential-manager-38">資格情報マネージャー</a>の間でリンク可能な情報が一切渡されないことを保証することはできません。
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-30">ユーザーエージェント</a>は、
+                            id="ref-for-index-term-user-agents-37">ユーザーエージェント</a>は、
                         ユーザー許可の体験において、この事実を考慮することが推奨されます。
                     </p>
                     <div class="issue" id="issue-container-number-279">
@@ -5001,7 +5044,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     </p>
                     <p>
                         リンク不能性と同様に、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-31">ユーザー
+                            id="ref-for-index-term-user-agents-38">ユーザー
                             エージェント</a>が、
                         ユーザーが資格情報リクエストの続行を
                         許可した後に、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
@@ -5009,12 +5052,12 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         検証に積極的に関与していないことを保証することは不可能です。その時点以降、
                         この判断は<a data-link-type="dfn"
                             href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-32">資格情報マネージャー</a>に委ねられます。一部の資格情報
+                            id="ref-for-index-term-credential-manager-39">資格情報マネージャー</a>に委ねられます。一部の資格情報
                         マネージャーは<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-32">ユーザー
+                            id="ref-for-index-term-user-agents-39">ユーザー
                             エージェント</a>とみなすことができますが、一般には、
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-33">ユーザーエージェント</a>が
+                            id="ref-for-index-term-user-agents-40">ユーザーエージェント</a>が
                         <a href="#DC-API" data-matched-text="[[[#DC-API|Digital Credentials API]]]">Digital Credentials
                             API</a>を実装する際、その許可
                         体験を、ユーザーによる確認前に
@@ -5029,9 +5072,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         プロトコルには、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
                             id="ref-for-index-term-issuers-15">発行者</a>、
                         <a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-33">資格情報マネージャー</a>、および<a data-link-type="dfn"
+                            id="ref-for-index-term-credential-manager-40">資格情報マネージャー</a>、および<a data-link-type="dfn"
                             href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-18">検証者</a>が「ホームへの通信」メカニズムへの
+                            id="ref-for-index-term-verifiers-38">検証者</a>が「ホームへの通信」メカニズムへの
                         依存を回避または低減できるようにする仕組みをサポートすることが要求されます。
                     </p>
                     <div class="issue" id="issue-container-number-279-0">
@@ -5068,7 +5111,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                             アキュムレータ</a>などのオフライン失効方式をサポートすることが期待されます。さらに、
                         プロトコルの設計および仕様は、可能な場合には
                         失効を目的とした<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-19">検証者</a>の関与を抑制することが期待されます。
+                            id="ref-for-index-term-verifiers-39">検証者</a>の関与を抑制することが期待されます。
                     </p>
                     <div class="issue" id="issue-container-number-280">
                         <div class="issue-title marker" id="h-issue-4"><a
@@ -5112,20 +5155,20 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     </div>
                     <p>
                         検証者認可とは、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-20">検証者</a>が自身の身元を証明し、
+                            id="ref-for-index-term-verifiers-40">検証者</a>が自身の身元を証明し、
                         特定の属性または資格情報を要求する正当な権限を有することを示す
                         プロセスを指す。これは、政府発行の資格情報などの機密データを
                         交換する場合に特に有用である。検証者認可は、不要または悪用的な
                         資格情報要求を制限し、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-21">検証者</a>のアクセスが、
+                            id="ref-for-index-term-verifiers-41">検証者</a>のアクセスが、
                         登録した特定の資格情報属性に限定されることを保証できる。
                     </p>
                     <p>
                         検証者認可の確認は通常、
                         <a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-34">資格情報マネージャー</a>によって処理されるが、
+                            id="ref-for-index-term-credential-manager-41">資格情報マネージャー</a>によって処理されるが、
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-34">ユーザーエージェント</a>は、
+                            id="ref-for-index-term-user-agents-41">ユーザーエージェント</a>は、
                         そのような仕組みの存在が API の悪用を防止し、十分な情報に基づいた
                         ユーザー権限の体験を設計する上で役立つことを見いだす可能性がある。
                     </p>
@@ -5139,7 +5182,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                                     aria-label="GitHub ラベル: privacy-tracker">privacy-tracker</a></span></div>
                         <p class="">
                             <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                                id="ref-for-index-term-user-agents-35">ユーザーエージェント</a>が検証者の
+                                id="ref-for-index-term-user-agents-42">ユーザーエージェント</a>が検証者の
                             認可を理解できるようにする規定を、プロトコルに含めることを要求すべきでしょうか？
                         </p>
                     </div>
@@ -5155,26 +5198,26 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         ユーザー情報が「転送中」に他の当事者へ公開されることを防ぎ、
                         ユーザー属性を安全に処理および保存することを
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-22">検証者</a>に促すため、プロトコルは
+                            id="ref-for-index-term-verifiers-42">検証者</a>に促すため、プロトコルは
                         資格情報交換における暗号化された
                         応答をサポートし、かつ必須とすることが求められる。暗号化鍵が
                         リクエスト内で送られる場合、<a data-link-type="dfn"
                             href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-23">検証者</a>のページ上のスクリプト、例えば
+                            id="ref-for-index-term-verifiers-43">検証者</a>のページ上のスクリプト、例えば
                         ブラウザー拡張機能によって挿入されたスクリプトは、署名されていない
                         リクエスト内のその鍵を置き換えることができる。その結果、応答は
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-24">検証者</a>ではなく攻撃者に向けて暗号化される。署名付きリクエストでは、<a
+                            id="ref-for-index-term-verifiers-44">検証者</a>ではなく攻撃者に向けて暗号化される。署名付きリクエストでは、<a
                             data-link-type="dfn"
                             href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-35">資格情報マネージャー</a>はその変更を検出できるが、
+                            id="ref-for-index-term-credential-manager-42">資格情報マネージャー</a>はその変更を検出できるが、
                         それは、署名の検証に用いる鍵を
                         既に<a data-link-type="dfn"
                             href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-25">検証者</a>のものとして認識している場合に限られる（
+                            id="ref-for-index-term-verifiers-45">検証者</a>のものとして認識している場合に限られる（
                         <a href="#signing-presentation-requests"
                             data-matched-text="[[[#signing-presentation-requests]]]" class="sec-ref"><bdi
-                                class="secno">10.4 </bdi>
+                                class="secno">10.5 </bdi>
                             プレゼンテーション要求の署名</a>を参照）。
                     </p>
                     <div class="issue closed" id="issue-container-number-109">
@@ -5254,28 +5297,28 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             </p>
             <ul>
                 <li>理想的には、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-26">検証者</a>が資格情報に対するリクエストを自主的に規制することが望まれます。
+                        id="ref-for-index-term-verifiers-46">検証者</a>が資格情報に対するリクエストを自主的に規制することが望まれます。
                     しかし、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-36">ユーザー
+                        id="ref-for-index-term-user-agents-43">ユーザー
                         エージェント</a>の観点から見ると、
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-27">検証者</a>は潜在的な攻撃者であり、その設計において
+                        id="ref-for-index-term-verifiers-47">検証者</a>は潜在的な攻撃者であり、その設計において
                     ユーザーの最善の利益を考慮しない可能性があります。Digital Credentials API は、
                     すべての<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-28">検証者</a>には、
+                        id="ref-for-index-term-verifiers-48">検証者</a>には、
                     不必要なリクエストや悪用を行う動機となるインセンティブが存在し得るという前提で動作し、それに応じて
                     ユーザーを保護します。
                 </li>
                 <li><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-37">ユーザーエージェント</a>は、Web 上の危険なコンテンツや
+                        id="ref-for-index-term-user-agents-44">ユーザーエージェント</a>は、Web 上の危険なコンテンツや
                     許可リクエストからユーザーを保護する責任を負い、
                     ユーザーに代わって介入し、リクエストを事前に拒否したり、
                     事前承認を要求したりすることができます。これを支援するため、この仕様では、
                     資格情報リクエストが<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-38">ユーザー
+                        id="ref-for-index-term-user-agents-45">ユーザー
                         エージェント</a>から読み取り可能であることを要求します
                     （すなわち、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-29">検証者</a>に対してエンドツーエンドで暗号化されていないこと。以下を参照：
+                        id="ref-for-index-term-verifiers-49">検証者</a>に対してエンドツーエンドで暗号化されていないこと。以下を参照：
                     <a href="#protocols" data-matched-text="[[[#protocols]]]" class="sec-ref"><bdi class="secno">5.
                         </bdi>
                         プロトコル</a>および<a href="#prepare-credential-requests"
@@ -5287,9 +5330,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         id="ref-for-index-term-issuers-18">発行者</a>および立法者は、
                     （特に政府発行の）資格情報の使用を、目的証明を伴う特定の
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-30">検証者</a>に制限することを決定する可能性があります。<a data-link-type="dfn"
+                        id="ref-for-index-term-verifiers-50">検証者</a>に制限することを決定する可能性があります。<a data-link-type="dfn"
                         href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                        id="ref-for-index-term-credential-manager-36">資格情報マネージャー</a>には、
+                        id="ref-for-index-term-credential-manager-43">資格情報マネージャー</a>には、
                     法律またはポリシーによってこれらの制限を適用することが求められる可能性があります。
                 </li>
                 <li>自身の個人情報を共有するかどうかの最終的な決定は
@@ -5297,7 +5340,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         data-lt="initiate the credential request" href="#dfn-initiate-the-credential-request"
                         class="internalDFN" id="ref-for-dfn-initiate-the-credential-request-2">要求します</a>。
                     <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-39">ユーザーエージェント</a>が資格情報選択画面を
+                        id="ref-for-index-term-user-agents-46">ユーザーエージェント</a>が資格情報選択画面を
                     ユーザーに提示することを要求し、他の
                     当事者も追加で確認または同意を要求する場合があります。
                 </li>
@@ -5312,12 +5355,12 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             <p>
                 両方の種類の資格情報に適用される、リスク軽減およびユーザー制御を確保するための
                 重要な要素は、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-40">ユーザー
+                    id="ref-for-index-term-user-agents-47">ユーザー
                     エージェント</a>が
                 資格情報リクエストのメタデータを検査し、それに基づいて判断したり UI
                 表示を行ったりできることです。この仕様では、リクエストを
                 暗号化せずに送信し、関連情報を含めるというプロトコル要件を通じて、この<a data-link-type="dfn"
-                    href="https://infra.spec.whatwg.org/#user-agent" id="ref-for-index-term-user-agents-41">ユーザー
+                    href="https://infra.spec.whatwg.org/#user-agent" id="ref-for-index-term-user-agents-48">ユーザー
                     エージェント</a>によるアクセスを保証します（<a href="#protocols" data-matched-text="[[[#protocols]]]"
                     class="sec-ref"><bdi class="secno">5. </bdi>
                     プロトコル</a>
@@ -5373,12 +5416,12 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         自体によって本質的に引き起こされるものではなく、エコシステム全体での
                         デジタルクレデンシャル採用の増加によるものですが、
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-42">ユーザー
+                            id="ref-for-index-term-user-agents-49">ユーザー
                             エージェント</a>による Digital Credentials API の実装は、
                         それにさらなる勢いを与える可能性があります。そのため、ユーザーに有害な
                         結果をもたらす可能性があることから、API を実装する<a data-link-type="dfn"
                             href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-43">ユーザーエージェント</a>はこの影響を
+                            id="ref-for-index-term-user-agents-50">ユーザーエージェント</a>はこの影響を
                         考慮する必要があります:
                     </p>
                     <ul>
@@ -5398,7 +5441,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                                 href="https://www.rfc-editor.org/info/rfc6973/#section-5.1.1">監視</a>
                             の可能性の増加、およびオンラインサービスの仮名利用に対する制限。
                             <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                                id="ref-for-index-term-verifiers-31">検証者</a>と<a data-link-type="dfn"
+                                id="ref-for-index-term-verifiers-51">検証者</a>と<a data-link-type="dfn"
                                 href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
                                 id="ref-for-index-term-issuers-19">発行者</a>、またはその他の当事者が共謀すると、
                             Web 上でのユーザーの活動を綿密に監視し、
@@ -5439,10 +5482,10 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         法律や規制も制定することが望まれます。交換に関与するすべての当事者は、
                         法的に義務付けられているか否かにかかわらず、存在する場合には政府の<a data-link-type="dfn"
                             href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-32">検証者</a>認証
+                            id="ref-for-index-term-verifiers-52">検証者</a>認証
                         スキームをサポートすることが推奨されます。
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-33">検証者</a>認証スキーム、たとえば<a
+                            id="ref-for-index-term-verifiers-53">検証者</a>認証スキーム、たとえば<a
                             href="https://github.com/eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework/blob/main/docs/annexes/annex-2/annex-2-high-level-requirements.md#a2327-topic-27---registration-of-pid-providers-providers-of-qeaas-pub-eaas-and-non-qualified-eaas-and-relying-parties">
                             EUDI アクセスおよび登録証明書</a>のサポート（および統合）は、
                         不要なクレデンシャル要求の増加リスクを緩和できます。しかし、
@@ -5451,7 +5494,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     </p>
                     <p>
                         Digital Credentials API を実装する<a data-link-type="dfn"
-                            href="https://infra.spec.whatwg.org/#user-agent" id="ref-for-index-term-user-agents-44">ユーザー
+                            href="https://infra.spec.whatwg.org/#user-agent" id="ref-for-index-term-user-agents-51">ユーザー
                             エージェント</a>が、リスクを低減し、ユーザーの
                         理解を高め、特定の種類の被害を防止するために実行できる
                         その他の実践的な手段があります:
@@ -5468,7 +5511,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                             <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
                                 id="ref-for-index-term-issuers-20">発行者</a>を隠すことで、<a data-link-type="dfn"
                                 href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                                id="ref-for-index-term-verifiers-34">検証者</a>による監視および潜在的な
+                                id="ref-for-index-term-verifiers-54">検証者</a>による監視および潜在的な
                             差別を防ぐことができます。
                         </li>
                         <li>有用なコンテキストと明確で理解しやすい許可
@@ -5479,10 +5522,10 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     </ul>
                     <p>
                         さらに、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-45">ユーザー
+                            id="ref-for-index-term-user-agents-52">ユーザー
                             エージェント</a>が、これらの緩和策がない場合、たとえば
                         <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-35">検証者</a>認証スキームなしで政府発行クレデンシャルから
+                            id="ref-for-index-term-verifiers-55">検証者</a>認証スキームなしで政府発行クレデンシャルから
                         個人情報を交換する場合を考慮した許可
                         体験を設計することが極めて重要です。この種の交換には、
                         より高い摩擦と、関与するリスクを強調する明確なユーザーメッセージを
@@ -5539,7 +5582,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         サイト間追跡や ID の関連付けを行う目的で悪用される可能性があります。
                         デジタルクレデンシャルに基づく追跡
                         スキームに参加する<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-36">検証者</a>は、ユーザーが
+                            id="ref-for-index-term-verifiers-56">検証者</a>は、ユーザーが
                         プライバシーへの影響を十分に理解しないまま、多数のサイトで識別子クレデンシャルを
                         共有することを受け入れるようなインセンティブ（Web の「ロイヤルティ
                         カード」）を作り出す可能性があります。
@@ -5561,7 +5604,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     <p>
                         政府発行ではないクレデンシャルについては、
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-46">ユーザーエージェント</a>が、要求されたクレデンシャル
+                            id="ref-for-index-term-user-agents-53">ユーザーエージェント</a>が、要求されたクレデンシャル
                         形式とそのプライバシー特性を理解し、ユーザーに表示する
                         コンテキストと、各クレデンシャル型に適切な摩擦の程度を決定する
                         リスクフレームワークを構築することが推奨されます。これらのクレデンシャルの交換に
@@ -5572,17 +5615,17 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     </p>
                     <p>
                         要求されているクレデンシャルの種類を認識する<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-47">ユーザーエージェント</a>には、
+                            id="ref-for-index-term-user-agents-54">ユーザーエージェント</a>には、
                         要求されたクレデンシャルに最適に適合し、
                         それを共有した場合の影響をユーザーが理解できるようにするため、
                         許可体験をカスタマイズすることが推奨されます。
                     </p>
                     <p>
                         <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-48">ユーザーエージェント</a>がすべてのクレデンシャル
+                            id="ref-for-index-term-user-agents-55">ユーザーエージェント</a>がすべてのクレデンシャル
                         要求を理解することは期待できません。要求されているクレデンシャルの種類を
                         認識しない<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                            id="ref-for-index-term-user-agents-49">ユーザーエージェント</a>には、許可体験におけるユーザーの
+                            id="ref-for-index-term-user-agents-56">ユーザーエージェント</a>には、許可体験におけるユーザーの
                         摩擦を大幅に増加させ、不明なクレデンシャルをウェブサイトと共有する
                         リスクをユーザーに明確に伝えることが推奨されます。このためには、
                         適切な程度の摩擦と透明性を適用するために、
@@ -5592,7 +5635,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         ブラウザはクレデンシャル要求に関する知識を
                         オペレーティングシステムに委任し、オペレーティングシステムが<a data-link-type="dfn"
                             href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                            id="ref-for-index-term-credential-manager-37">クレデンシャルマネージャー</a>に
+                            id="ref-for-index-term-credential-manager-44">クレデンシャルマネージャー</a>に
                         既知のクレデンシャル型を登録させ、不明なクレデンシャル型に対する
                         交換要求を拒否させる場合があります。
                     </p>
@@ -5612,7 +5655,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         <p class="">
                             ユーザーに適切な透明性を提供する必要性は、
                             明示的な<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                                id="ref-for-index-term-user-agents-50">ユーザーエージェント</a>の承認なしに
+                                id="ref-for-index-term-user-agents-57">ユーザーエージェント</a>の承認なしに
                             エコシステムが新しいクレデンシャル形式を開発できるようにしたいという要望と矛盾します。
                         </p>
                     </div>
@@ -5639,7 +5682,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         <p class="">
                             不要または不正な要求を行う<a data-link-type="dfn"
                                 href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                                id="ref-for-index-term-verifiers-37">検証者</a>のための、
+                                id="ref-for-index-term-verifiers-57">検証者</a>のための、
                             相互運用可能な不正利用報告システムを検討する。
                         </p>
                     </div>
@@ -5678,16 +5721,16 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 <p>
                     この攻撃は、第三者の攻撃者（たとえば、
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-38">検証者</a>のページに埋め込まれているが、追跡目的で
+                        id="ref-for-index-term-verifiers-58">検証者</a>のページに埋め込まれているが、追跡目的で
                     積極的に協力していないスクリプト）にとっては困難になる可能性があります。なぜなら、
                     応答の暗号化が必須であり、応答は
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-39">検証者</a>のサーバーで復号されるべきだからです。
+                        id="ref-for-index-term-verifiers-59">検証者</a>のサーバーで復号されるべきだからです。
                     したがって、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-40">検証者</a>は、復号された情報を
+                        id="ref-for-index-term-verifiers-60">検証者</a>は、復号された情報を
                     クライアント側 JavaScript に返さないようにできます。ただし、すべての
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-41">検証者</a>がそうするとは限りません。
+                        id="ref-for-index-term-verifiers-61">検証者</a>がそうするとは限りません。
                 </p>
             </section>
             <section id="leaking-incidental-data-with-credential-presentations">
@@ -5699,13 +5742,13 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 <p>
                     資格情報の真正性を確保するため、資格情報を
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-42">検証者</a>に提示する際には、通常、
+                        id="ref-for-index-term-verifiers-62">検証者</a>に提示する際には、通常、
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-43">検証者</a>がアクセスを要求している内容よりも多くの情報が含まれます。通常、少なくとも
+                        id="ref-for-index-term-verifiers-63">検証者</a>がアクセスを要求している内容よりも多くの情報が含まれます。通常、少なくとも
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-issuers"
                         id="ref-for-index-term-issuers-22">発行者</a>および<a data-link-type="dfn"
                         href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                        id="ref-for-index-term-credential-manager-38">資格情報マネージャー</a>の署名、
+                        id="ref-for-index-term-credential-manager-45">資格情報マネージャー</a>の署名、
                     さらに場合によってはその他のメタデータが含まれます。
                 </p>
                 <p>
@@ -5716,11 +5759,11 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 <p>
                     Digital Credentials API は資格情報レスポンスの内容を制御しませんが、
                     <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-51">ユーザーエージェント</a>は、要求された内容を超えてどの情報が
+                        id="ref-for-index-term-user-agents-58">ユーザーエージェント</a>は、要求された内容を超えてどの情報が
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-44">検証者</a>と共有される可能性が高いかを明確に強調し、
+                        id="ref-for-index-term-verifiers-64">検証者</a>と共有される可能性が高いかを明確に強調し、
                     より広範には、<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-45">検証者</a>による API を通じたフィンガープリンティングを特定してブロックすることで、
+                        id="ref-for-index-term-verifiers-65">検証者</a>による API を通じたフィンガープリンティングを特定してブロックすることで、
                     この種の追跡からユーザーを保護するのに役立ちます。
                 </p>
             </section>
@@ -5739,18 +5782,18 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                         data-lt="issuance protocol" href="#dfn-issuance-protocol" class="internalDFN"
                         id="ref-for-dfn-issuance-protocol-22">発行</a>プロトコルが
                     <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-52">ユーザーエージェント</a>によってサポートされているかに関する情報を、
+                        id="ref-for-index-term-user-agents-59">ユーザーエージェント</a>によってサポートされているかに関する情報を、
                     <a data-link-type="idl" data-lt="userAgentAllowsProtocol()"
                         href="#dom-digitalcredential-useragentallowsprotocol" class="internalDFN"
                         id="ref-for-dom-digitalcredential-useragentallowsprotocol-5"><code>userAgentAllowsProtocol</code></a><code>()</code>を通じて公開します。
                     これは、たとえば、どの<a data-link-type="dfn"
                         href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                        id="ref-for-index-term-credential-manager-39">資格情報マネージャー</a>アプリケーションがユーザーの
+                        id="ref-for-index-term-credential-manager-46">資格情報マネージャー</a>アプリケーションがユーザーの
                     デバイスにインストールされているかに基づいてレスポンスをカスタマイズしないことで、ブラウザーの
                     フィンガープリンティングやユーザーのデバイス
                     構成に関する情報の漏洩を軽減します。したがって、返される情報は、せいぜい
                     <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-53">ユーザーエージェント</a>のバージョンと同等です。
+                        id="ref-for-index-term-user-agents-60">ユーザーエージェント</a>のバージョンと同等です。
                 </p>
             </section>
             <section id="avoiding-leaks-of-credential-availability">
@@ -5783,7 +5826,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     資格情報がないためにリクエストを拒否する場合でも、ユーザーが
                     プロンプトをキャンセルしたためにリクエストを拒否する場合と同じ汎用エラーを返す。さらに、
                     人為的な遅延に依存せずにタイミング攻撃を防止するため、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-54">ユーザー
+                        id="ref-for-index-term-user-agents-61">ユーザー
                         エージェント</a>は、一致する資格情報が見つからない場合にユーザー向けダイアログ（空の選択画面や
                     通知など）を表示し、プロンプトの
                     閉じられるまでの遅延がユーザーによるキャンセルと区別できないようにする。
@@ -5811,9 +5854,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 オフラインでユーザーを追跡できる可能性があります。また、ユーザーの閲覧活動の一部だけでなく、
                 特定のウェブサイトや
                 <a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-40">資格情報マネージャー</a>に対して自身を識別しようとする意図も明らかにします。資格情報リクエストにおける
+                    id="ref-for-index-term-credential-manager-47">資格情報マネージャー</a>に対して自身を識別しようとする意図も明らかにします。資格情報リクエストにおける
                 <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-55">ユーザーエージェント</a>の重要な責務の一つは、情報交換を
+                    id="ref-for-index-term-user-agents-62">ユーザーエージェント</a>の重要な責務の一つは、情報交換を
                 続行するための許可をユーザーから得ることです。
             </p>
             <p>
@@ -5823,7 +5866,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             </p>
             <ul>
                 <li>資格情報を要求する<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-46">検証者</a>のオリジン。
+                        id="ref-for-index-term-verifiers-66">検証者</a>のオリジン。
                 </li>
                 <li>要求されている情報、またはリクエストに
                     応答することで明らかになる情報。
@@ -5832,7 +5875,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 </li>
                 <li>資格情報リクエストを満たすために、どの<a data-link-type="dfn"
                         href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                        id="ref-for-index-term-credential-manager-41">資格情報マネージャー</a>を使用できるか。
+                        id="ref-for-index-term-credential-manager-48">資格情報マネージャー</a>を使用できるか。
                 </li>
                 <li>要求された情報を共有するために、どの資格情報が
                     使用されるか。
@@ -5840,7 +5883,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             </ul>
             <p>
                 <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-56">ユーザーエージェント</a>は、その実装において、
+                    id="ref-for-index-term-user-agents-63">ユーザーエージェント</a>は、その実装において、
                 ユーザーに関連する情報の交換が行われる前に、一覧に示した詳細が
                 ユーザーに完全に開示されるようにすることが推奨されます。
             </p>
@@ -5913,7 +5956,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 <p>
                     ユーザーのシステムの技術アーキテクチャによっては、
                     「<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-57">ユーザー
+                        id="ref-for-index-term-user-agents-64">ユーザー
                         エージェント</a>」の定義には、
                     ブラウザとオペレーティングシステムなど、
                     ソフトウェアスタックの複数の協調する層が含まれる可能性があります。これらの層にとっての
@@ -5926,7 +5969,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 </p>
                 <p>
                     このため、許可を求める<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-58">ユーザーエージェント</a>には、
+                        id="ref-for-index-term-user-agents-65">ユーザーエージェント</a>には、
                     安全であると判断する場合、理想的なユーザー体験のために
                     ソフトウェア層を統合することが推奨されます。たとえば、
                     ブラウザがオペレーティングシステムの API 契約を信頼して
@@ -5943,11 +5986,11 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 </div>
                 <p>
                     ユーザー許可フローの一部として、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-59">ユーザー
+                        id="ref-for-index-term-user-agents-66">ユーザー
                         エージェント</a>は、
                     クレデンシャル要求を<a data-link-type="dfn"
                         href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                        id="ref-for-index-term-credential-manager-42">クレデンシャルマネージャー</a>へ転送するかどうか、
+                        id="ref-for-index-term-credential-manager-49">クレデンシャルマネージャー</a>へ転送するかどうか、
                     またどのクレデンシャル
                     マネージャーを選択するかを、ユーザーが選択する権限を保持していることを
                     保証する必要があります。これは、要求の一部として情報が開示され、
@@ -5963,26 +6006,26 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 </div>
                 <p>
                     <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-60">ユーザー
+                        id="ref-for-index-term-user-agents-67">ユーザー
                         エージェント</a>によって仲介される許可は、同意ではありません。同意には、
                     法的および規制上の環境によって異なり得る特定の法的定義があり、
                     情報を
                     <a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                        id="ref-for-index-term-credential-manager-43">資格情報マネージャー</a>が
+                        id="ref-for-index-term-credential-manager-50">資格情報マネージャー</a>が
                     <a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-47">検証者</a>と共有する前に収集する必要がある場合や、<a data-link-type="dfn"
+                        id="ref-for-index-term-verifiers-67">検証者</a>と共有する前に収集する必要がある場合や、<a data-link-type="dfn"
                         href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                        id="ref-for-index-term-verifiers-48">検証者</a>自身がリクエストを開始する前に
+                        id="ref-for-index-term-verifiers-68">検証者</a>自身がリクエストを開始する前に
                     収集する必要がある場合があります。同意を取得するための枠組みや規制はまだ
                     策定中ですが、この API は、以下を含み得る
                     必要な情報の交換を可能にすることを目的としています：
                 </p>
                 <ul>
                     <li>資格情報を受け取る<a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-49">検証者</a>のプライバシーポリシー。
+                            id="ref-for-index-term-verifiers-69">検証者</a>のプライバシーポリシー。
                     </li>
                     <li><a data-link-type="dfn" href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-50">検証者</a>がその情報を要求する
+                            id="ref-for-index-term-verifiers-70">検証者</a>がその情報を要求する
                         目的。
                     </li>
                     <li>その情報が何に使用されるか。
@@ -5993,7 +6036,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     </li>
                     <li>資格情報へアクセスするための<a data-link-type="dfn"
                             href="https://www.w3.org/TR/vc-data-model-2.0/#dfn-verifier"
-                            id="ref-for-index-term-verifiers-51">検証者</a>の正当性および登録に関する
+                            id="ref-for-index-term-verifiers-71">検証者</a>の正当性および登録に関する
                         表明。たとえば、<a
                             href="https://github.com/eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework/blob/main/docs/annexes/annex-2/annex-2-high-level-requirements.md#a2327-topic-27---registration-of-pid-providers-providers-of-qeaas-pub-eaas-and-non-qualified-eaas-and-relying-parties">
                             EUDI アクセスおよび登録証明書</a>など。
@@ -6002,7 +6045,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 <p>
                     この情報のより多くが構造化形式で利用可能になるにつれて、
                     <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-61">ユーザーエージェント</a>およびこの仕様も、それを活用して
+                        id="ref-for-index-term-user-agents-68">ユーザーエージェント</a>およびこの仕様も、それを活用して
                     ユーザー許可の体験を改善することが期待されます。
                 </p>
             </section>
@@ -6021,7 +6064,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 ブラウザー管理の永続的状態やローカルストレージの仕組みを導入しない。この
                 API を通じて要求される資格情報は、外部の<a data-link-type="dfn"
                     href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-44">資格情報マネージャー</a>またはオペレーティングシステムによって保存および管理される。
+                    id="ref-for-index-term-credential-manager-51">資格情報マネージャー</a>またはオペレーティングシステムによって保存および管理される。
                 したがって、ユーザーが特定のオリジンについて、またはグローバルに閲覧データ（例えば、Cookie
                 やローカルストレージ）を消去しても、通常、それらの外部
                 マネージャー内に保持されている資格情報が消去されたり影響を受けたりすることはない。
@@ -6045,11 +6088,11 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     class="secno">3. </bdi>
                 適用範囲</a>を参照）。以下のガイダンスは、
             <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                id="ref-for-index-term-user-agents-62">ユーザーエージェント</a>および<a data-link-type="dfn|abstract-op"
+                id="ref-for-index-term-user-agents-69">ユーザーエージェント</a>および<a data-link-type="dfn|abstract-op"
                 href="#dfn-digital-credential-chooser" class="internalDFN"
-                id="ref-for-dfn-digital-credential-chooser-16">デジタルクレデンシャル選択機能</a>、<a data-link-type="dfn|abstract-op"
+                id="ref-for-dfn-digital-credential-chooser-20">デジタルクレデンシャル選択機能</a>、<a data-link-type="dfn|abstract-op"
                 href="#dfn-credential-manager-chooser" class="internalDFN"
-                id="ref-for-dfn-credential-manager-chooser-5">クレデンシャルマネージャー選択機能</a>と、それらを取り巻くフローを
+                id="ref-for-dfn-credential-manager-chooser-11">クレデンシャルマネージャー選択機能</a>と、それらを取り巻くフローを
             実装するプラットフォームに適用され、
             [<cite><a class="bibref" data-link-type="biblio" href="#bib-wcag22"
                     title="Web コンテンツ・アクセシビリティ・ガイドライン (WCAG) 2.2">WCAG22</a></cite>] の関連する達成基準を参照する。いずれかの選択機能が
@@ -6082,7 +6125,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
         </p>
         <p>
             操作が失敗した場合、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                id="ref-for-index-term-user-agents-63">ユーザーエージェント</a>は、いくつかの
+                id="ref-for-index-term-user-agents-70">ユーザーエージェント</a>は、いくつかの
             異なるエラーのいずれかで拒否する。例えば、"<a data-link-type="exception" href="https://webidl.spec.whatwg.org/#notallowederror"
                 id="ref-for-index-term-notallowederror-exception-9"><code>NotAllowedError</code></a>"、
             "<a data-link-type="exception" href="https://webidl.spec.whatwg.org/#invalidstateerror"
@@ -6117,9 +6160,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             <a data-matched-text="[[[WCAG22#motion-actuation]]]" href="https://www.w3.org/TR/WCAG22/#motion-actuation"
                 class="sec-ref">§&nbsp;達成基準 2.5.4 動きによる起動</a>を参照）。<a data-link-type="dfn|abstract-op"
                 href="#dfn-digital-credential-chooser" class="internalDFN"
-                id="ref-for-dfn-digital-credential-chooser-17">デジタルクレデンシャル選択機能</a>および<a data-link-type="dfn|abstract-op"
+                id="ref-for-dfn-digital-credential-chooser-21">デジタルクレデンシャル選択機能</a>および<a data-link-type="dfn|abstract-op"
                 href="#dfn-credential-manager-chooser" class="internalDFN"
-                id="ref-for-dfn-credential-manager-chooser-6">クレデンシャルマネージャー選択機能</a>は、
+                id="ref-for-dfn-credential-manager-chooser-12">クレデンシャルマネージャー選択機能</a>は、
             意味のあるフォーカス順序でコントロールを提示<em class="rfc2119">するべきである</em>（
             <a data-matched-text="[[[WCAG22#focus-order]]]" href="https://www.w3.org/TR/WCAG22/#focus-order"
                 class="sec-ref">§&nbsp;達成基準 2.4.3 フォーカス順序</a>を参照）。また、選択機能が
@@ -6142,7 +6185,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             特性のみに依存<em class="rfc2119">するべきではない</em>。
             このステップは通常、プラットフォームまたは<a data-link-type="dfn"
                 href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                id="ref-for-index-term-credential-manager-45">クレデンシャルマネージャー</a>によって実行され、それ以外については
+                id="ref-for-index-term-credential-manager-52">クレデンシャルマネージャー</a>によって実行され、それ以外については
             この仕様の範囲外である。
         </p>
         <p>
@@ -6267,7 +6310,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 および方向のメタデータとローカライズされた代替を提供することを期待します。
             </li>
             <li>API がプラットフォームへルーティングし、<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                    id="ref-for-index-term-user-agents-64">ユーザー
+                    id="ref-for-index-term-user-agents-71">ユーザー
                     エージェント</a>またはプラットフォームが
                 表示する可能性のある値は、<a data-link-type="dfn|abstract-op" href="#dfn-document-origin" class="internalDFN" id="ref-for-update-20261119-ja-67">文書オリジン</a>と<a data-link-type="dfn|abstract-op" href="#dfn-top-level-origin" class="internalDFN"
                     id="ref-for-dfn-top-level-origin-2">最上位オリジン</a>です。
@@ -6281,9 +6324,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                 インタラクション中にユーザーへ提示されるその他のテキストは、ウェブサイトによって（ホスト言語を通じて
                 言語および書字方向のサポートを提供する HTML を使用して）レンダリングされるか、
                 プラットフォームの<a data-link-type="dfn|abstract-op" href="#dfn-digital-credential-chooser" class="internalDFN"
-                    id="ref-for-dfn-digital-credential-chooser-18">デジタルクレデンシャル選択機能</a>
+                    id="ref-for-dfn-digital-credential-chooser-22">デジタルクレデンシャル選択機能</a>
                 および<a data-link-type="dfn|abstract-op" href="#dfn-credential-manager-chooser" class="internalDFN"
-                    id="ref-for-dfn-credential-manager-chooser-7">クレデンシャルマネージャー選択機能</a>によってレンダリングされる。これらの選択機能は
+                    id="ref-for-dfn-credential-manager-chooser-13">クレデンシャルマネージャー選択機能</a>によってレンダリングされる。これらの選択機能は
                 この仕様の範囲外である。
                 それらがクレデンシャルの内容を表示する場合、その内容の言語および
                 書字方向は、クレデンシャル形式および
@@ -6311,7 +6354,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             文書は<cite><a data-matched-text="[[[webdriver-bidi]]]" href="https://www.w3.org/TR/webdriver-bidi/">WebDriver
                     BiDi</a></cite>
             仕様の拡張モジュールを定義します。<a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                id="ref-for-index-term-user-agents-65">ユーザーエージェント</a>が
+                id="ref-for-index-term-user-agents-72">ユーザーエージェント</a>が
             それらをサポートすることは<em class="rfc2119">任意です</em>。
         </p>
         <section id="the-digitalcredentials-module">
@@ -6330,7 +6373,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     href="https://www.w3.org/TR/credential-management-1/#dom-credential-create-slot"
                     id="ref-for-index-term-create-origin-options-sameoriginwithancestors-for-credential-3"><code>[[Create]](<var>origin</var>, <var>options</var>, <var>sameOriginWithAncestors</var>)</code></a>
                 呼び出し中の<a data-link-type="dfn" href="https://www.w3.org/TR/credential-management-1/#credential-manager"
-                    id="ref-for-index-term-credential-manager-46">クレデンシャルマネージャー</a>のリモートエンドの動作を管理および
+                    id="ref-for-index-term-credential-manager-53">クレデンシャルマネージャー</a>のリモートエンドの動作を管理および
                 シミュレートするためのコマンドが含まれます。
             </p>
             <section id="types">
@@ -6615,7 +6658,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             </p>
             <ol class="algorithm">
                 <li><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#user-agent"
-                        id="ref-for-index-term-user-agents-66">ユーザーエージェント</a>が自動化の制御下にない場合、
+                        id="ref-for-index-term-user-agents-73">ユーザーエージェント</a>が自動化の制御下にない場合、
                     <code>false</code> を返します。
                 </li>
                 <li><var>context ID</var>を<var>global</var>の<a data-link-type="dfn"
@@ -6695,7 +6738,10 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
       </div>
 
       <ul class="index">
-<li><a class="index-term" href="#dfn-clear-the-abort-signal">中止シグナルをクリアする</a> <span class="print-only">§6.7</span></li>
+<li>
+      <a class="index-term" href="#dfn-browser-extension-access">ブラウザー拡張機能によるアクセス</a> 
+    <span class="print-only">§10.1.1</span></li>
+                <li><a class="index-term" href="#dfn-clear-the-abort-signal">中止シグナルをクリアする</a> <span class="print-only">§6.7</span></li>
 <li><a class="index-term" href="#dfn-return-to-idle">アイドル状態に戻る</a> <span class="print-only">§6.8</span></li>
 
         <li>
@@ -7141,6 +7187,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
           <span class="print-only">§6.4</span>
         </li>
         <li>
+      <a class="index-term" href="#dfn-verifier-origin-script-compromise">検証者オリジンのスクリプト侵害</a> 
+    <span class="print-only">§10.1.1</span></li>
+                <li>
           <a class="index-term" href="#cddl-value-digitalcredentials-virtualwalletaction-wait"><code>"wait"</code></a>
           <span class="print-only">§14.1.1</span>
         </li>
@@ -7328,6 +7377,14 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
           </ul>
         </li>
         <li>
+        [<cite><a class="bibref" data-link-type="biblio" href="#bib-secure-contexts">SECURE-CONTEXTS</a></cite>] defines the following:
+        <ul>
+          <li>
+    <span class="index-term" data-href="https://www.w3.org/TR/secure-contexts/#potentially-trustworthy-origin" id="index-term-potentially-trustworthy-origin" tabindex="0" aria-haspopup="dialog">潜在的に信頼できるオリジン</span>
+  </li>
+        </ul>
+      </li>
+            <li>
           <cite><a class="bibref" data-link-type="biblio" href="#bib-html">HTML 標準</a></cite> は以下を定義する:
           <ul>
             <li>
@@ -7423,7 +7480,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
             </li>
             <li>
               <span class="index-term" data-href="https://html.spec.whatwg.org/multipage/webappapis.html#secure-context"
-                id="index-term-secure-contexts" tabindex="0" aria-haspopup="dialog">セキュアコンテキスト</span>
+                id="index-term-secure-context" tabindex="0" aria-haspopup="dialog">セキュアコンテキスト</span>
             </li>
             <li>
               <span class="index-term"
@@ -7910,20 +7967,20 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-<li><a href="#ref-for-dfn-credential-manager-chooser-1" title="2.3 デジタルクレデンシャルの要求">2.3 デジタルクレデンシャルの要求</a></li>
-<li><a href="#ref-for-update-20261119-ja-4" title="6. クレデンシャル要求コーディネーター">6. クレデンシャル要求コーディネーター</a></li>
-<li><a href="#ref-for-dfn-credential-manager-chooser-2" title="6.5 クレデンシャル要求の中止">6.5 クレデンシャル要求の中止</a></li>
-<li><a href="#ref-for-update-20261119-ja-11" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-dfn-credential-manager-chooser-1" title="§ 2.3 デジタルクレデンシャルの要求">§ 2.3 デジタルクレデンシャルの要求</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-4" title="§ 6. クレデンシャル要求コーディネーター">§ 6. クレデンシャル要求コーディネーター</a> </li>
+        <li><a href="#ref-for-dfn-credential-manager-chooser-2" title="§ 6.5 クレデンシャル要求の中止">§ 6.5 クレデンシャル要求の中止</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-11" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-26" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-34" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
-<li><a href="#ref-for-dfn-credential-manager-chooser-3" title="7. デジタルクレデンシャル API">7. デジタルクレデンシャル API</a></li>
-<li><a href="#ref-for-update-20261119-ja-62" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-dfn-credential-manager-chooser-4" title="11.1 設計上の考慮事項と代替案">11.1 設計上の考慮事項と代替案</a></li>
-<li><a href="#ref-for-dfn-credential-manager-chooser-5" title="12. アクセシビリティに関する考慮事項">12. アクセシビリティに関する考慮事項</a></li>
-<li><a href="#ref-for-dfn-credential-manager-chooser-6" title="12. アクセシビリティに関する考慮事項">12. アクセシビリティに関する考慮事項</a></li>
-<li><a href="#ref-for-dfn-credential-manager-chooser-7" title="13. 国際化に関する考慮事項">13. 国際化に関する考慮事項</a></li>
-      </ul>
+        <li><a href="#ref-for-dfn-credential-manager-chooser-3" title="§ 7. デジタルクレデンシャル API">§ 7. デジタルクレデンシャル API</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-62" title="§ 10.2 緩和策">§ 10.2 緩和策</a> </li>
+        <li><a href="#ref-for-dfn-credential-manager-chooser-9" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+        <li><a href="#ref-for-dfn-credential-manager-chooser-10" title="§ 11.1 設計上の考慮事項と代替案">§ 11.1 設計上の考慮事項と代替案</a> </li>
+        <li><a href="#ref-for-dfn-credential-manager-chooser-11" title="§ 12. アクセシビリティに関する考慮事項">§ 12. アクセシビリティに関する考慮事項</a> <a href="#ref-for-dfn-credential-manager-chooser-12" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-dfn-credential-manager-chooser-13" title="§ 13. 国際化に関する考慮事項">§ 13. 国際化に関する考慮事項</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-credential-request"
       aria-label="Links in this document to definition: Credential request">
@@ -7962,14 +8019,12 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-        <li>
-          <a href="#ref-for-dfn-credential-response-1" title="§ 6. Credential Request Coordinator">§ 6. クレデンシャル要求コーディネーター</a>
-        </li>
-        <li>
-          <a href="#ref-for-dfn-credential-response-2" title="§ 10. Security Considerations">§ 10. セキュリティに関する考慮事項</a>
-        </li>
-      </ul>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-dfn-credential-response-1" title="§ 6. クレデンシャル要求コーディネーター">§ 6. クレデンシャル要求コーディネーター</a> </li>
+        <li><a href="#ref-for-dfn-credential-response-2" title="§ 10. セキュリティに関する考慮事項">§ 10. セキュリティに関する考慮事項</a> </li>
+        <li><a href="#ref-for-dfn-credential-response-3" title="§ 10.1.1 対象範囲内の脅威">§ 10.1.1 対象範囲内の脅威</a> <a href="#ref-for-dfn-credential-response-4" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-dfn-credential-response-5" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> <a href="#ref-for-dfn-credential-response-6" title="Reference 2">(2)</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-digital-credential"
       aria-label="Links in this document to definition: Digital credential">
@@ -8032,29 +8087,26 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-<li><a href="#ref-for-dfn-digital-credential-chooser-1" title="2.3 デジタルクレデンシャルの要求">2.3 デジタルクレデンシャルの要求</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-2" title="4. 用語">4. 用語</a></li>
-<li><a href="#ref-for-update-20261119-ja-3" title="6. クレデンシャル要求コーディネーター">6. クレデンシャル要求コーディネーター</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-3" title="6.5 クレデンシャル要求の中止">6.5 クレデンシャル要求の中止</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-4" title="6.5 クレデンシャル要求の中止">6.5 クレデンシャル要求の中止</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-5" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-dfn-digital-credential-chooser-1" title="§ 2.3 デジタルクレデンシャルの要求">§ 2.3 デジタルクレデンシャルの要求</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-2" title="§ 4. 用語">§ 4. 用語</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-3" title="§ 6. クレデンシャル要求コーディネーター">§ 6. クレデンシャル要求コーディネーター</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-3" title="§ 6.5 クレデンシャル要求の中止">§ 6.5 クレデンシャル要求の中止</a> <a href="#ref-for-dfn-digital-credential-chooser-4" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-5" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-25" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-dfn-digital-credential-chooser-6" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-dfn-digital-credential-chooser-7" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-dfn-digital-credential-chooser-8" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-9" title="7. デジタルクレデンシャル API">7. デジタルクレデンシャル API</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-10" title="8.1 [[DiscoverFromExternalSource]](origin, options, sameOriginWithAncestors) 内部メソッド">8.1 [[DiscoverFromExternalSource]](origin, options, sameOriginWithAncestors) 内部メソッド</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-11" title="10.1.1 対象範囲内の脅威">10.1.1 対象範囲内の脅威</a></li>
-<li><a href="#ref-for-update-20261119-ja-61" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-12" title="10.3 侵害されたコンテンツプロセスからの偽造リクエスト">10.3 侵害されたコンテンツプロセスからの偽造リクエスト</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-13" title="10.3 侵害されたコンテンツプロセスからの偽造リクエスト">10.3 侵害されたコンテンツプロセスからの偽造リクエスト</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-14" title="10.3 侵害されたコンテンツプロセスからの偽造リクエスト">10.3 侵害されたコンテンツプロセスからの偽造リクエスト</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-15" title="11.1 設計上の考慮事項と代替案">11.1 設計上の考慮事項と代替案</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-16" title="12. アクセシビリティに関する考慮事項">12. アクセシビリティに関する考慮事項</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-17" title="12. アクセシビリティに関する考慮事項">12. アクセシビリティに関する考慮事項</a></li>
-<li><a href="#ref-for-dfn-digital-credential-chooser-18" title="13. 国際化に関する考慮事項">13. 国際化に関する考慮事項</a></li>
-      </ul>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-9" title="§ 7. デジタルクレデンシャル API">§ 7. デジタルクレデンシャル API</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-10" title="§ 8.1 [[DiscoverFromExternalSource]](origin, options, sameOriginWithAncestors) 内部メソッド">§ 8.1 [[DiscoverFromExternalSource]](origin, options, sameOriginWithAncestors) 内部メソッド</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-11" title="§ 10.1.1 対象範囲内の脅威">§ 10.1.1 対象範囲内の脅威</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-61" title="§ 10.2 緩和策">§ 10.2 緩和策</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-12" title="§ 10.3 侵害されたコンテンツプロセスからの偽造リクエスト">§ 10.3 侵害されたコンテンツプロセスからの偽造リクエスト</a> <a href="#ref-for-dfn-digital-credential-chooser-13" title="Reference 2">(2)</a> <a href="#ref-for-dfn-digital-credential-chooser-14" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-18" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-19" title="§ 11.1 設計上の考慮事項と代替案">§ 11.1 設計上の考慮事項と代替案</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-20" title="§ 12. アクセシビリティに関する考慮事項">§ 12. アクセシビリティに関する考慮事項</a> <a href="#ref-for-dfn-digital-credential-chooser-21" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-dfn-digital-credential-chooser-22" title="§ 13. 国際化に関する考慮事項">§ 13. 国際化に関する考慮事項</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-issuance-protocol"
       aria-label="Links in this document to definition: Issuance protocol">
@@ -9639,6 +9691,42 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
         </li>
       </ul>
     </div>
+<div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-verifier-origin-script-compromise" aria-label="Details for definition: 検証者オリジンのスクリプト侵害">
+      <span class="caret"></span>
+      <div>
+        <a class="self-link" href="#dfn-verifier-origin-script-compromise" aria-label="Permalink for definition: 検証者オリジンのスクリプト侵害. Activate to close this dialog.">パーマリンク</a>
+         
+        
+      </div>
+      <p><b>参照箇所：</b></p>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-dfn-verifier-origin-script-compromise-1" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+    </ul> 
+    </div>
+<div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-browser-extension-access" aria-label="Details for definition: ブラウザー拡張機能によるアクセス">
+      <span class="caret"></span>
+      <div>
+        <a class="self-link" href="#dfn-browser-extension-access" aria-label="Permalink for definition: ブラウザー拡張機能によるアクセス. Activate to close this dialog.">パーマリンク</a>
+         
+        
+      </div>
+      <p><b>参照箇所：</b></p>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-dfn-browser-extension-access-1" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+    </ul> 
+    </div>
+<div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-index-term-potentially-trustworthy-origin" aria-label="Details for definition: 潜在的に信頼できるオリジン">
+      <span class="caret"></span>
+      <div>
+        <a class="self-link" href="https://www.w3.org/TR/secure-contexts/#potentially-trustworthy-origin" aria-label="Permalink for definition: 潜在的に信頼できるオリジン. Activate to close this dialog.">パーマリンク</a>
+         
+        
+      </div>
+      <p><b>参照箇所：</b></p>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-index-term-potentially-trustworthy-origin-1" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+    </ul> 
+    </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-dfn-api-flooding"
       aria-label="Links in this document to definition: API Flooding">
       <span class="caret"></span>
@@ -10252,57 +10340,43 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-<li><a href="#ref-for-index-term-credential-manager-1" title="1. はじめに">1. はじめに</a></li>
-<li><a href="#ref-for-index-term-credential-manager-2" title="2.3 デジタルクレデンシャルの要求">2.3 デジタルクレデンシャルの要求</a></li>
-<li><a href="#ref-for-index-term-credential-manager-3" title="3. 適用範囲">3. 適用範囲</a></li>
-<li><a href="#ref-for-index-term-credential-manager-4" title="3. 適用範囲">3. 適用範囲</a></li>
-<li><a href="#ref-for-index-term-credential-manager-5" title="4. 用語">4. 用語</a></li>
-<li><a href="#ref-for-index-term-credential-manager-6" title="4. 用語">4. 用語</a></li>
-<li><a href="#ref-for-index-term-credential-manager-7" title="6. クレデンシャル要求コーディネーター">6. クレデンシャル要求コーディネーター</a></li>
-<li><a href="#ref-for-index-term-credential-manager-8" title="6. クレデンシャル要求コーディネーター">6. クレデンシャル要求コーディネーター</a></li>
-<li><a href="#ref-for-index-term-credential-manager-9" title="6. クレデンシャル要求コーディネーター">6. クレデンシャル要求コーディネーター</a></li>
-<li><a href="#ref-for-update-20261119-ja-13" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-index-term-credential-manager-1" title="§ 1. はじめに">§ 1. はじめに</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-2" title="§ 2.3 デジタルクレデンシャルの要求">§ 2.3 デジタルクレデンシャルの要求</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-3" title="§ 3. 適用範囲">§ 3. 適用範囲</a> <a href="#ref-for-index-term-credential-manager-4" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-5" title="§ 4. 用語">§ 4. 用語</a> <a href="#ref-for-index-term-credential-manager-6" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-7" title="§ 6. クレデンシャル要求コーディネーター">§ 6. クレデンシャル要求コーディネーター</a> <a href="#ref-for-index-term-credential-manager-8" title="Reference 2">(2)</a> <a href="#ref-for-index-term-credential-manager-9" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-13" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-index-term-credential-manager-10" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-33" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-35" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
-<li><a href="#ref-for-index-term-credential-manager-11" title="7. デジタルクレデンシャル API">7. デジタルクレデンシャル API</a></li>
-<li><a href="#ref-for-index-term-credential-manager-12" title="7. デジタルクレデンシャル API">7. デジタルクレデンシャル API</a></li>
-<li><a href="#ref-for-index-term-credential-manager-13" title="7.2.1 requests メンバー">7.2.1 requests メンバー</a></li>
-<li><a href="#ref-for-index-term-credential-manager-14" title="7.3 DigitalCredentialGetRequest 辞書">7.3 DigitalCredentialGetRequest 辞書</a></li>
-<li><a href="#ref-for-index-term-credential-manager-15" title="7.3.2 data メンバー">7.3.2 data メンバー</a></li>
-<li><a href="#ref-for-index-term-credential-manager-16" title="7.6.2 data メンバー">7.6.2 data メンバー</a></li>
-<li><a href="#ref-for-index-term-credential-manager-17" title="7.7.3 userAgentAllowsProtocol() メソッド">7.7.3 userAgentAllowsProtocol() メソッド</a></li>
-<li><a href="#ref-for-index-term-credential-manager-18" title="10.1.1 対象範囲内の脅威">10.1.1 対象範囲内の脅威</a></li>
-<li><a href="#ref-for-index-term-credential-manager-19" title="10.1.2 対象範囲外の脅威">10.1.2 対象範囲外の脅威</a></li>
-<li><a href="#ref-for-index-term-credential-manager-20" title="10.1.2 対象範囲外の脅威">10.1.2 対象範囲外の脅威</a></li>
-<li><a href="#ref-for-index-term-credential-manager-21" title="10.1.2 対象範囲外の脅威">10.1.2 対象範囲外の脅威</a></li>
-<li><a href="#ref-for-index-term-credential-manager-22" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-index-term-credential-manager-23" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-index-term-credential-manager-24" title="10.4 プレゼンテーション要求の署名">10.4 プレゼンテーション要求の署名</a></li>
-<li><a href="#ref-for-index-term-credential-manager-25" title="10.4 プレゼンテーション要求の署名">10.4 プレゼンテーション要求の署名</a></li>
-<li><a href="#ref-for-index-term-credential-manager-26" title="10.4 プレゼンテーション要求の署名">10.4 プレゼンテーション要求の署名</a></li>
-<li><a href="#ref-for-index-term-credential-manager-27" title="10.5 クロスデバイスセキュリティと近接性">10.5 クロスデバイスセキュリティと近接性</a></li>
-<li><a href="#ref-for-index-term-credential-manager-28" title="10.5 クロスデバイスセキュリティと近接性">10.5 クロスデバイスセキュリティと近接性</a></li>
-<li><a href="#ref-for-index-term-credential-manager-29" title="11.3.1.2 リンク不可能な提示">11.3.1.2 リンク不可能な提示</a></li>
-<li><a href="#ref-for-index-term-credential-manager-30" title="11.3.1.2 リンク不可能な提示">11.3.1.2 リンク不可能な提示</a></li>
-<li><a href="#ref-for-index-term-credential-manager-31" title="11.3.1.2 リンク不可能な提示">11.3.1.2 リンク不可能な提示</a></li>
-<li><a href="#ref-for-index-term-credential-manager-32" title="11.3.1.3 「Phone home」メカニズム">11.3.1.3 「Phone home」メカニズム</a></li>
-<li><a href="#ref-for-index-term-credential-manager-33" title="11.3.1.3 「Phone home」メカニズム">11.3.1.3 「Phone home」メカニズム</a></li>
-<li><a href="#ref-for-index-term-credential-manager-34" title="11.3.1.6 検証者認可のサポート">11.3.1.6 検証者認可のサポート</a></li>
-<li><a href="#ref-for-index-term-credential-manager-35" title="11.3.1.7 クレデンシャル応答の暗号化">11.3.1.7 クレデンシャル応答の暗号化</a></li>
-<li><a href="#ref-for-index-term-credential-manager-36" title="11.4 不要なクレデンシャル要求">11.4 不要なクレデンシャル要求</a></li>
-<li><a href="#ref-for-index-term-credential-manager-37" title="11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-credential-manager-38" title="11.5.2 クレデンシャル提示に伴う付随データの漏えい">11.5.2 クレデンシャル提示に伴う付随データの漏えい</a></li>
-<li><a href="#ref-for-index-term-credential-manager-39" title="11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈">11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈</a></li>
-<li><a href="#ref-for-index-term-credential-manager-40" title="11.6 ユーザーの許可と透明性">11.6 ユーザーの許可と透明性</a></li>
-<li><a href="#ref-for-index-term-credential-manager-41" title="11.6 ユーザーの許可と透明性">11.6 ユーザーの許可と透明性</a></li>
-<li><a href="#ref-for-index-term-credential-manager-42" title="11.6.3 クレデンシャルマネージャー選択前の許可">11.6.3 クレデンシャルマネージャー選択前の許可</a></li>
-<li><a href="#ref-for-index-term-credential-manager-43" title="11.6.4 許可と同意">11.6.4 許可と同意</a></li>
-<li><a href="#ref-for-index-term-credential-manager-44" title="11.7 データの消去と永続的状態">11.7 データの消去と永続的状態</a></li>
-<li><a href="#ref-for-index-term-credential-manager-45" title="12. アクセシビリティに関する考慮事項">12. アクセシビリティに関する考慮事項</a></li>
-<li><a href="#ref-for-index-term-credential-manager-46" title="14.1 digitalCredentials モジュール">14.1 digitalCredentials モジュール</a></li>
-      </ul>
+        <li><a href="#ref-for-index-term-credential-manager-11" title="§ 7. デジタルクレデンシャル API">§ 7. デジタルクレデンシャル API</a> <a href="#ref-for-index-term-credential-manager-12" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-13" title="§ 7.2.1 requests メンバー">§ 7.2.1 requests メンバー</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-14" title="§ 7.3 DigitalCredentialGetRequest 辞書">§ 7.3 DigitalCredentialGetRequest 辞書</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-15" title="§ 7.3.2 data メンバー">§ 7.3.2 data メンバー</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-16" title="§ 7.6.2 data メンバー">§ 7.6.2 data メンバー</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-17" title="§ 7.7.3 userAgentAllowsProtocol() メソッド">§ 7.7.3 userAgentAllowsProtocol() メソッド</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-18" title="§ 10.1.1 対象範囲内の脅威">§ 10.1.1 対象範囲内の脅威</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-19" title="§ 10.1.2 対象範囲外の脅威">§ 10.1.2 対象範囲外の脅威</a> <a href="#ref-for-index-term-credential-manager-20" title="Reference 2">(2)</a> <a href="#ref-for-index-term-credential-manager-21" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-22" title="§ 10.2 緩和策">§ 10.2 緩和策</a> <a href="#ref-for-index-term-credential-manager-23" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-27" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> <a href="#ref-for-index-term-credential-manager-28" title="Reference 2">(2)</a> <a href="#ref-for-index-term-credential-manager-29" title="Reference 3">(3)</a> <a href="#ref-for-index-term-credential-manager-30" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-31" title="§ 10.5 プレゼンテーション要求の署名">§ 10.5 プレゼンテーション要求の署名</a> <a href="#ref-for-index-term-credential-manager-32" title="Reference 2">(2)</a> <a href="#ref-for-index-term-credential-manager-33" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-34" title="§ 10.6 クロスデバイスセキュリティと近接性">§ 10.6 クロスデバイスセキュリティと近接性</a> <a href="#ref-for-index-term-credential-manager-35" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-36" title="§ 11.3.1.2 リンク不可能な提示">§ 11.3.1.2 リンク不可能な提示</a> <a href="#ref-for-index-term-credential-manager-37" title="Reference 2">(2)</a> <a href="#ref-for-index-term-credential-manager-38" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-39" title="§ 11.3.1.3 「Phone home」メカニズム">§ 11.3.1.3 「Phone home」メカニズム</a> <a href="#ref-for-index-term-credential-manager-40" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-41" title="§ 11.3.1.6 検証者認可のサポート">§ 11.3.1.6 検証者認可のサポート</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-42" title="§ 11.3.1.7 クレデンシャル応答の暗号化">§ 11.3.1.7 クレデンシャル応答の暗号化</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-43" title="§ 11.4 不要なクレデンシャル要求">§ 11.4 不要なクレデンシャル要求</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-44" title="§ 11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">§ 11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-45" title="§ 11.5.2 クレデンシャル提示に伴う付随データの漏えい">§ 11.5.2 クレデンシャル提示に伴う付随データの漏えい</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-46" title="§ 11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈">§ 11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-47" title="§ 11.6 ユーザーの許可と透明性">§ 11.6 ユーザーの許可と透明性</a> <a href="#ref-for-index-term-credential-manager-48" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-49" title="§ 11.6.3 クレデンシャルマネージャー選択前の許可">§ 11.6.3 クレデンシャルマネージャー選択前の許可</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-50" title="§ 11.6.4 許可と同意">§ 11.6.4 許可と同意</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-51" title="§ 11.7 データの消去と永続的状態">§ 11.7 データの消去と永続的状態</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-52" title="§ 12. アクセシビリティに関する考慮事項">§ 12. アクセシビリティに関する考慮事項</a> </li>
+        <li><a href="#ref-for-index-term-credential-manager-53" title="§ 14.1 digitalCredentials モジュール">§ 14.1 digitalCredentials モジュール</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true"
       id="dfn-panel-for-index-term-credentialcreationoptions"
@@ -10914,20 +10988,15 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-<li><a href="#ref-for-update-20261119-ja-7" title="6. クレデンシャル要求コーディネーター">6. クレデンシャル要求コーディネーター</a></li>
-<li><a href="#ref-for-index-term-origin-1" title="6.2 クレデンシャル要求の準備">6.2 クレデンシャル要求の準備</a></li>
-<li><a href="#ref-for-update-20261119-ja-8" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
-<li><a href="#ref-for-update-20261119-ja-36" title="7.8.1 request context 構造体">7.8.1 request context 構造体</a></li>
-<li><a href="#ref-for-update-20261119-ja-37" title="7.8.1 request context 構造体">7.8.1 request context 構造体</a></li>
-<li><a href="#ref-for-update-20261119-ja-42" title="7.8.1 request context 構造体">7.8.1 request context 構造体</a></li>
-<li><a href="#ref-for-update-20261119-ja-44" title="7.8.1 request context 構造体">7.8.1 request context 構造体</a></li>
-<li><a href="#ref-for-update-20261119-ja-48" title="7.8.1 request context 構造体">7.8.1 request context 構造体</a></li>
-<li><a href="#ref-for-update-20261119-ja-55" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-update-20261119-ja-63" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-index-term-origin-2" title="10.5 クロスデバイスセキュリティと近接性">10.5 クロスデバイスセキュリティと近接性</a></li>
-<li><a href="#ref-for-index-term-origin-3" title="10.5 クロスデバイスセキュリティと近接性">10.5 クロスデバイスセキュリティと近接性</a></li>
-      </ul>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-update-20261119-ja-7" title="§ 6. クレデンシャル要求コーディネーター">§ 6. クレデンシャル要求コーディネーター</a> </li>
+        <li><a href="#ref-for-index-term-origin-1" title="§ 6.2 クレデンシャル要求の準備">§ 6.2 クレデンシャル要求の準備</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-8" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
+        <li><a href="#ref-for-update-20261119-ja-36" title="§ 7.8.1 request context 構造体">§ 7.8.1 request context 構造体</a> <a href="#ref-for-update-20261119-ja-37" title="Reference 2">(2)</a> <a href="#ref-for-update-20261119-ja-42" title="Reference 3">(3)</a> <a href="#ref-for-update-20261119-ja-44" title="Reference 4">(4)</a> <a href="#ref-for-update-20261119-ja-48" title="Reference 5">(5)</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-55" title="§ 10.2 緩和策">§ 10.2 緩和策</a> <a href="#ref-for-update-20261119-ja-63" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-origin-11" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+        <li><a href="#ref-for-index-term-origin-12" title="§ 10.6 クロスデバイスセキュリティと近接性">§ 10.6 クロスデバイスセキュリティと近接性</a> <a href="#ref-for-index-term-origin-13" title="Reference 2">(2)</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true"
       id="dfn-panel-for-index-term-origin-for-environment-settings-object"
@@ -11014,7 +11083,7 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 <li><a href="#ref-for-update-20261119-ja-38" title="7.8.1 request context 構造体">7.8.1 request context 構造体</a></li>
       </ul>
     </div>
-<div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-index-term-secure-contexts"
+<div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-index-term-secure-context"
       aria-label="Links in this document to definition: secure contexts">
       <span class="caret"></span>
       <div>
@@ -11024,16 +11093,12 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-        <li>
-          <a href="#ref-for-index-term-secure-contexts-1" title="§ 10.2 Mitigations">§ 10.2 緩和策</a> <a
-            href="#ref-for-index-term-secure-contexts-2" title="Reference 2">(2)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-secure-contexts-3" title="§ 10.4 Signing presentation requests">§ 10.4 Signing 提示要求</a>
-        </li>
-      <li><a href="#ref-for-update-20261119-ja-49" title="10.1.1 対象範囲内の脅威">10.1.1 対象範囲内の脅威</a></li>
-</ul>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-update-20261119-ja-49" title="§ 10.1.1 対象範囲内の脅威">§ 10.1.1 対象範囲内の脅威</a> </li>
+        <li><a href="#ref-for-index-term-secure-context-2" title="§ 10.2 緩和策">§ 10.2 緩和策</a> <a href="#ref-for-index-term-secure-context-3" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-secure-context-4" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+        <li><a href="#ref-for-index-term-secure-context-5" title="§ 10.5 プレゼンテーション要求の署名">§ 10.5 プレゼンテーション要求の署名</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-index-term-top-level-traversable"
       aria-label="Links in this document to definition: top-level traversable">
@@ -11391,82 +11456,48 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-<li><a href="#ref-for-index-term-user-agents-1" title="">ref-for-index-term-user-agents-1</a></li>
-<li><a href="#ref-for-index-term-user-agents-2" title="2.2 プロトコルが許可されているかの確認">2.2 プロトコルが許可されているかの確認</a></li>
-<li><a href="#ref-for-index-term-user-agents-3" title="3. 適用範囲">3. 適用範囲</a></li>
-<li><a href="#ref-for-index-term-user-agents-4" title="3. 適用範囲">3. 適用範囲</a></li>
-<li><a href="#ref-for-index-term-user-agents-5" title="4. 用語">4. 用語</a></li>
-<li><a href="#ref-for-index-term-user-agents-6" title="4. 用語">4. 用語</a></li>
-<li><a href="#ref-for-index-term-user-agents-7" title="5. プロトコル">5. プロトコル</a></li>
-<li><a href="#ref-for-index-term-user-agents-8" title="5. プロトコル">5. プロトコル</a></li>
-<li><a href="#ref-for-index-term-user-agents-9" title="5. プロトコル">5. プロトコル</a></li>
-<li><a href="#ref-for-update-20261119-ja-1" title="6. クレデンシャル要求コーディネーター">6. クレデンシャル要求コーディネーター</a></li>
-<li><a href="#ref-for-index-term-user-agents-10" title="6.4 クレデンシャル要求の検証">6.4 クレデンシャル要求の検証</a></li>
-<li><a href="#ref-for-index-term-user-agents-11" title="6.4 クレデンシャル要求の検証">6.4 クレデンシャル要求の検証</a></li>
-<li><a href="#ref-for-index-term-user-agents-12" title="6.4 クレデンシャル要求の検証">6.4 クレデンシャル要求の検証</a></li>
-<li><a href="#ref-for-index-term-user-agents-13" title="6.4 クレデンシャル要求の検証">6.4 クレデンシャル要求の検証</a></li>
-<li><a href="#ref-for-index-term-user-agents-14" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-index-term-user-agents-1" title="§ 概要">§ 概要</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-2" title="§ 2.2 プロトコルが許可されているかの確認">§ 2.2 プロトコルが許可されているかの確認</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-3" title="§ 3. 適用範囲">§ 3. 適用範囲</a> <a href="#ref-for-index-term-user-agents-4" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-5" title="§ 4. 用語">§ 4. 用語</a> <a href="#ref-for-index-term-user-agents-6" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-7" title="§ 5. プロトコル">§ 5. プロトコル</a> <a href="#ref-for-index-term-user-agents-8" title="Reference 2">(2)</a> <a href="#ref-for-index-term-user-agents-9" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-update-20261119-ja-1" title="§ 6. クレデンシャル要求コーディネーター">§ 6. クレデンシャル要求コーディネーター</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-10" title="§ 6.4 クレデンシャル要求の検証">§ 6.4 クレデンシャル要求の検証</a> <a href="#ref-for-index-term-user-agents-11" title="Reference 2">(2)</a> <a href="#ref-for-index-term-user-agents-12" title="Reference 3">(3)</a> <a href="#ref-for-index-term-user-agents-13" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-14" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-index-term-user-agents-15" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-17" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-19" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-27" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
 <li><a href="#ref-for-update-20261119-ja-29" title="6.9 クレデンシャル要求の開始">6.9 クレデンシャル要求の開始</a></li>
-<li><a href="#ref-for-index-term-user-agents-16" title="7. デジタルクレデンシャル API">7. デジタルクレデンシャル API</a></li>
-<li><a href="#ref-for-index-term-user-agents-17" title="7.7 DigitalCredential インターフェイス">7.7 DigitalCredential インターフェイス</a></li>
-<li><a href="#ref-for-index-term-user-agents-18" title="7.7 DigitalCredential インターフェイス">7.7 DigitalCredential インターフェイス</a></li>
-<li><a href="#ref-for-index-term-user-agents-19" title="10.1.2 対象範囲外の脅威">10.1.2 対象範囲外の脅威</a></li>
-<li><a href="#ref-for-index-term-user-agents-20" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-update-20261119-ja-53" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-update-20261119-ja-59" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-update-20261119-ja-66" title="10.2 緩和策">10.2 緩和策</a></li>
-<li><a href="#ref-for-index-term-user-agents-21" title="11. プライバシーに関する考慮事項">11. プライバシーに関する考慮事項</a></li>
-<li><a href="#ref-for-index-term-user-agents-22" title="11.1 設計上の考慮事項と代替案">11.1 設計上の考慮事項と代替案</a></li>
-<li><a href="#ref-for-index-term-user-agents-23" title="11.1 設計上の考慮事項と代替案">11.1 設計上の考慮事項と代替案</a></li>
-<li><a href="#ref-for-index-term-user-agents-24" title="11.2 プライバシーのスペクトラム">11.2 プライバシーのスペクトラム</a></li>
-<li><a href="#ref-for-index-term-user-agents-25" title="11.2 プライバシーのスペクトラム">11.2 プライバシーのスペクトラム</a></li>
-<li><a href="#ref-for-index-term-user-agents-26" title="11.2 プライバシーのスペクトラム">11.2 プライバシーのスペクトラム</a></li>
-<li><a href="#ref-for-index-term-user-agents-27" title="11.3 提示プロトコルとクレデンシャル形式">11.3 提示プロトコルとクレデンシャル形式</a></li>
-<li><a href="#ref-for-index-term-user-agents-28" title="11.3.1.2 リンク不可能な提示">11.3.1.2 リンク不可能な提示</a></li>
-<li><a href="#ref-for-index-term-user-agents-29" title="11.3.1.2 リンク不可能な提示">11.3.1.2 リンク不可能な提示</a></li>
-<li><a href="#ref-for-index-term-user-agents-30" title="11.3.1.2 リンク不可能な提示">11.3.1.2 リンク不可能な提示</a></li>
-<li><a href="#ref-for-index-term-user-agents-31" title="11.3.1.3 「Phone home」メカニズム">11.3.1.3 「Phone home」メカニズム</a></li>
-<li><a href="#ref-for-index-term-user-agents-32" title="11.3.1.3 「Phone home」メカニズム">11.3.1.3 「Phone home」メカニズム</a></li>
-<li><a href="#ref-for-index-term-user-agents-33" title="11.3.1.3 「Phone home」メカニズム">11.3.1.3 「Phone home」メカニズム</a></li>
-<li><a href="#ref-for-index-term-user-agents-34" title="11.3.1.6 検証者認可のサポート">11.3.1.6 検証者認可のサポート</a></li>
-<li><a href="#ref-for-index-term-user-agents-35" title="11.3.1.6 検証者認可のサポート">11.3.1.6 検証者認可のサポート</a></li>
-<li><a href="#ref-for-index-term-user-agents-36" title="11.4 不要なクレデンシャル要求">11.4 不要なクレデンシャル要求</a></li>
-<li><a href="#ref-for-index-term-user-agents-37" title="11.4 不要なクレデンシャル要求">11.4 不要なクレデンシャル要求</a></li>
-<li><a href="#ref-for-index-term-user-agents-38" title="11.4 不要なクレデンシャル要求">11.4 不要なクレデンシャル要求</a></li>
-<li><a href="#ref-for-index-term-user-agents-39" title="11.4 不要なクレデンシャル要求">11.4 不要なクレデンシャル要求</a></li>
-<li><a href="#ref-for-index-term-user-agents-40" title="11.4 不要なクレデンシャル要求">11.4 不要なクレデンシャル要求</a></li>
-<li><a href="#ref-for-index-term-user-agents-41" title="11.4 不要なクレデンシャル要求">11.4 不要なクレデンシャル要求</a></li>
-<li><a href="#ref-for-index-term-user-agents-42" title="11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク">11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク</a></li>
-<li><a href="#ref-for-index-term-user-agents-43" title="11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク">11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク</a></li>
-<li><a href="#ref-for-index-term-user-agents-44" title="11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和">11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-user-agents-45" title="11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和">11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-user-agents-46" title="11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-user-agents-47" title="11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-user-agents-48" title="11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-user-agents-49" title="11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-user-agents-50" title="11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a></li>
-<li><a href="#ref-for-index-term-user-agents-51" title="11.5.2 クレデンシャル提示に伴う付随データの漏えい">11.5.2 クレデンシャル提示に伴う付随データの漏えい</a></li>
-<li><a href="#ref-for-index-term-user-agents-52" title="11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈">11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈</a></li>
-<li><a href="#ref-for-index-term-user-agents-53" title="11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈">11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈</a></li>
-<li><a href="#ref-for-index-term-user-agents-54" title="11.5.4 クレデンシャルの利用可否の漏えい回避">11.5.4 クレデンシャルの利用可否の漏えい回避</a></li>
-<li><a href="#ref-for-index-term-user-agents-55" title="11.6 ユーザーの許可と透明性">11.6 ユーザーの許可と透明性</a></li>
-<li><a href="#ref-for-index-term-user-agents-56" title="11.6 ユーザーの許可と透明性">11.6 ユーザーの許可と透明性</a></li>
-<li><a href="#ref-for-index-term-user-agents-57" title="11.6.2 複数のユーザーエージェントの統合">11.6.2 複数のユーザーエージェントの統合</a></li>
-<li><a href="#ref-for-index-term-user-agents-58" title="11.6.2 複数のユーザーエージェントの統合">11.6.2 複数のユーザーエージェントの統合</a></li>
-<li><a href="#ref-for-index-term-user-agents-59" title="11.6.3 クレデンシャルマネージャー選択前の許可">11.6.3 クレデンシャルマネージャー選択前の許可</a></li>
-<li><a href="#ref-for-index-term-user-agents-60" title="11.6.4 許可と同意">11.6.4 許可と同意</a></li>
-<li><a href="#ref-for-index-term-user-agents-61" title="11.6.4 許可と同意">11.6.4 許可と同意</a></li>
-<li><a href="#ref-for-index-term-user-agents-62" title="12. アクセシビリティに関する考慮事項">12. アクセシビリティに関する考慮事項</a></li>
-<li><a href="#ref-for-index-term-user-agents-63" title="12. アクセシビリティに関する考慮事項">12. アクセシビリティに関する考慮事項</a></li>
-<li><a href="#ref-for-index-term-user-agents-64" title="13. 国際化に関する考慮事項">13. 国際化に関する考慮事項</a></li>
-<li><a href="#ref-for-index-term-user-agents-65" title="14. 自動テスト">14. 自動テスト</a></li>
-<li><a href="#ref-for-index-term-user-agents-66" title="14.2 仮想ウォレットの動作の処理">14.2 仮想ウォレットの動作の処理</a></li>
-      </ul>
+        <li><a href="#ref-for-index-term-user-agents-16" title="§ 7. デジタルクレデンシャル API">§ 7. デジタルクレデンシャル API</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-17" title="§ 7.7 DigitalCredential インターフェイス">§ 7.7 DigitalCredential インターフェイス</a> <a href="#ref-for-index-term-user-agents-18" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-19" title="§ 10.1.2 対象範囲外の脅威">§ 10.1.2 対象範囲外の脅威</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-20" title="§ 10.2 緩和策">§ 10.2 緩和策</a> <a href="#ref-for-update-20261119-ja-53" title="Reference 2">(2)</a> <a href="#ref-for-update-20261119-ja-59" title="Reference 3">(3)</a> <a href="#ref-for-update-20261119-ja-66" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-27" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-28" title="§ 11. プライバシーに関する考慮事項">§ 11. プライバシーに関する考慮事項</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-29" title="§ 11.1 設計上の考慮事項と代替案">§ 11.1 設計上の考慮事項と代替案</a> <a href="#ref-for-index-term-user-agents-30" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-31" title="§ 11.2 プライバシーのスペクトラム">§ 11.2 プライバシーのスペクトラム</a> <a href="#ref-for-index-term-user-agents-32" title="Reference 2">(2)</a> <a href="#ref-for-index-term-user-agents-33" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-34" title="§ 11.3 提示プロトコルとクレデンシャル形式">§ 11.3 提示プロトコルとクレデンシャル形式</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-35" title="§ 11.3.1.2 リンク不可能な提示">§ 11.3.1.2 リンク不可能な提示</a> <a href="#ref-for-index-term-user-agents-36" title="Reference 2">(2)</a> <a href="#ref-for-index-term-user-agents-37" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-38" title="§ 11.3.1.3 「Phone home」メカニズム">§ 11.3.1.3 「Phone home」メカニズム</a> <a href="#ref-for-index-term-user-agents-39" title="Reference 2">(2)</a> <a href="#ref-for-index-term-user-agents-40" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-41" title="§ 11.3.1.6 検証者認可のサポート">§ 11.3.1.6 検証者認可のサポート</a> <a href="#ref-for-index-term-user-agents-42" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-43" title="§ 11.4 不要なクレデンシャル要求">§ 11.4 不要なクレデンシャル要求</a> <a href="#ref-for-index-term-user-agents-44" title="Reference 2">(2)</a> <a href="#ref-for-index-term-user-agents-45" title="Reference 3">(3)</a> <a href="#ref-for-index-term-user-agents-46" title="Reference 4">(4)</a> <a href="#ref-for-index-term-user-agents-47" title="Reference 5">(5)</a> <a href="#ref-for-index-term-user-agents-48" title="Reference 6">(6)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-49" title="§ 11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク">§ 11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク</a> <a href="#ref-for-index-term-user-agents-50" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-51" title="§ 11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和">§ 11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和</a> <a href="#ref-for-index-term-user-agents-52" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-53" title="§ 11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和">§ 11.4.2.3 政府発行ではないクレデンシャルに対する不要な要求の緩和</a> <a href="#ref-for-index-term-user-agents-54" title="Reference 2">(2)</a> <a href="#ref-for-index-term-user-agents-55" title="Reference 3">(3)</a> <a href="#ref-for-index-term-user-agents-56" title="Reference 4">(4)</a> <a href="#ref-for-index-term-user-agents-57" title="Reference 5">(5)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-58" title="§ 11.5.2 クレデンシャル提示に伴う付随データの漏えい">§ 11.5.2 クレデンシャル提示に伴う付随データの漏えい</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-59" title="§ 11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈">§ 11.5.3 プロトコルの利用可否を通じたデバイス特性の露呈</a> <a href="#ref-for-index-term-user-agents-60" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-61" title="§ 11.5.4 クレデンシャルの利用可否の漏えい回避">§ 11.5.4 クレデンシャルの利用可否の漏えい回避</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-62" title="§ 11.6 ユーザーの許可と透明性">§ 11.6 ユーザーの許可と透明性</a> <a href="#ref-for-index-term-user-agents-63" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-64" title="§ 11.6.2 複数のユーザーエージェントの統合">§ 11.6.2 複数のユーザーエージェントの統合</a> <a href="#ref-for-index-term-user-agents-65" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-66" title="§ 11.6.3 クレデンシャルマネージャー選択前の許可">§ 11.6.3 クレデンシャルマネージャー選択前の許可</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-67" title="§ 11.6.4 許可と同意">§ 11.6.4 許可と同意</a> <a href="#ref-for-index-term-user-agents-68" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-69" title="§ 12. アクセシビリティに関する考慮事項">§ 12. アクセシビリティに関する考慮事項</a> <a href="#ref-for-index-term-user-agents-70" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-71" title="§ 13. 国際化に関する考慮事項">§ 13. 国際化に関する考慮事項</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-72" title="§ 14. 自動テスト">§ 14. 自動テスト</a> </li>
+        <li><a href="#ref-for-index-term-user-agents-73" title="§ 14.2 仮想ウォレットの動作の処理">§ 14.2 仮想ウォレットの動作の処理</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-index-term-express-permission"
       aria-label="Links in this document to definition: express permission">
@@ -11732,110 +11763,33 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
 
       </div>
       <p><b>参照箇所：</b></p>
-      <ul>
-        <li>
-          <a href="#ref-for-index-term-verifiers-1" title="§ 1. Introduction">§ 1. はじめに</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-2" title="§ 4. Terminology">§ 4. 用語</a> <a
-            href="#ref-for-index-term-verifiers-3" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-4"
-            title="Reference 3">(3)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-5" title="§ 5. Protocols">§ 5. プロトコル</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-6" title="§ 7.7.3 The userAgentAllowsProtocol() method">§ 7.7.3 The
-            userAgentAllowsProtocol() method</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-7" title="§ 10.4 Signing presentation requests">§ 10.4 Signing 提示要求</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-8" title="§ 10.5 Cross-Device Security and Proximity">§ 10.5 クロスデバイスセキュリティと近接性</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-9" title="§ 11. Privacy Considerations">§ 11. プライバシーに関する考慮事項</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-10" title="§ 11.1 Design Considerations and Alternatives">§ 11.1 設計上の考慮事項と代替案</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-11" title="§ 11.3.1.1 Selective disclosure">§ 11.3.1.1 Selective
-            disclosure</a> <a href="#ref-for-index-term-verifiers-12" title="Reference 2">(2)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-13" title="§ 11.3.1.2 Unlinkable presentations">§ 11.3.1.2 Unlinkable
-            presentations</a> <a href="#ref-for-index-term-verifiers-14" title="Reference 2">(2)</a> <a
-            href="#ref-for-index-term-verifiers-15" title="Reference 3">(3)</a> <a
-            href="#ref-for-index-term-verifiers-16" title="Reference 4">(4)</a> <a
-            href="#ref-for-index-term-verifiers-17" title="Reference 5">(5)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-18" title="§ 11.3.1.3 &quot;Phone home&quot; mechanisms">§ 11.3.1.3
-            "Phone home" mechanisms</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-19" title="§ 11.3.1.4 Unlinkable revocation">§ 11.3.1.4 Unlinkable
-            revocation</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-20" title="§ 11.3.1.6 Support for verifier authorization">§ 11.3.1.6
-            Support for verifier authorization</a> <a href="#ref-for-index-term-verifiers-21"
-            title="Reference 2">(2)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-22" title="§ 11.3.1.7 Encrypting credential responses">§ 11.3.1.7 Encrypting クレデンシャル応答</a> <a href="#ref-for-index-term-verifiers-23" title="Reference 2">(2)</a>
-          <a href="#ref-for-index-term-verifiers-24" title="Reference 3">(3)</a> <a
-            href="#ref-for-index-term-verifiers-25" title="Reference 4">(4)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-26" title="§ 11.4 Unnecessary Requests for Credentials">§ 11.4 不要なクレデンシャル要求</a> <a href="#ref-for-index-term-verifiers-27"
-            title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-28" title="Reference 3">(3)</a> <a
-            href="#ref-for-index-term-verifiers-29" title="Reference 4">(4)</a> <a
-            href="#ref-for-index-term-verifiers-30" title="Reference 5">(5)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-31"
-            title="§ 11.4.1.2 Risk of proliferation of requests for government credentials">§ 11.4.1.2 Risk of
-            proliferation of requests for government credentials</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-32"
-            title="§ 11.4.1.3 Mitigating unnecessary requests for government credentials">§ 11.4.1.3 Mitigating
-            unnecessary requests for government credentials</a> <a href="#ref-for-index-term-verifiers-33"
-            title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-34" title="Reference 3">(3)</a> <a
-            href="#ref-for-index-term-verifiers-35" title="Reference 4">(4)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-36"
-            title="§ 11.4.2.2 Risk of proliferation of requests for non-government credentials">§ 11.4.2.2 Risk of
-            proliferation of requests for non-government credentials</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-37" title="§ 11.4.2.4 Reporting abuse">§ 11.4.2.4 Reporting abuse</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-38" title="§ 11.5.1 Browser fingerprinting">§ 11.5.1 ブラウザフィンガープリンティング</a> <a href="#ref-for-index-term-verifiers-39" title="Reference 2">(2)</a> <a
-            href="#ref-for-index-term-verifiers-40" title="Reference 3">(3)</a> <a
-            href="#ref-for-index-term-verifiers-41" title="Reference 4">(4)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-42"
-            title="§ 11.5.2 Leaking incidental data with credential presentations">§ 11.5.2 クレデンシャル提示に伴う付随データの漏えい</a> <a href="#ref-for-index-term-verifiers-43" title="Reference 2">(2)</a> <a
-            href="#ref-for-index-term-verifiers-44" title="Reference 3">(3)</a> <a
-            href="#ref-for-index-term-verifiers-45" title="Reference 4">(4)</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-46" title="§ 11.6 User Permission and Transparency">§ 11.6 ユーザーの許可と透明性</a>
-        </li>
-        <li>
-          <a href="#ref-for-index-term-verifiers-47" title="§ 11.6.4 Permission vs. Consent">§ 11.6.4 許可と同意</a> <a href="#ref-for-index-term-verifiers-48" title="Reference 2">(2)</a> <a
-            href="#ref-for-index-term-verifiers-49" title="Reference 3">(3)</a> <a
-            href="#ref-for-index-term-verifiers-50" title="Reference 4">(4)</a> <a
-            href="#ref-for-index-term-verifiers-51" title="Reference 5">(5)</a>
-        </li>
-      </ul>
+      <ul class="dfn-panel-refs">
+        <li><a href="#ref-for-index-term-verifiers-1" title="§ 1. はじめに">§ 1. はじめに</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-2" title="§ 4. 用語">§ 4. 用語</a> <a href="#ref-for-index-term-verifiers-3" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-4" title="Reference 3">(3)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-5" title="§ 5. プロトコル">§ 5. プロトコル</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-6" title="§ 7.7.3 userAgentAllowsProtocol() メソッド">§ 7.7.3 userAgentAllowsProtocol() メソッド</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-7" title="§ 10.1.1 対象範囲内の脅威">§ 10.1.1 対象範囲内の脅威</a> <a href="#ref-for-index-term-verifiers-8" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-9" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-10" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-11" title="§ 10.4 スクリプト挿入に対する検証者の防御強化">§ 10.4 スクリプト挿入に対する検証者の防御強化</a> <a href="#ref-for-index-term-verifiers-12" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-13" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-14" title="Reference 4">(4)</a> <a href="#ref-for-index-term-verifiers-15" title="Reference 5">(5)</a> <a href="#ref-for-index-term-verifiers-16" title="Reference 6">(6)</a> <a href="#ref-for-index-term-verifiers-17" title="Reference 7">(7)</a> <a href="#ref-for-index-term-verifiers-18" title="Reference 8">(8)</a> <a href="#ref-for-index-term-verifiers-19" title="Reference 9">(9)</a> <a href="#ref-for-index-term-verifiers-20" title="Reference 10">(10)</a> <a href="#ref-for-index-term-verifiers-21" title="Reference 11">(11)</a> <a href="#ref-for-index-term-verifiers-22" title="Reference 12">(12)</a> <a href="#ref-for-index-term-verifiers-23" title="Reference 13">(13)</a> <a href="#ref-for-index-term-verifiers-24" title="Reference 14">(14)</a> <a href="#ref-for-index-term-verifiers-25" title="Reference 15">(15)</a> <a href="#ref-for-index-term-verifiers-26" title="Reference 16">(16)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-27" title="§ 10.5 プレゼンテーション要求の署名">§ 10.5 プレゼンテーション要求の署名</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-28" title="§ 10.6 クロスデバイスセキュリティと近接性">§ 10.6 クロスデバイスセキュリティと近接性</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-29" title="§ 11. プライバシーに関する考慮事項">§ 11. プライバシーに関する考慮事項</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-30" title="§ 11.1 設計上の考慮事項と代替案">§ 11.1 設計上の考慮事項と代替案</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-31" title="§ 11.3.1.1 選択的開示">§ 11.3.1.1 選択的開示</a> <a href="#ref-for-index-term-verifiers-32" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-33" title="§ 11.3.1.2 リンク不可能な提示">§ 11.3.1.2 リンク不可能な提示</a> <a href="#ref-for-index-term-verifiers-34" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-35" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-36" title="Reference 4">(4)</a> <a href="#ref-for-index-term-verifiers-37" title="Reference 5">(5)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-38" title="§ 11.3.1.3 「Phone home」メカニズム">§ 11.3.1.3 「Phone home」メカニズム</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-39" title="§ 11.3.1.4 リンク不可能な失効">§ 11.3.1.4 リンク不可能な失効</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-40" title="§ 11.3.1.6 検証者認可のサポート">§ 11.3.1.6 検証者認可のサポート</a> <a href="#ref-for-index-term-verifiers-41" title="Reference 2">(2)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-42" title="§ 11.3.1.7 クレデンシャル応答の暗号化">§ 11.3.1.7 クレデンシャル応答の暗号化</a> <a href="#ref-for-index-term-verifiers-43" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-44" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-45" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-46" title="§ 11.4 不要なクレデンシャル要求">§ 11.4 不要なクレデンシャル要求</a> <a href="#ref-for-index-term-verifiers-47" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-48" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-49" title="Reference 4">(4)</a> <a href="#ref-for-index-term-verifiers-50" title="Reference 5">(5)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-51" title="§ 11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク">§ 11.4.1.2 政府発行クレデンシャルに対する要求の増加リスク</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-52" title="§ 11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和">§ 11.4.1.3 政府発行クレデンシャルに対する不要な要求の緩和</a> <a href="#ref-for-index-term-verifiers-53" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-54" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-55" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-56" title="§ 11.4.2.2 政府発行ではないクレデンシャルに対する要求の増加リスク">§ 11.4.2.2 政府発行ではないクレデンシャルに対する要求の増加リスク</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-57" title="§ 11.4.2.4 不正利用の報告">§ 11.4.2.4 不正利用の報告</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-58" title="§ 11.5.1 ブラウザフィンガープリンティング">§ 11.5.1 ブラウザフィンガープリンティング</a> <a href="#ref-for-index-term-verifiers-59" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-60" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-61" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-62" title="§ 11.5.2 クレデンシャル提示に伴う付随データの漏えい">§ 11.5.2 クレデンシャル提示に伴う付随データの漏えい</a> <a href="#ref-for-index-term-verifiers-63" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-64" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-65" title="Reference 4">(4)</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-66" title="§ 11.6 ユーザーの許可と透明性">§ 11.6 ユーザーの許可と透明性</a> </li>
+        <li><a href="#ref-for-index-term-verifiers-67" title="§ 11.6.4 許可と同意">§ 11.6.4 許可と同意</a> <a href="#ref-for-index-term-verifiers-68" title="Reference 2">(2)</a> <a href="#ref-for-index-term-verifiers-69" title="Reference 3">(3)</a> <a href="#ref-for-index-term-verifiers-70" title="Reference 4">(4)</a> <a href="#ref-for-index-term-verifiers-71" title="Reference 5">(5)</a> </li>
+    </ul>
     </div>
 <div class="dfn-panel" hidden="" role="dialog" aria-modal="true" id="dfn-panel-for-index-term-error"
       aria-label="Links in this document to definition: error">
@@ -12717,6 +12671,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     2025-03-26. URL: <a
                         href="https://github.com/w3c/credential-considerations/blob/main/credentials-considerations.md">https://github.com/w3c/credential-considerations/blob/main/credentials-considerations.md</a>
                 </dd>
+                <dt id="bib-csp3">[CSP3]</dt><dd>
+      <a href="https://www.w3.org/TR/CSP3/"><cite>Content Security Policy Level 3</cite></a>. Mike West; Antonio Sartori.  W3C. 27 October 2026. W3C Working Draft. URL: <a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
+    </dd>
                 <dt id="bib-custom-schemes">[custom-schemes]</dt>
                 <dd>
                     <a href="https://github.com/w3c-fedid/digital-credentials/blob/main/custom-schemes.md"><cite>本人確認情報の提示における
@@ -12771,6 +12728,9 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     2023年11月10日. CRD. URL: <a
                         href="https://www.w3.org/TR/secure-contexts/">https://www.w3.org/TR/secure-contexts/</a>
                 </dd>
+                <dt id="bib-sri">[SRI]</dt><dd>
+      <a href="https://www.w3.org/TR/sri-2/"><cite>Subresource Integrity</cite></a>. Frederik Braun.  W3C. 20 March 2026. W3C Working Draft. URL: <a href="https://www.w3.org/TR/sri-2/">https://www.w3.org/TR/sri-2/</a>
+    </dd>
                 <dt id="bib-threat-model-decentralized-credentials">[threat-model-decentralized-credentials]</dt>
                 <dd>
                     <a href="https://www.w3.org/TR/threat-model-decentralized-credentials/"><cite>分散型
@@ -12778,11 +12738,17 @@ interface <a class="internalDFN idlID" data-link-type="interface" href="#dom-dig
                     DNOTE. URL: <a
                         href="https://www.w3.org/TR/threat-model-decentralized-credentials/">https://www.w3.org/TR/threat-model-decentralized-credentials/</a>
                 </dd>
+                <dt id="bib-trusted-types">[trusted-types]</dt><dd>
+      <a href="https://www.w3.org/TR/trusted-types/"><cite>Trusted Types</cite></a>. Krzysztof Kotowicz.  W3C. 7 October 2026. W3C Working Draft. URL: <a href="https://www.w3.org/TR/trusted-types/">https://www.w3.org/TR/trusted-types/</a>
+    </dd>
                 <dt id="bib-url">[URL]</dt>
                 <dd>
                     <a href="https://url.spec.whatwg.org/"><cite>URL 標準</cite></a>. Anne van Kesteren. WHATWG.
                     現行標準. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
                 </dd>
+            <dt id="bib-web-dev-strict-csp-article">[web-dev-strict-csp-article]</dt><dd>
+      <a href="https://web.dev/articles/strict-csp"><cite>Mitigate cross-site scripting (XSS) with a strict Content Security Policy (CSP)</cite></a>.  web.dev. 2024-09-13. URL: <a href="https://web.dev/articles/strict-csp">https://web.dev/articles/strict-csp</a>
+    </dd>
             </dl>
         </section>
     </section>
