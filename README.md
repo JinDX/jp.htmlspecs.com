@@ -82,7 +82,7 @@ HTML および関連 API、CSS 仕様シリーズ、HTTP 仕様シリーズ 🌐
 - [RDF Dataset Canonicalization](https://jp.htmlspecs.com/rdf-canon/)（[Source](https://www.w3.org/TR/2024/REC-rdf-canon-20240521/) ![Recommendation](https://img.shields.io/badge/REC-309c40)）
 - [SPARQL 1.2 Query Language](https://jp.htmlspecs.com/sparql12-query/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-query-20261119/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SPARQL 1.2 Protocol](https://jp.htmlspecs.com/sparql12-protocol/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-protocol-20261120/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
-- [SHACL 1.2 Core](https://jp.htmlspecs.com/shacl12-core/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-core-20261124/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
+- [SHACL 1.2 Core](https://jp.htmlspecs.com/shacl12-core/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-core-20261126/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SHACL 1.2 Profiling](https://jp.htmlspecs.com/shacl12-profiling/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-profiling-20261125/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SHACL 1.2 SPARQL-Related Features](https://jp.htmlspecs.com/shacl12-sparql/)（[Source](https://www.w3.org/TR/2026/WD-shacl12-sparql-20261119/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
 - [SPARQL 1.2 RL](https://jp.htmlspecs.com/sparql12-rl/)（[Source](https://www.w3.org/TR/2026/WD-sparql12-rl-20261126/) ![Working Draft](https://img.shields.io/badge/WD-e66e33)）
